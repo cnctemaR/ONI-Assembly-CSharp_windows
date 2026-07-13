@@ -4,6 +4,7 @@ using UnityEngine.SocialPlatforms.Impl;
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("Local is deprecated and will be removed in a future release.", false)]
 	public class Local : ISocialPlatform
 	{
 		public ILocalUser localUser

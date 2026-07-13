@@ -17,10 +17,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Nop_
-				{
-					opcode = OpCodes.Nop
-				};
+				return new Code.Nop_(OpCodes.Nop);
 			}
 		}
 
@@ -28,10 +25,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Break_
-				{
-					opcode = OpCodes.Break
-				};
+				return new Code.Break_(OpCodes.Break);
 			}
 		}
 
@@ -39,10 +33,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarg_0_
-				{
-					opcode = OpCodes.Ldarg_0
-				};
+				return new Code.Ldarg_0_(OpCodes.Ldarg_0);
 			}
 		}
 
@@ -50,10 +41,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarg_1_
-				{
-					opcode = OpCodes.Ldarg_1
-				};
+				return new Code.Ldarg_1_(OpCodes.Ldarg_1);
 			}
 		}
 
@@ -61,10 +49,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarg_2_
-				{
-					opcode = OpCodes.Ldarg_2
-				};
+				return new Code.Ldarg_2_(OpCodes.Ldarg_2);
 			}
 		}
 
@@ -72,10 +57,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarg_3_
-				{
-					opcode = OpCodes.Ldarg_3
-				};
+				return new Code.Ldarg_3_(OpCodes.Ldarg_3);
 			}
 		}
 
@@ -83,10 +65,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloc_0_
-				{
-					opcode = OpCodes.Ldloc_0
-				};
+				return new Code.Ldloc_0_(OpCodes.Ldloc_0);
 			}
 		}
 
@@ -94,10 +73,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloc_1_
-				{
-					opcode = OpCodes.Ldloc_1
-				};
+				return new Code.Ldloc_1_(OpCodes.Ldloc_1);
 			}
 		}
 
@@ -105,10 +81,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloc_2_
-				{
-					opcode = OpCodes.Ldloc_2
-				};
+				return new Code.Ldloc_2_(OpCodes.Ldloc_2);
 			}
 		}
 
@@ -116,10 +89,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloc_3_
-				{
-					opcode = OpCodes.Ldloc_3
-				};
+				return new Code.Ldloc_3_(OpCodes.Ldloc_3);
 			}
 		}
 
@@ -127,10 +97,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stloc_0_
-				{
-					opcode = OpCodes.Stloc_0
-				};
+				return new Code.Stloc_0_(OpCodes.Stloc_0);
 			}
 		}
 
@@ -138,10 +105,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stloc_1_
-				{
-					opcode = OpCodes.Stloc_1
-				};
+				return new Code.Stloc_1_(OpCodes.Stloc_1);
 			}
 		}
 
@@ -149,10 +113,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stloc_2_
-				{
-					opcode = OpCodes.Stloc_2
-				};
+				return new Code.Stloc_2_(OpCodes.Stloc_2);
 			}
 		}
 
@@ -160,10 +121,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stloc_3_
-				{
-					opcode = OpCodes.Stloc_3
-				};
+				return new Code.Stloc_3_(OpCodes.Stloc_3);
 			}
 		}
 
@@ -171,10 +129,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarg_S_
-				{
-					opcode = OpCodes.Ldarg_S
-				};
+				return new Code.Ldarg_S_(OpCodes.Ldarg_S);
 			}
 		}
 
@@ -182,10 +137,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarga_S_
-				{
-					opcode = OpCodes.Ldarga_S
-				};
+				return new Code.Ldarga_S_(OpCodes.Ldarga_S);
 			}
 		}
 
@@ -193,10 +145,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Starg_S_
-				{
-					opcode = OpCodes.Starg_S
-				};
+				return new Code.Starg_S_(OpCodes.Starg_S);
 			}
 		}
 
@@ -204,10 +153,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloc_S_
-				{
-					opcode = OpCodes.Ldloc_S
-				};
+				return new Code.Ldloc_S_(OpCodes.Ldloc_S);
 			}
 		}
 
@@ -215,10 +161,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloca_S_
-				{
-					opcode = OpCodes.Ldloca_S
-				};
+				return new Code.Ldloca_S_(OpCodes.Ldloca_S);
 			}
 		}
 
@@ -226,10 +169,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stloc_S_
-				{
-					opcode = OpCodes.Stloc_S
-				};
+				return new Code.Stloc_S_(OpCodes.Stloc_S);
 			}
 		}
 
@@ -237,10 +177,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldnull_
-				{
-					opcode = OpCodes.Ldnull
-				};
+				return new Code.Ldnull_(OpCodes.Ldnull);
 			}
 		}
 
@@ -248,10 +185,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_M1_
-				{
-					opcode = OpCodes.Ldc_I4_M1
-				};
+				return new Code.Ldc_I4_M1_(OpCodes.Ldc_I4_M1);
 			}
 		}
 
@@ -259,10 +193,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_0_
-				{
-					opcode = OpCodes.Ldc_I4_0
-				};
+				return new Code.Ldc_I4_0_(OpCodes.Ldc_I4_0);
 			}
 		}
 
@@ -270,10 +201,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_1_
-				{
-					opcode = OpCodes.Ldc_I4_1
-				};
+				return new Code.Ldc_I4_1_(OpCodes.Ldc_I4_1);
 			}
 		}
 
@@ -281,10 +209,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_2_
-				{
-					opcode = OpCodes.Ldc_I4_2
-				};
+				return new Code.Ldc_I4_2_(OpCodes.Ldc_I4_2);
 			}
 		}
 
@@ -292,10 +217,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_3_
-				{
-					opcode = OpCodes.Ldc_I4_3
-				};
+				return new Code.Ldc_I4_3_(OpCodes.Ldc_I4_3);
 			}
 		}
 
@@ -303,10 +225,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_4_
-				{
-					opcode = OpCodes.Ldc_I4_4
-				};
+				return new Code.Ldc_I4_4_(OpCodes.Ldc_I4_4);
 			}
 		}
 
@@ -314,10 +233,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_5_
-				{
-					opcode = OpCodes.Ldc_I4_5
-				};
+				return new Code.Ldc_I4_5_(OpCodes.Ldc_I4_5);
 			}
 		}
 
@@ -325,10 +241,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_6_
-				{
-					opcode = OpCodes.Ldc_I4_6
-				};
+				return new Code.Ldc_I4_6_(OpCodes.Ldc_I4_6);
 			}
 		}
 
@@ -336,10 +249,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_7_
-				{
-					opcode = OpCodes.Ldc_I4_7
-				};
+				return new Code.Ldc_I4_7_(OpCodes.Ldc_I4_7);
 			}
 		}
 
@@ -347,10 +257,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_8_
-				{
-					opcode = OpCodes.Ldc_I4_8
-				};
+				return new Code.Ldc_I4_8_(OpCodes.Ldc_I4_8);
 			}
 		}
 
@@ -358,10 +265,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_S_
-				{
-					opcode = OpCodes.Ldc_I4_S
-				};
+				return new Code.Ldc_I4_S_(OpCodes.Ldc_I4_S);
 			}
 		}
 
@@ -369,10 +273,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I4_
-				{
-					opcode = OpCodes.Ldc_I4
-				};
+				return new Code.Ldc_I4_(OpCodes.Ldc_I4);
 			}
 		}
 
@@ -380,10 +281,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_I8_
-				{
-					opcode = OpCodes.Ldc_I8
-				};
+				return new Code.Ldc_I8_(OpCodes.Ldc_I8);
 			}
 		}
 
@@ -391,10 +289,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_R4_
-				{
-					opcode = OpCodes.Ldc_R4
-				};
+				return new Code.Ldc_R4_(OpCodes.Ldc_R4);
 			}
 		}
 
@@ -402,10 +297,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldc_R8_
-				{
-					opcode = OpCodes.Ldc_R8
-				};
+				return new Code.Ldc_R8_(OpCodes.Ldc_R8);
 			}
 		}
 
@@ -413,10 +305,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Dup_
-				{
-					opcode = OpCodes.Dup
-				};
+				return new Code.Dup_(OpCodes.Dup);
 			}
 		}
 
@@ -424,10 +313,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Pop_
-				{
-					opcode = OpCodes.Pop
-				};
+				return new Code.Pop_(OpCodes.Pop);
 			}
 		}
 
@@ -435,10 +321,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Jmp_
-				{
-					opcode = OpCodes.Jmp
-				};
+				return new Code.Jmp_(OpCodes.Jmp);
 			}
 		}
 
@@ -446,10 +329,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Call_
-				{
-					opcode = OpCodes.Call
-				};
+				return new Code.Call_(OpCodes.Call);
 			}
 		}
 
@@ -457,10 +337,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Calli_
-				{
-					opcode = OpCodes.Calli
-				};
+				return new Code.Calli_(OpCodes.Calli);
 			}
 		}
 
@@ -468,10 +345,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ret_
-				{
-					opcode = OpCodes.Ret
-				};
+				return new Code.Ret_(OpCodes.Ret);
 			}
 		}
 
@@ -479,10 +353,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Br_S_
-				{
-					opcode = OpCodes.Br_S
-				};
+				return new Code.Br_S_(OpCodes.Br_S);
 			}
 		}
 
@@ -490,10 +361,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Brfalse_S_
-				{
-					opcode = OpCodes.Brfalse_S
-				};
+				return new Code.Brfalse_S_(OpCodes.Brfalse_S);
 			}
 		}
 
@@ -501,10 +369,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Brtrue_S_
-				{
-					opcode = OpCodes.Brtrue_S
-				};
+				return new Code.Brtrue_S_(OpCodes.Brtrue_S);
 			}
 		}
 
@@ -512,10 +377,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Beq_S_
-				{
-					opcode = OpCodes.Beq_S
-				};
+				return new Code.Beq_S_(OpCodes.Beq_S);
 			}
 		}
 
@@ -523,10 +385,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bge_S_
-				{
-					opcode = OpCodes.Bge_S
-				};
+				return new Code.Bge_S_(OpCodes.Bge_S);
 			}
 		}
 
@@ -534,10 +393,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bgt_S_
-				{
-					opcode = OpCodes.Bgt_S
-				};
+				return new Code.Bgt_S_(OpCodes.Bgt_S);
 			}
 		}
 
@@ -545,10 +401,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ble_S_
-				{
-					opcode = OpCodes.Ble_S
-				};
+				return new Code.Ble_S_(OpCodes.Ble_S);
 			}
 		}
 
@@ -556,10 +409,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Blt_S_
-				{
-					opcode = OpCodes.Blt_S
-				};
+				return new Code.Blt_S_(OpCodes.Blt_S);
 			}
 		}
 
@@ -567,10 +417,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bne_Un_S_
-				{
-					opcode = OpCodes.Bne_Un_S
-				};
+				return new Code.Bne_Un_S_(OpCodes.Bne_Un_S);
 			}
 		}
 
@@ -578,10 +425,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bge_Un_S_
-				{
-					opcode = OpCodes.Bge_Un_S
-				};
+				return new Code.Bge_Un_S_(OpCodes.Bge_Un_S);
 			}
 		}
 
@@ -589,10 +433,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bgt_Un_S_
-				{
-					opcode = OpCodes.Bgt_Un_S
-				};
+				return new Code.Bgt_Un_S_(OpCodes.Bgt_Un_S);
 			}
 		}
 
@@ -600,10 +441,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ble_Un_S_
-				{
-					opcode = OpCodes.Ble_Un_S
-				};
+				return new Code.Ble_Un_S_(OpCodes.Ble_Un_S);
 			}
 		}
 
@@ -611,10 +449,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Blt_Un_S_
-				{
-					opcode = OpCodes.Blt_Un_S
-				};
+				return new Code.Blt_Un_S_(OpCodes.Blt_Un_S);
 			}
 		}
 
@@ -622,10 +457,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Br_
-				{
-					opcode = OpCodes.Br
-				};
+				return new Code.Br_(OpCodes.Br);
 			}
 		}
 
@@ -633,10 +465,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Brfalse_
-				{
-					opcode = OpCodes.Brfalse
-				};
+				return new Code.Brfalse_(OpCodes.Brfalse);
 			}
 		}
 
@@ -644,10 +473,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Brtrue_
-				{
-					opcode = OpCodes.Brtrue
-				};
+				return new Code.Brtrue_(OpCodes.Brtrue);
 			}
 		}
 
@@ -655,10 +481,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Beq_
-				{
-					opcode = OpCodes.Beq
-				};
+				return new Code.Beq_(OpCodes.Beq);
 			}
 		}
 
@@ -666,10 +489,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bge_
-				{
-					opcode = OpCodes.Bge
-				};
+				return new Code.Bge_(OpCodes.Bge);
 			}
 		}
 
@@ -677,10 +497,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bgt_
-				{
-					opcode = OpCodes.Bgt
-				};
+				return new Code.Bgt_(OpCodes.Bgt);
 			}
 		}
 
@@ -688,10 +505,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ble_
-				{
-					opcode = OpCodes.Ble
-				};
+				return new Code.Ble_(OpCodes.Ble);
 			}
 		}
 
@@ -699,10 +513,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Blt_
-				{
-					opcode = OpCodes.Blt
-				};
+				return new Code.Blt_(OpCodes.Blt);
 			}
 		}
 
@@ -710,10 +521,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bne_Un_
-				{
-					opcode = OpCodes.Bne_Un
-				};
+				return new Code.Bne_Un_(OpCodes.Bne_Un);
 			}
 		}
 
@@ -721,10 +529,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bge_Un_
-				{
-					opcode = OpCodes.Bge_Un
-				};
+				return new Code.Bge_Un_(OpCodes.Bge_Un);
 			}
 		}
 
@@ -732,10 +537,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Bgt_Un_
-				{
-					opcode = OpCodes.Bgt_Un
-				};
+				return new Code.Bgt_Un_(OpCodes.Bgt_Un);
 			}
 		}
 
@@ -743,10 +545,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ble_Un_
-				{
-					opcode = OpCodes.Ble_Un
-				};
+				return new Code.Ble_Un_(OpCodes.Ble_Un);
 			}
 		}
 
@@ -754,10 +553,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Blt_Un_
-				{
-					opcode = OpCodes.Blt_Un
-				};
+				return new Code.Blt_Un_(OpCodes.Blt_Un);
 			}
 		}
 
@@ -765,10 +561,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Switch_
-				{
-					opcode = OpCodes.Switch
-				};
+				return new Code.Switch_(OpCodes.Switch);
 			}
 		}
 
@@ -776,10 +569,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_I1_
-				{
-					opcode = OpCodes.Ldind_I1
-				};
+				return new Code.Ldind_I1_(OpCodes.Ldind_I1);
 			}
 		}
 
@@ -787,10 +577,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_U1_
-				{
-					opcode = OpCodes.Ldind_U1
-				};
+				return new Code.Ldind_U1_(OpCodes.Ldind_U1);
 			}
 		}
 
@@ -798,10 +585,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_I2_
-				{
-					opcode = OpCodes.Ldind_I2
-				};
+				return new Code.Ldind_I2_(OpCodes.Ldind_I2);
 			}
 		}
 
@@ -809,10 +593,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_U2_
-				{
-					opcode = OpCodes.Ldind_U2
-				};
+				return new Code.Ldind_U2_(OpCodes.Ldind_U2);
 			}
 		}
 
@@ -820,10 +601,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_I4_
-				{
-					opcode = OpCodes.Ldind_I4
-				};
+				return new Code.Ldind_I4_(OpCodes.Ldind_I4);
 			}
 		}
 
@@ -831,10 +609,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_U4_
-				{
-					opcode = OpCodes.Ldind_U4
-				};
+				return new Code.Ldind_U4_(OpCodes.Ldind_U4);
 			}
 		}
 
@@ -842,10 +617,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_I8_
-				{
-					opcode = OpCodes.Ldind_I8
-				};
+				return new Code.Ldind_I8_(OpCodes.Ldind_I8);
 			}
 		}
 
@@ -853,10 +625,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_I_
-				{
-					opcode = OpCodes.Ldind_I
-				};
+				return new Code.Ldind_I_(OpCodes.Ldind_I);
 			}
 		}
 
@@ -864,10 +633,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_R4_
-				{
-					opcode = OpCodes.Ldind_R4
-				};
+				return new Code.Ldind_R4_(OpCodes.Ldind_R4);
 			}
 		}
 
@@ -875,10 +641,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_R8_
-				{
-					opcode = OpCodes.Ldind_R8
-				};
+				return new Code.Ldind_R8_(OpCodes.Ldind_R8);
 			}
 		}
 
@@ -886,10 +649,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldind_Ref_
-				{
-					opcode = OpCodes.Ldind_Ref
-				};
+				return new Code.Ldind_Ref_(OpCodes.Ldind_Ref);
 			}
 		}
 
@@ -897,10 +657,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_Ref_
-				{
-					opcode = OpCodes.Stind_Ref
-				};
+				return new Code.Stind_Ref_(OpCodes.Stind_Ref);
 			}
 		}
 
@@ -908,10 +665,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_I1_
-				{
-					opcode = OpCodes.Stind_I1
-				};
+				return new Code.Stind_I1_(OpCodes.Stind_I1);
 			}
 		}
 
@@ -919,10 +673,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_I2_
-				{
-					opcode = OpCodes.Stind_I2
-				};
+				return new Code.Stind_I2_(OpCodes.Stind_I2);
 			}
 		}
 
@@ -930,10 +681,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_I4_
-				{
-					opcode = OpCodes.Stind_I4
-				};
+				return new Code.Stind_I4_(OpCodes.Stind_I4);
 			}
 		}
 
@@ -941,10 +689,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_I8_
-				{
-					opcode = OpCodes.Stind_I8
-				};
+				return new Code.Stind_I8_(OpCodes.Stind_I8);
 			}
 		}
 
@@ -952,10 +697,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_R4_
-				{
-					opcode = OpCodes.Stind_R4
-				};
+				return new Code.Stind_R4_(OpCodes.Stind_R4);
 			}
 		}
 
@@ -963,10 +705,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_R8_
-				{
-					opcode = OpCodes.Stind_R8
-				};
+				return new Code.Stind_R8_(OpCodes.Stind_R8);
 			}
 		}
 
@@ -974,10 +713,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Add_
-				{
-					opcode = OpCodes.Add
-				};
+				return new Code.Add_(OpCodes.Add);
 			}
 		}
 
@@ -985,10 +721,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Sub_
-				{
-					opcode = OpCodes.Sub
-				};
+				return new Code.Sub_(OpCodes.Sub);
 			}
 		}
 
@@ -996,10 +729,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Mul_
-				{
-					opcode = OpCodes.Mul
-				};
+				return new Code.Mul_(OpCodes.Mul);
 			}
 		}
 
@@ -1007,10 +737,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Div_
-				{
-					opcode = OpCodes.Div
-				};
+				return new Code.Div_(OpCodes.Div);
 			}
 		}
 
@@ -1018,10 +745,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Div_Un_
-				{
-					opcode = OpCodes.Div_Un
-				};
+				return new Code.Div_Un_(OpCodes.Div_Un);
 			}
 		}
 
@@ -1029,10 +753,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Rem_
-				{
-					opcode = OpCodes.Rem
-				};
+				return new Code.Rem_(OpCodes.Rem);
 			}
 		}
 
@@ -1040,10 +761,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Rem_Un_
-				{
-					opcode = OpCodes.Rem_Un
-				};
+				return new Code.Rem_Un_(OpCodes.Rem_Un);
 			}
 		}
 
@@ -1051,10 +769,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.And_
-				{
-					opcode = OpCodes.And
-				};
+				return new Code.And_(OpCodes.And);
 			}
 		}
 
@@ -1062,10 +777,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Or_
-				{
-					opcode = OpCodes.Or
-				};
+				return new Code.Or_(OpCodes.Or);
 			}
 		}
 
@@ -1073,10 +785,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Xor_
-				{
-					opcode = OpCodes.Xor
-				};
+				return new Code.Xor_(OpCodes.Xor);
 			}
 		}
 
@@ -1084,10 +793,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Shl_
-				{
-					opcode = OpCodes.Shl
-				};
+				return new Code.Shl_(OpCodes.Shl);
 			}
 		}
 
@@ -1095,10 +801,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Shr_
-				{
-					opcode = OpCodes.Shr
-				};
+				return new Code.Shr_(OpCodes.Shr);
 			}
 		}
 
@@ -1106,10 +809,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Shr_Un_
-				{
-					opcode = OpCodes.Shr_Un
-				};
+				return new Code.Shr_Un_(OpCodes.Shr_Un);
 			}
 		}
 
@@ -1117,10 +817,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Neg_
-				{
-					opcode = OpCodes.Neg
-				};
+				return new Code.Neg_(OpCodes.Neg);
 			}
 		}
 
@@ -1128,10 +825,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Not_
-				{
-					opcode = OpCodes.Not
-				};
+				return new Code.Not_(OpCodes.Not);
 			}
 		}
 
@@ -1139,10 +833,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_I1_
-				{
-					opcode = OpCodes.Conv_I1
-				};
+				return new Code.Conv_I1_(OpCodes.Conv_I1);
 			}
 		}
 
@@ -1150,10 +841,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_I2_
-				{
-					opcode = OpCodes.Conv_I2
-				};
+				return new Code.Conv_I2_(OpCodes.Conv_I2);
 			}
 		}
 
@@ -1161,10 +849,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_I4_
-				{
-					opcode = OpCodes.Conv_I4
-				};
+				return new Code.Conv_I4_(OpCodes.Conv_I4);
 			}
 		}
 
@@ -1172,10 +857,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_I8_
-				{
-					opcode = OpCodes.Conv_I8
-				};
+				return new Code.Conv_I8_(OpCodes.Conv_I8);
 			}
 		}
 
@@ -1183,10 +865,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_R4_
-				{
-					opcode = OpCodes.Conv_R4
-				};
+				return new Code.Conv_R4_(OpCodes.Conv_R4);
 			}
 		}
 
@@ -1194,10 +873,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_R8_
-				{
-					opcode = OpCodes.Conv_R8
-				};
+				return new Code.Conv_R8_(OpCodes.Conv_R8);
 			}
 		}
 
@@ -1205,10 +881,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_U4_
-				{
-					opcode = OpCodes.Conv_U4
-				};
+				return new Code.Conv_U4_(OpCodes.Conv_U4);
 			}
 		}
 
@@ -1216,10 +889,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_U8_
-				{
-					opcode = OpCodes.Conv_U8
-				};
+				return new Code.Conv_U8_(OpCodes.Conv_U8);
 			}
 		}
 
@@ -1227,10 +897,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Callvirt_
-				{
-					opcode = OpCodes.Callvirt
-				};
+				return new Code.Callvirt_(OpCodes.Callvirt);
 			}
 		}
 
@@ -1238,10 +905,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Cpobj_
-				{
-					opcode = OpCodes.Cpobj
-				};
+				return new Code.Cpobj_(OpCodes.Cpobj);
 			}
 		}
 
@@ -1249,10 +913,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldobj_
-				{
-					opcode = OpCodes.Ldobj
-				};
+				return new Code.Ldobj_(OpCodes.Ldobj);
 			}
 		}
 
@@ -1260,10 +921,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldstr_
-				{
-					opcode = OpCodes.Ldstr
-				};
+				return new Code.Ldstr_(OpCodes.Ldstr);
 			}
 		}
 
@@ -1271,10 +929,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Newobj_
-				{
-					opcode = OpCodes.Newobj
-				};
+				return new Code.Newobj_(OpCodes.Newobj);
 			}
 		}
 
@@ -1282,10 +937,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Castclass_
-				{
-					opcode = OpCodes.Castclass
-				};
+				return new Code.Castclass_(OpCodes.Castclass);
 			}
 		}
 
@@ -1293,10 +945,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Isinst_
-				{
-					opcode = OpCodes.Isinst
-				};
+				return new Code.Isinst_(OpCodes.Isinst);
 			}
 		}
 
@@ -1304,10 +953,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_R_Un_
-				{
-					opcode = OpCodes.Conv_R_Un
-				};
+				return new Code.Conv_R_Un_(OpCodes.Conv_R_Un);
 			}
 		}
 
@@ -1315,10 +961,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Unbox_
-				{
-					opcode = OpCodes.Unbox
-				};
+				return new Code.Unbox_(OpCodes.Unbox);
 			}
 		}
 
@@ -1326,10 +969,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Throw_
-				{
-					opcode = OpCodes.Throw
-				};
+				return new Code.Throw_(OpCodes.Throw);
 			}
 		}
 
@@ -1337,10 +977,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldfld_
-				{
-					opcode = OpCodes.Ldfld
-				};
+				return new Code.Ldfld_(OpCodes.Ldfld);
 			}
 		}
 
@@ -1348,10 +985,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldflda_
-				{
-					opcode = OpCodes.Ldflda
-				};
+				return new Code.Ldflda_(OpCodes.Ldflda);
 			}
 		}
 
@@ -1359,10 +993,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stfld_
-				{
-					opcode = OpCodes.Stfld
-				};
+				return new Code.Stfld_(OpCodes.Stfld);
 			}
 		}
 
@@ -1370,10 +1001,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldsfld_
-				{
-					opcode = OpCodes.Ldsfld
-				};
+				return new Code.Ldsfld_(OpCodes.Ldsfld);
 			}
 		}
 
@@ -1381,10 +1009,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldsflda_
-				{
-					opcode = OpCodes.Ldsflda
-				};
+				return new Code.Ldsflda_(OpCodes.Ldsflda);
 			}
 		}
 
@@ -1392,10 +1017,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stsfld_
-				{
-					opcode = OpCodes.Stsfld
-				};
+				return new Code.Stsfld_(OpCodes.Stsfld);
 			}
 		}
 
@@ -1403,10 +1025,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stobj_
-				{
-					opcode = OpCodes.Stobj
-				};
+				return new Code.Stobj_(OpCodes.Stobj);
 			}
 		}
 
@@ -1414,10 +1033,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I1_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_I1_Un
-				};
+				return new Code.Conv_Ovf_I1_Un_(OpCodes.Conv_Ovf_I1_Un);
 			}
 		}
 
@@ -1425,10 +1041,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I2_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_I2_Un
-				};
+				return new Code.Conv_Ovf_I2_Un_(OpCodes.Conv_Ovf_I2_Un);
 			}
 		}
 
@@ -1436,10 +1049,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I4_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_I4_Un
-				};
+				return new Code.Conv_Ovf_I4_Un_(OpCodes.Conv_Ovf_I4_Un);
 			}
 		}
 
@@ -1447,10 +1057,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I8_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_I8_Un
-				};
+				return new Code.Conv_Ovf_I8_Un_(OpCodes.Conv_Ovf_I8_Un);
 			}
 		}
 
@@ -1458,10 +1065,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U1_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_U1_Un
-				};
+				return new Code.Conv_Ovf_U1_Un_(OpCodes.Conv_Ovf_U1_Un);
 			}
 		}
 
@@ -1469,10 +1073,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U2_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_U2_Un
-				};
+				return new Code.Conv_Ovf_U2_Un_(OpCodes.Conv_Ovf_U2_Un);
 			}
 		}
 
@@ -1480,10 +1081,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U4_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_U4_Un
-				};
+				return new Code.Conv_Ovf_U4_Un_(OpCodes.Conv_Ovf_U4_Un);
 			}
 		}
 
@@ -1491,10 +1089,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U8_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_U8_Un
-				};
+				return new Code.Conv_Ovf_U8_Un_(OpCodes.Conv_Ovf_U8_Un);
 			}
 		}
 
@@ -1502,10 +1097,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_I_Un
-				};
+				return new Code.Conv_Ovf_I_Un_(OpCodes.Conv_Ovf_I_Un);
 			}
 		}
 
@@ -1513,10 +1105,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U_Un_
-				{
-					opcode = OpCodes.Conv_Ovf_U_Un
-				};
+				return new Code.Conv_Ovf_U_Un_(OpCodes.Conv_Ovf_U_Un);
 			}
 		}
 
@@ -1524,10 +1113,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Box_
-				{
-					opcode = OpCodes.Box
-				};
+				return new Code.Box_(OpCodes.Box);
 			}
 		}
 
@@ -1535,10 +1121,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Newarr_
-				{
-					opcode = OpCodes.Newarr
-				};
+				return new Code.Newarr_(OpCodes.Newarr);
 			}
 		}
 
@@ -1546,10 +1129,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldlen_
-				{
-					opcode = OpCodes.Ldlen
-				};
+				return new Code.Ldlen_(OpCodes.Ldlen);
 			}
 		}
 
@@ -1557,10 +1137,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelema_
-				{
-					opcode = OpCodes.Ldelema
-				};
+				return new Code.Ldelema_(OpCodes.Ldelema);
 			}
 		}
 
@@ -1568,10 +1145,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_I1_
-				{
-					opcode = OpCodes.Ldelem_I1
-				};
+				return new Code.Ldelem_I1_(OpCodes.Ldelem_I1);
 			}
 		}
 
@@ -1579,10 +1153,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_U1_
-				{
-					opcode = OpCodes.Ldelem_U1
-				};
+				return new Code.Ldelem_U1_(OpCodes.Ldelem_U1);
 			}
 		}
 
@@ -1590,10 +1161,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_I2_
-				{
-					opcode = OpCodes.Ldelem_I2
-				};
+				return new Code.Ldelem_I2_(OpCodes.Ldelem_I2);
 			}
 		}
 
@@ -1601,10 +1169,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_U2_
-				{
-					opcode = OpCodes.Ldelem_U2
-				};
+				return new Code.Ldelem_U2_(OpCodes.Ldelem_U2);
 			}
 		}
 
@@ -1612,10 +1177,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_I4_
-				{
-					opcode = OpCodes.Ldelem_I4
-				};
+				return new Code.Ldelem_I4_(OpCodes.Ldelem_I4);
 			}
 		}
 
@@ -1623,10 +1185,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_U4_
-				{
-					opcode = OpCodes.Ldelem_U4
-				};
+				return new Code.Ldelem_U4_(OpCodes.Ldelem_U4);
 			}
 		}
 
@@ -1634,10 +1193,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_I8_
-				{
-					opcode = OpCodes.Ldelem_I8
-				};
+				return new Code.Ldelem_I8_(OpCodes.Ldelem_I8);
 			}
 		}
 
@@ -1645,10 +1201,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_I_
-				{
-					opcode = OpCodes.Ldelem_I
-				};
+				return new Code.Ldelem_I_(OpCodes.Ldelem_I);
 			}
 		}
 
@@ -1656,10 +1209,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_R4_
-				{
-					opcode = OpCodes.Ldelem_R4
-				};
+				return new Code.Ldelem_R4_(OpCodes.Ldelem_R4);
 			}
 		}
 
@@ -1667,10 +1217,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_R8_
-				{
-					opcode = OpCodes.Ldelem_R8
-				};
+				return new Code.Ldelem_R8_(OpCodes.Ldelem_R8);
 			}
 		}
 
@@ -1678,10 +1225,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_Ref_
-				{
-					opcode = OpCodes.Ldelem_Ref
-				};
+				return new Code.Ldelem_Ref_(OpCodes.Ldelem_Ref);
 			}
 		}
 
@@ -1689,10 +1233,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_I_
-				{
-					opcode = OpCodes.Stelem_I
-				};
+				return new Code.Stelem_I_(OpCodes.Stelem_I);
 			}
 		}
 
@@ -1700,10 +1241,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_I1_
-				{
-					opcode = OpCodes.Stelem_I1
-				};
+				return new Code.Stelem_I1_(OpCodes.Stelem_I1);
 			}
 		}
 
@@ -1711,10 +1249,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_I2_
-				{
-					opcode = OpCodes.Stelem_I2
-				};
+				return new Code.Stelem_I2_(OpCodes.Stelem_I2);
 			}
 		}
 
@@ -1722,10 +1257,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_I4_
-				{
-					opcode = OpCodes.Stelem_I4
-				};
+				return new Code.Stelem_I4_(OpCodes.Stelem_I4);
 			}
 		}
 
@@ -1733,10 +1265,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_I8_
-				{
-					opcode = OpCodes.Stelem_I8
-				};
+				return new Code.Stelem_I8_(OpCodes.Stelem_I8);
 			}
 		}
 
@@ -1744,10 +1273,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_R4_
-				{
-					opcode = OpCodes.Stelem_R4
-				};
+				return new Code.Stelem_R4_(OpCodes.Stelem_R4);
 			}
 		}
 
@@ -1755,10 +1281,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_R8_
-				{
-					opcode = OpCodes.Stelem_R8
-				};
+				return new Code.Stelem_R8_(OpCodes.Stelem_R8);
 			}
 		}
 
@@ -1766,10 +1289,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_Ref_
-				{
-					opcode = OpCodes.Stelem_Ref
-				};
+				return new Code.Stelem_Ref_(OpCodes.Stelem_Ref);
 			}
 		}
 
@@ -1777,10 +1297,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldelem_
-				{
-					opcode = OpCodes.Ldelem
-				};
+				return new Code.Ldelem_(OpCodes.Ldelem);
 			}
 		}
 
@@ -1788,10 +1305,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stelem_
-				{
-					opcode = OpCodes.Stelem
-				};
+				return new Code.Stelem_(OpCodes.Stelem);
 			}
 		}
 
@@ -1799,10 +1313,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Unbox_Any_
-				{
-					opcode = OpCodes.Unbox_Any
-				};
+				return new Code.Unbox_Any_(OpCodes.Unbox_Any);
 			}
 		}
 
@@ -1810,10 +1321,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I1_
-				{
-					opcode = OpCodes.Conv_Ovf_I1
-				};
+				return new Code.Conv_Ovf_I1_(OpCodes.Conv_Ovf_I1);
 			}
 		}
 
@@ -1821,10 +1329,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U1_
-				{
-					opcode = OpCodes.Conv_Ovf_U1
-				};
+				return new Code.Conv_Ovf_U1_(OpCodes.Conv_Ovf_U1);
 			}
 		}
 
@@ -1832,10 +1337,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I2_
-				{
-					opcode = OpCodes.Conv_Ovf_I2
-				};
+				return new Code.Conv_Ovf_I2_(OpCodes.Conv_Ovf_I2);
 			}
 		}
 
@@ -1843,10 +1345,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U2_
-				{
-					opcode = OpCodes.Conv_Ovf_U2
-				};
+				return new Code.Conv_Ovf_U2_(OpCodes.Conv_Ovf_U2);
 			}
 		}
 
@@ -1854,10 +1353,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I4_
-				{
-					opcode = OpCodes.Conv_Ovf_I4
-				};
+				return new Code.Conv_Ovf_I4_(OpCodes.Conv_Ovf_I4);
 			}
 		}
 
@@ -1865,10 +1361,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U4_
-				{
-					opcode = OpCodes.Conv_Ovf_U4
-				};
+				return new Code.Conv_Ovf_U4_(OpCodes.Conv_Ovf_U4);
 			}
 		}
 
@@ -1876,10 +1369,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I8_
-				{
-					opcode = OpCodes.Conv_Ovf_I8
-				};
+				return new Code.Conv_Ovf_I8_(OpCodes.Conv_Ovf_I8);
 			}
 		}
 
@@ -1887,10 +1377,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U8_
-				{
-					opcode = OpCodes.Conv_Ovf_U8
-				};
+				return new Code.Conv_Ovf_U8_(OpCodes.Conv_Ovf_U8);
 			}
 		}
 
@@ -1898,10 +1385,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Refanyval_
-				{
-					opcode = OpCodes.Refanyval
-				};
+				return new Code.Refanyval_(OpCodes.Refanyval);
 			}
 		}
 
@@ -1909,10 +1393,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ckfinite_
-				{
-					opcode = OpCodes.Ckfinite
-				};
+				return new Code.Ckfinite_(OpCodes.Ckfinite);
 			}
 		}
 
@@ -1920,10 +1401,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Mkrefany_
-				{
-					opcode = OpCodes.Mkrefany
-				};
+				return new Code.Mkrefany_(OpCodes.Mkrefany);
 			}
 		}
 
@@ -1931,10 +1409,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldtoken_
-				{
-					opcode = OpCodes.Ldtoken
-				};
+				return new Code.Ldtoken_(OpCodes.Ldtoken);
 			}
 		}
 
@@ -1942,10 +1417,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_U2_
-				{
-					opcode = OpCodes.Conv_U2
-				};
+				return new Code.Conv_U2_(OpCodes.Conv_U2);
 			}
 		}
 
@@ -1953,10 +1425,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_U1_
-				{
-					opcode = OpCodes.Conv_U1
-				};
+				return new Code.Conv_U1_(OpCodes.Conv_U1);
 			}
 		}
 
@@ -1964,10 +1433,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_I_
-				{
-					opcode = OpCodes.Conv_I
-				};
+				return new Code.Conv_I_(OpCodes.Conv_I);
 			}
 		}
 
@@ -1975,10 +1441,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_I_
-				{
-					opcode = OpCodes.Conv_Ovf_I
-				};
+				return new Code.Conv_Ovf_I_(OpCodes.Conv_Ovf_I);
 			}
 		}
 
@@ -1986,10 +1449,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_Ovf_U_
-				{
-					opcode = OpCodes.Conv_Ovf_U
-				};
+				return new Code.Conv_Ovf_U_(OpCodes.Conv_Ovf_U);
 			}
 		}
 
@@ -1997,10 +1457,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Add_Ovf_
-				{
-					opcode = OpCodes.Add_Ovf
-				};
+				return new Code.Add_Ovf_(OpCodes.Add_Ovf);
 			}
 		}
 
@@ -2008,10 +1465,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Add_Ovf_Un_
-				{
-					opcode = OpCodes.Add_Ovf_Un
-				};
+				return new Code.Add_Ovf_Un_(OpCodes.Add_Ovf_Un);
 			}
 		}
 
@@ -2019,10 +1473,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Mul_Ovf_
-				{
-					opcode = OpCodes.Mul_Ovf
-				};
+				return new Code.Mul_Ovf_(OpCodes.Mul_Ovf);
 			}
 		}
 
@@ -2030,10 +1481,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Mul_Ovf_Un_
-				{
-					opcode = OpCodes.Mul_Ovf_Un
-				};
+				return new Code.Mul_Ovf_Un_(OpCodes.Mul_Ovf_Un);
 			}
 		}
 
@@ -2041,10 +1489,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Sub_Ovf_
-				{
-					opcode = OpCodes.Sub_Ovf
-				};
+				return new Code.Sub_Ovf_(OpCodes.Sub_Ovf);
 			}
 		}
 
@@ -2052,10 +1497,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Sub_Ovf_Un_
-				{
-					opcode = OpCodes.Sub_Ovf_Un
-				};
+				return new Code.Sub_Ovf_Un_(OpCodes.Sub_Ovf_Un);
 			}
 		}
 
@@ -2063,10 +1505,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Endfinally_
-				{
-					opcode = OpCodes.Endfinally
-				};
+				return new Code.Endfinally_(OpCodes.Endfinally);
 			}
 		}
 
@@ -2074,10 +1513,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Leave_
-				{
-					opcode = OpCodes.Leave
-				};
+				return new Code.Leave_(OpCodes.Leave);
 			}
 		}
 
@@ -2085,10 +1521,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Leave_S_
-				{
-					opcode = OpCodes.Leave_S
-				};
+				return new Code.Leave_S_(OpCodes.Leave_S);
 			}
 		}
 
@@ -2096,10 +1529,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stind_I_
-				{
-					opcode = OpCodes.Stind_I
-				};
+				return new Code.Stind_I_(OpCodes.Stind_I);
 			}
 		}
 
@@ -2107,10 +1537,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Conv_U_
-				{
-					opcode = OpCodes.Conv_U
-				};
+				return new Code.Conv_U_(OpCodes.Conv_U);
 			}
 		}
 
@@ -2118,10 +1545,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefix7_
-				{
-					opcode = OpCodes.Prefix7
-				};
+				return new Code.Prefix7_(OpCodes.Prefix7);
 			}
 		}
 
@@ -2129,10 +1553,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefix6_
-				{
-					opcode = OpCodes.Prefix6
-				};
+				return new Code.Prefix6_(OpCodes.Prefix6);
 			}
 		}
 
@@ -2140,10 +1561,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefix5_
-				{
-					opcode = OpCodes.Prefix5
-				};
+				return new Code.Prefix5_(OpCodes.Prefix5);
 			}
 		}
 
@@ -2151,10 +1569,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefix4_
-				{
-					opcode = OpCodes.Prefix4
-				};
+				return new Code.Prefix4_(OpCodes.Prefix4);
 			}
 		}
 
@@ -2162,10 +1577,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefix3_
-				{
-					opcode = OpCodes.Prefix3
-				};
+				return new Code.Prefix3_(OpCodes.Prefix3);
 			}
 		}
 
@@ -2173,10 +1585,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefix2_
-				{
-					opcode = OpCodes.Prefix2
-				};
+				return new Code.Prefix2_(OpCodes.Prefix2);
 			}
 		}
 
@@ -2184,10 +1593,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefix1_
-				{
-					opcode = OpCodes.Prefix1
-				};
+				return new Code.Prefix1_(OpCodes.Prefix1);
 			}
 		}
 
@@ -2195,10 +1601,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Prefixref_
-				{
-					opcode = OpCodes.Prefixref
-				};
+				return new Code.Prefixref_(OpCodes.Prefixref);
 			}
 		}
 
@@ -2206,10 +1609,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Arglist_
-				{
-					opcode = OpCodes.Arglist
-				};
+				return new Code.Arglist_(OpCodes.Arglist);
 			}
 		}
 
@@ -2217,10 +1617,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ceq_
-				{
-					opcode = OpCodes.Ceq
-				};
+				return new Code.Ceq_(OpCodes.Ceq);
 			}
 		}
 
@@ -2228,10 +1625,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Cgt_
-				{
-					opcode = OpCodes.Cgt
-				};
+				return new Code.Cgt_(OpCodes.Cgt);
 			}
 		}
 
@@ -2239,10 +1633,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Cgt_Un_
-				{
-					opcode = OpCodes.Cgt_Un
-				};
+				return new Code.Cgt_Un_(OpCodes.Cgt_Un);
 			}
 		}
 
@@ -2250,10 +1641,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Clt_
-				{
-					opcode = OpCodes.Clt
-				};
+				return new Code.Clt_(OpCodes.Clt);
 			}
 		}
 
@@ -2261,10 +1649,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Clt_Un_
-				{
-					opcode = OpCodes.Clt_Un
-				};
+				return new Code.Clt_Un_(OpCodes.Clt_Un);
 			}
 		}
 
@@ -2272,10 +1657,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldftn_
-				{
-					opcode = OpCodes.Ldftn
-				};
+				return new Code.Ldftn_(OpCodes.Ldftn);
 			}
 		}
 
@@ -2283,10 +1665,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldvirtftn_
-				{
-					opcode = OpCodes.Ldvirtftn
-				};
+				return new Code.Ldvirtftn_(OpCodes.Ldvirtftn);
 			}
 		}
 
@@ -2294,10 +1673,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarg_
-				{
-					opcode = OpCodes.Ldarg
-				};
+				return new Code.Ldarg_(OpCodes.Ldarg);
 			}
 		}
 
@@ -2305,10 +1681,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldarga_
-				{
-					opcode = OpCodes.Ldarga
-				};
+				return new Code.Ldarga_(OpCodes.Ldarga);
 			}
 		}
 
@@ -2316,10 +1689,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Starg_
-				{
-					opcode = OpCodes.Starg
-				};
+				return new Code.Starg_(OpCodes.Starg);
 			}
 		}
 
@@ -2327,10 +1697,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloc_
-				{
-					opcode = OpCodes.Ldloc
-				};
+				return new Code.Ldloc_(OpCodes.Ldloc);
 			}
 		}
 
@@ -2338,10 +1705,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Ldloca_
-				{
-					opcode = OpCodes.Ldloca
-				};
+				return new Code.Ldloca_(OpCodes.Ldloca);
 			}
 		}
 
@@ -2349,10 +1713,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Stloc_
-				{
-					opcode = OpCodes.Stloc
-				};
+				return new Code.Stloc_(OpCodes.Stloc);
 			}
 		}
 
@@ -2360,10 +1721,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Localloc_
-				{
-					opcode = OpCodes.Localloc
-				};
+				return new Code.Localloc_(OpCodes.Localloc);
 			}
 		}
 
@@ -2371,10 +1729,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Endfilter_
-				{
-					opcode = OpCodes.Endfilter
-				};
+				return new Code.Endfilter_(OpCodes.Endfilter);
 			}
 		}
 
@@ -2382,10 +1737,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Unaligned_
-				{
-					opcode = OpCodes.Unaligned
-				};
+				return new Code.Unaligned_(OpCodes.Unaligned);
 			}
 		}
 
@@ -2393,10 +1745,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Volatile_
-				{
-					opcode = OpCodes.Volatile
-				};
+				return new Code.Volatile_(OpCodes.Volatile);
 			}
 		}
 
@@ -2404,10 +1753,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Tailcall_
-				{
-					opcode = OpCodes.Tailcall
-				};
+				return new Code.Tailcall_(OpCodes.Tailcall);
 			}
 		}
 
@@ -2415,10 +1761,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Initobj_
-				{
-					opcode = OpCodes.Initobj
-				};
+				return new Code.Initobj_(OpCodes.Initobj);
 			}
 		}
 
@@ -2426,10 +1769,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Constrained_
-				{
-					opcode = OpCodes.Constrained
-				};
+				return new Code.Constrained_(OpCodes.Constrained);
 			}
 		}
 
@@ -2437,10 +1777,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Cpblk_
-				{
-					opcode = OpCodes.Cpblk
-				};
+				return new Code.Cpblk_(OpCodes.Cpblk);
 			}
 		}
 
@@ -2448,10 +1785,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Initblk_
-				{
-					opcode = OpCodes.Initblk
-				};
+				return new Code.Initblk_(OpCodes.Initblk);
 			}
 		}
 
@@ -2459,10 +1793,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Rethrow_
-				{
-					opcode = OpCodes.Rethrow
-				};
+				return new Code.Rethrow_(OpCodes.Rethrow);
 			}
 		}
 
@@ -2470,10 +1801,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Sizeof_
-				{
-					opcode = OpCodes.Sizeof
-				};
+				return new Code.Sizeof_(OpCodes.Sizeof);
 			}
 		}
 
@@ -2481,10 +1809,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Refanytype_
-				{
-					opcode = OpCodes.Refanytype
-				};
+				return new Code.Refanytype_(OpCodes.Refanytype);
 			}
 		}
 
@@ -2492,10 +1817,7 @@ namespace HarmonyLib
 		{
 			get
 			{
-				return new Code.Readonly_
-				{
-					opcode = OpCodes.Readonly
-				};
+				return new Code.Readonly_(OpCodes.Readonly);
 			}
 		}
 
@@ -2517,3617 +1839,3617 @@ namespace HarmonyLib
 
 		public class Nop_ : CodeMatch
 		{
+			public Nop_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Nop_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Nop_)base.Set(operand, name);
+					return (Code.Nop_)base.Set(OpCodes.Nop, operand, name);
 				}
-			}
-
-			public Nop_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Break_ : CodeMatch
 		{
+			public Break_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Break_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Break_)base.Set(operand, name);
+					return (Code.Break_)base.Set(OpCodes.Break, operand, name);
 				}
-			}
-
-			public Break_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarg_0_ : CodeMatch
 		{
+			public Ldarg_0_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarg_0_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarg_0_)base.Set(operand, name);
+					return (Code.Ldarg_0_)base.Set(OpCodes.Ldarg_0, operand, name);
 				}
-			}
-
-			public Ldarg_0_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarg_1_ : CodeMatch
 		{
+			public Ldarg_1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarg_1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarg_1_)base.Set(operand, name);
+					return (Code.Ldarg_1_)base.Set(OpCodes.Ldarg_1, operand, name);
 				}
-			}
-
-			public Ldarg_1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarg_2_ : CodeMatch
 		{
+			public Ldarg_2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarg_2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarg_2_)base.Set(operand, name);
+					return (Code.Ldarg_2_)base.Set(OpCodes.Ldarg_2, operand, name);
 				}
-			}
-
-			public Ldarg_2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarg_3_ : CodeMatch
 		{
+			public Ldarg_3_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarg_3_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarg_3_)base.Set(operand, name);
+					return (Code.Ldarg_3_)base.Set(OpCodes.Ldarg_3, operand, name);
 				}
-			}
-
-			public Ldarg_3_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloc_0_ : CodeMatch
 		{
+			public Ldloc_0_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloc_0_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloc_0_)base.Set(operand, name);
+					return (Code.Ldloc_0_)base.Set(OpCodes.Ldloc_0, operand, name);
 				}
-			}
-
-			public Ldloc_0_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloc_1_ : CodeMatch
 		{
+			public Ldloc_1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloc_1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloc_1_)base.Set(operand, name);
+					return (Code.Ldloc_1_)base.Set(OpCodes.Ldloc_1, operand, name);
 				}
-			}
-
-			public Ldloc_1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloc_2_ : CodeMatch
 		{
+			public Ldloc_2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloc_2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloc_2_)base.Set(operand, name);
+					return (Code.Ldloc_2_)base.Set(OpCodes.Ldloc_2, operand, name);
 				}
-			}
-
-			public Ldloc_2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloc_3_ : CodeMatch
 		{
+			public Ldloc_3_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloc_3_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloc_3_)base.Set(operand, name);
+					return (Code.Ldloc_3_)base.Set(OpCodes.Ldloc_3, operand, name);
 				}
-			}
-
-			public Ldloc_3_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stloc_0_ : CodeMatch
 		{
+			public Stloc_0_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stloc_0_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stloc_0_)base.Set(operand, name);
+					return (Code.Stloc_0_)base.Set(OpCodes.Stloc_0, operand, name);
 				}
-			}
-
-			public Stloc_0_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stloc_1_ : CodeMatch
 		{
+			public Stloc_1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stloc_1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stloc_1_)base.Set(operand, name);
+					return (Code.Stloc_1_)base.Set(OpCodes.Stloc_1, operand, name);
 				}
-			}
-
-			public Stloc_1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stloc_2_ : CodeMatch
 		{
+			public Stloc_2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stloc_2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stloc_2_)base.Set(operand, name);
+					return (Code.Stloc_2_)base.Set(OpCodes.Stloc_2, operand, name);
 				}
-			}
-
-			public Stloc_2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stloc_3_ : CodeMatch
 		{
+			public Stloc_3_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stloc_3_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stloc_3_)base.Set(operand, name);
+					return (Code.Stloc_3_)base.Set(OpCodes.Stloc_3, operand, name);
 				}
-			}
-
-			public Stloc_3_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarg_S_ : CodeMatch
 		{
+			public Ldarg_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarg_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarg_S_)base.Set(operand, name);
+					return (Code.Ldarg_S_)base.Set(OpCodes.Ldarg_S, operand, name);
 				}
-			}
-
-			public Ldarg_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarga_S_ : CodeMatch
 		{
+			public Ldarga_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarga_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarga_S_)base.Set(operand, name);
+					return (Code.Ldarga_S_)base.Set(OpCodes.Ldarga_S, operand, name);
 				}
-			}
-
-			public Ldarga_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Starg_S_ : CodeMatch
 		{
+			public Starg_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Starg_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Starg_S_)base.Set(operand, name);
+					return (Code.Starg_S_)base.Set(OpCodes.Starg_S, operand, name);
 				}
-			}
-
-			public Starg_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloc_S_ : CodeMatch
 		{
+			public Ldloc_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloc_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloc_S_)base.Set(operand, name);
+					return (Code.Ldloc_S_)base.Set(OpCodes.Ldloc_S, operand, name);
 				}
-			}
-
-			public Ldloc_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloca_S_ : CodeMatch
 		{
+			public Ldloca_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloca_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloca_S_)base.Set(operand, name);
+					return (Code.Ldloca_S_)base.Set(OpCodes.Ldloca_S, operand, name);
 				}
-			}
-
-			public Ldloca_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stloc_S_ : CodeMatch
 		{
+			public Stloc_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stloc_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stloc_S_)base.Set(operand, name);
+					return (Code.Stloc_S_)base.Set(OpCodes.Stloc_S, operand, name);
 				}
-			}
-
-			public Stloc_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldnull_ : CodeMatch
 		{
+			public Ldnull_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldnull_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldnull_)base.Set(operand, name);
+					return (Code.Ldnull_)base.Set(OpCodes.Ldnull, operand, name);
 				}
-			}
-
-			public Ldnull_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_M1_ : CodeMatch
 		{
+			public Ldc_I4_M1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_M1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_M1_)base.Set(operand, name);
+					return (Code.Ldc_I4_M1_)base.Set(OpCodes.Ldc_I4_M1, operand, name);
 				}
-			}
-
-			public Ldc_I4_M1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_0_ : CodeMatch
 		{
+			public Ldc_I4_0_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_0_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_0_)base.Set(operand, name);
+					return (Code.Ldc_I4_0_)base.Set(OpCodes.Ldc_I4_0, operand, name);
 				}
-			}
-
-			public Ldc_I4_0_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_1_ : CodeMatch
 		{
+			public Ldc_I4_1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_1_)base.Set(operand, name);
+					return (Code.Ldc_I4_1_)base.Set(OpCodes.Ldc_I4_1, operand, name);
 				}
-			}
-
-			public Ldc_I4_1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_2_ : CodeMatch
 		{
+			public Ldc_I4_2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_2_)base.Set(operand, name);
+					return (Code.Ldc_I4_2_)base.Set(OpCodes.Ldc_I4_2, operand, name);
 				}
-			}
-
-			public Ldc_I4_2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_3_ : CodeMatch
 		{
+			public Ldc_I4_3_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_3_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_3_)base.Set(operand, name);
+					return (Code.Ldc_I4_3_)base.Set(OpCodes.Ldc_I4_3, operand, name);
 				}
-			}
-
-			public Ldc_I4_3_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_4_ : CodeMatch
 		{
+			public Ldc_I4_4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_4_)base.Set(operand, name);
+					return (Code.Ldc_I4_4_)base.Set(OpCodes.Ldc_I4_4, operand, name);
 				}
-			}
-
-			public Ldc_I4_4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_5_ : CodeMatch
 		{
+			public Ldc_I4_5_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_5_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_5_)base.Set(operand, name);
+					return (Code.Ldc_I4_5_)base.Set(OpCodes.Ldc_I4_5, operand, name);
 				}
-			}
-
-			public Ldc_I4_5_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_6_ : CodeMatch
 		{
+			public Ldc_I4_6_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_6_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_6_)base.Set(operand, name);
+					return (Code.Ldc_I4_6_)base.Set(OpCodes.Ldc_I4_6, operand, name);
 				}
-			}
-
-			public Ldc_I4_6_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_7_ : CodeMatch
 		{
+			public Ldc_I4_7_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_7_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_7_)base.Set(operand, name);
+					return (Code.Ldc_I4_7_)base.Set(OpCodes.Ldc_I4_7, operand, name);
 				}
-			}
-
-			public Ldc_I4_7_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_8_ : CodeMatch
 		{
+			public Ldc_I4_8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_8_)base.Set(operand, name);
+					return (Code.Ldc_I4_8_)base.Set(OpCodes.Ldc_I4_8, operand, name);
 				}
-			}
-
-			public Ldc_I4_8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_S_ : CodeMatch
 		{
+			public Ldc_I4_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_S_)base.Set(operand, name);
+					return (Code.Ldc_I4_S_)base.Set(OpCodes.Ldc_I4_S, operand, name);
 				}
-			}
-
-			public Ldc_I4_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I4_ : CodeMatch
 		{
+			public Ldc_I4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I4_)base.Set(operand, name);
+					return (Code.Ldc_I4_)base.Set(OpCodes.Ldc_I4, operand, name);
 				}
-			}
-
-			public Ldc_I4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_I8_ : CodeMatch
 		{
+			public Ldc_I8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_I8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_I8_)base.Set(operand, name);
+					return (Code.Ldc_I8_)base.Set(OpCodes.Ldc_I8, operand, name);
 				}
-			}
-
-			public Ldc_I8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_R4_ : CodeMatch
 		{
+			public Ldc_R4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_R4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_R4_)base.Set(operand, name);
+					return (Code.Ldc_R4_)base.Set(OpCodes.Ldc_R4, operand, name);
 				}
-			}
-
-			public Ldc_R4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldc_R8_ : CodeMatch
 		{
+			public Ldc_R8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldc_R8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldc_R8_)base.Set(operand, name);
+					return (Code.Ldc_R8_)base.Set(OpCodes.Ldc_R8, operand, name);
 				}
-			}
-
-			public Ldc_R8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Dup_ : CodeMatch
 		{
+			public Dup_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Dup_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Dup_)base.Set(operand, name);
+					return (Code.Dup_)base.Set(OpCodes.Dup, operand, name);
 				}
-			}
-
-			public Dup_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Pop_ : CodeMatch
 		{
+			public Pop_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Pop_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Pop_)base.Set(operand, name);
+					return (Code.Pop_)base.Set(OpCodes.Pop, operand, name);
 				}
-			}
-
-			public Pop_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Jmp_ : CodeMatch
 		{
+			public Jmp_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Jmp_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Jmp_)base.Set(operand, name);
+					return (Code.Jmp_)base.Set(OpCodes.Jmp, operand, name);
 				}
-			}
-
-			public Jmp_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Call_ : CodeMatch
 		{
+			public Call_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Call_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Call_)base.Set(operand, name);
+					return (Code.Call_)base.Set(OpCodes.Call, operand, name);
 				}
-			}
-
-			public Call_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Calli_ : CodeMatch
 		{
+			public Calli_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Calli_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Calli_)base.Set(operand, name);
+					return (Code.Calli_)base.Set(OpCodes.Calli, operand, name);
 				}
-			}
-
-			public Calli_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ret_ : CodeMatch
 		{
+			public Ret_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ret_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ret_)base.Set(operand, name);
+					return (Code.Ret_)base.Set(OpCodes.Ret, operand, name);
 				}
-			}
-
-			public Ret_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Br_S_ : CodeMatch
 		{
+			public Br_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Br_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Br_S_)base.Set(operand, name);
+					return (Code.Br_S_)base.Set(OpCodes.Br_S, operand, name);
 				}
-			}
-
-			public Br_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Brfalse_S_ : CodeMatch
 		{
+			public Brfalse_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Brfalse_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Brfalse_S_)base.Set(operand, name);
+					return (Code.Brfalse_S_)base.Set(OpCodes.Brfalse_S, operand, name);
 				}
-			}
-
-			public Brfalse_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Brtrue_S_ : CodeMatch
 		{
+			public Brtrue_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Brtrue_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Brtrue_S_)base.Set(operand, name);
+					return (Code.Brtrue_S_)base.Set(OpCodes.Brtrue_S, operand, name);
 				}
-			}
-
-			public Brtrue_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Beq_S_ : CodeMatch
 		{
+			public Beq_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Beq_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Beq_S_)base.Set(operand, name);
+					return (Code.Beq_S_)base.Set(OpCodes.Beq_S, operand, name);
 				}
-			}
-
-			public Beq_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bge_S_ : CodeMatch
 		{
+			public Bge_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bge_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bge_S_)base.Set(operand, name);
+					return (Code.Bge_S_)base.Set(OpCodes.Bge_S, operand, name);
 				}
-			}
-
-			public Bge_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bgt_S_ : CodeMatch
 		{
+			public Bgt_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bgt_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bgt_S_)base.Set(operand, name);
+					return (Code.Bgt_S_)base.Set(OpCodes.Bgt_S, operand, name);
 				}
-			}
-
-			public Bgt_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ble_S_ : CodeMatch
 		{
+			public Ble_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ble_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ble_S_)base.Set(operand, name);
+					return (Code.Ble_S_)base.Set(OpCodes.Ble_S, operand, name);
 				}
-			}
-
-			public Ble_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Blt_S_ : CodeMatch
 		{
+			public Blt_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Blt_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Blt_S_)base.Set(operand, name);
+					return (Code.Blt_S_)base.Set(OpCodes.Blt_S, operand, name);
 				}
-			}
-
-			public Blt_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bne_Un_S_ : CodeMatch
 		{
+			public Bne_Un_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bne_Un_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bne_Un_S_)base.Set(operand, name);
+					return (Code.Bne_Un_S_)base.Set(OpCodes.Bne_Un_S, operand, name);
 				}
-			}
-
-			public Bne_Un_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bge_Un_S_ : CodeMatch
 		{
+			public Bge_Un_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bge_Un_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bge_Un_S_)base.Set(operand, name);
+					return (Code.Bge_Un_S_)base.Set(OpCodes.Bge_Un_S, operand, name);
 				}
-			}
-
-			public Bge_Un_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bgt_Un_S_ : CodeMatch
 		{
+			public Bgt_Un_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bgt_Un_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bgt_Un_S_)base.Set(operand, name);
+					return (Code.Bgt_Un_S_)base.Set(OpCodes.Bgt_Un_S, operand, name);
 				}
-			}
-
-			public Bgt_Un_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ble_Un_S_ : CodeMatch
 		{
+			public Ble_Un_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ble_Un_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ble_Un_S_)base.Set(operand, name);
+					return (Code.Ble_Un_S_)base.Set(OpCodes.Ble_Un_S, operand, name);
 				}
-			}
-
-			public Ble_Un_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Blt_Un_S_ : CodeMatch
 		{
+			public Blt_Un_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Blt_Un_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Blt_Un_S_)base.Set(operand, name);
+					return (Code.Blt_Un_S_)base.Set(OpCodes.Blt_Un_S, operand, name);
 				}
-			}
-
-			public Blt_Un_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Br_ : CodeMatch
 		{
+			public Br_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Br_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Br_)base.Set(operand, name);
+					return (Code.Br_)base.Set(OpCodes.Br, operand, name);
 				}
-			}
-
-			public Br_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Brfalse_ : CodeMatch
 		{
+			public Brfalse_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Brfalse_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Brfalse_)base.Set(operand, name);
+					return (Code.Brfalse_)base.Set(OpCodes.Brfalse, operand, name);
 				}
-			}
-
-			public Brfalse_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Brtrue_ : CodeMatch
 		{
+			public Brtrue_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Brtrue_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Brtrue_)base.Set(operand, name);
+					return (Code.Brtrue_)base.Set(OpCodes.Brtrue, operand, name);
 				}
-			}
-
-			public Brtrue_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Beq_ : CodeMatch
 		{
+			public Beq_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Beq_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Beq_)base.Set(operand, name);
+					return (Code.Beq_)base.Set(OpCodes.Beq, operand, name);
 				}
-			}
-
-			public Beq_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bge_ : CodeMatch
 		{
+			public Bge_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bge_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bge_)base.Set(operand, name);
+					return (Code.Bge_)base.Set(OpCodes.Bge, operand, name);
 				}
-			}
-
-			public Bge_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bgt_ : CodeMatch
 		{
+			public Bgt_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bgt_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bgt_)base.Set(operand, name);
+					return (Code.Bgt_)base.Set(OpCodes.Bgt, operand, name);
 				}
-			}
-
-			public Bgt_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ble_ : CodeMatch
 		{
+			public Ble_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ble_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ble_)base.Set(operand, name);
+					return (Code.Ble_)base.Set(OpCodes.Ble, operand, name);
 				}
-			}
-
-			public Ble_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Blt_ : CodeMatch
 		{
+			public Blt_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Blt_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Blt_)base.Set(operand, name);
+					return (Code.Blt_)base.Set(OpCodes.Blt, operand, name);
 				}
-			}
-
-			public Blt_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bne_Un_ : CodeMatch
 		{
+			public Bne_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bne_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bne_Un_)base.Set(operand, name);
+					return (Code.Bne_Un_)base.Set(OpCodes.Bne_Un, operand, name);
 				}
-			}
-
-			public Bne_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bge_Un_ : CodeMatch
 		{
+			public Bge_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bge_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bge_Un_)base.Set(operand, name);
+					return (Code.Bge_Un_)base.Set(OpCodes.Bge_Un, operand, name);
 				}
-			}
-
-			public Bge_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Bgt_Un_ : CodeMatch
 		{
+			public Bgt_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Bgt_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Bgt_Un_)base.Set(operand, name);
+					return (Code.Bgt_Un_)base.Set(OpCodes.Bgt_Un, operand, name);
 				}
-			}
-
-			public Bgt_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ble_Un_ : CodeMatch
 		{
+			public Ble_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ble_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ble_Un_)base.Set(operand, name);
+					return (Code.Ble_Un_)base.Set(OpCodes.Ble_Un, operand, name);
 				}
-			}
-
-			public Ble_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Blt_Un_ : CodeMatch
 		{
+			public Blt_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Blt_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Blt_Un_)base.Set(operand, name);
+					return (Code.Blt_Un_)base.Set(OpCodes.Blt_Un, operand, name);
 				}
-			}
-
-			public Blt_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Switch_ : CodeMatch
 		{
+			public Switch_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Switch_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Switch_)base.Set(operand, name);
+					return (Code.Switch_)base.Set(OpCodes.Switch, operand, name);
 				}
-			}
-
-			public Switch_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_I1_ : CodeMatch
 		{
+			public Ldind_I1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_I1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_I1_)base.Set(operand, name);
+					return (Code.Ldind_I1_)base.Set(OpCodes.Ldind_I1, operand, name);
 				}
-			}
-
-			public Ldind_I1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_U1_ : CodeMatch
 		{
+			public Ldind_U1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_U1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_U1_)base.Set(operand, name);
+					return (Code.Ldind_U1_)base.Set(OpCodes.Ldind_U1, operand, name);
 				}
-			}
-
-			public Ldind_U1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_I2_ : CodeMatch
 		{
+			public Ldind_I2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_I2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_I2_)base.Set(operand, name);
+					return (Code.Ldind_I2_)base.Set(OpCodes.Ldind_I2, operand, name);
 				}
-			}
-
-			public Ldind_I2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_U2_ : CodeMatch
 		{
+			public Ldind_U2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_U2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_U2_)base.Set(operand, name);
+					return (Code.Ldind_U2_)base.Set(OpCodes.Ldind_U2, operand, name);
 				}
-			}
-
-			public Ldind_U2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_I4_ : CodeMatch
 		{
+			public Ldind_I4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_I4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_I4_)base.Set(operand, name);
+					return (Code.Ldind_I4_)base.Set(OpCodes.Ldind_I4, operand, name);
 				}
-			}
-
-			public Ldind_I4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_U4_ : CodeMatch
 		{
+			public Ldind_U4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_U4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_U4_)base.Set(operand, name);
+					return (Code.Ldind_U4_)base.Set(OpCodes.Ldind_U4, operand, name);
 				}
-			}
-
-			public Ldind_U4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_I8_ : CodeMatch
 		{
+			public Ldind_I8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_I8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_I8_)base.Set(operand, name);
+					return (Code.Ldind_I8_)base.Set(OpCodes.Ldind_I8, operand, name);
 				}
-			}
-
-			public Ldind_I8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_I_ : CodeMatch
 		{
+			public Ldind_I_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_I_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_I_)base.Set(operand, name);
+					return (Code.Ldind_I_)base.Set(OpCodes.Ldind_I, operand, name);
 				}
-			}
-
-			public Ldind_I_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_R4_ : CodeMatch
 		{
+			public Ldind_R4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_R4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_R4_)base.Set(operand, name);
+					return (Code.Ldind_R4_)base.Set(OpCodes.Ldind_R4, operand, name);
 				}
-			}
-
-			public Ldind_R4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_R8_ : CodeMatch
 		{
+			public Ldind_R8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_R8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_R8_)base.Set(operand, name);
+					return (Code.Ldind_R8_)base.Set(OpCodes.Ldind_R8, operand, name);
 				}
-			}
-
-			public Ldind_R8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldind_Ref_ : CodeMatch
 		{
+			public Ldind_Ref_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldind_Ref_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldind_Ref_)base.Set(operand, name);
+					return (Code.Ldind_Ref_)base.Set(OpCodes.Ldind_Ref, operand, name);
 				}
-			}
-
-			public Ldind_Ref_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_Ref_ : CodeMatch
 		{
+			public Stind_Ref_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_Ref_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_Ref_)base.Set(operand, name);
+					return (Code.Stind_Ref_)base.Set(OpCodes.Stind_Ref, operand, name);
 				}
-			}
-
-			public Stind_Ref_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_I1_ : CodeMatch
 		{
+			public Stind_I1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_I1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_I1_)base.Set(operand, name);
+					return (Code.Stind_I1_)base.Set(OpCodes.Stind_I1, operand, name);
 				}
-			}
-
-			public Stind_I1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_I2_ : CodeMatch
 		{
+			public Stind_I2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_I2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_I2_)base.Set(operand, name);
+					return (Code.Stind_I2_)base.Set(OpCodes.Stind_I2, operand, name);
 				}
-			}
-
-			public Stind_I2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_I4_ : CodeMatch
 		{
+			public Stind_I4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_I4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_I4_)base.Set(operand, name);
+					return (Code.Stind_I4_)base.Set(OpCodes.Stind_I4, operand, name);
 				}
-			}
-
-			public Stind_I4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_I8_ : CodeMatch
 		{
+			public Stind_I8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_I8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_I8_)base.Set(operand, name);
+					return (Code.Stind_I8_)base.Set(OpCodes.Stind_I8, operand, name);
 				}
-			}
-
-			public Stind_I8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_R4_ : CodeMatch
 		{
+			public Stind_R4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_R4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_R4_)base.Set(operand, name);
+					return (Code.Stind_R4_)base.Set(OpCodes.Stind_R4, operand, name);
 				}
-			}
-
-			public Stind_R4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_R8_ : CodeMatch
 		{
+			public Stind_R8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_R8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_R8_)base.Set(operand, name);
+					return (Code.Stind_R8_)base.Set(OpCodes.Stind_R8, operand, name);
 				}
-			}
-
-			public Stind_R8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Add_ : CodeMatch
 		{
+			public Add_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Add_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Add_)base.Set(operand, name);
+					return (Code.Add_)base.Set(OpCodes.Add, operand, name);
 				}
-			}
-
-			public Add_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Sub_ : CodeMatch
 		{
+			public Sub_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Sub_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Sub_)base.Set(operand, name);
+					return (Code.Sub_)base.Set(OpCodes.Sub, operand, name);
 				}
-			}
-
-			public Sub_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Mul_ : CodeMatch
 		{
+			public Mul_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Mul_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Mul_)base.Set(operand, name);
+					return (Code.Mul_)base.Set(OpCodes.Mul, operand, name);
 				}
-			}
-
-			public Mul_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Div_ : CodeMatch
 		{
+			public Div_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Div_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Div_)base.Set(operand, name);
+					return (Code.Div_)base.Set(OpCodes.Div, operand, name);
 				}
-			}
-
-			public Div_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Div_Un_ : CodeMatch
 		{
+			public Div_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Div_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Div_Un_)base.Set(operand, name);
+					return (Code.Div_Un_)base.Set(OpCodes.Div_Un, operand, name);
 				}
-			}
-
-			public Div_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Rem_ : CodeMatch
 		{
+			public Rem_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Rem_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Rem_)base.Set(operand, name);
+					return (Code.Rem_)base.Set(OpCodes.Rem, operand, name);
 				}
-			}
-
-			public Rem_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Rem_Un_ : CodeMatch
 		{
+			public Rem_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Rem_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Rem_Un_)base.Set(operand, name);
+					return (Code.Rem_Un_)base.Set(OpCodes.Rem_Un, operand, name);
 				}
-			}
-
-			public Rem_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class And_ : CodeMatch
 		{
+			public And_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.And_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.And_)base.Set(operand, name);
+					return (Code.And_)base.Set(OpCodes.And, operand, name);
 				}
-			}
-
-			public And_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Or_ : CodeMatch
 		{
+			public Or_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Or_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Or_)base.Set(operand, name);
+					return (Code.Or_)base.Set(OpCodes.Or, operand, name);
 				}
-			}
-
-			public Or_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Xor_ : CodeMatch
 		{
+			public Xor_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Xor_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Xor_)base.Set(operand, name);
+					return (Code.Xor_)base.Set(OpCodes.Xor, operand, name);
 				}
-			}
-
-			public Xor_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Shl_ : CodeMatch
 		{
+			public Shl_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Shl_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Shl_)base.Set(operand, name);
+					return (Code.Shl_)base.Set(OpCodes.Shl, operand, name);
 				}
-			}
-
-			public Shl_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Shr_ : CodeMatch
 		{
+			public Shr_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Shr_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Shr_)base.Set(operand, name);
+					return (Code.Shr_)base.Set(OpCodes.Shr, operand, name);
 				}
-			}
-
-			public Shr_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Shr_Un_ : CodeMatch
 		{
+			public Shr_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Shr_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Shr_Un_)base.Set(operand, name);
+					return (Code.Shr_Un_)base.Set(OpCodes.Shr_Un, operand, name);
 				}
-			}
-
-			public Shr_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Neg_ : CodeMatch
 		{
+			public Neg_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Neg_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Neg_)base.Set(operand, name);
+					return (Code.Neg_)base.Set(OpCodes.Neg, operand, name);
 				}
-			}
-
-			public Neg_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Not_ : CodeMatch
 		{
+			public Not_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Not_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Not_)base.Set(operand, name);
+					return (Code.Not_)base.Set(OpCodes.Not, operand, name);
 				}
-			}
-
-			public Not_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_I1_ : CodeMatch
 		{
+			public Conv_I1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_I1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_I1_)base.Set(operand, name);
+					return (Code.Conv_I1_)base.Set(OpCodes.Conv_I1, operand, name);
 				}
-			}
-
-			public Conv_I1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_I2_ : CodeMatch
 		{
+			public Conv_I2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_I2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_I2_)base.Set(operand, name);
+					return (Code.Conv_I2_)base.Set(OpCodes.Conv_I2, operand, name);
 				}
-			}
-
-			public Conv_I2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_I4_ : CodeMatch
 		{
+			public Conv_I4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_I4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_I4_)base.Set(operand, name);
+					return (Code.Conv_I4_)base.Set(OpCodes.Conv_I4, operand, name);
 				}
-			}
-
-			public Conv_I4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_I8_ : CodeMatch
 		{
+			public Conv_I8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_I8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_I8_)base.Set(operand, name);
+					return (Code.Conv_I8_)base.Set(OpCodes.Conv_I8, operand, name);
 				}
-			}
-
-			public Conv_I8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_R4_ : CodeMatch
 		{
+			public Conv_R4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_R4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_R4_)base.Set(operand, name);
+					return (Code.Conv_R4_)base.Set(OpCodes.Conv_R4, operand, name);
 				}
-			}
-
-			public Conv_R4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_R8_ : CodeMatch
 		{
+			public Conv_R8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_R8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_R8_)base.Set(operand, name);
+					return (Code.Conv_R8_)base.Set(OpCodes.Conv_R8, operand, name);
 				}
-			}
-
-			public Conv_R8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_U4_ : CodeMatch
 		{
+			public Conv_U4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_U4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_U4_)base.Set(operand, name);
+					return (Code.Conv_U4_)base.Set(OpCodes.Conv_U4, operand, name);
 				}
-			}
-
-			public Conv_U4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_U8_ : CodeMatch
 		{
+			public Conv_U8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_U8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_U8_)base.Set(operand, name);
+					return (Code.Conv_U8_)base.Set(OpCodes.Conv_U8, operand, name);
 				}
-			}
-
-			public Conv_U8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Callvirt_ : CodeMatch
 		{
+			public Callvirt_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Callvirt_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Callvirt_)base.Set(operand, name);
+					return (Code.Callvirt_)base.Set(OpCodes.Callvirt, operand, name);
 				}
-			}
-
-			public Callvirt_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Cpobj_ : CodeMatch
 		{
+			public Cpobj_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Cpobj_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Cpobj_)base.Set(operand, name);
+					return (Code.Cpobj_)base.Set(OpCodes.Cpobj, operand, name);
 				}
-			}
-
-			public Cpobj_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldobj_ : CodeMatch
 		{
+			public Ldobj_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldobj_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldobj_)base.Set(operand, name);
+					return (Code.Ldobj_)base.Set(OpCodes.Ldobj, operand, name);
 				}
-			}
-
-			public Ldobj_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldstr_ : CodeMatch
 		{
+			public Ldstr_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldstr_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldstr_)base.Set(operand, name);
+					return (Code.Ldstr_)base.Set(OpCodes.Ldstr, operand, name);
 				}
-			}
-
-			public Ldstr_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Newobj_ : CodeMatch
 		{
+			public Newobj_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Newobj_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Newobj_)base.Set(operand, name);
+					return (Code.Newobj_)base.Set(OpCodes.Newobj, operand, name);
 				}
-			}
-
-			public Newobj_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Castclass_ : CodeMatch
 		{
+			public Castclass_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Castclass_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Castclass_)base.Set(operand, name);
+					return (Code.Castclass_)base.Set(OpCodes.Castclass, operand, name);
 				}
-			}
-
-			public Castclass_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Isinst_ : CodeMatch
 		{
+			public Isinst_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Isinst_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Isinst_)base.Set(operand, name);
+					return (Code.Isinst_)base.Set(OpCodes.Isinst, operand, name);
 				}
-			}
-
-			public Isinst_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_R_Un_ : CodeMatch
 		{
+			public Conv_R_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_R_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_R_Un_)base.Set(operand, name);
+					return (Code.Conv_R_Un_)base.Set(OpCodes.Conv_R_Un, operand, name);
 				}
-			}
-
-			public Conv_R_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Unbox_ : CodeMatch
 		{
+			public Unbox_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Unbox_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Unbox_)base.Set(operand, name);
+					return (Code.Unbox_)base.Set(OpCodes.Unbox, operand, name);
 				}
-			}
-
-			public Unbox_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Throw_ : CodeMatch
 		{
+			public Throw_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Throw_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Throw_)base.Set(operand, name);
+					return (Code.Throw_)base.Set(OpCodes.Throw, operand, name);
 				}
-			}
-
-			public Throw_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldfld_ : CodeMatch
 		{
+			public Ldfld_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldfld_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldfld_)base.Set(operand, name);
+					return (Code.Ldfld_)base.Set(OpCodes.Ldfld, operand, name);
 				}
-			}
-
-			public Ldfld_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldflda_ : CodeMatch
 		{
+			public Ldflda_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldflda_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldflda_)base.Set(operand, name);
+					return (Code.Ldflda_)base.Set(OpCodes.Ldflda, operand, name);
 				}
-			}
-
-			public Ldflda_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stfld_ : CodeMatch
 		{
+			public Stfld_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stfld_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stfld_)base.Set(operand, name);
+					return (Code.Stfld_)base.Set(OpCodes.Stfld, operand, name);
 				}
-			}
-
-			public Stfld_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldsfld_ : CodeMatch
 		{
+			public Ldsfld_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldsfld_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldsfld_)base.Set(operand, name);
+					return (Code.Ldsfld_)base.Set(OpCodes.Ldsfld, operand, name);
 				}
-			}
-
-			public Ldsfld_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldsflda_ : CodeMatch
 		{
+			public Ldsflda_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldsflda_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldsflda_)base.Set(operand, name);
+					return (Code.Ldsflda_)base.Set(OpCodes.Ldsflda, operand, name);
 				}
-			}
-
-			public Ldsflda_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stsfld_ : CodeMatch
 		{
+			public Stsfld_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stsfld_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stsfld_)base.Set(operand, name);
+					return (Code.Stsfld_)base.Set(OpCodes.Stsfld, operand, name);
 				}
-			}
-
-			public Stsfld_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stobj_ : CodeMatch
 		{
+			public Stobj_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stobj_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stobj_)base.Set(operand, name);
+					return (Code.Stobj_)base.Set(OpCodes.Stobj, operand, name);
 				}
-			}
-
-			public Stobj_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I1_Un_ : CodeMatch
 		{
+			public Conv_Ovf_I1_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I1_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I1_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I1_Un_)base.Set(OpCodes.Conv_Ovf_I1_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I1_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I2_Un_ : CodeMatch
 		{
+			public Conv_Ovf_I2_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I2_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I2_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I2_Un_)base.Set(OpCodes.Conv_Ovf_I2_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I2_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I4_Un_ : CodeMatch
 		{
+			public Conv_Ovf_I4_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I4_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I4_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I4_Un_)base.Set(OpCodes.Conv_Ovf_I4_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I4_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I8_Un_ : CodeMatch
 		{
+			public Conv_Ovf_I8_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I8_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I8_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I8_Un_)base.Set(OpCodes.Conv_Ovf_I8_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I8_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U1_Un_ : CodeMatch
 		{
+			public Conv_Ovf_U1_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U1_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U1_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U1_Un_)base.Set(OpCodes.Conv_Ovf_U1_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U1_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U2_Un_ : CodeMatch
 		{
+			public Conv_Ovf_U2_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U2_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U2_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U2_Un_)base.Set(OpCodes.Conv_Ovf_U2_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U2_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U4_Un_ : CodeMatch
 		{
+			public Conv_Ovf_U4_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U4_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U4_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U4_Un_)base.Set(OpCodes.Conv_Ovf_U4_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U4_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U8_Un_ : CodeMatch
 		{
+			public Conv_Ovf_U8_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U8_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U8_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U8_Un_)base.Set(OpCodes.Conv_Ovf_U8_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U8_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I_Un_ : CodeMatch
 		{
+			public Conv_Ovf_I_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I_Un_)base.Set(OpCodes.Conv_Ovf_I_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U_Un_ : CodeMatch
 		{
+			public Conv_Ovf_U_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U_Un_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U_Un_)base.Set(OpCodes.Conv_Ovf_U_Un, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Box_ : CodeMatch
 		{
+			public Box_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Box_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Box_)base.Set(operand, name);
+					return (Code.Box_)base.Set(OpCodes.Box, operand, name);
 				}
-			}
-
-			public Box_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Newarr_ : CodeMatch
 		{
+			public Newarr_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Newarr_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Newarr_)base.Set(operand, name);
+					return (Code.Newarr_)base.Set(OpCodes.Newarr, operand, name);
 				}
-			}
-
-			public Newarr_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldlen_ : CodeMatch
 		{
+			public Ldlen_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldlen_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldlen_)base.Set(operand, name);
+					return (Code.Ldlen_)base.Set(OpCodes.Ldlen, operand, name);
 				}
-			}
-
-			public Ldlen_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelema_ : CodeMatch
 		{
+			public Ldelema_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelema_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelema_)base.Set(operand, name);
+					return (Code.Ldelema_)base.Set(OpCodes.Ldelema, operand, name);
 				}
-			}
-
-			public Ldelema_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_I1_ : CodeMatch
 		{
+			public Ldelem_I1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_I1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_I1_)base.Set(operand, name);
+					return (Code.Ldelem_I1_)base.Set(OpCodes.Ldelem_I1, operand, name);
 				}
-			}
-
-			public Ldelem_I1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_U1_ : CodeMatch
 		{
+			public Ldelem_U1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_U1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_U1_)base.Set(operand, name);
+					return (Code.Ldelem_U1_)base.Set(OpCodes.Ldelem_U1, operand, name);
 				}
-			}
-
-			public Ldelem_U1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_I2_ : CodeMatch
 		{
+			public Ldelem_I2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_I2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_I2_)base.Set(operand, name);
+					return (Code.Ldelem_I2_)base.Set(OpCodes.Ldelem_I2, operand, name);
 				}
-			}
-
-			public Ldelem_I2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_U2_ : CodeMatch
 		{
+			public Ldelem_U2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_U2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_U2_)base.Set(operand, name);
+					return (Code.Ldelem_U2_)base.Set(OpCodes.Ldelem_U2, operand, name);
 				}
-			}
-
-			public Ldelem_U2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_I4_ : CodeMatch
 		{
+			public Ldelem_I4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_I4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_I4_)base.Set(operand, name);
+					return (Code.Ldelem_I4_)base.Set(OpCodes.Ldelem_I4, operand, name);
 				}
-			}
-
-			public Ldelem_I4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_U4_ : CodeMatch
 		{
+			public Ldelem_U4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_U4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_U4_)base.Set(operand, name);
+					return (Code.Ldelem_U4_)base.Set(OpCodes.Ldelem_U4, operand, name);
 				}
-			}
-
-			public Ldelem_U4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_I8_ : CodeMatch
 		{
+			public Ldelem_I8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_I8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_I8_)base.Set(operand, name);
+					return (Code.Ldelem_I8_)base.Set(OpCodes.Ldelem_I8, operand, name);
 				}
-			}
-
-			public Ldelem_I8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_I_ : CodeMatch
 		{
+			public Ldelem_I_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_I_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_I_)base.Set(operand, name);
+					return (Code.Ldelem_I_)base.Set(OpCodes.Ldelem_I, operand, name);
 				}
-			}
-
-			public Ldelem_I_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_R4_ : CodeMatch
 		{
+			public Ldelem_R4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_R4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_R4_)base.Set(operand, name);
+					return (Code.Ldelem_R4_)base.Set(OpCodes.Ldelem_R4, operand, name);
 				}
-			}
-
-			public Ldelem_R4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_R8_ : CodeMatch
 		{
+			public Ldelem_R8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_R8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_R8_)base.Set(operand, name);
+					return (Code.Ldelem_R8_)base.Set(OpCodes.Ldelem_R8, operand, name);
 				}
-			}
-
-			public Ldelem_R8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_Ref_ : CodeMatch
 		{
+			public Ldelem_Ref_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_Ref_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_Ref_)base.Set(operand, name);
+					return (Code.Ldelem_Ref_)base.Set(OpCodes.Ldelem_Ref, operand, name);
 				}
-			}
-
-			public Ldelem_Ref_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_I_ : CodeMatch
 		{
+			public Stelem_I_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_I_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_I_)base.Set(operand, name);
+					return (Code.Stelem_I_)base.Set(OpCodes.Stelem_I, operand, name);
 				}
-			}
-
-			public Stelem_I_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_I1_ : CodeMatch
 		{
+			public Stelem_I1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_I1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_I1_)base.Set(operand, name);
+					return (Code.Stelem_I1_)base.Set(OpCodes.Stelem_I1, operand, name);
 				}
-			}
-
-			public Stelem_I1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_I2_ : CodeMatch
 		{
+			public Stelem_I2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_I2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_I2_)base.Set(operand, name);
+					return (Code.Stelem_I2_)base.Set(OpCodes.Stelem_I2, operand, name);
 				}
-			}
-
-			public Stelem_I2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_I4_ : CodeMatch
 		{
+			public Stelem_I4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_I4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_I4_)base.Set(operand, name);
+					return (Code.Stelem_I4_)base.Set(OpCodes.Stelem_I4, operand, name);
 				}
-			}
-
-			public Stelem_I4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_I8_ : CodeMatch
 		{
+			public Stelem_I8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_I8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_I8_)base.Set(operand, name);
+					return (Code.Stelem_I8_)base.Set(OpCodes.Stelem_I8, operand, name);
 				}
-			}
-
-			public Stelem_I8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_R4_ : CodeMatch
 		{
+			public Stelem_R4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_R4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_R4_)base.Set(operand, name);
+					return (Code.Stelem_R4_)base.Set(OpCodes.Stelem_R4, operand, name);
 				}
-			}
-
-			public Stelem_R4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_R8_ : CodeMatch
 		{
+			public Stelem_R8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_R8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_R8_)base.Set(operand, name);
+					return (Code.Stelem_R8_)base.Set(OpCodes.Stelem_R8, operand, name);
 				}
-			}
-
-			public Stelem_R8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_Ref_ : CodeMatch
 		{
+			public Stelem_Ref_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_Ref_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_Ref_)base.Set(operand, name);
+					return (Code.Stelem_Ref_)base.Set(OpCodes.Stelem_Ref, operand, name);
 				}
-			}
-
-			public Stelem_Ref_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldelem_ : CodeMatch
 		{
+			public Ldelem_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldelem_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldelem_)base.Set(operand, name);
+					return (Code.Ldelem_)base.Set(OpCodes.Ldelem, operand, name);
 				}
-			}
-
-			public Ldelem_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stelem_ : CodeMatch
 		{
+			public Stelem_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stelem_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stelem_)base.Set(operand, name);
+					return (Code.Stelem_)base.Set(OpCodes.Stelem, operand, name);
 				}
-			}
-
-			public Stelem_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Unbox_Any_ : CodeMatch
 		{
+			public Unbox_Any_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Unbox_Any_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Unbox_Any_)base.Set(operand, name);
+					return (Code.Unbox_Any_)base.Set(OpCodes.Unbox_Any, operand, name);
 				}
-			}
-
-			public Unbox_Any_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I1_ : CodeMatch
 		{
+			public Conv_Ovf_I1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I1_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I1_)base.Set(OpCodes.Conv_Ovf_I1, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U1_ : CodeMatch
 		{
+			public Conv_Ovf_U1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U1_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U1_)base.Set(OpCodes.Conv_Ovf_U1, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I2_ : CodeMatch
 		{
+			public Conv_Ovf_I2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I2_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I2_)base.Set(OpCodes.Conv_Ovf_I2, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U2_ : CodeMatch
 		{
+			public Conv_Ovf_U2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U2_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U2_)base.Set(OpCodes.Conv_Ovf_U2, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I4_ : CodeMatch
 		{
+			public Conv_Ovf_I4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I4_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I4_)base.Set(OpCodes.Conv_Ovf_I4, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U4_ : CodeMatch
 		{
+			public Conv_Ovf_U4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U4_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U4_)base.Set(OpCodes.Conv_Ovf_U4, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I8_ : CodeMatch
 		{
+			public Conv_Ovf_I8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I8_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I8_)base.Set(OpCodes.Conv_Ovf_I8, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U8_ : CodeMatch
 		{
+			public Conv_Ovf_U8_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U8_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U8_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U8_)base.Set(OpCodes.Conv_Ovf_U8, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U8_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Refanyval_ : CodeMatch
 		{
+			public Refanyval_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Refanyval_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Refanyval_)base.Set(operand, name);
+					return (Code.Refanyval_)base.Set(OpCodes.Refanyval, operand, name);
 				}
-			}
-
-			public Refanyval_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ckfinite_ : CodeMatch
 		{
+			public Ckfinite_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ckfinite_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ckfinite_)base.Set(operand, name);
+					return (Code.Ckfinite_)base.Set(OpCodes.Ckfinite, operand, name);
 				}
-			}
-
-			public Ckfinite_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Mkrefany_ : CodeMatch
 		{
+			public Mkrefany_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Mkrefany_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Mkrefany_)base.Set(operand, name);
+					return (Code.Mkrefany_)base.Set(OpCodes.Mkrefany, operand, name);
 				}
-			}
-
-			public Mkrefany_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldtoken_ : CodeMatch
 		{
+			public Ldtoken_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldtoken_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldtoken_)base.Set(operand, name);
+					return (Code.Ldtoken_)base.Set(OpCodes.Ldtoken, operand, name);
 				}
-			}
-
-			public Ldtoken_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_U2_ : CodeMatch
 		{
+			public Conv_U2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_U2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_U2_)base.Set(operand, name);
+					return (Code.Conv_U2_)base.Set(OpCodes.Conv_U2, operand, name);
 				}
-			}
-
-			public Conv_U2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_U1_ : CodeMatch
 		{
+			public Conv_U1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_U1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_U1_)base.Set(operand, name);
+					return (Code.Conv_U1_)base.Set(OpCodes.Conv_U1, operand, name);
 				}
-			}
-
-			public Conv_U1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_I_ : CodeMatch
 		{
+			public Conv_I_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_I_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_I_)base.Set(operand, name);
+					return (Code.Conv_I_)base.Set(OpCodes.Conv_I, operand, name);
 				}
-			}
-
-			public Conv_I_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_I_ : CodeMatch
 		{
+			public Conv_Ovf_I_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_I_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_I_)base.Set(operand, name);
+					return (Code.Conv_Ovf_I_)base.Set(OpCodes.Conv_Ovf_I, operand, name);
 				}
-			}
-
-			public Conv_Ovf_I_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_Ovf_U_ : CodeMatch
 		{
+			public Conv_Ovf_U_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_Ovf_U_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_Ovf_U_)base.Set(operand, name);
+					return (Code.Conv_Ovf_U_)base.Set(OpCodes.Conv_Ovf_U, operand, name);
 				}
-			}
-
-			public Conv_Ovf_U_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Add_Ovf_ : CodeMatch
 		{
+			public Add_Ovf_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Add_Ovf_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Add_Ovf_)base.Set(operand, name);
+					return (Code.Add_Ovf_)base.Set(OpCodes.Add_Ovf, operand, name);
 				}
-			}
-
-			public Add_Ovf_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Add_Ovf_Un_ : CodeMatch
 		{
+			public Add_Ovf_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Add_Ovf_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Add_Ovf_Un_)base.Set(operand, name);
+					return (Code.Add_Ovf_Un_)base.Set(OpCodes.Add_Ovf_Un, operand, name);
 				}
-			}
-
-			public Add_Ovf_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Mul_Ovf_ : CodeMatch
 		{
+			public Mul_Ovf_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Mul_Ovf_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Mul_Ovf_)base.Set(operand, name);
+					return (Code.Mul_Ovf_)base.Set(OpCodes.Mul_Ovf, operand, name);
 				}
-			}
-
-			public Mul_Ovf_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Mul_Ovf_Un_ : CodeMatch
 		{
+			public Mul_Ovf_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Mul_Ovf_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Mul_Ovf_Un_)base.Set(operand, name);
+					return (Code.Mul_Ovf_Un_)base.Set(OpCodes.Mul_Ovf_Un, operand, name);
 				}
-			}
-
-			public Mul_Ovf_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Sub_Ovf_ : CodeMatch
 		{
+			public Sub_Ovf_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Sub_Ovf_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Sub_Ovf_)base.Set(operand, name);
+					return (Code.Sub_Ovf_)base.Set(OpCodes.Sub_Ovf, operand, name);
 				}
-			}
-
-			public Sub_Ovf_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Sub_Ovf_Un_ : CodeMatch
 		{
+			public Sub_Ovf_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Sub_Ovf_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Sub_Ovf_Un_)base.Set(operand, name);
+					return (Code.Sub_Ovf_Un_)base.Set(OpCodes.Sub_Ovf_Un, operand, name);
 				}
-			}
-
-			public Sub_Ovf_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Endfinally_ : CodeMatch
 		{
+			public Endfinally_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Endfinally_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Endfinally_)base.Set(operand, name);
+					return (Code.Endfinally_)base.Set(OpCodes.Endfinally, operand, name);
 				}
-			}
-
-			public Endfinally_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Leave_ : CodeMatch
 		{
+			public Leave_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Leave_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Leave_)base.Set(operand, name);
+					return (Code.Leave_)base.Set(OpCodes.Leave, operand, name);
 				}
-			}
-
-			public Leave_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Leave_S_ : CodeMatch
 		{
+			public Leave_S_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Leave_S_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Leave_S_)base.Set(operand, name);
+					return (Code.Leave_S_)base.Set(OpCodes.Leave_S, operand, name);
 				}
-			}
-
-			public Leave_S_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stind_I_ : CodeMatch
 		{
+			public Stind_I_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stind_I_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stind_I_)base.Set(operand, name);
+					return (Code.Stind_I_)base.Set(OpCodes.Stind_I, operand, name);
 				}
-			}
-
-			public Stind_I_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Conv_U_ : CodeMatch
 		{
+			public Conv_U_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Conv_U_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Conv_U_)base.Set(operand, name);
+					return (Code.Conv_U_)base.Set(OpCodes.Conv_U, operand, name);
 				}
-			}
-
-			public Conv_U_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefix7_ : CodeMatch
 		{
+			public Prefix7_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefix7_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefix7_)base.Set(operand, name);
+					return (Code.Prefix7_)base.Set(OpCodes.Prefix7, operand, name);
 				}
-			}
-
-			public Prefix7_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefix6_ : CodeMatch
 		{
+			public Prefix6_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefix6_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefix6_)base.Set(operand, name);
+					return (Code.Prefix6_)base.Set(OpCodes.Prefix6, operand, name);
 				}
-			}
-
-			public Prefix6_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefix5_ : CodeMatch
 		{
+			public Prefix5_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefix5_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefix5_)base.Set(operand, name);
+					return (Code.Prefix5_)base.Set(OpCodes.Prefix5, operand, name);
 				}
-			}
-
-			public Prefix5_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefix4_ : CodeMatch
 		{
+			public Prefix4_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefix4_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefix4_)base.Set(operand, name);
+					return (Code.Prefix4_)base.Set(OpCodes.Prefix4, operand, name);
 				}
-			}
-
-			public Prefix4_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefix3_ : CodeMatch
 		{
+			public Prefix3_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefix3_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefix3_)base.Set(operand, name);
+					return (Code.Prefix3_)base.Set(OpCodes.Prefix3, operand, name);
 				}
-			}
-
-			public Prefix3_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefix2_ : CodeMatch
 		{
+			public Prefix2_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefix2_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefix2_)base.Set(operand, name);
+					return (Code.Prefix2_)base.Set(OpCodes.Prefix2, operand, name);
 				}
-			}
-
-			public Prefix2_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefix1_ : CodeMatch
 		{
+			public Prefix1_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefix1_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefix1_)base.Set(operand, name);
+					return (Code.Prefix1_)base.Set(OpCodes.Prefix1, operand, name);
 				}
-			}
-
-			public Prefix1_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Prefixref_ : CodeMatch
 		{
+			public Prefixref_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Prefixref_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Prefixref_)base.Set(operand, name);
+					return (Code.Prefixref_)base.Set(OpCodes.Prefixref, operand, name);
 				}
-			}
-
-			public Prefixref_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Arglist_ : CodeMatch
 		{
+			public Arglist_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Arglist_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Arglist_)base.Set(operand, name);
+					return (Code.Arglist_)base.Set(OpCodes.Arglist, operand, name);
 				}
-			}
-
-			public Arglist_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ceq_ : CodeMatch
 		{
+			public Ceq_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ceq_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ceq_)base.Set(operand, name);
+					return (Code.Ceq_)base.Set(OpCodes.Ceq, operand, name);
 				}
-			}
-
-			public Ceq_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Cgt_ : CodeMatch
 		{
+			public Cgt_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Cgt_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Cgt_)base.Set(operand, name);
+					return (Code.Cgt_)base.Set(OpCodes.Cgt, operand, name);
 				}
-			}
-
-			public Cgt_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Cgt_Un_ : CodeMatch
 		{
+			public Cgt_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Cgt_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Cgt_Un_)base.Set(operand, name);
+					return (Code.Cgt_Un_)base.Set(OpCodes.Cgt_Un, operand, name);
 				}
-			}
-
-			public Cgt_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Clt_ : CodeMatch
 		{
+			public Clt_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Clt_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Clt_)base.Set(operand, name);
+					return (Code.Clt_)base.Set(OpCodes.Clt, operand, name);
 				}
-			}
-
-			public Clt_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Clt_Un_ : CodeMatch
 		{
+			public Clt_Un_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Clt_Un_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Clt_Un_)base.Set(operand, name);
+					return (Code.Clt_Un_)base.Set(OpCodes.Clt_Un, operand, name);
 				}
-			}
-
-			public Clt_Un_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldftn_ : CodeMatch
 		{
+			public Ldftn_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldftn_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldftn_)base.Set(operand, name);
+					return (Code.Ldftn_)base.Set(OpCodes.Ldftn, operand, name);
 				}
-			}
-
-			public Ldftn_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldvirtftn_ : CodeMatch
 		{
+			public Ldvirtftn_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldvirtftn_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldvirtftn_)base.Set(operand, name);
+					return (Code.Ldvirtftn_)base.Set(OpCodes.Ldvirtftn, operand, name);
 				}
-			}
-
-			public Ldvirtftn_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarg_ : CodeMatch
 		{
+			public Ldarg_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarg_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarg_)base.Set(operand, name);
+					return (Code.Ldarg_)base.Set(OpCodes.Ldarg, operand, name);
 				}
-			}
-
-			public Ldarg_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldarga_ : CodeMatch
 		{
+			public Ldarga_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldarga_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldarga_)base.Set(operand, name);
+					return (Code.Ldarga_)base.Set(OpCodes.Ldarga, operand, name);
 				}
-			}
-
-			public Ldarga_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Starg_ : CodeMatch
 		{
+			public Starg_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Starg_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Starg_)base.Set(operand, name);
+					return (Code.Starg_)base.Set(OpCodes.Starg, operand, name);
 				}
-			}
-
-			public Starg_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloc_ : CodeMatch
 		{
+			public Ldloc_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloc_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloc_)base.Set(operand, name);
+					return (Code.Ldloc_)base.Set(OpCodes.Ldloc, operand, name);
 				}
-			}
-
-			public Ldloc_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Ldloca_ : CodeMatch
 		{
+			public Ldloca_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Ldloca_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Ldloca_)base.Set(operand, name);
+					return (Code.Ldloca_)base.Set(OpCodes.Ldloca, operand, name);
 				}
-			}
-
-			public Ldloca_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Stloc_ : CodeMatch
 		{
+			public Stloc_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Stloc_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Stloc_)base.Set(operand, name);
+					return (Code.Stloc_)base.Set(OpCodes.Stloc, operand, name);
 				}
-			}
-
-			public Stloc_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Localloc_ : CodeMatch
 		{
+			public Localloc_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Localloc_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Localloc_)base.Set(operand, name);
+					return (Code.Localloc_)base.Set(OpCodes.Localloc, operand, name);
 				}
-			}
-
-			public Localloc_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Endfilter_ : CodeMatch
 		{
+			public Endfilter_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Endfilter_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Endfilter_)base.Set(operand, name);
+					return (Code.Endfilter_)base.Set(OpCodes.Endfilter, operand, name);
 				}
-			}
-
-			public Endfilter_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Unaligned_ : CodeMatch
 		{
+			public Unaligned_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Unaligned_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Unaligned_)base.Set(operand, name);
+					return (Code.Unaligned_)base.Set(OpCodes.Unaligned, operand, name);
 				}
-			}
-
-			public Unaligned_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Volatile_ : CodeMatch
 		{
+			public Volatile_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Volatile_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Volatile_)base.Set(operand, name);
+					return (Code.Volatile_)base.Set(OpCodes.Volatile, operand, name);
 				}
-			}
-
-			public Volatile_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Tailcall_ : CodeMatch
 		{
+			public Tailcall_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Tailcall_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Tailcall_)base.Set(operand, name);
+					return (Code.Tailcall_)base.Set(OpCodes.Tailcall, operand, name);
 				}
-			}
-
-			public Tailcall_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Initobj_ : CodeMatch
 		{
+			public Initobj_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Initobj_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Initobj_)base.Set(operand, name);
+					return (Code.Initobj_)base.Set(OpCodes.Initobj, operand, name);
 				}
-			}
-
-			public Initobj_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Constrained_ : CodeMatch
 		{
+			public Constrained_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Constrained_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Constrained_)base.Set(operand, name);
+					return (Code.Constrained_)base.Set(OpCodes.Constrained, operand, name);
 				}
-			}
-
-			public Constrained_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Cpblk_ : CodeMatch
 		{
+			public Cpblk_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Cpblk_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Cpblk_)base.Set(operand, name);
+					return (Code.Cpblk_)base.Set(OpCodes.Cpblk, operand, name);
 				}
-			}
-
-			public Cpblk_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Initblk_ : CodeMatch
 		{
+			public Initblk_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Initblk_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Initblk_)base.Set(operand, name);
+					return (Code.Initblk_)base.Set(OpCodes.Initblk, operand, name);
 				}
-			}
-
-			public Initblk_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Rethrow_ : CodeMatch
 		{
+			public Rethrow_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Rethrow_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Rethrow_)base.Set(operand, name);
+					return (Code.Rethrow_)base.Set(OpCodes.Rethrow, operand, name);
 				}
-			}
-
-			public Rethrow_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Sizeof_ : CodeMatch
 		{
+			public Sizeof_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Sizeof_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Sizeof_)base.Set(operand, name);
+					return (Code.Sizeof_)base.Set(OpCodes.Sizeof, operand, name);
 				}
-			}
-
-			public Sizeof_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Refanytype_ : CodeMatch
 		{
+			public Refanytype_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Refanytype_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Refanytype_)base.Set(operand, name);
+					return (Code.Refanytype_)base.Set(OpCodes.Refanytype, operand, name);
 				}
-			}
-
-			public Refanytype_()
-				: base(null, null, null)
-			{
 			}
 		}
 
 		public class Readonly_ : CodeMatch
 		{
+			public Readonly_(OpCode opcode)
+				: base(new OpCode?(opcode), null, null)
+			{
+			}
+
 			public Code.Readonly_ this[object operand = null, string name = null]
 			{
 				get
 				{
-					return (Code.Readonly_)base.Set(operand, name);
+					return (Code.Readonly_)base.Set(OpCodes.Readonly, operand, name);
 				}
-			}
-
-			public Readonly_()
-				: base(null, null, null)
-			{
 			}
 		}
 	}

@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class SecurityDeclaration
+	internal sealed class SecurityDeclaration
 	{
 		public SecurityAction Action
 		{

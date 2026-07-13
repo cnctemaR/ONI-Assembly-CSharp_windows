@@ -74,6 +74,7 @@ public class OrbitalDeployCargoModule : GameStateMachine<OrbitalDeployCargoModul
 			this.storage = base.GetComponent<Storage>();
 			base.GetComponent<RocketModule>().AddModuleCondition(ProcessCondition.ProcessConditionType.RocketStorage, new LoadingCompleteCondition(this.storage));
 			base.gameObject.Subscribe(-1683615038, new Action<object>(this.SetupMeter));
+			base.gameObject.Subscribe(-887025858, new Action<object>(this.OnRocketLanded));
 		}
 
 		private void SetupMeter(object obj)
@@ -86,7 +87,17 @@ public class OrbitalDeployCargoModule : GameStateMachine<OrbitalDeployCargoModul
 		protected override void OnCleanUp()
 		{
 			base.gameObject.Unsubscribe(-1683615038, new Action<object>(this.SetupMeter));
+			base.gameObject.Unsubscribe(-887025858, new Action<object>(this.OnRocketLanded));
 			base.OnCleanUp();
+		}
+
+		private void OnRocketLanded(object obj)
+		{
+			TreeFilterable component = base.gameObject.GetComponent<TreeFilterable>();
+			if (component != null && component.OnFilterChanged != null)
+			{
+				component.OnFilterChanged(component.AcceptedTags);
+			}
 		}
 
 		public bool NeedsVisualUpdate()

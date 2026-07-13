@@ -11,31 +11,14 @@ namespace UnityEngine.Rendering
 			{
 				renderPipeline = this.CreatePipeline();
 			}
+			catch (InvalidImportException)
+			{
+			}
 			catch (Exception ex)
 			{
-				bool flag = !ex.Data.Contains("InvalidImport") || !(ex.Data["InvalidImport"] is int) || (int)ex.Data["InvalidImport"] != 1;
-				if (flag)
-				{
-					Debug.LogException(ex);
-				}
+				Debug.LogException(ex);
 			}
 			return renderPipeline;
-		}
-
-		public virtual string[] renderingLayerMaskNames
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		public virtual string[] prefixedRenderingLayerMaskNames
-		{
-			get
-			{
-				return null;
-			}
 		}
 
 		public virtual Material defaultMaterial
@@ -182,6 +165,14 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public virtual Shader defaultSpeedTree9Shader
+		{
+			get
+			{
+				return null;
+			}
+		}
+
 		public virtual string renderPipelineShaderTag
 		{
 			get
@@ -193,19 +184,66 @@ namespace UnityEngine.Rendering
 
 		protected abstract RenderPipeline CreatePipeline();
 
+		public virtual Type pipelineType
+		{
+			get
+			{
+				Debug.LogWarning("You must either inherit from RenderPipelineAsset<TRenderPipeline> or override pipelineType property.");
+				return null;
+			}
+		}
+
+		internal string pipelineTypeFullName
+		{
+			get
+			{
+				Type pipelineType = this.pipelineType;
+				return ((pipelineType != null) ? pipelineType.FullName : null) ?? string.Empty;
+			}
+		}
+
+		protected virtual void EnsureGlobalSettings()
+		{
+		}
+
 		protected virtual void OnValidate()
 		{
-			bool flag = RenderPipelineManager.s_CurrentPipelineAsset == this;
-			if (flag)
-			{
-				RenderPipelineManager.CleanupRenderPipeline();
-				RenderPipelineManager.PrepareRenderPipeline(this);
-			}
+			RenderPipelineManager.RecreateCurrentPipeline(this);
 		}
 
 		protected virtual void OnDisable()
 		{
 			RenderPipelineManager.CleanupRenderPipeline();
+		}
+
+		protected internal virtual bool requiresCompatibleRenderPipelineGlobalSettings { get; } = false;
+
+		[Obsolete("This property is obsolete. Use pipelineType instead. #from(23.2)", false)]
+		protected internal virtual Type renderPipelineType
+		{
+			get
+			{
+				Debug.LogWarning("You must either inherit from RenderPipelineAsset<TRenderPipeline> or override renderPipelineType property");
+				return null;
+			}
+		}
+
+		[Obsolete("This property is obsolete. Use RenderingLayerMask API and Tags & Layers project settings instead. #from(23.3)", false)]
+		public virtual string[] renderingLayerMaskNames
+		{
+			get
+			{
+				return null;
+			}
+		}
+
+		[Obsolete("This property is obsolete. Use RenderingLayerMask API and Tags & Layers project settings instead. #from(23.3)", false)]
+		public virtual string[] prefixedRenderingLayerMaskNames
+		{
+			get
+			{
+				return null;
+			}
 		}
 	}
 }

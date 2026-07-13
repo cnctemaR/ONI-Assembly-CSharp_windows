@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -35,6 +36,7 @@ namespace UnityEngine
 
 		internal abstract ISubsystem CreateImpl();
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.XRModule" })]
 		internal IntPtr m_Ptr;
 	}
 }

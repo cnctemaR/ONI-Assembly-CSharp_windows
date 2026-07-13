@@ -6,14 +6,25 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering
 {
+	[NativeHeader("Runtime/Graphics/Format.h")]
 	[NativeHeader("Runtime/Graphics/TextureFormat.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
-	[NativeHeader("Runtime/Graphics/Format.h")]
 	public class GraphicsFormatUtility
 	{
 		[FreeFunction("GetGraphicsFormat_Native_Texture")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern GraphicsFormat GetFormat([NotNull("NullExceptionObject")] Texture texture);
+		internal static GraphicsFormat GetFormat([NotNull] Texture texture)
+		{
+			if (texture == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(texture, "texture");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(texture);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(texture, "texture");
+			}
+			return GraphicsFormatUtility.GetFormat_Injected(intPtr);
+		}
 
 		public static GraphicsFormat GetGraphicsFormat(TextureFormat format, bool isSRGB)
 		{
@@ -53,9 +64,9 @@ namespace UnityEngine.Experimental.Rendering
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern GraphicsFormat GetDepthStencilFormatFromBitsLegacy_Native(int minimumDepthBits);
 
-		internal static GraphicsFormat GetDepthStencilFormat(int minimumDepthBits)
+		public static GraphicsFormat GetDepthStencilFormat(int depthBits)
 		{
-			return GraphicsFormatUtility.GetDepthStencilFormatFromBitsLegacy_Native(minimumDepthBits);
+			return GraphicsFormatUtility.GetDepthStencilFormatFromBitsLegacy_Native(depthBits);
 		}
 
 		[FreeFunction(IsThreadSafe = true)]
@@ -123,7 +134,7 @@ namespace UnityEngine.Experimental.Rendering
 				for (int i = num; i < array.Length; i++)
 				{
 					GraphicsFormat graphicsFormat2 = array[i];
-					bool flag9 = SystemInfo.IsFormatSupported(graphicsFormat2, FormatUsage.Render);
+					bool flag9 = SystemInfo.IsFormatSupported(graphicsFormat2, GraphicsFormatUsage.Render);
 					if (flag9)
 					{
 						return graphicsFormat2;
@@ -187,12 +198,38 @@ namespace UnityEngine.Experimental.Rendering
 		}
 
 		[FreeFunction(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetFormatString(GraphicsFormat format);
+		public static string GetFormatString(GraphicsFormat format)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				GraphicsFormatUtility.GetFormatString_Injected(format, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetFormatString_Native_TextureFormat(TextureFormat format);
+		private static string GetFormatString_Native_TextureFormat(TextureFormat format)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				GraphicsFormatUtility.GetFormatString_Native_TextureFormat_Injected(format, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public static string GetFormatString(TextureFormat format)
 		{
@@ -400,9 +437,11 @@ namespace UnityEngine.Experimental.Rendering
 		}
 
 		[FreeFunction(IsThreadSafe = true)]
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release", false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsPVRTCFormat(GraphicsFormat format);
 
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release", false)]
 		public static bool IsPVRTCFormat(TextureFormat format)
 		{
 			return GraphicsFormatUtility.IsPVRTCFormat(GraphicsFormatUtility.GetGraphicsFormat(format, false));
@@ -562,6 +601,15 @@ namespace UnityEngine.Experimental.Rendering
 		{
 			return GraphicsFormatUtility.ComputeMipChainSize_Native_3D(width, height, depth, GraphicsFormatUtility.GetGraphicsFormat(format, false), mipCount);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsFormat GetFormat_Injected(IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetFormatString_Injected(GraphicsFormat format, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetFormatString_Native_TextureFormat_Injected(TextureFormat format, out ManagedSpanWrapper ret);
 
 		private static readonly GraphicsFormat[] tableNoStencil = new GraphicsFormat[]
 		{

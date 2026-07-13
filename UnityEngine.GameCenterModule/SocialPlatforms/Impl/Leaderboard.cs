@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms.Impl
 {
+	[Obsolete("Leaderboard is deprecated and will be removed in a future release.", false)]
 	public class Leaderboard : ILeaderboard
 	{
 		public Leaderboard()

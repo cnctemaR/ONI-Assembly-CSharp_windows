@@ -53,9 +53,9 @@ namespace System.Diagnostics
 			this.m_processAccess = 2035711;
 		}
 
+		[Browsable(false)]
 		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
 		private bool Associated
 		{
 			get
@@ -64,9 +64,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The value returned from the associated process when it terminated.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public int ExitCode
 		{
 			get
@@ -80,9 +80,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Indicates if the associated process has been terminated.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Indicates if the associated process has been terminated.")]
 		public bool HasExited
 		{
 			get
@@ -191,9 +191,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Returns the native handle for this process.   The handle is only available if the process was started using this component.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Returns the native handle for this process.   The handle is only available if the process was started using this component.")]
 		public IntPtr Handle
 		{
 			get
@@ -203,8 +203,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public SafeProcessHandle SafeHandle
 		{
 			get
@@ -225,8 +225,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		[MonitoringDescription("The name of the machine the running the process.")]
 		public string MachineName
 		{
@@ -237,8 +237,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The maximum amount of physical memory the process has required since it was started.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public IntPtr MaxWorkingSet
 		{
 			get
@@ -330,8 +330,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The amount of CPU time the process spent inside the operating system core.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of CPU time the process spent inside the operating system core.")]
 		public TimeSpan PrivilegedProcessorTime
 		{
 			get
@@ -364,8 +364,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The time at which the process was started.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The time at which the process was started.")]
 		public DateTime StartTime
 		{
 			get
@@ -375,9 +375,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue(null)]
 		[Browsable(false)]
 		[MonitoringDescription("The object used to marshal the event handler calls issued as a result of a Process exit.")]
+		[DefaultValue(null)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get
@@ -424,9 +424,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Whether the process component should watch for the associated process to exit, and raise the Exited event.")]
 		[Browsable(false)]
 		[DefaultValue(false)]
+		[MonitoringDescription("Whether the process component should watch for the associated process to exit, and raise the Exited event.")]
 		public bool EnableRaisingEvents
 		{
 			get
@@ -454,8 +454,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("Standard input stream of the process.")]
 		public StreamWriter StandardInput
 		{
@@ -471,8 +471,8 @@ namespace System.Diagnostics
 		}
 
 		[MonitoringDescription("Standard output stream of the process.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public StreamReader StandardOutput
 		{
 			get
@@ -493,9 +493,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Standard error stream of the process.")]
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Standard error stream of the process.")]
 		public StreamReader StandardError
 		{
 			get
@@ -516,8 +516,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("If the WatchForExit property is set to true, then this event is raised when the associated process exits.")]
 		[Category("Behavior")]
+		[MonitoringDescription("If the WatchForExit property is set to true, then this event is raised when the associated process exits.")]
 		public event EventHandler Exited
 		{
 			add
@@ -1206,9 +1206,9 @@ namespace System.Diagnostics
 			this.SetProcessId(id);
 		}
 
-		[MonitoringDescription("Base process priority.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonoTODO]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Base process priority.")]
 		public int BasePriority
 		{
 			get
@@ -1217,8 +1217,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("Handles for this process.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonoTODO]
 		public int HandleCount
 		{
@@ -1228,8 +1228,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The main module of the process.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Browsable(false)]
 		public ProcessModule MainModule
 		{
@@ -1260,8 +1260,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The title of the main window of the process.")]
 		[MonoTODO]
+		[MonitoringDescription("The title of the main window of the process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public string MainWindowTitle
 		{
@@ -1331,10 +1331,10 @@ namespace System.Diagnostics
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern long GetProcessData(int pid, int data_type, out int error);
 
-		[MonitoringDescription("The number of bytes that are not pageable.")]
 		[Obsolete("Use NonpagedSystemMemorySize64")]
-		[MonoTODO]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The number of bytes that are not pageable.")]
+		[MonoTODO]
 		public int NonpagedSystemMemorySize
 		{
 			get
@@ -1365,10 +1365,10 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
 		[MonoTODO]
 		[Obsolete("Use PeakPagedMemorySize64")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
 		public int PeakPagedMemorySize
 		{
 			get
@@ -1377,9 +1377,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
 		[Obsolete("Use PeakVirtualMemorySize64")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public int PeakVirtualMemorySize
 		{
 			get
@@ -1401,9 +1401,9 @@ namespace System.Diagnostics
 			}
 		}
 
+		[MonitoringDescription("The number of bytes that are not pageable.")]
 		[ComVisible(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The number of bytes that are not pageable.")]
 		[MonoTODO]
 		public long NonpagedSystemMemorySize64
 		{
@@ -1414,8 +1414,8 @@ namespace System.Diagnostics
 		}
 
 		[ComVisible(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The number of bytes that are paged.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public long PagedMemorySize64
 		{
 			get
@@ -1425,8 +1425,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The amount of paged system memory in bytes.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[ComVisible(false)]
 		public long PagedSystemMemorySize64
 		{
@@ -1436,10 +1436,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[ComVisible(false)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonoTODO]
+		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
 		public long PeakPagedMemorySize64
 		{
 			get
@@ -1448,9 +1448,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[ComVisible(false)]
+		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
 		public long PeakVirtualMemorySize64
 		{
 			get
@@ -1460,9 +1460,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ComVisible(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The maximum amount of system memory used by this process.")]
+		[ComVisible(false)]
 		public long PeakWorkingSet64
 		{
 			get
@@ -1472,9 +1472,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Process will be of higher priority while it is actively used.")]
 		[MonoTODO]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Process will be of higher priority while it is actively used.")]
 		public bool PriorityBoostEnabled
 		{
 			get
@@ -1486,9 +1486,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Obsolete("Use PrivateMemorySize64")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The amount of memory exclusively used by this process.")]
+		[Obsolete("Use PrivateMemorySize64")]
 		public int PrivateMemorySize
 		{
 			get
@@ -1562,9 +1562,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("Allowed processor that can be used by this process.")]
+		[MonoTODO]
 		public IntPtr ProcessorAffinity
 		{
 			get
@@ -1576,9 +1576,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Is this process responsive.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonoTODO]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Is this process responsive.")]
 		public bool Responding
 		{
 			get
@@ -1588,8 +1588,8 @@ namespace System.Diagnostics
 		}
 
 		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The number of threads of this process.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public ProcessThreadCollection Threads
 		{
 			get
@@ -1615,9 +1615,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The amount of physical memory currently used for this process.")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[Obsolete("Use WorkingSet64")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of physical memory currently used for this process.")]
 		public int WorkingSet
 		{
 			get
@@ -1627,9 +1627,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ComVisible(false)]
-		[MonitoringDescription("The amount of memory exclusively used by this process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of memory exclusively used by this process.")]
+		[ComVisible(false)]
 		public long PrivateMemorySize64
 		{
 			get
@@ -1639,9 +1639,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[ComVisible(false)]
+		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
 		public long VirtualMemorySize64
 		{
 			get
@@ -1652,8 +1652,8 @@ namespace System.Diagnostics
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[ComVisible(false)]
 		[MonitoringDescription("The amount of physical memory currently used for this process.")]
+		[ComVisible(false)]
 		public long WorkingSet64
 		{
 			get

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Mono.Cecil.Rocks
 {
-	public static class TypeDefinitionRocks
+	internal static class TypeDefinitionRocks
 	{
 		public static IEnumerable<MethodDefinition> GetConstructors(this TypeDefinition self)
 		{

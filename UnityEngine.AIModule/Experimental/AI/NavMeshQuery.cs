@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.AI;
@@ -7,11 +8,12 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.AI
 {
-	[StaticAccessor("NavMeshQueryBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Math/Matrix4x4.h")]
 	[NativeHeader("Modules/AI/Public/NavMeshBindingTypes.h")]
 	[NativeHeader("Modules/AI/NavMeshExperimental.bindings.h")]
+	[StaticAccessor("NavMeshQueryBindings", StaticAccessorType.DoubleColon)]
 	[NativeContainer]
+	[Obsolete("The experimental NavMeshQuery struct has been deprecated without replacement.")]
 	public struct NavMeshQuery : IDisposable
 	{
 		public NavMeshQuery(NavMeshWorld world, Allocator allocator, int pathNodePoolSize = 0)
@@ -251,46 +253,46 @@ namespace UnityEngine.Experimental.AI
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create_Injected(ref NavMeshWorld world, int nodePoolSize);
+		private static extern IntPtr Create_Injected([In] ref NavMeshWorld world, int nodePoolSize);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern PathQueryStatus BeginFindPath_Injected(IntPtr navMeshQuery, ref NavMeshLocation start, ref NavMeshLocation end, int areaMask, void* costs);
+		private unsafe static extern PathQueryStatus BeginFindPath_Injected(IntPtr navMeshQuery, [In] ref NavMeshLocation start, [In] ref NavMeshLocation end, int areaMask, void* costs);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsValidPolygon_Injected(IntPtr navMeshQuery, ref PolygonId polygon);
+		private static extern bool IsValidPolygon_Injected(IntPtr navMeshQuery, [In] ref PolygonId polygon);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetAgentTypeIdForPolygon_Injected(IntPtr navMeshQuery, ref PolygonId polygon);
+		private static extern int GetAgentTypeIdForPolygon_Injected(IntPtr navMeshQuery, [In] ref PolygonId polygon);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsPositionInPolygon_Injected(IntPtr navMeshQuery, ref Vector3 position, ref PolygonId polygon);
+		private static extern bool IsPositionInPolygon_Injected(IntPtr navMeshQuery, [In] ref Vector3 position, [In] ref PolygonId polygon);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern PathQueryStatus GetClosestPointOnPoly_Injected(IntPtr navMeshQuery, ref PolygonId polygon, ref Vector3 position, out Vector3 nearest);
+		private static extern PathQueryStatus GetClosestPointOnPoly_Injected(IntPtr navMeshQuery, [In] ref PolygonId polygon, [In] ref Vector3 position, out Vector3 nearest);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MapLocation_Injected(IntPtr navMeshQuery, ref Vector3 position, ref Vector3 extents, int agentTypeID, int areaMask = -1, out NavMeshLocation ret);
+		private static extern void MapLocation_Injected(IntPtr navMeshQuery, [In] ref Vector3 position, [In] ref Vector3 extents, int agentTypeID, int areaMask, out NavMeshLocation ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MoveLocation_Injected(IntPtr navMeshQuery, ref NavMeshLocation location, ref Vector3 target, int areaMask, out NavMeshLocation ret);
+		private static extern void MoveLocation_Injected(IntPtr navMeshQuery, [In] ref NavMeshLocation location, [In] ref Vector3 target, int areaMask, out NavMeshLocation ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetPortalPoints_Injected(IntPtr navMeshQuery, ref PolygonId polygon, ref PolygonId neighbourPolygon, out Vector3 left, out Vector3 right);
+		private static extern bool GetPortalPoints_Injected(IntPtr navMeshQuery, [In] ref PolygonId polygon, [In] ref PolygonId neighbourPolygon, out Vector3 left, out Vector3 right);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PolygonLocalToWorldMatrix_Injected(IntPtr navMeshQuery, ref PolygonId polygon, out Matrix4x4 ret);
+		private static extern void PolygonLocalToWorldMatrix_Injected(IntPtr navMeshQuery, [In] ref PolygonId polygon, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PolygonWorldToLocalMatrix_Injected(IntPtr navMeshQuery, ref PolygonId polygon, out Matrix4x4 ret);
+		private static extern void PolygonWorldToLocalMatrix_Injected(IntPtr navMeshQuery, [In] ref PolygonId polygon, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern NavMeshPolyTypes GetPolygonType_Injected(IntPtr navMeshQuery, ref PolygonId polygon);
+		private static extern NavMeshPolyTypes GetPolygonType_Injected(IntPtr navMeshQuery, [In] ref PolygonId polygon);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern PathQueryStatus Raycast_Injected(IntPtr navMeshQuery, ref NavMeshLocation start, ref Vector3 targetPosition, int areaMask, void* costs, out NavMeshHit hit, void* path, out int pathCount, int maxPath);
+		private unsafe static extern PathQueryStatus Raycast_Injected(IntPtr navMeshQuery, [In] ref NavMeshLocation start, [In] ref Vector3 targetPosition, int areaMask, void* costs, out NavMeshHit hit, void* path, out int pathCount, int maxPath);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern PathQueryStatus GetEdgesAndNeighbors_Injected(IntPtr navMeshQuery, ref PolygonId node, int maxVerts, int maxNei, void* verts, void* neighbors, void* edgeIndices, out int vertCount, out int neighborsCount);
+		private unsafe static extern PathQueryStatus GetEdgesAndNeighbors_Injected(IntPtr navMeshQuery, [In] ref PolygonId node, int maxVerts, int maxNei, void* verts, void* neighbors, void* edgeIndices, out int vertCount, out int neighborsCount);
 
 		[NativeDisableUnsafePtrRestriction]
 		internal IntPtr m_NavMeshQuery;

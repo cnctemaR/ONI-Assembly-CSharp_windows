@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum DocumentType
+	internal enum DocumentType
 	{
 		Other,
 		Text

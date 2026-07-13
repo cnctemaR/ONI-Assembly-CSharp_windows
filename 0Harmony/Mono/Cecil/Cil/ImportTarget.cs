@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class ImportTarget
+	internal sealed class ImportTarget
 	{
 		public string Namespace
 		{

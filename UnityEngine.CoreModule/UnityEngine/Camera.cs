@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
@@ -11,234 +10,634 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeHeader("Runtime/Camera/RenderManager.h")]
-	[NativeHeader("Runtime/Camera/Camera.h")]
-	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
+	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Camera/Camera.h")]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
+	[UsedByNativeCode]
 	public sealed class Camera : Behaviour
 	{
 		[NativeProperty("Near")]
-		public extern float nearClipPlane
+		public float nearClipPlane
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_nearClipPlane_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_nearClipPlane_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("Far")]
-		public extern float farClipPlane
+		public float farClipPlane
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_farClipPlane_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_farClipPlane_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("VerticalFieldOfView")]
-		public extern float fieldOfView
+		public float fieldOfView
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_fieldOfView_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_fieldOfView_Injected(intPtr, value);
+			}
 		}
 
-		public extern RenderingPath renderingPath
+		public RenderingPath renderingPath
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_renderingPath_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_renderingPath_Injected(intPtr, value);
+			}
 		}
 
-		public extern RenderingPath actualRenderingPath
+		public RenderingPath actualRenderingPath
 		{
 			[NativeName("CalculateRenderingPath")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_actualRenderingPath_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Reset();
-
-		public extern bool allowHDR
+		public void Reset()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.Reset_Injected(intPtr);
 		}
 
-		public extern bool allowMSAA
+		public bool allowHDR
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_allowHDR_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_allowHDR_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool allowDynamicResolution
+		public bool allowMSAA
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_allowMSAA_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_allowMSAA_Injected(intPtr, value);
+			}
+		}
+
+		public bool allowDynamicResolution
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_allowDynamicResolution_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_allowDynamicResolution_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("ForceIntoRT")]
-		public extern bool forceIntoRenderTexture
+		public bool forceIntoRenderTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_forceIntoRenderTexture_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_forceIntoRenderTexture_Injected(intPtr, value);
+			}
 		}
 
-		public extern float orthographicSize
+		public float orthographicSize
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_orthographicSize_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_orthographicSize_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool orthographic
+		public bool orthographic
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_orthographic_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_orthographic_Injected(intPtr, value);
+			}
 		}
 
-		public extern OpaqueSortMode opaqueSortMode
+		public OpaqueSortMode opaqueSortMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_opaqueSortMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_opaqueSortMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern TransparencySortMode transparencySortMode
+		public TransparencySortMode transparencySortMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_transparencySortMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_transparencySortMode_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 transparencySortAxis
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_transparencySortAxis_Injected(out vector);
+				Camera.get_transparencySortAxis_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_transparencySortAxis_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_transparencySortAxis_Injected(intPtr, ref value);
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetTransparencySortSettings();
-
-		public extern float depth
+		public void ResetTransparencySortSettings()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetTransparencySortSettings_Injected(intPtr);
 		}
 
-		public extern float aspect
+		public float depth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_depth_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_depth_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetAspect();
+		public float aspect
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_aspect_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_aspect_Injected(intPtr, value);
+			}
+		}
+
+		public void ResetAspect()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetAspect_Injected(intPtr);
+		}
 
 		public Vector3 velocity
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_velocity_Injected(out vector);
+				Camera.get_velocity_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
 
-		public extern int cullingMask
+		public int cullingMask
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_cullingMask_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_cullingMask_Injected(intPtr, value);
+			}
 		}
 
-		public extern int eventMask
+		public int eventMask
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_eventMask_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_eventMask_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool layerCullSpherical
+		public bool layerCullSpherical
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return this.layerCullSphericalInternal;
+			}
+			set
+			{
+				bool flag = GraphicsSettings.currentRenderPipeline != null;
+				if (flag)
+				{
+					Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.layerCullSpherical only with the built-in renderer.");
+				}
+				this.layerCullSphericalInternal = value;
+			}
 		}
 
-		public extern CameraType cameraType
+		[NativeProperty("LayerCullSpherical")]
+		internal bool layerCullSphericalInternal
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_layerCullSphericalInternal_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_layerCullSphericalInternal_Injected(intPtr, value);
+			}
 		}
 
-		internal extern Material skyboxMaterial
+		public CameraType cameraType
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_cameraType_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_cameraType_Injected(intPtr, value);
+			}
+		}
+
+		internal Material skyboxMaterial
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Material>(Camera.get_skyboxMaterial_Injected(intPtr));
+			}
 		}
 
 		[NativeConditional("UNITY_EDITOR")]
-		public extern ulong overrideSceneCullingMask
+		public ulong overrideSceneCullingMask
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_overrideSceneCullingMask_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_overrideSceneCullingMask_Injected(intPtr, value);
+			}
 		}
 
 		[NativeConditional("UNITY_EDITOR")]
-		internal extern ulong sceneCullingMask
+		internal ulong sceneCullingMask
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_sceneCullingMask_Injected(intPtr);
+			}
+		}
+
+		[NativeConditional("UNITY_EDITOR")]
+		internal bool useInteractiveLightBakingData
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_useInteractiveLightBakingData_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_useInteractiveLightBakingData_Injected(intPtr, value);
+			}
 		}
 
 		[FreeFunction("CameraScripting::GetLayerCullDistances", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float[] GetLayerCullDistances();
+		private float[] GetLayerCullDistances()
+		{
+			float[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Camera.GetLayerCullDistances_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				float[] array;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("CameraScripting::SetLayerCullDistances", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLayerCullDistances([NotNull("ArgumentNullException")] float[] d);
+		private unsafe void SetLayerCullDistances([NotNull] float[] d)
+		{
+			if (d == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(d, "d");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<float> span = new Span<float>(d);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Camera.SetLayerCullDistances_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		public float[] layerCullDistances
 		{
@@ -266,178 +665,445 @@ namespace UnityEngine
 			}
 		}
 
-		public extern bool useOcclusionCulling
+		public bool useOcclusionCulling
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_useOcclusionCulling_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_useOcclusionCulling_Injected(intPtr, value);
+			}
 		}
 
 		public Matrix4x4 cullingMatrix
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_cullingMatrix_Injected(out matrix4x);
+				Camera.get_cullingMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 			set
 			{
-				this.set_cullingMatrix_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_cullingMatrix_Injected(intPtr, ref value);
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetCullingMatrix();
+		public void ResetCullingMatrix()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetCullingMatrix_Injected(intPtr);
+		}
 
 		public Color backgroundColor
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_backgroundColor_Injected(out color);
+				Camera.get_backgroundColor_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_backgroundColor_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_backgroundColor_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern CameraClearFlags clearFlags
+		public CameraClearFlags clearFlags
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_clearFlags_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_clearFlags_Injected(intPtr, value);
+			}
 		}
 
-		public extern DepthTextureMode depthTextureMode
+		public DepthTextureMode depthTextureMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_depthTextureMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_depthTextureMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool clearStencilAfterLightingPass
+		public bool clearStencilAfterLightingPass
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_clearStencilAfterLightingPass_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_clearStencilAfterLightingPass_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetReplacementShader(Shader shader, string replacementTag);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetReplacementShader();
-
-		internal extern Camera.ProjectionMatrixMode projectionMatrixMode
+		public unsafe void SetReplacementShader(Shader shader, string replacementTag)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				IntPtr intPtr2 = Object.MarshalledUnityObject.Marshal<Shader>(shader);
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(replacementTag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = replacementTag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Camera.SetReplacementShader_Injected(intPtr, intPtr2, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
 		}
 
-		public extern bool usePhysicalProperties
+		public void ResetReplacementShader()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetReplacementShader_Injected(intPtr);
 		}
 
-		public extern int iso
+		internal Camera.ProjectionMatrixMode projectionMatrixMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_projectionMatrixMode_Injected(intPtr);
+			}
 		}
 
-		public extern float shutterSpeed
+		public bool usePhysicalProperties
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_usePhysicalProperties_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_usePhysicalProperties_Injected(intPtr, value);
+			}
 		}
 
-		public extern float aperture
+		public int iso
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_iso_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_iso_Injected(intPtr, value);
+			}
 		}
 
-		public extern float focusDistance
+		public float shutterSpeed
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_shutterSpeed_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_shutterSpeed_Injected(intPtr, value);
+			}
 		}
 
-		public extern float focalLength
+		public float aperture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_aperture_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_aperture_Injected(intPtr, value);
+			}
 		}
 
-		public extern int bladeCount
+		public float focusDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_focusDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_focusDistance_Injected(intPtr, value);
+			}
+		}
+
+		public float focalLength
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_focalLength_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_focalLength_Injected(intPtr, value);
+			}
+		}
+
+		public int bladeCount
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_bladeCount_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_bladeCount_Injected(intPtr, value);
+			}
 		}
 
 		public Vector2 curvature
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_curvature_Injected(out vector);
+				Camera.get_curvature_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_curvature_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_curvature_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern float barrelClipping
+		public float barrelClipping
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_barrelClipping_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_barrelClipping_Injected(intPtr, value);
+			}
 		}
 
-		public extern float anamorphism
+		public float anamorphism
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_anamorphism_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_anamorphism_Injected(intPtr, value);
+			}
 		}
 
 		public Vector2 sensorSize
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_sensorSize_Injected(out vector);
+				Camera.get_sensorSize_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_sensorSize_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_sensorSize_Injected(intPtr, ref value);
 			}
 		}
 
@@ -445,38 +1111,79 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_lensShift_Injected(out vector);
+				Camera.get_lensShift_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_lensShift_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_lensShift_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern Camera.GateFitMode gateFit
+		public Camera.GateFitMode gateFit
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_gateFit_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_gateFit_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetGateFittedFieldOfView();
+		public float GetGateFittedFieldOfView()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Camera.GetGateFittedFieldOfView_Injected(intPtr);
+		}
 
 		public Vector2 GetGateFittedLensShift()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector2 vector;
-			this.GetGateFittedLensShift_Injected(out vector);
+			Camera.GetGateFittedLensShift_Injected(intPtr, out vector);
 			return vector;
 		}
 
 		internal Vector3 GetLocalSpaceAim()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetLocalSpaceAim_Injected(out vector);
+			Camera.GetLocalSpaceAim_Injected(intPtr, out vector);
 			return vector;
 		}
 
@@ -485,13 +1192,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Rect rect;
-				this.get_rect_Injected(out rect);
+				Camera.get_rect_Injected(intPtr, out rect);
 				return rect;
 			}
 			set
 			{
-				this.set_rect_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_rect_Injected(intPtr, ref value);
 			}
 		}
 
@@ -500,71 +1217,149 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Rect rect;
-				this.get_pixelRect_Injected(out rect);
+				Camera.get_pixelRect_Injected(intPtr, out rect);
 				return rect;
 			}
 			set
 			{
-				this.set_pixelRect_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_pixelRect_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern int pixelWidth
+		public int pixelWidth
 		{
 			[FreeFunction("CameraScripting::GetPixelWidth", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_pixelWidth_Injected(intPtr);
+			}
 		}
 
-		public extern int pixelHeight
+		public int pixelHeight
 		{
 			[FreeFunction("CameraScripting::GetPixelHeight", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_pixelHeight_Injected(intPtr);
+			}
 		}
 
-		public extern int scaledPixelWidth
+		public int scaledPixelWidth
 		{
 			[FreeFunction("CameraScripting::GetScaledPixelWidth", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_scaledPixelWidth_Injected(intPtr);
+			}
 		}
 
-		public extern int scaledPixelHeight
+		public int scaledPixelHeight
 		{
 			[FreeFunction("CameraScripting::GetScaledPixelHeight", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_scaledPixelHeight_Injected(intPtr);
+			}
 		}
 
-		public extern RenderTexture targetTexture
+		public RenderTexture targetTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<RenderTexture>(Camera.get_targetTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_targetTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(value));
+			}
 		}
 
-		public extern RenderTexture activeTexture
+		public RenderTexture activeTexture
 		{
 			[NativeName("GetCurrentTargetTexture")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<RenderTexture>(Camera.get_activeTexture_Injected(intPtr));
+			}
 		}
 
-		public extern int targetDisplay
+		public int targetDisplay
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_targetDisplay_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_targetDisplay_Injected(intPtr, value);
+			}
 		}
 
 		[FreeFunction("CameraScripting::SetTargetBuffers", HasExplicitThis = true)]
 		private void SetTargetBuffersImpl(RenderBuffer color, RenderBuffer depth)
 		{
-			this.SetTargetBuffersImpl_Injected(ref color, ref depth);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.SetTargetBuffersImpl_Injected(intPtr, ref color, ref depth);
 		}
 
 		public void SetTargetBuffers(RenderBuffer colorBuffer, RenderBuffer depthBuffer)
@@ -573,9 +1368,19 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("CameraScripting::SetTargetBuffers", HasExplicitThis = true)]
-		private void SetTargetBuffersMRTImpl(RenderBuffer[] color, RenderBuffer depth)
+		private unsafe void SetTargetBuffersMRTImpl(RenderBuffer[] color, RenderBuffer depth)
 		{
-			this.SetTargetBuffersMRTImpl_Injected(color, ref depth);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<RenderBuffer> span = new Span<RenderBuffer>(color);
+			fixed (RenderBuffer* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Camera.SetTargetBuffersMRTImpl_Injected(intPtr, ref managedSpanWrapper, ref depth);
+			}
 		}
 
 		public void SetTargetBuffers(RenderBuffer[] colorBuffer, RenderBuffer depthBuffer)
@@ -583,15 +1388,27 @@ namespace UnityEngine
 			this.SetTargetBuffersMRTImpl(colorBuffer, depthBuffer);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern string[] GetCameraBufferWarnings();
+		internal string[] GetCameraBufferWarnings()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Camera.GetCameraBufferWarnings_Injected(intPtr);
+		}
 
 		public Matrix4x4 cameraToWorldMatrix
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_cameraToWorldMatrix_Injected(out matrix4x);
+				Camera.get_cameraToWorldMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 		}
@@ -600,13 +1417,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_worldToCameraMatrix_Injected(out matrix4x);
+				Camera.get_worldToCameraMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 			set
 			{
-				this.set_worldToCameraMatrix_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_worldToCameraMatrix_Injected(intPtr, ref value);
 			}
 		}
 
@@ -614,13 +1441,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_projectionMatrix_Injected(out matrix4x);
+				Camera.get_projectionMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 			set
 			{
-				this.set_projectionMatrix_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_projectionMatrix_Injected(intPtr, ref value);
 			}
 		}
 
@@ -628,74 +1465,142 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_nonJitteredProjectionMatrix_Injected(out matrix4x);
+				Camera.get_nonJitteredProjectionMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 			set
 			{
-				this.set_nonJitteredProjectionMatrix_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_nonJitteredProjectionMatrix_Injected(intPtr, ref value);
 			}
 		}
 
 		[NativeProperty("UseJitteredProjectionMatrixForTransparent")]
-		public extern bool useJitteredProjectionMatrixForTransparentRendering
+		public bool useJitteredProjectionMatrixForTransparentRendering
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_useJitteredProjectionMatrixForTransparentRendering_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_useJitteredProjectionMatrixForTransparentRendering_Injected(intPtr, value);
+			}
 		}
 
 		public Matrix4x4 previousViewProjectionMatrix
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_previousViewProjectionMatrix_Injected(out matrix4x);
+				Camera.get_previousViewProjectionMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetWorldToCameraMatrix();
+		public void ResetWorldToCameraMatrix()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetWorldToCameraMatrix_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetProjectionMatrix();
+		public void ResetProjectionMatrix()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetProjectionMatrix_Injected(intPtr);
+		}
 
 		[FreeFunction("CameraScripting::CalculateObliqueMatrix", HasExplicitThis = true)]
 		public Matrix4x4 CalculateObliqueMatrix(Vector4 clipPlane)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.CalculateObliqueMatrix_Injected(ref clipPlane, out matrix4x);
+			Camera.CalculateObliqueMatrix_Injected(intPtr, ref clipPlane, out matrix4x);
 			return matrix4x;
 		}
 
 		public Vector3 WorldToScreenPoint(Vector3 position, Camera.MonoOrStereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.WorldToScreenPoint_Injected(ref position, eye, out vector);
+			Camera.WorldToScreenPoint_Injected(intPtr, ref position, eye, out vector);
 			return vector;
 		}
 
 		public Vector3 WorldToViewportPoint(Vector3 position, Camera.MonoOrStereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.WorldToViewportPoint_Injected(ref position, eye, out vector);
+			Camera.WorldToViewportPoint_Injected(intPtr, ref position, eye, out vector);
 			return vector;
 		}
 
 		public Vector3 ViewportToWorldPoint(Vector3 position, Camera.MonoOrStereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.ViewportToWorldPoint_Injected(ref position, eye, out vector);
+			Camera.ViewportToWorldPoint_Injected(intPtr, ref position, eye, out vector);
 			return vector;
 		}
 
 		public Vector3 ScreenToWorldPoint(Vector3 position, Camera.MonoOrStereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.ScreenToWorldPoint_Injected(ref position, eye, out vector);
+			Camera.ScreenToWorldPoint_Injected(intPtr, ref position, eye, out vector);
 			return vector;
 		}
 
@@ -721,29 +1626,49 @@ namespace UnityEngine
 
 		public Vector3 ScreenToViewportPoint(Vector3 position)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.ScreenToViewportPoint_Injected(ref position, out vector);
+			Camera.ScreenToViewportPoint_Injected(intPtr, ref position, out vector);
 			return vector;
 		}
 
 		public Vector3 ViewportToScreenPoint(Vector3 position)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.ViewportToScreenPoint_Injected(ref position, out vector);
+			Camera.ViewportToScreenPoint_Injected(intPtr, ref position, out vector);
 			return vector;
 		}
 
 		internal Vector2 GetFrustumPlaneSizeAt(float distance)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector2 vector;
-			this.GetFrustumPlaneSizeAt_Injected(distance, out vector);
+			Camera.GetFrustumPlaneSizeAt_Injected(intPtr, distance, out vector);
 			return vector;
 		}
 
 		private Ray ViewportPointToRay(Vector2 pos, Camera.MonoOrStereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Ray ray;
-			this.ViewportPointToRay_Injected(ref pos, eye, out ray);
+			Camera.ViewportPointToRay_Injected(intPtr, ref pos, eye, out ray);
 			return ray;
 		}
 
@@ -759,8 +1684,13 @@ namespace UnityEngine
 
 		private Ray ScreenPointToRay(Vector2 pos, Camera.MonoOrStereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Ray ray;
-			this.ScreenPointToRay_Injected(ref pos, eye, out ray);
+			Camera.ScreenPointToRay_Injected(intPtr, ref pos, eye, out ray);
 			return ray;
 		}
 
@@ -775,9 +1705,34 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("CameraScripting::CalculateViewportRayVectors", HasExplicitThis = true)]
-		private void CalculateFrustumCornersInternal(Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, [Out] Vector3[] outCorners)
+		private unsafe void CalculateFrustumCornersInternal(Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, [Out] Vector3[] outCorners)
 		{
-			this.CalculateFrustumCornersInternal_Injected(ref viewport, z, eye, outCorners);
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (outCorners != null)
+				{
+					fixed (Vector3[] array = outCorners)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Camera.CalculateFrustumCornersInternal_Injected(intPtr, ref viewport, z, eye, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Vector3[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Vector3>(ref array);
+			}
 		}
 
 		public void CalculateFrustumCorners(Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, Vector3[] outCorners)
@@ -821,18 +1776,30 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float VerticalToHorizontalFieldOfView(float verticalFieldOfView, float aspectRatio);
 
-		public static extern Camera main
+		public static Camera main
 		{
 			[FreeFunction("FindMainCamera")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Camera>(Camera.get_main_Injected());
+			}
 		}
 
-		public static extern Camera current
+		public static Camera current
+		{
+			get
+			{
+				return Camera.currentInternal;
+			}
+		}
+
+		private static Camera currentInternal
 		{
 			[FreeFunction("GetCurrentCameraPPtr")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Camera>(Camera.get_currentInternal_Injected());
+			}
 		}
 
 		public Scene scene
@@ -840,111 +1807,254 @@ namespace UnityEngine
 			[FreeFunction("CameraScripting::GetScene", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Scene scene;
-				this.get_scene_Injected(out scene);
+				Camera.get_scene_Injected(intPtr, out scene);
 				return scene;
 			}
 			[FreeFunction("CameraScripting::SetScene", HasExplicitThis = true)]
 			set
 			{
-				this.set_scene_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_scene_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern bool stereoEnabled
+		public bool stereoEnabled
 		{
 			[NativeMethod("GetStereoEnabledForBuiltInOrSRP")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_stereoEnabled_Injected(intPtr);
+			}
 		}
 
-		public extern float stereoSeparation
+		public float stereoSeparation
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_stereoSeparation_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_stereoSeparation_Injected(intPtr, value);
+			}
 		}
 
-		public extern float stereoConvergence
+		public float stereoConvergence
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_stereoConvergence_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_stereoConvergence_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool areVRStereoViewMatricesWithinSingleCullTolerance
+		public bool areVRStereoViewMatricesWithinSingleCullTolerance
 		{
 			[NativeName("AreVRStereoViewMatricesWithinSingleCullTolerance")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_areVRStereoViewMatricesWithinSingleCullTolerance_Injected(intPtr);
+			}
 		}
 
-		public extern StereoTargetEyeMask stereoTargetEye
+		public StereoTargetEyeMask stereoTargetEye
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return this.stereoTargetEyeInternal;
+			}
+			set
+			{
+				bool flag = GraphicsSettings.currentRenderPipeline != null;
+				if (flag)
+				{
+					Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.stereoTargetEye only with the built-in renderer.");
+				}
+				this.stereoTargetEyeInternal = value;
+			}
 		}
 
-		public extern Camera.MonoOrStereoscopicEye stereoActiveEye
+		[NativeProperty("StereoTargetEye")]
+		internal StereoTargetEyeMask stereoTargetEyeInternal
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_stereoTargetEyeInternal_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_stereoTargetEyeInternal_Injected(intPtr, value);
+			}
+		}
+
+		public Camera.MonoOrStereoscopicEye stereoActiveEye
 		{
 			[FreeFunction("CameraScripting::GetStereoActiveEye", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_stereoActiveEye_Injected(intPtr);
+			}
 		}
 
 		public Matrix4x4 GetStereoNonJitteredProjectionMatrix(Camera.StereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetStereoNonJitteredProjectionMatrix_Injected(eye, out matrix4x);
+			Camera.GetStereoNonJitteredProjectionMatrix_Injected(intPtr, eye, out matrix4x);
 			return matrix4x;
 		}
 
 		[FreeFunction("CameraScripting::GetStereoViewMatrix", HasExplicitThis = true)]
 		public Matrix4x4 GetStereoViewMatrix(Camera.StereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetStereoViewMatrix_Injected(eye, out matrix4x);
+			Camera.GetStereoViewMatrix_Injected(intPtr, eye, out matrix4x);
 			return matrix4x;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CopyStereoDeviceProjectionMatrixToNonJittered(Camera.StereoscopicEye eye);
+		public void CopyStereoDeviceProjectionMatrixToNonJittered(Camera.StereoscopicEye eye)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.CopyStereoDeviceProjectionMatrixToNonJittered_Injected(intPtr, eye);
+		}
 
 		[FreeFunction("CameraScripting::GetStereoProjectionMatrix", HasExplicitThis = true)]
 		public Matrix4x4 GetStereoProjectionMatrix(Camera.StereoscopicEye eye)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetStereoProjectionMatrix_Injected(eye, out matrix4x);
+			Camera.GetStereoProjectionMatrix_Injected(intPtr, eye, out matrix4x);
 			return matrix4x;
 		}
 
 		public void SetStereoProjectionMatrix(Camera.StereoscopicEye eye, Matrix4x4 matrix)
 		{
-			this.SetStereoProjectionMatrix_Injected(eye, ref matrix);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.SetStereoProjectionMatrix_Injected(intPtr, eye, ref matrix);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetStereoProjectionMatrices();
+		public void ResetStereoProjectionMatrices()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetStereoProjectionMatrices_Injected(intPtr);
+		}
 
 		public void SetStereoViewMatrix(Camera.StereoscopicEye eye, Matrix4x4 matrix)
 		{
-			this.SetStereoViewMatrix_Injected(eye, ref matrix);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.SetStereoViewMatrix_Injected(intPtr, eye, ref matrix);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetStereoViewMatrices();
+		public void ResetStereoViewMatrices()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.ResetStereoViewMatrices_Injected(intPtr);
+		}
 
 		[FreeFunction("CameraScripting::GetAllCamerasCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetAllCamerasCount();
 
 		[FreeFunction("CameraScripting::GetAllCameras")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetAllCamerasImpl([NotNull("ArgumentNullException")] [Out] Camera[] cam);
+		private static int GetAllCamerasImpl([NotNull] [Out] Camera[] cam)
+		{
+			if (cam == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			return Camera.GetAllCamerasImpl_Injected(cam);
+		}
 
 		public static int allCamerasCount
 		{
@@ -980,8 +2090,15 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("CameraScripting::RenderToCubemap", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool RenderToCubemapImpl(Texture tex, [DefaultValue("63")] int faceMask);
+		private bool RenderToCubemapImpl(Texture tex, [DefaultValue("63")] int faceMask)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Camera.RenderToCubemapImpl_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(tex), faceMask);
+		}
 
 		public bool RenderToCubemap(Cubemap cubemap, int faceMask)
 		{
@@ -1004,8 +2121,15 @@ namespace UnityEngine
 		}
 
 		[NativeConditional("UNITY_EDITOR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetFilterMode();
+		private int GetFilterMode()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Camera.GetFilterMode_Injected(intPtr);
+		}
 
 		[NativeConditional("UNITY_EDITOR")]
 		public Camera.SceneViewFilterMode sceneViewFilterMode
@@ -1016,9 +2140,39 @@ namespace UnityEngine
 			}
 		}
 
+		[NativeConditional("UNITY_EDITOR")]
+		public bool renderCloudsInSceneView
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_renderCloudsInSceneView_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Camera.set_renderCloudsInSceneView_Injected(intPtr, value);
+			}
+		}
+
 		[NativeName("RenderToCubemap")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool RenderToCubemapEyeImpl(RenderTexture cubemap, int faceMask, Camera.MonoOrStereoscopicEye stereoEye);
+		private bool RenderToCubemapEyeImpl(RenderTexture cubemap, int faceMask, Camera.MonoOrStereoscopicEye stereoEye)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Camera.RenderToCubemapEyeImpl_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(cubemap), faceMask, stereoEye);
+		}
 
 		public bool RenderToCubemap(RenderTexture cubemap, int faceMask, Camera.MonoOrStereoscopicEye stereoEye)
 		{
@@ -1026,34 +2180,53 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("CameraScripting::Render", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Render();
+		public void Render()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.Render_Injected(intPtr);
+		}
 
 		[FreeFunction("CameraScripting::RenderWithShader", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RenderWithShader(Shader shader, string replacementTag);
+		public unsafe void RenderWithShader(Shader shader, string replacementTag)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				IntPtr intPtr2 = Object.MarshalledUnityObject.Marshal<Shader>(shader);
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(replacementTag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = replacementTag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Camera.RenderWithShader_Injected(intPtr, intPtr2, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("CameraScripting::RenderDontRestore", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RenderDontRestore();
-
-		[Obsolete("SubmitRenderRequests is obsolete, use SubmitRenderRequest with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
-		public void SubmitRenderRequests(List<Camera.RenderRequest> renderRequests)
+		public void RenderDontRestore()
 		{
-			bool flag = renderRequests == null || renderRequests.Count == 0;
-			if (flag)
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
 			{
-				throw new ArgumentException("SubmitRenderRequests has been invoked with invalid renderRequests");
+				ThrowHelper.ThrowNullReferenceException(this);
 			}
-			bool flag2 = GraphicsSettings.currentRenderPipeline == null;
-			if (flag2)
-			{
-				Debug.LogWarning("Trying to invoke 'SubmitRenderRequests' when no SRP is set. A scriptable render pipeline is needed for this function call");
-			}
-			else
-			{
-				this.SubmitRenderRequestsInternal(renderRequests);
-			}
+			Camera.RenderDontRestore_Injected(intPtr);
 		}
 
 		public void SubmitRenderRequest<RequestData>(RequestData renderRequest)
@@ -1061,7 +2234,7 @@ namespace UnityEngine
 			bool flag = renderRequest == null;
 			if (flag)
 			{
-				throw new ArgumentException("SubmitRenderRequests is invoked with invalid renderRequests");
+				throw new ArgumentException("SubmitRenderRequest is invoked with invalid renderRequests");
 			}
 			ObjectIdRequest objectIdRequest = renderRequest as ObjectIdRequest;
 			bool flag2 = objectIdRequest != null;
@@ -1090,45 +2263,182 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("CameraScripting::SubmitRenderRequests", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SubmitRenderRequestsInternal(object requests);
+		private void SubmitRenderRequestsInternal(object requests)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.SubmitRenderRequestsInternal_Injected(intPtr, requests);
+		}
 
 		[NativeConditional("UNITY_EDITOR")]
 		[FreeFunction("CameraScripting::SubmitBuiltInObjectIDRenderRequest", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Object[] SubmitBuiltInObjectIDRenderRequest(RenderTexture target, int mipLevel, CubemapFace cubemapFace, int depthSlice);
-
-		[FreeFunction("CameraScripting::SetupCurrent")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetupCurrent(Camera cur);
-
-		[FreeFunction("CameraScripting::CopyFrom", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CopyFrom(Camera other);
-
-		public extern int commandBufferCount
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		private Object[] SubmitBuiltInObjectIDRenderRequest(RenderTexture target, int mipLevel, CubemapFace cubemapFace, int depthSlice)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Camera.SubmitBuiltInObjectIDRenderRequest_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(target), mipLevel, cubemapFace, depthSlice);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RemoveCommandBuffers(CameraEvent evt);
+		public bool isProcessingRenderRequest
+		{
+			[NativeMethod("IsProcessingRenderRequest")]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_isProcessingRenderRequest_Injected(intPtr);
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RemoveAllCommandBuffers();
+		[FreeFunction("CameraScripting::SetupCurrent")]
+		public static void SetupCurrent(Camera cur)
+		{
+			Camera.SetupCurrent_Injected(Object.MarshalledUnityObject.Marshal<Camera>(cur));
+		}
+
+		[FreeFunction("CameraScripting::CopyFrom", HasExplicitThis = true)]
+		public void CopyFrom(Camera other)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.CopyFrom_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Camera>(other));
+		}
+
+		public int commandBufferCount
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Camera.get_commandBufferCount_Injected(intPtr);
+			}
+		}
+
+		[NativeName("RemoveCommandBuffers")]
+		private void RemoveCommandBuffersImpl(CameraEvent evt)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.RemoveCommandBuffersImpl_Injected(intPtr, evt);
+		}
+
+		[NativeName("RemoveAllCommandBuffers")]
+		private void RemoveAllCommandBuffersImpl()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Camera.RemoveAllCommandBuffersImpl_Injected(intPtr);
+		}
+
+		public void RemoveCommandBuffers(CameraEvent evt)
+		{
+			bool flag = RenderPipelineManager.currentPipeline != null;
+			if (flag)
+			{
+				Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.RemoveCommandBuffers only with the built-in renderer.");
+			}
+			else
+			{
+				this.m_NonSerializedVersion += 1U;
+				this.RemoveCommandBuffersImpl(evt);
+			}
+		}
+
+		public void RemoveAllCommandBuffers()
+		{
+			bool flag = RenderPipelineManager.currentPipeline != null;
+			if (flag)
+			{
+				Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.RemoveAllCommandBuffers only with the built-in renderer.");
+			}
+			else
+			{
+				this.m_NonSerializedVersion += 1U;
+				this.RemoveAllCommandBuffersImpl();
+			}
+		}
 
 		[NativeName("AddCommandBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddCommandBufferImpl(CameraEvent evt, [NotNull("ArgumentNullException")] CommandBuffer buffer);
+		private void AddCommandBufferImpl(CameraEvent evt, [NotNull] CommandBuffer buffer)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = CommandBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			Camera.AddCommandBufferImpl_Injected(intPtr, evt, intPtr2);
+		}
 
 		[NativeName("AddCommandBufferAsync")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddCommandBufferAsyncImpl(CameraEvent evt, [NotNull("ArgumentNullException")] CommandBuffer buffer, ComputeQueueType queueType);
+		private void AddCommandBufferAsyncImpl(CameraEvent evt, [NotNull] CommandBuffer buffer, ComputeQueueType queueType)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = CommandBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			Camera.AddCommandBufferAsyncImpl_Injected(intPtr, evt, intPtr2, queueType);
+		}
 
 		[NativeName("RemoveCommandBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RemoveCommandBufferImpl(CameraEvent evt, [NotNull("ArgumentNullException")] CommandBuffer buffer);
+		private void RemoveCommandBufferImpl(CameraEvent evt, [NotNull] CommandBuffer buffer)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = CommandBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			Camera.RemoveCommandBufferImpl_Injected(intPtr, evt, intPtr2);
+		}
 
 		public void AddCommandBuffer(CameraEvent evt, CommandBuffer buffer)
 		{
@@ -1142,7 +2452,16 @@ namespace UnityEngine
 			{
 				throw new NullReferenceException("buffer is null");
 			}
-			this.AddCommandBufferImpl(evt, buffer);
+			bool flag3 = RenderPipelineManager.currentPipeline != null;
+			if (flag3)
+			{
+				Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.AddCommandBuffer only with the built-in renderer.");
+			}
+			else
+			{
+				this.AddCommandBufferImpl(evt, buffer);
+				this.m_NonSerializedVersion += 1U;
+			}
 		}
 
 		public void AddCommandBufferAsync(CameraEvent evt, CommandBuffer buffer, ComputeQueueType queueType)
@@ -1157,7 +2476,16 @@ namespace UnityEngine
 			{
 				throw new NullReferenceException("buffer is null");
 			}
-			this.AddCommandBufferAsyncImpl(evt, buffer, queueType);
+			bool flag3 = RenderPipelineManager.currentPipeline != null;
+			if (flag3)
+			{
+				Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.AddCommandBufferAsync only with the built-in renderer.");
+			}
+			else
+			{
+				this.AddCommandBufferAsyncImpl(evt, buffer, queueType);
+				this.m_NonSerializedVersion += 1U;
+			}
 		}
 
 		public void RemoveCommandBuffer(CameraEvent evt, CommandBuffer buffer)
@@ -1172,12 +2500,39 @@ namespace UnityEngine
 			{
 				throw new NullReferenceException("buffer is null");
 			}
-			this.RemoveCommandBufferImpl(evt, buffer);
+			bool flag3 = RenderPipelineManager.currentPipeline != null;
+			if (flag3)
+			{
+				Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.RemoveCommandBuffer only with the built-in renderer.");
+			}
+			else
+			{
+				this.RemoveCommandBufferImpl(evt, buffer);
+				this.m_NonSerializedVersion += 1U;
+			}
+		}
+
+		public CommandBuffer[] GetCommandBuffers(CameraEvent evt)
+		{
+			bool flag = RenderPipelineManager.currentPipeline != null;
+			if (flag)
+			{
+				Debug.LogWarning("Your project uses a scriptable render pipeline. You can use Camera.GetCommandBuffers only with the built-in renderer.");
+			}
+			return this.GetCommandBuffersImpl(evt);
 		}
 
 		[FreeFunction("CameraScripting::GetCommandBuffers", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern CommandBuffer[] GetCommandBuffers(CameraEvent evt);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		internal CommandBuffer[] GetCommandBuffersImpl(CameraEvent evt)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Camera.GetCommandBuffersImpl_Injected(intPtr, evt);
+		}
 
 		[RequiredByNativeCode]
 		private static void FireOnPreCull(Camera cam)
@@ -1209,6 +2564,12 @@ namespace UnityEngine
 			}
 		}
 
+		[RequiredByNativeCode]
+		private static void BumpNonSerializedVersion(Camera cam)
+		{
+			cam.m_NonSerializedVersion += 1U;
+		}
+
 		internal void OnlyUsedForTesting1()
 		{
 		}
@@ -1227,154 +2588,549 @@ namespace UnityEngine
 			return Camera.GetCullingParameters_Internal(this, stereoAware, out cullingParameters, sizeof(ScriptableCullingParameters));
 		}
 
-		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
 		[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetCullingParameters_Internal(Camera camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize);
+		[FreeFunction("ScriptableRenderPipeline_Bindings::GetCullingParameters_Internal")]
+		private static bool GetCullingParameters_Internal(Camera camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize)
+		{
+			return Camera.GetCullingParameters_Internal_Injected(Object.MarshalledUnityObject.Marshal<Camera>(camera), stereoAware, out cullingParameters, managedCullingParametersSize);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_transparencySortAxis_Injected(out Vector3 ret);
+		private static extern float get_nearClipPlane_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_transparencySortAxis_Injected(ref Vector3 value);
+		private static extern void set_nearClipPlane_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_velocity_Injected(out Vector3 ret);
+		private static extern float get_farClipPlane_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_cullingMatrix_Injected(out Matrix4x4 ret);
+		private static extern void set_farClipPlane_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_cullingMatrix_Injected(ref Matrix4x4 value);
+		private static extern float get_fieldOfView_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_backgroundColor_Injected(out Color ret);
+		private static extern void set_fieldOfView_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_backgroundColor_Injected(ref Color value);
+		private static extern RenderingPath get_renderingPath_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_curvature_Injected(out Vector2 ret);
+		private static extern void set_renderingPath_Injected(IntPtr _unity_self, RenderingPath value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_curvature_Injected(ref Vector2 value);
+		private static extern RenderingPath get_actualRenderingPath_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_sensorSize_Injected(out Vector2 ret);
+		private static extern void Reset_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_sensorSize_Injected(ref Vector2 value);
+		private static extern bool get_allowHDR_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_lensShift_Injected(out Vector2 ret);
+		private static extern void set_allowHDR_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_lensShift_Injected(ref Vector2 value);
+		private static extern bool get_allowMSAA_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetGateFittedLensShift_Injected(out Vector2 ret);
+		private static extern void set_allowMSAA_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetLocalSpaceAim_Injected(out Vector3 ret);
+		private static extern bool get_allowDynamicResolution_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_rect_Injected(out Rect ret);
+		private static extern void set_allowDynamicResolution_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_rect_Injected(ref Rect value);
+		private static extern bool get_forceIntoRenderTexture_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_pixelRect_Injected(out Rect ret);
+		private static extern void set_forceIntoRenderTexture_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_pixelRect_Injected(ref Rect value);
+		private static extern float get_orthographicSize_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTargetBuffersImpl_Injected(ref RenderBuffer color, ref RenderBuffer depth);
+		private static extern void set_orthographicSize_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTargetBuffersMRTImpl_Injected(RenderBuffer[] color, ref RenderBuffer depth);
+		private static extern bool get_orthographic_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_cameraToWorldMatrix_Injected(out Matrix4x4 ret);
+		private static extern void set_orthographic_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_worldToCameraMatrix_Injected(out Matrix4x4 ret);
+		private static extern OpaqueSortMode get_opaqueSortMode_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_worldToCameraMatrix_Injected(ref Matrix4x4 value);
+		private static extern void set_opaqueSortMode_Injected(IntPtr _unity_self, OpaqueSortMode value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_projectionMatrix_Injected(out Matrix4x4 ret);
+		private static extern TransparencySortMode get_transparencySortMode_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_projectionMatrix_Injected(ref Matrix4x4 value);
+		private static extern void set_transparencySortMode_Injected(IntPtr _unity_self, TransparencySortMode value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_nonJitteredProjectionMatrix_Injected(out Matrix4x4 ret);
+		private static extern void get_transparencySortAxis_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_nonJitteredProjectionMatrix_Injected(ref Matrix4x4 value);
+		private static extern void set_transparencySortAxis_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_previousViewProjectionMatrix_Injected(out Matrix4x4 ret);
+		private static extern void ResetTransparencySortSettings_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CalculateObliqueMatrix_Injected(ref Vector4 clipPlane, out Matrix4x4 ret);
+		private static extern float get_depth_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void WorldToScreenPoint_Injected(ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+		private static extern void set_depth_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void WorldToViewportPoint_Injected(ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+		private static extern float get_aspect_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ViewportToWorldPoint_Injected(ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+		private static extern void set_aspect_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ScreenToWorldPoint_Injected(ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+		private static extern void ResetAspect_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ScreenToViewportPoint_Injected(ref Vector3 position, out Vector3 ret);
+		private static extern void get_velocity_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ViewportToScreenPoint_Injected(ref Vector3 position, out Vector3 ret);
+		private static extern int get_cullingMask_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetFrustumPlaneSizeAt_Injected(float distance, out Vector2 ret);
+		private static extern void set_cullingMask_Injected(IntPtr _unity_self, int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ViewportPointToRay_Injected(ref Vector2 pos, Camera.MonoOrStereoscopicEye eye, out Ray ret);
+		private static extern int get_eventMask_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ScreenPointToRay_Injected(ref Vector2 pos, Camera.MonoOrStereoscopicEye eye, out Ray ret);
+		private static extern void set_eventMask_Injected(IntPtr _unity_self, int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CalculateFrustumCornersInternal_Injected(ref Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, [Out] Vector3[] outCorners);
+		private static extern bool get_layerCullSphericalInternal_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CalculateProjectionMatrixFromPhysicalPropertiesInternal_Injected(out Matrix4x4 output, float focalLength, ref Vector2 sensorSize, ref Vector2 lensShift, float nearClip, float farClip, float gateAspect, Camera.GateFitMode gateFitMode);
+		private static extern void set_layerCullSphericalInternal_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_scene_Injected(out Scene ret);
+		private static extern CameraType get_cameraType_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_scene_Injected(ref Scene value);
+		private static extern void set_cameraType_Injected(IntPtr _unity_self, CameraType value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetStereoNonJitteredProjectionMatrix_Injected(Camera.StereoscopicEye eye, out Matrix4x4 ret);
+		private static extern IntPtr get_skyboxMaterial_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetStereoViewMatrix_Injected(Camera.StereoscopicEye eye, out Matrix4x4 ret);
+		private static extern ulong get_overrideSceneCullingMask_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetStereoProjectionMatrix_Injected(Camera.StereoscopicEye eye, out Matrix4x4 ret);
+		private static extern void set_overrideSceneCullingMask_Injected(IntPtr _unity_self, ulong value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetStereoProjectionMatrix_Injected(Camera.StereoscopicEye eye, ref Matrix4x4 matrix);
+		private static extern ulong get_sceneCullingMask_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetStereoViewMatrix_Injected(Camera.StereoscopicEye eye, ref Matrix4x4 matrix);
+		private static extern bool get_useInteractiveLightBakingData_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_useInteractiveLightBakingData_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLayerCullDistances_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLayerCullDistances_Injected(IntPtr _unity_self, ref ManagedSpanWrapper d);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_useOcclusionCulling_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_useOcclusionCulling_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_cullingMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cullingMatrix_Injected(IntPtr _unity_self, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetCullingMatrix_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_backgroundColor_Injected(IntPtr _unity_self, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_backgroundColor_Injected(IntPtr _unity_self, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern CameraClearFlags get_clearFlags_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_clearFlags_Injected(IntPtr _unity_self, CameraClearFlags value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern DepthTextureMode get_depthTextureMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_depthTextureMode_Injected(IntPtr _unity_self, DepthTextureMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_clearStencilAfterLightingPass_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_clearStencilAfterLightingPass_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetReplacementShader_Injected(IntPtr _unity_self, IntPtr shader, ref ManagedSpanWrapper replacementTag);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetReplacementShader_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Camera.ProjectionMatrixMode get_projectionMatrixMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_usePhysicalProperties_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_usePhysicalProperties_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_iso_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_iso_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_shutterSpeed_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_shutterSpeed_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_aperture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_aperture_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_focusDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_focusDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_focalLength_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_focalLength_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_bladeCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_bladeCount_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_curvature_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_curvature_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_barrelClipping_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_barrelClipping_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_anamorphism_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_anamorphism_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_sensorSize_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sensorSize_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_lensShift_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_lensShift_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Camera.GateFitMode get_gateFit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_gateFit_Injected(IntPtr _unity_self, Camera.GateFitMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetGateFittedFieldOfView_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGateFittedLensShift_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLocalSpaceAim_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_rect_Injected(IntPtr _unity_self, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rect_Injected(IntPtr _unity_self, [In] ref Rect value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_pixelRect_Injected(IntPtr _unity_self, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_pixelRect_Injected(IntPtr _unity_self, [In] ref Rect value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_pixelWidth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_pixelHeight_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_scaledPixelWidth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_scaledPixelHeight_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_targetTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetTexture_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_activeTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_targetDisplay_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetDisplay_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTargetBuffersImpl_Injected(IntPtr _unity_self, [In] ref RenderBuffer color, [In] ref RenderBuffer depth);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTargetBuffersMRTImpl_Injected(IntPtr _unity_self, ref ManagedSpanWrapper color, [In] ref RenderBuffer depth);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetCameraBufferWarnings_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_cameraToWorldMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_worldToCameraMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_worldToCameraMatrix_Injected(IntPtr _unity_self, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_projectionMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_projectionMatrix_Injected(IntPtr _unity_self, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_nonJitteredProjectionMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_nonJitteredProjectionMatrix_Injected(IntPtr _unity_self, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_useJitteredProjectionMatrixForTransparentRendering_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_useJitteredProjectionMatrixForTransparentRendering_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_previousViewProjectionMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetWorldToCameraMatrix_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetProjectionMatrix_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CalculateObliqueMatrix_Injected(IntPtr _unity_self, [In] ref Vector4 clipPlane, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void WorldToScreenPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void WorldToViewportPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ViewportToWorldPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ScreenToWorldPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, Camera.MonoOrStereoscopicEye eye, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ScreenToViewportPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ViewportToScreenPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetFrustumPlaneSizeAt_Injected(IntPtr _unity_self, float distance, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ViewportPointToRay_Injected(IntPtr _unity_self, [In] ref Vector2 pos, Camera.MonoOrStereoscopicEye eye, out Ray ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ScreenPointToRay_Injected(IntPtr _unity_self, [In] ref Vector2 pos, Camera.MonoOrStereoscopicEye eye, out Ray ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CalculateFrustumCornersInternal_Injected(IntPtr _unity_self, [In] ref Rect viewport, float z, Camera.MonoOrStereoscopicEye eye, out BlittableArrayWrapper outCorners);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CalculateProjectionMatrixFromPhysicalPropertiesInternal_Injected(out Matrix4x4 output, float focalLength, [In] ref Vector2 sensorSize, [In] ref Vector2 lensShift, float nearClip, float farClip, float gateAspect, Camera.GateFitMode gateFitMode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_main_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_currentInternal_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_scene_Injected(IntPtr _unity_self, out Scene ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_scene_Injected(IntPtr _unity_self, [In] ref Scene value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_stereoEnabled_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_stereoSeparation_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_stereoSeparation_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_stereoConvergence_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_stereoConvergence_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_areVRStereoViewMatricesWithinSingleCullTolerance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern StereoTargetEyeMask get_stereoTargetEyeInternal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_stereoTargetEyeInternal_Injected(IntPtr _unity_self, StereoTargetEyeMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Camera.MonoOrStereoscopicEye get_stereoActiveEye_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetStereoNonJitteredProjectionMatrix_Injected(IntPtr _unity_self, Camera.StereoscopicEye eye, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetStereoViewMatrix_Injected(IntPtr _unity_self, Camera.StereoscopicEye eye, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyStereoDeviceProjectionMatrixToNonJittered_Injected(IntPtr _unity_self, Camera.StereoscopicEye eye);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetStereoProjectionMatrix_Injected(IntPtr _unity_self, Camera.StereoscopicEye eye, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStereoProjectionMatrix_Injected(IntPtr _unity_self, Camera.StereoscopicEye eye, [In] ref Matrix4x4 matrix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetStereoProjectionMatrices_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStereoViewMatrix_Injected(IntPtr _unity_self, Camera.StereoscopicEye eye, [In] ref Matrix4x4 matrix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetStereoViewMatrices_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetAllCamerasImpl_Injected([Out] Camera[] cam);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RenderToCubemapImpl_Injected(IntPtr _unity_self, IntPtr tex, [DefaultValue("63")] int faceMask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetFilterMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_renderCloudsInSceneView_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_renderCloudsInSceneView_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RenderToCubemapEyeImpl_Injected(IntPtr _unity_self, IntPtr cubemap, int faceMask, Camera.MonoOrStereoscopicEye stereoEye);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Render_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RenderWithShader_Injected(IntPtr _unity_self, IntPtr shader, ref ManagedSpanWrapper replacementTag);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RenderDontRestore_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SubmitRenderRequestsInternal_Injected(IntPtr _unity_self, object requests);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Object[] SubmitBuiltInObjectIDRenderRequest_Injected(IntPtr _unity_self, IntPtr target, int mipLevel, CubemapFace cubemapFace, int depthSlice);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isProcessingRenderRequest_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetupCurrent_Injected(IntPtr cur);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyFrom_Injected(IntPtr _unity_self, IntPtr other);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_commandBufferCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RemoveCommandBuffersImpl_Injected(IntPtr _unity_self, CameraEvent evt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RemoveAllCommandBuffersImpl_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddCommandBufferImpl_Injected(IntPtr _unity_self, CameraEvent evt, IntPtr buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddCommandBufferAsyncImpl_Injected(IntPtr _unity_self, CameraEvent evt, IntPtr buffer, ComputeQueueType queueType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RemoveCommandBufferImpl_Injected(IntPtr _unity_self, CameraEvent evt, IntPtr buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern CommandBuffer[] GetCommandBuffersImpl_Injected(IntPtr _unity_self, CameraEvent evt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetCullingParameters_Internal_Injected(IntPtr camera, bool stereoAware, out ScriptableCullingParameters cullingParameters, int managedCullingParametersSize);
 
 		public const float kMinAperture = 0.7f;
 
@@ -1383,6 +3139,8 @@ namespace UnityEngine
 		public const int kMinBladeCount = 3;
 
 		public const int kMaxBladeCount = 11;
+
+		internal uint m_NonSerializedVersion;
 
 		public static Camera.CameraCallback onPreCull;
 
@@ -1442,96 +3200,6 @@ namespace UnityEngine
 		{
 			Off,
 			ShowFiltered
-		}
-
-		[Obsolete("The RenderRequest struct is obsolete, use the function overload with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
-		public enum RenderRequestMode
-		{
-			None,
-			ObjectId,
-			Depth,
-			VertexNormal,
-			WorldPosition,
-			EntityId,
-			BaseColor,
-			SpecularColor,
-			Metallic,
-			Emission,
-			Normal,
-			Smoothness,
-			Occlusion,
-			DiffuseColor
-		}
-
-		[Obsolete("The RenderRequest struct is obsolete, use the function overload with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
-		public enum RenderRequestOutputSpace
-		{
-			ScreenSpace = -1,
-			UV0,
-			UV1,
-			UV2,
-			UV3,
-			UV4,
-			UV5,
-			UV6,
-			UV7,
-			UV8
-		}
-
-		[Obsolete("The RenderRequest struct is obsolete, use the function overload with RequestData of supported types such as RenderPipeline.StandardRequest", true)]
-		public struct RenderRequest
-		{
-			public RenderRequest(Camera.RenderRequestMode mode, RenderTexture rt)
-			{
-				this.m_CameraRenderMode = mode;
-				this.m_ResultRT = rt;
-				this.m_OutputSpace = Camera.RenderRequestOutputSpace.ScreenSpace;
-			}
-
-			public RenderRequest(Camera.RenderRequestMode mode, Camera.RenderRequestOutputSpace space, RenderTexture rt)
-			{
-				this.m_CameraRenderMode = mode;
-				this.m_ResultRT = rt;
-				this.m_OutputSpace = space;
-			}
-
-			public bool isValid
-			{
-				get
-				{
-					return this.m_CameraRenderMode != Camera.RenderRequestMode.None && this.m_ResultRT != null;
-				}
-			}
-
-			public Camera.RenderRequestMode mode
-			{
-				get
-				{
-					return this.m_CameraRenderMode;
-				}
-			}
-
-			public RenderTexture result
-			{
-				get
-				{
-					return this.m_ResultRT;
-				}
-			}
-
-			public Camera.RenderRequestOutputSpace outputSpace
-			{
-				get
-				{
-					return this.m_OutputSpace;
-				}
-			}
-
-			private readonly Camera.RenderRequestMode m_CameraRenderMode;
-
-			private readonly RenderTexture m_ResultRT;
-
-			private readonly Camera.RenderRequestOutputSpace m_OutputSpace;
 		}
 
 		public delegate void CameraCallback(Camera cam);

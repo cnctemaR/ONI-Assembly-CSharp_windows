@@ -534,6 +534,11 @@ namespace UnityEngine.UI
 
 		public virtual bool Raycast(Vector2 sp, Camera eventCamera)
 		{
+			return this.Raycast(sp, eventCamera, false);
+		}
+
+		protected bool Raycast(Vector2 sp, Camera eventCamera, bool ignoreMasks)
+		{
 			if (!base.isActiveAndEnabled)
 			{
 				return false;
@@ -542,50 +547,76 @@ namespace UnityEngine.UI
 			List<Component> list = CollectionPool<List<Component>, Component>.Get();
 			bool flag = false;
 			bool flag2 = true;
+			bool flag3 = false;
 			while (transform != null)
 			{
+				bool flag4 = true;
+				bool flag5 = false;
+				bool flag6 = true;
 				transform.GetComponents<Component>(list);
 				for (int i = 0; i < list.Count; i++)
 				{
-					Canvas canvas = list[i] as Canvas;
+					Component component = list[i];
+					Canvas canvas = component as Canvas;
 					if (canvas != null && canvas.overrideSorting)
 					{
 						flag2 = false;
 					}
-					ICanvasRaycastFilter canvasRaycastFilter = list[i] as ICanvasRaycastFilter;
-					if (canvasRaycastFilter != null)
+					ICanvasRaycastFilter canvasRaycastFilter = component as ICanvasRaycastFilter;
+					if (canvasRaycastFilter != null && (!ignoreMasks || (!(component is Mask) && !(component is RectMask2D))))
 					{
-						bool flag3 = true;
-						CanvasGroup canvasGroup = list[i] as CanvasGroup;
+						CanvasGroup canvasGroup = component as CanvasGroup;
 						if (canvasGroup != null)
 						{
-							if (!canvasGroup.enabled)
+							if (canvasGroup.enabled && !flag)
 							{
-								goto IL_00CD;
-							}
-							if (!flag && canvasGroup.ignoreParentGroups)
-							{
-								flag = true;
-								flag3 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
-							}
-							else if (!flag)
-							{
-								flag3 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
+								if (canvasGroup.ignoreParentGroups)
+								{
+									flag = true;
+								}
+								flag4 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
+								if (!flag4)
+								{
+									break;
+								}
 							}
 						}
 						else
 						{
-							flag3 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
-						}
-						if (!flag3)
-						{
-							CollectionPool<List<Component>, Component>.Release(list);
-							return false;
+							if (flag3)
+							{
+								Graphic graphic = component as Graphic;
+								if (graphic != null && !graphic.raycastTarget)
+								{
+									goto IL_0116;
+								}
+							}
+							flag5 |= component is Mask;
+							flag4 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
+							if (!flag4)
+							{
+								if (!flag3 || !(component is MaskableGraphic))
+								{
+									break;
+								}
+								flag6 = flag4;
+								if (!ignoreMasks && flag5)
+								{
+									break;
+								}
+								flag4 = true;
+							}
 						}
 					}
-					IL_00CD:;
+					IL_0116:;
+				}
+				if (!flag4 || (flag5 && !flag6))
+				{
+					CollectionPool<List<Component>, Component>.Release(list);
+					return false;
 				}
 				transform = (flag2 ? transform.parent : null);
+				flag3 = true;
 			}
 			CollectionPool<List<Component>, Component>.Release(list);
 			return true;

@@ -18,7 +18,7 @@ public class GravitasBathroomMirrorConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Glass, true);
 		component.Temperature = 294.15f;
-		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntryThenNext("story_trait_hijackheadquarters_mirror", UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_SUCCESS.SEARCH6, new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextJournalEntry), true));
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntryThenNext("story_trait_hijackheadquarters_mirror", UI.USERMENUACTIONS.READLORE.SEARCH_FLATOBJECT_SUCCESS.SEARCH1, new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextJournalEntry), true));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

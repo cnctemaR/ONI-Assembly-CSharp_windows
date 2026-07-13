@@ -304,7 +304,7 @@ public class ChorePreconditions
 			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
 			return !(context.consumerState.consumer == null) && !(context.consumerState.navigator == null) && !(kmonoBehaviour == null) && context.consumerState.navigator.CanReach(Grid.PosToCell(kmonoBehaviour));
 		};
-		precondition.canExecuteOnAnyThread = true;
+		precondition.canExecuteOnAnyThread = false;
 		this.IsChattable = precondition;
 		precondition = default(Chore.Precondition);
 		precondition.id = "IsNotRedAlert";

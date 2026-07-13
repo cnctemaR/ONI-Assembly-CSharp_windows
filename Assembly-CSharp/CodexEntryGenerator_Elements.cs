@@ -197,55 +197,139 @@ public class CodexEntryGenerator_Elements
 
 	public static void GenerateMadeAndUsedContainers(Tag tag, List<ContentContainer> containers)
 	{
-		List<ICodexWidget> list = new List<ICodexWidget>();
-		List<ICodexWidget> list2 = new List<ICodexWidget>();
-		Func<ComplexRecipe.RecipeElement, bool> <>9__0;
-		Func<ComplexRecipe.RecipeElement, bool> <>9__1;
+		List<ICodexWidget> used = new List<ICodexWidget>();
+		List<ICodexWidget> made = new List<ICodexWidget>();
+		Func<ComplexRecipe.RecipeElement, bool> <>9__3;
+		Func<ComplexRecipe.RecipeElement, bool> <>9__4;
 		foreach (ComplexRecipe complexRecipe in ComplexRecipeManager.Get().recipes)
 		{
 			if (Game.IsCorrectDlcActiveForCurrentSave(complexRecipe) && !complexRecipe.IsAnyProductDeprecated())
 			{
 				IEnumerable<ComplexRecipe.RecipeElement> ingredients = complexRecipe.ingredients;
 				Func<ComplexRecipe.RecipeElement, bool> func;
-				if ((func = <>9__0) == null)
+				if ((func = <>9__3) == null)
 				{
-					func = (<>9__0 = (ComplexRecipe.RecipeElement i) => i.material == tag);
+					func = (<>9__3 = (ComplexRecipe.RecipeElement i) => i.material == tag);
 				}
 				if (ingredients.Any<ComplexRecipe.RecipeElement>(func))
 				{
-					list.Add(new CodexRecipePanel(complexRecipe, false));
+					used.Add(new CodexRecipePanel(complexRecipe, false));
 				}
 				IEnumerable<ComplexRecipe.RecipeElement> results = complexRecipe.results;
 				Func<ComplexRecipe.RecipeElement, bool> func2;
-				if ((func2 = <>9__1) == null)
+				if ((func2 = <>9__4) == null)
 				{
-					func2 = (<>9__1 = (ComplexRecipe.RecipeElement i) => i.material == tag);
+					func2 = (<>9__4 = (ComplexRecipe.RecipeElement i) => i.material == tag);
 				}
 				if (results.Any<ComplexRecipe.RecipeElement>(func2))
 				{
-					list2.Add(new CodexRecipePanel(complexRecipe, true));
+					made.Add(new CodexRecipePanel(complexRecipe, true));
 				}
 			}
 		}
-		List<CodexEntryGenerator_Elements.ConversionEntry> list3;
-		if (CodexEntryGenerator_Elements.GetElementEntryContext().usedMap.map.TryGetValue(tag, out list3))
+		List<CodexEntryGenerator_Elements.ConversionEntry> list;
+		if (CodexEntryGenerator_Elements.GetElementEntryContext().usedMap.map.TryGetValue(tag, out list))
 		{
-			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry in list3)
+			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry in list)
 			{
-				list.Add(new CodexConversionPanel(conversionEntry.title, conversionEntry.inSet.ToArray<ElementUsage>(), conversionEntry.outSet.ToArray<ElementUsage>(), conversionEntry.prefab, conversionEntry.aidIcon1));
+				used.Add(new CodexConversionPanel(conversionEntry.title, conversionEntry.inSet.ToArray<ElementUsage>(), conversionEntry.outSet.ToArray<ElementUsage>(), conversionEntry.prefab, conversionEntry.aidIcon1));
 			}
 		}
-		List<CodexEntryGenerator_Elements.ConversionEntry> list4;
-		if (CodexEntryGenerator_Elements.GetElementEntryContext().madeMap.map.TryGetValue(tag, out list4))
+		List<CodexEntryGenerator_Elements.ConversionEntry> list2;
+		if (CodexEntryGenerator_Elements.GetElementEntryContext().madeMap.map.TryGetValue(tag, out list2))
 		{
-			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 in list4)
+			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 in list2)
 			{
-				list2.Add(new CodexConversionPanel(conversionEntry2.title, conversionEntry2.inSet.ToArray<ElementUsage>(), conversionEntry2.outSet.ToArray<ElementUsage>(), conversionEntry2.prefab, conversionEntry2.aidIcon1));
+				made.Add(new CodexConversionPanel(conversionEntry2.title, conversionEntry2.inSet.ToArray<ElementUsage>(), conversionEntry2.outSet.ToArray<ElementUsage>(), conversionEntry2.prefab, conversionEntry2.aidIcon1));
 			}
 		}
-		ContentContainer contentContainer = new ContentContainer(list, ContentContainer.ContentLayout.Vertical);
-		ContentContainer contentContainer2 = new ContentContainer(list2, ContentContainer.ContentLayout.Vertical);
-		if (list.Count > 0)
+		List<ManualCodexConversionRegistry.ManualConversionEntry> conversionsForGivenConverter = ManualCodexConversionRegistry.GetConversionsForGivenConverter(tag);
+		if (conversionsForGivenConverter != null)
+		{
+			conversionsForGivenConverter.ForEach(delegate(ManualCodexConversionRegistry.ManualConversionEntry ce)
+			{
+				List<ICodexWidget> used3 = used;
+				string headerDescription = ce.headerDescription;
+				object obj;
+				if (ce.input == null)
+				{
+					obj = null;
+				}
+				else
+				{
+					(obj = new ElementUsage[1])[0] = new ElementUsage(ce.input.first, ce.input.second, false, ce.inputCustomFormating);
+				}
+				object obj2;
+				if (ce.output == null)
+				{
+					obj2 = null;
+				}
+				else
+				{
+					(obj2 = new ElementUsage[1])[0] = new ElementUsage(ce.output.first, ce.output.second, false, ce.outputCustomFormating);
+				}
+				used3.Add(new CodexConversionPanel(headerDescription, obj, obj2, Assets.GetPrefab(tag)));
+			});
+		}
+		List<ManualCodexConversionRegistry.ManualConversionEntry> producersForGivenOutput = ManualCodexConversionRegistry.GetProducersForGivenOutput(tag);
+		if (producersForGivenOutput != null)
+		{
+			producersForGivenOutput.ForEach(delegate(ManualCodexConversionRegistry.ManualConversionEntry ce)
+			{
+				List<ICodexWidget> made2 = made;
+				string headerDescription2 = ce.headerDescription;
+				object obj3;
+				if (ce.input == null)
+				{
+					obj3 = null;
+				}
+				else
+				{
+					(obj3 = new ElementUsage[1])[0] = new ElementUsage(ce.input.first, ce.input.second, false, ce.inputCustomFormating);
+				}
+				object obj4;
+				if (ce.output == null)
+				{
+					obj4 = null;
+				}
+				else
+				{
+					(obj4 = new ElementUsage[1])[0] = new ElementUsage(ce.output.first, ce.output.second, false, ce.outputCustomFormating);
+				}
+				made2.Add(new CodexConversionPanel(headerDescription2, obj3, obj4, Assets.GetPrefab(ce.converter.first)));
+			});
+		}
+		List<ManualCodexConversionRegistry.ManualConversionEntry> consumersForGivenInput = ManualCodexConversionRegistry.GetConsumersForGivenInput(tag);
+		if (consumersForGivenInput != null)
+		{
+			consumersForGivenInput.ForEach(delegate(ManualCodexConversionRegistry.ManualConversionEntry ce)
+			{
+				List<ICodexWidget> used2 = used;
+				string headerDescription3 = ce.headerDescription;
+				object obj5;
+				if (ce.input == null)
+				{
+					obj5 = null;
+				}
+				else
+				{
+					(obj5 = new ElementUsage[1])[0] = new ElementUsage(ce.input.first, ce.input.second, false, ce.inputCustomFormating);
+				}
+				object obj6;
+				if (ce.output == null)
+				{
+					obj6 = null;
+				}
+				else
+				{
+					(obj6 = new ElementUsage[1])[0] = new ElementUsage(ce.output.first, ce.output.second, false, ce.outputCustomFormating);
+				}
+				used2.Add(new CodexConversionPanel(headerDescription3, obj5, obj6, Assets.GetPrefab(ce.converter.first)));
+			});
+		}
+		ContentContainer contentContainer = new ContentContainer(used, ContentContainer.ContentLayout.Vertical);
+		ContentContainer contentContainer2 = new ContentContainer(made, ContentContainer.ContentLayout.Vertical);
+		if (used.Count > 0)
 		{
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
@@ -254,7 +338,7 @@ public class CodexEntryGenerator_Elements
 			}, ContentContainer.ContentLayout.Vertical));
 			containers.Add(contentContainer);
 		}
-		if (list2.Count > 0)
+		if (made.Count > 0)
 		{
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{

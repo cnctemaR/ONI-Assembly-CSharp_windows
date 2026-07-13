@@ -16,6 +16,14 @@ public class RocketClusterDestinationSelector : ClusterDestinationSelector
 		}
 	}
 
+	public AxialI PreviousDestination
+	{
+		get
+		{
+			return this.m_prevDestination;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

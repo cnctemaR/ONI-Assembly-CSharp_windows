@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum CustomDebugInformationKind
+	internal enum CustomDebugInformationKind
 	{
 		Binary,
 		StateMachineScope,

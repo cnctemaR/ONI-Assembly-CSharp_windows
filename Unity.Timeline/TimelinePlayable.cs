@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine.Animations;
 using UnityEngine.Audio;
 using UnityEngine.Playables;
@@ -39,6 +40,7 @@ namespace UnityEngine.Timeline
 			this.m_CurrentListOfActiveClips = new List<RuntimeElement>(num);
 			this.m_ActiveClips = new List<RuntimeElement>(num);
 			this.m_EvaluateCallbacks.Clear();
+			this.m_AlwaysEvaluateCallbacks.Clear();
 			this.m_PlayableCache.Clear();
 			this.CompileTrackList(graph, timelinePlayable, list, go, createOutputs);
 		}
@@ -50,6 +52,7 @@ namespace UnityEngine.Timeline
 				if (trackAsset.IsCompilable() && !this.m_PlayableCache.ContainsKey(trackAsset))
 				{
 					trackAsset.SortClips();
+					trackAsset.ComputeBlendsFromOverlaps(false);
 					this.CreateTrackPlayable(graph, timelinePlayable, trackAsset, go, createOutputs);
 				}
 			}
@@ -67,9 +70,10 @@ namespace UnityEngine.Timeline
 				playableOutput.SetReferenceObject(playableBinding.sourceObject);
 				playableOutput.SetSourcePlayable(playable, port);
 				playableOutput.SetWeight(1f);
-				if (track as AnimationTrack != null)
+				AnimationTrack animationTrack = track as AnimationTrack;
+				if (animationTrack != null)
 				{
-					this.EvaluateWeightsForAnimationPlayableOutput(track, (AnimationPlayableOutput)playableOutput);
+					this.AddPlayableOutputCallbacks(animationTrack, playableOutput);
 				}
 				if (playableOutput.IsPlayableOutputOfType<AudioPlayableOutput>())
 				{
@@ -85,16 +89,6 @@ namespace UnityEngine.Timeline
 					}
 				}
 			}
-		}
-
-		private void EvaluateWeightsForAnimationPlayableOutput(TrackAsset track, AnimationPlayableOutput animOutput)
-		{
-			this.m_EvaluateCallbacks.Add(new AnimationOutputWeightProcessor(animOutput));
-		}
-
-		private void EvaluateAnimationPreviewUpdateCallback(TrackAsset track, AnimationPlayableOutput animOutput)
-		{
-			this.m_EvaluateCallbacks.Add(new AnimationPreviewUpdateCallback(animOutput));
 		}
 
 		private Playable CreateTrackPlayable(PlayableGraph graph, Playable timelinePlayable, TrackAsset track, GameObject go, bool createOutputs)
@@ -134,7 +128,7 @@ namespace UnityEngine.Timeline
 			{
 				this.CreateTrackOutput(graph, track, go, playable2, playable2.GetInputCount<Playable>() - 1);
 			}
-			this.CacheTrack(track, playable3, flag ? (playable2.GetInputCount<Playable>() - 1) : (-1), playable2);
+			this.CacheTrack(track, playable3);
 			return playable3;
 		}
 
@@ -171,14 +165,10 @@ namespace UnityEngine.Timeline
 				this.m_CurrentListOfActiveClips[i].EvaluateAt(time, frameData);
 				this.m_ActiveClips.Add(this.m_CurrentListOfActiveClips[i]);
 			}
-			int count = this.m_EvaluateCallbacks.Count;
-			for (int j = 0; j < count; j++)
-			{
-				this.m_EvaluateCallbacks[j].Evaluate();
-			}
+			this.InvokeOutputCallbacks(this.m_CurrentListOfActiveClips);
 		}
 
-		private void CacheTrack(TrackAsset track, Playable playable, int port, Playable parent)
+		private void CacheTrack(TrackAsset track, Playable playable)
 		{
 			this.m_PlayableCache[track] = playable;
 		}
@@ -188,6 +178,109 @@ namespace UnityEngine.Timeline
 			new List<IntervalTree<RuntimeElement>.Entry>();
 		}
 
+		private void AddPlayableOutputCallbacks(AnimationTrack track, PlayableOutput playableOutput)
+		{
+			this.AddOutputWeightProcessor(track, (AnimationPlayableOutput)playableOutput);
+		}
+
+		private void AddOutputWeightProcessor(AnimationTrack track, AnimationPlayableOutput animOutput)
+		{
+			AnimationOutputWeightProcessor animationOutputWeightProcessor = new AnimationOutputWeightProcessor(animOutput);
+			if (track.inClipMode)
+			{
+				this.AddEvaluateCallback(track, animationOutputWeightProcessor);
+			}
+			else
+			{
+				this.m_AlwaysEvaluateCallbacks.Add(animationOutputWeightProcessor);
+			}
+			this.m_ForceEvaluateNextEvaluate.Add(animationOutputWeightProcessor);
+		}
+
+		private void AddEvaluateCallback(AnimationTrack track, ITimelineEvaluateCallback callback)
+		{
+			List<ITimelineEvaluateCallback> list;
+			if (this.m_EvaluateCallbacks.TryGetValue(track, out list))
+			{
+				list.Add(callback);
+				return;
+			}
+			this.m_EvaluateCallbacks[track] = new List<ITimelineEvaluateCallback> { callback };
+		}
+
+		private void InvokeOutputCallbacks(IReadOnlyList<RuntimeElement> activeRuntimeElements)
+		{
+			foreach (ITimelineEvaluateCallback timelineEvaluateCallback in this.m_ForceEvaluateNextEvaluate)
+			{
+				timelineEvaluateCallback.Evaluate();
+				this.m_InvokedThisFrame.Add(timelineEvaluateCallback);
+			}
+			this.m_ForceEvaluateNextEvaluate.Clear();
+			if (activeRuntimeElements.Count > 0)
+			{
+				using (TimelinePlayable.TrackCacheManager trackCacheManager = new TimelinePlayable.TrackCacheManager(this.m_ActiveTracksToEvaluateCache, activeRuntimeElements))
+				{
+					using (HashSet<AnimationTrack>.Enumerator enumerator2 = trackCacheManager.trackCache.GetEnumerator())
+					{
+						while (enumerator2.MoveNext())
+						{
+							AnimationTrack animationTrack = enumerator2.Current;
+							List<ITimelineEvaluateCallback> list;
+							if (this.TryGetCallbackList(animationTrack, out list))
+							{
+								foreach (ITimelineEvaluateCallback timelineEvaluateCallback2 in list)
+								{
+									if (!this.m_InvokedThisFrame.Contains(timelineEvaluateCallback2))
+									{
+										timelineEvaluateCallback2.Evaluate();
+										this.m_InvokedThisFrame.Add(timelineEvaluateCallback2);
+										this.m_ForceEvaluateNextEvaluate.Add(timelineEvaluateCallback2);
+									}
+								}
+							}
+						}
+						goto IL_0188;
+					}
+				}
+			}
+			foreach (List<ITimelineEvaluateCallback> list2 in this.m_EvaluateCallbacks.Values)
+			{
+				foreach (ITimelineEvaluateCallback timelineEvaluateCallback3 in list2)
+				{
+					if (!this.m_InvokedThisFrame.Contains(timelineEvaluateCallback3))
+					{
+						timelineEvaluateCallback3.Evaluate();
+					}
+				}
+			}
+			IL_0188:
+			foreach (ITimelineEvaluateCallback timelineEvaluateCallback4 in this.m_AlwaysEvaluateCallbacks)
+			{
+				timelineEvaluateCallback4.Evaluate();
+			}
+			this.m_InvokedThisFrame.Clear();
+		}
+
+		private bool TryGetCallbackList(AnimationTrack track, out List<ITimelineEvaluateCallback> list)
+		{
+			if (track == null)
+			{
+				list = null;
+				return false;
+			}
+			return this.m_EvaluateCallbacks.TryGetValue(track, out list) || this.TryGetCallbackList(track.parent as AnimationTrack, out list);
+		}
+
+		private static ProfilerMarker k_CreateTimelineGraphMarker = new ProfilerMarker(ProfilerCategory.Scripts, "Timeline.CreatePlayableGraph");
+
+		private static ProfilerMarker k_CreateTimelineTrackMarker = new ProfilerMarker(ProfilerCategory.Scripts, "Timeline.CreateTrackPlayable");
+
+		private static ProfilerMarker k_CreateTimelineTrackOutputsMarker = new ProfilerMarker(ProfilerCategory.Scripts, "Timeline.CreateTrackPlayableOutputs");
+
+		private static ProfilerMarker m_findActiveClipsMarker = new ProfilerMarker(ProfilerCategory.Scripts, "TimelinePlayable.GetActiveClips");
+
+		private static ProfilerMarker m_SetClipsLocalTimeMarker = new ProfilerMarker(ProfilerCategory.Scripts, "TimelinePlayable.SetActiveClipsTime");
+
 		private IntervalTree<RuntimeElement> m_IntervalTree = new IntervalTree<RuntimeElement>();
 
 		private List<RuntimeElement> m_ActiveClips = new List<RuntimeElement>();
@@ -196,10 +289,51 @@ namespace UnityEngine.Timeline
 
 		private int m_ActiveBit;
 
-		private List<ITimelineEvaluateCallback> m_EvaluateCallbacks = new List<ITimelineEvaluateCallback>();
-
 		private Dictionary<TrackAsset, Playable> m_PlayableCache = new Dictionary<TrackAsset, Playable>();
 
 		internal static bool muteAudioScrubbing = true;
+
+		private readonly Dictionary<AnimationTrack, List<ITimelineEvaluateCallback>> m_EvaluateCallbacks = new Dictionary<AnimationTrack, List<ITimelineEvaluateCallback>>();
+
+		private readonly List<ITimelineEvaluateCallback> m_AlwaysEvaluateCallbacks = new List<ITimelineEvaluateCallback>();
+
+		private readonly HashSet<ITimelineEvaluateCallback> m_ForceEvaluateNextEvaluate = new HashSet<ITimelineEvaluateCallback>();
+
+		private readonly HashSet<ITimelineEvaluateCallback> m_InvokedThisFrame = new HashSet<ITimelineEvaluateCallback>();
+
+		private readonly HashSet<AnimationTrack> m_ActiveTracksToEvaluateCache = new HashSet<AnimationTrack>();
+
+		private readonly struct TrackCacheManager : IDisposable
+		{
+			public TrackCacheManager(HashSet<AnimationTrack> cache, IReadOnlyList<RuntimeElement> activeRuntimeElements)
+			{
+				this.trackCache = cache;
+				this.GetTrackAssetsFromRuntimeElements(activeRuntimeElements);
+			}
+
+			public void Dispose()
+			{
+				this.trackCache.Clear();
+			}
+
+			private void GetTrackAssetsFromRuntimeElements(IReadOnlyList<RuntimeElement> activeRuntimeElements)
+			{
+				for (int i = 0; i < activeRuntimeElements.Count; i++)
+				{
+					RuntimeClip runtimeClip = activeRuntimeElements[i] as RuntimeClip;
+					if (runtimeClip != null)
+					{
+						TimelineClip clip = runtimeClip.clip;
+						AnimationTrack animationTrack = ((clip != null) ? clip.GetParentTrack() : null) as AnimationTrack;
+						if (animationTrack != null)
+						{
+							this.trackCache.Add(animationTrack);
+						}
+					}
+				}
+			}
+
+			public readonly HashSet<AnimationTrack> trackCache;
+		}
 	}
 }

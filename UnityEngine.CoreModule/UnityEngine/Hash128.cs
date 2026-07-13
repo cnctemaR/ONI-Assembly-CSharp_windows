@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -8,9 +9,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Utilities/Hash128.h")]
 	[NativeHeader("Runtime/Export/Hashing/Hash128.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Utilities/Hash128.h")]
 	[Serializable]
 	public struct Hash128 : IComparable, IComparable<Hash128>, IEquatable<Hash128>
 	{
@@ -63,22 +64,70 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("StringToHash128", IsThreadSafe = true)]
-		public static Hash128 Parse(string hashString)
+		public unsafe static Hash128 Parse(string hashString)
 		{
-			Hash128 hash;
-			Hash128.Parse_Injected(hashString, out hash);
-			return hash;
+			Hash128 hash2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(hashString, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = hashString.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Hash128 hash;
+				Hash128.Parse_Injected(ref managedSpanWrapper, out hash);
+			}
+			finally
+			{
+				char* ptr = null;
+				Hash128 hash;
+				hash2 = hash;
+			}
+			return hash2;
 		}
 
 		[FreeFunction("Hash128ToString", IsThreadSafe = true)]
 		private static string Hash128ToStringImpl(Hash128 hash)
 		{
-			return Hash128.Hash128ToStringImpl_Injected(ref hash);
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				Hash128.Hash128ToStringImpl_Injected(ref hash, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
 		}
 
 		[FreeFunction("ComputeHash128FromScriptString", IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ComputeFromString(string data, ref Hash128 hash);
+		private unsafe static void ComputeFromString(string data, ref Hash128 hash)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(data, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = data.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Hash128.ComputeFromString_Injected(ref managedSpanWrapper, ref hash);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("ComputeHash128FromScriptPointer", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -151,7 +200,7 @@ namespace UnityEngine
 				throw new ArgumentException(string.Format("List<{0}> passed to {1} must be blittable.\n{2}", typeof(T), "Compute", UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
 			}
 			Hash128 hash = default(Hash128);
-			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList(data), 0, data.Count, UnsafeUtility.SizeOf<T>(), ref hash);
+			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList<T>(data), 0, data.Count, UnsafeUtility.SizeOf<T>(), ref hash);
 			return hash;
 		}
 
@@ -168,7 +217,7 @@ namespace UnityEngine
 				throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (start:{0} count:{1})", start, count));
 			}
 			Hash128 hash = default(Hash128);
-			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList(data), start, count, UnsafeUtility.SizeOf<T>(), ref hash);
+			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList<T>(data), start, count, UnsafeUtility.SizeOf<T>(), ref hash);
 			return hash;
 		}
 
@@ -256,7 +305,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentException(string.Format("List<{0}> passed to {1} must be blittable.\n{2}", typeof(T), "Append", UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
 			}
-			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList(data), 0, data.Count, UnsafeUtility.SizeOf<T>(), ref this);
+			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList<T>(data), 0, data.Count, UnsafeUtility.SizeOf<T>(), ref this);
 		}
 
 		public void Append<T>(List<T> data, int start, int count) where T : struct
@@ -271,7 +320,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (start:{0} count:{1})", start, count));
 			}
-			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList(data), start, count, UnsafeUtility.SizeOf<T>(), ref this);
+			Hash128.ComputeFromArray(NoAllocHelpers.ExtractArrayFromList<T>(data), start, count, UnsafeUtility.SizeOf<T>(), ref this);
 		}
 
 		public unsafe void Append<[IsUnmanaged] T>(ref T val) where T : struct, ValueType
@@ -426,10 +475,13 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Parse_Injected(string hashString, out Hash128 ret);
+		private static extern void Parse_Injected(ref ManagedSpanWrapper hashString, out Hash128 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string Hash128ToStringImpl_Injected(ref Hash128 hash);
+		private static extern void Hash128ToStringImpl_Injected([In] ref Hash128 hash, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ComputeFromString_Injected(ref ManagedSpanWrapper data, ref Hash128 hash);
 
 		internal ulong u64_0;
 

@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public interface IMetadataImporter
+	internal interface IMetadataImporter
 	{
 		AssemblyNameReference ImportReference(AssemblyNameReference reference);
 

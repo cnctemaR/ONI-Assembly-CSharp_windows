@@ -236,6 +236,15 @@ namespace UnityEngine
 			return intPtr;
 		}
 
+		public static void PushLocalFrame(int capacity)
+		{
+			bool flag = AndroidJNI.PushLocalFrame(capacity) < 0;
+			if (flag)
+			{
+				AndroidJNISafe.CheckException();
+			}
+		}
+
 		public static IntPtr NewObject(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
 			return AndroidJNISafe.NewObject(clazz, methodID, new Span<jvalue>(args));
@@ -558,16 +567,22 @@ namespace UnityEngine
 
 		public static string CallStaticStringMethod(IntPtr clazz, IntPtr methodID, Span<jvalue> args)
 		{
-			string text;
+			string text = null;
+			string text2;
 			try
 			{
 				text = AndroidJNI.CallStaticStringMethod(clazz, methodID, args);
+				text2 = text;
 			}
 			finally
 			{
-				AndroidJNISafe.CheckException();
+				bool flag = text == null;
+				if (flag)
+				{
+					AndroidJNISafe.CheckException();
+				}
 			}
-			return text;
+			return text2;
 		}
 
 		public static char CallStaticCharMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
@@ -1025,16 +1040,22 @@ namespace UnityEngine
 
 		public static string CallStringMethod(IntPtr obj, IntPtr methodID, Span<jvalue> args)
 		{
-			string text;
+			string text = null;
+			string text2;
 			try
 			{
 				text = AndroidJNI.CallStringMethod(obj, methodID, args);
+				text2 = text;
 			}
 			finally
 			{
-				AndroidJNISafe.CheckException();
+				bool flag = text == null;
+				if (flag)
+				{
+					AndroidJNISafe.CheckException();
+				}
 			}
-			return text;
+			return text2;
 		}
 
 		public static char CallCharMethod(IntPtr obj, IntPtr methodID, jvalue[] args)

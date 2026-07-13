@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum GenericParameterType
+	internal enum GenericParameterType
 	{
 		Type,
 		Method

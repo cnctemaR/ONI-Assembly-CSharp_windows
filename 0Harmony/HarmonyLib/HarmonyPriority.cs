@@ -2,7 +2,7 @@
 
 namespace HarmonyLib
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method)]
 	public class HarmonyPriority : HarmonyAttribute
 	{
 		public HarmonyPriority(int priority)

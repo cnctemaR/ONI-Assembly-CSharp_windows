@@ -7,7 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/Workable/Capturable")]
-public class Capturable : Workable, IGameObjectEffectDescriptor
+public class Capturable : Workable
 {
 	public bool IsMarkedForCapture
 	{
@@ -163,6 +163,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 
 	private void OnChoreBegins(Chore chore)
 	{
+		if (base.gameObject.GetSMI<FlopStates.Instance>() != null)
+		{
+			return;
+		}
 		IdleStates.Instance smi = base.gameObject.GetSMI<IdleStates.Instance>();
 		if (smi != null)
 		{
@@ -173,6 +177,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 
 	private void OnChoreEnds(Chore chore)
 	{
+		if (base.gameObject.GetSMI<FlopStates.Instance>() != null)
+		{
+			return;
+		}
 		IdleStates.Instance smi = base.gameObject.GetSMI<IdleStates.Instance>();
 		if (smi != null)
 		{

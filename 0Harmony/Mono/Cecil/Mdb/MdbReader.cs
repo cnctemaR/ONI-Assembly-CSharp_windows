@@ -6,7 +6,7 @@ using Mono.CompilerServices.SymbolWriter;
 
 namespace Mono.Cecil.Mdb
 {
-	public sealed class MdbReader : ISymbolReader, IDisposable
+	internal sealed class MdbReader : ISymbolReader, IDisposable
 	{
 		public MdbReader(ModuleDefinition module, MonoSymbolFile symFile)
 		{
@@ -149,6 +149,11 @@ namespace Mono.Cecil.Mdb
 				StartColumn = line.Column,
 				EndColumn = line.EndColumn
 			};
+		}
+
+		public Collection<CustomDebugInformation> Read(ICustomDebugInformationProvider provider)
+		{
+			return new Collection<CustomDebugInformation>();
 		}
 
 		public void Dispose()

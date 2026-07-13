@@ -31,6 +31,10 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
+		if (eventData.button != PointerEventData.InputButton.Left)
+		{
+			return;
+		}
 		bool flag = Time.unscaledTime - this.lastClickTime < 0.3f;
 		this.SelectCrewMember(flag);
 		this.lastClickTime = Time.unscaledTime;

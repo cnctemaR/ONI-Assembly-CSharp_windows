@@ -3,7 +3,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public interface ICustomAttributeProvider : IMetadataTokenProvider
+	internal interface ICustomAttributeProvider : IMetadataTokenProvider
 	{
 		Collection<CustomAttribute> CustomAttributes { get; }
 

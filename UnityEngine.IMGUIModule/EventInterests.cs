@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal struct EventInterests
 	{
 		public bool wantsMouseMove { readonly get; set; }

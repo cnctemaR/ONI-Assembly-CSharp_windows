@@ -162,6 +162,11 @@ namespace Mono.Cecil
 			{
 				return null;
 			}
+			MethodDefinition methodDefinition = method as MethodDefinition;
+			if (methodDefinition != null)
+			{
+				return methodDefinition;
+			}
 			return this.GetMethod(typeDefinition, method);
 		}
 
@@ -188,7 +193,7 @@ namespace Mono.Cecil
 			for (int i = 0; i < methods.Count; i++)
 			{
 				MethodDefinition methodDefinition = methods[i];
-				if (!(methodDefinition.Name != reference.Name) && methodDefinition.HasGenericParameters == reference.HasGenericParameters && (!methodDefinition.HasGenericParameters || methodDefinition.GenericParameters.Count == reference.GenericParameters.Count) && MetadataResolver.AreSame(methodDefinition.ReturnType, reference.ReturnType) && methodDefinition.IsVarArg() == reference.IsVarArg())
+				if (!(methodDefinition.Name != reference.Name) && methodDefinition.HasGenericParameters == reference.HasGenericParameters && (!methodDefinition.HasGenericParameters || methodDefinition.GenericParameters.Count == reference.GenericParameters.Count) && MetadataResolver.AreSame(methodDefinition.ReturnType, reference.ReturnType) && methodDefinition.HasThis == reference.HasThis && methodDefinition.IsVarArg() == reference.IsVarArg())
 				{
 					if (methodDefinition.IsVarArg() && MetadataResolver.IsVarArgCallTo(methodDefinition, reference))
 					{
@@ -265,7 +270,16 @@ namespace Mono.Cecil
 			{
 				return MetadataResolver.AreSame((IModifierType)a, (IModifierType)b);
 			}
-			return !a.IsArray || MetadataResolver.AreSame((ArrayType)a, (ArrayType)b);
+			if (a.IsArray)
+			{
+				return MetadataResolver.AreSame((ArrayType)a, (ArrayType)b);
+			}
+			return !a.IsFunctionPointer || MetadataResolver.AreSame((FunctionPointerType)a, (FunctionPointerType)b);
+		}
+
+		private static bool AreSame(FunctionPointerType a, FunctionPointerType b)
+		{
+			return a.HasThis == b.HasThis && a.CallingConvention == b.CallingConvention && MetadataResolver.AreSame(a.ReturnType, b.ReturnType) && a.ContainsGenericParameter == b.ContainsGenericParameter && a.HasParameters == b.HasParameters && (!a.HasParameters || MetadataResolver.AreSame(a.Parameters, b.Parameters));
 		}
 
 		private static bool AreSame(ArrayType a, ArrayType b)

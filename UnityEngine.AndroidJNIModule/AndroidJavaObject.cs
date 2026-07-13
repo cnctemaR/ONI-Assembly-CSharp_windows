@@ -301,7 +301,7 @@ namespace UnityEngine
 
 		~AndroidJavaObject()
 		{
-			this.Dispose(true);
+			this.Dispose(false);
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -342,14 +342,23 @@ namespace UnityEngine
 					span = span2;
 				}
 				Span<jvalue> span3 = span;
-				AndroidJNIHelper.CreateJNIArgArray(args, span3);
+				bool flag = span3.Length > 0;
+				if (flag)
+				{
+					AndroidJNISafe.PushLocalFrame(span3.Length);
+					AndroidJNIHelper.CreateJNIArgArray(args, span3);
+				}
 				try
 				{
 					AndroidJNISafe.CallVoidMethod(this.m_jobject, methodID, span3);
 				}
 				finally
 				{
-					AndroidJNIHelper.DeleteJNIArgArray(args, span3);
+					bool flag2 = span3.Length > 0;
+					if (flag2)
+					{
+						AndroidJNI.PopLocalFrame(IntPtr.Zero);
+					}
 				}
 			}
 		}
@@ -377,8 +386,9 @@ namespace UnityEngine
 					span = span2;
 				}
 				span3 = span;
-				AndroidJNIHelper.CreateJNIArgArray(args, span3);
 			}
+			AndroidJNI.PushLocalFrame(span3.Length + 1);
+			AndroidJNIHelper.CreateJNIArgArray(args, span3);
 			ReturnType returnType;
 			try
 			{
@@ -473,7 +483,7 @@ namespace UnityEngine
 						if (flag12)
 						{
 							IntPtr intPtr = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, span3);
-							returnType = ((intPtr == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaClassDeleteLocalRef(intPtr))));
+							returnType = ((intPtr == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)new AndroidJavaClass(intPtr))));
 						}
 						else
 						{
@@ -481,7 +491,7 @@ namespace UnityEngine
 							if (flag13)
 							{
 								IntPtr intPtr2 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, span3);
-								returnType = ((intPtr2 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaObjectDeleteLocalRef(intPtr2))));
+								returnType = ((intPtr2 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)new AndroidJavaObject(intPtr2))));
 							}
 							else
 							{
@@ -493,7 +503,7 @@ namespace UnityEngine
 									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
 								IntPtr intPtr3 = AndroidJNISafe.CallObjectMethod(this.m_jobject, methodID, span3);
-								returnType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<ReturnType>(intPtr3);
+								returnType = AndroidJavaObject.FromJavaArray<ReturnType>(intPtr3);
 							}
 						}
 					}
@@ -501,7 +511,7 @@ namespace UnityEngine
 			}
 			finally
 			{
-				AndroidJNIHelper.DeleteJNIArgArray(args, span3);
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
 			}
 			return returnType;
 		}
@@ -784,14 +794,23 @@ namespace UnityEngine
 					span = span2;
 				}
 				Span<jvalue> span3 = span;
-				AndroidJNIHelper.CreateJNIArgArray(args, span3);
+				bool flag = span3.Length > 0;
+				if (flag)
+				{
+					AndroidJNISafe.PushLocalFrame(span3.Length);
+					AndroidJNIHelper.CreateJNIArgArray(args, span3);
+				}
 				try
 				{
 					AndroidJNISafe.CallStaticVoidMethod(this.m_jclass, methodID, span3);
 				}
 				finally
 				{
-					AndroidJNIHelper.DeleteJNIArgArray(args, span3);
+					bool flag2 = span3.Length > 0;
+					if (flag2)
+					{
+						AndroidJNI.PopLocalFrame(IntPtr.Zero);
+					}
 				}
 			}
 		}
@@ -819,8 +838,9 @@ namespace UnityEngine
 					span = span2;
 				}
 				span3 = span;
-				AndroidJNIHelper.CreateJNIArgArray(args, span3);
 			}
+			AndroidJNI.PushLocalFrame(span3.Length + 1);
+			AndroidJNIHelper.CreateJNIArgArray(args, span3);
 			ReturnType returnType;
 			try
 			{
@@ -915,7 +935,7 @@ namespace UnityEngine
 						if (flag12)
 						{
 							IntPtr intPtr = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, span3);
-							returnType = ((intPtr == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaClassDeleteLocalRef(intPtr))));
+							returnType = ((intPtr == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)new AndroidJavaClass(intPtr))));
 						}
 						else
 						{
@@ -923,7 +943,7 @@ namespace UnityEngine
 							if (flag13)
 							{
 								IntPtr intPtr2 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, span3);
-								returnType = ((intPtr2 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)AndroidJavaObject.AndroidJavaObjectDeleteLocalRef(intPtr2))));
+								returnType = ((intPtr2 == IntPtr.Zero) ? default(ReturnType) : ((ReturnType)((object)new AndroidJavaObject(intPtr2))));
 							}
 							else
 							{
@@ -935,7 +955,7 @@ namespace UnityEngine
 									throw new Exception(text + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + "'");
 								}
 								IntPtr intPtr3 = AndroidJNISafe.CallStaticObjectMethod(this.m_jclass, methodID, span3);
-								returnType = AndroidJavaObject.FromJavaArrayDeleteLocalRef<ReturnType>(intPtr3);
+								returnType = AndroidJavaObject.FromJavaArray<ReturnType>(intPtr3);
 							}
 						}
 					}
@@ -943,7 +963,7 @@ namespace UnityEngine
 			}
 			finally
 			{
-				AndroidJNIHelper.DeleteJNIArgArray(args, span3);
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
 			}
 			return returnType;
 		}
@@ -1250,6 +1270,21 @@ namespace UnityEngine
 				{
 					AndroidJNISafe.DeleteLocalRef(jobject);
 				}
+			}
+			return returnType;
+		}
+
+		internal static ReturnType FromJavaArray<ReturnType>(IntPtr jobject)
+		{
+			bool flag = jobject == IntPtr.Zero;
+			ReturnType returnType;
+			if (flag)
+			{
+				returnType = default(ReturnType);
+			}
+			else
+			{
+				returnType = (ReturnType)((object)AndroidJNIHelper.ConvertFromJNIArray<ReturnType>(jobject));
 			}
 			return returnType;
 		}

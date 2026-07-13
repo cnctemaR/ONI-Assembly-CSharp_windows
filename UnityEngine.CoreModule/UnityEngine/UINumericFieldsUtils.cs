@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEditor.UIBuilderModule" })]
 	internal static class UINumericFieldsUtils
 	{
 		public static bool TryConvertStringToDouble(string str, out double value)
@@ -134,7 +136,13 @@ namespace UnityEngine
 
 		public static readonly string k_AllowedCharactersForFloat = "inftynaeINFTYNAE0123456789.,-*/+%^()cosqrludxvRL=pP#";
 
+		public static readonly string k_AllowedCharactersForFloat_NoExpressions = "0123456789.-";
+
 		public static readonly string k_AllowedCharactersForInt = "0123456789-*/+%^()cosintaqrtelfundxvRL,=pPI#";
+
+		public static readonly string k_AllowedCharactersForInt_NoExpressions = "0123456789-";
+
+		public static readonly string k_AllowedCharactersForUInt_NoExpressions = "0123456789";
 
 		public static readonly string k_DoubleFieldFormatString = "R";
 

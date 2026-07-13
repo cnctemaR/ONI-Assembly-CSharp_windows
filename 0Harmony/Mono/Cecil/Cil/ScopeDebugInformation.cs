@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class ScopeDebugInformation : DebugInformation
+	internal sealed class ScopeDebugInformation : DebugInformation
 	{
 		public InstructionOffset Start
 		{

@@ -1,25 +1,36 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Physics/CharacterJoint.h")]
 	[NativeClass("Unity::CharacterJoint")]
+	[RequireComponent(typeof(Rigidbody))]
+	[NativeHeader("Modules/Physics/CharacterJoint.h")]
 	public class CharacterJoint : Joint
 	{
 		public Vector3 swingAxis
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_swingAxis_Injected(out vector);
+				CharacterJoint.get_swingAxis_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_swingAxis_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_swingAxis_Injected(intPtr, ref value);
 			}
 		}
 
@@ -27,13 +38,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimitSpring softJointLimitSpring;
-				this.get_twistLimitSpring_Injected(out softJointLimitSpring);
+				CharacterJoint.get_twistLimitSpring_Injected(intPtr, out softJointLimitSpring);
 				return softJointLimitSpring;
 			}
 			set
 			{
-				this.set_twistLimitSpring_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_twistLimitSpring_Injected(intPtr, ref value);
 			}
 		}
 
@@ -41,13 +62,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimitSpring softJointLimitSpring;
-				this.get_swingLimitSpring_Injected(out softJointLimitSpring);
+				CharacterJoint.get_swingLimitSpring_Injected(intPtr, out softJointLimitSpring);
 				return softJointLimitSpring;
 			}
 			set
 			{
-				this.set_swingLimitSpring_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_swingLimitSpring_Injected(intPtr, ref value);
 			}
 		}
 
@@ -55,13 +86,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_lowTwistLimit_Injected(out softJointLimit);
+				CharacterJoint.get_lowTwistLimit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_lowTwistLimit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_lowTwistLimit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -69,13 +110,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_highTwistLimit_Injected(out softJointLimit);
+				CharacterJoint.get_highTwistLimit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_highTwistLimit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_highTwistLimit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -83,13 +134,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_swing1Limit_Injected(out softJointLimit);
+				CharacterJoint.get_swing1Limit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_swing1Limit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_swing1Limit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -97,92 +158,150 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_swing2Limit_Injected(out softJointLimit);
+				CharacterJoint.get_swing2Limit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_swing2Limit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_swing2Limit_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern bool enableProjection
+		public bool enableProjection
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CharacterJoint.get_enableProjection_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_enableProjection_Injected(intPtr, value);
+			}
 		}
 
-		public extern float projectionDistance
+		public float projectionDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CharacterJoint.get_projectionDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_projectionDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern float projectionAngle
+		public float projectionAngle
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CharacterJoint.get_projectionAngle_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CharacterJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CharacterJoint.set_projectionAngle_Injected(intPtr, value);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_swingAxis_Injected(out Vector3 ret);
+		private static extern void get_swingAxis_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_swingAxis_Injected(ref Vector3 value);
+		private static extern void set_swingAxis_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_twistLimitSpring_Injected(out SoftJointLimitSpring ret);
+		private static extern void get_twistLimitSpring_Injected(IntPtr _unity_self, out SoftJointLimitSpring ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_twistLimitSpring_Injected(ref SoftJointLimitSpring value);
+		private static extern void set_twistLimitSpring_Injected(IntPtr _unity_self, [In] ref SoftJointLimitSpring value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_swingLimitSpring_Injected(out SoftJointLimitSpring ret);
+		private static extern void get_swingLimitSpring_Injected(IntPtr _unity_self, out SoftJointLimitSpring ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_swingLimitSpring_Injected(ref SoftJointLimitSpring value);
+		private static extern void set_swingLimitSpring_Injected(IntPtr _unity_self, [In] ref SoftJointLimitSpring value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_lowTwistLimit_Injected(out SoftJointLimit ret);
+		private static extern void get_lowTwistLimit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_lowTwistLimit_Injected(ref SoftJointLimit value);
+		private static extern void set_lowTwistLimit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_highTwistLimit_Injected(out SoftJointLimit ret);
+		private static extern void get_highTwistLimit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_highTwistLimit_Injected(ref SoftJointLimit value);
+		private static extern void set_highTwistLimit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_swing1Limit_Injected(out SoftJointLimit ret);
+		private static extern void get_swing1Limit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_swing1Limit_Injected(ref SoftJointLimit value);
+		private static extern void set_swing1Limit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_swing2Limit_Injected(out SoftJointLimit ret);
+		private static extern void get_swing2Limit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_swing2Limit_Injected(ref SoftJointLimit value);
+		private static extern void set_swing2Limit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("TargetRotation not in use for Unity 5 and assumed disabled.", true)]
-		public Quaternion targetRotation;
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enableProjection_Injected(IntPtr _unity_self);
 
-		[Obsolete("TargetAngularVelocity not in use for Unity 5 and assumed disabled.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public Vector3 targetAngularVelocity;
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enableProjection_Injected(IntPtr _unity_self, bool value);
 
-		[Obsolete("RotationDrive not in use for Unity 5 and assumed disabled.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public JointDrive rotationDrive;
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_projectionDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_projectionDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_projectionAngle_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_projectionAngle_Injected(IntPtr _unity_self, float value);
 	}
 }

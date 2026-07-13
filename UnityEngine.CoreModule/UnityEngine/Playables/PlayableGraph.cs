@@ -1,16 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
+	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
+	[UsedByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Export/Director/PlayableGraph.bindings.h")]
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	public struct PlayableGraph
 	{
 		public Playable GetRootPlayable(int index)
@@ -91,89 +92,82 @@ namespace UnityEngine.Playables
 			return PlayableGraph.Create(null);
 		}
 
-		public static PlayableGraph Create(string name)
+		public unsafe static PlayableGraph Create(string name)
 		{
-			PlayableGraph playableGraph;
-			PlayableGraph.Create_Injected(name, out playableGraph);
-			return playableGraph;
+			PlayableGraph playableGraph2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				PlayableGraph playableGraph;
+				PlayableGraph.Create_Injected(ref managedSpanWrapper, out playableGraph);
+			}
+			finally
+			{
+				char* ptr = null;
+				PlayableGraph playableGraph;
+				playableGraph2 = playableGraph;
+			}
+			return playableGraph2;
 		}
 
 		[FreeFunction("PlayableGraphBindings::Destroy", HasExplicitThis = true, ThrowsException = true)]
-		public void Destroy()
-		{
-			PlayableGraph.Destroy_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Destroy();
 
-		public bool IsValid()
-		{
-			return PlayableGraph.IsValid_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool IsValid();
 
 		[FreeFunction("PlayableGraphBindings::IsPlaying", HasExplicitThis = true, ThrowsException = true)]
-		public bool IsPlaying()
-		{
-			return PlayableGraph.IsPlaying_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool IsPlaying();
 
 		[FreeFunction("PlayableGraphBindings::IsDone", HasExplicitThis = true, ThrowsException = true)]
-		public bool IsDone()
-		{
-			return PlayableGraph.IsDone_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool IsDone();
 
 		[FreeFunction("PlayableGraphBindings::Play", HasExplicitThis = true, ThrowsException = true)]
-		public void Play()
-		{
-			PlayableGraph.Play_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Play();
 
 		[FreeFunction("PlayableGraphBindings::Stop", HasExplicitThis = true, ThrowsException = true)]
-		public void Stop()
-		{
-			PlayableGraph.Stop_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Stop();
 
 		[FreeFunction("PlayableGraphBindings::Evaluate", HasExplicitThis = true, ThrowsException = true)]
-		public void Evaluate([DefaultValue("0")] float deltaTime)
-		{
-			PlayableGraph.Evaluate_Injected(ref this, deltaTime);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Evaluate([DefaultValue("0")] float deltaTime);
 
 		[FreeFunction("PlayableGraphBindings::GetTimeUpdateMode", HasExplicitThis = true, ThrowsException = true)]
-		public DirectorUpdateMode GetTimeUpdateMode()
-		{
-			return PlayableGraph.GetTimeUpdateMode_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern DirectorUpdateMode GetTimeUpdateMode();
 
 		[FreeFunction("PlayableGraphBindings::SetTimeUpdateMode", HasExplicitThis = true, ThrowsException = true)]
-		public void SetTimeUpdateMode(DirectorUpdateMode value)
-		{
-			PlayableGraph.SetTimeUpdateMode_Injected(ref this, value);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetTimeUpdateMode(DirectorUpdateMode value);
 
 		[FreeFunction("PlayableGraphBindings::GetResolver", HasExplicitThis = true, ThrowsException = true)]
-		public IExposedPropertyTable GetResolver()
-		{
-			return PlayableGraph.GetResolver_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern IExposedPropertyTable GetResolver();
 
 		[FreeFunction("PlayableGraphBindings::SetResolver", HasExplicitThis = true, ThrowsException = true)]
-		public void SetResolver(IExposedPropertyTable value)
-		{
-			PlayableGraph.SetResolver_Injected(ref this, value);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetResolver(IExposedPropertyTable value);
 
 		[FreeFunction("PlayableGraphBindings::GetPlayableCount", HasExplicitThis = true, ThrowsException = true)]
-		public int GetPlayableCount()
-		{
-			return PlayableGraph.GetPlayableCount_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetPlayableCount();
 
 		[FreeFunction("PlayableGraphBindings::GetRootPlayableCount", HasExplicitThis = true, ThrowsException = true)]
-		public int GetRootPlayableCount()
-		{
-			return PlayableGraph.GetRootPlayableCount_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetRootPlayableCount();
 
 		[FreeFunction("PlayableGraphBindings::SynchronizeEvaluation", HasExplicitThis = true, ThrowsException = true)]
 		internal void SynchronizeEvaluation(PlayableGraph playable)
@@ -182,10 +176,8 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableGraphBindings::GetOutputCount", HasExplicitThis = true, ThrowsException = true)]
-		public int GetOutputCount()
-		{
-			return PlayableGraph.GetOutputCount_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern int GetOutputCount();
 
 		[FreeFunction("PlayableGraphBindings::CreatePlayableHandle", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayableHandle CreatePlayableHandle()
@@ -196,9 +188,27 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableGraphBindings::CreateScriptOutputInternal", HasExplicitThis = true, ThrowsException = true)]
-		internal bool CreateScriptOutputInternal(string name, out PlayableOutputHandle handle)
+		internal unsafe bool CreateScriptOutputInternal(string name, out PlayableOutputHandle handle)
 		{
-			return PlayableGraph.CreateScriptOutputInternal_Injected(ref this, name, out handle);
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = PlayableGraph.CreateScriptOutputInternal_Injected(ref this, ref managedSpanWrapper, out handle);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
 		}
 
 		[FreeFunction("PlayableGraphBindings::GetRootPlayableInternal", HasExplicitThis = true, ThrowsException = true)]
@@ -216,10 +226,8 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableGraphBindings::IsMatchFrameRateEnabled", HasExplicitThis = true, ThrowsException = true)]
-		internal bool IsMatchFrameRateEnabled()
-		{
-			return PlayableGraph.IsMatchFrameRateEnabled_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool IsMatchFrameRateEnabled();
 
 		[FreeFunction("PlayableGraphBindings::EnableMatchFrameRate", HasExplicitThis = true, ThrowsException = true)]
 		internal void EnableMatchFrameRate(FrameRate frameRate)
@@ -228,10 +236,8 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableGraphBindings::DisableMatchFrameRate", HasExplicitThis = true, ThrowsException = true)]
-		internal void DisableMatchFrameRate()
-		{
-			PlayableGraph.DisableMatchFrameRate_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void DisableMatchFrameRate();
 
 		[FreeFunction("PlayableGraphBindings::GetFrameRate", HasExplicitThis = true, ThrowsException = true)]
 		internal FrameRate GetFrameRate()
@@ -242,22 +248,16 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableGraphBindings::GetOutputInternal", HasExplicitThis = true, ThrowsException = true)]
-		private bool GetOutputInternal(int index, out PlayableOutputHandle handle)
-		{
-			return PlayableGraph.GetOutputInternal_Injected(ref this, index, out handle);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool GetOutputInternal(int index, out PlayableOutputHandle handle);
 
 		[FreeFunction("PlayableGraphBindings::GetOutputCountByTypeInternal", HasExplicitThis = true, ThrowsException = true)]
-		private int GetOutputCountByTypeInternal(Type outputType)
-		{
-			return PlayableGraph.GetOutputCountByTypeInternal_Injected(ref this, outputType);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetOutputCountByTypeInternal(Type outputType);
 
 		[FreeFunction("PlayableGraphBindings::GetOutputByTypeInternal", HasExplicitThis = true, ThrowsException = true)]
-		private bool GetOutputByTypeInternal(Type outputType, int index, out PlayableOutputHandle handle)
-		{
-			return PlayableGraph.GetOutputByTypeInternal_Injected(ref this, outputType, index, out handle);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool GetOutputByTypeInternal(Type outputType, int index, out PlayableOutputHandle handle);
 
 		[FreeFunction("PlayableGraphBindings::ConnectInternal", HasExplicitThis = true, ThrowsException = true)]
 		private bool ConnectInternal(PlayableHandle source, int sourceOutputPort, PlayableHandle destination, int destinationInputPort)
@@ -284,97 +284,40 @@ namespace UnityEngine.Playables
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Create_Injected(string name, out PlayableGraph ret);
+		private static extern void Create_Injected(ref ManagedSpanWrapper name, out PlayableGraph ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Destroy_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsValid_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsPlaying_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsDone_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Play_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Stop_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Evaluate_Injected(ref PlayableGraph _unity_self, [DefaultValue("0")] float deltaTime);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern DirectorUpdateMode GetTimeUpdateMode_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetTimeUpdateMode_Injected(ref PlayableGraph _unity_self, DirectorUpdateMode value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IExposedPropertyTable GetResolver_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetResolver_Injected(ref PlayableGraph _unity_self, IExposedPropertyTable value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetPlayableCount_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetRootPlayableCount_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SynchronizeEvaluation_Injected(ref PlayableGraph _unity_self, ref PlayableGraph playable);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetOutputCount_Injected(ref PlayableGraph _unity_self);
+		private static extern void SynchronizeEvaluation_Injected(ref PlayableGraph _unity_self, [In] ref PlayableGraph playable);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CreatePlayableHandle_Injected(ref PlayableGraph _unity_self, out PlayableHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CreateScriptOutputInternal_Injected(ref PlayableGraph _unity_self, string name, out PlayableOutputHandle handle);
+		private static extern bool CreateScriptOutputInternal_Injected(ref PlayableGraph _unity_self, ref ManagedSpanWrapper name, out PlayableOutputHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetRootPlayableInternal_Injected(ref PlayableGraph _unity_self, int index, out PlayableHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DestroyOutputInternal_Injected(ref PlayableGraph _unity_self, ref PlayableOutputHandle handle);
+		private static extern void DestroyOutputInternal_Injected(ref PlayableGraph _unity_self, [In] ref PlayableOutputHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsMatchFrameRateEnabled_Injected(ref PlayableGraph _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void EnableMatchFrameRate_Injected(ref PlayableGraph _unity_self, ref FrameRate frameRate);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DisableMatchFrameRate_Injected(ref PlayableGraph _unity_self);
+		private static extern void EnableMatchFrameRate_Injected(ref PlayableGraph _unity_self, [In] ref FrameRate frameRate);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetFrameRate_Injected(ref PlayableGraph _unity_self, out FrameRate ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetOutputInternal_Injected(ref PlayableGraph _unity_self, int index, out PlayableOutputHandle handle);
+		private static extern bool ConnectInternal_Injected(ref PlayableGraph _unity_self, [In] ref PlayableHandle source, int sourceOutputPort, [In] ref PlayableHandle destination, int destinationInputPort);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetOutputCountByTypeInternal_Injected(ref PlayableGraph _unity_self, Type outputType);
+		private static extern void DisconnectInternal_Injected(ref PlayableGraph _unity_self, [In] ref PlayableHandle playable, int inputPort);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetOutputByTypeInternal_Injected(ref PlayableGraph _unity_self, Type outputType, int index, out PlayableOutputHandle handle);
+		private static extern void DestroyPlayableInternal_Injected(ref PlayableGraph _unity_self, [In] ref PlayableHandle playable);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool ConnectInternal_Injected(ref PlayableGraph _unity_self, ref PlayableHandle source, int sourceOutputPort, ref PlayableHandle destination, int destinationInputPort);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DisconnectInternal_Injected(ref PlayableGraph _unity_self, ref PlayableHandle playable, int inputPort);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DestroyPlayableInternal_Injected(ref PlayableGraph _unity_self, ref PlayableHandle playable);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DestroySubgraphInternal_Injected(ref PlayableGraph _unity_self, ref PlayableHandle playable);
+		private static extern void DestroySubgraphInternal_Injected(ref PlayableGraph _unity_self, [In] ref PlayableHandle playable);
 
 		internal IntPtr m_Handle;
 

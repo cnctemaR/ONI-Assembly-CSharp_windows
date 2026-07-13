@@ -161,7 +161,7 @@ public class FoodFightChore : Chore<FoodFightChore.StatesInstance>
 				Edible component = gameObject2.GetComponent<Edible>();
 				float num = Math.Min(200000f, component.Calories);
 				component.Calories -= num;
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -num, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.FOODFIGHT_CONTEXT, "{0}", component.GetProperName()), null);
+				ReportManager.Instance.ReportValueWithGameObjectContext(ReportManager.ReportType.CaloriesCreated, -num, smi.master.gameObject, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.FOODFIGHT_CONTEXT, "{0}", component.GetProperName()));
 				if (component.Calories <= 0f)
 				{
 					Util.KDestroyGameObject(gameObject2);

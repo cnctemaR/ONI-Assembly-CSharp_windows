@@ -3,12 +3,29 @@ using UnityEngine;
 
 public abstract class UtilityNetworkLink : KMonoBehaviour
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		base.Subscribe<UtilityNetworkLink>(774203113, UtilityNetworkLink.OnBuildingBrokenDelegate);
+		base.Subscribe<UtilityNetworkLink>(-1735440190, UtilityNetworkLink.OnBuildingFullyRepairedDelegate);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe<UtilityNetworkLink>(774203113, UtilityNetworkLink.OnBuildingBrokenDelegate);
-		base.Subscribe<UtilityNetworkLink>(-1735440190, UtilityNetworkLink.OnBuildingFullyRepairedDelegate);
 		this.Connect();
+		if ((this.spawnState & UtilityNetworkLink.SpawnFlags.PendingBroken) != UtilityNetworkLink.SpawnFlags.None)
+		{
+			this.Disconnect();
+			this.spawnState &= ~UtilityNetworkLink.SpawnFlags.PendingBroken;
+		}
+		if ((this.spawnState & UtilityNetworkLink.SpawnFlags.PendingRepaired) != UtilityNetworkLink.SpawnFlags.None)
+		{
+			this.Connect();
+			this.spawnState &= ~UtilityNetworkLink.SpawnFlags.PendingRepaired;
+		}
+		this.spawnState &= ~UtilityNetworkLink.SpawnFlags.PendingSpawn;
+		DebugUtil.DevAssert(this.spawnState == UtilityNetworkLink.SpawnFlags.None, "Failed to resolve all pending spawn actions", null);
 	}
 
 	protected override void OnCleanUp()
@@ -82,11 +99,21 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 
 	private void OnBuildingBroken(object data)
 	{
+		if ((this.spawnState & UtilityNetworkLink.SpawnFlags.PendingSpawn) != UtilityNetworkLink.SpawnFlags.None)
+		{
+			this.spawnState |= UtilityNetworkLink.SpawnFlags.PendingBroken;
+			return;
+		}
 		this.Disconnect();
 	}
 
 	private void OnBuildingFullyRepaired(object data)
 	{
+		if ((this.spawnState & UtilityNetworkLink.SpawnFlags.PendingSpawn) != UtilityNetworkLink.SpawnFlags.None)
+		{
+			this.spawnState |= UtilityNetworkLink.SpawnFlags.PendingRepaired;
+			return;
+		}
 		this.Connect();
 	}
 
@@ -121,4 +148,15 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 	{
 		component.OnBuildingFullyRepaired(data);
 	});
+
+	private UtilityNetworkLink.SpawnFlags spawnState = UtilityNetworkLink.SpawnFlags.PendingSpawn;
+
+	[Flags]
+	private enum SpawnFlags
+	{
+		None = 0,
+		PendingSpawn = 1,
+		PendingBroken = 2,
+		PendingRepaired = 4
+	}
 }

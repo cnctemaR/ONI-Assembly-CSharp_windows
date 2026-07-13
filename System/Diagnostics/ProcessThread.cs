@@ -11,8 +11,8 @@ namespace System.Diagnostics
 		{
 		}
 
-		[MonitoringDescription("The base priority of this thread.")]
 		[MonoTODO]
+		[MonitoringDescription("The base priority of this thread.")]
 		public int BasePriority
 		{
 			get
@@ -31,8 +31,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The ID of this thread.")]
 		[MonoTODO]
+		[MonitoringDescription("The ID of this thread.")]
 		public int Id
 		{
 			get
@@ -41,8 +41,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[MonoTODO]
+		[Browsable(false)]
 		public int IdealProcessor
 		{
 			set
@@ -50,8 +50,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Thread gets a priority boot when interactively used by a user.")]
 		[MonoTODO]
+		[MonitoringDescription("Thread gets a priority boot when interactively used by a user.")]
 		public bool PriorityBoostEnabled
 		{
 			get
@@ -76,8 +76,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The amount of CPU time used in privileged mode.")]
 		[MonoTODO]
+		[MonitoringDescription("The amount of CPU time used in privileged mode.")]
 		public TimeSpan PrivilegedProcessorTime
 		{
 			get
@@ -86,8 +86,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
 		[MonoTODO]
+		[Browsable(false)]
 		public IntPtr ProcessorAffinity
 		{
 			set
@@ -115,8 +115,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The current state of this thread.")]
 		[MonoTODO]
+		[MonitoringDescription("The current state of this thread.")]
 		public ThreadState ThreadState
 		{
 			get

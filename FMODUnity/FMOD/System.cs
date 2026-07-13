@@ -94,13 +94,13 @@ namespace FMOD
 
 		public RESULT setAdvancedSettings(ref ADVANCEDSETTINGS settings)
 		{
-			settings.cbSize = MarshalHelper.SizeOf(typeof(ADVANCEDSETTINGS));
+			settings.cbSize = Marshal.SizeOf<ADVANCEDSETTINGS>();
 			return FMOD.System.FMOD5_System_SetAdvancedSettings(this.handle, ref settings);
 		}
 
 		public RESULT getAdvancedSettings(ref ADVANCEDSETTINGS settings)
 		{
-			settings.cbSize = MarshalHelper.SizeOf(typeof(ADVANCEDSETTINGS));
+			settings.cbSize = Marshal.SizeOf<ADVANCEDSETTINGS>();
 			return FMOD.System.FMOD5_System_GetAdvancedSettings(this.handle, ref settings);
 		}
 
@@ -288,7 +288,13 @@ namespace FMOD
 
 		public RESULT getVersion(out uint version)
 		{
-			return FMOD.System.FMOD5_System_GetVersion(this.handle, out version);
+			uint num;
+			return this.getVersion(out version, out num);
+		}
+
+		public RESULT getVersion(out uint version, out uint buildnumber)
+		{
+			return FMOD.System.FMOD5_System_GetVersion(this.handle, out version, out buildnumber);
 		}
 
 		public RESULT getOutputHandle(out IntPtr handle)
@@ -339,7 +345,7 @@ namespace FMOD
 		public RESULT createSound(string name, MODE mode, out Sound sound)
 		{
 			CREATESOUNDEXINFO createsoundexinfo = default(CREATESOUNDEXINFO);
-			createsoundexinfo.cbsize = MarshalHelper.SizeOf(typeof(CREATESOUNDEXINFO));
+			createsoundexinfo.cbsize = Marshal.SizeOf<CREATESOUNDEXINFO>();
 			return this.createSound(name, mode, ref createsoundexinfo, out sound);
 		}
 
@@ -366,7 +372,7 @@ namespace FMOD
 		public RESULT createStream(string name, MODE mode, out Sound sound)
 		{
 			CREATESOUNDEXINFO createsoundexinfo = default(CREATESOUNDEXINFO);
-			createsoundexinfo.cbsize = MarshalHelper.SizeOf(typeof(CREATESOUNDEXINFO));
+			createsoundexinfo.cbsize = Marshal.SizeOf<CREATESOUNDEXINFO>();
 			return this.createStream(name, mode, ref createsoundexinfo, out sound);
 		}
 
@@ -378,6 +384,11 @@ namespace FMOD
 		public RESULT createDSPByType(DSP_TYPE type, out DSP dsp)
 		{
 			return FMOD.System.FMOD5_System_CreateDSPByType(this.handle, type, out dsp.handle);
+		}
+
+		public RESULT createDSPConnection(DSPCONNECTION_TYPE type, out DSPConnection connection)
+		{
+			return FMOD.System.FMOD5_System_CreateDSPConnection(this.handle, type, out connection.handle);
 		}
 
 		public RESULT createChannelGroup(string name, out ChannelGroup channelgroup)
@@ -722,7 +733,7 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_GetSpeakerModeChannels(IntPtr system, SPEAKERMODE mode, out int channels);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_GetVersion(IntPtr system, out uint version);
+		private static extern RESULT FMOD5_System_GetVersion(IntPtr system, out uint version, out uint buildnumber);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_GetOutputHandle(IntPtr system, out IntPtr handle);
@@ -756,6 +767,9 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_CreateDSPByType(IntPtr system, DSP_TYPE type, out IntPtr dsp);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_CreateDSPConnection(IntPtr system, DSPCONNECTION_TYPE type, out IntPtr connection);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_CreateChannelGroup(IntPtr system, byte[] name, out IntPtr channelgroup);

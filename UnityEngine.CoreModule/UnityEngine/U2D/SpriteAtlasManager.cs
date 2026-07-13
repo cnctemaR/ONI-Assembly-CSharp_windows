@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.U2D
 {
+	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
 	[StaticAccessor("GetSpriteAtlasManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
-	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
 	public class SpriteAtlasManager
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -44,7 +44,12 @@ namespace UnityEngine.U2D
 			}
 		}
 
+		internal static void Register(SpriteAtlas spriteAtlas)
+		{
+			SpriteAtlasManager.Register_Injected(Object.MarshalledUnityObject.Marshal<SpriteAtlas>(spriteAtlas));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Register(SpriteAtlas spriteAtlas);
+		private static extern void Register_Injected(IntPtr spriteAtlas);
 	}
 }

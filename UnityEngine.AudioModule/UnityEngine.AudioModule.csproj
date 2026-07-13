@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D43B}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD87}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.AudioModule</RootNamespace>
     <AssemblyName>UnityEngine.AudioModule</AssemblyName>
@@ -14,7 +14,10 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsUnmanagedAttribute.cs" />
+    <Compile Include="UnityEngine\ActivePlayable.cs" />
     <Compile Include="UnityEngine\AudioBehaviour.cs" />
     <Compile Include="UnityEngine\AudioChorusFilter.cs" />
     <Compile Include="UnityEngine\AudioClip.cs" />
@@ -24,6 +27,7 @@
     <Compile Include="UnityEngine\AudioDataLoadState.cs" />
     <Compile Include="UnityEngine\AudioDistortionFilter.cs" />
     <Compile Include="UnityEngine\AudioEchoFilter.cs" />
+    <Compile Include="UnityEngine\AudioExtensions.cs" />
     <Compile Include="UnityEngine\AudioHighPassFilter.cs" />
     <Compile Include="UnityEngine\AudioListener.cs" />
     <Compile Include="UnityEngine\AudioLowPassFilter.cs" />
@@ -39,6 +43,8 @@
     <Compile Include="UnityEngine\AudioSpeakerMode.cs" />
     <Compile Include="UnityEngine\AudioVelocityUpdateMode.cs" />
     <Compile Include="UnityEngine\Audio\AudioClipPlayable.cs" />
+    <Compile Include="UnityEngine\Audio\AudioContainerElement.cs" />
+    <Compile Include="UnityEngine\Audio\AudioFormat.cs" />
     <Compile Include="UnityEngine\Audio\AudioManagerTestProxy.cs" />
     <Compile Include="UnityEngine\Audio\AudioMixer.cs" />
     <Compile Include="UnityEngine\Audio\AudioMixerGroup.cs" />
@@ -48,6 +54,43 @@
     <Compile Include="UnityEngine\Audio\AudioPlayableBinding.cs" />
     <Compile Include="UnityEngine\Audio\AudioPlayableGraphExtensions.cs" />
     <Compile Include="UnityEngine\Audio\AudioPlayableOutput.cs" />
+    <Compile Include="UnityEngine\Audio\AudioRandomContainer.cs" />
+    <Compile Include="UnityEngine\Audio\AudioRandomContainerAutomaticTriggerMode.cs" />
+    <Compile Include="UnityEngine\Audio\AudioRandomContainerLoopMode.cs" />
+    <Compile Include="UnityEngine\Audio\AudioRandomContainerPlaybackMode.cs" />
+    <Compile Include="UnityEngine\Audio\AudioRandomContainerTriggerMode.cs" />
+    <Compile Include="UnityEngine\Audio\AudioResource.cs" />
+    <Compile Include="UnityEngine\Audio\ChannelBuffer.cs" />
+    <Compile Include="UnityEngine\Audio\ConfigureArguments.cs" />
+    <Compile Include="UnityEngine\Audio\ControlContext.cs" />
+    <Compile Include="UnityEngine\Audio\ControlFunction.cs" />
+    <Compile Include="UnityEngine\Audio\ControlHeader.cs" />
+    <Compile Include="UnityEngine\Audio\DisposeArguments.cs" />
+    <Compile Include="UnityEngine\Audio\DSPConfiguration.cs" />
+    <Compile Include="UnityEngine\Audio\Generator.cs" />
+    <Compile Include="UnityEngine\Audio\GeneratorInstance.cs" />
+    <Compile Include="UnityEngine\Audio\IAudioGenerator.cs" />
+    <Compile Include="UnityEngine\Audio\IAudioScriptingContext.cs" />
+    <Compile Include="UnityEngine\Audio\IGeneratorControlExtensions.cs" />
+    <Compile Include="UnityEngine\Audio\IGeneratorDefinition.cs" />
+    <Compile Include="UnityEngine\Audio\IGeneratorProcessorExtensions.cs" />
+    <Compile Include="UnityEngine\Audio\IRootOutputControlExtensions.cs" />
+    <Compile Include="UnityEngine\Audio\IRootOutputProcessorExtensions.cs" />
+    <Compile Include="UnityEngine\Audio\MessageArguments.cs" />
+    <Compile Include="UnityEngine\Audio\MessageExtensions.cs" />
+    <Compile Include="UnityEngine\Audio\ProcessingContext.cs" />
+    <Compile Include="UnityEngine\Audio\Processor.cs" />
+    <Compile Include="UnityEngine\Audio\ProcessorExtensions.cs" />
+    <Compile Include="UnityEngine\Audio\ProcessorFunction.cs" />
+    <Compile Include="UnityEngine\Audio\ProcessorHeader.cs" />
+    <Compile Include="UnityEngine\Audio\ProcessorInstance.cs" />
+    <Compile Include="UnityEngine\Audio\ProcessorRealtimeUpdateArguments.cs" />
+    <Compile Include="UnityEngine\Audio\RealtimeAccess.cs" />
+    <Compile Include="UnityEngine\Audio\RealtimeContext.cs" />
+    <Compile Include="UnityEngine\Audio\RootOutputInstance.cs" />
+    <Compile Include="UnityEngine\Audio\ScriptableGeneratorBindings.cs" />
+    <Compile Include="UnityEngine\Audio\ScriptableProcessorBindings.cs" />
+    <Compile Include="UnityEngine\Audio\UpdateArguments.cs" />
     <Compile Include="UnityEngine\Experimental\Audio\AudioClipExtensionsInternal.cs" />
     <Compile Include="UnityEngine\Experimental\Audio\AudioSampleProvider.cs" />
     <Compile Include="UnityEngine\Experimental\Audio\AudioSampleProviderExtensionsInternal.cs" />
@@ -55,24 +98,26 @@
     <Compile Include="UnityEngine\FFTWindow.cs" />
     <Compile Include="UnityEngine\Microphone.cs" />
     <Compile Include="UnityEngine\MovieTexture.cs" />
+    <Compile Include="UnityEngine\PlayableSettings.cs" />
     <Compile Include="UnityEngine\WebCamDevice.cs" />
     <Compile Include="UnityEngine\WebCamFlags.cs" />
     <Compile Include="UnityEngine\WebCamKind.cs" />
     <Compile Include="UnityEngine\WebCamTexture.cs" />
+    <Compile Include="Unity\Audio\Handle.cs" />
     <Compile Include="Unity\Audio\IHandle.cs" />
     <Compile Include="Unity\Audio\IValidatable.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D416}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D440}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D458}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDAF}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

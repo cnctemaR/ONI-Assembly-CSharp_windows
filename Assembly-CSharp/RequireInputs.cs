@@ -42,7 +42,7 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 
 	protected override void OnSpawn()
 	{
-		this.CheckRequirements(true);
+		this.CheckRequirements();
 		this.Bind();
 	}
 
@@ -62,10 +62,10 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 
 	public void Sim200ms(float dt)
 	{
-		this.CheckRequirements(false);
+		this.CheckRequirements();
 	}
 
-	private void CheckRequirements(bool forceEvent)
+	private void CheckRequirements()
 	{
 		bool flag = true;
 		bool flag2 = false;

@@ -11,7 +11,7 @@ namespace FMOD
 			{
 				if (!(this.pcmreadcallback_internal == IntPtr.Zero))
 				{
-					return (SOUND_PCMREAD_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.pcmreadcallback_internal, typeof(SOUND_PCMREAD_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<SOUND_PCMREAD_CALLBACK>(this.pcmreadcallback_internal);
 				}
 				return null;
 			}
@@ -27,7 +27,7 @@ namespace FMOD
 			{
 				if (!(this.pcmsetposcallback_internal == IntPtr.Zero))
 				{
-					return (SOUND_PCMSETPOS_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.pcmsetposcallback_internal, typeof(SOUND_PCMSETPOS_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<SOUND_PCMSETPOS_CALLBACK>(this.pcmsetposcallback_internal);
 				}
 				return null;
 			}
@@ -43,7 +43,7 @@ namespace FMOD
 			{
 				if (!(this.nonblockcallback_internal == IntPtr.Zero))
 				{
-					return (SOUND_NONBLOCK_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.nonblockcallback_internal, typeof(SOUND_NONBLOCK_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<SOUND_NONBLOCK_CALLBACK>(this.nonblockcallback_internal);
 				}
 				return null;
 			}
@@ -59,7 +59,7 @@ namespace FMOD
 			{
 				if (!(this.fileuseropen_internal == IntPtr.Zero))
 				{
-					return (FILE_OPEN_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.fileuseropen_internal, typeof(FILE_OPEN_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<FILE_OPEN_CALLBACK>(this.fileuseropen_internal);
 				}
 				return null;
 			}
@@ -75,7 +75,7 @@ namespace FMOD
 			{
 				if (!(this.fileuserclose_internal == IntPtr.Zero))
 				{
-					return (FILE_CLOSE_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.fileuserclose_internal, typeof(FILE_CLOSE_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<FILE_CLOSE_CALLBACK>(this.fileuserclose_internal);
 				}
 				return null;
 			}
@@ -91,7 +91,7 @@ namespace FMOD
 			{
 				if (!(this.fileuserread_internal == IntPtr.Zero))
 				{
-					return (FILE_READ_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.fileuserread_internal, typeof(FILE_READ_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<FILE_READ_CALLBACK>(this.fileuserread_internal);
 				}
 				return null;
 			}
@@ -107,7 +107,7 @@ namespace FMOD
 			{
 				if (!(this.fileuserseek_internal == IntPtr.Zero))
 				{
-					return (FILE_SEEK_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.fileuserseek_internal, typeof(FILE_SEEK_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<FILE_SEEK_CALLBACK>(this.fileuserseek_internal);
 				}
 				return null;
 			}
@@ -123,7 +123,7 @@ namespace FMOD
 			{
 				if (!(this.fileuserasyncread_internal == IntPtr.Zero))
 				{
-					return (FILE_ASYNCREAD_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.fileuserasyncread_internal, typeof(FILE_ASYNCREAD_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<FILE_ASYNCREAD_CALLBACK>(this.fileuserasyncread_internal);
 				}
 				return null;
 			}
@@ -139,7 +139,7 @@ namespace FMOD
 			{
 				if (!(this.fileuserasynccancel_internal == IntPtr.Zero))
 				{
-					return (FILE_ASYNCCANCEL_CALLBACK)Marshal.GetDelegateForFunctionPointer(this.fileuserasynccancel_internal, typeof(FILE_ASYNCCANCEL_CALLBACK));
+					return Marshal.GetDelegateForFunctionPointer<FILE_ASYNCCANCEL_CALLBACK>(this.fileuserasynccancel_internal);
 				}
 				return null;
 			}

@@ -177,6 +177,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		Components.Light2Ds.Add(this);
 		if (base.isSpawned)
 		{
+			this.origin = Grid.PosToCell(base.transform.GetPosition() + this.Offset);
+			this.cachedCell = this.origin;
 			this.AddToScenePartitioner();
 			this.emitter.Refresh(this.pending_emitter_state, true);
 		}

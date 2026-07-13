@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -8,12 +9,12 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Tilemaps
 {
-	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
 	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
+	[NativeHeader("Modules/Tilemap/Public/TilemapTile.h")]
 	[NativeHeader("Modules/Grid/Public/Grid.h")]
 	[NativeHeader("Runtime/Graphics/SpriteFrame.h")]
-	[NativeHeader("Modules/Tilemap/Public/TilemapTile.h")]
-	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
+	[RequireComponent(typeof(Transform))]
 	[NativeType(Header = "Modules/Tilemap/Public/Tilemap.h")]
 	public sealed class Tilemap : GridLayout
 	{
@@ -22,6 +23,9 @@ namespace UnityEngine.Tilemaps
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<Tilemap, NativeArray<Vector3Int>> tilemapPositionsChanged;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<Tilemap, NativeArray<Vector3Int>> loopEndedForTileAnimation;
 
 		internal bool bufferSyncTile
 		{
@@ -37,6 +41,34 @@ namespace UnityEngine.Tilemaps
 					this.SendAndClearSyncTileBuffer();
 				}
 				this.m_BufferSyncTile = value;
+			}
+		}
+
+		internal static bool HasLoopEndedForTileAnimationCallback()
+		{
+			return Tilemap.loopEndedForTileAnimation != null;
+		}
+
+		private unsafe void HandleLoopEndedForTileAnimationCallback(int count, IntPtr positionsIntPtr)
+		{
+			bool flag = !Tilemap.HasLoopEndedForTileAnimationCallback();
+			if (!flag)
+			{
+				void* ptr = positionsIntPtr.ToPointer();
+				NativeArray<Vector3Int> nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector3Int>(ptr, count, Allocator.Invalid);
+				this.SendLoopEndedForTileAnimationCallback(nativeArray);
+			}
+		}
+
+		private void SendLoopEndedForTileAnimationCallback(NativeArray<Vector3Int> positions)
+		{
+			try
+			{
+				Tilemap.loopEndedForTileAnimation(this, positions);
+			}
+			catch (Exception ex)
+			{
+				Debug.LogException(ex, this);
 			}
 		}
 
@@ -61,7 +93,7 @@ namespace UnityEngine.Tilemaps
 
 		private unsafe void HandlePositionsChangedCallback(int count, IntPtr positionsIntPtr)
 		{
-			bool flag = Tilemap.tilemapPositionsChanged == null;
+			bool flag = !Tilemap.HasPositionsChangedCallback();
 			if (!flag)
 			{
 				void* ptr = positionsIntPtr.ToPointer();
@@ -104,11 +136,18 @@ namespace UnityEngine.Tilemaps
 			Tilemap.tilemapTileChanged -= callback;
 		}
 
-		public extern Grid layoutGrid
+		public Grid layoutGrid
 		{
 			[NativeMethod(Name = "GetAttachedGrid")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Grid>(Tilemap.get_layoutGrid_Injected(intPtr));
+			}
 		}
 
 		public Vector3 GetCellCenterLocal(Vector3Int position)
@@ -134,8 +173,13 @@ namespace UnityEngine.Tilemaps
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_localBounds_Injected(out bounds);
+				Tilemap.get_localBounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 		}
@@ -145,31 +189,60 @@ namespace UnityEngine.Tilemaps
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_localFrameBounds_Injected(out bounds);
+				Tilemap.get_localFrameBounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 		}
 
-		public extern float animationFrameRate
+		public float animationFrameRate
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Tilemap.get_animationFrameRate_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Tilemap.set_animationFrameRate_Injected(intPtr, value);
+			}
 		}
 
 		public Color color
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_color_Injected(out color);
+				Tilemap.get_color_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_color_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Tilemap.set_color_Injected(intPtr, ref value);
 			}
 		}
 
@@ -177,13 +250,23 @@ namespace UnityEngine.Tilemaps
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3Int vector3Int;
-				this.get_origin_Injected(out vector3Int);
+				Tilemap.get_origin_Injected(intPtr, out vector3Int);
 				return vector3Int;
 			}
 			set
 			{
-				this.set_origin_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Tilemap.set_origin_Injected(intPtr, ref value);
 			}
 		}
 
@@ -191,13 +274,23 @@ namespace UnityEngine.Tilemaps
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3Int vector3Int;
-				this.get_size_Injected(out vector3Int);
+				Tilemap.get_size_Injected(intPtr, out vector3Int);
 				return vector3Int;
 			}
 			set
 			{
-				this.set_size_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Tilemap.set_size_Injected(intPtr, ref value);
 			}
 		}
 
@@ -206,22 +299,46 @@ namespace UnityEngine.Tilemaps
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_tileAnchor_Injected(out vector);
+				Tilemap.get_tileAnchor_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_tileAnchor_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Tilemap.set_tileAnchor_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern Tilemap.Orientation orientation
+		public Tilemap.Orientation orientation
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Tilemap.get_orientation_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Tilemap.set_orientation_Injected(intPtr, value);
+			}
 		}
 
 		public Matrix4x4 orientationMatrix
@@ -229,20 +346,35 @@ namespace UnityEngine.Tilemaps
 			[NativeMethod(Name = "GetTileOrientationMatrix")]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_orientationMatrix_Injected(out matrix4x);
+				Tilemap.get_orientationMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 			[NativeMethod(Name = "SetOrientationMatrix")]
 			set
 			{
-				this.set_orientationMatrix_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Tilemap.set_orientationMatrix_Injected(intPtr, ref value);
 			}
 		}
 
 		internal Object GetTileAsset(Vector3Int position)
 		{
-			return this.GetTileAsset_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Object>(Tilemap.GetTileAsset_Injected(intPtr, ref position));
 		}
 
 		public TileBase GetTile(Vector3Int position)
@@ -257,7 +389,12 @@ namespace UnityEngine.Tilemaps
 
 		internal Object[] GetTileAssetsBlock(Vector3Int position, Vector3Int blockDimensions)
 		{
-			return this.GetTileAssetsBlock_Injected(ref position, ref blockDimensions);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetTileAssetsBlock_Injected(intPtr, ref position, ref blockDimensions);
 		}
 
 		public TileBase[] GetTilesBlock(BoundsInt bounds)
@@ -272,9 +409,14 @@ namespace UnityEngine.Tilemaps
 		}
 
 		[FreeFunction(Name = "TilemapBindings::GetTileAssetsBlockNonAlloc", HasExplicitThis = true)]
-		internal int GetTileAssetsBlockNonAlloc(Vector3Int startPosition, Vector3Int endPosition, [Unmarshalled] Object[] tiles)
+		internal int GetTileAssetsBlockNonAlloc(Vector3Int startPosition, Vector3Int endPosition, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] Object[] tiles)
 		{
-			return this.GetTileAssetsBlockNonAlloc_Injected(ref startPosition, ref endPosition, tiles);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetTileAssetsBlockNonAlloc_Injected(intPtr, ref startPosition, ref endPosition, tiles);
 		}
 
 		public int GetTilesBlockNonAlloc(BoundsInt bounds, TileBase[] tiles)
@@ -284,13 +426,30 @@ namespace UnityEngine.Tilemaps
 
 		public int GetTilesRangeCount(Vector3Int startPosition, Vector3Int endPosition)
 		{
-			return this.GetTilesRangeCount_Injected(ref startPosition, ref endPosition);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetTilesRangeCount_Injected(intPtr, ref startPosition, ref endPosition);
 		}
 
 		[FreeFunction(Name = "TilemapBindings::GetTileAssetsRangeNonAlloc", HasExplicitThis = true)]
-		internal int GetTileAssetsRangeNonAlloc(Vector3Int startPosition, Vector3Int endPosition, [Unmarshalled] Vector3Int[] positions, [Unmarshalled] Object[] tiles)
+		internal unsafe int GetTileAssetsRangeNonAlloc(Vector3Int startPosition, Vector3Int endPosition, Vector3Int[] positions, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] Object[] tiles)
 		{
-			return this.GetTileAssetsRangeNonAlloc_Injected(ref startPosition, ref endPosition, positions, tiles);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector3Int> span = new Span<Vector3Int>(positions);
+			int tileAssetsRangeNonAlloc_Injected;
+			fixed (Vector3Int* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				tileAssetsRangeNonAlloc_Injected = Tilemap.GetTileAssetsRangeNonAlloc_Injected(intPtr, ref startPosition, ref endPosition, ref managedSpanWrapper, tiles);
+			}
+			return tileAssetsRangeNonAlloc_Injected;
 		}
 
 		public int GetTilesRangeNonAlloc(Vector3Int startPosition, Vector3Int endPosition, Vector3Int[] positions, TileBase[] tiles)
@@ -300,7 +459,12 @@ namespace UnityEngine.Tilemaps
 
 		internal void SetTileAsset(Vector3Int position, Object tile)
 		{
-			this.SetTileAsset_Injected(ref position, tile);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetTileAsset_Injected(intPtr, ref position, Object.MarshalledUnityObject.Marshal<Object>(tile));
 		}
 
 		public void SetTile(Vector3Int position, TileBase tile)
@@ -308,8 +472,20 @@ namespace UnityEngine.Tilemaps
 			this.SetTileAsset(position, tile);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetTileAssets(Vector3Int[] positionArray, Object[] tileArray);
+		internal unsafe void SetTileAssets(Vector3Int[] positionArray, Object[] tileArray)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector3Int> span = new Span<Vector3Int>(positionArray);
+			fixed (Vector3Int* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Tilemap.SetTileAssets_Injected(intPtr, ref managedSpanWrapper, tileArray);
+			}
+		}
 
 		public void SetTiles(Vector3Int[] positionArray, TileBase[] tileArray)
 		{
@@ -319,7 +495,12 @@ namespace UnityEngine.Tilemaps
 		[NativeMethod(Name = "SetTileAssetsBlock")]
 		private void INTERNAL_CALL_SetTileAssetsBlock(Vector3Int position, Vector3Int blockDimensions, Object[] tileArray)
 		{
-			this.INTERNAL_CALL_SetTileAssetsBlock_Injected(ref position, ref blockDimensions, tileArray);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.INTERNAL_CALL_SetTileAssetsBlock_Injected(intPtr, ref position, ref blockDimensions, tileArray);
 		}
 
 		public void SetTilesBlock(BoundsInt position, TileBase[] tileArray)
@@ -330,12 +511,24 @@ namespace UnityEngine.Tilemaps
 		[NativeMethod(Name = "SetTileChangeData")]
 		public void SetTile(TileChangeData tileChangeData, bool ignoreLockFlags)
 		{
-			this.SetTile_Injected(ref tileChangeData, ignoreLockFlags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetTile_Injected(intPtr, ref tileChangeData, ignoreLockFlags);
 		}
 
 		[NativeMethod(Name = "SetTileChangeDataArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetTiles(TileChangeData[] tileChangeDataArray, bool ignoreLockFlags);
+		public void SetTiles(TileChangeData[] tileChangeDataArray, bool ignoreLockFlags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetTiles_Injected(intPtr, tileChangeDataArray, ignoreLockFlags);
+		}
 
 		public bool HasTile(Vector3Int position)
 		{
@@ -345,38 +538,85 @@ namespace UnityEngine.Tilemaps
 		[NativeMethod(Name = "RefreshTileAsset")]
 		public void RefreshTile(Vector3Int position)
 		{
-			this.RefreshTile_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.RefreshTile_Injected(intPtr, ref position);
 		}
 
 		[FreeFunction(Name = "TilemapBindings::RefreshTileAssetsNative", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe extern void RefreshTilesNative(void* positions, int count);
+		internal unsafe void RefreshTilesNative(void* positions, int count)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.RefreshTilesNative_Injected(intPtr, positions, count);
+		}
 
 		[NativeMethod(Name = "RefreshAllTileAssets")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RefreshAllTiles();
+		public void RefreshAllTiles()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.RefreshAllTiles_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SwapTileAsset(Object changeTile, Object newTile);
+		internal void SwapTileAsset(Object changeTile, Object newTile)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SwapTileAsset_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Object>(changeTile), Object.MarshalledUnityObject.Marshal<Object>(newTile));
+		}
 
 		public void SwapTile(TileBase changeTile, TileBase newTile)
 		{
 			this.SwapTileAsset(changeTile, newTile);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern bool ContainsTileAsset(Object tileAsset);
+		internal bool ContainsTileAsset(Object tileAsset)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.ContainsTileAsset_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Object>(tileAsset));
+		}
 
 		public bool ContainsTile(TileBase tileAsset)
 		{
 			return this.ContainsTileAsset(tileAsset);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetUsedTilesCount();
+		public int GetUsedTilesCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetUsedTilesCount_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetUsedSpritesCount();
+		public int GetUsedSpritesCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetUsedSpritesCount_Injected(intPtr);
+		}
 
 		public int GetUsedTilesNonAlloc(TileBase[] usedTiles)
 		{
@@ -389,136 +629,260 @@ namespace UnityEngine.Tilemaps
 		}
 
 		[FreeFunction(Name = "TilemapBindings::GetUsedTilesNonAlloc", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int Internal_GetUsedTilesNonAlloc([Unmarshalled] Object[] usedTiles);
+		internal int Internal_GetUsedTilesNonAlloc([UnityMarshalAs(NativeType.ScriptingObjectPtr)] Object[] usedTiles)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.Internal_GetUsedTilesNonAlloc_Injected(intPtr, usedTiles);
+		}
 
 		[FreeFunction(Name = "TilemapBindings::GetUsedSpritesNonAlloc", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int Internal_GetUsedSpritesNonAlloc([Unmarshalled] Object[] usedSprites);
+		internal int Internal_GetUsedSpritesNonAlloc([UnityMarshalAs(NativeType.ScriptingObjectPtr)] Object[] usedSprites)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.Internal_GetUsedSpritesNonAlloc_Injected(intPtr, usedSprites);
+		}
 
 		public Sprite GetSprite(Vector3Int position)
 		{
-			return this.GetSprite_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Sprite>(Tilemap.GetSprite_Injected(intPtr, ref position));
 		}
 
 		public Matrix4x4 GetTransformMatrix(Vector3Int position)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetTransformMatrix_Injected(ref position, out matrix4x);
+			Tilemap.GetTransformMatrix_Injected(intPtr, ref position, out matrix4x);
 			return matrix4x;
 		}
 
 		public void SetTransformMatrix(Vector3Int position, Matrix4x4 transform)
 		{
-			this.SetTransformMatrix_Injected(ref position, ref transform);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetTransformMatrix_Injected(intPtr, ref position, ref transform);
 		}
 
 		[NativeMethod(Name = "GetTileColor")]
 		public Color GetColor(Vector3Int position)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Color color;
-			this.GetColor_Injected(ref position, out color);
+			Tilemap.GetColor_Injected(intPtr, ref position, out color);
 			return color;
 		}
 
 		[NativeMethod(Name = "SetTileColor")]
 		public void SetColor(Vector3Int position, Color color)
 		{
-			this.SetColor_Injected(ref position, ref color);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetColor_Injected(intPtr, ref position, ref color);
 		}
 
 		public TileFlags GetTileFlags(Vector3Int position)
 		{
-			return this.GetTileFlags_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetTileFlags_Injected(intPtr, ref position);
 		}
 
 		public void SetTileFlags(Vector3Int position, TileFlags flags)
 		{
-			this.SetTileFlags_Injected(ref position, flags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetTileFlags_Injected(intPtr, ref position, flags);
 		}
 
 		public void AddTileFlags(Vector3Int position, TileFlags flags)
 		{
-			this.AddTileFlags_Injected(ref position, flags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.AddTileFlags_Injected(intPtr, ref position, flags);
 		}
 
 		public void RemoveTileFlags(Vector3Int position, TileFlags flags)
 		{
-			this.RemoveTileFlags_Injected(ref position, flags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.RemoveTileFlags_Injected(intPtr, ref position, flags);
 		}
 
 		[NativeMethod(Name = "GetTileInstantiatedObject")]
 		public GameObject GetInstantiatedObject(Vector3Int position)
 		{
-			return this.GetInstantiatedObject_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<GameObject>(Tilemap.GetInstantiatedObject_Injected(intPtr, ref position));
 		}
 
 		[NativeMethod(Name = "GetTileObjectToInstantiate")]
 		public GameObject GetObjectToInstantiate(Vector3Int position)
 		{
-			return this.GetObjectToInstantiate_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<GameObject>(Tilemap.GetObjectToInstantiate_Injected(intPtr, ref position));
 		}
 
 		[NativeMethod(Name = "SetTileColliderType")]
 		public void SetColliderType(Vector3Int position, Tile.ColliderType colliderType)
 		{
-			this.SetColliderType_Injected(ref position, colliderType);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetColliderType_Injected(intPtr, ref position, colliderType);
 		}
 
 		[NativeMethod(Name = "GetTileColliderType")]
 		public Tile.ColliderType GetColliderType(Vector3Int position)
 		{
-			return this.GetColliderType_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetColliderType_Injected(intPtr, ref position);
 		}
 
 		[NativeMethod(Name = "GetTileAnimationFrameCount")]
 		public int GetAnimationFrameCount(Vector3Int position)
 		{
-			return this.GetAnimationFrameCount_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetAnimationFrameCount_Injected(intPtr, ref position);
 		}
 
 		[NativeMethod(Name = "GetTileAnimationFrame")]
 		public int GetAnimationFrame(Vector3Int position)
 		{
-			return this.GetAnimationFrame_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetAnimationFrame_Injected(intPtr, ref position);
 		}
 
 		[NativeMethod(Name = "SetTileAnimationFrame")]
 		public void SetAnimationFrame(Vector3Int position, int frame)
 		{
-			this.SetAnimationFrame_Injected(ref position, frame);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetAnimationFrame_Injected(intPtr, ref position, frame);
 		}
 
 		[NativeMethod(Name = "GetTileAnimationTime")]
 		public float GetAnimationTime(Vector3Int position)
 		{
-			return this.GetAnimationTime_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetAnimationTime_Injected(intPtr, ref position);
 		}
 
 		[NativeMethod(Name = "SetTileAnimationTime")]
 		public void SetAnimationTime(Vector3Int position, float time)
 		{
-			this.SetAnimationTime_Injected(ref position, time);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetAnimationTime_Injected(intPtr, ref position, time);
 		}
 
 		public TileAnimationFlags GetTileAnimationFlags(Vector3Int position)
 		{
-			return this.GetTileAnimationFlags_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Tilemap.GetTileAnimationFlags_Injected(intPtr, ref position);
 		}
 
 		public void SetTileAnimationFlags(Vector3Int position, TileAnimationFlags flags)
 		{
-			this.SetTileAnimationFlags_Injected(ref position, flags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SetTileAnimationFlags_Injected(intPtr, ref position, flags);
 		}
 
 		public void AddTileAnimationFlags(Vector3Int position, TileAnimationFlags flags)
 		{
-			this.AddTileAnimationFlags_Injected(ref position, flags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.AddTileAnimationFlags_Injected(intPtr, ref position, flags);
 		}
 
 		public void RemoveTileAnimationFlags(Vector3Int position, TileAnimationFlags flags)
 		{
-			this.RemoveTileAnimationFlags_Injected(ref position, flags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.RemoveTileAnimationFlags_Injected(intPtr, ref position, flags);
 		}
 
 		public void FloodFill(Vector3Int position, TileBase tile)
@@ -529,7 +893,12 @@ namespace UnityEngine.Tilemaps
 		[NativeMethod(Name = "FloodFill")]
 		private void FloodFillTileAsset(Vector3Int position, Object tile)
 		{
-			this.FloodFillTileAsset_Injected(ref position, tile);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.FloodFillTileAsset_Injected(intPtr, ref position, Object.MarshalledUnityObject.Marshal<Object>(tile));
 		}
 
 		public void BoxFill(Vector3Int position, TileBase tile, int startX, int startY, int endX, int endY)
@@ -540,7 +909,12 @@ namespace UnityEngine.Tilemaps
 		[NativeMethod(Name = "BoxFill")]
 		private void BoxFillTileAsset(Vector3Int position, Object tile, int startX, int startY, int endX, int endY)
 		{
-			this.BoxFillTileAsset_Injected(ref position, tile, startX, startY, endX, endY);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.BoxFillTileAsset_Injected(intPtr, ref position, Object.MarshalledUnityObject.Marshal<Object>(tile), startX, startY, endX, endY);
 		}
 
 		public void InsertCells(Vector3Int position, Vector3Int insertCells)
@@ -550,7 +924,12 @@ namespace UnityEngine.Tilemaps
 
 		public void InsertCells(Vector3Int position, int numColumns, int numRows, int numLayers)
 		{
-			this.InsertCells_Injected(ref position, numColumns, numRows, numLayers);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.InsertCells_Injected(intPtr, ref position, numColumns, numRows, numLayers);
 		}
 
 		public void DeleteCells(Vector3Int position, Vector3Int deleteCells)
@@ -560,17 +939,61 @@ namespace UnityEngine.Tilemaps
 
 		public void DeleteCells(Vector3Int position, int numColumns, int numRows, int numLayers)
 		{
-			this.DeleteCells_Injected(ref position, numColumns, numRows, numLayers);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.DeleteCells_Injected(intPtr, ref position, numColumns, numRows, numLayers);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ClearAllTiles();
+		public void ClearAllTiles()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.ClearAllTiles_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResizeBounds();
+		public void ResizeBounds()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.ResizeBounds_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CompressBounds();
+		[NativeMethod(Name = "CompressBounds")]
+		private void CompressTilemapBounds(bool keepEditorPreview)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.CompressTilemapBounds_Injected(intPtr, keepEditorPreview);
+		}
+
+		public void CompressBounds()
+		{
+			this.CompressTilemapBounds(false);
+		}
+
+		[RequiredByNativeCode]
+		internal void GetLoopEndedForTileAnimationCallbackSettings(ref bool hasEndLoopForTileAnimationCallback)
+		{
+			hasEndLoopForTileAnimationCallback = Tilemap.HasLoopEndedForTileAnimationCallback();
+		}
+
+		[RequiredByNativeCode]
+		private void DoLoopEndedForTileAnimationCallback(int count, IntPtr positionsIntPtr)
+		{
+			this.HandleLoopEndedForTileAnimationCallback(count, positionsIntPtr);
+		}
 
 		[RequiredByNativeCode]
 		internal void GetSyncTileCallbackSettings(ref Tilemap.SyncTileCallbackSettings settings)
@@ -580,8 +1003,15 @@ namespace UnityEngine.Tilemaps
 			settings.isBufferSyncTile = this.bufferSyncTile;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SendAndClearSyncTileBuffer();
+		internal void SendAndClearSyncTileBuffer()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Tilemap>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Tilemap.SendAndClearSyncTileBuffer_Injected(intPtr);
+		}
 
 		[RequiredByNativeCode]
 		private void DoSyncTileCallback(Tilemap.SyncTile[] syncTiles)
@@ -596,145 +1026,202 @@ namespace UnityEngine.Tilemaps
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localBounds_Injected(out Bounds ret);
+		private static extern IntPtr get_layoutGrid_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localFrameBounds_Injected(out Bounds ret);
+		private static extern void get_localBounds_Injected(IntPtr _unity_self, out Bounds ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_color_Injected(out Color ret);
+		private static extern void get_localFrameBounds_Injected(IntPtr _unity_self, out Bounds ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_color_Injected(ref Color value);
+		private static extern float get_animationFrameRate_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_origin_Injected(out Vector3Int ret);
+		private static extern void set_animationFrameRate_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_origin_Injected(ref Vector3Int value);
+		private static extern void get_color_Injected(IntPtr _unity_self, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_size_Injected(out Vector3Int ret);
+		private static extern void set_color_Injected(IntPtr _unity_self, [In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_size_Injected(ref Vector3Int value);
+		private static extern void get_origin_Injected(IntPtr _unity_self, out Vector3Int ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_tileAnchor_Injected(out Vector3 ret);
+		private static extern void set_origin_Injected(IntPtr _unity_self, [In] ref Vector3Int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_tileAnchor_Injected(ref Vector3 value);
+		private static extern void get_size_Injected(IntPtr _unity_self, out Vector3Int ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_orientationMatrix_Injected(out Matrix4x4 ret);
+		private static extern void set_size_Injected(IntPtr _unity_self, [In] ref Vector3Int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_orientationMatrix_Injected(ref Matrix4x4 value);
+		private static extern void get_tileAnchor_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Object GetTileAsset_Injected(ref Vector3Int position);
+		private static extern void set_tileAnchor_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Object[] GetTileAssetsBlock_Injected(ref Vector3Int position, ref Vector3Int blockDimensions);
+		private static extern Tilemap.Orientation get_orientation_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetTileAssetsBlockNonAlloc_Injected(ref Vector3Int startPosition, ref Vector3Int endPosition, Object[] tiles);
+		private static extern void set_orientation_Injected(IntPtr _unity_self, Tilemap.Orientation value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetTilesRangeCount_Injected(ref Vector3Int startPosition, ref Vector3Int endPosition);
+		private static extern void get_orientationMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetTileAssetsRangeNonAlloc_Injected(ref Vector3Int startPosition, ref Vector3Int endPosition, Vector3Int[] positions, Object[] tiles);
+		private static extern void set_orientationMatrix_Injected(IntPtr _unity_self, [In] ref Matrix4x4 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTileAsset_Injected(ref Vector3Int position, Object tile);
+		private static extern IntPtr GetTileAsset_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_CALL_SetTileAssetsBlock_Injected(ref Vector3Int position, ref Vector3Int blockDimensions, Object[] tileArray);
+		private static extern Object[] GetTileAssetsBlock_Injected(IntPtr _unity_self, [In] ref Vector3Int position, [In] ref Vector3Int blockDimensions);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTile_Injected(ref TileChangeData tileChangeData, bool ignoreLockFlags);
+		private static extern int GetTileAssetsBlockNonAlloc_Injected(IntPtr _unity_self, [In] ref Vector3Int startPosition, [In] ref Vector3Int endPosition, Object[] tiles);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RefreshTile_Injected(ref Vector3Int position);
+		private static extern int GetTilesRangeCount_Injected(IntPtr _unity_self, [In] ref Vector3Int startPosition, [In] ref Vector3Int endPosition);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Sprite GetSprite_Injected(ref Vector3Int position);
+		private static extern int GetTileAssetsRangeNonAlloc_Injected(IntPtr _unity_self, [In] ref Vector3Int startPosition, [In] ref Vector3Int endPosition, ref ManagedSpanWrapper positions, Object[] tiles);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTransformMatrix_Injected(ref Vector3Int position, out Matrix4x4 ret);
+		private static extern void SetTileAsset_Injected(IntPtr _unity_self, [In] ref Vector3Int position, IntPtr tile);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTransformMatrix_Injected(ref Vector3Int position, ref Matrix4x4 transform);
+		private static extern void SetTileAssets_Injected(IntPtr _unity_self, ref ManagedSpanWrapper positionArray, Object[] tileArray);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetColor_Injected(ref Vector3Int position, out Color ret);
+		private static extern void INTERNAL_CALL_SetTileAssetsBlock_Injected(IntPtr _unity_self, [In] ref Vector3Int position, [In] ref Vector3Int blockDimensions, Object[] tileArray);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColor_Injected(ref Vector3Int position, ref Color color);
+		private static extern void SetTile_Injected(IntPtr _unity_self, [In] ref TileChangeData tileChangeData, bool ignoreLockFlags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern TileFlags GetTileFlags_Injected(ref Vector3Int position);
+		private static extern void SetTiles_Injected(IntPtr _unity_self, TileChangeData[] tileChangeDataArray, bool ignoreLockFlags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTileFlags_Injected(ref Vector3Int position, TileFlags flags);
+		private static extern void RefreshTile_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddTileFlags_Injected(ref Vector3Int position, TileFlags flags);
+		private unsafe static extern void RefreshTilesNative_Injected(IntPtr _unity_self, void* positions, int count);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RemoveTileFlags_Injected(ref Vector3Int position, TileFlags flags);
+		private static extern void RefreshAllTiles_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GameObject GetInstantiatedObject_Injected(ref Vector3Int position);
+		private static extern void SwapTileAsset_Injected(IntPtr _unity_self, IntPtr changeTile, IntPtr newTile);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GameObject GetObjectToInstantiate_Injected(ref Vector3Int position);
+		private static extern bool ContainsTileAsset_Injected(IntPtr _unity_self, IntPtr tileAsset);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColliderType_Injected(ref Vector3Int position, Tile.ColliderType colliderType);
+		private static extern int GetUsedTilesCount_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Tile.ColliderType GetColliderType_Injected(ref Vector3Int position);
+		private static extern int GetUsedSpritesCount_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetAnimationFrameCount_Injected(ref Vector3Int position);
+		private static extern int Internal_GetUsedTilesNonAlloc_Injected(IntPtr _unity_self, Object[] usedTiles);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetAnimationFrame_Injected(ref Vector3Int position);
+		private static extern int Internal_GetUsedSpritesNonAlloc_Injected(IntPtr _unity_self, Object[] usedSprites);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetAnimationFrame_Injected(ref Vector3Int position, int frame);
+		private static extern IntPtr GetSprite_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float GetAnimationTime_Injected(ref Vector3Int position);
+		private static extern void GetTransformMatrix_Injected(IntPtr _unity_self, [In] ref Vector3Int position, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetAnimationTime_Injected(ref Vector3Int position, float time);
+		private static extern void SetTransformMatrix_Injected(IntPtr _unity_self, [In] ref Vector3Int position, [In] ref Matrix4x4 transform);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern TileAnimationFlags GetTileAnimationFlags_Injected(ref Vector3Int position);
+		private static extern void GetColor_Injected(IntPtr _unity_self, [In] ref Vector3Int position, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTileAnimationFlags_Injected(ref Vector3Int position, TileAnimationFlags flags);
+		private static extern void SetColor_Injected(IntPtr _unity_self, [In] ref Vector3Int position, [In] ref Color color);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddTileAnimationFlags_Injected(ref Vector3Int position, TileAnimationFlags flags);
+		private static extern TileFlags GetTileFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RemoveTileAnimationFlags_Injected(ref Vector3Int position, TileAnimationFlags flags);
+		private static extern void SetTileFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position, TileFlags flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void FloodFillTileAsset_Injected(ref Vector3Int position, Object tile);
+		private static extern void AddTileFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position, TileFlags flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void BoxFillTileAsset_Injected(ref Vector3Int position, Object tile, int startX, int startY, int endX, int endY);
+		private static extern void RemoveTileFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position, TileFlags flags);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InsertCells_Injected(ref Vector3Int position, int numColumns, int numRows, int numLayers);
+		private static extern IntPtr GetInstantiatedObject_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DeleteCells_Injected(ref Vector3Int position, int numColumns, int numRows, int numLayers);
+		private static extern IntPtr GetObjectToInstantiate_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetColliderType_Injected(IntPtr _unity_self, [In] ref Vector3Int position, Tile.ColliderType colliderType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Tile.ColliderType GetColliderType_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetAnimationFrameCount_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetAnimationFrame_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAnimationFrame_Injected(IntPtr _unity_self, [In] ref Vector3Int position, int frame);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetAnimationTime_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAnimationTime_Injected(IntPtr _unity_self, [In] ref Vector3Int position, float time);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TileAnimationFlags GetTileAnimationFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTileAnimationFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position, TileAnimationFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddTileAnimationFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position, TileAnimationFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RemoveTileAnimationFlags_Injected(IntPtr _unity_self, [In] ref Vector3Int position, TileAnimationFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FloodFillTileAsset_Injected(IntPtr _unity_self, [In] ref Vector3Int position, IntPtr tile);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BoxFillTileAsset_Injected(IntPtr _unity_self, [In] ref Vector3Int position, IntPtr tile, int startX, int startY, int endX, int endY);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InsertCells_Injected(IntPtr _unity_self, [In] ref Vector3Int position, int numColumns, int numRows, int numLayers);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DeleteCells_Injected(IntPtr _unity_self, [In] ref Vector3Int position, int numColumns, int numRows, int numLayers);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearAllTiles_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResizeBounds_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CompressTilemapBounds_Injected(IntPtr _unity_self, bool keepEditorPreview);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendAndClearSyncTileBuffer_Injected(IntPtr _unity_self);
 
 		private bool m_BufferSyncTile;
 

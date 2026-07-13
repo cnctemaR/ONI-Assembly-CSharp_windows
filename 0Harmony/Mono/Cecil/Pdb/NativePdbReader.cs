@@ -7,7 +7,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Pdb
 {
-	public class NativePdbReader : ISymbolReader, IDisposable
+	internal class NativePdbReader : ISymbolReader, IDisposable
 	{
 		internal NativePdbReader(Disposable<Stream> file)
 		{
@@ -399,6 +399,11 @@ namespace Mono.Cecil.Pdb
 			};
 			this.documents.Add(name, document);
 			return document;
+		}
+
+		public Collection<CustomDebugInformation> Read(ICustomDebugInformationProvider provider)
+		{
+			return new Collection<CustomDebugInformation>();
 		}
 
 		public void Dispose()

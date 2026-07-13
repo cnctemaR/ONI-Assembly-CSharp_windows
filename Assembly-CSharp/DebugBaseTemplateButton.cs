@@ -375,7 +375,7 @@ public class DebugBaseTemplateButton : KScreen
 
 	private void GetEntities<T>(int rootX, int rootY, ref List<Prefab> _primaryElementOres, ref List<Prefab> _otherEntities, ref HashSet<GameObject> _excludeEntities)
 	{
-		object[] array = global::UnityEngine.Object.FindObjectsOfType(typeof(T));
+		object[] array = global::UnityEngine.Object.FindObjectsByType(typeof(T), FindObjectsSortMode.InstanceID);
 		object[] array2 = array;
 		this.GetEntities<object>(array2, rootX, rootY, ref _primaryElementOres, ref _otherEntities, ref _excludeEntities);
 	}

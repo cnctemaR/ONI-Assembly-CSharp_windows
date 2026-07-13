@@ -357,12 +357,14 @@ public class HotTub : StateMachineComponent<HotTub.StatesInstance>, IGameObjectE
 
 		public void SapHeatFromWater(float dt)
 		{
-			float num = base.smi.master.waterCoolingRate * dt / (float)base.smi.master.waterStorage.items.Count;
+			float num = base.smi.master.waterCoolingRate * dt;
+			float num2 = num / (float)base.smi.master.waterStorage.items.Count;
 			foreach (GameObject gameObject in base.smi.master.waterStorage.items)
 			{
-				GameUtil.DeltaThermalEnergy(gameObject.GetComponent<PrimaryElement>(), -num, base.smi.master.minimumWaterTemperature);
-				GameUtil.DeltaThermalEnergy(base.GetComponent<PrimaryElement>(), num, base.GetComponent<PrimaryElement>().Element.highTemp);
+				GameUtil.DeltaThermalEnergy(gameObject.GetComponent<PrimaryElement>(), -num2, base.smi.master.minimumWaterTemperature);
 			}
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			GameUtil.DeltaThermalEnergy(component, num, component.Element.highTemp);
 		}
 
 		public void ConsumeBleachstone(float dt)

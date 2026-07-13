@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum GenericParameterAttributes : ushort
+	internal enum GenericParameterAttributes : ushort
 	{
 		VarianceMask = 3,
 		NonVariant = 0,
@@ -12,6 +12,7 @@ namespace Mono.Cecil
 		SpecialConstraintMask = 28,
 		ReferenceTypeConstraint = 4,
 		NotNullableValueTypeConstraint = 8,
-		DefaultConstructorConstraint = 16
+		DefaultConstructorConstraint = 16,
+		AllowByRefLikeConstraint = 32
 	}
 }

@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms.Impl
 {
+	[Obsolete("Achievement is deprecated and will be removed in a future release.", false)]
 	public class Achievement : IAchievement
 	{
 		public Achievement(string id, double percentCompleted, bool completed, bool hidden, DateTime lastReportedDate)

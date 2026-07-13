@@ -12,7 +12,7 @@ public class PerformanceCaptureMonitor
 	public static void WritePerformanceCaptureData()
 	{
 		PerformanceCaptureMonitor.Data.SWAverageFrameTimeMs = (float)(PerformanceCaptureMonitor.captureTimer.Elapsed.TotalMilliseconds / (double)GenericGameSettings.instance.scriptedProfile.frameCount);
-		PerformanceCaptureMonitor.Data.Revision = 707956U;
+		PerformanceCaptureMonitor.Data.Revision = 719533U;
 		PerformanceCaptureMonitor.Data.Branch = "release";
 		PerformanceCaptureMonitor.Data.IsBaseGame = !DlcManager.IsExpansion1Active();
 		PerformanceCaptureMonitor.Data.LoadedDlcs = DlcManager.GetActiveDLCIds();
@@ -85,6 +85,10 @@ public class PerformanceCaptureMonitor
 		PerformanceCaptureMonitor.Data.SaveLoadMemoryMegs = PerformanceCaptureMonitor.GetMemoryUsed();
 		PerformanceCaptureMonitor.loadTimer.Stop();
 		PerformanceCaptureMonitor.Data.SaveLoadTimeSec = (float)PerformanceCaptureMonitor.loadTimer.Elapsed.TotalSeconds;
+		if (GenericGameSettings.instance.devQuitAfterLoadingSave)
+		{
+			App.QuitCode(KCrashReporter.hasCrash ? 1 : 0);
+		}
 		yield break;
 	}
 

@@ -33,8 +33,28 @@ namespace UnityEngine
 		private static extern void Internal_Destroy(IntPtr ptr);
 
 		[FreeFunction("CreatePing")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Internal_Create(string address);
+		private unsafe static IntPtr Internal_Create(string address)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(address, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = address.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = Ping.Internal_Create_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
 
 		public bool isDone
 		{
@@ -46,22 +66,74 @@ namespace UnityEngine
 		}
 
 		[NativeName("GetIsDone")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool Internal_IsDone();
-
-		public extern int time
+		private bool Internal_IsDone()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			IntPtr intPtr = Ping.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Ping.Internal_IsDone_Injected(intPtr);
 		}
 
-		public extern string ip
+		public int time
+		{
+			get
+			{
+				IntPtr intPtr = Ping.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Ping.get_time_Injected(intPtr);
+			}
+		}
+
+		public string ip
 		{
 			[NativeName("GetIP")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Ping.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					Ping.get_ip_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Internal_Create_Injected(ref ManagedSpanWrapper address);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Internal_IsDone_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_time_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_ip_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(Ping ping)
+			{
+				return ping.m_Ptr;
+			}
+		}
 	}
 }

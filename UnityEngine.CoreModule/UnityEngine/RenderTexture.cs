@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Internal;
@@ -9,44 +10,100 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[NativeHeader("Runtime/Graphics/RenderBufferManager.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	public class RenderTexture : Texture
 	{
-		public override extern int width
+		public override int width
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_width_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_width_Injected(intPtr, value);
+			}
 		}
 
-		public override extern int height
+		public override int height
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_height_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_height_Injected(intPtr, value);
+			}
 		}
 
-		public override extern TextureDimension dimension
+		public override TextureDimension dimension
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_dimension_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_dimension_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("GetColorFormat")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GraphicsFormat GetColorFormat(bool suppressWarnings);
+		private GraphicsFormat GetColorFormat(bool suppressWarnings)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RenderTexture.GetColorFormat_Injected(intPtr, suppressWarnings);
+		}
 
 		[NativeName("SetColorFormat")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColorFormat(GraphicsFormat format);
+		private void SetColorFormat(GraphicsFormat format)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.SetColorFormat_Injected(intPtr, format);
+		}
 
 		public new GraphicsFormat graphicsFormat
 		{
@@ -61,37 +118,86 @@ namespace UnityEngine
 		}
 
 		[NativeProperty("MipMap")]
-		public extern bool useMipMap
+		public bool useMipMap
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_useMipMap_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_useMipMap_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("SRGBReadWrite")]
-		public extern bool sRGB
+		public bool sRGB
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_sRGB_Injected(intPtr);
+			}
 		}
 
 		[NativeProperty("VRUsage")]
-		public extern VRTextureUsage vrUsage
+		public VRTextureUsage vrUsage
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_vrUsage_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_vrUsage_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("Memoryless")]
-		public extern RenderTextureMemoryless memorylessMode
+		public RenderTextureMemoryless memorylessMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_memorylessMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_memorylessMode_Injected(intPtr, value);
+			}
 		}
 
 		public RenderTextureFormat format
@@ -112,76 +218,264 @@ namespace UnityEngine
 			}
 			set
 			{
+				bool flag = value == RenderTextureFormat.Depth || value == RenderTextureFormat.Shadowmap;
+				if (flag)
+				{
+					bool flag2 = this.depthStencilFormat == GraphicsFormat.None;
+					if (flag2)
+					{
+						RenderTexture.WarnAboutFallbackTo16BitsDepth(value);
+						this.depthStencilFormat = GraphicsFormat.D16_UNorm;
+					}
+					bool flag3 = value == RenderTextureFormat.Shadowmap;
+					if (flag3)
+					{
+						this.SetShadowSamplingMode(ShadowSamplingMode.CompareDepths);
+					}
+				}
 				this.graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(value, this.sRGB);
 			}
 		}
 
-		public extern GraphicsFormat stencilFormat
+		public GraphicsFormat stencilFormat
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_stencilFormat_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_stencilFormat_Injected(intPtr, value);
+			}
 		}
 
-		public extern GraphicsFormat depthStencilFormat
+		public GraphicsFormat depthStencilFormat
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_depthStencilFormat_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_depthStencilFormat_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool autoGenerateMips
+		public bool autoGenerateMips
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_autoGenerateMips_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_autoGenerateMips_Injected(intPtr, value);
+			}
 		}
 
-		public extern int volumeDepth
+		public int volumeDepth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_volumeDepth_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_volumeDepth_Injected(intPtr, value);
+			}
 		}
 
-		public extern int antiAliasing
+		public int antiAliasing
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_antiAliasing_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_antiAliasing_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool bindTextureMS
+		public bool bindTextureMS
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_bindTextureMS_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_bindTextureMS_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool enableRandomWrite
+		public bool enableRandomWrite
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_enableRandomWrite_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_enableRandomWrite_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool useDynamicScale
+		public bool useDynamicScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_useDynamicScale_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_useDynamicScale_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetIsPowerOfTwo();
+		public bool useDynamicScaleExplicit
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_useDynamicScaleExplicit_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_useDynamicScaleExplicit_Injected(intPtr, value);
+			}
+		}
+
+		public bool enableShadingRate
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_enableShadingRate_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_enableShadingRate_Injected(intPtr, value);
+			}
+		}
+
+		public void ApplyDynamicScale()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.ApplyDynamicScale_Injected(intPtr);
+		}
+
+		private bool GetIsPowerOfTwo()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RenderTexture.GetIsPowerOfTwo_Injected(intPtr);
+		}
 
 		public bool isPowerOfTwo
 		{
@@ -194,13 +488,17 @@ namespace UnityEngine
 			}
 		}
 
-		[FreeFunction("RenderTexture::GetActive")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RenderTexture GetActive();
+		[FreeFunction("RenderTexture::GetActiveAsRenderTexture")]
+		private static RenderTexture GetActive()
+		{
+			return Unmarshal.UnmarshalUnityObject<RenderTexture>(RenderTexture.GetActive_Injected());
+		}
 
 		[FreeFunction("RenderTextureScripting::SetActive")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetActive(RenderTexture rt);
+		private static void SetActive(RenderTexture rt)
+		{
+			RenderTexture.SetActive_Injected(Object.MarshalledUnityObject.Marshal<RenderTexture>(rt));
+		}
 
 		public static RenderTexture active
 		{
@@ -217,24 +515,48 @@ namespace UnityEngine
 		[FreeFunction(Name = "RenderTextureScripting::GetColorBuffer", HasExplicitThis = true)]
 		private RenderBuffer GetColorBuffer()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			RenderBuffer renderBuffer;
-			this.GetColorBuffer_Injected(out renderBuffer);
+			RenderTexture.GetColorBuffer_Injected(intPtr, out renderBuffer);
 			return renderBuffer;
 		}
 
 		[FreeFunction(Name = "RenderTextureScripting::GetDepthBuffer", HasExplicitThis = true)]
 		private RenderBuffer GetDepthBuffer()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			RenderBuffer renderBuffer;
-			this.GetDepthBuffer_Injected(out renderBuffer);
+			RenderTexture.GetDepthBuffer_Injected(intPtr, out renderBuffer);
 			return renderBuffer;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMipMapCount(int count);
+		private void SetMipMapCount(int count)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.SetMipMapCount_Injected(intPtr, count);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetShadowSamplingMode(ShadowSamplingMode samplingMode);
+		internal void SetShadowSamplingMode(ShadowSamplingMode samplingMode)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.SetShadowSamplingMode_Injected(intPtr, samplingMode);
+		}
 
 		public RenderBuffer colorBuffer
 		{
@@ -252,15 +574,36 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetNativeDepthBufferPtr();
+		public IntPtr GetNativeDepthBufferPtr()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RenderTexture.GetNativeDepthBufferPtr_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void DiscardContents(bool discardColor, bool discardDepth);
+		public void DiscardContents(bool discardColor, bool discardDepth)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.DiscardContents_Injected(intPtr, discardColor, discardDepth);
+		}
 
 		[Obsolete("This function has no effect.", false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void MarkRestoreExpected();
+		public void MarkRestoreExpected()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.MarkRestoreExpected_Injected(intPtr);
+		}
 
 		public void DiscardContents()
 		{
@@ -268,12 +611,26 @@ namespace UnityEngine
 		}
 
 		[NativeName("ResolveAntiAliasedSurface")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ResolveAA();
+		private void ResolveAA()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.ResolveAA_Injected(intPtr);
+		}
 
 		[NativeName("ResolveAntiAliasedSurface")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ResolveAATo(RenderTexture rt);
+		private void ResolveAATo(RenderTexture rt)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.ResolveAATo_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(rt));
+		}
 
 		public void ResolveAntiAliasedSurface()
 		{
@@ -286,68 +643,161 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "RenderTextureScripting::SetGlobalShaderProperty", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalShaderProperty(string propertyName);
+		public unsafe void SetGlobalShaderProperty(string propertyName)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(propertyName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = propertyName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				RenderTexture.SetGlobalShaderProperty_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool Create();
+		public bool Create()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RenderTexture.Create_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Release();
+		public void Release()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.Release_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsCreated();
+		public bool IsCreated()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RenderTexture.IsCreated_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GenerateMips();
+		public void GenerateMips()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.GenerateMips_Injected(intPtr);
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ConvertToEquirect(RenderTexture equirect, Camera.MonoOrStereoscopicEye eye = Camera.MonoOrStereoscopicEye.Mono);
+		public void ConvertToEquirect(RenderTexture equirect, Camera.MonoOrStereoscopicEye eye = Camera.MonoOrStereoscopicEye.Mono)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.ConvertToEquirect_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(equirect), eye);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetSRGBReadWrite(bool srgb);
+		internal void SetSRGBReadWrite(bool srgb)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.SetSRGBReadWrite_Injected(intPtr, srgb);
+		}
 
 		[FreeFunction("RenderTextureScripting::Create")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] RenderTexture rt);
 
 		[FreeFunction("RenderTextureSupportsStencil")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool SupportsStencil(RenderTexture rt);
+		public static bool SupportsStencil(RenderTexture rt)
+		{
+			return RenderTexture.SupportsStencil_Injected(Object.MarshalledUnityObject.Marshal<RenderTexture>(rt));
+		}
 
 		[NativeName("SetRenderTextureDescFromScript")]
 		private void SetRenderTextureDescriptor(RenderTextureDescriptor desc)
 		{
-			this.SetRenderTextureDescriptor_Injected(ref desc);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RenderTexture.SetRenderTextureDescriptor_Injected(intPtr, ref desc);
 		}
 
 		[NativeName("GetRenderTextureDesc")]
 		private RenderTextureDescriptor GetDescriptor()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			RenderTextureDescriptor renderTextureDescriptor;
-			this.GetDescriptor_Injected(out renderTextureDescriptor);
+			RenderTexture.GetDescriptor_Injected(intPtr, out renderTextureDescriptor);
 			return renderTextureDescriptor;
 		}
 
 		[FreeFunction("GetRenderBufferManager().GetTextures().GetTempBuffer")]
 		private static RenderTexture GetTemporary_Internal(RenderTextureDescriptor desc)
 		{
-			return RenderTexture.GetTemporary_Internal_Injected(ref desc);
+			return Unmarshal.UnmarshalUnityObject<RenderTexture>(RenderTexture.GetTemporary_Internal_Injected(ref desc));
 		}
 
 		[FreeFunction("GetRenderBufferManager().GetTextures().ReleaseTempBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void ReleaseTemporary(RenderTexture temp);
+		public static void ReleaseTemporary(RenderTexture temp)
+		{
+			RenderTexture.ReleaseTemporary_Injected(Object.MarshalledUnityObject.Marshal<RenderTexture>(temp));
+		}
 
-		public extern int depth
+		public int depth
 		{
 			[FreeFunction("RenderTextureScripting::GetDepth", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RenderTexture.get_depth_Injected(intPtr);
+			}
 			[FreeFunction("RenderTextureScripting::SetDepth", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RenderTexture.set_depth_Injected(intPtr, value);
+			}
 		}
 
 		[RequiredByNativeCode]
@@ -357,7 +807,7 @@ namespace UnityEngine
 
 		public RenderTexture(RenderTextureDescriptor desc)
 		{
-			RenderTexture.ValidateRenderTextureDesc(desc);
+			RenderTexture.ValidateRenderTextureDesc(ref desc);
 			RenderTexture.Internal_Create(this);
 			this.SetRenderTextureDescriptor(desc);
 		}
@@ -369,15 +819,21 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("textureToCopy");
 			}
-			RenderTexture.ValidateRenderTextureDesc(textureToCopy.descriptor);
+			RenderTextureDescriptor descriptor = textureToCopy.descriptor;
+			RenderTexture.ValidateRenderTextureDesc(ref descriptor);
 			RenderTexture.Internal_Create(this);
-			this.SetRenderTextureDescriptor(textureToCopy.descriptor);
+			this.SetRenderTextureDescriptor(descriptor);
 		}
 
 		[ExcludeFromDocs]
 		public RenderTexture(int width, int height, int depth, DefaultFormat format)
 			: this(width, height, RenderTexture.GetDefaultColorFormat(format), RenderTexture.GetDefaultDepthStencilFormat(format, depth), Texture.GenerateAllMips)
 		{
+			bool flag = this != null;
+			if (flag)
+			{
+				this.SetShadowSamplingMode(RenderTexture.GetShadowSamplingModeForFormat(format));
+			}
 		}
 
 		[ExcludeFromDocs]
@@ -389,7 +845,7 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public RenderTexture(int width, int height, int depth, GraphicsFormat format, int mipCount)
 		{
-			bool flag = format != GraphicsFormat.None && !base.ValidateFormat(format, FormatUsage.Render);
+			bool flag = format != GraphicsFormat.None && !base.ValidateFormat(format, GraphicsFormatUsage.Render);
 			if (!flag)
 			{
 				RenderTexture.Internal_Create(this);
@@ -405,7 +861,7 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public RenderTexture(int width, int height, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat, int mipCount)
 		{
-			bool flag = colorFormat != GraphicsFormat.None && !base.ValidateFormat(colorFormat, FormatUsage.Render);
+			bool flag = colorFormat != GraphicsFormat.None && !base.ValidateFormat(colorFormat, GraphicsFormatUsage.Render);
 			if (!flag)
 			{
 				RenderTexture.Internal_Create(this);
@@ -450,11 +906,11 @@ namespace UnityEngine
 		private void Initialize(int width, int height, int depth, RenderTextureFormat format, RenderTextureReadWrite readWrite, int mipCount)
 		{
 			GraphicsFormat compatibleFormat = RenderTexture.GetCompatibleFormat(format, readWrite);
-			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depth, format);
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depth, format, false);
 			bool flag = compatibleFormat > GraphicsFormat.None;
 			if (flag)
 			{
-				bool flag2 = !base.ValidateFormat(compatibleFormat, FormatUsage.Render);
+				bool flag2 = !base.ValidateFormat(compatibleFormat, GraphicsFormatUsage.Render);
 				if (flag2)
 				{
 					return;
@@ -467,15 +923,22 @@ namespace UnityEngine
 			this.graphicsFormat = compatibleFormat;
 			this.SetMipMapCount(mipCount);
 			this.SetSRGBReadWrite(GraphicsFormatUtility.IsSRGBFormat(compatibleFormat));
+			this.SetShadowSamplingMode(RenderTexture.GetShadowSamplingModeForFormat(format));
 		}
 
 		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, GraphicsFormat colorFormat)
 		{
-			return (colorFormat == GraphicsFormat.ShadowAuto) ? GraphicsFormatUtility.GetDepthStencilFormat(depthBits, 0) : GraphicsFormatUtility.GetDepthStencilFormat(depthBits);
+			return RenderTexture.GetDepthStencilFormatLegacy(depthBits, false);
 		}
 
-		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, RenderTextureFormat format)
+		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, RenderTextureFormat format, bool disableFallback = false)
 		{
+			bool flag = !disableFallback && (format == RenderTextureFormat.Depth || format == RenderTextureFormat.Shadowmap) && depthBits < 16;
+			if (flag)
+			{
+				RenderTexture.WarnAboutFallbackTo16BitsDepth(format);
+				depthBits = 16;
+			}
 			return RenderTexture.GetDepthStencilFormatLegacy(depthBits, format == RenderTextureFormat.Shadowmap);
 		}
 
@@ -484,9 +947,26 @@ namespace UnityEngine
 			return RenderTexture.GetDepthStencilFormatLegacy(depthBits, format == DefaultFormat.Shadow);
 		}
 
+		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, ShadowSamplingMode shadowSamplingMode)
+		{
+			return RenderTexture.GetDepthStencilFormatLegacy(depthBits, shadowSamplingMode != ShadowSamplingMode.None);
+		}
+
 		internal static GraphicsFormat GetDepthStencilFormatLegacy(int depthBits, bool requestedShadowMap)
 		{
-			return requestedShadowMap ? GraphicsFormatUtility.GetDepthStencilFormat(depthBits, 0) : GraphicsFormatUtility.GetDepthStencilFormat(depthBits);
+			GraphicsFormat graphicsFormat = (requestedShadowMap ? GraphicsFormatUtility.GetDepthStencilFormat(depthBits, 0) : GraphicsFormatUtility.GetDepthStencilFormat(depthBits));
+			bool flag = depthBits > 16 && graphicsFormat == GraphicsFormat.None && requestedShadowMap;
+			GraphicsFormat graphicsFormat2;
+			if (flag)
+			{
+				Debug.LogWarning(string.Format("No compatible shadow map depth format with {0} or more depth bits has been found. Changing to a 16 bit depth buffer.", depthBits));
+				graphicsFormat2 = GraphicsFormat.D16_UNorm;
+			}
+			else
+			{
+				graphicsFormat2 = graphicsFormat;
+			}
+			return graphicsFormat2;
 		}
 
 		public RenderTextureDescriptor descriptor
@@ -497,19 +977,20 @@ namespace UnityEngine
 			}
 			set
 			{
-				RenderTexture.ValidateRenderTextureDesc(value);
+				RenderTexture.ValidateRenderTextureDesc(ref value);
 				this.SetRenderTextureDescriptor(value);
 			}
 		}
 
-		private static void ValidateRenderTextureDesc(RenderTextureDescriptor desc)
+		private static void ValidateRenderTextureDesc(ref RenderTextureDescriptor desc)
 		{
 			bool flag = desc.graphicsFormat == GraphicsFormat.None && desc.depthStencilFormat == GraphicsFormat.None;
 			if (flag)
 			{
-				throw new ArgumentException("RenderTextureDesc graphicsFormat and depthStencilFormat cannot both be None.");
+				RenderTexture.WarnAboutFallbackTo16BitsDepth(desc.colorFormat);
+				desc.depthStencilFormat = GraphicsFormat.D16_UNorm;
 			}
-			bool flag2 = desc.graphicsFormat != GraphicsFormat.None && !SystemInfo.IsFormatSupported(desc.graphicsFormat, FormatUsage.Render);
+			bool flag2 = desc.graphicsFormat != GraphicsFormat.None && !SystemInfo.IsFormatSupported(desc.graphicsFormat, GraphicsFormatUsage.Render);
 			if (flag2)
 			{
 				throw new ArgumentException("RenderTextureDesc graphicsFormat must be a supported GraphicsFormat. " + desc.graphicsFormat.ToString() + " is not supported on this platform.", "desc.graphicsFormat");
@@ -544,7 +1025,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentException("RenderTextureDesc volumeDepth must be a multiple of 6 when dimension is CubeArray", "desc.volumeDepth");
 			}
-			bool flag9 = desc.graphicsFormat != GraphicsFormat.ShadowAuto && desc.graphicsFormat != GraphicsFormat.DepthAuto && GraphicsFormatUtility.IsDepthStencilFormat(desc.graphicsFormat);
+			bool flag9 = GraphicsFormatUtility.IsDepthStencilFormat(desc.graphicsFormat);
 			if (flag9)
 			{
 				throw new ArgumentException("RenderTextureDesc graphicsFormat must not be a depth/stencil format. " + desc.graphicsFormat.ToString() + " is not supported.", "desc.graphicsFormat");
@@ -554,20 +1035,13 @@ namespace UnityEngine
 		internal static GraphicsFormat GetDefaultColorFormat(DefaultFormat format)
 		{
 			GraphicsFormat graphicsFormat;
-			if (format != DefaultFormat.DepthStencil)
+			if (format - DefaultFormat.DepthStencil > 1)
 			{
-				if (format != DefaultFormat.Shadow)
-				{
-					graphicsFormat = SystemInfo.GetGraphicsFormat(format);
-				}
-				else
-				{
-					graphicsFormat = GraphicsFormat.ShadowAuto;
-				}
+				graphicsFormat = SystemInfo.GetGraphicsFormat(format);
 			}
 			else
 			{
-				graphicsFormat = GraphicsFormat.DepthAuto;
+				graphicsFormat = GraphicsFormat.None;
 			}
 			return graphicsFormat;
 		}
@@ -586,10 +1060,25 @@ namespace UnityEngine
 			return graphicsFormat;
 		}
 
+		internal static ShadowSamplingMode GetShadowSamplingModeForFormat(RenderTextureFormat format)
+		{
+			return (format == RenderTextureFormat.Shadowmap) ? ShadowSamplingMode.CompareDepths : ShadowSamplingMode.None;
+		}
+
+		internal static ShadowSamplingMode GetShadowSamplingModeForFormat(DefaultFormat format)
+		{
+			return (format == DefaultFormat.Shadow) ? ShadowSamplingMode.CompareDepths : ShadowSamplingMode.None;
+		}
+
+		internal static void WarnAboutFallbackTo16BitsDepth(RenderTextureFormat format)
+		{
+			Debug.LogWarning(string.Format("{0} RenderTexture requested without a depth buffer. Changing to a 16 bit depth buffer. To resolve this warning, please specify the desired number of depth bits when creating the render texture.", format));
+		}
+
 		internal static GraphicsFormat GetCompatibleFormat(RenderTextureFormat renderTextureFormat, RenderTextureReadWrite readWrite)
 		{
 			GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(renderTextureFormat, readWrite);
-			GraphicsFormat compatibleFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, FormatUsage.Render);
+			GraphicsFormat compatibleFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, GraphicsFormatUsage.Render);
 			bool flag = graphicsFormat == compatibleFormat;
 			GraphicsFormat graphicsFormat2;
 			if (flag)
@@ -606,26 +1095,28 @@ namespace UnityEngine
 
 		public static RenderTexture GetTemporary(RenderTextureDescriptor desc)
 		{
-			RenderTexture.ValidateRenderTextureDesc(desc);
+			RenderTexture.ValidateRenderTextureDesc(ref desc);
 			desc.createdFromScript = true;
 			return RenderTexture.GetTemporary_Internal(desc);
 		}
 
-		private static RenderTexture GetTemporaryImpl(int width, int height, GraphicsFormat depthStencilFormat, GraphicsFormat colorFormat, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false)
+		private static RenderTexture GetTemporaryImpl(int width, int height, GraphicsFormat depthStencilFormat, GraphicsFormat colorFormat, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false, ShadowSamplingMode shadowSamplingMode = ShadowSamplingMode.None)
 		{
 			return RenderTexture.GetTemporary(new RenderTextureDescriptor(width, height, colorFormat, depthStencilFormat)
 			{
 				msaaSamples = antiAliasing,
 				memoryless = memorylessMode,
 				vrUsage = vrUsage,
-				useDynamicScale = useDynamicScale
+				useDynamicScale = useDynamicScale,
+				shadowSamplingMode = shadowSamplingMode
 			});
 		}
 
 		[ExcludeFromDocs]
 		public static RenderTexture GetTemporary(int width, int height, int depthBuffer, GraphicsFormat format, [DefaultValue("1")] int antiAliasing, [DefaultValue("RenderTextureMemoryless.None")] RenderTextureMemoryless memorylessMode, [DefaultValue("VRTextureUsage.None")] VRTextureUsage vrUsage, [DefaultValue("false")] bool useDynamicScale)
 		{
-			return RenderTexture.GetTemporaryImpl(width, height, RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format), format, antiAliasing, memorylessMode, vrUsage, useDynamicScale);
+			ShadowSamplingMode shadowSamplingMode = ShadowSamplingMode.None;
+			return RenderTexture.GetTemporaryImpl(width, height, RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, shadowSamplingMode), format, antiAliasing, memorylessMode, vrUsage, useDynamicScale, ShadowSamplingMode.None);
 		}
 
 		[ExcludeFromDocs]
@@ -655,8 +1146,9 @@ namespace UnityEngine
 		public static RenderTexture GetTemporary(int width, int height, [DefaultValue("0")] int depthBuffer, [DefaultValue("RenderTextureFormat.Default")] RenderTextureFormat format, [DefaultValue("RenderTextureReadWrite.Default")] RenderTextureReadWrite readWrite, [DefaultValue("1")] int antiAliasing, [DefaultValue("RenderTextureMemoryless.None")] RenderTextureMemoryless memorylessMode, [DefaultValue("VRTextureUsage.None")] VRTextureUsage vrUsage, [DefaultValue("false")] bool useDynamicScale)
 		{
 			GraphicsFormat compatibleFormat = RenderTexture.GetCompatibleFormat(format, readWrite);
-			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format);
-			return RenderTexture.GetTemporaryImpl(width, height, depthStencilFormatLegacy, compatibleFormat, antiAliasing, memorylessMode, vrUsage, useDynamicScale);
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format, false);
+			ShadowSamplingMode shadowSamplingModeForFormat = RenderTexture.GetShadowSamplingModeForFormat(format);
+			return RenderTexture.GetTemporaryImpl(width, height, depthStencilFormatLegacy, compatibleFormat, antiAliasing, memorylessMode, vrUsage, useDynamicScale, shadowSamplingModeForFormat);
 		}
 
 		[ExcludeFromDocs]
@@ -748,18 +1240,189 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetColorBuffer_Injected(out RenderBuffer ret);
+		private static extern int get_width_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetDepthBuffer_Injected(out RenderBuffer ret);
+		private static extern void set_width_Injected(IntPtr _unity_self, int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTextureDescriptor_Injected(ref RenderTextureDescriptor desc);
+		private static extern int get_height_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetDescriptor_Injected(out RenderTextureDescriptor ret);
+		private static extern void set_height_Injected(IntPtr _unity_self, int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RenderTexture GetTemporary_Internal_Injected(ref RenderTextureDescriptor desc);
+		private static extern TextureDimension get_dimension_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_dimension_Injected(IntPtr _unity_self, TextureDimension value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsFormat GetColorFormat_Injected(IntPtr _unity_self, bool suppressWarnings);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetColorFormat_Injected(IntPtr _unity_self, GraphicsFormat format);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_useMipMap_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_useMipMap_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_sRGB_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VRTextureUsage get_vrUsage_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_vrUsage_Injected(IntPtr _unity_self, VRTextureUsage value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RenderTextureMemoryless get_memorylessMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_memorylessMode_Injected(IntPtr _unity_self, RenderTextureMemoryless value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsFormat get_stencilFormat_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_stencilFormat_Injected(IntPtr _unity_self, GraphicsFormat value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsFormat get_depthStencilFormat_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_depthStencilFormat_Injected(IntPtr _unity_self, GraphicsFormat value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_autoGenerateMips_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_autoGenerateMips_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_volumeDepth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_volumeDepth_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_antiAliasing_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_antiAliasing_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_bindTextureMS_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_bindTextureMS_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enableRandomWrite_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enableRandomWrite_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_useDynamicScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_useDynamicScale_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_useDynamicScaleExplicit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_useDynamicScaleExplicit_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enableShadingRate_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enableShadingRate_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ApplyDynamicScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetIsPowerOfTwo_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetActive_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetActive_Injected(IntPtr rt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetColorBuffer_Injected(IntPtr _unity_self, out RenderBuffer ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDepthBuffer_Injected(IntPtr _unity_self, out RenderBuffer ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMipMapCount_Injected(IntPtr _unity_self, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetShadowSamplingMode_Injected(IntPtr _unity_self, ShadowSamplingMode samplingMode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetNativeDepthBufferPtr_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DiscardContents_Injected(IntPtr _unity_self, bool discardColor, bool discardDepth);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MarkRestoreExpected_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResolveAA_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResolveAATo_Injected(IntPtr _unity_self, IntPtr rt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalShaderProperty_Injected(IntPtr _unity_self, ref ManagedSpanWrapper propertyName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Create_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Release_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsCreated_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GenerateMips_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ConvertToEquirect_Injected(IntPtr _unity_self, IntPtr equirect, Camera.MonoOrStereoscopicEye eye);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSRGBReadWrite_Injected(IntPtr _unity_self, bool srgb);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsStencil_Injected(IntPtr rt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTextureDescriptor_Injected(IntPtr _unity_self, [In] ref RenderTextureDescriptor desc);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDescriptor_Injected(IntPtr _unity_self, out RenderTextureDescriptor ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetTemporary_Internal_Injected([In] ref RenderTextureDescriptor desc);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseTemporary_Injected(IntPtr temp);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_depth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_depth_Injected(IntPtr _unity_self, int value);
 	}
 }

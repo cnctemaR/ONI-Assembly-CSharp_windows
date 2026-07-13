@@ -34,6 +34,11 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		public struct InsightsUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct UnityWebRequestUpdate
 		{
 		}
@@ -168,8 +173,8 @@ namespace UnityEngine.PlayerLoop
 		{
 		}
 
-		[Obsolete("TangoUpdate has been deprecated. Use ARCoreUpdate instead (UnityUpgradable) -> UnityEngine.PlayerLoop.EarlyUpdate/ARCoreUpdate", false)]
 		[RequiredByNativeCode]
+		[Obsolete("TangoUpdate has been deprecated. Use ARCoreUpdate instead (UnityUpgradable) -> UnityEngine.PlayerLoop.EarlyUpdate/ARCoreUpdate", false)]
 		public struct TangoUpdate
 		{
 		}
@@ -181,6 +186,11 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct PerformanceAnalyticsUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct TilemapRendererEarlyUpdate
 		{
 		}
 	}

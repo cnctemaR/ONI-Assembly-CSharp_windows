@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -136,8 +137,8 @@ namespace UnityEngine
 			Display.ActivateDisplayImpl(this.nativeDisplay, width, height, refreshRate);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Activate(int, int, int) is deprecated. Use Activate(int, int, RefreshRate) instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public void Activate(int width, int height, int refreshRate)
 		{
 			bool flag = refreshRate < 0;
@@ -278,7 +279,7 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ActivateDisplayImpl_Injected(IntPtr nativeDisplay, int width, int height, ref RefreshRate refreshRate);
+		private static extern void ActivateDisplayImpl_Injected(IntPtr nativeDisplay, int width, int height, [In] ref RefreshRate refreshRate);
 
 		internal IntPtr nativeDisplay;
 

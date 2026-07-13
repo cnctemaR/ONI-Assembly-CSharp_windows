@@ -6,8 +6,8 @@ using System.Security;
 
 namespace System.Runtime.Serialization.Formatters
 {
-	[SoapType(Embedded = true)]
 	[ComVisible(true)]
+	[SoapType(Embedded = true)]
 	[Serializable]
 	public sealed class SoapFault : ISerializable
 	{

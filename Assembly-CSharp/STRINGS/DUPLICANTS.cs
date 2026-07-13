@@ -2023,7 +2023,7 @@ namespace STRINGS
 
 				public static LocString IS_NOT_BURROWED = "Is not burrowed";
 
-				public static LocString IS_CREATURE_AVAILABLE_FOR_RANCHING = "No Critters Available";
+				public static LocString IS_CREATURE_AVAILABLE_FOR_RANCHING = "No Critters Ready";
 
 				public static LocString IS_CREATURE_AVAILABLE_FOR_FIXED_CAPTURE = "Pen Status OK";
 

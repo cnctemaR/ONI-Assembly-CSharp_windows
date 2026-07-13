@@ -8,6 +8,7 @@ namespace UnityEngine
 	public class InspectorNameAttribute : PropertyAttribute
 	{
 		public InspectorNameAttribute(string displayName)
+			: base(true)
 		{
 			this.displayName = displayName;
 		}

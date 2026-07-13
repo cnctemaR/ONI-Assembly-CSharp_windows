@@ -2,7 +2,7 @@
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
 	public sealed class ColorUsageAttribute : PropertyAttribute
 	{
 		public ColorUsageAttribute(bool showAlpha)

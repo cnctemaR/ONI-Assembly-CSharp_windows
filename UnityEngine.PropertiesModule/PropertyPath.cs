@@ -81,10 +81,7 @@ namespace Unity.Properties
 			this.m_Part2 = propertyPath.m_Part2;
 			this.m_Part3 = propertyPath.m_Part3;
 			this.m_AdditionalParts = propertyPath.m_AdditionalParts;
-			this.m_InlinePartsCount = propertyPath.m_InlinePartsCount;
-			int inlinePartsCount = this.m_InlinePartsCount;
-			PropertyPathPart[] additionalParts = this.m_AdditionalParts;
-			this.Length = inlinePartsCount + ((additionalParts != null) ? additionalParts.Length : 0);
+			this.Length = propertyPath.Length;
 		}
 
 		private PropertyPath(in PropertyPathPart part)
@@ -94,7 +91,6 @@ namespace Unity.Properties
 			this.m_Part2 = default(PropertyPathPart);
 			this.m_Part3 = default(PropertyPathPart);
 			this.m_AdditionalParts = null;
-			this.m_InlinePartsCount = 1;
 			this.Length = 1;
 		}
 
@@ -105,7 +101,6 @@ namespace Unity.Properties
 			this.m_Part2 = default(PropertyPathPart);
 			this.m_Part3 = default(PropertyPathPart);
 			this.m_AdditionalParts = null;
-			this.m_InlinePartsCount = 2;
 			this.Length = 2;
 		}
 
@@ -116,7 +111,6 @@ namespace Unity.Properties
 			this.m_Part2 = part2;
 			this.m_Part3 = default(PropertyPathPart);
 			this.m_AdditionalParts = null;
-			this.m_InlinePartsCount = 3;
 			this.Length = 3;
 		}
 
@@ -127,7 +121,6 @@ namespace Unity.Properties
 			this.m_Part2 = part2;
 			this.m_Part3 = part3;
 			this.m_AdditionalParts = null;
-			this.m_InlinePartsCount = 4;
 			this.Length = 4;
 		}
 
@@ -137,7 +130,6 @@ namespace Unity.Properties
 			this.m_Part1 = default(PropertyPathPart);
 			this.m_Part2 = default(PropertyPathPart);
 			this.m_Part3 = default(PropertyPathPart);
-			this.m_InlinePartsCount = 0;
 			this.m_AdditionalParts = ((parts.Count > 4) ? new PropertyPathPart[parts.Count - 4] : null);
 			for (int i = 0; i < parts.Count; i++)
 			{
@@ -145,19 +137,15 @@ namespace Unity.Properties
 				{
 				case 0:
 					this.m_Part0 = parts[i];
-					this.m_InlinePartsCount++;
 					break;
 				case 1:
 					this.m_Part1 = parts[i];
-					this.m_InlinePartsCount++;
 					break;
 				case 2:
 					this.m_Part2 = parts[i];
-					this.m_InlinePartsCount++;
 					break;
 				case 3:
 					this.m_Part3 = parts[i];
-					this.m_InlinePartsCount++;
 					break;
 				default:
 					this.m_AdditionalParts[i - 4] = parts[i];
@@ -218,18 +206,18 @@ namespace Unity.Properties
 					if (flag)
 					{
 						int num2 = 0;
-						PropertyPathPart propertyPathPart = path[0];
-						PropertyPathPart propertyPathPart2 = ((length > 1) ? path[1] : pathToAppend[num2++]);
-						PropertyPathPart propertyPathPart3 = ((num > 2) ? ((length > 2) ? path[2] : pathToAppend[num2++]) : default(PropertyPathPart));
-						PropertyPathPart propertyPathPart4 = ((num > 3) ? ((length > 3) ? path[3] : pathToAppend[num2]) : default(PropertyPathPart));
+						PropertyPathPart part = path.m_Part0;
+						PropertyPathPart propertyPathPart = ((length > 1) ? path.m_Part1 : pathToAppend[num2++]);
+						PropertyPathPart propertyPathPart2 = ((num > 2) ? ((length > 2) ? path.m_Part2 : pathToAppend[num2++]) : default(PropertyPathPart));
+						PropertyPathPart propertyPathPart3 = ((num > 3) ? ((length > 3) ? path.m_Part3 : pathToAppend[num2]) : default(PropertyPathPart));
 						switch (num)
 						{
 						case 2:
-							return new PropertyPath(in propertyPathPart, in propertyPathPart2);
+							return new PropertyPath(in part, in propertyPathPart);
 						case 3:
-							return new PropertyPath(in propertyPathPart, in propertyPathPart2, in propertyPathPart3);
+							return new PropertyPath(in part, in propertyPathPart, in propertyPathPart2);
 						case 4:
-							return new PropertyPath(in propertyPathPart, in propertyPathPart2, in propertyPathPart3, in propertyPathPart4);
+							return new PropertyPath(in part, in propertyPathPart, in propertyPathPart2, in propertyPathPart3);
 						}
 					}
 					List<PropertyPathPart> list = CollectionPool<List<PropertyPathPart>, PropertyPathPart>.Get();
@@ -277,26 +265,14 @@ namespace Unity.Properties
 				switch (path.Length + 1)
 				{
 				case 2:
-				{
-					PropertyPathPart propertyPathPart = path[0];
-					propertyPath = new PropertyPath(in propertyPathPart, in part);
+					propertyPath = new PropertyPath(in path.m_Part0, in part);
 					break;
-				}
 				case 3:
-				{
-					PropertyPathPart propertyPathPart = path[0];
-					PropertyPathPart propertyPathPart2 = path[1];
-					propertyPath = new PropertyPath(in propertyPathPart, in propertyPathPart2, in part);
+					propertyPath = new PropertyPath(in path.m_Part0, in path.m_Part1, in part);
 					break;
-				}
 				case 4:
-				{
-					PropertyPathPart propertyPathPart = path[0];
-					PropertyPathPart propertyPathPart2 = path[1];
-					PropertyPathPart propertyPathPart3 = path[2];
-					propertyPath = new PropertyPath(in propertyPathPart, in propertyPathPart2, in propertyPathPart3, in part);
+					propertyPath = new PropertyPath(in path.m_Part0, in path.m_Part1, in path.m_Part2, in part);
 					break;
-				}
 				default:
 				{
 					List<PropertyPathPart> list = CollectionPool<List<PropertyPathPart>, PropertyPathPart>.Get();
@@ -570,9 +546,9 @@ namespace Unity.Properties
 
 		private static PropertyPath ConstructFromPath(string path)
 		{
-			PropertyPath.<>c__DisplayClass37_0 CS$<>8__locals1;
+			PropertyPath.<>c__DisplayClass36_0 CS$<>8__locals1;
 			CS$<>8__locals1.path = path;
-			bool flag = string.IsNullOrEmpty(CS$<>8__locals1.path);
+			bool flag = string.IsNullOrWhiteSpace(CS$<>8__locals1.path);
 			PropertyPath propertyPath;
 			if (flag)
 			{
@@ -593,7 +569,7 @@ namespace Unity.Properties
 						{
 						case 0:
 						{
-							PropertyPath.<ConstructFromPath>g__TrimStart|37_0(ref CS$<>8__locals1);
+							PropertyPath.<ConstructFromPath>g__TrimStart|36_0(ref CS$<>8__locals1);
 							bool flag2 = CS$<>8__locals1.index == CS$<>8__locals1.length;
 							if (!flag2)
 							{
@@ -646,7 +622,7 @@ namespace Unity.Properties
 							else
 							{
 								list.Add(new PropertyPathPart(CS$<>8__locals1.path.Substring(index, CS$<>8__locals1.index - index)));
-								PropertyPath.<ConstructFromPath>g__ReadNext|37_1(ref CS$<>8__locals1);
+								PropertyPath.<ConstructFromPath>g__ReadNext|36_1(ref CS$<>8__locals1);
 							}
 							break;
 						}
@@ -712,7 +688,7 @@ namespace Unity.Properties
 							bool flag16 = CS$<>8__locals1.index == CS$<>8__locals1.length;
 							if (!flag16)
 							{
-								PropertyPath.<ConstructFromPath>g__ReadNext|37_1(ref CS$<>8__locals1);
+								PropertyPath.<ConstructFromPath>g__ReadNext|36_1(ref CS$<>8__locals1);
 							}
 							break;
 						}
@@ -757,7 +733,7 @@ namespace Unity.Properties
 							string text2 = CS$<>8__locals1.path.Substring(index3, CS$<>8__locals1.index - index3);
 							list.Add(new PropertyPathPart(text2));
 							CS$<>8__locals1.index += 2;
-							PropertyPath.<ConstructFromPath>g__ReadNext|37_1(ref CS$<>8__locals1);
+							PropertyPath.<ConstructFromPath>g__ReadNext|36_1(ref CS$<>8__locals1);
 							break;
 						}
 						}
@@ -770,6 +746,16 @@ namespace Unity.Properties
 				}
 			}
 			return propertyPath;
+		}
+
+		public static bool operator ==(PropertyPath lhs, PropertyPath rhs)
+		{
+			return lhs.Equals(rhs);
+		}
+
+		public static bool operator !=(PropertyPath lhs, PropertyPath rhs)
+		{
+			return !(lhs == rhs);
 		}
 
 		public bool Equals(PropertyPath other)
@@ -862,7 +848,7 @@ namespace Unity.Properties
 		}
 
 		[CompilerGenerated]
-		internal static void <ConstructFromPath>g__TrimStart|37_0(ref PropertyPath.<>c__DisplayClass37_0 A_0)
+		internal static void <ConstructFromPath>g__TrimStart|36_0(ref PropertyPath.<>c__DisplayClass36_0 A_0)
 		{
 			while (A_0.index < A_0.length && A_0.path[A_0.index] == ' ')
 			{
@@ -872,7 +858,7 @@ namespace Unity.Properties
 		}
 
 		[CompilerGenerated]
-		internal static void <ConstructFromPath>g__ReadNext|37_1(ref PropertyPath.<>c__DisplayClass37_0 A_0)
+		internal static void <ConstructFromPath>g__ReadNext|36_1(ref PropertyPath.<>c__DisplayClass36_0 A_0)
 		{
 			bool flag = A_0.index == A_0.length;
 			if (flag)
@@ -909,8 +895,6 @@ namespace Unity.Properties
 		private readonly PropertyPathPart m_Part2;
 
 		private readonly PropertyPathPart m_Part3;
-
-		private readonly int m_InlinePartsCount;
 
 		private readonly PropertyPathPart[] m_AdditionalParts;
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -8,18 +9,37 @@ namespace UnityEngine
 	[NativeHeader("Modules/TerrainPhysics/TerrainCollider.h")]
 	public class TerrainCollider : Collider
 	{
-		public extern TerrainData terrainData
+		public TerrainData terrainData
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<TerrainData>(TerrainCollider.get_terrainData_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainCollider.set_terrainData_Injected(intPtr, Object.MarshalledUnityObject.Marshal<TerrainData>(value));
+			}
 		}
 
 		private RaycastHit Raycast(Ray ray, float maxDistance, bool hitHoles, ref bool hasHit)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainCollider>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			RaycastHit raycastHit;
-			this.Raycast_Injected(ref ray, maxDistance, hitHoles, ref hasHit, out raycastHit);
+			TerrainCollider.Raycast_Injected(intPtr, ref ray, maxDistance, hitHoles, ref hasHit, out raycastHit);
 			return raycastHit;
 		}
 
@@ -31,6 +51,12 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Raycast_Injected(ref Ray ray, float maxDistance, bool hitHoles, ref bool hasHit, out RaycastHit ret);
+		private static extern IntPtr get_terrainData_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_terrainData_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Raycast_Injected(IntPtr _unity_self, [In] ref Ray ray, float maxDistance, bool hitHoles, ref bool hasHit, out RaycastHit ret);
 	}
 }

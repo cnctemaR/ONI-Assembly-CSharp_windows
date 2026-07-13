@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using MonoMod.Utils;
+using System.Runtime.CompilerServices;
+using MonoMod;
 
 namespace HarmonyLib
 {
@@ -40,9 +41,18 @@ namespace HarmonyLib
 				{
 					text2 = new Uri(assembly.CodeBase).LocalPath;
 				}
-				int size = IntPtr.Size;
-				Platform platform = PlatformHelper.Current;
-				FileLog.Log(string.Format("### Harmony id={0}, version={1}, location={2}, env/clr={3}, platform={4}, ptrsize:runtime/env={5}/{6}", new object[] { id, version, text2, text3, text4, size, platform }));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(57, 5);
+				defaultInterpolatedStringHandler.AppendLiteral("### Harmony id=");
+				defaultInterpolatedStringHandler.AppendFormatted(id);
+				defaultInterpolatedStringHandler.AppendLiteral(", version=");
+				defaultInterpolatedStringHandler.AppendFormatted<Version>(version);
+				defaultInterpolatedStringHandler.AppendLiteral(", location=");
+				defaultInterpolatedStringHandler.AppendFormatted(text2);
+				defaultInterpolatedStringHandler.AppendLiteral(", env/clr=");
+				defaultInterpolatedStringHandler.AppendFormatted(text3);
+				defaultInterpolatedStringHandler.AppendLiteral(", platform=");
+				defaultInterpolatedStringHandler.AppendFormatted(text4);
+				FileLog.Log(defaultInterpolatedStringHandler.ToStringAndClear());
 				MethodBase outsideCaller = AccessTools.GetOutsideCaller();
 				if (outsideCaller.DeclaringType != null)
 				{
@@ -53,7 +63,10 @@ namespace HarmonyLib
 						text2 = new Uri(assembly2.CodeBase).LocalPath;
 					}
 					FileLog.Log("### Started from " + outsideCaller.FullDescription() + ", location " + text2);
-					FileLog.Log(string.Format("### At {0:yyyy-MM-dd hh.mm.ss}", DateTime.Now));
+					defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(7, 1);
+					defaultInterpolatedStringHandler.AppendLiteral("### At ");
+					defaultInterpolatedStringHandler.AppendFormatted<DateTime>(DateTime.Now, "yyyy-MM-dd hh.mm.ss");
+					FileLog.Log(defaultInterpolatedStringHandler.ToStringAndClear());
 				}
 			}
 			this.Id = id;
@@ -61,7 +74,8 @@ namespace HarmonyLib
 
 		public void PatchAll()
 		{
-			Assembly assembly = new StackTrace().GetFrame(1).GetMethod().ReflectedType.Assembly;
+			MethodBase method = new StackTrace().GetFrame(1).GetMethod();
+			Assembly assembly = method.ReflectedType.Assembly;
 			this.PatchAll(assembly);
 		}
 
@@ -82,10 +96,79 @@ namespace HarmonyLib
 
 		public void PatchAll(Assembly assembly)
 		{
-			AccessTools.GetTypesFromAssembly(assembly).Do<Type>(delegate(Type type)
+			AccessTools.GetTypesFromAssembly(assembly).DoIf<Type>((Type type) => type.HasHarmonyAttribute(), delegate(Type type)
 			{
 				this.CreateClassProcessor(type).Patch();
 			});
+		}
+
+		public void PatchAllUncategorized()
+		{
+			MethodBase method = new StackTrace().GetFrame(1).GetMethod();
+			Assembly assembly = method.ReflectedType.Assembly;
+			this.PatchAllUncategorized(assembly);
+		}
+
+		public void PatchAllUncategorized(Assembly assembly)
+		{
+			PatchClassProcessor[] array = (from type in AccessTools.GetTypesFromAssembly(assembly)
+				where type.HasHarmonyAttribute()
+				select type).Select<Type, PatchClassProcessor>(new Func<Type, PatchClassProcessor>(this.CreateClassProcessor)).ToArray<PatchClassProcessor>();
+			array.DoIf<PatchClassProcessor>((PatchClassProcessor patchClass) => string.IsNullOrEmpty(patchClass.Category), delegate(PatchClassProcessor patchClass)
+			{
+				patchClass.Patch();
+			});
+		}
+
+		public void PatchCategory(string category)
+		{
+			MethodBase method = new StackTrace().GetFrame(1).GetMethod();
+			Assembly assembly = method.ReflectedType.Assembly;
+			this.PatchCategory(assembly, category);
+		}
+
+		public void PatchCategory(Assembly assembly, string category)
+		{
+			ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>> assemblyCachedCategories = Harmony.AssemblyCachedCategories;
+			ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>>.CreateValueCallback createValueCallback;
+			if ((createValueCallback = Harmony.<>O.<0>__BuildCategoryCache) == null)
+			{
+				createValueCallback = (Harmony.<>O.<0>__BuildCategoryCache = new ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>>.CreateValueCallback(Harmony.BuildCategoryCache));
+			}
+			Dictionary<string, List<Type>> value = assemblyCachedCategories.GetValue(assembly, createValueCallback);
+			List<Type> list;
+			if (value.TryGetValue(category, out list))
+			{
+				list.Do<Type>(delegate(Type type)
+				{
+					this.CreateClassProcessor(type).Patch();
+				});
+			}
+		}
+
+		private static Dictionary<string, List<Type>> BuildCategoryCache(Assembly assembly)
+		{
+			Dictionary<string, List<Type>> dictionary = new Dictionary<string, List<Type>>();
+			foreach (Type type in AccessTools.GetTypesFromAssembly(assembly))
+			{
+				List<HarmonyMethod> fromType = HarmonyMethodExtensions.GetFromType(type);
+				if (fromType.Count != 0)
+				{
+					HarmonyMethod harmonyMethod = HarmonyMethod.Merge(fromType);
+					string category = harmonyMethod.category;
+					if (!string.IsNullOrEmpty(category))
+					{
+						List<Type> list;
+						if (!dictionary.TryGetValue(category, out list) && list == null)
+						{
+							list = new List<Type>();
+						}
+						list.Add(type);
+						dictionary[category] = list;
+					}
+				}
+			}
+			return dictionary;
 		}
 
 		public MethodInfo Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)
@@ -105,10 +188,11 @@ namespace HarmonyLib
 
 		public void UnpatchAll(string harmonyID = null)
 		{
-			Harmony.<>c__DisplayClass13_0 CS$<>8__locals1 = new Harmony.<>c__DisplayClass13_0();
+			Harmony.<>c__DisplayClass19_0 CS$<>8__locals1 = new Harmony.<>c__DisplayClass19_0();
 			CS$<>8__locals1.harmonyID = harmonyID;
 			CS$<>8__locals1.<>4__this = this;
-			using (List<MethodBase>.Enumerator enumerator = Harmony.GetAllPatchedMethods().ToList<MethodBase>().GetEnumerator())
+			List<MethodBase> list = Harmony.GetAllPatchedMethods().ToList<MethodBase>();
+			using (List<MethodBase>.Enumerator enumerator = list.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{
@@ -122,6 +206,14 @@ namespace HarmonyLib
 							CS$<>8__locals1.<>4__this.Unpatch(original, patchInfo.PatchMethod);
 						});
 						patchInfo2.Prefixes.DoIf<Patch>(new Func<Patch, bool>(CS$<>8__locals1.<UnpatchAll>g__IDCheck|0), delegate(Patch patchInfo)
+						{
+							CS$<>8__locals1.<>4__this.Unpatch(original, patchInfo.PatchMethod);
+						});
+						patchInfo2.InnerPostfixes.DoIf<Patch>(new Func<Patch, bool>(CS$<>8__locals1.<UnpatchAll>g__IDCheck|0), delegate(Patch patchInfo)
+						{
+							CS$<>8__locals1.<>4__this.Unpatch(original, patchInfo.PatchMethod);
+						});
+						patchInfo2.InnerPrefixes.DoIf<Patch>(new Func<Patch, bool>(CS$<>8__locals1.<UnpatchAll>g__IDCheck|0), delegate(Patch patchInfo)
 						{
 							CS$<>8__locals1.<>4__this.Unpatch(original, patchInfo.PatchMethod);
 						});
@@ -143,18 +235,51 @@ namespace HarmonyLib
 
 		public void Unpatch(MethodBase original, HarmonyPatchType type, string harmonyID = "*")
 		{
-			this.CreateProcessor(original).Unpatch(type, harmonyID);
+			PatchProcessor patchProcessor = this.CreateProcessor(original);
+			patchProcessor.Unpatch(type, harmonyID);
 		}
 
 		public void Unpatch(MethodBase original, MethodInfo patch)
 		{
-			this.CreateProcessor(original).Unpatch(patch);
+			PatchProcessor patchProcessor = this.CreateProcessor(original);
+			patchProcessor.Unpatch(patch);
+		}
+
+		public void UnpatchCategory(string category)
+		{
+			MethodBase method = new StackTrace().GetFrame(1).GetMethod();
+			Assembly assembly = method.ReflectedType.Assembly;
+			this.UnpatchCategory(assembly, category);
+		}
+
+		public void UnpatchCategory(Assembly assembly, string category)
+		{
+			ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>> assemblyCachedCategories = Harmony.AssemblyCachedCategories;
+			ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>>.CreateValueCallback createValueCallback;
+			if ((createValueCallback = Harmony.<>O.<0>__BuildCategoryCache) == null)
+			{
+				createValueCallback = (Harmony.<>O.<0>__BuildCategoryCache = new ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>>.CreateValueCallback(Harmony.BuildCategoryCache));
+			}
+			Dictionary<string, List<Type>> value = assemblyCachedCategories.GetValue(assembly, createValueCallback);
+			List<Type> list;
+			if (value.TryGetValue(category, out list))
+			{
+				list.Do<Type>(delegate(Type type)
+				{
+					this.CreateClassProcessor(type).Unpatch();
+				});
+			}
 		}
 
 		public static bool HasAnyPatches(string harmonyID)
 		{
-			return (from original in Harmony.GetAllPatchedMethods()
-				select Harmony.GetPatchInfo(original)).Any<Patches>((Patches info) => info.Owners.Contains(harmonyID));
+			IEnumerable<MethodBase> allPatchedMethods = Harmony.GetAllPatchedMethods();
+			Func<MethodBase, Patches> func;
+			if ((func = Harmony.<>O.<1>__GetPatchInfo) == null)
+			{
+				func = (Harmony.<>O.<1>__GetPatchInfo = new Func<MethodBase, Patches>(Harmony.GetPatchInfo));
+			}
+			return allPatchedMethods.Select<MethodBase, Patches>(func).Any<Patches>((Patches info) => info.Owners.Contains(harmonyID));
 		}
 
 		public static Patches GetPatchInfo(MethodBase method)
@@ -180,7 +305,7 @@ namespace HarmonyLib
 			{
 				throw new ArgumentNullException("replacement");
 			}
-			return HarmonySharedState.GetOriginal(replacement);
+			return HarmonySharedState.GetRealMethod(replacement, false);
 		}
 
 		public static MethodBase GetMethodFromStackframe(StackFrame frame)
@@ -189,18 +314,16 @@ namespace HarmonyLib
 			{
 				throw new ArgumentNullException("frame");
 			}
-			return HarmonySharedState.FindReplacement(frame) ?? frame.GetMethod();
+			return HarmonySharedState.GetStackFrameMethod(frame, true);
 		}
 
 		public static MethodBase GetOriginalMethodFromStackframe(StackFrame frame)
 		{
-			MethodBase methodBase = Harmony.GetMethodFromStackframe(frame);
-			MethodInfo methodInfo = methodBase as MethodInfo;
-			if (methodInfo != null)
+			if (frame == null)
 			{
-				methodBase = Harmony.GetOriginalMethod(methodInfo) ?? methodBase;
+				throw new ArgumentNullException("frame");
 			}
-			return methodBase;
+			return HarmonySharedState.GetStackFrameMethod(frame, false);
 		}
 
 		public static Dictionary<string, Version> VersionInfo(out Version currentVersion)
@@ -208,6 +331,36 @@ namespace HarmonyLib
 			return PatchProcessor.VersionInfo(out currentVersion);
 		}
 
+		public static void SetSwitch(string name, object value)
+		{
+			Switches.SetSwitchValue(name, value);
+		}
+
+		public static void ClearSwitch(string name)
+		{
+			Switches.ClearSwitchValue(name);
+		}
+
+		public static bool TryGetSwitch(string name, out object value)
+		{
+			return Switches.TryGetSwitchValue(name, out value);
+		}
+
+		public static bool TryIsSwitchEnabled(string name, out bool isEnabled)
+		{
+			return Switches.TryGetSwitchEnabled(name, out isEnabled);
+		}
+
 		public static bool DEBUG;
+
+		private static readonly ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>> AssemblyCachedCategories = new ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>>();
+
+		[CompilerGenerated]
+		private static class <>O
+		{
+			public static ConditionalWeakTable<Assembly, Dictionary<string, List<Type>>>.CreateValueCallback <0>__BuildCategoryCache;
+
+			public static Func<MethodBase, Patches> <1>__GetPatchInfo;
+		}
 	}
 }

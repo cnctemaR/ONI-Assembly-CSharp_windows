@@ -215,8 +215,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		SimTemperatureTransfer sttOptimizationHook = primary_element.sttOptimizationHook;
 		if (Sim.IsValidHandle(sttOptimizationHook.simHandle))
 		{
-			float mass = primary_element.Mass;
-			float num = ((mass >= 0.01f) ? (mass * primary_element.Element.specificHeatCapacity) : 0f);
+			float num = primary_element.Mass * primary_element.Element.specificHeatCapacity;
 			SimMessages.SetElementChunkData(sttOptimizationHook.simHandle, temperature, num);
 			int handleIndex = Sim.GetHandleIndex(sttOptimizationHook.simHandle);
 			Game.Instance.simData.elementChunks[handleIndex].temperature = temperature;
@@ -227,7 +226,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	{
 		if (Sim.IsValidHandle(this.simHandle))
 		{
-			float num = ((primary_element.Mass >= 0.01f) ? (primary_element.Mass * primary_element.Element.specificHeatCapacity) : 0f);
+			float num = primary_element.Mass * primary_element.Element.specificHeatCapacity;
 			SimMessages.SetElementChunkData(this.simHandle, primary_element.Temperature, num);
 			return;
 		}
@@ -287,7 +286,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			SimTemperatureTransfer.handleInstanceMap[this.simHandle] = this;
 			if (this.forceDataSyncOnRegister || Mathf.Abs(temperature - internalTemperature) > 0.1f)
 			{
-				float num = ((this.pe.Mass >= 0.01f) ? (this.pe.Mass * this.pe.Element.specificHeatCapacity) : 0f);
+				float num = this.pe.Mass * this.pe.Element.specificHeatCapacity;
 				SimMessages.SetElementChunkData(this.simHandle, internalTemperature, num);
 				SimMessages.MoveElementChunk(this.simHandle, Grid.PosToCell(this));
 				Game.Instance.simData.elementChunks[handleIndex].temperature = internalTemperature;
@@ -312,8 +311,6 @@ public class SimTemperatureTransfer : KMonoBehaviour
 	public PrimaryElement pe;
 
 	private const float SIM_FREEZE_SPAWN_ORE_PERCENT = 0.8f;
-
-	public const float MIN_MASS_FOR_TEMPERATURE_TRANSFER = 0.01f;
 
 	public float deltaKJ;
 

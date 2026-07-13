@@ -12,8 +12,8 @@ using System.Threading;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_Assembly))]
+	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]

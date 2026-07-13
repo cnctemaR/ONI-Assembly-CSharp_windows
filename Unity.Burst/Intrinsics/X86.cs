@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using AOT;
 
 namespace Unity.Burst.Intrinsics
 {
@@ -101,22 +102,17 @@ namespace Unity.Burst.Intrinsics
 		}
 
 		[BurstCompile(CompileSynchronously = true)]
+		[MonoPInvokeCallback(typeof(X86.DoSetCSRTrampoline_00000129$PostfixBurstDelegate))]
 		private static void DoSetCSRTrampoline(int bits)
 		{
-			if (X86.Sse.IsSseSupported)
-			{
-				X86.BurstIntrinsicSetCSRFromManaged(bits);
-			}
+			X86.DoSetCSRTrampoline_00000129$BurstDirectCall.Invoke(bits);
 		}
 
 		[BurstCompile(CompileSynchronously = true)]
+		[MonoPInvokeCallback(typeof(X86.DoGetCSRTrampoline_0000012A$PostfixBurstDelegate))]
 		private static int DoGetCSRTrampoline()
 		{
-			if (X86.Sse.IsSseSupported)
-			{
-				return X86.BurstIntrinsicGetCSRFromManaged();
-			}
-			return 0;
+			return X86.DoGetCSRTrampoline_0000012A$BurstDirectCall.Invoke();
 		}
 
 		public static X86.MXCSRBits MXCSR
@@ -131,6 +127,27 @@ namespace Unity.Burst.Intrinsics
 			{
 				X86.setcsr_raw((int)value);
 			}
+		}
+
+		[BurstCompile(CompileSynchronously = true)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static void DoSetCSRTrampoline$BurstManaged(int bits)
+		{
+			if (X86.Sse.IsSseSupported)
+			{
+				X86.BurstIntrinsicSetCSRFromManaged(bits);
+			}
+		}
+
+		[BurstCompile(CompileSynchronously = true)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static int DoGetCSRTrampoline$BurstManaged()
+		{
+			if (X86.Sse.IsSseSupported)
+			{
+				return X86.BurstIntrinsicGetCSRFromManaged();
+			}
+			return 0;
 		}
 
 		public static class Avx
@@ -9101,6 +9118,83 @@ namespace Unity.Burst.Intrinsics
 				}
 				return v;
 			}
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal delegate void DoSetCSRTrampoline_00000129$PostfixBurstDelegate(int bits);
+
+		internal static class DoSetCSRTrampoline_00000129$BurstDirectCall
+		{
+			[BurstDiscard]
+			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
+			{
+				if (X86.DoSetCSRTrampoline_00000129$BurstDirectCall.Pointer == 0)
+				{
+					X86.DoSetCSRTrampoline_00000129$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<X86.DoSetCSRTrampoline_00000129$PostfixBurstDelegate>(new X86.DoSetCSRTrampoline_00000129$PostfixBurstDelegate(X86.DoSetCSRTrampoline)).Value;
+				}
+				A_0 = X86.DoSetCSRTrampoline_00000129$BurstDirectCall.Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				IntPtr intPtr = (IntPtr)0;
+				X86.DoSetCSRTrampoline_00000129$BurstDirectCall.GetFunctionPointerDiscard(ref intPtr);
+				return intPtr;
+			}
+
+			public static void Invoke(int bits)
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = X86.DoSetCSRTrampoline_00000129$BurstDirectCall.GetFunctionPointer();
+					if (functionPointer != 0)
+					{
+						calli(System.Void(System.Int32), bits, functionPointer);
+						return;
+					}
+				}
+				X86.DoSetCSRTrampoline$BurstManaged(bits);
+			}
+
+			private static IntPtr Pointer;
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		internal delegate int DoGetCSRTrampoline_0000012A$PostfixBurstDelegate();
+
+		internal static class DoGetCSRTrampoline_0000012A$BurstDirectCall
+		{
+			[BurstDiscard]
+			private static void GetFunctionPointerDiscard(ref IntPtr A_0)
+			{
+				if (X86.DoGetCSRTrampoline_0000012A$BurstDirectCall.Pointer == 0)
+				{
+					X86.DoGetCSRTrampoline_0000012A$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<X86.DoGetCSRTrampoline_0000012A$PostfixBurstDelegate>(new X86.DoGetCSRTrampoline_0000012A$PostfixBurstDelegate(X86.DoGetCSRTrampoline)).Value;
+				}
+				A_0 = X86.DoGetCSRTrampoline_0000012A$BurstDirectCall.Pointer;
+			}
+
+			private static IntPtr GetFunctionPointer()
+			{
+				IntPtr intPtr = (IntPtr)0;
+				X86.DoGetCSRTrampoline_0000012A$BurstDirectCall.GetFunctionPointerDiscard(ref intPtr);
+				return intPtr;
+			}
+
+			public static int Invoke()
+			{
+				if (BurstCompiler.IsEnabled)
+				{
+					IntPtr functionPointer = X86.DoGetCSRTrampoline_0000012A$BurstDirectCall.GetFunctionPointer();
+					if (functionPointer != 0)
+					{
+						return calli(System.Int32(), functionPointer);
+					}
+				}
+				return X86.DoGetCSRTrampoline$BurstManaged();
+			}
+
+			private static IntPtr Pointer;
 		}
 	}
 }

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_MethodInfo))]
 	[Serializable]
 	public abstract class MethodInfo : MethodBase, _MethodInfo

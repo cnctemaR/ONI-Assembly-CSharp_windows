@@ -2215,12 +2215,12 @@ namespace System.Net
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool AllowReadStreamBuffering { get; set; }
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool AllowWriteStreamBuffering { get; set; }
 
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
@@ -2235,8 +2235,8 @@ namespace System.Net
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected virtual void OnWriteStreamClosed(WriteStreamClosedEventArgs e)
 		{
 		}

@@ -195,6 +195,22 @@ public static class ClusterUtil
 		return list;
 	}
 
+	public static void GetPickupablesFromRelatedWorlds(WorldInventory worldInventory, Tag tag, ref List<Pickupable> pickupables)
+	{
+		int parentWorldId = worldInventory.GetComponent<WorldContainer>().ParentWorldId;
+		foreach (WorldContainer worldContainer in ClusterManager.Instance.WorldContainers)
+		{
+			if (worldContainer.ParentWorldId == parentWorldId)
+			{
+				ICollection<Pickupable> pickupables2 = worldContainer.worldInventory.GetPickupables(tag, false);
+				if (pickupables2 != null)
+				{
+					pickupables.AddRange(pickupables2);
+				}
+			}
+		}
+	}
+
 	public static string DebugGetMyWorldName(this GameObject gameObject)
 	{
 		WorldContainer myWorld = gameObject.GetMyWorld();

@@ -152,10 +152,6 @@ namespace Mono.Btls
 
 		internal override bool ValidateCertificate(ChainValidationHelper validator, string targetHost, bool serverMode, X509CertificateCollection certificates, bool wantsChain, ref X509Chain chain, ref SslPolicyErrors errors, ref int status11)
 		{
-			if (Environment.OSVersion.Platform == PlatformID.Unix && Environment.GetEnvironmentVariable("UNITY_THISISABUILDMACHINE") != null)
-			{
-				return true;
-			}
 			if (chain != null)
 			{
 				X509ChainImplBtls x509ChainImplBtls = (X509ChainImplBtls)chain.Impl;

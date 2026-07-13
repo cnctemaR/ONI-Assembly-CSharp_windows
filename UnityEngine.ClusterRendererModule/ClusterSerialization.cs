@@ -8,6 +8,7 @@ using UnityEngine.Internal;
 namespace UnityEngine
 {
 	[NativeHeader("Modules/ClusterRenderer/ClusterSerialization.h")]
+	[Obsolete("This type is deprecated and will be removed in a future release.", false)]
 	[ExcludeFromDocs]
 	public static class ClusterSerialization
 	{

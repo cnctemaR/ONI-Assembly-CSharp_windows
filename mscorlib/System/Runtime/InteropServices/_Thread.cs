@@ -4,8 +4,8 @@ using System.Threading;
 namespace System.Runtime.InteropServices
 {
 	[TypeLibImportClass(typeof(Thread))]
-	[Guid("C281C7F1-4AA9-3517-961A-463CFED57E75")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("C281C7F1-4AA9-3517-961A-463CFED57E75")]
 	[CLSCompliant(false)]
 	[ComVisible(true)]
 	public interface _Thread

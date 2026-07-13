@@ -186,24 +186,27 @@ namespace UnityEngine.NVIDIA
 			return new GraphicsDeviceDebugView(this.CreateDebugViewId());
 		}
 
-		public unsafe void UpdateDebugView(GraphicsDeviceDebugView debugView)
+		public void UpdateDebugView(GraphicsDeviceDebugView debugView)
 		{
 			bool flag = debugView == null;
 			if (!flag)
 			{
-				GraphicsDeviceDebugInfo debugInfo = this.GetDebugInfo(debugView.m_ViewId);
-				debugView.m_DeviceVersion = debugInfo.NVDeviceVersion;
-				debugView.m_NgxVersion = debugInfo.NGXVersion;
-				bool flag2 = debugView.m_DlssDebugFeatures == null || (ulong)debugInfo.dlssInfosCount != (ulong)((long)debugView.m_DlssDebugFeatures.Length);
-				if (flag2)
+				GCHandle gchandle = GCHandle.Alloc(debugView.m_DlssDebugFeatures, GCHandleType.Pinned);
+				try
 				{
-					debugView.m_DlssDebugFeatures = new DLSSDebugFeatureInfos[debugInfo.dlssInfosCount];
+					GraphicsDeviceDebugInfo graphicsDeviceDebugInfo = new GraphicsDeviceDebugInfo
+					{
+						outDlssInfoBuffer = gchandle.AddrOfPinnedObject(),
+						outDlssInfoBufferCapacity = (uint)debugView.m_DlssDebugFeatures.Length
+					};
+					GraphicsDevice.NVUP_GetGraphicsDeviceDebugInfo(debugView.m_ViewId, out graphicsDeviceDebugInfo);
+					debugView.m_DeviceVersion = graphicsDeviceDebugInfo.NVDeviceVersion;
+					debugView.m_NgxVersion = graphicsDeviceDebugInfo.NGXVersion;
+					debugView.m_DlssFeatureValidCount = graphicsDeviceDebugInfo.dlssInfoCount;
 				}
-				int num = 0;
-				while ((long)num < (long)((ulong)debugInfo.dlssInfosCount))
+				finally
 				{
-					debugView.m_DlssDebugFeatures[num] = debugInfo.dlssInfos[num];
-					num++;
+					gchandle.Free();
 				}
 			}
 		}
@@ -215,6 +218,17 @@ namespace UnityEngine.NVIDIA
 			{
 				this.DeleteDebugViewId(debugView.m_ViewId);
 			}
+		}
+
+		public static string GetDLSSPresetExplanation(DLSSPreset preset)
+		{
+			IntPtr intPtr = GraphicsDevice.NVUP_GetDLSSPresetExplanation(preset);
+			return Marshal.PtrToStringAnsi(intPtr);
+		}
+
+		public static uint GetAvailableDLSSPresetsForQuality(DLSSQuality perfQuality)
+		{
+			return GraphicsDevice.NVUP_GetAvailableDLSSPresetsForQuality(perfQuality);
 		}
 
 		[DllImport("NVUnityPlugin", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
@@ -252,6 +266,12 @@ namespace UnityEngine.NVIDIA
 
 		[DllImport("NVUnityPlugin", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
 		private static extern int NVUP_GetBaseEventId();
+
+		[DllImport("NVUnityPlugin", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		private static extern IntPtr NVUP_GetDLSSPresetExplanation(DLSSPreset preset);
+
+		[DllImport("NVUnityPlugin", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		private static extern uint NVUP_GetAvailableDLSSPresetsForQuality(DLSSQuality perfQuality);
 
 		private static string s_DefaultProjectID = "231313132";
 

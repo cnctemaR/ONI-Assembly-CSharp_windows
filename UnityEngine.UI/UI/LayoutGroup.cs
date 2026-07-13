@@ -159,6 +159,7 @@ namespace UnityEngine.UI
 		protected override void OnEnable()
 		{
 			base.OnEnable();
+			this.rectTransform.sendChildDimensionsChange = true;
 			this.SetDirty();
 		}
 
@@ -166,6 +167,7 @@ namespace UnityEngine.UI
 		{
 			this.m_Tracker.Clear();
 			LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
+			this.rectTransform.sendChildDimensionsChange = false;
 			base.OnDisable();
 		}
 
@@ -282,6 +284,14 @@ namespace UnityEngine.UI
 		protected virtual void OnTransformChildrenChanged()
 		{
 			this.SetDirty();
+		}
+
+		protected virtual void OnChildRectTransformDimensionsChange()
+		{
+			if (!CanvasUpdateRegistry.IsRebuildingLayout())
+			{
+				this.SetDirty();
+			}
 		}
 
 		protected void SetProperty<T>(ref T currentValue, T newValue)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class LineNumberTable
+	internal class LineNumberTable
 	{
 		public LineNumberEntry[] LineNumbers
 		{

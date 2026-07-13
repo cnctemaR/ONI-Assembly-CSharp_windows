@@ -538,6 +538,13 @@ namespace STRINGS
 			Standby
 		}
 
+		public class UNKNOWN_DLC
+		{
+			public static LocString NAME = "Unknown DLC";
+
+			public static LocString NAME_ITAL = "<i>" + UI.UNKNOWN_DLC.NAME + "</i>";
+		}
+
 		public class VANILLA
 		{
 			public static LocString NAME = "Base Game";
@@ -4588,6 +4595,8 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "MODS";
 
+				public static LocString TITLE_SAFE_MODE = "MODS - SAFE MODE";
+
 				public static LocString MANAGE = "Subscription";
 
 				public static LocString MANAGE_LOCAL = "Browse";
@@ -4607,6 +4616,8 @@ namespace STRINGS
 				public static LocString DB_CORRUPT = "An error occurred trying to load the Mod Database.\n\n{0}";
 
 				public static LocString NO_DESCRIPTION = "No description found in mod.yaml";
+
+				public static LocString INSTALLED_VERSION_NEWER_THAN_LOADED_VERSION = "Reinstall pending";
 
 				public class CONTENT_FAILURE
 				{
@@ -4714,6 +4725,8 @@ namespace STRINGS
 
 				public static LocString UNINSTALLED = "UNINSTALLED";
 
+				public static LocString CANNOT_INSTALL = "FAILED INSTALL";
+
 				public static LocString REQUIRES_RESTART = "RESTART REQUIRED";
 
 				public static LocString BAD_WORLD_GEN = "LOAD FAILED";
@@ -4749,6 +4762,8 @@ namespace STRINGS
 					public static LocString INSTALLED = "Installation succeeded";
 
 					public static LocString UNINSTALLED = "Uninstalled";
+
+					public static LocString CANNOT_INSTALL = "Install failed due to disk i/o errors";
 
 					public static LocString BAD_WORLD_GEN = "Encountered an error while loading file";
 
@@ -4852,6 +4867,13 @@ namespace STRINGS
 					public static LocString MESSAGE = "{0}\nRestart required.";
 
 					public static LocString DEV_MESSAGE = "{0}\nRestart required.\nGame may be unstable until restarted.";
+				}
+
+				public class SAFE_MODE
+				{
+					public static LocString TITLE = "MOD SAFE MODE";
+
+					public static LocString MESSAGE = "One or more mods caused the game to crash when launched. Mods will not be loaded until the game is restarted.\n\nPlease disable some mods and restart to see if that fixes the issue.";
 				}
 			}
 
@@ -5487,6 +5509,8 @@ namespace STRINGS
 			public static LocString COLLECTION_THE = "Part of the {Collection} collection.";
 
 			public static LocString COLLECTION_COMING_SOON = "Part of {Collection} collection. Coming soon!";
+
+			public static LocString COLLECTION_COMING_SOON_THE = "Part of the {Collection} collection. Coming soon!";
 
 			public static LocString ITEM_RARITY_DETAILS = "{RarityName} quality.";
 
@@ -11036,7 +11060,9 @@ namespace STRINGS
 
 			public class LOREBEARERSIDESCREEN
 			{
-				public static LocString TITLE = "Read Files";
+				public static LocString TITLE = "Lore Drop";
+
+				public static LocString BUTTON = "Read Files";
 			}
 
 			public class CONFIGURECONSUMERSIDESCREEN
@@ -12437,6 +12463,8 @@ namespace STRINGS
 
 				public static LocString DESTINATION_LABEL = "Destination: {0}";
 
+				public static LocString DESTINATION_ROUNTRIP_LABEL = "Pending Roundtrip to: {0}";
+
 				public static LocString DESTINATION_LABEL_SELECTING = "Selecting new destination...";
 
 				public static LocString DESTINATION_LABEL_INVALID = "None selected";
@@ -12531,15 +12559,21 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Printables";
 
-				public static LocString NEXTPRODUCTION = "Next Production: {0}";
+				public static LocString NEXTPRODUCTION = "Next Print: {0}";
 
 				public static LocString GAMEOVER = "Colony Lost";
 
 				public static LocString VICTORY_CONDITIONS = "Hardwired Imperatives";
 
-				public static LocString SUMMARY_TITLE = "Colony Summary";
+				public static LocString SUMMARY_TITLE = "Management";
+
+				public static LocString SUMMARY_BUTTON = "Colony Summary";
+
+				public static LocString SKILLS_TITLE = "Skills";
 
 				public static LocString SKILLS_BUTTON = "Duplicant Skills";
+
+				public static LocString RESEARCH_BUTTON = "Research";
 			}
 
 			public class VALVESIDESCREEN
@@ -13968,6 +14002,20 @@ namespace STRINGS
 					public static LocString SEARCH1 = "I look around but find nothing of interest.";
 				}
 
+				public class SEARCH_FLATOBJECT_SUCCESS
+				{
+					public static LocString SEARCH1 = "There's a recording device taped to the back.\n\nNew Database Entry discovered.";
+
+					public static LocString SEARCH2 = "I find a small plastic disc and download its contents to my database.\n\nNew Database Entry discovered.";
+
+					public static LocString SEARCH3 = "A bundle of papers was tucked out of sight. I scan the contents and add them to my database.\n\nNew Database Entry discovered.";
+				}
+
+				public class SEARCH_FLATOBJECT_FAIL
+				{
+					public static LocString SEARCH1 = "There is nothing to find here. I suppose some things really are exactly what they seem to be.";
+				}
+
 				public class SEARCH_SPACEPOI_SUCCESS
 				{
 					public static LocString SEARCH1 = "A quick analysis of the hardware of this debris has uncovered some searchable files within.\n\nNew Database Entry unlocked.";
@@ -13995,16 +14043,6 @@ namespace STRINGS
 				public class SEARCH_DISPLAY_FAIL
 				{
 					public static LocString SEARCH1 = "The display is frozen. Whatever information it once contained is long gone.";
-				}
-
-				public class SEARCH_MIRROR_SUCCESS
-				{
-					public static LocString SEARCH1 = "I look behind the mirror and find a recording device taped to the back.\n\nNew Database Entry unlocked.";
-				}
-
-				public class SEARCH_MIRROR_FAIL
-				{
-					public static LocString SEARCH1 = "There's nothing to see here but the streaks left by a distracted cleaner.";
 				}
 			}
 
@@ -16420,6 +16458,8 @@ namespace STRINGS
 
 			public static LocString KCAL_PER_CYCLE = UI.FormatAsLink("KCal", "FOOD") + " per cycle: {0}";
 
+			public static LocString PER_STARMAP_HEX = "{0} per Starmap hex";
+
 			public static LocString REMOVES_DISEASE = "Kills germs";
 
 			public static LocString DOCTORING = "Doctoring";
@@ -16519,6 +16559,10 @@ namespace STRINGS
 			public static LocString KETTLE_MELT_RATE = "Melting Rate: {0}";
 
 			public static LocString FOOD_DEHYDRATOR_WATER_OUTPUT = "Wet Floor";
+
+			public static LocString PRODUCESDATABANKS = UI.FormatAsLink(DatabankHelper.NAME_PLURAL, "Databank") + ": {0}";
+
+			public static LocString PRODUCESMEDICINE = "Medicine";
 
 			public class TOOLTIPS
 			{
@@ -17486,6 +17530,10 @@ namespace STRINGS
 					"Ice",
 					UI.PST_KEYWORD
 				});
+
+				public static LocString PRODUCESDATABANKS = "This building produces {0} " + UI.FormatAsLink(DatabankHelper.NAME_PLURAL, "Databank") + " each time a Starmap hex is revealed";
+
+				public static LocString PRODUCESMEDICINE = "This building produces medical supplies";
 			}
 		}
 

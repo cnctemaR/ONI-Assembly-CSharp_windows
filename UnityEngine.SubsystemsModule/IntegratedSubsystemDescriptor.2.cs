@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Subsystems/SubsystemDescriptor.h")]
 	[UsedByNativeCode("SubsystemDescriptor")]
+	[NativeHeader("Modules/Subsystems/SubsystemDescriptor.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class IntegratedSubsystemDescriptor<TSubsystem> : IntegratedSubsystemDescriptor where TSubsystem : IntegratedSubsystem
 	{

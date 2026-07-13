@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.IO.Archive
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/VirtualFileSystem/ArchiveFileSystem/ArchiveFileHandle.h")]
+	[RequiredByNativeCode]
 	public struct ArchiveHandle
 	{
 		public ArchiveStatus Status

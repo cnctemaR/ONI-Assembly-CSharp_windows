@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
-	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
-	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
+	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+	[NativeHeader("Runtime/Misc/SystemInfoAudio.h")]
+	[NativeHeader("Runtime/Misc/SystemInfoMemory.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
+	[NativeHeader("Runtime/Misc/SystemInfoRendering.h")]
 	public sealed class SystemInfo
 	{
 		[NativeProperty]
@@ -52,6 +56,22 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.GetProcessorType();
+			}
+		}
+
+		public static string processorModel
+		{
+			get
+			{
+				return SystemInfo.GetProcessorModel();
+			}
+		}
+
+		public static string processorManufacturer
+		{
+			get
+			{
+				return SystemInfo.GetProcessorManufacturer();
 			}
 		}
 
@@ -140,6 +160,14 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.SupportsAudio();
+			}
+		}
+
+		public static bool supportsRendering
+		{
+			get
+			{
+				return SystemInfo.SupportsRendering();
 			}
 		}
 
@@ -244,6 +272,14 @@ namespace UnityEngine
 			get
 			{
 				return SystemInfo.GetFoveatedRenderingCaps();
+			}
+		}
+
+		public static bool hasTiledGPU
+		{
+			get
+			{
+				return SystemInfo.HasTiledGPU();
 			}
 		}
 
@@ -474,11 +510,35 @@ namespace UnityEngine
 			}
 		}
 
+		public static bool supportsMultisampledBackBuffer
+		{
+			get
+			{
+				return SystemInfo.SupportsMultisampledBackBuffer();
+			}
+		}
+
+		public static bool supportsMemorylessTextures
+		{
+			get
+			{
+				return SystemInfo.SupportsMemorylessTextures();
+			}
+		}
+
 		public static bool supportsMultisampleAutoResolve
 		{
 			get
 			{
 				return SystemInfo.SupportsMultisampleAutoResolve();
+			}
+		}
+
+		public static bool supportsMultisampledShaderResolve
+		{
+			get
+			{
+				return SystemInfo.SupportsMultisampledShaderResolve();
 			}
 		}
 
@@ -498,12 +558,36 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("supportsStencil always returns true, no need to call it")]
+		[Obsolete("supportsStencil always returns true, no need to call it", true)]
 		public static int supportsStencil
 		{
 			get
 			{
 				return 1;
+			}
+		}
+
+		public static bool supportsVariableRateShading
+		{
+			get
+			{
+				return SystemInfo.SupportsVariableRateShading();
+			}
+		}
+
+		public static int maxTiledPixelStorageSize
+		{
+			get
+			{
+				return SystemInfo.MaxTiledPixelStorageSize();
+			}
+		}
+
+		public static bool supportsDynamicResolution
+		{
+			get
+			{
+				return SystemInfo.SupportsDynamicResolution();
 			}
 		}
 
@@ -618,6 +702,7 @@ namespace UnityEngine
 
 		internal static int maxRenderTextureSize
 		{
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			get
 			{
 				return SystemInfo.GetMaxRenderTextureSize();
@@ -744,11 +829,51 @@ namespace UnityEngine
 			}
 		}
 
+		public static bool supportsParallelPSOCreation
+		{
+			get
+			{
+				return SystemInfo.SupportsParallelPSOCreation();
+			}
+		}
+
+		public static bool supportsRayTracingShaders
+		{
+			get
+			{
+				return SystemInfo.SupportsRayTracingShaders();
+			}
+		}
+
 		public static bool supportsRayTracing
 		{
 			get
 			{
 				return SystemInfo.SupportsRayTracing();
+			}
+		}
+
+		public static bool supportsInlineRayTracing
+		{
+			get
+			{
+				return SystemInfo.SupportsInlineRayTracing();
+			}
+		}
+
+		public static bool supportsIndirectDispatchRays
+		{
+			get
+			{
+				return SystemInfo.SupportsIndirectDispatchRays();
+			}
+		}
+
+		public static bool supportsMachineLearning
+		{
+			get
+			{
+				return SystemInfo.SupportsMachineLearning();
 			}
 		}
 
@@ -784,7 +909,7 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Use SystemInfo.constantBufferOffsetAlignment instead.")]
+		[Obsolete("Use SystemInfo.constantBufferOffsetAlignment instead.", true)]
 		public static bool minConstantBufferOffsetAlignment
 		{
 			get
@@ -882,7 +1007,15 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Vertex program support is required in Unity 5.0+")]
+		public static bool supportsDepthFetchInRenderPass
+		{
+			get
+			{
+				return SystemInfo.SupportsDepthFetchInRenderPass();
+			}
+		}
+
+		[Obsolete("Vertex program support is required in Unity 5.0+", true)]
 		public static bool supportsVertexPrograms
 		{
 			get
@@ -900,16 +1033,76 @@ namespace UnityEngine
 		private static extern BatteryStatus GetBatteryStatus();
 
 		[FreeFunction("systeminfo::GetOperatingSystem")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetOperatingSystem();
+		private static string GetOperatingSystem()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetOperatingSystem_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("systeminfo::GetOperatingSystemFamily")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern OperatingSystemFamily GetOperatingSystemFamily();
 
 		[FreeFunction("systeminfo::GetProcessorType")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetProcessorType();
+		private static string GetProcessorType()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetProcessorType_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		[FreeFunction("systeminfo::GetProcessorModel")]
+		private static string GetProcessorModel()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetProcessorModel_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		[FreeFunction("systeminfo::GetProcessorManufacturer")]
+		private static string GetProcessorManufacturer()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetProcessorManufacturer_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("systeminfo::GetProcessorFrequencyMHz")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -924,16 +1117,55 @@ namespace UnityEngine
 		private static extern int GetPhysicalMemoryMB();
 
 		[FreeFunction("systeminfo::GetDeviceUniqueIdentifier")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetDeviceUniqueIdentifier();
+		private static string GetDeviceUniqueIdentifier()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetDeviceUniqueIdentifier_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("systeminfo::GetDeviceName")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetDeviceName();
+		private static string GetDeviceName()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetDeviceName_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("systeminfo::GetDeviceModel")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetDeviceModel();
+		private static string GetDeviceModel()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetDeviceModel_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("systeminfo::SupportsAccelerometer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -955,6 +1187,10 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsAudio();
 
+		[FreeFunction("systeminfo::SupportsRendering")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsRendering();
+
 		[FreeFunction("systeminfo::GetDeviceType")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern DeviceType GetDeviceType();
@@ -964,12 +1200,38 @@ namespace UnityEngine
 		private static extern int GetGraphicsMemorySize();
 
 		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsDeviceName")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetGraphicsDeviceName();
+		private static string GetGraphicsDeviceName()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetGraphicsDeviceName_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsDeviceVendor")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetGraphicsDeviceVendor();
+		private static string GetGraphicsDeviceVendor()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetGraphicsDeviceVendor_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsDeviceID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -988,8 +1250,21 @@ namespace UnityEngine
 		private static extern bool GetGraphicsUVStartsAtTop();
 
 		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsDeviceVersion")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetGraphicsDeviceVersion();
+		private static string GetGraphicsDeviceVersion()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SystemInfo.GetGraphicsDeviceVersion_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsShaderLevel")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -998,6 +1273,10 @@ namespace UnityEngine
 		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsMultiThreaded")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool GetGraphicsMultiThreaded();
+
+		[FreeFunction("ScriptingGraphicsCaps::HasTiledGPU")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasTiledGPU();
 
 		[FreeFunction("ScriptingGraphicsCaps::GetRenderingThreadingMode")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1131,9 +1410,21 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsMultisampled2DArrayTextures();
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampledBackBuffer")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMultisampledBackBuffer();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMemorylessTextures")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMemorylessTextures();
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampleAutoResolve")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsMultisampleAutoResolve();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMultisampledShaderResolve")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMultisampledShaderResolve();
 
 		[FreeFunction("ScriptingGraphicsCaps::SupportsTextureWrapMirrorOnce")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1227,9 +1518,29 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsAsyncGPUReadback();
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsParallelPSOCreation")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsParallelPSOCreation();
+
 		[FreeFunction("ScriptingGraphicsCaps::SupportsRayTracing")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsRayTracing();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsRayTracingShaders")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsRayTracingShaders();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsInlineRayTracing")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsInlineRayTracing();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsIndirectDispatchRays")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsIndirectDispatchRays();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsMachineLearning")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsMachineLearning();
 
 		[FreeFunction("ScriptingGraphicsCaps::SupportsSetConstantBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1255,13 +1566,27 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsMipStreaming();
 
+		[Obsolete("Use overload with a GraphicsFormatUsage parameter instead", false)]
+		public static bool IsFormatSupported(GraphicsFormat format, FormatUsage usage)
+		{
+			GraphicsFormatUsage graphicsFormatUsage = (GraphicsFormatUsage)(1 << (int)usage);
+			return SystemInfo.IsFormatSupported(format, graphicsFormatUsage);
+		}
+
 		[FreeFunction("ScriptingGraphicsCaps::IsFormatSupported")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsFormatSupported(GraphicsFormat format, FormatUsage usage);
+		public static extern bool IsFormatSupported(GraphicsFormat format, GraphicsFormatUsage usage);
+
+		[Obsolete("Use overload with a GraphicsFormatUsage parameter instead", false)]
+		public static GraphicsFormat GetCompatibleFormat(GraphicsFormat format, FormatUsage usage)
+		{
+			GraphicsFormatUsage graphicsFormatUsage = (GraphicsFormatUsage)(1 << (int)usage);
+			return SystemInfo.GetCompatibleFormat(format, graphicsFormatUsage);
+		}
 
 		[FreeFunction("ScriptingGraphicsCaps::GetCompatibleFormat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GraphicsFormat GetCompatibleFormat(GraphicsFormat format, FormatUsage usage);
+		public static extern GraphicsFormat GetCompatibleFormat(GraphicsFormat format, GraphicsFormatUsage usage);
 
 		[FreeFunction("ScriptingGraphicsCaps::GetGraphicsFormat")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1272,6 +1597,10 @@ namespace UnityEngine
 		{
 			return SystemInfo.GetRenderTextureSupportedMSAASampleCount_Injected(ref desc);
 		}
+
+		[FreeFunction("ScriptingGraphicsCaps::GetTiledRenderTargetStorageSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern int GetTiledRenderTargetStorageSize(GraphicsFormat format, int sampleCount);
 
 		[FreeFunction("ScriptingGraphicsCaps::UsesLoadStoreActions")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1305,6 +1634,22 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsIndirectArgumentsBuffer();
 
+		[FreeFunction("ScriptingGraphicsCaps::SupportsDepthFetchInRenderPass")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsDepthFetchInRenderPass();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsVariableRateShading")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsVariableRateShading();
+
+		[FreeFunction("ScriptingGraphicsCaps::MaxTiledPixelStorageSize")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MaxTiledPixelStorageSize();
+
+		[FreeFunction("ScriptingGraphicsCaps::SupportsDynamicResolution")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SupportsDynamicResolution();
+
 		[Obsolete("SystemInfo.supportsGPUFence has been deprecated, use SystemInfo.supportsGraphicsFence instead (UnityUpgradable) ->  supportsGraphicsFence", true)]
 		public static bool supportsGPUFence
 		{
@@ -1315,7 +1660,37 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetRenderTextureSupportedMSAASampleCount_Injected(ref RenderTextureDescriptor desc);
+		private static extern void GetOperatingSystem_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetProcessorType_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetProcessorModel_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetProcessorManufacturer_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDeviceUniqueIdentifier_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDeviceName_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDeviceModel_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGraphicsDeviceName_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGraphicsDeviceVendor_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGraphicsDeviceVersion_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetRenderTextureSupportedMSAASampleCount_Injected([In] ref RenderTextureDescriptor desc);
 
 		public const string unsupportedIdentifier = "n/a";
 	}

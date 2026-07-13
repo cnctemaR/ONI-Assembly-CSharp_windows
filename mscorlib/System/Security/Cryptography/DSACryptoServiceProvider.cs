@@ -246,8 +246,8 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		[MonoTODO("call into KeyPairPersistence to get details")]
 		[ComVisible(false)]
+		[MonoTODO("call into KeyPairPersistence to get details")]
 		public CspKeyContainerInfo CspKeyContainerInfo
 		{
 			[SecuritySafeCritical]

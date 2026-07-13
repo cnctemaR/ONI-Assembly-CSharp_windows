@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public interface IMetadataTokenProvider
+	internal interface IMetadataTokenProvider
 	{
 		MetadataToken MetadataToken { get; set; }
 	}

@@ -474,7 +474,8 @@ public class KAnimBatchGroup
 		UI,
 		StaticBatch,
 		DontRender,
-		AnimOnly
+		AnimOnly,
+		BuildAndAnims
 	}
 
 	public enum MaterialType

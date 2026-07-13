@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
@@ -104,8 +105,13 @@ namespace UnityEngine.AI
 		}
 
 		[StaticAccessor("NavMeshBuildMarkup", StaticAccessorType.DoubleColon)]
+		private static Transform InternalGetRootGO(EntityId instanceID)
+		{
+			return Unmarshal.UnmarshalUnityObject<Transform>(NavMeshBuildMarkup.InternalGetRootGO_Injected(ref instanceID));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Transform InternalGetRootGO(int instanceID);
+		private static extern IntPtr InternalGetRootGO_Injected([In] ref EntityId instanceID);
 
 		private int m_OverrideArea;
 

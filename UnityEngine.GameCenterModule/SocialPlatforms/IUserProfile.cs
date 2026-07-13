@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("IUserProfile is deprecated and will be removed in a future release.", false)]
 	public interface IUserProfile
 	{
 		string userName { get; }

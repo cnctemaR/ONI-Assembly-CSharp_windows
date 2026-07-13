@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum TargetArchitecture
+	internal enum TargetArchitecture
 	{
 		I386 = 332,
 		AMD64 = 34404,

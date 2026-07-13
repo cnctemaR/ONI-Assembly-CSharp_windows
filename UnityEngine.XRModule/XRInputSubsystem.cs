@@ -8,15 +8,29 @@ using UnityEngine.Scripting;
 namespace UnityEngine.XR
 {
 	[NativeType(Header = "Modules/XR/Subsystems/Input/XRInputSubsystem.h")]
-	[NativeConditional("ENABLE_XR")]
 	[UsedByNativeCode]
+	[NativeConditional("ENABLE_XR")]
 	public class XRInputSubsystem : IntegratedSubsystem<XRInputSubsystemDescriptor>
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern uint GetIndex();
+		internal uint GetIndex()
+		{
+			IntPtr intPtr = XRInputSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRInputSubsystem.GetIndex_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TryRecenter();
+		public bool TryRecenter()
+		{
+			IntPtr intPtr = XRInputSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRInputSubsystem.TryRecenter_Injected(intPtr);
+		}
 
 		public bool TryGetInputDevices(List<InputDevice> devices)
 		{
@@ -40,14 +54,35 @@ namespace UnityEngine.XR
 			return true;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TrySetTrackingOriginMode(TrackingOriginModeFlags origin);
+		public bool TrySetTrackingOriginMode(TrackingOriginModeFlags origin)
+		{
+			IntPtr intPtr = XRInputSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRInputSubsystem.TrySetTrackingOriginMode_Injected(intPtr, origin);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern TrackingOriginModeFlags GetTrackingOriginMode();
+		public TrackingOriginModeFlags GetTrackingOriginMode()
+		{
+			IntPtr intPtr = XRInputSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRInputSubsystem.GetTrackingOriginMode_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern TrackingOriginModeFlags GetSupportedTrackingOriginModes();
+		public TrackingOriginModeFlags GetSupportedTrackingOriginModes()
+		{
+			IntPtr intPtr = XRInputSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRInputSubsystem.GetSupportedTrackingOriginModes_Injected(intPtr);
+		}
 
 		public bool TryGetBoundaryPoints(List<Vector3> boundaryPoints)
 		{
@@ -59,8 +94,38 @@ namespace UnityEngine.XR
 			return this.TryGetBoundaryPoints_AsList(boundaryPoints);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool TryGetBoundaryPoints_AsList(List<Vector3> boundaryPoints);
+		private unsafe bool TryGetBoundaryPoints_AsList(List<Vector3> boundaryPoints)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = XRInputSubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableListWrapper blittableListWrapper;
+				if (boundaryPoints != null)
+				{
+					fixed (Vector3[] array = NoAllocHelpers.ExtractArrayFromList<Vector3>(boundaryPoints))
+					{
+						BlittableArrayWrapper blittableArrayWrapper;
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+						blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, boundaryPoints.Count);
+					}
+				}
+				flag = XRInputSubsystem.TryGetBoundaryPoints_AsList_Injected(intPtr, ref blittableListWrapper);
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<Vector3>(boundaryPoints);
+			}
+			return flag;
+		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<XRInputSubsystem> trackingOriginUpdated;
@@ -92,9 +157,66 @@ namespace UnityEngine.XR
 			}
 		}
 
+		internal unsafe void TryGetDeviceIds_AsList(List<ulong> deviceIds)
+		{
+			try
+			{
+				IntPtr intPtr = XRInputSubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableListWrapper blittableListWrapper;
+				if (deviceIds != null)
+				{
+					fixed (ulong[] array = NoAllocHelpers.ExtractArrayFromList<ulong>(deviceIds))
+					{
+						BlittableArrayWrapper blittableArrayWrapper;
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+						blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, deviceIds.Count);
+					}
+				}
+				XRInputSubsystem.TryGetDeviceIds_AsList_Injected(intPtr, ref blittableListWrapper);
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ulong>(deviceIds);
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void TryGetDeviceIds_AsList(List<ulong> deviceIds);
+		private static extern uint GetIndex_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryRecenter_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TrySetTrackingOriginMode_Injected(IntPtr _unity_self, TrackingOriginModeFlags origin);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TrackingOriginModeFlags GetTrackingOriginMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TrackingOriginModeFlags GetSupportedTrackingOriginModes_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetBoundaryPoints_AsList_Injected(IntPtr _unity_self, ref BlittableListWrapper boundaryPoints);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void TryGetDeviceIds_AsList_Injected(IntPtr _unity_self, ref BlittableListWrapper deviceIds);
 
 		private List<ulong> m_DeviceIdsCache;
+
+		internal new static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(XRInputSubsystem xrInputSubsystem)
+			{
+				return xrInputSubsystem.m_Ptr;
+			}
+		}
 	}
 }

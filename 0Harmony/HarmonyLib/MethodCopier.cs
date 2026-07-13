@@ -19,14 +19,16 @@ namespace HarmonyLib
 			this.reader.GenerateInstructions();
 		}
 
-		internal void SetDebugging(bool debug)
+		internal MethodCopier(MethodCreatorConfig config)
 		{
-			this.reader.SetDebugging(debug);
-		}
-
-		internal void SetArgumentShift(bool useShift)
-		{
-			this.reader.SetArgumentShift(useShift);
+			if (config.MethodBase == null)
+			{
+				throw new ArgumentNullException("config.methodbase");
+			}
+			this.reader = new MethodBodyReader(config.MethodBase, config.il);
+			this.reader.DeclareVariables(config.originalVariables);
+			this.reader.GenerateInstructions();
+			this.reader.SetDebugging(config.debug);
 		}
 
 		internal void AddTranspiler(MethodInfo transpiler)
@@ -34,9 +36,9 @@ namespace HarmonyLib
 			this.transpilers.Add(transpiler);
 		}
 
-		internal List<CodeInstruction> Finalize(Emitter emitter, List<Label> endLabels, out bool hasReturnCode)
+		internal List<CodeInstruction> Finalize(bool stripLastReturn, out bool hasReturnCode, out bool methodEndsInDeadCode, List<Label> endLabels)
 		{
-			return this.reader.FinalizeILCodes(emitter, this.transpilers, endLabels, out hasReturnCode);
+			return this.reader.FinalizeILCodes(this.transpilers, stripLastReturn, out hasReturnCode, out methodEndsInDeadCode, endLabels);
 		}
 
 		internal static List<CodeInstruction> GetInstructions(ILGenerator generator, MethodBase method, int maxTranspilers)
@@ -49,10 +51,8 @@ namespace HarmonyLib
 			{
 				throw new ArgumentNullException("method");
 			}
-			LocalBuilder[] array = MethodPatcher.DeclareLocalVariables(generator, method);
-			bool flag = StructReturnBuffer.NeedsFix(method);
+			LocalBuilder[] array = MethodPatcherTools.DeclareOriginalLocalVariables(generator, method);
 			MethodCopier methodCopier = new MethodCopier(method, generator, array);
-			methodCopier.SetArgumentShift(flag);
 			Patches patchInfo = Harmony.GetPatchInfo(method);
 			if (patchInfo != null)
 			{
@@ -64,8 +64,9 @@ namespace HarmonyLib
 					num++;
 				}
 			}
+			bool flag;
 			bool flag2;
-			return methodCopier.Finalize(null, null, out flag2);
+			return methodCopier.Finalize(false, out flag, out flag2, null);
 		}
 
 		private readonly MethodBodyReader reader;

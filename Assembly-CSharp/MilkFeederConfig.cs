@@ -48,6 +48,7 @@ public class MilkFeederConfig : IBuildingConfig
 		storage.allowSettingOnlyFetchMarkedItems = false;
 		storage.showCapacityStatusItem = true;
 		storage.showCapacityAsMainStatus = true;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;

@@ -15,6 +15,11 @@ namespace UnityEngine
 			return testClass.value == 42;
 		}
 
+		[RequiredByNativeCode]
+		private static void SetupCallbacks(IntPtr p)
+		{
+		}
+
 		private struct TestClass
 		{
 			public int value;

@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
+	[Obsolete]
 	[Guid("b196b285-bab4-101a-b69c-00aa00341d07")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Obsolete]
 	[ComImport]
 	public interface UCOMIEnumConnectionPoints
 	{

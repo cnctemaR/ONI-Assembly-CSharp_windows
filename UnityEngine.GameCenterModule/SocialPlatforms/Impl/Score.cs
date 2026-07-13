@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms.Impl
 {
+	[Obsolete("Score is deprecated and will be removed in a future release.", false)]
 	public class Score : IScore
 	{
 		public Score()

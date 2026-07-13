@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Mono/Coroutine.h")]
+	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Coroutine : YieldInstruction
 	{
@@ -25,5 +25,13 @@ namespace UnityEngine
 		private static extern void ReleaseCoroutine(IntPtr ptr);
 
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(Coroutine coroutine)
+			{
+				return coroutine.m_Ptr;
+			}
+		}
 	}
 }

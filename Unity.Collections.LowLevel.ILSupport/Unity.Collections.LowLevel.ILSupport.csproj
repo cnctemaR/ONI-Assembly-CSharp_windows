@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D42F}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD77}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Unity.Collections.LowLevel.ILSupport</RootNamespace>
+    <RootNamespace>Unity.Collections.LowLevel.Unsafe</RootNamespace>
     <AssemblyName>Unity.Collections.LowLevel.ILSupport</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
@@ -14,9 +14,14 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="ILSupport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="System\Runtime\CompilerServices\IsReadOnlyAttribute.cs" />
-    <Compile Include="Unity\Collections\LowLevel\Unsafe\ILSupport.cs" />
+    <Compile Include="UnitySourceGeneratedAssemblyMonoScriptTypes_v1.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

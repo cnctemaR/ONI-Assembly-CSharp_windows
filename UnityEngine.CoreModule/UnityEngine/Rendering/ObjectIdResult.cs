@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace UnityEngine.Rendering
 {
 	public class ObjectIdResult
 	{
-		public Object[] idToObjectMapping { get; }
+		public Object[] idToObjectMapping
+		{
+			[return: NotNull]
+			get;
+		}
 
 		internal ObjectIdResult(Object[] idToObjectMapping)
 		{

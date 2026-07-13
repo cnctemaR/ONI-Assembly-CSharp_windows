@@ -1,29 +1,40 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 using UnityEngine.U2D;
 
 namespace UnityEngine.Tilemaps
 {
-	[NativeHeader("Modules/Tilemap/TilemapRendererJobs.h")]
-	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	[RequireComponent(typeof(Tilemap))]
+	[NativeHeader("Modules/Tilemap/TilemapRendererJobs.h")]
 	[NativeType(Header = "Modules/Tilemap/Public/TilemapRenderer.h")]
 	[NativeHeader("Modules/Tilemap/Public/TilemapMarshalling.h")]
+	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
 	public sealed class TilemapRenderer : Renderer
 	{
 		public Vector3Int chunkSize
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3Int vector3Int;
-				this.get_chunkSize_Injected(out vector3Int);
+				TilemapRenderer.get_chunkSize_Injected(intPtr, out vector3Int);
 				return vector3Int;
 			}
 			set
 			{
-				this.set_chunkSize_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_chunkSize_Injected(intPtr, ref value);
 			}
 		}
 
@@ -32,64 +43,158 @@ namespace UnityEngine.Tilemaps
 			[FreeFunction("TilemapRendererBindings::GetChunkCullingBounds", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_chunkCullingBounds_Injected(out vector);
+				TilemapRenderer.get_chunkCullingBounds_Injected(intPtr, out vector);
 				return vector;
 			}
 			[FreeFunction("TilemapRendererBindings::SetChunkCullingBounds", HasExplicitThis = true)]
 			set
 			{
-				this.set_chunkCullingBounds_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_chunkCullingBounds_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern int maxChunkCount
+		public int maxChunkCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TilemapRenderer.get_maxChunkCount_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_maxChunkCount_Injected(intPtr, value);
+			}
 		}
 
-		public extern int maxFrameAge
+		public int maxFrameAge
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TilemapRenderer.get_maxFrameAge_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_maxFrameAge_Injected(intPtr, value);
+			}
 		}
 
-		public extern TilemapRenderer.SortOrder sortOrder
+		public TilemapRenderer.SortOrder sortOrder
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TilemapRenderer.get_sortOrder_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_sortOrder_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("RenderMode")]
-		public extern TilemapRenderer.Mode mode
+		public TilemapRenderer.Mode mode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TilemapRenderer.get_mode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_mode_Injected(intPtr, value);
+			}
 		}
 
-		public extern TilemapRenderer.DetectChunkCullingBounds detectChunkCullingBounds
+		public TilemapRenderer.DetectChunkCullingBounds detectChunkCullingBounds
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TilemapRenderer.get_detectChunkCullingBounds_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_detectChunkCullingBounds_Injected(intPtr, value);
+			}
 		}
 
-		public extern SpriteMaskInteraction maskInteraction
+		public SpriteMaskInteraction maskInteraction
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TilemapRenderer.get_maskInteraction_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TilemapRenderer.set_maskInteraction_Injected(intPtr, value);
+			}
 		}
 
 		[RequiredByNativeCode]
@@ -104,20 +209,66 @@ namespace UnityEngine.Tilemaps
 			SpriteAtlasManager.atlasRegistered -= this.OnSpriteAtlasRegistered;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void OnSpriteAtlasRegistered(SpriteAtlas atlas);
+		internal void OnSpriteAtlasRegistered(SpriteAtlas atlas)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TilemapRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			TilemapRenderer.OnSpriteAtlasRegistered_Injected(intPtr, Object.MarshalledUnityObject.Marshal<SpriteAtlas>(atlas));
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_chunkSize_Injected(out Vector3Int ret);
+		private static extern void get_chunkSize_Injected(IntPtr _unity_self, out Vector3Int ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_chunkSize_Injected(ref Vector3Int value);
+		private static extern void set_chunkSize_Injected(IntPtr _unity_self, [In] ref Vector3Int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_chunkCullingBounds_Injected(out Vector3 ret);
+		private static extern void get_chunkCullingBounds_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_chunkCullingBounds_Injected(ref Vector3 value);
+		private static extern void set_chunkCullingBounds_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_maxChunkCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maxChunkCount_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_maxFrameAge_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maxFrameAge_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TilemapRenderer.SortOrder get_sortOrder_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortOrder_Injected(IntPtr _unity_self, TilemapRenderer.SortOrder value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TilemapRenderer.Mode get_mode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_mode_Injected(IntPtr _unity_self, TilemapRenderer.Mode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TilemapRenderer.DetectChunkCullingBounds get_detectChunkCullingBounds_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_detectChunkCullingBounds_Injected(IntPtr _unity_self, TilemapRenderer.DetectChunkCullingBounds value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteMaskInteraction get_maskInteraction_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maskInteraction_Injected(IntPtr _unity_self, SpriteMaskInteraction value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OnSpriteAtlasRegistered_Injected(IntPtr _unity_self, IntPtr atlas);
 
 		public enum SortOrder
 		{
@@ -130,7 +281,8 @@ namespace UnityEngine.Tilemaps
 		public enum Mode
 		{
 			Chunk,
-			Individual
+			Individual,
+			SRPBatch
 		}
 
 		public enum DetectChunkCullingBounds

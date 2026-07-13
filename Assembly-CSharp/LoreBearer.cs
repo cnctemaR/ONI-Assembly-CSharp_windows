@@ -6,6 +6,9 @@ using UnityEngine;
 [AddComponentMenu("KMonoBehaviour/scripts/LoreBearer")]
 public class LoreBearer : KMonoBehaviour
 {
+	[Serialize]
+	public bool BeenClicked { get; private set; }
+
 	public string content
 	{
 		get
@@ -93,9 +96,6 @@ public class LoreBearer : KMonoBehaviour
 		}
 		return -100;
 	}
-
-	[Serialize]
-	private bool BeenClicked;
 
 	public string BeenSearched = UI.USERMENUACTIONS.READLORE.ALREADY_SEARCHED;
 

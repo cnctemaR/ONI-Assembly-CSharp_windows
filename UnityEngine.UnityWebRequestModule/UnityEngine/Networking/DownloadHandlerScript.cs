@@ -10,10 +10,10 @@ namespace UnityEngine.Networking
 	public class DownloadHandlerScript : DownloadHandler
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerScript obj);
+		private static extern IntPtr Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] DownloadHandlerScript obj);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr CreatePreallocated(DownloadHandlerScript obj, [Unmarshalled] byte[] preallocatedBuffer);
+		private static extern IntPtr CreatePreallocated([UnityMarshalAs(NativeType.ScriptingObjectPtr)] DownloadHandlerScript obj, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] byte[] preallocatedBuffer);
 
 		private void InternalCreateScript()
 		{
@@ -38,6 +38,14 @@ namespace UnityEngine.Networking
 				throw new ArgumentException("Cannot create a preallocated-buffer DownloadHandlerScript backed by a null or zero-length array");
 			}
 			this.InternalCreateScript(preallocatedBuffer);
+		}
+
+		internal new static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(DownloadHandlerScript handler)
+			{
+				return handler.m_Ptr;
+			}
 		}
 	}
 }

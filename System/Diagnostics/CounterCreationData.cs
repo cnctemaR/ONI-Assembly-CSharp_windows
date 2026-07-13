@@ -18,8 +18,8 @@ namespace System.Diagnostics
 			this.CounterType = counterType;
 		}
 
-		[DefaultValue("")]
 		[MonitoringDescription("Description of this counter.")]
+		[DefaultValue("")]
 		public string CounterHelp
 		{
 			get
@@ -59,8 +59,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Type of this counter.")]
 		[DefaultValue(typeof(PerformanceCounterType), "NumberOfItems32")]
+		[MonitoringDescription("Type of this counter.")]
 		public PerformanceCounterType CounterType
 		{
 			get

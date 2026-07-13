@@ -1,40 +1,70 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
-using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Physics/SphereCollider.h")]
-	[RequiredByNativeCode]
 	public class SphereCollider : Collider
 	{
 		public Vector3 center
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SphereCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_center_Injected(out vector);
+				SphereCollider.get_center_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_center_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SphereCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SphereCollider.set_center_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern float radius
+		public float radius
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SphereCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SphereCollider.get_radius_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SphereCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SphereCollider.set_radius_Injected(intPtr, value);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_center_Injected(out Vector3 ret);
+		private static extern void get_center_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_center_Injected(ref Vector3 value);
+		private static extern void set_center_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_radius_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_radius_Injected(IntPtr _unity_self, float value);
 	}
 }

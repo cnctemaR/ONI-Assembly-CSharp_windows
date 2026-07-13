@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using AOT;
@@ -45,9 +46,9 @@ namespace Unity.Burst
 			return (BurstExecutionEnvironment)BurstCompilerService.GetCurrentExecutionMode();
 		}
 
-		internal static T CompileDelegate<T>(T delegateMethod) where T : class
+		internal static T CompileDelegate<T>(T delegateMethod, bool deterministicCompilation = false) where T : class
 		{
-			return (T)((object)Marshal.GetDelegateForFunctionPointer((IntPtr)BurstCompiler.Compile(delegateMethod, false), delegateMethod.GetType()));
+			return (T)((object)Marshal.GetDelegateForFunctionPointer((IntPtr)BurstCompiler.Compile(delegateMethod, false, deterministicCompilation), delegateMethod.GetType()));
 		}
 
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
@@ -87,7 +88,7 @@ namespace Unity.Burst
 				onCompileILPPMethod();
 			}
 			MethodInfo methodInfo = (MethodInfo)MethodBase.GetMethodFromHandle(burstMethodHandle);
-			return (IntPtr)BurstCompiler.Compile(new BurstCompiler.FakeDelegate(methodInfo), methodInfo, true, true);
+			return (IntPtr)BurstCompiler.Compile(new BurstCompiler.FakeDelegate(methodInfo), methodInfo, true, true, false);
 		}
 
 		[Obsolete("This method will be removed in a future version of Burst")]
@@ -98,17 +99,23 @@ namespace Unity.Burst
 
 		public unsafe static void* GetILPPMethodFunctionPointer2(IntPtr ilppMethod, RuntimeMethodHandle managedMethodHandle, RuntimeTypeHandle delegateTypeHandle)
 		{
-			if (ilppMethod == IntPtr.Zero)
-			{
-				throw new ArgumentNullException("ilppMethod");
-			}
-			if (managedMethodHandle.Value == IntPtr.Zero)
+			BurstCompiler.<>c__DisplayClass17_0 CS$<>8__locals1;
+			CS$<>8__locals1.managedMethodHandle = managedMethodHandle;
+			CS$<>8__locals1.delegateTypeHandle = delegateTypeHandle;
+			if (CS$<>8__locals1.managedMethodHandle.Value == IntPtr.Zero)
 			{
 				throw new ArgumentNullException("managedMethodHandle");
 			}
-			if (delegateTypeHandle.Value == IntPtr.Zero)
+			if (CS$<>8__locals1.delegateTypeHandle.Value == IntPtr.Zero)
 			{
 				throw new ArgumentNullException("delegateTypeHandle");
+			}
+			if (ilppMethod == IntPtr.Zero)
+			{
+				Delegate @delegate;
+				GCHandle gchandle;
+				BurstCompiler.<GetILPPMethodFunctionPointer2>g__GetManagedFallbackDelegate|17_0(out @delegate, out gchandle, ref CS$<>8__locals1);
+				return (void*)Marshal.GetFunctionPointerForDelegate(@delegate);
 			}
 			return ilppMethod.ToPointer();
 		}
@@ -121,20 +128,20 @@ namespace Unity.Burst
 
 		public static FunctionPointer<T> CompileFunctionPointer<T>(T delegateMethod) where T : class
 		{
-			return new FunctionPointer<T>(new IntPtr(BurstCompiler.Compile(delegateMethod, true)));
+			return new FunctionPointer<T>(new IntPtr(BurstCompiler.Compile(delegateMethod, true, false)));
 		}
 
-		private unsafe static void* Compile(object delegateObj, bool isFunctionPointer)
+		private unsafe static void* Compile(object delegateObj, bool isFunctionPointer, bool deterministicCompilation = false)
 		{
 			if (!(delegateObj is Delegate))
 			{
 				throw new ArgumentException("object instance must be a System.Delegate", "delegateObj");
 			}
 			Delegate @delegate = (Delegate)delegateObj;
-			return BurstCompiler.Compile(@delegate, @delegate.Method, isFunctionPointer, false);
+			return BurstCompiler.Compile(@delegate, @delegate.Method, isFunctionPointer, false, deterministicCompilation);
 		}
 
-		private unsafe static void* Compile(object delegateObj, MethodInfo methodInfo, bool isFunctionPointer, bool isILPostProcessing)
+		private unsafe static void* Compile(object delegateObj, MethodInfo methodInfo, bool isFunctionPointer, bool isILPostProcessing, bool deterministicCompilation = false)
 		{
 			if (delegateObj == null)
 			{
@@ -157,16 +164,21 @@ namespace Unity.Burst
 			{
 				@delegate = delegateObj as Delegate;
 			}
+			Delegate delegate2 = delegateObj as Delegate;
 			if (!BurstCompilerOptions.HasBurstCompileAttribute(methodInfo))
 			{
 				throw new InvalidOperationException(string.Format("Burst cannot compile the function pointer `{0}` because the `[BurstCompile]` attribute is missing", methodInfo));
 			}
-			void* ptr;
+			void* ptr = null;
 			if (BurstCompiler.Options.EnableBurstCompilation && BurstCompiler.BurstCompilerHelper.IsBurstGenerated)
 			{
+				if (isFunctionPointer && methodInfo.Name.EndsWith("$BurstManaged"))
+				{
+					delegateObj = methodInfo.DeclaringType.GetMethod(methodInfo.Name.Replace("$BurstManaged", ""), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).CreateDelegate(delegate2.GetType());
+				}
 				ptr = BurstCompilerService.GetAsyncCompiledAsyncDelegateMethod(BurstCompilerService.CompileAsyncDelegateMethod(delegateObj, string.Empty));
 			}
-			else
+			if (ptr == null)
 			{
 				if (isILPostProcessing)
 				{
@@ -229,14 +241,6 @@ namespace Unity.Burst
 		internal static void UnloadAdditionalLibraries()
 		{
 			BurstCompiler.SendCommandToCompiler("$unload_burst_natives", null);
-		}
-
-		internal static void InitialiseDebuggerHooks()
-		{
-			if (BurstCompiler.IsApiAvailable("BurstManagedDebuggerPluginV1") && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BURST_DISABLE_DEBUGGER_HOOKS")))
-			{
-				BurstCompiler.SendCommandToCompiler(BurstCompiler.SendCommandToCompiler("$request_debug_command", null), null);
-			}
 		}
 
 		internal static bool IsApiAvailable(string apiName)
@@ -310,6 +314,15 @@ namespace Unity.Burst
 
 		private static void DummyMethod()
 		{
+		}
+
+		[CompilerGenerated]
+		internal static void <GetILPPMethodFunctionPointer2>g__GetManagedFallbackDelegate|17_0(out Delegate managedFallbackDelegate, out GCHandle gcHandle, ref BurstCompiler.<>c__DisplayClass17_0 A_2)
+		{
+			MethodInfo methodInfo = (MethodInfo)MethodBase.GetMethodFromHandle(A_2.managedMethodHandle);
+			Type typeFromHandle = Type.GetTypeFromHandle(A_2.delegateTypeHandle);
+			managedFallbackDelegate = Delegate.CreateDelegate(typeFromHandle, methodInfo);
+			gcHandle = GCHandle.Alloc(managedFallbackDelegate);
 		}
 
 		[ThreadStatic]
@@ -395,9 +408,7 @@ namespace Unity.Burst
 			[MonoPInvokeCallback(typeof(BurstCompiler.BurstCompilerHelper.IsBurstEnabledDelegate))]
 			private static bool IsBurstEnabled()
 			{
-				bool flag = true;
-				BurstCompiler.BurstCompilerHelper.DiscardedMethod(ref flag);
-				return flag;
+				return BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$BurstDirectCall.Invoke();
 			}
 
 			[BurstDiscard]
@@ -411,12 +422,60 @@ namespace Unity.Burst
 				return BurstCompilerService.GetAsyncCompiledAsyncDelegateMethod(BurstCompilerService.CompileAsyncDelegateMethod(del, string.Empty)) != null;
 			}
 
+			[BurstCompile]
+			[MonoPInvokeCallback(typeof(BurstCompiler.BurstCompilerHelper.IsBurstEnabledDelegate))]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			internal static bool IsBurstEnabled$BurstManaged()
+			{
+				bool flag = true;
+				BurstCompiler.BurstCompilerHelper.DiscardedMethod(ref flag);
+				return flag;
+			}
+
 			private static readonly BurstCompiler.BurstCompilerHelper.IsBurstEnabledDelegate IsBurstEnabledImpl = new BurstCompiler.BurstCompilerHelper.IsBurstEnabledDelegate(BurstCompiler.BurstCompilerHelper.IsBurstEnabled);
 
 			public static readonly bool IsBurstGenerated = BurstCompiler.BurstCompilerHelper.IsCompiledByBurst(BurstCompiler.BurstCompilerHelper.IsBurstEnabledImpl);
 
 			[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 			private delegate bool IsBurstEnabledDelegate();
+
+			[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+			internal delegate bool IsBurstEnabled_00000145$PostfixBurstDelegate();
+
+			internal static class IsBurstEnabled_00000145$BurstDirectCall
+			{
+				[BurstDiscard]
+				private static void GetFunctionPointerDiscard(ref IntPtr A_0)
+				{
+					if (BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$BurstDirectCall.Pointer == 0)
+					{
+						BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$BurstDirectCall.Pointer = BurstCompiler.CompileFunctionPointer<BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$PostfixBurstDelegate>(new BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$PostfixBurstDelegate(BurstCompiler.BurstCompilerHelper.IsBurstEnabled)).Value;
+					}
+					A_0 = BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$BurstDirectCall.Pointer;
+				}
+
+				private static IntPtr GetFunctionPointer()
+				{
+					IntPtr intPtr = (IntPtr)0;
+					BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$BurstDirectCall.GetFunctionPointerDiscard(ref intPtr);
+					return intPtr;
+				}
+
+				public static bool Invoke()
+				{
+					if (BurstCompiler.IsEnabled)
+					{
+						IntPtr functionPointer = BurstCompiler.BurstCompilerHelper.IsBurstEnabled_00000145$BurstDirectCall.GetFunctionPointer();
+						if (functionPointer != 0)
+						{
+							return calli(System.Boolean(), functionPointer);
+						}
+					}
+					return BurstCompiler.BurstCompilerHelper.IsBurstEnabled$BurstManaged();
+				}
+
+				private static IntPtr Pointer;
+			}
 		}
 
 		private class FakeDelegate

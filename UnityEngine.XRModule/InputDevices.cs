@@ -8,10 +8,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
-	[NativeConditional("ENABLE_VR")]
+	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
 	[UsedByNativeCode]
+	[NativeConditional("ENABLE_VR")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class InputDevices
 	{
@@ -146,14 +146,50 @@ namespace UnityEngine.XR
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetDevices_Internal([NotNull("ArgumentNullException")] List<InputDevice> inputDevices);
+		private unsafe static void GetDevices_Internal([NotNull] List<InputDevice> inputDevices)
+		{
+			if (inputDevices == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(inputDevices, "inputDevices");
+			}
+			try
+			{
+				fixed (InputDevice[] array = NoAllocHelpers.ExtractArrayFromList<InputDevice>(inputDevices))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, inputDevices.Count);
+					InputDevices.GetDevices_Internal_Injected(ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<InputDevice>(inputDevices);
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool SendHapticImpulse(ulong deviceId, uint channel, float amplitude, float duration);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool SendHapticBuffer(ulong deviceId, uint channel, [NotNull("ArgumentNullException")] byte[] buffer);
+		internal unsafe static bool SendHapticBuffer(ulong deviceId, uint channel, [NotNull] byte[] buffer)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			Span<byte> span = new Span<byte>(buffer);
+			bool flag;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				flag = InputDevices.SendHapticBuffer_Injected(deviceId, channel, ref managedSpanWrapper);
+			}
+			return flag;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool TryGetHapticCapabilities(ulong deviceId, out HapticCapabilities capabilities);
@@ -161,68 +197,447 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void StopHaptics(ulong deviceId);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureUsages(ulong deviceId, [NotNull("ArgumentNullException")] List<InputFeatureUsage> featureUsages);
+		internal static bool TryGetFeatureUsages(ulong deviceId, [NotNull] List<InputFeatureUsage> featureUsages)
+		{
+			if (featureUsages == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(featureUsages, "featureUsages");
+			}
+			return InputDevices.TryGetFeatureUsages_Injected(deviceId, featureUsages);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_bool(ulong deviceId, string usage, out bool value);
+		internal unsafe static bool TryGetFeatureValue_bool(ulong deviceId, string usage, out bool value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_bool_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_UInt32(ulong deviceId, string usage, out uint value);
+		internal unsafe static bool TryGetFeatureValue_UInt32(ulong deviceId, string usage, out uint value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_UInt32_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_float(ulong deviceId, string usage, out float value);
+		internal unsafe static bool TryGetFeatureValue_float(ulong deviceId, string usage, out float value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_float_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_Vector2f(ulong deviceId, string usage, out Vector2 value);
+		internal unsafe static bool TryGetFeatureValue_Vector2f(ulong deviceId, string usage, out Vector2 value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_Vector2f_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_Vector3f(ulong deviceId, string usage, out Vector3 value);
+		internal unsafe static bool TryGetFeatureValue_Vector3f(ulong deviceId, string usage, out Vector3 value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_Vector3f_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_Quaternionf(ulong deviceId, string usage, out Quaternion value);
+		internal unsafe static bool TryGetFeatureValue_Quaternionf(ulong deviceId, string usage, out Quaternion value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_Quaternionf_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_Custom(ulong deviceId, string usage, [Out] byte[] value);
+		internal unsafe static bool TryGetFeatureValue_Custom(ulong deviceId, string usage, [Out] byte[] value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (value != null)
+				{
+					fixed (byte[] array = value)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_Custom_Injected(deviceId, ref managedSpanWrapper, out blittableArrayWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+				byte[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<byte>(ref array);
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValueAtTime_bool(ulong deviceId, string usage, long time, out bool value);
+		internal unsafe static bool TryGetFeatureValueAtTime_bool(ulong deviceId, string usage, long time, out bool value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValueAtTime_bool_Injected(deviceId, ref managedSpanWrapper, time, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValueAtTime_UInt32(ulong deviceId, string usage, long time, out uint value);
+		internal unsafe static bool TryGetFeatureValueAtTime_UInt32(ulong deviceId, string usage, long time, out uint value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValueAtTime_UInt32_Injected(deviceId, ref managedSpanWrapper, time, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValueAtTime_float(ulong deviceId, string usage, long time, out float value);
+		internal unsafe static bool TryGetFeatureValueAtTime_float(ulong deviceId, string usage, long time, out float value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValueAtTime_float_Injected(deviceId, ref managedSpanWrapper, time, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValueAtTime_Vector2f(ulong deviceId, string usage, long time, out Vector2 value);
+		internal unsafe static bool TryGetFeatureValueAtTime_Vector2f(ulong deviceId, string usage, long time, out Vector2 value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValueAtTime_Vector2f_Injected(deviceId, ref managedSpanWrapper, time, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValueAtTime_Vector3f(ulong deviceId, string usage, long time, out Vector3 value);
+		internal unsafe static bool TryGetFeatureValueAtTime_Vector3f(ulong deviceId, string usage, long time, out Vector3 value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValueAtTime_Vector3f_Injected(deviceId, ref managedSpanWrapper, time, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValueAtTime_Quaternionf(ulong deviceId, string usage, long time, out Quaternion value);
+		internal unsafe static bool TryGetFeatureValueAtTime_Quaternionf(ulong deviceId, string usage, long time, out Quaternion value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValueAtTime_Quaternionf_Injected(deviceId, ref managedSpanWrapper, time, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_XRHand(ulong deviceId, string usage, out Hand value);
+		internal unsafe static bool TryGetFeatureValue_XRHand(ulong deviceId, string usage, out Hand value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_XRHand_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_XRBone(ulong deviceId, string usage, out Bone value);
+		internal unsafe static bool TryGetFeatureValue_XRBone(ulong deviceId, string usage, out Bone value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_XRBone_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool TryGetFeatureValue_XREyes(ulong deviceId, string usage, out Eyes value);
+		internal unsafe static bool TryGetFeatureValue_XREyes(ulong deviceId, string usage, out Eyes value)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(usage, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = usage.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = InputDevices.TryGetFeatureValue_XREyes_Injected(deviceId, ref managedSpanWrapper, out value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool IsDeviceValid(ulong deviceId);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetDeviceName(ulong deviceId);
+		internal static string GetDeviceName(ulong deviceId)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				InputDevices.GetDeviceName_Injected(deviceId, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetDeviceManufacturer(ulong deviceId);
+		internal static string GetDeviceManufacturer(ulong deviceId)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				InputDevices.GetDeviceManufacturer_Injected(deviceId, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetDeviceSerialNumber(ulong deviceId);
+		internal static string GetDeviceSerialNumber(ulong deviceId)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				InputDevices.GetDeviceSerialNumber_Injected(deviceId, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern InputDeviceCharacteristics GetDeviceCharacteristics(ulong deviceId);
@@ -282,6 +697,72 @@ namespace UnityEngine.XR
 			}
 			return inputDeviceRole;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDevices_Internal_Injected(ref BlittableListWrapper inputDevices);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SendHapticBuffer_Injected(ulong deviceId, uint channel, ref ManagedSpanWrapper buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureUsages_Injected(ulong deviceId, List<InputFeatureUsage> featureUsages);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_bool_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_UInt32_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out uint value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_float_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_Vector2f_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_Vector3f_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_Quaternionf_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out Quaternion value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_Custom_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out BlittableArrayWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValueAtTime_bool_Injected(ulong deviceId, ref ManagedSpanWrapper usage, long time, out bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValueAtTime_UInt32_Injected(ulong deviceId, ref ManagedSpanWrapper usage, long time, out uint value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValueAtTime_float_Injected(ulong deviceId, ref ManagedSpanWrapper usage, long time, out float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValueAtTime_Vector2f_Injected(ulong deviceId, ref ManagedSpanWrapper usage, long time, out Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValueAtTime_Vector3f_Injected(ulong deviceId, ref ManagedSpanWrapper usage, long time, out Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValueAtTime_Quaternionf_Injected(ulong deviceId, ref ManagedSpanWrapper usage, long time, out Quaternion value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_XRHand_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out Hand value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_XRBone_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out Bone value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFeatureValue_XREyes_Injected(ulong deviceId, ref ManagedSpanWrapper usage, out Eyes value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDeviceName_Injected(ulong deviceId, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDeviceManufacturer_Injected(ulong deviceId, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDeviceSerialNumber_Injected(ulong deviceId, out ManagedSpanWrapper ret);
 
 		private static List<InputDevice> s_InputDeviceList;
 	}

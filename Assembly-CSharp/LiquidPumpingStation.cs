@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Klei;
 using UnityEngine;
 
@@ -120,8 +121,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				}
 			}
 		}
-		int l = 0;
-		while (l < this.infoCount)
+		for (int l = this.infoCount - 1; l >= 0; l--)
 		{
 			LiquidPumpingStation.LiquidInfo liquidInfo = this.infos[l];
 			if (liquidInfo.amount <= 1f)
@@ -130,7 +130,9 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				{
 					liquidInfo.source.DeleteObject();
 				}
-				this.infos[l] = this.infos[this.infoCount - 1];
+				IList list = this.infos;
+				int num6 = this.infoCount - 1;
+				Util.Swap(list, in l, in num6);
 				this.infoCount--;
 			}
 			else
@@ -150,7 +152,6 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				}
 				liquidInfo.source.GetComponent<Pickupable>().TotalAmount = liquidInfo.amount;
 				this.infos[l] = liquidInfo;
-				l++;
 			}
 		}
 		if (num != this.infoCount)
@@ -375,7 +376,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				num = Mathf.Max(num, 1f);
 				HandleVector<Game.ComplexCallbackInfo<Sim.MassConsumedCallback>>.Handle handle = Game.Instance.massConsumedCallbackManager.Add(new Action<Sim.MassConsumedCallback, object>(LiquidPumpingStation.WorkSession.OnSimConsumeCallback), this, "LiquidPumpingStation");
 				int depthAvailable = PumpingStationGuide.GetDepthAvailable(this.cell, this.pump);
-				SimMessages.ConsumeMass(Grid.OffsetCell(this.cell, new CellOffset(0, -depthAvailable)), this.element, num, (byte)(depthAvailable + 1), handle.index);
+				SimMessages.ConsumeMass(Grid.OffsetCell(this.cell, new CellOffset(0, -depthAvailable)), this.element, num, 2, (byte)(depthAvailable + 1), handle.index);
 			}
 		}
 

@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum MethodAttributes : ushort
+	internal enum MethodAttributes : ushort
 	{
 		MemberAccessMask = 7,
 		CompilerControlled = 0,

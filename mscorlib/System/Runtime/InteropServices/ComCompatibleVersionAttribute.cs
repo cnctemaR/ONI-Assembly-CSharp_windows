@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class ComCompatibleVersionAttribute : Attribute
 	{
 		public ComCompatibleVersionAttribute(int major, int minor, int build, int revision)

@@ -80,6 +80,10 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 
 	public static void FlopForward(FlopStates.Instance smi, float dt)
 	{
+		if (smi.HasTag(GameTags.Creatures.StunnedForCapture))
+		{
+			return;
+		}
 		KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
 		int currentFrame = component.currentFrame;
 		if (component.IsVisible() && (currentFrame < 23 || currentFrame > 36))

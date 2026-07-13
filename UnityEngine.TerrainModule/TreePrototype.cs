@@ -7,6 +7,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[UsedByNativeCode]
+	[NativeAsStruct]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TreePrototype
 	{
@@ -105,13 +106,36 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("TerrainDataScriptingInterface::ValidateTreePrototype")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool ValidateTreePrototype([NotNull("ArgumentNullException")] TreePrototype prototype, out string errorMessage);
+		internal static bool ValidateTreePrototype([NotNull] TreePrototype prototype, out string errorMessage)
+		{
+			if (prototype == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(prototype, "prototype");
+			}
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				flag = TreePrototype.ValidateTreePrototype_Injected(prototype, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				errorMessage = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return flag;
+		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ValidateTreePrototype_Injected(TreePrototype prototype, out ManagedSpanWrapper errorMessage);
+
+		[NativeName("prefab")]
 		internal GameObject m_Prefab;
 
+		[NativeName("bendFactor")]
 		internal float m_BendFactor;
 
+		[NativeName("navMeshLod")]
 		internal int m_NavMeshLod;
 	}
 }

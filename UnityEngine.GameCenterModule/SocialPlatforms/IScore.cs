@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("IScore is deprecated and will be removed in a future release.", false)]
 	public interface IScore
 	{
 		void ReportScore(Action<bool> callback);

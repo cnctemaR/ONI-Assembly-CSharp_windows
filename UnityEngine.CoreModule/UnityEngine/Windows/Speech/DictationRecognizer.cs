@@ -13,8 +13,8 @@ namespace UnityEngine.Windows.Speech
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr Create(object self, ConfidenceLevel minimumConfidence, DictationTopicConstraint topicConstraint);
 
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Start(IntPtr self);
 
@@ -191,24 +191,24 @@ namespace UnityEngine.Windows.Speech
 		}
 
 		[RequiredByNativeCode]
-		private void DictationRecognizer_InvokeHypothesisGeneratedEvent(string keyword)
+		private unsafe void DictationRecognizer_InvokeHypothesisGeneratedEvent(IntPtr keyword, int keywordLength)
 		{
 			DictationRecognizer.DictationHypothesisDelegate dictationHypothesis = this.DictationHypothesis;
 			bool flag = dictationHypothesis != null;
 			if (flag)
 			{
-				dictationHypothesis(keyword);
+				dictationHypothesis(new string((char*)(void*)keyword, 0, keywordLength));
 			}
 		}
 
 		[RequiredByNativeCode]
-		private void DictationRecognizer_InvokeResultGeneratedEvent(string keyword, ConfidenceLevel minimumConfidence)
+		private unsafe void DictationRecognizer_InvokeResultGeneratedEvent(IntPtr keyword, int keywordLength, ConfidenceLevel minimumConfidence)
 		{
 			DictationRecognizer.DictationResultDelegate dictationResult = this.DictationResult;
 			bool flag = dictationResult != null;
 			if (flag)
 			{
-				dictationResult(keyword, minimumConfidence);
+				dictationResult(new string((char*)(void*)keyword, 0, keywordLength), minimumConfidence);
 			}
 		}
 

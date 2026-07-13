@@ -6,8 +6,8 @@ using Unity;
 
 namespace System.Text.RegularExpressions
 {
-	[DebuggerTypeProxy(typeof(CollectionDebuggerProxy<Group>))]
 	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(CollectionDebuggerProxy<Group>))]
 	[Serializable]
 	public class GroupCollection : IList<Group>, ICollection<Group>, IEnumerable<Group>, IEnumerable, IReadOnlyList<Group>, IReadOnlyCollection<Group>, IList, ICollection
 	{

@@ -2,13 +2,16 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Diagnostics/Validation.h")]
 	[NativeHeader("Runtime/Export/Debug/Debug.bindings.h")]
+	[NativeHeader("Runtime/Diagnostics/IntegrityCheck.h")]
 	public class Debug
 	{
 		public static ILogger unityLogger
@@ -86,8 +89,28 @@ namespace UnityEngine
 		public static extern void DebugBreak();
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe static extern int ExtractStackTraceNoAlloc(byte* buffer, int bufferMax, string projectFolder);
+		public unsafe static int ExtractStackTraceNoAlloc(byte* buffer, int bufferMax, string projectFolder)
+		{
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(projectFolder, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = projectFolder.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = Debug.ExtractStackTraceNoAlloc_Injected(buffer, bufferMax, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
 
 		public static void Log(object message)
 		{
@@ -306,10 +329,6 @@ namespace UnityEngine
 			get;
 		}
 
-		[FreeFunction("DeveloperConsole_OpenConsoleFile")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void OpenConsoleFile();
-
 		[NativeThrows]
 		internal static extern DiagnosticSwitch[] diagnosticSwitches
 		{
@@ -317,6 +336,7 @@ namespace UnityEngine
 			get;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEngine.TextCoreTextEngineModule", "UnityEngine.IMGUIModule" })]
 		internal static DiagnosticSwitch GetDiagnosticSwitch(string name)
 		{
 			foreach (DiagnosticSwitch diagnosticSwitch in Debug.diagnosticSwitches)
@@ -371,6 +391,31 @@ namespace UnityEngine
 			return flag2;
 		}
 
+		[FreeFunction("RetrieveStartupLogs_Internal")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern Debug.StartupLog[] RetrieveStartupLogs();
+
+		[FreeFunction("CheckApplicationIntegrity")]
+		public static string CheckIntegrity(IntegrityCheckLevel level)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				Debug.CheckIntegrity_Injected(level, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		[FreeFunction("IsValidationLevelEnabled")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern bool IsValidationLevelEnabled(ValidationLevel level);
+
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Conditional("UNITY_ASSERTIONS")]
 		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
@@ -383,8 +428,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Debug.logger is obsolete. Please use Debug.unityLogger instead (UnityUpgradable) -> unityLogger")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static ILogger logger
 		{
 			get
@@ -394,10 +439,26 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawLine_Injected(ref Vector3 start, ref Vector3 end, [DefaultValue("Color.white")] ref Color color, [DefaultValue("0.0f")] float duration, [DefaultValue("true")] bool depthTest);
+		private static extern void DrawLine_Injected([In] ref Vector3 start, [In] ref Vector3 end, [DefaultValue("Color.white")] [In] ref Color color, [DefaultValue("0.0f")] float duration, [DefaultValue("true")] bool depthTest);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern int ExtractStackTraceNoAlloc_Injected(byte* buffer, int bufferMax, ref ManagedSpanWrapper projectFolder);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CheckIntegrity_Injected(IntegrityCheckLevel level, out ManagedSpanWrapper ret);
 
 		internal static readonly ILogger s_DefaultLogger = new Logger(new DebugLogHandler());
 
 		internal static ILogger s_Logger = new Logger(new DebugLogHandler());
+
+		[NativeHeader("Runtime/Export/Debug/LogCapture.bindings.h")]
+		public struct StartupLog
+		{
+			public long timestamp;
+
+			public LogType logType;
+
+			public string message;
+		}
 	}
 }

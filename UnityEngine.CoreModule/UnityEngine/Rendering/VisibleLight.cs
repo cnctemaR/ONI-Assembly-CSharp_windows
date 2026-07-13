@@ -86,6 +86,30 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public float innerSpotAngle
+		{
+			get
+			{
+				return this.m_InnerSpotAngle;
+			}
+			set
+			{
+				this.m_InnerSpotAngle = value;
+			}
+		}
+
+		public Vector2 areaSize
+		{
+			get
+			{
+				return this.m_AreaSize;
+			}
+			set
+			{
+				this.m_AreaSize = value;
+			}
+		}
+
 		public bool intersectsNearPlane
 		{
 			get
@@ -124,9 +148,17 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public bool forcedVisible
+		{
+			get
+			{
+				return (this.m_Flags & VisibleLightFlags.ForcedVisible) > (VisibleLightFlags)0;
+			}
+		}
+
 		public bool Equals(VisibleLight other)
 		{
-			return this.m_LightType == other.m_LightType && this.m_FinalColor.Equals(other.m_FinalColor) && this.m_ScreenRect.Equals(other.m_ScreenRect) && this.m_LocalToWorldMatrix.Equals(other.m_LocalToWorldMatrix) && this.m_Range.Equals(other.m_Range) && this.m_SpotAngle.Equals(other.m_SpotAngle) && this.m_InstanceId == other.m_InstanceId && this.m_Flags == other.m_Flags;
+			return this.m_LightType == other.m_LightType && this.m_FinalColor.Equals(other.m_FinalColor) && this.m_ScreenRect.Equals(other.m_ScreenRect) && this.m_LocalToWorldMatrix.Equals(other.m_LocalToWorldMatrix) && this.m_Range.Equals(other.m_Range) && this.m_SpotAngle.Equals(other.m_SpotAngle) && this.m_InnerSpotAngle.Equals(other.m_InnerSpotAngle) && this.m_AreaSize.Equals(other.m_AreaSize) && this.m_InstanceId == other.m_InstanceId && this.m_Flags == other.m_Flags;
 		}
 
 		public override bool Equals(object obj)
@@ -143,6 +175,8 @@ namespace UnityEngine.Rendering
 			num = (num * 397) ^ this.m_LocalToWorldMatrix.GetHashCode();
 			num = (num * 397) ^ this.m_Range.GetHashCode();
 			num = (num * 397) ^ this.m_SpotAngle.GetHashCode();
+			num = (num * 397) ^ this.m_InnerSpotAngle.GetHashCode();
+			num = (num * 397) ^ this.m_AreaSize.GetHashCode();
 			num = (num * 397) ^ this.m_InstanceId;
 			return (num * 397) ^ (int)this.m_Flags;
 		}
@@ -168,6 +202,10 @@ namespace UnityEngine.Rendering
 		private float m_Range;
 
 		private float m_SpotAngle;
+
+		private float m_InnerSpotAngle;
+
+		private Vector2 m_AreaSize;
 
 		private int m_InstanceId;
 

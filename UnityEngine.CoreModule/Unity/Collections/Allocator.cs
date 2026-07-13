@@ -12,6 +12,7 @@ namespace Unity.Collections
 		TempJob,
 		Persistent,
 		AudioKernel,
+		Domain,
 		FirstUserIndex = 64
 	}
 }

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[DesignerCategory("Component")]
 	public class Component : MarshalByRefObject, IComponent, IDisposable
 	{
@@ -55,8 +55,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public virtual ISite Site
 		{
 			get
@@ -97,8 +97,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public IContainer Container
 		{
 			get
@@ -122,8 +122,8 @@ namespace System.ComponentModel
 			return null;
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		protected bool DesignMode
 		{
 			get

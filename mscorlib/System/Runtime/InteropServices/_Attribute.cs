@@ -3,10 +3,10 @@
 namespace System.Runtime.InteropServices
 {
 	[TypeLibImportClass(typeof(Attribute))]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[Guid("917B14D0-2D9E-38B8-92A9-381ACF52F7C0")]
-	[ComVisible(true)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	public interface _Attribute
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

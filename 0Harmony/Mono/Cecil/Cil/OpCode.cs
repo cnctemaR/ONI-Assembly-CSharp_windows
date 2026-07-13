@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public struct OpCode : IEquatable<OpCode>
+	internal struct OpCode : IEquatable<OpCode>
 	{
 		public string Name
 		{

@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
-	public abstract class DebugInformation : ICustomDebugInformationProvider, IMetadataTokenProvider
+	internal abstract class DebugInformation : ICustomDebugInformationProvider, IMetadataTokenProvider
 	{
 		public MetadataToken MetadataToken
 		{

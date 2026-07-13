@@ -41,9 +41,14 @@ public class KInputField : KScreen
 
 	private void OnEditEnd(string input)
 	{
-		if (base.gameObject.activeInHierarchy)
+		if (!base.gameObject.activeInHierarchy)
 		{
-			this.ProcessInput(input);
+			this.StopEditing();
+			return;
+		}
+		this.ProcessInput(input);
+		if (base.isEditing)
+		{
 			base.StartCoroutine(this.DelayedEndEdit());
 			return;
 		}

@@ -4,7 +4,7 @@ using Klei.AI;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Bed")]
-public class Bed : Workable, IGameObjectEffectDescriptor, IBasicBuilding
+public class Bed : Workable, IBasicBuilding
 {
 	protected override void OnPrefabInit()
 	{

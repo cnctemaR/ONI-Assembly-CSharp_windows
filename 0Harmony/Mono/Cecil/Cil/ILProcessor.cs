@@ -3,7 +3,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class ILProcessor
+	internal sealed class ILProcessor
 	{
 		public MethodBody Body
 		{

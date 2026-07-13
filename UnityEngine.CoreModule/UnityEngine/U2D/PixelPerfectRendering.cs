@@ -5,8 +5,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.U2D
 {
-	[NativeHeader("Runtime/2D/Common/PixelSnapping.h")]
 	[MovedFrom("UnityEngine.Experimental.U2D")]
+	[NativeHeader("Runtime/2D/Common/PixelSnapping.h")]
 	public static class PixelPerfectRendering
 	{
 		public static extern float pixelSnapSpacing

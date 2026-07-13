@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Utilities/PropertyName.h")]
 	[NativeHeader("Runtime/Director/Core/ExposedPropertyTable.bindings.h")]
+	[NativeHeader("Runtime/Utilities/PropertyName.h")]
 	public struct ExposedPropertyResolver
 	{
 		internal static Object ResolveReferenceInternal(IntPtr ptr, PropertyName name, out bool isValid)
@@ -21,11 +22,11 @@ namespace UnityEngine
 		[FreeFunction("ExposedPropertyTableBindings::ResolveReferenceInternal")]
 		private static Object ResolveReferenceBindingsInternal(IntPtr ptr, PropertyName name, out bool isValid)
 		{
-			return ExposedPropertyResolver.ResolveReferenceBindingsInternal_Injected(ptr, ref name, out isValid);
+			return Unmarshal.UnmarshalUnityObject<Object>(ExposedPropertyResolver.ResolveReferenceBindingsInternal_Injected(ptr, ref name, out isValid));
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Object ResolveReferenceBindingsInternal_Injected(IntPtr ptr, ref PropertyName name, out bool isValid);
+		private static extern IntPtr ResolveReferenceBindingsInternal_Injected(IntPtr ptr, [In] ref PropertyName name, out bool isValid);
 
 		internal IntPtr table;
 	}

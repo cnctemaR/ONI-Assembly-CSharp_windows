@@ -2,6 +2,7 @@
 
 namespace UnityEngine
 {
+	[Obsolete("Use SubsystemDescriptorWithProvider<> instead.", false)]
 	public class SubsystemDescriptor<TSubsystem> : SubsystemDescriptor where TSubsystem : Subsystem
 	{
 		internal override ISubsystem CreateImpl()

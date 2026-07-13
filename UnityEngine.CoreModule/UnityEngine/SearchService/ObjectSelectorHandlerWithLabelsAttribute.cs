@@ -2,8 +2,8 @@
 
 namespace UnityEngine.SearchService
 {
-	[Obsolete("ObjectSelectorHandlerWithLabelsAttribute has been deprecated. Use SearchContextAttribute instead.", true)]
 	[AttributeUsage(AttributeTargets.Field)]
+	[Obsolete("ObjectSelectorHandlerWithLabelsAttribute has been deprecated. Use SearchContextAttribute instead.", true)]
 	public class ObjectSelectorHandlerWithLabelsAttribute : Attribute
 	{
 		public string[] labels { get; }

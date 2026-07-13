@@ -730,10 +730,12 @@ public class DetailsScreen : KTabMenu
 			else if (commandModule != null)
 			{
 				this.TrySetRocketTitle(commandModule);
+				this.TabTitle.SetSubText(commandModule.GetComponent<BuildingComplete>().Def.Name, "");
 			}
 			else if (clustercraftExteriorDoor != null)
 			{
 				this.TrySetRocketTitle(clustercraftExteriorDoor);
+				this.TabTitle.SetSubText(clustercraftExteriorDoor.GetComponent<BuildingComplete>().Def.Name, "");
 			}
 			else
 			{
@@ -751,7 +753,7 @@ public class DetailsScreen : KTabMenu
 			WorldContainer targetWorld = clusterCraftDoor.GetTargetWorld();
 			this.TabTitle.SetTitle(targetWorld.GetComponent<ClusterGridEntity>().Name);
 			this.TabTitle.SetUserEditable(true);
-			this.TabTitle.SetSubText(this.target.GetProperName(), "");
+			clusterCraftDoor.GetComponent<KSelectable>().SetName(targetWorld.GetComponent<ClusterGridEntity>().Name);
 			this.setRocketTitleHandle = -1;
 			return;
 		}
@@ -770,10 +772,11 @@ public class DetailsScreen : KTabMenu
 	{
 		if (commandModule != null)
 		{
-			this.TabTitle.SetTitle(SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(commandModule.GetComponent<LaunchConditionManager>()).GetRocketName());
+			string rocketName = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(commandModule.GetComponent<LaunchConditionManager>()).GetRocketName();
+			commandModule.GetComponent<KSelectable>().SetName(rocketName);
+			this.TabTitle.SetTitle(rocketName);
 			this.TabTitle.SetUserEditable(true);
 		}
-		this.TabTitle.SetSubText(this.target.GetProperName(), "");
 	}
 
 	public TargetPanel GetActiveTab()

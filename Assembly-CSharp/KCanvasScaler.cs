@@ -51,7 +51,7 @@ public class KCanvasScaler : KMonoBehaviour
 		Camera camera = Camera.main;
 		if (camera == null)
 		{
-			camera = global::UnityEngine.Object.FindObjectOfType<Camera>();
+			camera = global::UnityEngine.Object.FindFirstObjectByType<Camera>();
 		}
 		camera != null;
 		float num = (float)Screen.width / (float)Screen.height;

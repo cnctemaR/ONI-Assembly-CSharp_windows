@@ -13,7 +13,7 @@ namespace UnityEngine
 		public int x
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_X;
 			}
@@ -27,7 +27,7 @@ namespace UnityEngine
 		public int y
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_Y;
 			}
@@ -41,7 +41,7 @@ namespace UnityEngine
 		public int z
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_Z;
 			}
@@ -79,22 +79,22 @@ namespace UnityEngine
 		public int this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				int num;
 				switch (index)
 				{
 				case 0:
-					num = this.x;
+					num = this.m_X;
 					break;
 				case 1:
-					num = this.y;
+					num = this.m_Y;
 					break;
 				case 2:
-					num = this.z;
+					num = this.m_Z;
 					break;
 				default:
-					throw new IndexOutOfRangeException(UnityString.Format("Invalid Vector3Int index addressed: {0}!", new object[] { index }));
+					throw new IndexOutOfRangeException(string.Format("Invalid Vector3Int index addressed: {0}!", index));
 				}
 				return num;
 			}
@@ -104,35 +104,35 @@ namespace UnityEngine
 				switch (index)
 				{
 				case 0:
-					this.x = value;
+					this.m_X = value;
 					break;
 				case 1:
-					this.y = value;
+					this.m_Y = value;
 					break;
 				case 2:
-					this.z = value;
+					this.m_Z = value;
 					break;
 				default:
-					throw new IndexOutOfRangeException(UnityString.Format("Invalid Vector3Int index addressed: {0}!", new object[] { index }));
+					throw new IndexOutOfRangeException(string.Format("Invalid Vector3Int index addressed: {0}!", index));
 				}
 			}
 		}
 
-		public float magnitude
+		public readonly float magnitude
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return Mathf.Sqrt((float)(this.x * this.x + this.y * this.y + this.z * this.z));
+				return Mathf.Sqrt((float)(this.m_X * this.m_X + this.m_Y * this.m_Y + this.m_Z * this.m_Z));
 			}
 		}
 
-		public int sqrMagnitude
+		public readonly int sqrMagnitude
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return this.x * this.x + this.y * this.y + this.z * this.z;
+				return this.m_X * this.m_X + this.m_Y * this.m_Y + this.m_Z * this.m_Z;
 			}
 		}
 
@@ -143,56 +143,104 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float Distance(in Vector3Int a, in Vector3Int b)
+		{
+			return (a - b).magnitude;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int Min(Vector3Int lhs, Vector3Int rhs)
 		{
-			return new Vector3Int(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y), Mathf.Min(lhs.z, rhs.z));
+			return new Vector3Int(Mathf.Min(lhs.m_X, rhs.m_X), Mathf.Min(lhs.m_Y, rhs.m_Y), Mathf.Min(lhs.m_Z, rhs.m_Z));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector3Int Min(in Vector3Int lhs, in Vector3Int rhs)
+		{
+			return new Vector3Int(Mathf.Min(lhs.m_X, rhs.m_X), Mathf.Min(lhs.m_Y, rhs.m_Y), Mathf.Min(lhs.m_Z, rhs.m_Z));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int Max(Vector3Int lhs, Vector3Int rhs)
 		{
-			return new Vector3Int(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y), Mathf.Max(lhs.z, rhs.z));
+			return new Vector3Int(Mathf.Max(lhs.m_X, rhs.m_X), Mathf.Max(lhs.m_Y, rhs.m_Y), Mathf.Max(lhs.m_Z, rhs.m_Z));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector3Int Max(in Vector3Int lhs, in Vector3Int rhs)
+		{
+			return new Vector3Int(Mathf.Max(lhs.m_X, rhs.m_X), Mathf.Max(lhs.m_Y, rhs.m_Y), Mathf.Max(lhs.m_Z, rhs.m_Z));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int Scale(Vector3Int a, Vector3Int b)
 		{
-			return new Vector3Int(a.x * b.x, a.y * b.y, a.z * b.z);
+			return new Vector3Int(a.m_X * b.m_X, a.m_Y * b.m_Y, a.m_Z * b.m_Z);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector3Int Scale(in Vector3Int a, in Vector3Int b)
+		{
+			return new Vector3Int(a.m_X * b.m_X, a.m_Y * b.m_Y, a.m_Z * b.m_Z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Scale(Vector3Int scale)
 		{
-			this.x *= scale.x;
-			this.y *= scale.y;
-			this.z *= scale.z;
+			this.m_X *= scale.m_X;
+			this.m_Y *= scale.m_Y;
+			this.m_Z *= scale.m_Z;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Scale(in Vector3Int scale)
+		{
+			this.m_X *= scale.m_X;
+			this.m_Y *= scale.m_Y;
+			this.m_Z *= scale.m_Z;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Clamp(Vector3Int min, Vector3Int max)
 		{
-			this.x = Math.Max(min.x, this.x);
-			this.x = Math.Min(max.x, this.x);
-			this.y = Math.Max(min.y, this.y);
-			this.y = Math.Min(max.y, this.y);
-			this.z = Math.Max(min.z, this.z);
-			this.z = Math.Min(max.z, this.z);
+			this.m_X = Mathf.Clamp(this.m_X, min.m_X, max.m_X);
+			this.m_Y = Mathf.Clamp(this.m_Y, min.m_Y, max.m_Y);
+			this.m_Z = Mathf.Clamp(this.m_Z, min.m_Z, max.m_Z);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Clamp(in Vector3Int min, in Vector3Int max)
+		{
+			this.m_X = Mathf.Clamp(this.m_X, min.m_X, max.m_X);
+			this.m_Y = Mathf.Clamp(this.m_Y, min.m_Y, max.m_Y);
+			this.m_Z = Mathf.Clamp(this.m_Z, min.m_Z, max.m_Z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static implicit operator Vector3(Vector3Int v)
 		{
-			return new Vector3((float)v.x, (float)v.y, (float)v.z);
+			return new Vector3
+			{
+				x = (float)v.m_X,
+				y = (float)v.m_Y,
+				z = (float)v.m_Z
+			};
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static explicit operator Vector2Int(Vector3Int v)
 		{
-			return new Vector2Int(v.x, v.y);
+			return new Vector2Int(v.m_X, v.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int FloorToInt(Vector3 v)
+		{
+			return new Vector3Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y), Mathf.FloorToInt(v.z));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector3Int FloorToInt(in Vector3 v)
 		{
 			return new Vector3Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y), Mathf.FloorToInt(v.z));
 		}
@@ -204,7 +252,19 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector3Int CeilToInt(in Vector3 v)
+		{
+			return new Vector3Int(Mathf.CeilToInt(v.x), Mathf.CeilToInt(v.y), Mathf.CeilToInt(v.z));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int RoundToInt(Vector3 v)
+		{
+			return new Vector3Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), Mathf.RoundToInt(v.z));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector3Int RoundToInt(in Vector3 v)
 		{
 			return new Vector3Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), Mathf.RoundToInt(v.z));
 		}
@@ -212,49 +272,49 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int operator +(Vector3Int a, Vector3Int b)
 		{
-			return new Vector3Int(a.x + b.x, a.y + b.y, a.z + b.z);
+			return new Vector3Int(a.m_X + b.m_X, a.m_Y + b.m_Y, a.m_Z + b.m_Z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int operator -(Vector3Int a, Vector3Int b)
 		{
-			return new Vector3Int(a.x - b.x, a.y - b.y, a.z - b.z);
+			return new Vector3Int(a.m_X - b.m_X, a.m_Y - b.m_Y, a.m_Z - b.m_Z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int operator *(Vector3Int a, Vector3Int b)
 		{
-			return new Vector3Int(a.x * b.x, a.y * b.y, a.z * b.z);
+			return new Vector3Int(a.m_X * b.m_X, a.m_Y * b.m_Y, a.m_Z * b.m_Z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int operator -(Vector3Int a)
 		{
-			return new Vector3Int(-a.x, -a.y, -a.z);
+			return new Vector3Int(-a.m_X, -a.m_Y, -a.m_Z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int operator *(Vector3Int a, int b)
 		{
-			return new Vector3Int(a.x * b, a.y * b, a.z * b);
+			return new Vector3Int(a.m_X * b, a.m_Y * b, a.m_Z * b);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int operator *(int a, Vector3Int b)
 		{
-			return new Vector3Int(a * b.x, a * b.y, a * b.z);
+			return new Vector3Int(a * b.m_X, a * b.m_Y, a * b.m_Z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector3Int operator /(Vector3Int a, int b)
 		{
-			return new Vector3Int(a.x / b, a.y / b, a.z / b);
+			return new Vector3Int(a.m_X / b, a.m_Y / b, a.m_Z / b);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Vector3Int lhs, Vector3Int rhs)
 		{
-			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+			return lhs.m_X == rhs.m_X && lhs.m_Y == rhs.m_Y && lhs.m_Z == rhs.m_Z;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -264,52 +324,64 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool Equals(object other)
+		public override readonly bool Equals(object other)
 		{
-			bool flag = !(other is Vector3Int);
-			return !flag && this.Equals((Vector3Int)other);
+			Vector3Int vector3Int;
+			bool flag;
+			if (other is Vector3Int)
+			{
+				vector3Int = (Vector3Int)other;
+				flag = true;
+			}
+			else
+			{
+				flag = false;
+			}
+			bool flag2 = flag;
+			return flag2 && this.Equals(in vector3Int);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Equals(Vector3Int other)
+		public readonly bool Equals(Vector3Int other)
 		{
 			return this == other;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override int GetHashCode()
+		public readonly bool Equals(in Vector3Int other)
 		{
-			int hashCode = this.y.GetHashCode();
-			int hashCode2 = this.z.GetHashCode();
-			return this.x.GetHashCode() ^ (hashCode << 4) ^ (hashCode >> 28) ^ (hashCode2 >> 4) ^ (hashCode2 << 28);
+			return this == other;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override string ToString()
+		public override readonly int GetHashCode()
+		{
+			int hashCode = this.m_Y.GetHashCode();
+			int hashCode2 = this.m_Z.GetHashCode();
+			return this.m_X.GetHashCode() ^ (hashCode << 4) ^ (hashCode >> 28) ^ (hashCode2 >> 4) ^ (hashCode2 << 28);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override readonly string ToString()
 		{
 			return this.ToString(null, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format)
+		public readonly string ToString(string format)
 		{
 			return this.ToString(format, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format, IFormatProvider formatProvider)
+		public readonly string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = formatProvider == null;
 			if (flag)
 			{
 				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
-			return UnityString.Format("({0}, {1}, {2})", new object[]
-			{
-				this.x.ToString(format, formatProvider),
-				this.y.ToString(format, formatProvider),
-				this.z.ToString(format, formatProvider)
-			});
+			return string.Format("({0}, {1}, {2})", this.m_X.ToString(format, formatProvider), this.m_Y.ToString(format, formatProvider), this.m_Z.ToString(format, formatProvider));
 		}
 
 		public static Vector3Int zero

@@ -8,7 +8,12 @@ namespace UnityEngine
 	internal struct StaticBatchingHelper
 	{
 		[FreeFunction("StaticBatching::CombineMeshesForStaticBatching")]
+		internal static void CombineMeshes(GameObject[] gos, GameObject staticBatchRoot)
+		{
+			StaticBatchingHelper.CombineMeshes_Injected(gos, Object.MarshalledUnityObject.Marshal<GameObject>(staticBatchRoot));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void CombineMeshes(GameObject[] gos, GameObject staticBatchRoot);
+		private static extern void CombineMeshes_Injected(GameObject[] gos, IntPtr staticBatchRoot);
 	}
 }

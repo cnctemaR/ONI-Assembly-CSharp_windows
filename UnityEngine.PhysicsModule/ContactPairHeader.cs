@@ -1,10 +1,13 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[UsedByNativeCode]
 	public readonly struct ContactPairHeader
 	{
-		public int BodyInstanceID
+		[Obsolete("bodyInstanceID is deprecated, use bodyEntityId instead.", false)]
+		public int bodyInstanceID
 		{
 			get
 			{
@@ -12,7 +15,8 @@ namespace UnityEngine
 			}
 		}
 
-		public int OtherBodyInstanceID
+		[Obsolete("otherBodyInstanceID is deprecated, use otherBodyEntityId instead.", false)]
+		public int otherBodyInstanceID
 		{
 			get
 			{
@@ -20,7 +24,23 @@ namespace UnityEngine
 			}
 		}
 
-		public Component Body
+		public EntityId bodyEntityId
+		{
+			get
+			{
+				return this.m_BodyID;
+			}
+		}
+
+		public EntityId otherBodyEntityId
+		{
+			get
+			{
+				return this.m_OtherBodyID;
+			}
+		}
+
+		public Component body
 		{
 			get
 			{
@@ -28,7 +48,7 @@ namespace UnityEngine
 			}
 		}
 
-		public Component OtherBody
+		public Component otherBody
 		{
 			get
 			{
@@ -36,7 +56,7 @@ namespace UnityEngine
 			}
 		}
 
-		public int PairCount
+		public int pairCount
 		{
 			get
 			{
@@ -44,7 +64,7 @@ namespace UnityEngine
 			}
 		}
 
-		internal bool HasRemovedBody
+		internal bool hasRemovedBody
 		{
 			get
 			{
@@ -67,9 +87,54 @@ namespace UnityEngine
 			return this.m_StartPtr.ToInt64() / (long)sizeof(ContactPair) + index * sizeof(ContactPair);
 		}
 
-		internal readonly int m_BodyID;
+		[Obsolete("Please use ContactPairHeader.bodyInstanceID instead. (UnityUpgradable) -> bodyInstanceID", false)]
+		public int BodyInstanceID
+		{
+			get
+			{
+				return this.bodyInstanceID;
+			}
+		}
 
-		internal readonly int m_OtherBodyID;
+		[Obsolete("Please use ContactPairHeader.otherBodyInstanceID instead. (UnityUpgradable) -> otherBodyInstanceID", false)]
+		public int OtherBodyInstanceID
+		{
+			get
+			{
+				return this.otherBodyInstanceID;
+			}
+		}
+
+		[Obsolete("Please use ContactPairHeader.body instead. (UnityUpgradable) -> body", false)]
+		public Component Body
+		{
+			get
+			{
+				return this.body;
+			}
+		}
+
+		[Obsolete("Please use ContactPairHeader.otherBody instead. (UnityUpgradable) -> otherBody", false)]
+		public Component OtherBody
+		{
+			get
+			{
+				return this.otherBody;
+			}
+		}
+
+		[Obsolete("Please use ContactPairHeader.pairCount instead. (UnityUpgradable) -> pairCount", false)]
+		public int PairCount
+		{
+			get
+			{
+				return this.pairCount;
+			}
+		}
+
+		internal readonly EntityId m_BodyID;
+
+		internal readonly EntityId m_OtherBodyID;
 
 		internal readonly IntPtr m_StartPtr;
 

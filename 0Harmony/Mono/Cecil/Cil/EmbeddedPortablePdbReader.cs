@@ -1,4 +1,5 @@
 ﻿using System;
+using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
@@ -26,6 +27,11 @@ namespace Mono.Cecil.Cil
 		public MethodDebugInformation Read(MethodDefinition method)
 		{
 			return this.reader.Read(method);
+		}
+
+		public Collection<CustomDebugInformation> Read(ICustomDebugInformationProvider provider)
+		{
+			return this.reader.Read(provider);
 		}
 
 		public void Dispose()

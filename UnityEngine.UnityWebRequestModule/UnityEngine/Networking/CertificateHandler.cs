@@ -11,11 +11,18 @@ namespace UnityEngine.Networking
 	public class CertificateHandler : IDisposable
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(CertificateHandler obj);
+		private static extern IntPtr Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] CertificateHandler obj);
 
 		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Release();
+		private void ReleaseFromScripting()
+		{
+			IntPtr intPtr = CertificateHandler.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CertificateHandler.ReleaseFromScripting_Injected(intPtr);
+		}
 
 		protected CertificateHandler()
 		{
@@ -43,12 +50,23 @@ namespace UnityEngine.Networking
 			bool flag = this.m_Ptr != IntPtr.Zero;
 			if (flag)
 			{
-				this.Release();
+				this.ReleaseFromScripting();
 				this.m_Ptr = IntPtr.Zero;
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseFromScripting_Injected(IntPtr _unity_self);
+
 		[NonSerialized]
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(CertificateHandler handler)
+			{
+				return handler.m_Ptr;
+			}
+		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -8,9 +9,9 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Camera/RenderLoops/LightProbeContext.h")]
-	[NativeContainer]
 	[StaticAccessor("LightProbeContextWrapper", StaticAccessorType.DoubleColon)]
+	[NativeContainer]
+	[NativeHeader("Runtime/Camera/RenderLoops/LightProbeContext.h")]
 	public struct LightProbesQuery : IDisposable
 	{
 		public LightProbesQuery(Allocator allocator)
@@ -128,7 +129,7 @@ namespace UnityEngine
 		private static extern void CalculateInterpolatedLightAndOcclusionProbes(IntPtr lightProbeContextWrapper, IntPtr positions, IntPtr tetrahedronIndices, IntPtr lightProbes, IntPtr occlusionProbes, int count);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CalculateInterpolatedLightAndOcclusionProbe_Injected(IntPtr lightProbeContextWrapper, ref Vector3 position, ref int tetrahedronIndex, out SphericalHarmonicsL2 lightProbe, out Vector4 occlusionProbe);
+		private static extern void CalculateInterpolatedLightAndOcclusionProbe_Injected(IntPtr lightProbeContextWrapper, [In] ref Vector3 position, ref int tetrahedronIndex, out SphericalHarmonicsL2 lightProbe, out Vector4 occlusionProbe);
 
 		[NativeDisableUnsafePtrRestriction]
 		internal IntPtr m_LightProbeContextWrapper;

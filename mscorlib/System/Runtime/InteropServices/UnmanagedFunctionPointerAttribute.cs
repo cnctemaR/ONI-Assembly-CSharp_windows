@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class UnmanagedFunctionPointerAttribute : Attribute
 	{
 		public UnmanagedFunctionPointerAttribute(CallingConvention callingConvention)

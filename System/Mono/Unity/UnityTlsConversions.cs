@@ -81,23 +81,23 @@ namespace Mono.Unity
 			{
 				return AlertDescription.CertificateUnknown;
 			}
-			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_USER_ERROR1))
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_BADCERT_BAD_KEY))
 			{
 				return AlertDescription.UserCancelled;
 			}
-			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_USER_ERROR2))
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_BADCRL_BAD_MD))
 			{
 				return AlertDescription.UserCancelled;
 			}
-			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_USER_ERROR2))
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_BADCRL_BAD_MD))
 			{
 				return AlertDescription.UserCancelled;
 			}
-			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_USER_ERROR3))
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_BADCRL_BAD_PK))
 			{
 				return AlertDescription.UserCancelled;
 			}
-			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_USER_ERROR4))
+			if (verifyResult.HasFlag(UnityTls.unitytls_x509verify_result.UNITYTLS_X509VERIFY_FLAG_BADCRL_BAD_KEY))
 			{
 				return AlertDescription.UserCancelled;
 			}

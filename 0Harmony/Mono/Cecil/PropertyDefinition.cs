@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class PropertyDefinition : PropertyReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider, IConstantProvider
+	internal sealed class PropertyDefinition : PropertyReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider, IConstantProvider
 	{
 		public PropertyAttributes Attributes
 		{

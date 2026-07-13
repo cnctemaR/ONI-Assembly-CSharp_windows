@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Legacy/Input Field", 103)]
+	[AddComponentMenu("UI (Canvas)/Legacy/Input Field", 103)]
 	public class InputField : Selectable, IUpdateSelectedHandler, IEventSystemHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, ISubmitHandler, ICanvasElement, ILayoutElement
 	{
 		private BaseInput input
@@ -864,13 +864,13 @@ namespace UnityEngine.UI
 					if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Canceled)
 					{
 						this.m_WasCanceled = true;
+						return;
 					}
-					else if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Done)
+					if (this.m_Keyboard.status == TouchScreenKeyboard.Status.Done)
 					{
 						this.SendOnSubmit();
 					}
 				}
-				this.OnDeselect(null);
 				return;
 			}
 			string text = this.m_Keyboard.text;
@@ -897,7 +897,7 @@ namespace UnityEngine.UI
 						{
 							c = this.Validate(this.m_Text, this.m_Text.Length, c);
 						}
-						if (this.lineType == InputField.LineType.MultiLineSubmit && c == '\n')
+						if (this.lineType != InputField.LineType.MultiLineNewline && c == '\n')
 						{
 							this.UpdateLabel();
 							this.SendOnSubmit();
@@ -2208,7 +2208,7 @@ namespace UnityEngine.UI
 					{
 						return ch;
 					}
-					if (ch == '-' && (pos == 0 || flag2))
+					if (ch == '-' && (pos == 0 || flag2) && !text.Contains('-'))
 					{
 						return ch;
 					}
@@ -2216,7 +2216,7 @@ namespace UnityEngine.UI
 					{
 						return ch;
 					}
-					if (this.characterValidation == InputField.CharacterValidation.Integer && ch == '.' && (pos == 0 || flag2))
+					if (this.characterValidation == InputField.CharacterValidation.Integer && ch == '.' && (pos == 0 || flag2) && !text.Contains('-'))
 					{
 						return '-';
 					}

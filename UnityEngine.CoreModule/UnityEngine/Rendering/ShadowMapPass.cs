@@ -16,6 +16,7 @@ namespace UnityEngine.Rendering
 		DirectionalCascade2 = 256,
 		DirectionalCascade3 = 512,
 		Spotlight = 1024,
+		AreaLight = 2048,
 		Pointlight = 63,
 		Directional = 960,
 		All = 2047

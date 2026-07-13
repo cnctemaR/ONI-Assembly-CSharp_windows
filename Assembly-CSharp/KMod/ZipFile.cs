@@ -103,7 +103,7 @@ namespace KMod
 			return this.file_system;
 		}
 
-		public void CopyTo(string path, List<string> extensions = null)
+		public bool TryCopyTo(string path, List<string> extensions = null)
 		{
 			foreach (ZipEntry zipEntry in this.zipfile.Entries)
 			{
@@ -123,19 +123,25 @@ namespace KMod
 				{
 					string text2 = FileSystem.Normalize(Path.Combine(path, zipEntry.FileName));
 					string directoryName = Path.GetDirectoryName(text2);
-					if (string.IsNullOrEmpty(directoryName) || FileUtil.CreateDirectory(directoryName, 0))
+					if (!string.IsNullOrEmpty(directoryName) && !FileUtil.CreateDirectory(directoryName, 0))
 					{
+						return false;
+					}
+					using (FileStream fileStream = FileUtil.Create(text2, 0))
+					{
+						if (fileStream == null)
+						{
+							return false;
+						}
 						using (MemoryStream memoryStream = new MemoryStream((int)zipEntry.UncompressedSize))
 						{
 							zipEntry.Extract(memoryStream);
-							using (FileStream fileStream = FileUtil.Create(text2, 0))
-							{
-								fileStream.Write(memoryStream.GetBuffer(), 0, memoryStream.GetBuffer().Length);
-							}
+							fileStream.Write(memoryStream.GetBuffer(), 0, memoryStream.GetBuffer().Length);
 						}
 					}
 				}
 			}
+			return true;
 		}
 
 		public string Read(string relative_path)

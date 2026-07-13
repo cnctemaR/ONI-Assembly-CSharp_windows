@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GetAudioManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/Audio.bindings.h")]
+	[StaticAccessor("GetAudioManager()", StaticAccessorType.Dot)]
 	public sealed class AudioSettings
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AudioSpeakerMode GetSpeakerMode();
 
-		[NativeMethod(Name = "AudioSettings::SetConfiguration", IsFreeFunction = true)]
 		[NativeThrows]
+		[NativeMethod(Name = "AudioSettings::SetConfiguration", IsFreeFunction = true)]
 		private static bool SetConfiguration(AudioConfiguration config)
 		{
 			return AudioSettings.SetConfiguration_Injected(ref config);
@@ -100,8 +101,21 @@ namespace UnityEngine
 		}
 
 		[NativeName("GetCurrentSpatializerDefinitionName")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetSpatializerPluginName();
+		public static string GetSpatializerPluginName()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				AudioSettings.GetSpatializerPluginName_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public static AudioConfiguration GetConfiguration()
 		{
@@ -165,8 +179,21 @@ namespace UnityEngine
 		}
 
 		[NativeMethod(Name = "AudioSettings::GetCurrentAmbisonicDefinitionName", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetAmbisonicDecoderPluginName();
+		internal static string GetAmbisonicDecoderPluginName()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				AudioSettings.GetAmbisonicDecoderPluginName_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public static AudioSpatialExperience audioSpatialExperience
 		{
@@ -181,10 +208,16 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SetConfiguration_Injected(ref AudioConfiguration config);
+		private static extern bool SetConfiguration_Injected([In] ref AudioConfiguration config);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSpatializerPluginName_Injected(out ManagedSpanWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetConfiguration_Injected(out AudioConfiguration ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAmbisonicDecoderPluginName_Injected(out ManagedSpanWrapper ret);
 
 		public delegate void AudioConfigurationChangeHandler(bool deviceWasChanged);
 

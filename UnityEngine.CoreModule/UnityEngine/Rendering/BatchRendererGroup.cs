@@ -9,9 +9,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Math/Matrix4x4.h")]
 	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Math/Matrix4x4.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class BatchRendererGroup : IDisposable
 	{
@@ -19,6 +19,13 @@ namespace UnityEngine.Rendering
 		{
 			this.m_PerformCulling = cullingCallback;
 			this.m_GroupHandle = BatchRendererGroup.Create(this, (void*)userContext);
+		}
+
+		public unsafe BatchRendererGroup(BatchRendererGroupCreateInfo info)
+		{
+			this.m_PerformCulling = info.cullingCallback;
+			this.m_GroupHandle = BatchRendererGroup.Create(this, (void*)info.userContext);
+			this.m_FinishedCulling = info.finishedCullingCallback;
 		}
 
 		public void Dispose()
@@ -37,8 +44,13 @@ namespace UnityEngine.Rendering
 
 		private BatchID AddDrawCommandBatch(IntPtr values, int count, GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize)
 		{
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			BatchID batchID;
-			this.AddDrawCommandBatch_Injected(values, count, ref buffer, bufferOffset, windowSize, out batchID);
+			BatchRendererGroup.AddDrawCommandBatch_Injected(intPtr, values, count, ref buffer, bufferOffset, windowSize, out batchID);
 			return batchID;
 		}
 
@@ -54,7 +66,12 @@ namespace UnityEngine.Rendering
 
 		private void RemoveDrawCommandBatch(BatchID batchID)
 		{
-			this.RemoveDrawCommandBatch_Injected(ref batchID);
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.RemoveDrawCommandBatch_Injected(intPtr, ref batchID);
 		}
 
 		public void RemoveBatch(BatchID batchID)
@@ -64,7 +81,12 @@ namespace UnityEngine.Rendering
 
 		private void SetDrawCommandBatchBuffer(BatchID batchID, GraphicsBufferHandle buffer)
 		{
-			this.SetDrawCommandBatchBuffer_Injected(ref batchID, ref buffer);
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.SetDrawCommandBatchBuffer_Injected(intPtr, ref batchID, ref buffer);
 		}
 
 		public void SetBatchBuffer(BatchID batchID, GraphicsBufferHandle buffer)
@@ -74,78 +96,164 @@ namespace UnityEngine.Rendering
 
 		public BatchMaterialID RegisterMaterial(Material material)
 		{
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			BatchMaterialID batchMaterialID;
-			this.RegisterMaterial_Injected(material, out batchMaterialID);
+			BatchRendererGroup.RegisterMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material), out batchMaterialID);
 			return batchMaterialID;
 		}
 
-		public BatchMaterialID RegisterMaterial(int materialInstanceID)
+		internal unsafe void RegisterMaterials(ReadOnlySpan<EntityId> materialID, Span<BatchMaterialID> batchMaterialID)
 		{
-			return this.RegisterMaterial_InstanceID(materialInstanceID);
-		}
-
-		private BatchMaterialID RegisterMaterial_InstanceID(int materialInstanceID)
-		{
-			BatchMaterialID batchMaterialID;
-			this.RegisterMaterial_InstanceID_Injected(materialInstanceID, out batchMaterialID);
-			return batchMaterialID;
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<EntityId> readOnlySpan = materialID;
+			fixed (EntityId* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<BatchMaterialID> span = batchMaterialID;
+				fixed (BatchMaterialID* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					BatchRendererGroup.RegisterMaterials_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
 		}
 
 		public void UnregisterMaterial(BatchMaterialID material)
 		{
-			this.UnregisterMaterial_Injected(ref material);
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.UnregisterMaterial_Injected(intPtr, ref material);
 		}
 
 		public Material GetRegisteredMaterial(BatchMaterialID material)
 		{
-			return this.GetRegisteredMaterial_Injected(ref material);
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Material>(BatchRendererGroup.GetRegisteredMaterial_Injected(intPtr, ref material));
 		}
 
 		public BatchMeshID RegisterMesh(Mesh mesh)
 		{
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			BatchMeshID batchMeshID;
-			this.RegisterMesh_Injected(mesh, out batchMeshID);
+			BatchRendererGroup.RegisterMesh_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Mesh>(mesh), out batchMeshID);
 			return batchMeshID;
 		}
 
-		public BatchMeshID RegisterMesh(int meshInstanceID)
+		internal unsafe void RegisterMeshes(ReadOnlySpan<EntityId> meshID, Span<BatchMeshID> batchMeshID)
 		{
-			return this.RegisterMesh_InstanceID(meshInstanceID);
-		}
-
-		private BatchMeshID RegisterMesh_InstanceID(int meshInstanceID)
-		{
-			BatchMeshID batchMeshID;
-			this.RegisterMesh_InstanceID_Injected(meshInstanceID, out batchMeshID);
-			return batchMeshID;
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<EntityId> readOnlySpan = meshID;
+			fixed (EntityId* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<BatchMeshID> span = batchMeshID;
+				fixed (BatchMeshID* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					BatchRendererGroup.RegisterMeshes_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
 		}
 
 		public void UnregisterMesh(BatchMeshID mesh)
 		{
-			this.UnregisterMesh_Injected(ref mesh);
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.UnregisterMesh_Injected(intPtr, ref mesh);
 		}
 
 		public Mesh GetRegisteredMesh(BatchMeshID mesh)
 		{
-			return this.GetRegisteredMesh_Injected(ref mesh);
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Mesh>(BatchRendererGroup.GetRegisteredMesh_Injected(intPtr, ref mesh));
 		}
 
 		public void SetGlobalBounds(Bounds bounds)
 		{
-			this.SetGlobalBounds_Injected(ref bounds);
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.SetGlobalBounds_Injected(intPtr, ref bounds);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPickingMaterial(Material material);
+		public void SetPickingMaterial(Material material)
+		{
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.SetPickingMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetErrorMaterial(Material material);
+		public void SetErrorMaterial(Material material)
+		{
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.SetErrorMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetLoadingMaterial(Material material);
+		public void SetLoadingMaterial(Material material)
+		{
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BatchRendererGroup.SetLoadingMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetEnabledViewTypes(BatchCullingViewType[] viewTypes);
+		public unsafe void SetEnabledViewTypes(BatchCullingViewType[] viewTypes)
+		{
+			IntPtr intPtr = BatchRendererGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<BatchCullingViewType> span = new Span<BatchCullingViewType>(viewTypes);
+			fixed (BatchCullingViewType* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				BatchRendererGroup.SetEnabledViewTypes_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern BatchBufferTarget GetBufferTarget();
@@ -165,7 +273,7 @@ namespace UnityEngine.Rendering
 		public static extern int GetConstantBufferOffsetAlignment();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern IntPtr Create(BatchRendererGroup group, void* userContext);
+		private unsafe static extern IntPtr Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] BatchRendererGroup group, void* userContext);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Destroy(IntPtr groupHandle);
@@ -180,9 +288,11 @@ namespace UnityEngine.Rendering
 			{
 				BatchCullingOutput batchCullingOutput = new BatchCullingOutput
 				{
-					drawCommands = nativeArray3
+					drawCommands = nativeArray3,
+					customCullingResult = new NativeArray<IntPtr>(1, Allocator.Temp, NativeArrayOptions.ClearMemory)
 				};
-				context.cullingJobsFence = group.m_PerformCulling(group, new BatchCullingContext(nativeArray, nativeArray2, lodParameters, context.localToWorldMatrix, context.viewType, context.projectionType, context.cullingFlags, context.viewID, context.cullingLayerMask, context.sceneCullingMask, context.receiverPlaneOffset, context.receiverPlaneCount), batchCullingOutput, userContext);
+				context.cullingJobsFence = group.m_PerformCulling(group, new BatchCullingContext(nativeArray, nativeArray2, lodParameters, context.localToWorldMatrix, context.viewType, context.projectionType, context.cullingFlags, context.viewID, context.cullingLayerMask, context.sceneCullingMask, context.splitExclusionMask, context.receiverPlaneOffset, context.receiverPlaneCount, context.occlusionBuffer), batchCullingOutput, userContext);
+				context.customCullingResult = batchCullingOutput.customCullingResult[0];
 			}
 			finally
 			{
@@ -190,46 +300,96 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddDrawCommandBatch_Injected(IntPtr values, int count, ref GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize, out BatchID ret);
+		[RequiredByNativeCode]
+		private static void InvokeOnFinishedCulling(BatchRendererGroup group, IntPtr customCullingResult)
+		{
+			try
+			{
+				bool flag = group.m_FinishedCulling != null;
+				if (flag)
+				{
+					group.m_FinishedCulling(customCullingResult);
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.LogException(ex);
+			}
+		}
+
+		[FreeFunction("BatchRendererGroup::OcclusionTestAABB", IsThreadSafe = true)]
+		internal static bool OcclusionTestAABB(IntPtr occlusionBuffer, Bounds aabb)
+		{
+			return BatchRendererGroup.OcclusionTestAABB_Injected(occlusionBuffer, ref aabb);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RemoveDrawCommandBatch_Injected(ref BatchID batchID);
+		private static extern void AddDrawCommandBatch_Injected(IntPtr _unity_self, IntPtr values, int count, [In] ref GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize, out BatchID ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetDrawCommandBatchBuffer_Injected(ref BatchID batchID, ref GraphicsBufferHandle buffer);
+		private static extern void RemoveDrawCommandBatch_Injected(IntPtr _unity_self, [In] ref BatchID batchID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RegisterMaterial_Injected(Material material, out BatchMaterialID ret);
+		private static extern void SetDrawCommandBatchBuffer_Injected(IntPtr _unity_self, [In] ref BatchID batchID, [In] ref GraphicsBufferHandle buffer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RegisterMaterial_InstanceID_Injected(int materialInstanceID, out BatchMaterialID ret);
+		private static extern void RegisterMaterial_Injected(IntPtr _unity_self, IntPtr material, out BatchMaterialID ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void UnregisterMaterial_Injected(ref BatchMaterialID material);
+		private static extern void RegisterMaterials_Injected(IntPtr _unity_self, ref ManagedSpanWrapper materialID, ref ManagedSpanWrapper batchMaterialID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Material GetRegisteredMaterial_Injected(ref BatchMaterialID material);
+		private static extern void UnregisterMaterial_Injected(IntPtr _unity_self, [In] ref BatchMaterialID material);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RegisterMesh_Injected(Mesh mesh, out BatchMeshID ret);
+		private static extern IntPtr GetRegisteredMaterial_Injected(IntPtr _unity_self, [In] ref BatchMaterialID material);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RegisterMesh_InstanceID_Injected(int meshInstanceID, out BatchMeshID ret);
+		private static extern void RegisterMesh_Injected(IntPtr _unity_self, IntPtr mesh, out BatchMeshID ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void UnregisterMesh_Injected(ref BatchMeshID mesh);
+		private static extern void RegisterMeshes_Injected(IntPtr _unity_self, ref ManagedSpanWrapper meshID, ref ManagedSpanWrapper batchMeshID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Mesh GetRegisteredMesh_Injected(ref BatchMeshID mesh);
+		private static extern void UnregisterMesh_Injected(IntPtr _unity_self, [In] ref BatchMeshID mesh);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalBounds_Injected(ref Bounds bounds);
+		private static extern IntPtr GetRegisteredMesh_Injected(IntPtr _unity_self, [In] ref BatchMeshID mesh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalBounds_Injected(IntPtr _unity_self, [In] ref Bounds bounds);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPickingMaterial_Injected(IntPtr _unity_self, IntPtr material);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetErrorMaterial_Injected(IntPtr _unity_self, IntPtr material);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLoadingMaterial_Injected(IntPtr _unity_self, IntPtr material);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetEnabledViewTypes_Injected(IntPtr _unity_self, ref ManagedSpanWrapper viewTypes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool OcclusionTestAABB_Injected(IntPtr occlusionBuffer, [In] ref Bounds aabb);
 
 		private IntPtr m_GroupHandle = IntPtr.Zero;
 
 		private BatchRendererGroup.OnPerformCulling m_PerformCulling;
 
+		private BatchRendererGroup.OnFinishedCulling m_FinishedCulling;
+
 		public delegate JobHandle OnPerformCulling(BatchRendererGroup rendererGroup, BatchCullingContext cullingContext, BatchCullingOutput cullingOutput, IntPtr userContext);
+
+		public delegate void OnFinishedCulling(IntPtr customCullingResult);
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(BatchRendererGroup batchRendererGroup)
+			{
+				return batchRendererGroup.m_GroupHandle;
+			}
+		}
 	}
 }

@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("ParticleSystemScriptingClasses.h")]
 	[NativeHeader("Modules/ParticleSystem/ParticleSystemRenderer.h")]
-	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemRendererScriptBindings.h")]
+	[NativeHeader("ParticleSystemScriptingClasses.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Modules/ParticleSystem/ScriptBindings/ParticleSystemRendererScriptBindings.h")]
 	public sealed class ParticleSystemRenderer : Renderer
 	{
 		[Obsolete("EnableVertexStreams is deprecated. Use SetActiveVertexStreams instead.", false)]
@@ -361,113 +361,291 @@ namespace UnityEngine
 		}
 
 		[NativeName("RenderAlignment")]
-		public extern ParticleSystemRenderSpace alignment
+		public ParticleSystemRenderSpace alignment
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_alignment_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_alignment_Injected(intPtr, value);
+			}
 		}
 
-		public extern ParticleSystemRenderMode renderMode
+		public ParticleSystemRenderMode renderMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_renderMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_renderMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern ParticleSystemMeshDistribution meshDistribution
+		public ParticleSystemMeshDistribution meshDistribution
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_meshDistribution_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_meshDistribution_Injected(intPtr, value);
+			}
 		}
 
-		public extern ParticleSystemSortMode sortMode
+		public ParticleSystemSortMode sortMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_sortMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_sortMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern float lengthScale
+		public float lengthScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_lengthScale_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_lengthScale_Injected(intPtr, value);
+			}
 		}
 
-		public extern float velocityScale
+		public float velocityScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_velocityScale_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_velocityScale_Injected(intPtr, value);
+			}
 		}
 
-		public extern float cameraVelocityScale
+		public float cameraVelocityScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_cameraVelocityScale_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_cameraVelocityScale_Injected(intPtr, value);
+			}
 		}
 
-		public extern float normalDirection
+		public float normalDirection
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_normalDirection_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_normalDirection_Injected(intPtr, value);
+			}
 		}
 
-		public extern float shadowBias
+		public float shadowBias
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_shadowBias_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_shadowBias_Injected(intPtr, value);
+			}
 		}
 
-		public extern float sortingFudge
+		public float sortingFudge
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_sortingFudge_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_sortingFudge_Injected(intPtr, value);
+			}
 		}
 
-		public extern float minParticleSize
+		public float minParticleSize
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_minParticleSize_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_minParticleSize_Injected(intPtr, value);
+			}
 		}
 
-		public extern float maxParticleSize
+		public float maxParticleSize
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_maxParticleSize_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_maxParticleSize_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 pivot
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_pivot_Injected(out vector);
+				ParticleSystemRenderer.get_pivot_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_pivot_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_pivot_Injected(intPtr, ref value);
 			}
 		}
 
@@ -475,88 +653,247 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_flip_Injected(out vector);
+				ParticleSystemRenderer.get_flip_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_flip_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_flip_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern SpriteMaskInteraction maskInteraction
+		public SpriteMaskInteraction maskInteraction
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_maskInteraction_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_maskInteraction_Injected(intPtr, value);
+			}
 		}
 
-		public extern Material trailMaterial
+		public Material trailMaterial
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Material>(ParticleSystemRenderer.get_trailMaterial_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_trailMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(value));
+			}
 		}
 
-		internal extern Material oldTrailMaterial
+		internal Material oldTrailMaterial
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_oldTrailMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(value));
+			}
 		}
 
-		public extern bool enableGPUInstancing
+		public bool enableGPUInstancing
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_enableGPUInstancing_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_enableGPUInstancing_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool allowRoll
+		public bool allowRoll
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_allowRoll_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_allowRoll_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool freeformStretching
+		public bool freeformStretching
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_freeformStretching_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_freeformStretching_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool rotateWithStretchDirection
+		public bool rotateWithStretchDirection
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_rotateWithStretchDirection_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_rotateWithStretchDirection_Injected(intPtr, value);
+			}
 		}
 
-		public extern Mesh mesh
+		public bool applyActiveColorSpace
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_applyActiveColorSpace_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_applyActiveColorSpace_Injected(intPtr, value);
+			}
+		}
+
+		public Mesh mesh
 		{
 			[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetMesh", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Mesh>(ParticleSystemRenderer.get_mesh_Injected(intPtr));
+			}
 			[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetMesh", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ParticleSystemRenderer.set_mesh_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Mesh>(value));
+			}
 		}
 
-		[RequiredByNativeCode]
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetMeshes", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetMeshes([NotNull("ArgumentNullException")] [Out] Mesh[] meshes);
+		[RequiredByNativeCode]
+		public int GetMeshes([NotNull] [Out] Mesh[] meshes)
+		{
+			if (meshes == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(meshes, "meshes");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return ParticleSystemRenderer.GetMeshes_Injected(intPtr, meshes);
+		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetMeshes", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetMeshes([NotNull("ArgumentNullException")] Mesh[] meshes, int size);
+		public void SetMeshes([NotNull] Mesh[] meshes, int size)
+		{
+			if (meshes == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(meshes, "meshes");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ParticleSystemRenderer.SetMeshes_Injected(intPtr, meshes, size);
+		}
 
 		public void SetMeshes(Mesh[] meshes)
 		{
@@ -564,22 +901,75 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetMeshWeightings", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetMeshWeightings([NotNull("ArgumentNullException")] [Out] float[] weightings);
+		public unsafe int GetMeshWeightings([NotNull] [Out] float[] weightings)
+		{
+			if (weightings == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(weightings, "weightings");
+			}
+			int meshWeightings_Injected;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				fixed (float[] array = weightings)
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					meshWeightings_Injected = ParticleSystemRenderer.GetMeshWeightings_Injected(intPtr, out blittableArrayWrapper);
+				}
+			}
+			finally
+			{
+				float[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+			}
+			return meshWeightings_Injected;
+		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetMeshWeightings", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetMeshWeightings([NotNull("ArgumentNullException")] float[] weightings, int size);
+		public unsafe void SetMeshWeightings([NotNull] float[] weightings, int size)
+		{
+			if (weightings == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(weightings, "weightings");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<float> span = new Span<float>(weightings);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				ParticleSystemRenderer.SetMeshWeightings_Injected(intPtr, ref managedSpanWrapper, size);
+			}
+		}
 
 		public void SetMeshWeightings(float[] weightings)
 		{
 			this.SetMeshWeightings(weightings, weightings.Length);
 		}
 
-		public extern int meshCount
+		public int meshCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_meshCount_Injected(intPtr);
+			}
 		}
 
 		public void BakeMesh(Mesh mesh, ParticleSystemBakeMeshOptions options)
@@ -587,16 +977,66 @@ namespace UnityEngine
 			this.BakeMesh(mesh, Camera.main, options);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void BakeMesh([NotNull("ArgumentNullException")] Mesh mesh, [NotNull("ArgumentNullException")] Camera camera, ParticleSystemBakeMeshOptions options);
+		public void BakeMesh([NotNull] Mesh mesh, [NotNull] Camera camera, ParticleSystemBakeMeshOptions options)
+		{
+			if (mesh == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+			}
+			if (camera == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(mesh);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+			}
+			IntPtr intPtr3 = Object.MarshalledUnityObject.MarshalNotNull<Camera>(camera);
+			if (intPtr3 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			ParticleSystemRenderer.BakeMesh_Injected(intPtr, intPtr2, intPtr3, options);
+		}
 
 		public void BakeTrailsMesh(Mesh mesh, ParticleSystemBakeMeshOptions options)
 		{
 			this.BakeTrailsMesh(mesh, Camera.main, options);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void BakeTrailsMesh([NotNull("ArgumentNullException")] Mesh mesh, [NotNull("ArgumentNullException")] Camera camera, ParticleSystemBakeMeshOptions options);
+		public void BakeTrailsMesh([NotNull] Mesh mesh, [NotNull] Camera camera, ParticleSystemBakeMeshOptions options)
+		{
+			if (mesh == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+			}
+			if (camera == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(mesh);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+			}
+			IntPtr intPtr3 = Object.MarshalledUnityObject.MarshalNotNull<Camera>(camera);
+			if (intPtr3 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			ParticleSystemRenderer.BakeTrailsMesh_Injected(intPtr, intPtr2, intPtr3, options);
+		}
 
 		public int BakeTexture(ref Texture2D verticesTexture, ParticleSystemBakeTextureOptions options)
 		{
@@ -616,8 +1056,25 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::BakeTextureNoIndices", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Texture2D BakeTextureNoIndicesInternal(Texture2D verticesTexture, [NotNull("ArgumentNullException")] Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount);
+		private Texture2D BakeTextureNoIndicesInternal(Texture2D verticesTexture, [NotNull] Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount)
+		{
+			if (camera == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.Marshal<Texture2D>(verticesTexture);
+			IntPtr intPtr3 = Object.MarshalledUnityObject.MarshalNotNull<Camera>(camera);
+			if (intPtr3 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture2D>(ParticleSystemRenderer.BakeTextureNoIndicesInternal_Injected(intPtr, intPtr2, intPtr3, options, out indexCount));
+		}
 
 		public int BakeTexture(ref Texture2D verticesTexture, ref Texture2D indicesTexture, ParticleSystemBakeTextureOptions options)
 		{
@@ -634,10 +1091,26 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::BakeTexture", HasExplicitThis = true)]
-		private ParticleSystemRenderer.BakeTextureOutput BakeTextureInternal(Texture2D verticesTexture, Texture2D indicesTexture, [NotNull("ArgumentNullException")] Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount)
+		private ParticleSystemRenderer.BakeTextureOutput BakeTextureInternal(Texture2D verticesTexture, Texture2D indicesTexture, [NotNull] Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount)
 		{
+			if (camera == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.Marshal<Texture2D>(verticesTexture);
+			IntPtr intPtr3 = Object.MarshalledUnityObject.Marshal<Texture2D>(indicesTexture);
+			IntPtr intPtr4 = Object.MarshalledUnityObject.MarshalNotNull<Camera>(camera);
+			if (intPtr4 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
 			ParticleSystemRenderer.BakeTextureOutput bakeTextureOutput;
-			this.BakeTextureInternal_Injected(verticesTexture, indicesTexture, camera, options, out indexCount, out bakeTextureOutput);
+			ParticleSystemRenderer.BakeTextureInternal_Injected(intPtr, intPtr2, intPtr3, intPtr4, options, out indexCount, out bakeTextureOutput);
 			return bakeTextureOutput;
 		}
 
@@ -656,58 +1129,365 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::BakeTrailsTexture", HasExplicitThis = true)]
-		private ParticleSystemRenderer.BakeTextureOutput BakeTrailsTextureInternal(Texture2D verticesTexture, Texture2D indicesTexture, [NotNull("ArgumentNullException")] Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount)
+		private ParticleSystemRenderer.BakeTextureOutput BakeTrailsTextureInternal(Texture2D verticesTexture, Texture2D indicesTexture, [NotNull] Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount)
 		{
+			if (camera == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.Marshal<Texture2D>(verticesTexture);
+			IntPtr intPtr3 = Object.MarshalledUnityObject.Marshal<Texture2D>(indicesTexture);
+			IntPtr intPtr4 = Object.MarshalledUnityObject.MarshalNotNull<Camera>(camera);
+			if (intPtr4 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
 			ParticleSystemRenderer.BakeTextureOutput bakeTextureOutput;
-			this.BakeTrailsTextureInternal_Injected(verticesTexture, indicesTexture, camera, options, out indexCount, out bakeTextureOutput);
+			ParticleSystemRenderer.BakeTrailsTextureInternal_Injected(intPtr, intPtr2, intPtr3, intPtr4, options, out indexCount, out bakeTextureOutput);
 			return bakeTextureOutput;
 		}
 
-		public extern int activeVertexStreamsCount
+		public int activeVertexStreamsCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_activeVertexStreamsCount_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetActiveVertexStreams", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetActiveVertexStreams([NotNull("ArgumentNullException")] List<ParticleSystemVertexStream> streams);
+		public unsafe void SetActiveVertexStreams([NotNull] List<ParticleSystemVertexStream> streams)
+		{
+			if (streams == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(streams, "streams");
+			}
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				fixed (ParticleSystemVertexStream[] array = NoAllocHelpers.ExtractArrayFromList<ParticleSystemVertexStream>(streams))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, streams.Count);
+					ParticleSystemRenderer.SetActiveVertexStreams_Injected(intPtr, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ParticleSystemVertexStream>(streams);
+			}
+		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetActiveVertexStreams", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetActiveVertexStreams([NotNull("ArgumentNullException")] List<ParticleSystemVertexStream> streams);
-
-		public extern int activeTrailVertexStreamsCount
+		public unsafe void GetActiveVertexStreams([NotNull] List<ParticleSystemVertexStream> streams)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			if (streams == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(streams, "streams");
+			}
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				fixed (ParticleSystemVertexStream[] array = NoAllocHelpers.ExtractArrayFromList<ParticleSystemVertexStream>(streams))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, streams.Count);
+					ParticleSystemRenderer.GetActiveVertexStreams_Injected(intPtr, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ParticleSystemVertexStream>(streams);
+			}
+		}
+
+		public int activeTrailVertexStreamsCount
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ParticleSystemRenderer.get_activeTrailVertexStreamsCount_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::SetActiveTrailVertexStreams", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetActiveTrailVertexStreams([NotNull("ArgumentNullException")] List<ParticleSystemVertexStream> streams);
+		public unsafe void SetActiveTrailVertexStreams([NotNull] List<ParticleSystemVertexStream> streams)
+		{
+			if (streams == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(streams, "streams");
+			}
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				fixed (ParticleSystemVertexStream[] array = NoAllocHelpers.ExtractArrayFromList<ParticleSystemVertexStream>(streams))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, streams.Count);
+					ParticleSystemRenderer.SetActiveTrailVertexStreams_Injected(intPtr, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ParticleSystemVertexStream>(streams);
+			}
+		}
 
 		[FreeFunction(Name = "ParticleSystemRendererScriptBindings::GetActiveTrailVertexStreams", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetActiveTrailVertexStreams([NotNull("ArgumentNullException")] List<ParticleSystemVertexStream> streams);
+		public unsafe void GetActiveTrailVertexStreams([NotNull] List<ParticleSystemVertexStream> streams)
+		{
+			if (streams == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(streams, "streams");
+			}
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ParticleSystemRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				fixed (ParticleSystemVertexStream[] array = NoAllocHelpers.ExtractArrayFromList<ParticleSystemVertexStream>(streams))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, streams.Count);
+					ParticleSystemRenderer.GetActiveTrailVertexStreams_Injected(intPtr, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ParticleSystemVertexStream>(streams);
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_pivot_Injected(out Vector3 ret);
+		private static extern ParticleSystemRenderSpace get_alignment_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_pivot_Injected(ref Vector3 value);
+		private static extern void set_alignment_Injected(IntPtr _unity_self, ParticleSystemRenderSpace value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_flip_Injected(out Vector3 ret);
+		private static extern ParticleSystemRenderMode get_renderMode_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_flip_Injected(ref Vector3 value);
+		private static extern void set_renderMode_Injected(IntPtr _unity_self, ParticleSystemRenderMode value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void BakeTextureInternal_Injected(Texture2D verticesTexture, Texture2D indicesTexture, Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount, out ParticleSystemRenderer.BakeTextureOutput ret);
+		private static extern ParticleSystemMeshDistribution get_meshDistribution_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void BakeTrailsTextureInternal_Injected(Texture2D verticesTexture, Texture2D indicesTexture, Camera camera, ParticleSystemBakeTextureOptions options, out int indexCount, out ParticleSystemRenderer.BakeTextureOutput ret);
+		private static extern void set_meshDistribution_Injected(IntPtr _unity_self, ParticleSystemMeshDistribution value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ParticleSystemSortMode get_sortMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortMode_Injected(IntPtr _unity_self, ParticleSystemSortMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_lengthScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_lengthScale_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_velocityScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_velocityScale_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_cameraVelocityScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cameraVelocityScale_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_normalDirection_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_normalDirection_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_shadowBias_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_shadowBias_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_sortingFudge_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingFudge_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_minParticleSize_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_minParticleSize_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_maxParticleSize_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maxParticleSize_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_pivot_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_pivot_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_flip_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_flip_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteMaskInteraction get_maskInteraction_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maskInteraction_Injected(IntPtr _unity_self, SpriteMaskInteraction value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_trailMaterial_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_trailMaterial_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_oldTrailMaterial_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enableGPUInstancing_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enableGPUInstancing_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_allowRoll_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_allowRoll_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_freeformStretching_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_freeformStretching_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_rotateWithStretchDirection_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rotateWithStretchDirection_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_applyActiveColorSpace_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_applyActiveColorSpace_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_mesh_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_mesh_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMeshes_Injected(IntPtr _unity_self, [Out] Mesh[] meshes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMeshes_Injected(IntPtr _unity_self, Mesh[] meshes, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMeshWeightings_Injected(IntPtr _unity_self, out BlittableArrayWrapper weightings);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMeshWeightings_Injected(IntPtr _unity_self, ref ManagedSpanWrapper weightings, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_meshCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BakeMesh_Injected(IntPtr _unity_self, IntPtr mesh, IntPtr camera, ParticleSystemBakeMeshOptions options);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BakeTrailsMesh_Injected(IntPtr _unity_self, IntPtr mesh, IntPtr camera, ParticleSystemBakeMeshOptions options);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr BakeTextureNoIndicesInternal_Injected(IntPtr _unity_self, IntPtr verticesTexture, IntPtr camera, ParticleSystemBakeTextureOptions options, out int indexCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BakeTextureInternal_Injected(IntPtr _unity_self, IntPtr verticesTexture, IntPtr indicesTexture, IntPtr camera, ParticleSystemBakeTextureOptions options, out int indexCount, out ParticleSystemRenderer.BakeTextureOutput ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BakeTrailsTextureInternal_Injected(IntPtr _unity_self, IntPtr verticesTexture, IntPtr indicesTexture, IntPtr camera, ParticleSystemBakeTextureOptions options, out int indexCount, out ParticleSystemRenderer.BakeTextureOutput ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_activeVertexStreamsCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetActiveVertexStreams_Injected(IntPtr _unity_self, ref BlittableListWrapper streams);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetActiveVertexStreams_Injected(IntPtr _unity_self, ref BlittableListWrapper streams);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_activeTrailVertexStreamsCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetActiveTrailVertexStreams_Injected(IntPtr _unity_self, ref BlittableListWrapper streams);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetActiveTrailVertexStreams_Injected(IntPtr _unity_self, ref BlittableListWrapper streams);
 
 		internal struct BakeTextureOutput
 		{

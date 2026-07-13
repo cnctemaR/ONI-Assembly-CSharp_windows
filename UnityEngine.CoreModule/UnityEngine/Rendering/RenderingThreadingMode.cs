@@ -11,6 +11,7 @@ namespace UnityEngine.Rendering
 		MultiThreaded,
 		LegacyJobified,
 		NativeGraphicsJobs,
-		NativeGraphicsJobsWithoutRenderThread
+		NativeGraphicsJobsWithoutRenderThread,
+		NativeGraphicsJobsSplitThreading
 	}
 }

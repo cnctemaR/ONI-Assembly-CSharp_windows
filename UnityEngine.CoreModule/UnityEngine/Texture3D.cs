@@ -10,49 +10,85 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Texture3D.h")]
 	[ExcludeFromPreset]
+	[NativeHeader("Runtime/Graphics/Texture3D.h")]
 	public sealed class Texture3D : Texture
 	{
-		public extern int depth
+		public int depth
 		{
 			[NativeName("GetTextureLayerCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture3D.get_depth_Injected(intPtr);
+			}
 		}
 
-		public extern TextureFormat format
+		public TextureFormat format
 		{
 			[NativeName("GetTextureFormat")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture3D.get_format_Injected(intPtr);
+			}
 		}
 
-		public override extern bool isReadable
+		public override bool isReadable
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture3D.get_isReadable_Injected(intPtr);
+			}
 		}
 
 		[NativeName("SetPixel")]
 		private void SetPixelImpl(int mip, int x, int y, int z, Color color)
 		{
-			this.SetPixelImpl_Injected(mip, x, y, z, ref color);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture3D.SetPixelImpl_Injected(intPtr, mip, x, y, z, ref color);
 		}
 
 		[NativeName("GetPixel")]
 		private Color GetPixelImpl(int mip, int x, int y, int z)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Color color;
-			this.GetPixelImpl_Injected(mip, x, y, z, out color);
+			Texture3D.GetPixelImpl_Injected(intPtr, mip, x, y, z, out color);
 			return color;
 		}
 
 		[NativeName("GetPixelBilinear")]
 		private Color GetPixelBilinearImpl(int mip, float u, float v, float w)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Color color;
-			this.GetPixelBilinearImpl_Injected(mip, u, v, w, out color);
+			Texture3D.GetPixelBilinearImpl_Injected(intPtr, mip, u, v, w, out color);
 			return color;
 		}
 
@@ -70,16 +106,38 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("Texture3DScripting::UpdateExternalTexture", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void UpdateExternalTexture(IntPtr nativeTex);
+		public void UpdateExternalTexture(IntPtr nativeTex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture3D.UpdateExternalTexture_Injected(intPtr, nativeTex);
+		}
 
 		[FreeFunction(Name = "Texture3DScripting::Apply", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable);
+		private void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture3D.ApplyImpl_Injected(intPtr, updateMipmaps, makeNoLongerReadable);
+		}
 
 		[FreeFunction(Name = "Texture3DScripting::GetPixels", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color[] GetPixels(int miplevel);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color[] GetPixels(int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture3D.GetPixels_Injected(intPtr, miplevel);
+		}
 
 		public Color[] GetPixels()
 		{
@@ -87,8 +145,16 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture3DScripting::GetPixels32", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32(int miplevel);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color32[] GetPixels32(int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture3D.GetPixels32_Injected(intPtr, miplevel);
+		}
 
 		public Color32[] GetPixels32()
 		{
@@ -96,8 +162,20 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture3DScripting::SetPixels", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels([Unmarshalled] Color[] colors, int miplevel);
+		public unsafe void SetPixels(Color[] colors, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color> span = new Span<Color>(colors);
+			fixed (Color* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Texture3D.SetPixels_Injected(intPtr, ref managedSpanWrapper, miplevel);
+			}
+		}
 
 		public void SetPixels(Color[] colors)
 		{
@@ -105,8 +183,20 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture3DScripting::SetPixels32", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels32([Unmarshalled] Color32[] colors, int miplevel);
+		public unsafe void SetPixels32(Color32[] colors, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color32> span = new Span<Color32>(colors);
+			fixed (Color32* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Texture3D.SetPixels32_Injected(intPtr, ref managedSpanWrapper, miplevel);
+			}
+		}
 
 		public void SetPixels32(Color32[] colors)
 		{
@@ -114,15 +204,69 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture3DScripting::SetPixelDataArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool SetPixelDataImplArray(Array data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+		private bool SetPixelDataImplArray(Array data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture3D.SetPixelDataImplArray_Injected(intPtr, data, mipLevel, elementSize, dataArraySize, sourceDataStartIndex);
+		}
 
 		[FreeFunction(Name = "Texture3DScripting::SetPixelData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool SetPixelDataImpl(IntPtr data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+		private bool SetPixelDataImpl(IntPtr data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture3D.SetPixelDataImpl_Injected(intPtr, data, mipLevel, elementSize, dataArraySize, sourceDataStartIndex);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetImageDataPointer();
+		[FreeFunction(Name = "Texture3DScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Full(Texture src)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture3D.CopyPixels_Full_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src));
+		}
+
+		[FreeFunction(Name = "Texture3DScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Slice(Texture src, int srcElement, int srcMip, int dstElement, int dstMip)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture3D.CopyPixels_Slice_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src), srcElement, srcMip, dstElement, dstMip);
+		}
+
+		[FreeFunction(Name = "Texture3DScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Region(Texture src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture3D.CopyPixels_Region_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src), srcElement, srcMip, srcX, srcY, srcWidth, srcHeight, dstElement, dstMip, dstX, dstY);
+		}
+
+		private IntPtr GetImageData()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture3D>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture3D.GetImageData_Injected(intPtr);
+		}
 
 		[ExcludeFromDocs]
 		public Texture3D(int width, int height, int depth, DefaultFormat format, TextureCreationFlags flags)
@@ -136,8 +280,8 @@ namespace UnityEngine
 		{
 		}
 
-		[RequiredByNativeCode]
 		[ExcludeFromDocs]
+		[RequiredByNativeCode]
 		public Texture3D(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags)
 			: this(width, height, depth, format, flags, Texture.GenerateAllMips)
 		{
@@ -146,7 +290,7 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public Texture3D(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags, [DefaultValue("Texture.GenerateAllMips")] int mipCount)
 		{
-			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			bool flag = !base.ValidateFormat(format, GraphicsFormatUsage.Sample);
 			if (!flag)
 			{
 				Texture3D.ValidateIsNotCrunched(flags);
@@ -349,7 +493,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentException("The passed in miplevel " + mipLevel.ToString() + " is invalid. The valid range is 0 through  " + (base.mipmapCount - 1).ToString());
 			}
-			bool flag3 = this.GetImageDataPointer().ToInt64() == 0L;
+			bool flag3 = this.GetImageData().ToInt64() == 0L;
 			if (flag3)
 			{
 				throw new UnityException("Texture '" + base.name + "' has no data.");
@@ -363,8 +507,53 @@ namespace UnityEngine
 			{
 				throw base.CreateNativeArrayLengthOverflowException();
 			}
-			IntPtr intPtr = new IntPtr((long)this.GetImageDataPointer() + (long)pixelDataOffset);
+			IntPtr intPtr = new IntPtr((long)this.GetImageData() + (long)pixelDataOffset);
 			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, (int)num2, Allocator.None);
+		}
+
+		public void CopyPixels(Texture src)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Full(src);
+		}
+
+		public void CopyPixels(Texture src, int srcElement, int srcMip, int dstElement, int dstMip)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Slice(src, srcElement, srcMip, dstElement, dstMip);
+		}
+
+		public void CopyPixels(Texture src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Region(src, srcElement, srcMip, srcX, srcY, srcWidth, srcHeight, dstElement, dstMip, dstX, dstY);
 		}
 
 		private static void ValidateIsNotCrunched(TextureCreationFlags flags)
@@ -377,12 +566,57 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetPixelImpl_Injected(int mip, int x, int y, int z, ref Color color);
+		private static extern int get_depth_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPixelImpl_Injected(int mip, int x, int y, int z, out Color ret);
+		private static extern TextureFormat get_format_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPixelBilinearImpl_Injected(int mip, float u, float v, float w, out Color ret);
+		private static extern bool get_isReadable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPixelImpl_Injected(IntPtr _unity_self, int mip, int x, int y, int z, [In] ref Color color);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPixelImpl_Injected(IntPtr _unity_self, int mip, int x, int y, int z, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPixelBilinearImpl_Injected(IntPtr _unity_self, int mip, float u, float v, float w, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UpdateExternalTexture_Injected(IntPtr _unity_self, IntPtr nativeTex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ApplyImpl_Injected(IntPtr _unity_self, bool updateMipmaps, bool makeNoLongerReadable);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color[] GetPixels_Injected(IntPtr _unity_self, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color32[] GetPixels32_Injected(IntPtr _unity_self, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPixels_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPixels32_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPixelDataImplArray_Injected(IntPtr _unity_self, Array data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPixelDataImpl_Injected(IntPtr _unity_self, IntPtr data, int mipLevel, int elementSize, int dataArraySize, int sourceDataStartIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Full_Injected(IntPtr _unity_self, IntPtr src);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Slice_Injected(IntPtr _unity_self, IntPtr src, int srcElement, int srcMip, int dstElement, int dstMip);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Region_Injected(IntPtr _unity_self, IntPtr src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetImageData_Injected(IntPtr _unity_self);
 	}
 }

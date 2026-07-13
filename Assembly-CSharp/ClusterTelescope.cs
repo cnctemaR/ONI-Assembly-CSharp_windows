@@ -366,6 +366,9 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(element.tag.ProperName(), string.Format(global::STRINGS.BUILDINGS.PREFABS.TELESCOPE.REQUIREMENT_TOOLTIP, element.tag.ProperName()), Descriptor.DescriptorType.Requirement);
 			descriptors.Add(descriptor);
+			Descriptor descriptor2 = default(Descriptor);
+			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCESDATABANKS, 3), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCESDATABANKS, 3), Descriptor.DescriptorType.Effect);
+			descriptors.Add(descriptor2);
 			return descriptors;
 		}
 
@@ -402,9 +405,10 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			float num2 = dt * num;
 			if (this.m_fowManager.EarnRevealPointsForLocation(this.currentTarget, num2))
 			{
-				Util.KInstantiate(Assets.GetPrefab(DatabankHelper.ID), base.transform.position + Vector3.up * 2f + Vector3.left, Quaternion.identity, null, null, true, 23).SetActive(true);
-				Util.KInstantiate(Assets.GetPrefab(DatabankHelper.ID), base.transform.position + Vector3.up * 2f + Vector3.right, Quaternion.identity, null, null, true, 23).SetActive(true);
-				Util.KInstantiate(Assets.GetPrefab(DatabankHelper.ID), base.transform.position + Vector3.up * 2f + Vector3.zero, Quaternion.identity, null, null, true, 23).SetActive(true);
+				for (int i = 0; i < 3; i++)
+				{
+					Util.KInstantiate(Assets.GetPrefab(DatabankHelper.ID), base.transform.position + Vector3.up * 2f + Vector3.right, Quaternion.identity, null, null, true, 23).SetActive(true);
+				}
 				PopFXManager.Instance.SpawnFX(global::Def.GetUISprite(DatabankHelper.ID, "ui", false).first, DatabankHelper.NAME_PLURAL, base.transform, Vector3.up * 2f, 1.5f, true, false);
 			}
 			return base.OnWorkTick(worker, dt);
@@ -593,16 +597,6 @@ public class ClusterTelescope : GameStateMachine<ClusterTelescope, ClusterTelesc
 			}
 			base.ShowProgressBar(false);
 			component3.RemoveStatusItem(Db.Get().BuildingStatusItems.ClusterTelescopeMeteorWorking, this);
-		}
-
-		public override List<Descriptor> GetDescriptors(GameObject go)
-		{
-			List<Descriptor> descriptors = base.GetDescriptors(go);
-			Element element = ElementLoader.FindElementByHash(SimHashes.Oxygen);
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(element.tag.ProperName(), string.Format(global::STRINGS.BUILDINGS.PREFABS.TELESCOPE.REQUIREMENT_TOOLTIP, element.tag.ProperName()), Descriptor.DescriptorType.Requirement);
-			descriptors.Add(descriptor);
-			return descriptors;
 		}
 
 		protected override bool OnWorkTick(WorkerBase worker, float dt)

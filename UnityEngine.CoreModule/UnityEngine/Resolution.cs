@@ -43,8 +43,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Resolution.refreshRate is obsolete. Use refreshRateRatio instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public int refreshRate
 		{
 			get
@@ -60,7 +60,7 @@ namespace UnityEngine
 
 		public override string ToString()
 		{
-			return UnityString.Format("{0} x {1} @ {2}Hz", new object[] { this.m_Width, this.m_Height, this.m_RefreshRate });
+			return string.Format("{0} x {1} @ {2}Hz", this.m_Width, this.m_Height, this.m_RefreshRate);
 		}
 
 		private int m_Width;

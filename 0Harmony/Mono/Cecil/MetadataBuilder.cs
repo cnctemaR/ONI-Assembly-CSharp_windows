@@ -100,6 +100,8 @@ namespace Mono.Cecil
 			TextMap textMap = new TextMap();
 			textMap.AddMap(TextSegment.ImportAddressTable, (this.module.Architecture == TargetArchitecture.I386) ? 8 : 0);
 			textMap.AddMap(TextSegment.CLIHeader, 72, 8);
+			bool flag = this.module.Architecture == TargetArchitecture.AMD64 || this.module.Architecture == TargetArchitecture.IA64 || this.module.Architecture == TargetArchitecture.ARM64;
+			textMap.AddMap(TextSegment.Code, 0, (!flag) ? 4 : 16);
 			return textMap;
 		}
 
@@ -573,6 +575,10 @@ namespace Mono.Cecil
 			{
 				this.AddNestedTypes(type);
 			}
+			if (this.symbol_writer != null && type.HasCustomDebugInformations)
+			{
+				this.symbol_writer.Write(type);
+			}
 			WindowsRuntimeProjections.ApplyProjection(type, typeDefinitionProjection);
 		}
 
@@ -695,7 +701,17 @@ namespace Mono.Cecil
 
 		private void AddFieldRVA(FieldDefinition field)
 		{
-			this.GetTable<FieldRVATable>(Table.FieldRVA).AddRow(new Row<uint, uint>(this.data.AddData(field.InitialValue), field.token.RID));
+			MetadataTable<Row<uint, uint>> table = this.GetTable<FieldRVATable>(Table.FieldRVA);
+			int num = 1;
+			if (field.FieldType.IsDefinition && !field.FieldType.IsGenericInstance)
+			{
+				TypeDefinition typeDefinition = field.FieldType.Resolve();
+				if (typeDefinition.Module == this.module && typeDefinition.PackingSize > 1)
+				{
+					num = (int)typeDefinition.PackingSize;
+				}
+			}
+			table.AddRow(new Row<uint, uint>(this.data.AddData(field.InitialValue, num), field.token.RID));
 		}
 
 		private void AddFieldLayout(FieldDefinition field)
@@ -1235,7 +1251,7 @@ namespace Mono.Cecil
 					return signatureWriter;
 				}
 			}
-			else if (type - ElementType.Class > 2 && type - ElementType.Object > 2)
+			else if (type - ElementType.Class > 3 && type - ElementType.Object > 2)
 			{
 				goto IL_003B;
 			}
@@ -1731,16 +1747,6 @@ namespace Mono.Cecil
 			SignatureWriter signatureWriter = this.CreateSignatureWriter();
 			signatureWriter.WriteSequencePoints(info);
 			this.method_debug_information_table.rows[(int)(rid - 1U)].Col2 = this.GetBlobIndex(signatureWriter);
-		}
-
-		public void ComputeDeterministicMvid()
-		{
-			Guid guid = CryptoService.ComputeGuid(CryptoService.ComputeHash(new ByteBuffer[] { this.data, this.resources, this.string_heap, this.user_string_heap, this.blob_heap, this.table_heap, this.code }));
-			int position = this.guid_heap.position;
-			this.guid_heap.position = 0;
-			this.guid_heap.WriteBytes(guid.ToByteArray());
-			this.guid_heap.position = position;
-			this.module.Mvid = guid;
 		}
 
 		internal readonly ModuleDefinition module;

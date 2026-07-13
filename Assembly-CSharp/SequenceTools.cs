@@ -48,13 +48,13 @@ public static class SequenceTools
 	{
 		string text2 = text.Substring(0, Mathf.CeilToInt((float)text.Length * (1f - progress)));
 		label.SetText(text2);
-		label.ForceMeshUpdate();
+		label.ForceMeshUpdate(false, false);
 	}
 
 	public static void TextWriter(LocText label, string text, float progress)
 	{
 		string text2 = ((progress == 1f) ? text : text.Substring(0, Mathf.CeilToInt((float)text.Length * progress)));
 		label.SetText(text2);
-		label.ForceMeshUpdate();
+		label.ForceMeshUpdate(false, false);
 	}
 }

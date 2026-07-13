@@ -75,6 +75,14 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		public virtual float mouseScrollDeltaPerTick
+		{
+			get
+			{
+				return 1f;
+			}
+		}
+
 		public virtual bool touchSupported
 		{
 			get

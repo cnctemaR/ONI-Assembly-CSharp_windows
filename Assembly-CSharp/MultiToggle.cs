@@ -91,7 +91,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 
 	public virtual void OnPointerClick(PointerEventData eventData)
 	{
-		if (!this.allowRightClick && eventData.button == PointerEventData.InputButton.Right)
+		if (!this.AllowClick(eventData))
 		{
 			return;
 		}
@@ -214,9 +214,14 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 		}
 	}
 
+	protected bool AllowClick(PointerEventData eventData)
+	{
+		return this.allowRightClick || eventData.button != PointerEventData.InputButton.Right;
+	}
+
 	public virtual void OnPointerDown(PointerEventData eventData)
 	{
-		if (!this.allowRightClick && eventData.button == PointerEventData.InputButton.Right)
+		if (!this.AllowClick(eventData))
 		{
 			return;
 		}
@@ -231,7 +236,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
 				return;
 			}
-			if (on_click_override_sound_path != "" && has_sound_parameter)
+			if (has_sound_parameter)
 			{
 				KFMOD.PlayUISoundWithParameter(GlobalAssets.GetSound("General_Item_Click", false), toggleState.sound_parameter_name, toggleState.sound_parameter_value);
 				KFMOD.PlayUISoundWithParameter(GlobalAssets.GetSound(on_click_override_sound_path, false), toggleState.sound_parameter_name, toggleState.sound_parameter_value);
@@ -243,7 +248,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 
 	public virtual void OnPointerUp(PointerEventData eventData)
 	{
-		if (!this.allowRightClick && eventData.button == PointerEventData.InputButton.Right)
+		if (!this.AllowClick(eventData))
 		{
 			return;
 		}
@@ -293,7 +298,7 @@ public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHan
 
 	public global::System.Action onStopHold;
 
-	public bool allowRightClick = true;
+	public bool allowRightClick;
 
 	protected bool clickHeldDown;
 

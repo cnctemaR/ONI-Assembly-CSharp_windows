@@ -6,8 +6,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
-	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[UsedByNativeCode]
+	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[NativeHeader("PlatformDependent/Win/Webcam/CameraParameters.h")]
 	public struct CameraParameters
 	{

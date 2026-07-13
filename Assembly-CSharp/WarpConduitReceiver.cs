@@ -27,7 +27,7 @@ public class WarpConduitReceiver : StateMachineComponent<WarpConduitReceiver.Sta
 		}
 		WarpConduitSender warpConduitSender = null;
 		SaveGame.Instance.GetComponent<WorldGenSpawner>().SpawnTag("WarpConduitSender");
-		foreach (WarpConduitSender warpConduitSender2 in global::UnityEngine.Object.FindObjectsOfType<WarpConduitSender>())
+		foreach (WarpConduitSender warpConduitSender2 in global::UnityEngine.Object.FindObjectsByType<WarpConduitSender>(FindObjectsSortMode.None))
 		{
 			if (warpConduitSender2.GetMyWorldId() != this.GetMyWorldId())
 			{

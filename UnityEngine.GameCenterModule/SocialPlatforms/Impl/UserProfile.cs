@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms.Impl
 {
+	[Obsolete("UserProfile is deprecated and will be removed in a future release.", false)]
 	public class UserProfile : IUserProfile
 	{
 		public UserProfile()

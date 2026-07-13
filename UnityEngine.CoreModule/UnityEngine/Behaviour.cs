@@ -11,20 +11,50 @@ namespace UnityEngine
 	{
 		[NativeProperty]
 		[RequiredByNativeCode]
-		public extern bool enabled
+		public bool enabled
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Behaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Behaviour.get_enabled_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Behaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Behaviour.set_enabled_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty]
-		public extern bool isActiveAndEnabled
+		public bool isActiveAndEnabled
 		{
 			[NativeMethod("IsAddedToManager")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Behaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Behaviour.get_isActiveAndEnabled_Injected(intPtr);
+			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enabled_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enabled_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isActiveAndEnabled_Injected(IntPtr _unity_self);
 	}
 }

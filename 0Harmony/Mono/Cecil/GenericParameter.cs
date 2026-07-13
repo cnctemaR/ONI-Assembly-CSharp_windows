@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class GenericParameter : TypeReference, ICustomAttributeProvider, IMetadataTokenProvider
+	internal sealed class GenericParameter : TypeReference, ICustomAttributeProvider, IMetadataTokenProvider
 	{
 		public GenericParameterAttributes Attributes
 		{
@@ -269,6 +269,18 @@ namespace Mono.Cecil
 			set
 			{
 				this.attributes = this.attributes.SetAttributes(16, value);
+			}
+		}
+
+		public bool AllowByRefLikeConstraint
+		{
+			get
+			{
+				return this.attributes.GetAttributes(32);
+			}
+			set
+			{
+				this.attributes = this.attributes.SetAttributes(32, value);
 			}
 		}
 

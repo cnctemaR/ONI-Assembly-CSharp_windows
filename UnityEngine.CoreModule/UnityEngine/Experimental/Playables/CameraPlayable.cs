@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[RequiredByNativeCode]
-	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
-	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
+	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct CameraPlayable : IPlayable, IEquatable<CameraPlayable>
 	{
 		public static CameraPlayable Create(PlayableGraph graph, Camera camera)
@@ -80,20 +80,35 @@ namespace UnityEngine.Experimental.Playables
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Camera GetCameraInternal(ref PlayableHandle hdl);
+		private static Camera GetCameraInternal(ref PlayableHandle hdl)
+		{
+			return Unmarshal.UnmarshalUnityObject<Camera>(CameraPlayable.GetCameraInternal_Injected(ref hdl));
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetCameraInternal(ref PlayableHandle hdl, Camera camera);
+		private static void SetCameraInternal(ref PlayableHandle hdl, Camera camera)
+		{
+			CameraPlayable.SetCameraInternal_Injected(ref hdl, Object.MarshalledUnityObject.Marshal<Camera>(camera));
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool InternalCreateCameraPlayable(ref PlayableGraph graph, Camera camera, ref PlayableHandle handle);
+		private static bool InternalCreateCameraPlayable(ref PlayableGraph graph, Camera camera, ref PlayableHandle handle)
+		{
+			return CameraPlayable.InternalCreateCameraPlayable_Injected(ref graph, Object.MarshalledUnityObject.Marshal<Camera>(camera), ref handle);
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ValidateType(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetCameraInternal_Injected(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetCameraInternal_Injected(ref PlayableHandle hdl, IntPtr camera);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool InternalCreateCameraPlayable_Injected(ref PlayableGraph graph, IntPtr camera, ref PlayableHandle handle);
 
 		private PlayableHandle m_Handle;
 	}

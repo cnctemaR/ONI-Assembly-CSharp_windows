@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace MonoMod.Utils.Cil
 {
+	[NullableContext(1)]
+	[Nullable(0)]
 	internal static class ILGeneratorShimExt
 	{
 		static ILGeneratorShimExt()
@@ -36,22 +39,25 @@ namespace MonoMod.Utils.Cil
 
 		public static ILGeneratorShim GetProxiedShim(this ILGenerator il)
 		{
-			FieldInfo field = il.GetType().GetField("Target", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-			return ((field != null) ? field.GetValue(il) : null) as ILGeneratorShim;
+			FieldInfo field = Helpers.ThrowIfNull<ILGenerator>(il, "il").GetType().GetField("Target", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			return (ILGeneratorShim)((field != null) ? field.GetValue(il) : null);
 		}
 
-		public static T GetProxiedShim<T>(this ILGenerator il) where T : ILGeneratorShim
+		public static T GetProxiedShim<[Nullable(0)] T>(this ILGenerator il) where T : ILGeneratorShim
 		{
-			return il.GetProxiedShim() as T;
+			return (T)((object)il.GetProxiedShim());
 		}
 
+		[return: Nullable(2)]
 		public static object DynEmit(this ILGenerator il, OpCode opcode, object operand)
 		{
 			return il.DynEmit(new object[] { opcode, operand });
 		}
 
+		[return: Nullable(2)]
 		public static object DynEmit(this ILGenerator il, object[] emitArgs)
 		{
+			Helpers.ThrowIfArgumentNull<object[]>(emitArgs, "emitArgs");
 			Type operandType = emitArgs[1].GetType();
 			object obj = il.GetProxiedShim() ?? il;
 			Dictionary<Type, MethodInfo> dictionary = ((obj is ILGeneratorShim) ? ILGeneratorShimExt._EmittersShim : ILGeneratorShimExt._Emitters);

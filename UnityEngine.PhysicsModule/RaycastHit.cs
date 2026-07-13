@@ -1,15 +1,15 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Interfaces/IRaycast.h")]
+	[NativeHeader("Runtime/Interfaces/IPhysics.h")]
 	[NativeHeader("PhysicsScriptingClasses.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Physics/RaycastHit.h")]
+	[UsedByNativeCode]
 	public struct RaycastHit
 	{
 		public Collider collider
@@ -20,7 +20,16 @@ namespace UnityEngine
 			}
 		}
 
+		[Obsolete("RaycastHit.colliderInstanceID is obsolete. Use RaycastHit.colliderEntityId instead.")]
 		public int colliderInstanceID
+		{
+			get
+			{
+				return this.m_Collider;
+			}
+		}
+
+		public EntityId colliderEntityId
 		{
 			get
 			{
@@ -85,10 +94,10 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("CalculateRaycastTexCoord", true, true)]
-		private static Vector2 CalculateRaycastTexCoord(int colliderInstanceID, Vector2 uv, Vector3 pos, uint face, int textcoord)
+		private static Vector2 CalculateRaycastTexCoord(EntityId colliderInstanceID, Vector2 uv, Vector3 pos, uint face, int textcoord)
 		{
 			Vector2 vector;
-			RaycastHit.CalculateRaycastTexCoord_Injected(colliderInstanceID, ref uv, ref pos, face, textcoord, out vector);
+			RaycastHit.CalculateRaycastTexCoord_Injected(ref colliderInstanceID, ref uv, ref pos, face, textcoord, out vector);
 			return vector;
 		}
 
@@ -167,18 +176,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Use textureCoord2 instead. (UnityUpgradable) -> textureCoord2")]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public Vector2 textureCoord1
-		{
-			get
-			{
-				return this.textureCoord2;
-			}
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CalculateRaycastTexCoord_Injected(int colliderInstanceID, ref Vector2 uv, ref Vector3 pos, uint face, int textcoord, out Vector2 ret);
+		private static extern void CalculateRaycastTexCoord_Injected([In] ref EntityId colliderInstanceID, [In] ref Vector2 uv, [In] ref Vector3 pos, uint face, int textcoord, out Vector2 ret);
 
 		[NativeName("point")]
 		internal Vector3 m_Point;
@@ -196,6 +195,6 @@ namespace UnityEngine
 		internal Vector2 m_UV;
 
 		[NativeName("collider")]
-		internal int m_Collider;
+		internal EntityId m_Collider;
 	}
 }

@@ -10,7 +10,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/scripts/Workable")]
-public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
+public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable, IGameObjectEffectDescriptor
 {
 	public WorkerBase worker { get; protected set; }
 

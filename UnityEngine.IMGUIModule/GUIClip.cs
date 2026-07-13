@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEditor.UIBuilderModule" })]
 	[NativeHeader("Modules/IMGUI/GUIState.h")]
 	[NativeHeader("Modules/IMGUI/GUIClip.h")]
 	internal sealed class GUIClip
@@ -28,6 +30,7 @@ namespace UnityEngine
 
 		internal static Rect topmostRect
 		{
+			[VisibleToOtherModules(new string[] { "UnityEditor.UIBuilderModule" })]
 			[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetTopMostPhysicalRect")]
 			get
 			{
@@ -42,9 +45,11 @@ namespace UnityEngine
 			GUIClip.Internal_Push_Injected(ref screenRect, ref scrollOffset, ref renderOffset, resetOffset);
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_Pop();
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[FreeFunction("GetGUIState().m_CanvasGUIState.m_GUIClipState.GetCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int Internal_GetCount();
@@ -228,34 +233,34 @@ namespace UnityEngine
 		private static extern void get_topmostRect_Injected(out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_Push_Injected(ref Rect screenRect, ref Vector2 scrollOffset, ref Vector2 renderOffset, bool resetOffset);
+		private static extern void Internal_Push_Injected([In] ref Rect screenRect, [In] ref Vector2 scrollOffset, [In] ref Vector2 renderOffset, bool resetOffset);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetTopRect_Injected(out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Unclip_Vector2_Injected(ref Vector2 pos, out Vector2 ret);
+		private static extern void Unclip_Vector2_Injected([In] ref Vector2 pos, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Unclip_Rect_Injected(ref Rect rect, out Rect ret);
+		private static extern void Unclip_Rect_Injected([In] ref Rect rect, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Clip_Vector2_Injected(ref Vector2 absolutePos, out Vector2 ret);
+		private static extern void Clip_Vector2_Injected([In] ref Vector2 absolutePos, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_Clip_Rect_Injected(ref Rect absoluteRect, out Rect ret);
+		private static extern void Internal_Clip_Rect_Injected([In] ref Rect absoluteRect, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void UnclipToWindow_Vector2_Injected(ref Vector2 pos, out Vector2 ret);
+		private static extern void UnclipToWindow_Vector2_Injected([In] ref Vector2 pos, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void UnclipToWindow_Rect_Injected(ref Rect rect, out Rect ret);
+		private static extern void UnclipToWindow_Rect_Injected([In] ref Rect rect, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ClipToWindow_Vector2_Injected(ref Vector2 absolutePos, out Vector2 ret);
+		private static extern void ClipToWindow_Vector2_Injected([In] ref Vector2 absolutePos, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ClipToWindow_Rect_Injected(ref Rect absoluteRect, out Rect ret);
+		private static extern void ClipToWindow_Rect_Injected([In] ref Rect absoluteRect, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_GetAbsoluteMousePosition_Injected(out Vector2 ret);
@@ -264,14 +269,15 @@ namespace UnityEngine
 		private static extern void GetMatrix_Injected(out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetMatrix_Injected(ref Matrix4x4 m);
+		private static extern void SetMatrix_Injected([In] ref Matrix4x4 m);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetParentMatrix_Injected(out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_PushParentClip_Injected(ref Matrix4x4 renderTransform, ref Matrix4x4 inputTransform, ref Rect clipRect);
+		private static extern void Internal_PushParentClip_Injected([In] ref Matrix4x4 renderTransform, [In] ref Matrix4x4 inputTransform, [In] ref Rect clipRect);
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEditor.UIBuilderModule" })]
 		internal struct ParentClipScope : IDisposable
 		{
 			public ParentClipScope(Matrix4x4 objectTransform, Rect clipRect)

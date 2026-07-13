@@ -7,6 +7,10 @@ public class DragMe : MonoBehaviour, IBeginDragHandler, IEventSystemHandler, IDr
 {
 	public void OnBeginDrag(PointerEventData eventData)
 	{
+		if (eventData.button != PointerEventData.InputButton.Left)
+		{
+			return;
+		}
 		Canvas canvas = DragMe.FindInParents<Canvas>(base.gameObject);
 		if (canvas == null)
 		{

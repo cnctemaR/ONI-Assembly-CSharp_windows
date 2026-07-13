@@ -7,7 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/TinkerStation")]
-public class TinkerStation : Workable, IGameObjectEffectDescriptor, ISim1000ms
+public class TinkerStation : Workable, ISim1000ms
 {
 	public AttributeConverter AttributeConverter
 	{

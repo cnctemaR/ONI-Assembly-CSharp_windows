@@ -149,8 +149,8 @@ namespace System.Net.WebSockets
 			return ManagedWebSocket.CreateFromConnectedStream(stream, isServer, subProtocol, keepAliveInterval);
 		}
 
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.")]
 		public static bool IsApplicationTargeting45()
 		{
 			return true;

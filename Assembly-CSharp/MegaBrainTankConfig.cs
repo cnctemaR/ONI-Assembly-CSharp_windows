@@ -199,6 +199,8 @@ public class MegaBrainTankConfig : IBuildingConfig
 
 	public const float DIGESTION_RATE = 60f;
 
+	public const float JOURNALS_PER_SECOND = 0.016666668f;
+
 	public const float MAX_DIGESTION_TIME = 1500f;
 
 	public const float REFILL_THESHOLD_ADJUSTMENT = 1f;
@@ -219,7 +221,7 @@ public class MegaBrainTankConfig : IBuildingConfig
 
 	public const string BRAIN_HUM_EVENT = "MegaBrainTank_brain_wave_LP";
 
-	public const float METER_INCREMENT_SPEED = 0.04f;
+	public const float METER_STEP = 0.04f;
 
 	public static HashedString ACTIVATE_ALL;
 

@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class MethodImplAttribute : Attribute
 	{

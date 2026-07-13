@@ -313,26 +313,36 @@ namespace UnityEngine
 			return GUILayout.Toolbar(selected, contents, enabled, style, GUI.ToolbarButtonSize.Fixed, options);
 		}
 
+		internal static int Toolbar(int selected, GUIContent[] contents, bool[] enabled, GUIStyle style, GUIStyle firstStyle, GUIStyle midStyle, GUIStyle lastStyle, params GUILayoutOption[] options)
+		{
+			return GUILayout.Toolbar(selected, contents, enabled, style, firstStyle, midStyle, lastStyle, GUI.ToolbarButtonSize.Fixed, options);
+		}
+
 		public static int Toolbar(int selected, GUIContent[] contents, bool[] enabled, GUIStyle style, GUI.ToolbarButtonSize buttonSize, params GUILayoutOption[] options)
 		{
 			GUIStyle guistyle;
 			GUIStyle guistyle2;
 			GUIStyle guistyle3;
 			GUI.FindStyles(ref style, out guistyle, out guistyle2, out guistyle3, "left", "mid", "right");
+			return GUILayout.Toolbar(selected, contents, enabled, style, guistyle, guistyle2, guistyle3, buttonSize, options);
+		}
+
+		internal static int Toolbar(int selected, GUIContent[] contents, bool[] enabled, GUIStyle style, GUIStyle firstStyle, GUIStyle midStyle, GUIStyle lastStyle, GUI.ToolbarButtonSize buttonSize, params GUILayoutOption[] options)
+		{
 			Vector2 vector = default(Vector2);
 			int num = contents.Length;
-			GUIStyle guistyle4 = ((num > 1) ? guistyle : style);
-			GUIStyle guistyle5 = ((num > 1) ? guistyle2 : style);
-			GUIStyle guistyle6 = ((num > 1) ? guistyle3 : style);
+			GUIStyle guistyle = ((num > 1) ? firstStyle : style);
+			GUIStyle guistyle2 = ((num > 1) ? midStyle : style);
+			GUIStyle guistyle3 = ((num > 1) ? lastStyle : style);
 			float num2 = 0f;
 			for (int i = 0; i < contents.Length; i++)
 			{
 				bool flag = i == num - 2;
 				if (flag)
 				{
-					guistyle5 = guistyle6;
+					guistyle2 = guistyle3;
 				}
-				Vector2 vector2 = guistyle4.CalcSize(contents[i]);
+				Vector2 vector2 = guistyle.CalcSize(contents[i]);
 				if (buttonSize != GUI.ToolbarButtonSize.Fixed)
 				{
 					if (buttonSize == GUI.ToolbarButtonSize.FitToContents)
@@ -356,13 +366,13 @@ namespace UnityEngine
 				bool flag4 = i == num - 1;
 				if (flag4)
 				{
-					num2 += (float)guistyle4.margin.right;
+					num2 += (float)guistyle.margin.right;
 				}
 				else
 				{
-					num2 += (float)Mathf.Max(guistyle4.margin.right, guistyle5.margin.left);
+					num2 += (float)Mathf.Max(guistyle.margin.right, guistyle2.margin.left);
 				}
-				guistyle4 = guistyle5;
+				guistyle = guistyle2;
 			}
 			if (buttonSize != GUI.ToolbarButtonSize.Fixed)
 			{
@@ -375,7 +385,7 @@ namespace UnityEngine
 			{
 				vector.x = vector.x * (float)contents.Length + num2;
 			}
-			return GUI.Toolbar(GUILayoutUtility.GetRect(vector.x, vector.y, style, options), selected, contents, null, style, buttonSize, enabled);
+			return GUI.Toolbar(GUILayoutUtility.GetRect(vector.x, vector.y, style, options), selected, contents, null, style, firstStyle, midStyle, lastStyle, buttonSize, enabled);
 		}
 
 		public static int SelectionGrid(int selected, string[] texts, int xCount, params GUILayoutOption[] options)

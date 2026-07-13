@@ -652,6 +652,694 @@ namespace System
 			}
 		}
 
+		[PreserveDependency("CreateString(System.Char[])", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(char[] value);
+
+		private unsafe static string Ctor(char[] value)
+		{
+			if (value == null || value.Length == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(value.Length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char[] array = value)
+				{
+					char* ptr3;
+					if (value == null || array.Length == 0)
+					{
+						ptr3 = null;
+					}
+					else
+					{
+						ptr3 = &array[0];
+					}
+					string.wstrcpy(ptr2, ptr3, value.Length);
+					ptr = null;
+				}
+				return text;
+			}
+		}
+
+		[PreserveDependency("CreateString(System.Char[], System.Int32, System.Int32)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(char[] value, int startIndex, int length);
+
+		private unsafe static string Ctor(char[] value, int startIndex, int length)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
+			}
+			if (startIndex > value.Length - length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char[] array = value)
+				{
+					char* ptr3;
+					if (value == null || array.Length == 0)
+					{
+						ptr3 = null;
+					}
+					else
+					{
+						ptr3 = &array[0];
+					}
+					string.wstrcpy(ptr2, ptr3 + startIndex, length);
+					ptr = null;
+				}
+				return text;
+			}
+		}
+
+		[CLSCompliant(false)]
+		[PreserveDependency("CreateString(System.Char*)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(char* value);
+
+		private unsafe static string Ctor(char* ptr)
+		{
+			if (ptr == null)
+			{
+				return string.Empty;
+			}
+			int num = string.wcslen(ptr);
+			if (num == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(num);
+			fixed (char* ptr2 = &text._firstChar)
+			{
+				string.wstrcpy(ptr2, ptr, num);
+			}
+			return text;
+		}
+
+		[PreserveDependency("CreateString(System.Char*, System.Int32, System.Int32)", "System.String")]
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(char* value, int startIndex, int length);
+
+		private unsafe static string Ctor(char* ptr, int startIndex, int length)
+		{
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
+			}
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			char* ptr2 = ptr + startIndex;
+			if (ptr2 < ptr)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Pointer startIndex and length do not refer to a valid string.");
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			if (ptr == null)
+			{
+				throw new ArgumentOutOfRangeException("ptr", "Pointer startIndex and length do not refer to a valid string.");
+			}
+			string text = string.FastAllocateString(length);
+			fixed (char* ptr3 = &text._firstChar)
+			{
+				string.wstrcpy(ptr3, ptr2, length);
+			}
+			return text;
+		}
+
+		[CLSCompliant(false)]
+		[PreserveDependency("CreateString(System.SByte*)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(sbyte* value);
+
+		private unsafe static string Ctor(sbyte* value)
+		{
+			if (value == null)
+			{
+				return string.Empty;
+			}
+			int num = new ReadOnlySpan<byte>((void*)value, int.MaxValue).IndexOf(0);
+			if (num < 0)
+			{
+				throw new ArgumentException("The string must be null-terminated.");
+			}
+			return string.CreateStringForSByteConstructor((byte*)value, num);
+		}
+
+		[CLSCompliant(false)]
+		[PreserveDependency("CreateString(System.SByte*, System.Int32, System.Int32)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(sbyte* value, int startIndex, int length);
+
+		private unsafe static string Ctor(sbyte* value, int startIndex, int length)
+		{
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
+			}
+			if (value == null)
+			{
+				if (length == 0)
+				{
+					return string.Empty;
+				}
+				throw new ArgumentNullException("value");
+			}
+			else
+			{
+				byte* ptr = (byte*)(value + startIndex);
+				if (ptr < (byte*)value)
+				{
+					throw new ArgumentOutOfRangeException("value", "Pointer startIndex and length do not refer to a valid string.");
+				}
+				return string.CreateStringForSByteConstructor(ptr, length);
+			}
+		}
+
+		private unsafe static string CreateStringForSByteConstructor(byte* pb, int numBytes)
+		{
+			if (numBytes == 0)
+			{
+				return string.Empty;
+			}
+			return Encoding.UTF8.GetString(pb, numBytes);
+		}
+
+		[PreserveDependency("CreateString(System.SByte*, System.Int32, System.Int32, System.Text.Encoding)", "System.String")]
+		[CLSCompliant(false)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe extern String(sbyte* value, int startIndex, int length, Encoding enc);
+
+		private unsafe static string Ctor(sbyte* value, int startIndex, int length, Encoding enc)
+		{
+			if (enc == null)
+			{
+				return new string(value, startIndex, length);
+			}
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Non-negative number required.");
+			}
+			if (startIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
+			}
+			if (value == null)
+			{
+				if (length == 0)
+				{
+					return string.Empty;
+				}
+				throw new ArgumentNullException("value");
+			}
+			else
+			{
+				byte* ptr = (byte*)(value + startIndex);
+				if (ptr < (byte*)value)
+				{
+					throw new ArgumentOutOfRangeException("startIndex", "Pointer startIndex and length do not refer to a valid string.");
+				}
+				return enc.GetString(new ReadOnlySpan<byte>((void*)ptr, length));
+			}
+		}
+
+		[PreserveDependency("CreateString(System.Char, System.Int32)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(char c, int count);
+
+		private unsafe static string Ctor(char c, int count)
+		{
+			if (count > 0)
+			{
+				string text = string.FastAllocateString(count);
+				fixed (char* ptr = &text._firstChar)
+				{
+					uint* ptr2 = (uint*)ptr;
+					uint num = (uint)(((uint)c << 16) | c);
+					uint* ptr3 = ptr2;
+					if (count >= 4)
+					{
+						count -= 4;
+						do
+						{
+							*ptr3 = num;
+							ptr3[1] = num;
+							ptr3 += 2;
+							count -= 4;
+						}
+						while (count >= 0);
+					}
+					if ((count & 2) != 0)
+					{
+						*ptr3 = num;
+						ptr3++;
+					}
+					if ((count & 1) != 0)
+					{
+						*(short*)ptr3 = (short)c;
+					}
+				}
+				return text;
+			}
+			if (count == 0)
+			{
+				return string.Empty;
+			}
+			throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
+		}
+
+		[PreserveDependency("CreateString(System.ReadOnlySpan`1<System.Char>)", "System.String")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern String(ReadOnlySpan<char> value);
+
+		private unsafe static string Ctor(ReadOnlySpan<char> value)
+		{
+			if (value.Length == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(value.Length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* reference = MemoryMarshal.GetReference<char>(value))
+				{
+					char* ptr3 = reference;
+					string.wstrcpy(ptr2, ptr3, value.Length);
+					ptr = null;
+				}
+				return text;
+			}
+		}
+
+		public static string Create<TState>(int length, TState state, SpanAction<char, TState> action)
+		{
+			if (action == null)
+			{
+				throw new ArgumentNullException("action");
+			}
+			if (length > 0)
+			{
+				string text = string.FastAllocateString(length);
+				action(new Span<char>(text.GetRawStringData(), length), state);
+				return text;
+			}
+			if (length == 0)
+			{
+				return string.Empty;
+			}
+			throw new ArgumentOutOfRangeException("length");
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static implicit operator ReadOnlySpan<char>(string value)
+		{
+			if (value == null)
+			{
+				return default(ReadOnlySpan<char>);
+			}
+			return new ReadOnlySpan<char>(value.GetRawStringData(), value.Length);
+		}
+
+		public object Clone()
+		{
+			return this;
+		}
+
+		public unsafe static string Copy(string str)
+		{
+			if (str == null)
+			{
+				throw new ArgumentNullException("str");
+			}
+			string text = string.FastAllocateString(str.Length);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &str._firstChar)
+				{
+					char* ptr4 = ptr3;
+					string.wstrcpy(ptr2, ptr4, str.Length);
+					ptr = null;
+				}
+				return text;
+			}
+		}
+
+		public unsafe void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
+		{
+			if (destination == null)
+			{
+				throw new ArgumentNullException("destination");
+			}
+			if (count < 0)
+			{
+				throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
+			}
+			if (sourceIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("sourceIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (count > this.Length - sourceIndex)
+			{
+				throw new ArgumentOutOfRangeException("sourceIndex", "Index and count must refer to a location within the string.");
+			}
+			if (destinationIndex > destination.Length - count || destinationIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException("destinationIndex", "Index and count must refer to a location within the string.");
+			}
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char[] array = destination)
+				{
+					char* ptr3;
+					if (destination == null || array.Length == 0)
+					{
+						ptr3 = null;
+					}
+					else
+					{
+						ptr3 = &array[0];
+					}
+					string.wstrcpy(ptr3 + destinationIndex, ptr2 + sourceIndex, count);
+					ptr = null;
+				}
+				return;
+			}
+		}
+
+		public unsafe char[] ToCharArray()
+		{
+			if (this.Length == 0)
+			{
+				return Array.Empty<char>();
+			}
+			char[] array = new char[this.Length];
+			fixed (char* ptr = &this._firstChar)
+			{
+				char* ptr2 = ptr;
+				fixed (char* ptr3 = &array[0])
+				{
+					string.wstrcpy(ptr3, ptr2, this.Length);
+					ptr = null;
+				}
+				return array;
+			}
+		}
+
+		public unsafe char[] ToCharArray(int startIndex, int length)
+		{
+			if (startIndex < 0 || startIndex > this.Length || startIndex > this.Length - length)
+			{
+				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
+			}
+			if (length > 0)
+			{
+				char[] array = new char[length];
+				fixed (char* ptr = &this._firstChar)
+				{
+					char* ptr2 = ptr;
+					fixed (char* ptr3 = &array[0])
+					{
+						string.wstrcpy(ptr3, ptr2 + startIndex, length);
+						ptr = null;
+					}
+					return array;
+				}
+			}
+			if (length == 0)
+			{
+				return Array.Empty<char>();
+			}
+			throw new ArgumentOutOfRangeException("length", "Index was out of range. Must be non-negative and less than the size of the collection.");
+		}
+
+		[NonVersionable]
+		public static bool IsNullOrEmpty(string value)
+		{
+			return value == null || 0 >= value.Length;
+		}
+
+		public static bool IsNullOrWhiteSpace(string value)
+		{
+			if (value == null)
+			{
+				return true;
+			}
+			for (int i = 0; i < value.Length; i++)
+			{
+				if (!char.IsWhiteSpace(value[i]))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		internal ref char GetRawStringData()
+		{
+			return ref this._firstChar;
+		}
+
+		internal unsafe static string CreateStringFromEncoding(byte* bytes, int byteLength, Encoding encoding)
+		{
+			int charCount = encoding.GetCharCount(bytes, byteLength, null);
+			if (charCount == 0)
+			{
+				return string.Empty;
+			}
+			string text = string.FastAllocateString(charCount);
+			fixed (char* ptr = &text._firstChar)
+			{
+				char* ptr2 = ptr;
+				encoding.GetChars(bytes, byteLength, ptr2, charCount, null);
+			}
+			return text;
+		}
+
+		internal static string CreateFromChar(char c)
+		{
+			string text = string.FastAllocateString(1);
+			text._firstChar = c;
+			return text;
+		}
+
+		internal unsafe static void wstrcpy(char* dmem, char* smem, int charCount)
+		{
+			Buffer.Memmove((byte*)dmem, (byte*)smem, (uint)(charCount * 2));
+		}
+
+		public override string ToString()
+		{
+			return this;
+		}
+
+		public string ToString(IFormatProvider provider)
+		{
+			return this;
+		}
+
+		public CharEnumerator GetEnumerator()
+		{
+			return new CharEnumerator(this);
+		}
+
+		IEnumerator<char> IEnumerable<char>.GetEnumerator()
+		{
+			return new CharEnumerator(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new CharEnumerator(this);
+		}
+
+		internal unsafe static int wcslen(char* ptr)
+		{
+			char* ptr2 = ptr;
+			int num = IntPtr.Size - 1;
+			while ((ptr2 & (uint)num) != 0U)
+			{
+				if (*ptr2 != '\0')
+				{
+					ptr2++;
+				}
+				else
+				{
+					IL_006E:
+					int num2 = (int)((long)(ptr2 - ptr));
+					if (ptr + num2 != ptr2)
+					{
+						throw new ArgumentException("The string must be null-terminated.");
+					}
+					return num2;
+				}
+			}
+			for (;;)
+			{
+				if (((*(long*)ptr2 + 9223231297218904063L) | 9223231297218904063L) == -1L)
+				{
+					ptr2 += 4;
+				}
+				else
+				{
+					if (*ptr2 == '\0')
+					{
+						goto IL_006E;
+					}
+					if (ptr2[1] == '\0')
+					{
+						goto IL_006A;
+					}
+					if (ptr2[2] == '\0')
+					{
+						goto IL_0066;
+					}
+					if (ptr2[3] == '\0')
+					{
+						break;
+					}
+					ptr2 += 4;
+				}
+			}
+			ptr2++;
+			IL_0066:
+			ptr2++;
+			IL_006A:
+			ptr2++;
+			goto IL_006E;
+		}
+
+		public TypeCode GetTypeCode()
+		{
+			return TypeCode.String;
+		}
+
+		bool IConvertible.ToBoolean(IFormatProvider provider)
+		{
+			return Convert.ToBoolean(this, provider);
+		}
+
+		char IConvertible.ToChar(IFormatProvider provider)
+		{
+			return Convert.ToChar(this, provider);
+		}
+
+		sbyte IConvertible.ToSByte(IFormatProvider provider)
+		{
+			return Convert.ToSByte(this, provider);
+		}
+
+		byte IConvertible.ToByte(IFormatProvider provider)
+		{
+			return Convert.ToByte(this, provider);
+		}
+
+		short IConvertible.ToInt16(IFormatProvider provider)
+		{
+			return Convert.ToInt16(this, provider);
+		}
+
+		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		{
+			return Convert.ToUInt16(this, provider);
+		}
+
+		int IConvertible.ToInt32(IFormatProvider provider)
+		{
+			return Convert.ToInt32(this, provider);
+		}
+
+		uint IConvertible.ToUInt32(IFormatProvider provider)
+		{
+			return Convert.ToUInt32(this, provider);
+		}
+
+		long IConvertible.ToInt64(IFormatProvider provider)
+		{
+			return Convert.ToInt64(this, provider);
+		}
+
+		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		{
+			return Convert.ToUInt64(this, provider);
+		}
+
+		float IConvertible.ToSingle(IFormatProvider provider)
+		{
+			return Convert.ToSingle(this, provider);
+		}
+
+		double IConvertible.ToDouble(IFormatProvider provider)
+		{
+			return Convert.ToDouble(this, provider);
+		}
+
+		decimal IConvertible.ToDecimal(IFormatProvider provider)
+		{
+			return Convert.ToDecimal(this, provider);
+		}
+
+		DateTime IConvertible.ToDateTime(IFormatProvider provider)
+		{
+			return Convert.ToDateTime(this, provider);
+		}
+
+		object IConvertible.ToType(Type type, IFormatProvider provider)
+		{
+			return Convert.DefaultToType(this, type, provider);
+		}
+
+		public bool IsNormalized()
+		{
+			return this.IsNormalized(NormalizationForm.FormC);
+		}
+
+		public bool IsNormalized(NormalizationForm normalizationForm)
+		{
+			return Normalization.IsNormalized(this, normalizationForm);
+		}
+
+		public string Normalize()
+		{
+			return this.Normalize(NormalizationForm.FormC);
+		}
+
+		public string Normalize(NormalizationForm normalizationForm)
+		{
+			return Normalization.Normalize(this, normalizationForm);
+		}
+
 		private unsafe static void FillStringChecked(string dest, int destPos, string src)
 		{
 			if (src.Length > dest.Length - destPos)
@@ -2704,697 +3392,6 @@ namespace System
 					throw new ArgumentException("The string comparison type passed in is currently not supported.", "comparisonType");
 				}
 			}
-		}
-
-		[PreserveDependency("CreateString(System.Char[])", "System.String")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern String(char[] value);
-
-		private unsafe static string Ctor(char[] value)
-		{
-			if (value == null || value.Length == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(value.Length);
-			fixed (char* ptr = &text._firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char[] array = value)
-				{
-					char* ptr3;
-					if (value == null || array.Length == 0)
-					{
-						ptr3 = null;
-					}
-					else
-					{
-						ptr3 = &array[0];
-					}
-					string.wstrcpy(ptr2, ptr3, value.Length);
-					ptr = null;
-				}
-				return text;
-			}
-		}
-
-		[PreserveDependency("CreateString(System.Char[], System.Int32, System.Int32)", "System.String")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern String(char[] value, int startIndex, int length);
-
-		private unsafe static string Ctor(char[] value, int startIndex, int length)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
-			}
-			if (startIndex > value.Length - length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (length == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(length);
-			fixed (char* ptr = &text._firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char[] array = value)
-				{
-					char* ptr3;
-					if (value == null || array.Length == 0)
-					{
-						ptr3 = null;
-					}
-					else
-					{
-						ptr3 = &array[0];
-					}
-					string.wstrcpy(ptr2, ptr3 + startIndex, length);
-					ptr = null;
-				}
-				return text;
-			}
-		}
-
-		[CLSCompliant(false)]
-		[PreserveDependency("CreateString(System.Char*)", "System.String")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(char* value);
-
-		private unsafe static string Ctor(char* ptr)
-		{
-			if (ptr == null)
-			{
-				return string.Empty;
-			}
-			int num = string.wcslen(ptr);
-			if (num == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(num);
-			fixed (char* ptr2 = &text._firstChar)
-			{
-				string.wstrcpy(ptr2, ptr, num);
-			}
-			return text;
-		}
-
-		[PreserveDependency("CreateString(System.Char*, System.Int32, System.Int32)", "System.String")]
-		[CLSCompliant(false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(char* value, int startIndex, int length);
-
-		private unsafe static string Ctor(char* ptr, int startIndex, int length)
-		{
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
-			}
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
-			}
-			char* ptr2 = ptr + startIndex;
-			if (ptr2 < ptr)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Pointer startIndex and length do not refer to a valid string.");
-			}
-			if (length == 0)
-			{
-				return string.Empty;
-			}
-			if (ptr == null)
-			{
-				throw new ArgumentOutOfRangeException("ptr", "Pointer startIndex and length do not refer to a valid string.");
-			}
-			string text = string.FastAllocateString(length);
-			fixed (char* ptr3 = &text._firstChar)
-			{
-				string.wstrcpy(ptr3, ptr2, length);
-			}
-			return text;
-		}
-
-		[PreserveDependency("CreateString(System.SByte*)", "System.String")]
-		[CLSCompliant(false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(sbyte* value);
-
-		private unsafe static string Ctor(sbyte* value)
-		{
-			if (value == null)
-			{
-				return string.Empty;
-			}
-			int num = new ReadOnlySpan<byte>((void*)value, int.MaxValue).IndexOf(0);
-			if (num < 0)
-			{
-				throw new ArgumentException("The string must be null-terminated.");
-			}
-			return string.CreateStringForSByteConstructor((byte*)value, num);
-		}
-
-		[CLSCompliant(false)]
-		[PreserveDependency("CreateString(System.SByte*, System.Int32, System.Int32)", "System.String")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(sbyte* value, int startIndex, int length);
-
-		private unsafe static string Ctor(sbyte* value, int startIndex, int length)
-		{
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", "Length cannot be less than zero.");
-			}
-			if (value == null)
-			{
-				if (length == 0)
-				{
-					return string.Empty;
-				}
-				throw new ArgumentNullException("value");
-			}
-			else
-			{
-				byte* ptr = (byte*)(value + startIndex);
-				if (ptr < (byte*)value)
-				{
-					throw new ArgumentOutOfRangeException("value", "Pointer startIndex and length do not refer to a valid string.");
-				}
-				return string.CreateStringForSByteConstructor(ptr, length);
-			}
-		}
-
-		private unsafe static string CreateStringForSByteConstructor(byte* pb, int numBytes)
-		{
-			if (numBytes == 0)
-			{
-				return string.Empty;
-			}
-			return Encoding.UTF8.GetString(pb, numBytes);
-		}
-
-		[CLSCompliant(false)]
-		[PreserveDependency("CreateString(System.SByte*, System.Int32, System.Int32, System.Text.Encoding)", "System.String")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe extern String(sbyte* value, int startIndex, int length, Encoding enc);
-
-		private unsafe static string Ctor(sbyte* value, int startIndex, int length, Encoding enc)
-		{
-			if (enc == null)
-			{
-				return new string(value, startIndex, length);
-			}
-			if (length < 0)
-			{
-				throw new ArgumentOutOfRangeException("length", "Non-negative number required.");
-			}
-			if (startIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "StartIndex cannot be less than zero.");
-			}
-			if (value == null)
-			{
-				if (length == 0)
-				{
-					return string.Empty;
-				}
-				throw new ArgumentNullException("value");
-			}
-			else
-			{
-				byte* ptr = (byte*)(value + startIndex);
-				if (ptr < (byte*)value)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", "Pointer startIndex and length do not refer to a valid string.");
-				}
-				return enc.GetString(new ReadOnlySpan<byte>((void*)ptr, length));
-			}
-		}
-
-		[PreserveDependency("CreateString(System.Char, System.Int32)", "System.String")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern String(char c, int count);
-
-		private unsafe static string Ctor(char c, int count)
-		{
-			if (count > 0)
-			{
-				string text = string.FastAllocateString(count);
-				if (c != '\0')
-				{
-					fixed (char* ptr = &text._firstChar)
-					{
-						uint* ptr2 = (uint*)ptr;
-						uint num = (uint)(((uint)c << 16) | c);
-						uint* ptr3 = ptr2;
-						if (count >= 4)
-						{
-							count -= 4;
-							do
-							{
-								*ptr3 = num;
-								ptr3[1] = num;
-								ptr3 += 2;
-								count -= 4;
-							}
-							while (count >= 0);
-						}
-						if ((count & 2) != 0)
-						{
-							*ptr3 = num;
-							ptr3++;
-						}
-						if ((count & 1) != 0)
-						{
-							*(short*)ptr3 = (short)c;
-						}
-					}
-				}
-				return text;
-			}
-			if (count == 0)
-			{
-				return string.Empty;
-			}
-			throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
-		}
-
-		[PreserveDependency("CreateString(System.ReadOnlySpan`1<System.Char>)", "System.String")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern String(ReadOnlySpan<char> value);
-
-		private unsafe static string Ctor(ReadOnlySpan<char> value)
-		{
-			if (value.Length == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(value.Length);
-			fixed (char* ptr = &text._firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* reference = MemoryMarshal.GetReference<char>(value))
-				{
-					char* ptr3 = reference;
-					string.wstrcpy(ptr2, ptr3, value.Length);
-					ptr = null;
-				}
-				return text;
-			}
-		}
-
-		public static string Create<TState>(int length, TState state, SpanAction<char, TState> action)
-		{
-			if (action == null)
-			{
-				throw new ArgumentNullException("action");
-			}
-			if (length > 0)
-			{
-				string text = string.FastAllocateString(length);
-				action(new Span<char>(text.GetRawStringData(), length), state);
-				return text;
-			}
-			if (length == 0)
-			{
-				return string.Empty;
-			}
-			throw new ArgumentOutOfRangeException("length");
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static implicit operator ReadOnlySpan<char>(string value)
-		{
-			if (value == null)
-			{
-				return default(ReadOnlySpan<char>);
-			}
-			return new ReadOnlySpan<char>(value.GetRawStringData(), value.Length);
-		}
-
-		public object Clone()
-		{
-			return this;
-		}
-
-		public unsafe static string Copy(string str)
-		{
-			if (str == null)
-			{
-				throw new ArgumentNullException("str");
-			}
-			string text = string.FastAllocateString(str.Length);
-			fixed (char* ptr = &text._firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* ptr3 = &str._firstChar)
-				{
-					char* ptr4 = ptr3;
-					string.wstrcpy(ptr2, ptr4, str.Length);
-					ptr = null;
-				}
-				return text;
-			}
-		}
-
-		public unsafe void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
-		{
-			if (destination == null)
-			{
-				throw new ArgumentNullException("destination");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", "Count cannot be less than zero.");
-			}
-			if (sourceIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("sourceIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (count > this.Length - sourceIndex)
-			{
-				throw new ArgumentOutOfRangeException("sourceIndex", "Index and count must refer to a location within the string.");
-			}
-			if (destinationIndex > destination.Length - count || destinationIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("destinationIndex", "Index and count must refer to a location within the string.");
-			}
-			fixed (char* ptr = &this._firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char[] array = destination)
-				{
-					char* ptr3;
-					if (destination == null || array.Length == 0)
-					{
-						ptr3 = null;
-					}
-					else
-					{
-						ptr3 = &array[0];
-					}
-					string.wstrcpy(ptr3 + destinationIndex, ptr2 + sourceIndex, count);
-					ptr = null;
-				}
-				return;
-			}
-		}
-
-		public unsafe char[] ToCharArray()
-		{
-			if (this.Length == 0)
-			{
-				return Array.Empty<char>();
-			}
-			char[] array = new char[this.Length];
-			fixed (char* ptr = &this._firstChar)
-			{
-				char* ptr2 = ptr;
-				fixed (char* ptr3 = &array[0])
-				{
-					string.wstrcpy(ptr3, ptr2, this.Length);
-					ptr = null;
-				}
-				return array;
-			}
-		}
-
-		public unsafe char[] ToCharArray(int startIndex, int length)
-		{
-			if (startIndex < 0 || startIndex > this.Length || startIndex > this.Length - length)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (length > 0)
-			{
-				char[] array = new char[length];
-				fixed (char* ptr = &this._firstChar)
-				{
-					char* ptr2 = ptr;
-					fixed (char* ptr3 = &array[0])
-					{
-						string.wstrcpy(ptr3, ptr2 + startIndex, length);
-						ptr = null;
-					}
-					return array;
-				}
-			}
-			if (length == 0)
-			{
-				return Array.Empty<char>();
-			}
-			throw new ArgumentOutOfRangeException("length", "Index was out of range. Must be non-negative and less than the size of the collection.");
-		}
-
-		[NonVersionable]
-		public static bool IsNullOrEmpty(string value)
-		{
-			return value == null || 0 >= value.Length;
-		}
-
-		public static bool IsNullOrWhiteSpace(string value)
-		{
-			if (value == null)
-			{
-				return true;
-			}
-			for (int i = 0; i < value.Length; i++)
-			{
-				if (!char.IsWhiteSpace(value[i]))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		internal ref char GetRawStringData()
-		{
-			return ref this._firstChar;
-		}
-
-		internal unsafe static string CreateStringFromEncoding(byte* bytes, int byteLength, Encoding encoding)
-		{
-			int charCount = encoding.GetCharCount(bytes, byteLength, null);
-			if (charCount == 0)
-			{
-				return string.Empty;
-			}
-			string text = string.FastAllocateString(charCount);
-			fixed (char* ptr = &text._firstChar)
-			{
-				char* ptr2 = ptr;
-				encoding.GetChars(bytes, byteLength, ptr2, charCount, null);
-			}
-			return text;
-		}
-
-		internal static string CreateFromChar(char c)
-		{
-			string text = string.FastAllocateString(1);
-			text._firstChar = c;
-			return text;
-		}
-
-		internal unsafe static void wstrcpy(char* dmem, char* smem, int charCount)
-		{
-			Buffer.Memmove((byte*)dmem, (byte*)smem, (uint)(charCount * 2));
-		}
-
-		public override string ToString()
-		{
-			return this;
-		}
-
-		public string ToString(IFormatProvider provider)
-		{
-			return this;
-		}
-
-		public CharEnumerator GetEnumerator()
-		{
-			return new CharEnumerator(this);
-		}
-
-		IEnumerator<char> IEnumerable<char>.GetEnumerator()
-		{
-			return new CharEnumerator(this);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new CharEnumerator(this);
-		}
-
-		internal unsafe static int wcslen(char* ptr)
-		{
-			char* ptr2 = ptr;
-			int num = IntPtr.Size - 1;
-			while ((ptr2 & (uint)num) != 0U)
-			{
-				if (*ptr2 != '\0')
-				{
-					ptr2++;
-				}
-				else
-				{
-					IL_006E:
-					int num2 = (int)((long)(ptr2 - ptr));
-					if (ptr + num2 != ptr2)
-					{
-						throw new ArgumentException("The string must be null-terminated.");
-					}
-					return num2;
-				}
-			}
-			for (;;)
-			{
-				if (((*(long*)ptr2 + 9223231297218904063L) | 9223231297218904063L) == -1L)
-				{
-					ptr2 += 4;
-				}
-				else
-				{
-					if (*ptr2 == '\0')
-					{
-						goto IL_006E;
-					}
-					if (ptr2[1] == '\0')
-					{
-						goto IL_006A;
-					}
-					if (ptr2[2] == '\0')
-					{
-						goto IL_0066;
-					}
-					if (ptr2[3] == '\0')
-					{
-						break;
-					}
-					ptr2 += 4;
-				}
-			}
-			ptr2++;
-			IL_0066:
-			ptr2++;
-			IL_006A:
-			ptr2++;
-			goto IL_006E;
-		}
-
-		public TypeCode GetTypeCode()
-		{
-			return TypeCode.String;
-		}
-
-		bool IConvertible.ToBoolean(IFormatProvider provider)
-		{
-			return Convert.ToBoolean(this, provider);
-		}
-
-		char IConvertible.ToChar(IFormatProvider provider)
-		{
-			return Convert.ToChar(this, provider);
-		}
-
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
-		{
-			return Convert.ToSByte(this, provider);
-		}
-
-		byte IConvertible.ToByte(IFormatProvider provider)
-		{
-			return Convert.ToByte(this, provider);
-		}
-
-		short IConvertible.ToInt16(IFormatProvider provider)
-		{
-			return Convert.ToInt16(this, provider);
-		}
-
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
-		{
-			return Convert.ToUInt16(this, provider);
-		}
-
-		int IConvertible.ToInt32(IFormatProvider provider)
-		{
-			return Convert.ToInt32(this, provider);
-		}
-
-		uint IConvertible.ToUInt32(IFormatProvider provider)
-		{
-			return Convert.ToUInt32(this, provider);
-		}
-
-		long IConvertible.ToInt64(IFormatProvider provider)
-		{
-			return Convert.ToInt64(this, provider);
-		}
-
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
-		{
-			return Convert.ToUInt64(this, provider);
-		}
-
-		float IConvertible.ToSingle(IFormatProvider provider)
-		{
-			return Convert.ToSingle(this, provider);
-		}
-
-		double IConvertible.ToDouble(IFormatProvider provider)
-		{
-			return Convert.ToDouble(this, provider);
-		}
-
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
-		{
-			return Convert.ToDecimal(this, provider);
-		}
-
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
-		{
-			return Convert.ToDateTime(this, provider);
-		}
-
-		object IConvertible.ToType(Type type, IFormatProvider provider)
-		{
-			return Convert.DefaultToType(this, type, provider);
-		}
-
-		public bool IsNormalized()
-		{
-			return this.IsNormalized(NormalizationForm.FormC);
-		}
-
-		public bool IsNormalized(NormalizationForm normalizationForm)
-		{
-			return Normalization.IsNormalized(this, normalizationForm);
-		}
-
-		public string Normalize()
-		{
-			return this.Normalize(NormalizationForm.FormC);
-		}
-
-		public string Normalize(NormalizationForm normalizationForm)
-		{
-			return Normalization.Normalize(this, normalizationForm);
 		}
 
 		public int Length

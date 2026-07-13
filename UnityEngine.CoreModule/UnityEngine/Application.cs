@@ -15,24 +15,24 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Input/GetInput.h")]
-	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
-	[NativeHeader("Runtime/Utilities/URLUtility.h")]
-	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
 	[NativeHeader("Runtime/Input/InputManager.h")]
-	[NativeHeader("Runtime/Misc/SystemInfo.h")]
-	[NativeHeader("Runtime/Network/NetworkUtility.h")]
-	[NativeHeader("Runtime/Misc/Player.h")]
 	[NativeHeader("Runtime/Misc/BuildSettings.h")]
-	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
-	[NativeHeader("Runtime/Logging/LogSystem.h")]
-	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
-	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
-	[NativeHeader("Runtime/Utilities/Argv.h")]
-	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
+	[NativeHeader("Runtime/Misc/Player.h")]
+	[NativeHeader("Runtime/Input/GetInput.h")]
 	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
-	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
 	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
+	[NativeHeader("NativeKernel/Logging/LogSystem.h")]
+	[NativeHeader("Runtime/Input/TargetFrameRate.h")]
+	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
+	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
+	[NativeHeader("Runtime/Export/Application/Application.bindings.h")]
+	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
+	[NativeHeader("Runtime/Network/NetworkUtility.h")]
+	[NativeHeader("Runtime/Utilities/Argv.h")]
+	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
+	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
+	[NativeHeader("Runtime/Utilities/URLUtility.h")]
+	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	public class Application
 	{
 		[FreeFunction("GetInputManager().QuitApplication")]
@@ -44,8 +44,8 @@ namespace UnityEngine
 			Application.Quit(0);
 		}
 
-		[FreeFunction("GetInputManager().CancelQuitApplication")]
 		[Obsolete("CancelQuit is deprecated. Use the wantsToQuit event instead.")]
+		[FreeFunction("GetInputManager().CancelQuitApplication")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CancelQuit();
 
@@ -112,8 +112,28 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("Application_Bindings::CanStreamedLevelBeLoaded")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool CanStreamedLevelBeLoaded(string levelName);
+		public unsafe static bool CanStreamedLevelBeLoaded(string levelName)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(levelName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = levelName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = Application.CanStreamedLevelBeLoaded_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		public static extern bool isPlaying
 		{
@@ -123,8 +143,19 @@ namespace UnityEngine
 		}
 
 		[FreeFunction]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsPlaying([NotNull("NullExceptionObject")] Object obj);
+		public static bool IsPlaying([NotNull] Object obj)
+		{
+			if (obj == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Object>(obj);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			return Application.IsPlaying_Injected(intPtr);
+		}
 
 		public static extern bool isFocused
 		{
@@ -143,11 +174,24 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetBuildTags(string[] buildTags);
 
-		public static extern string buildGUID
+		public static string buildGUID
 		{
 			[FreeFunction("Application_Bindings::GetBuildGUID")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_buildGUID_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		public static extern bool runInBackground
@@ -178,6 +222,13 @@ namespace UnityEngine
 			get;
 		}
 
+		internal static extern bool isBuildingEditorResources
+		{
+			[FreeFunction("::IsBuildingEditorResources")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		internal static extern bool isHumanControllingUs
 		{
 			[FreeFunction("::IsHumanControllingUs")]
@@ -186,46 +237,154 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("HasARGV")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool HasARGV(string name);
+		internal unsafe static bool HasARGV(string name)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = Application.HasARGV_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		[FreeFunction("GetFirstValueForARGV")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetValueForARGV(string name);
+		internal unsafe static string GetValueForARGV(string name)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				Application.GetValueForARGV_Injected(ref managedSpanWrapper, out managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				ManagedSpanWrapper managedSpanWrapper2;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper2);
+			}
+			return stringAndDispose;
+		}
 
-		public static extern string dataPath
+		public static string dataPath
 		{
 			[FreeFunction("GetAppDataPath", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_dataPath_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string streamingAssetsPath
+		public static string streamingAssetsPath
 		{
 			[FreeFunction("GetStreamingAssetsPath", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_streamingAssetsPath_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string persistentDataPath
+		public static string persistentDataPath
 		{
 			[FreeFunction("GetPersistentDataPathApplicationSpecific")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_persistentDataPath_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string temporaryCachePath
+		public static string temporaryCachePath
 		{
 			[FreeFunction("GetTemporaryCachePathApplicationSpecific")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_temporaryCachePath_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string absoluteURL
+		public static string absoluteURL
 		{
 			[FreeFunction("GetPlayerSettings().GetAbsoluteURL")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_absoluteURL_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		[Obsolete("Application.ExternalEval is deprecated. See https://docs.unity3d.com/Manual/webgl-interactingwithbrowserscripting.html for alternatives.")]
@@ -240,18 +399,50 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("Application_Bindings::ExternalCall")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_ExternalCall(string script);
+		private unsafe static void Internal_ExternalCall(string script)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(script, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = script.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Application.Internal_ExternalCall_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		public static extern string unityVersion
+		public static string unityVersion
 		{
 			[FreeFunction("Application_Bindings::GetUnityVersion", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_unityVersion_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		internal static extern int unityVersionVer
 		{
+			[VisibleToOtherModules(new string[] { "UnityEditor.UIBuilderModule" })]
 			[FreeFunction("Application_Bindings::GetUnityVersionVer", IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -259,6 +450,7 @@ namespace UnityEngine
 
 		internal static extern int unityVersionMaj
 		{
+			[VisibleToOtherModules(new string[] { "UnityEditor.UIBuilderModule" })]
 			[FreeFunction("Application_Bindings::GetUnityVersionMaj", IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -271,25 +463,64 @@ namespace UnityEngine
 			get;
 		}
 
-		public static extern string version
+		public static string version
 		{
 			[FreeFunction("GetApplicationInfo().GetVersion")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_version_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string installerName
+		public static string installerName
 		{
 			[FreeFunction("GetApplicationInfo().GetInstallerName")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_installerName_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string identifier
+		public static string identifier
 		{
 			[FreeFunction("GetApplicationInfo().GetApplicationIdentifier")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_identifier_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		public static extern ApplicationInstallMode installMode
@@ -306,25 +537,64 @@ namespace UnityEngine
 			get;
 		}
 
-		public static extern string productName
+		public static string productName
 		{
 			[FreeFunction("GetPlayerSettings().GetProductName")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_productName_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string companyName
+		public static string companyName
 		{
 			[FreeFunction("GetPlayerSettings().GetCompanyName")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_companyName_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public static extern string cloudProjectId
+		public static string cloudProjectId
 		{
 			[FreeFunction("GetPlayerSettings().GetCloudProjectId")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_cloudProjectId_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		[FreeFunction("GetAdsIdHandler().RequestAdsIdAsync")]
@@ -332,8 +602,26 @@ namespace UnityEngine
 		public static extern bool RequestAdvertisingIdentifierAsync(Application.AdvertisingIdentifierCallback delegateMethod);
 
 		[FreeFunction("OpenURL")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void OpenURL(string url);
+		public unsafe static void OpenURL(string url)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(url, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = url.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Application.OpenURL_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[Obsolete("Use UnityEngine.Diagnostics.Utils.ForceCrash")]
 		public static void ForceCrash(int mode)
@@ -374,11 +662,24 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStackTraceLogType(LogType logType, StackTraceLogType stackTraceType);
 
-		public static extern string consoleLogPath
+		public static string consoleLogPath
 		{
 			[FreeFunction("GetConsoleLogPath")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Application.get_consoleLogPath_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		public static extern ThreadPriority backgroundLoadingPriority
@@ -406,8 +707,11 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("Application_Bindings::RequestUserAuthorization")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern AsyncOperation RequestUserAuthorization(UserAuthorization mode);
+		public static AsyncOperation RequestUserAuthorization(UserAuthorization mode)
+		{
+			IntPtr intPtr = Application.RequestUserAuthorization_Injected(mode);
+			return (intPtr == 0) ? null : AsyncOperation.BindingsMarshaller.ConvertToManaged(intPtr);
+		}
 
 		[FreeFunction("Application_Bindings::HasUserAuthorization")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -471,7 +775,7 @@ namespace UnityEngine
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				return platform == RuntimePlatform.GameCoreXboxOne || platform == RuntimePlatform.GameCoreXboxSeries || platform == RuntimePlatform.PS4 || platform == RuntimePlatform.PS5 || platform == RuntimePlatform.Switch || platform == RuntimePlatform.XboxOne;
+				return platform == RuntimePlatform.GameCoreXboxOne || platform == RuntimePlatform.GameCoreXboxSeries || platform == RuntimePlatform.PS4 || platform == RuntimePlatform.PS5 || platform == RuntimePlatform.Switch || platform == RuntimePlatform.Switch2 || platform == RuntimePlatform.XboxOne;
 			}
 		}
 
@@ -793,15 +1097,28 @@ namespace UnityEngine
 		}
 
 		[RequiredByNativeCode]
-		private static void Internal_ApplicationInit()
+		private static void Internal_InitializeExitCancellationToken()
 		{
-			Application.s_currentCancellationTokenSource = new CancellationTokenSource();
+			bool flag = Application.s_currentCancellationTokenSource == null || Application.s_currentCancellationTokenSource.IsCancellationRequested;
+			if (flag)
+			{
+				Application.s_currentCancellationTokenSource = new CancellationTokenSource();
+			}
+		}
+
+		[RequiredByNativeCode]
+		private static void Internal_RaiseExitCancellationToken()
+		{
+			CancellationTokenSource cancellationTokenSource = Application.s_currentCancellationTokenSource;
+			if (cancellationTokenSource != null)
+			{
+				cancellationTokenSource.Cancel();
+			}
 		}
 
 		[RequiredByNativeCode]
 		private static void Internal_ApplicationQuit()
 		{
-			Application.s_currentCancellationTokenSource.Cancel();
 			bool flag = Application.quitting != null;
 			if (flag)
 			{
@@ -974,6 +1291,69 @@ namespace UnityEngine
 				return false;
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CanStreamedLevelBeLoaded_Injected(ref ManagedSpanWrapper levelName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsPlaying_Injected(IntPtr obj);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_buildGUID_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasARGV_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetValueForARGV_Injected(ref ManagedSpanWrapper name, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_dataPath_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_streamingAssetsPath_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_persistentDataPath_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_temporaryCachePath_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_absoluteURL_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_ExternalCall_Injected(ref ManagedSpanWrapper script);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_unityVersion_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_version_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_installerName_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_identifier_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_productName_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_companyName_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_cloudProjectId_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OpenURL_Injected(ref ManagedSpanWrapper url);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_consoleLogPath_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr RequestUserAuthorization_Injected(UserAuthorization mode);
 
 		private static Application.LogCallback s_LogCallbackHandler;
 

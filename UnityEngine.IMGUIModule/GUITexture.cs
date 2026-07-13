@@ -3,9 +3,9 @@ using System.ComponentModel;
 
 namespace UnityEngine
 {
-	[Obsolete("GUITexture has been removed. Use UI.Image instead.", true)]
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	[ExcludeFromObjectFactory]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	[Obsolete("GUITexture has been removed. Use UI.Image instead.", true)]
 	[ExcludeFromPreset]
 	public sealed class GUITexture
 	{

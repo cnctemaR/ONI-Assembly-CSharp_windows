@@ -5,17 +5,61 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[StaticAccessor("AudioListenerBindings", StaticAccessorType.DoubleColon)]
 	[RequireComponent(typeof(Transform))]
+	[StaticAccessor("AudioListenerBindings", StaticAccessorType.DoubleColon)]
 	public sealed class AudioListener : AudioBehaviour
 	{
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetOutputDataHelper([Out] float[] samples, int channel);
+		private unsafe static void GetOutputDataHelper([Out] float[] samples, int channel)
+		{
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (samples != null)
+				{
+					fixed (float[] array = samples)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				AudioListener.GetOutputDataHelper_Injected(out blittableArrayWrapper, channel);
+			}
+			finally
+			{
+				float[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+			}
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetSpectrumDataHelper([Out] float[] samples, int channel, FFTWindow window);
+		private unsafe static void GetSpectrumDataHelper([Out] float[] samples, int channel, FFTWindow window)
+		{
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (samples != null)
+				{
+					fixed (float[] array = samples)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				AudioListener.GetSpectrumDataHelper_Injected(out blittableArrayWrapper, channel, window);
+			}
+			finally
+			{
+				float[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+			}
+		}
 
 		public static extern float volume
 		{
@@ -34,12 +78,26 @@ namespace UnityEngine
 			set;
 		}
 
-		public extern AudioVelocityUpdateMode velocityUpdateMode
+		public AudioVelocityUpdateMode velocityUpdateMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AudioListener>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AudioListener.get_velocityUpdateMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AudioListener>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				AudioListener.set_velocityUpdateMode_Injected(intPtr, value);
+			}
 		}
 
 		[Obsolete("GetOutputData returning a float[] is deprecated, use GetOutputData and pass a pre allocated array instead.")]
@@ -67,5 +125,17 @@ namespace UnityEngine
 		{
 			AudioListener.GetSpectrumDataHelper(samples, channel, window);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetOutputDataHelper_Injected(out BlittableArrayWrapper samples, int channel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSpectrumDataHelper_Injected(out BlittableArrayWrapper samples, int channel, FFTWindow window);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AudioVelocityUpdateMode get_velocityUpdateMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_velocityUpdateMode_Injected(IntPtr _unity_self, AudioVelocityUpdateMode value);
 	}
 }

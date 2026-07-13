@@ -3,6 +3,7 @@ using UnityEngine.SocialPlatforms;
 
 namespace UnityEngine
 {
+	[Obsolete("Social is deprecated and will be removed in a future release.", false)]
 	public static class Social
 	{
 		public static ISocialPlatform Active

@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices.ComTypes
 {
-	[Guid("B196B285-BAB4-101A-B69C-00AA00341D07")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("B196B285-BAB4-101A-B69C-00AA00341D07")]
 	[ComImport]
 	public interface IEnumConnectionPoints
 	{

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Mono.Cecil
 {
 	[Serializable]
-	public sealed class AssemblyResolutionException : FileNotFoundException
+	internal sealed class AssemblyResolutionException : FileNotFoundException
 	{
 		public AssemblyNameReference AssemblyReference
 		{

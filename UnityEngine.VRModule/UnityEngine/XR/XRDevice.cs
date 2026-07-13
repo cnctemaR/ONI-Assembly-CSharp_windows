@@ -6,6 +6,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
+	[Obsolete("UnityEngine.VRModule is deprecated and will be removed in a future version. Please use the APIs in the UnityEngine.XRModule instead")]
 	[NativeConditional("ENABLE_VR")]
 	public static class XRDevice
 	{
@@ -18,8 +19,8 @@ namespace UnityEngine.XR
 			}
 		}
 
-		[StaticAccessor("GetIVRDeviceSwapChain()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("DeviceRefreshRate")]
+		[StaticAccessor("GetIVRDeviceSwapChain()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float refreshRate
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -30,20 +31,31 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern IntPtr GetNativePtr();
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[Obsolete("This is obsolete, and should no longer be used.  Please use XRInputSubsystem.GetTrackingOriginMode.")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern TrackingSpaceType GetTrackingSpaceType();
 
-		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[Obsolete("This is obsolete, and should no longer be used.  Please use XRInputSubsystem.TrySetTrackingOriginMode.")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool SetTrackingSpaceType(TrackingSpaceType trackingSpaceType);
 
 		[NativeName("DisableAutoVRCameraTracking")]
 		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DisableAutoXRCameraTracking([NotNull("ArgumentNullException")] Camera camera, bool disabled);
+		public static void DisableAutoXRCameraTracking([NotNull] Camera camera, bool disabled)
+		{
+			if (camera == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(camera);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			XRDevice.DisableAutoXRCameraTracking_Injected(intPtr, disabled);
+		}
 
 		[NativeName("UpdateEyeTextureMSAASetting")]
 		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
@@ -54,8 +66,8 @@ namespace UnityEngine.XR
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 			[NativeName("SetProjectionZoomFactor")]
+			[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -72,5 +84,8 @@ namespace UnityEngine.XR
 				XRDevice.deviceLoaded(loadedDeviceName);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableAutoXRCameraTracking_Injected(IntPtr camera, bool disabled);
 	}
 }

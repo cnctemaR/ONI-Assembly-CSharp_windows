@@ -4,9 +4,9 @@ using System.ComponentModel;
 namespace UnityEngine
 {
 	[Obsolete("GUIText has been removed. Use UI.Text instead.", true)]
-	[ExcludeFromPreset]
-	[ExcludeFromObjectFactory]
 	[EditorBrowsable(EditorBrowsableState.Never)]
+	[ExcludeFromObjectFactory]
+	[ExcludeFromPreset]
 	public sealed class GUIText
 	{
 		private static void FeatureRemoved()

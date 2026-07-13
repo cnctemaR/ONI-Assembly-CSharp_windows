@@ -3,6 +3,7 @@
 namespace UnityEngine.Experimental.AI
 {
 	[Flags]
+	[Obsolete("The experimental PathQueryStatus struct has been deprecated without replacement.")]
 	public enum PathQueryStatus
 	{
 		Failure = -2147483648,

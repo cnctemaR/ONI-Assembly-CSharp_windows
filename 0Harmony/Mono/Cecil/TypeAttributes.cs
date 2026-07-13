@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum TypeAttributes : uint
+	internal enum TypeAttributes : uint
 	{
 		VisibilityMask = 7U,
 		NotPublic = 0U,

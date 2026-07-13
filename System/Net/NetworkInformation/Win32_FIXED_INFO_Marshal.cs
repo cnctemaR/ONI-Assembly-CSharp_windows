@@ -33,8 +33,8 @@ namespace System.Net.NetworkInformation
 
 		public uint EnableDns;
 
-		[CompilerGenerated]
 		[UnsafeValueType]
+		[CompilerGenerated]
 		[StructLayout(LayoutKind.Sequential, Size = 132)]
 		public struct <HostName>e__FixedBuffer
 		{

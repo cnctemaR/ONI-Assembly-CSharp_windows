@@ -25,5 +25,18 @@ namespace UnityEngine.Android
 		public float transferProgress { get; }
 
 		public AndroidAssetPackError error { get; }
+
+		internal bool downloadInProgress
+		{
+			get
+			{
+				return AndroidAssetPackInfo.DownloadInProgress(this.status);
+			}
+		}
+
+		internal static bool DownloadInProgress(AndroidAssetPackStatus status)
+		{
+			return status != AndroidAssetPackStatus.Canceled && status != AndroidAssetPackStatus.Completed && status != AndroidAssetPackStatus.Failed && status > AndroidAssetPackStatus.Unknown;
+		}
 	}
 }

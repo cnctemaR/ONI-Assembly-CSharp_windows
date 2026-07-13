@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Mono.Cecil;
 
 namespace MonoMod.Utils
 {
-	public delegate IMetadataTokenProvider Relinker(IMetadataTokenProvider mtp, IGenericParameterProvider context);
+	internal delegate IMetadataTokenProvider Relinker(IMetadataTokenProvider mtp, [Nullable(2)] IGenericParameterProvider context);
 }

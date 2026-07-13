@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
@@ -172,10 +173,23 @@ namespace UnityEngine
 		}
 
 		[NativeThrows]
-		public static extern string inputString
+		public static string inputString
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Input.get_inputString_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		[NativeThrows]
@@ -185,6 +199,17 @@ namespace UnityEngine
 			{
 				Vector3 vector;
 				Input.get_mousePosition_Injected(out vector);
+				return vector;
+			}
+		}
+
+		[NativeThrows]
+		public static Vector3 mousePositionDelta
+		{
+			get
+			{
+				Vector3 vector;
+				Input.get_mousePositionDelta_Injected(out vector);
 				return vector;
 			}
 		}
@@ -208,10 +233,23 @@ namespace UnityEngine
 			set;
 		}
 
-		public static extern string compositionString
+		public static string compositionString
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Input.get_compositionString_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		public static extern bool imeIsSelected
@@ -243,11 +281,30 @@ namespace UnityEngine
 			set;
 		}
 
-		public static extern bool mousePresent
+		internal static bool simulateTouchEnabled { get; set; }
+
+		[FreeFunction("GetMousePresent")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetMousePresentInternal();
+
+		[FreeFunction("IsTouchSupported")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetTouchSupportedInternal();
+
+		public static bool mousePresent
 		{
-			[FreeFunction("GetMousePresent")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return !Input.simulateTouchEnabled && Input.GetMousePresentInternal();
+			}
+		}
+
+		public static bool touchSupported
+		{
+			get
+			{
+				return Input.simulateTouchEnabled || Input.GetTouchSupportedInternal();
+			}
 		}
 
 		public static extern int penEventCount
@@ -274,13 +331,6 @@ namespace UnityEngine
 		public static extern bool stylusTouchSupported
 		{
 			[FreeFunction("IsStylusTouchSupported")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		public static extern bool touchSupported
-		{
-			[FreeFunction("IsTouchSupported")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -435,19 +485,28 @@ namespace UnityEngine
 		private static extern void GetAccelerationEvent_Injected(int index, out AccelerationEvent ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SimulateTouchInternal_Injected(ref Touch touch, long timestamp);
+		private static extern void SimulateTouchInternal_Injected([In] ref Touch touch, long timestamp);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_inputString_Injected(out ManagedSpanWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_mousePosition_Injected(out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_mousePositionDelta_Injected(out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_mouseScrollDelta_Injected(out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_compositionString_Injected(out ManagedSpanWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_compositionCursorPos_Injected(out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_compositionCursorPos_Injected(ref Vector2 value);
+		private static extern void set_compositionCursorPos_Injected([In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_acceleration_Injected(out Vector3 ret);

@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 	[UsedByNativeCode]
 	[Serializable]
 	internal struct MarkToMarkAdjustmentRecord
@@ -68,8 +69,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[SerializeField]
 		private uint m_CombiningMarkGlyphID;
 
-		[NativeName("combiningMarkPositionAdjustment")]
 		[SerializeField]
+		[NativeName("combiningMarkPositionAdjustment")]
 		private MarkPositionAdjustment m_CombiningMarkPositionAdjustment;
 	}
 }

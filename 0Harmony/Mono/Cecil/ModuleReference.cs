@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public class ModuleReference : IMetadataScope, IMetadataTokenProvider
+	internal class ModuleReference : IMetadataScope, IMetadataTokenProvider
 	{
 		public string Name
 		{

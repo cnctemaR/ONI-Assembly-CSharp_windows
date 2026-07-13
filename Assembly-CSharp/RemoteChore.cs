@@ -42,10 +42,13 @@ public class RemoteChore : WorkChore<RemoteWorkTerminal>
 				incomplete_contexts.Add(context);
 			}
 			List<Chore.PreconditionInstance> preconditions = context.chore.GetPreconditions();
-			context.failedPreconditionId = 0;
-			while (context.failedPreconditionId < preconditions.Count && !(preconditions[context.failedPreconditionId].condition.id == RemoteChore.RemoteChoreSubchorePreconditions.id))
+			for (int i = 0; i < preconditions.Count; i++)
 			{
-				context.failedPreconditionId++;
+				if (preconditions[i].condition.id == RemoteChore.RemoteChoreSubchorePreconditions.id)
+				{
+					context.failedPreconditionId = i;
+					break;
+				}
 			}
 			foreach (Chore.Precondition.Context context4 in pooledList2)
 			{

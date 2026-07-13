@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
 namespace UnityEngine
 {
+	[NativeHeader("AudioScriptingClasses.h")]
 	[NativeHeader("Runtime/Video/ScriptBindings/WebCamTexture.bindings.h")]
 	[NativeHeader("Runtime/Video/BaseWebCamTexture.h")]
-	[NativeHeader("AudioScriptingClasses.h")]
 	public sealed class WebCamTexture : Texture
 	{
 		public static extern WebCamDevice[] devices
 		{
-			[StaticAccessor("WebCamTextureBindings", StaticAccessorType.DoubleColon)]
 			[NativeName("Internal_GetDevices")]
+			[StaticAccessor("WebCamTextureBindings", StaticAccessorType.DoubleColon)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 			get;
 		}
 
@@ -48,80 +50,217 @@ namespace UnityEngine
 			WebCamTexture.Internal_CreateWebCamTexture(this, "", 0, 0, 0);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Play();
+		public void Play()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			WebCamTexture.Play_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Pause();
+		public void Pause()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			WebCamTexture.Pause_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Stop();
+		public void Stop()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			WebCamTexture.Stop_Injected(intPtr);
+		}
 
-		public extern bool isPlaying
+		public bool isPlaying
 		{
 			[NativeName("IsPlaying")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_isPlaying_Injected(intPtr);
+			}
 		}
 
 		[NativeName("Device")]
-		public extern string deviceName
+		public unsafe string deviceName
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					WebCamTexture.get_deviceName_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					WebCamTexture.set_deviceName_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
-		public extern float requestedFPS
+		public float requestedFPS
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_requestedFPS_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				WebCamTexture.set_requestedFPS_Injected(intPtr, value);
+			}
 		}
 
-		public extern int requestedWidth
+		public int requestedWidth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_requestedWidth_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				WebCamTexture.set_requestedWidth_Injected(intPtr, value);
+			}
 		}
 
-		public extern int requestedHeight
+		public int requestedHeight
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_requestedHeight_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				WebCamTexture.set_requestedHeight_Injected(intPtr, value);
+			}
 		}
 
-		public extern int videoRotationAngle
+		public int videoRotationAngle
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_videoRotationAngle_Injected(intPtr);
+			}
 		}
 
-		public extern bool videoVerticallyMirrored
+		public bool videoVerticallyMirrored
 		{
 			[NativeName("IsVideoVerticallyMirrored")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_videoVerticallyMirrored_Injected(intPtr);
+			}
 		}
 
-		public extern bool didUpdateThisFrame
+		public bool didUpdateThisFrame
 		{
 			[NativeName("DidUpdateThisFrame")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_didUpdateThisFrame_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction("WebCamTextureBindings::Internal_GetPixel", HasExplicitThis = true)]
 		public Color GetPixel(int x, int y)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Color color;
-			this.GetPixel_Injected(x, y, out color);
+			WebCamTexture.GetPixel_Injected(intPtr, x, y, out color);
 			return color;
 		}
 
@@ -131,8 +270,16 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("WebCamTextureBindings::Internal_GetPixels", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color[] GetPixels(int x, int y, int blockWidth, int blockHeight);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color[] GetPixels(int x, int y, int blockWidth, int blockHeight)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return WebCamTexture.GetPixels_Injected(intPtr, x, y, blockWidth, blockHeight);
+		}
 
 		[ExcludeFromDocs]
 		public Color32[] GetPixels32()
@@ -141,8 +288,16 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("WebCamTextureBindings::Internal_GetPixels32", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32([Unmarshalled] [DefaultValue("null")] Color32[] colors);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color32[] GetPixels32([UnityMarshalAs(NativeType.ScriptingObjectPtr)] [DefaultValue("null")] Color32[] colors)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return WebCamTexture.GetPixels32_Injected(intPtr, colors);
+		}
 
 		public Vector2? autoFocusPoint
 		{
@@ -160,33 +315,125 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_internalAutoFocusPoint_Injected(out vector);
+				WebCamTexture.get_internalAutoFocusPoint_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_internalAutoFocusPoint_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				WebCamTexture.set_internalAutoFocusPoint_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern bool isDepth
+		public bool isDepth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<WebCamTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return WebCamTexture.get_isDepth_Injected(intPtr);
+			}
 		}
 
 		[StaticAccessor("WebCamTextureBindings", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_CreateWebCamTexture([Writable] WebCamTexture self, string scriptingDevice, int requestedWidth, int requestedHeight, int maxFramerate);
+		private unsafe static void Internal_CreateWebCamTexture([Writable] WebCamTexture self, string scriptingDevice, int requestedWidth, int requestedHeight, int maxFramerate)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(scriptingDevice, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = scriptingDevice.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				WebCamTexture.Internal_CreateWebCamTexture_Injected(self, ref managedSpanWrapper, requestedWidth, requestedHeight, maxFramerate);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPixel_Injected(int x, int y, out Color ret);
+		private static extern void Play_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_internalAutoFocusPoint_Injected(out Vector2 ret);
+		private static extern void Pause_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_internalAutoFocusPoint_Injected(ref Vector2 value);
+		private static extern void Stop_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isPlaying_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_deviceName_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_deviceName_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_requestedFPS_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_requestedFPS_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_requestedWidth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_requestedWidth_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_requestedHeight_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_requestedHeight_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_videoRotationAngle_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_videoVerticallyMirrored_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_didUpdateThisFrame_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPixel_Injected(IntPtr _unity_self, int x, int y, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color[] GetPixels_Injected(IntPtr _unity_self, int x, int y, int blockWidth, int blockHeight);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color32[] GetPixels32_Injected(IntPtr _unity_self, [DefaultValue("null")] Color32[] colors);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_internalAutoFocusPoint_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_internalAutoFocusPoint_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isDepth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_CreateWebCamTexture_Injected([Writable] WebCamTexture self, ref ManagedSpanWrapper scriptingDevice, int requestedWidth, int requestedHeight, int maxFramerate);
 	}
 }

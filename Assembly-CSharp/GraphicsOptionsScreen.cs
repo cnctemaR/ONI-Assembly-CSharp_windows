@@ -48,7 +48,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 				this.resolutionDropdown.value = resolutionIndex;
 			}
 		}
-		this.CanvasScalers = global::UnityEngine.Object.FindObjectsOfType<KCanvasScaler>(true);
+		this.CanvasScalers = global::UnityEngine.Object.FindObjectsByType<KCanvasScaler>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID);
 		this.UpdateSliderLabel();
 		this.uiScaleSlider.onValueChanged.AddListener(delegate(float data)
 		{
@@ -103,7 +103,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 			int int2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
 			uint int3 = (uint)KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKeyNumerator, (int)Screen.currentResolution.refreshRateRatio.numerator);
 			uint int4 = (uint)KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKeyDenominator, (int)Screen.currentResolution.refreshRateRatio.denominator);
-			FullScreenMode fullScreenMode2 = ((KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, Screen.fullScreen ? 1 : 0) == 1) ? FullScreenMode.MaximizedWindow : FullScreenMode.Windowed);
+			FullScreenMode fullScreenMode2 = ((KPlayerPrefs.GetInt(GraphicsOptionsScreen.FullScreenKey, Screen.fullScreen ? 1 : 0) == 1) ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
 			if (int2 <= 1 || @int <= 1)
 			{
 				DebugUtil.LogArgs(new object[] { "Saved resolution was invalid, ignoring..." });
@@ -207,13 +207,13 @@ internal class GraphicsOptionsScreen : KModalScreen
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionHeightKey, settings.resolution.height);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKeyNumerator, (int)settings.resolution.refreshRateRatio.numerator);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKeyDenominator, (int)settings.resolution.refreshRateRatio.denominator);
-		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, (settings.fullscreen == FullScreenMode.Windowed) ? 0 : 1);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, (settings.fullscreen == FullScreenMode.Windowed || settings.fullscreen == FullScreenMode.MaximizedWindow) ? 0 : 1);
 		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ColorModeKey, settings.colorSetId);
 	}
 
 	private void UpdateUIScale(float value)
 	{
-		this.CanvasScalers = global::UnityEngine.Object.FindObjectsOfType<KCanvasScaler>(true);
+		this.CanvasScalers = global::UnityEngine.Object.FindObjectsByType<KCanvasScaler>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID);
 		foreach (KCanvasScaler kcanvasScaler in this.CanvasScalers)
 		{
 			float num = value / 100f;
@@ -343,7 +343,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			GraphicsOptionsScreen.Settings new_settings = default(GraphicsOptionsScreen.Settings);
 			new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
-			new_settings.fullscreen = ((this.fullscreenToggle.CurrentState == 0) ? FullScreenMode.Windowed : FullScreenMode.MaximizedWindow);
+			new_settings.fullscreen = ((this.fullscreenToggle.CurrentState == 0) ? FullScreenMode.Windowed : FullScreenMode.FullScreenWindow);
 			new_settings.lowRes = this.lowResToggle.CurrentState;
 			new_settings.colorSetId = this.colorModeId;
 			if (GlobalAssets.Instance.colorSetOptions[this.colorModeId] != GlobalAssets.Instance.colorSet)
@@ -549,7 +549,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	public static readonly string RefreshRateKeyNumerator = "RefreshRateNumerator";
 
-	public static readonly string RefreshRateKeyDenominator = "RefreshRateNumerator";
+	public static readonly string RefreshRateKeyDenominator = "RefreshRateDenominator";
 
 	public static readonly string FullScreenKey = "FullScreen";
 
@@ -557,9 +557,11 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	public static readonly string ColorModeKey = "ColorModeID";
 
-	private const FullScreenMode FULLSCREEN = FullScreenMode.MaximizedWindow;
+	private const FullScreenMode FULLSCREEN = FullScreenMode.FullScreenWindow;
 
 	private const FullScreenMode WINDOWED = FullScreenMode.Windowed;
+
+	private const FullScreenMode MAXIMIZED_WINDOWED = FullScreenMode.MaximizedWindow;
 
 	private KCanvasScaler[] CanvasScalers;
 

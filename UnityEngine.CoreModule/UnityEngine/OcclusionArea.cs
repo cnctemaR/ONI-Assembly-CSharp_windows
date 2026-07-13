@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -11,13 +12,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<OcclusionArea>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_center_Injected(out vector);
+				OcclusionArea.get_center_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_center_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<OcclusionArea>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				OcclusionArea.set_center_Injected(intPtr, ref value);
 			}
 		}
 
@@ -25,26 +36,36 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<OcclusionArea>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_size_Injected(out vector);
+				OcclusionArea.get_size_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_size_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<OcclusionArea>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				OcclusionArea.set_size_Injected(intPtr, ref value);
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_center_Injected(out Vector3 ret);
+		private static extern void get_center_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_center_Injected(ref Vector3 value);
+		private static extern void set_center_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_size_Injected(out Vector3 ret);
+		private static extern void get_size_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_size_Injected(ref Vector3 value);
+		private static extern void set_size_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 	}
 }

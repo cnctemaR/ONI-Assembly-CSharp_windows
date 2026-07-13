@@ -6,6 +6,7 @@ namespace UnityEngine.Tilemaps
 {
 	[RequiredByNativeCode]
 	[NativeType(Header = "Modules/Tilemap/TilemapScripting.h")]
+	[Serializable]
 	public struct TileChangeData
 	{
 		public Vector3Int position
@@ -64,12 +65,16 @@ namespace UnityEngine.Tilemaps
 			this.m_Transform = transform;
 		}
 
+		[SerializeField]
 		private Vector3Int m_Position;
 
+		[SerializeField]
 		private Object m_TileAsset;
 
+		[SerializeField]
 		private Color m_Color;
 
+		[SerializeField]
 		private Matrix4x4 m_Transform;
 	}
 }

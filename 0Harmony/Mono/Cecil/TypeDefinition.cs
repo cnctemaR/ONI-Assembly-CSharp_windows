@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading;
+using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class TypeDefinition : TypeReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider, ISecurityDeclarationProvider
+	internal sealed class TypeDefinition : TypeReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider, ISecurityDeclarationProvider, ICustomDebugInformationProvider
 	{
 		public TypeAttributes Attributes
 		{
@@ -373,6 +374,26 @@ namespace Mono.Cecil
 			get
 			{
 				return this.generic_parameters ?? this.GetGenericParameters(ref this.generic_parameters, this.Module);
+			}
+		}
+
+		public bool HasCustomDebugInformations
+		{
+			get
+			{
+				if (this.custom_infos != null)
+				{
+					return this.custom_infos.Count > 0;
+				}
+				return this.GetHasCustomDebugInformations(ref this.custom_infos, this.Module);
+			}
+		}
+
+		public Collection<CustomDebugInformation> CustomDebugInformations
+		{
+			get
+			{
+				return this.custom_infos ?? this.GetCustomDebugInformations(ref this.custom_infos, this.module);
 			}
 		}
 
@@ -809,5 +830,7 @@ namespace Mono.Cecil
 		private Collection<CustomAttribute> custom_attributes;
 
 		private Collection<SecurityDeclaration> security_declarations;
+
+		internal Collection<CustomDebugInformation> custom_infos;
 	}
 }

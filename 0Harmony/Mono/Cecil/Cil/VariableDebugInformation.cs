@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class VariableDebugInformation : DebugInformation
+	internal sealed class VariableDebugInformation : DebugInformation
 	{
 		public int Index
 		{

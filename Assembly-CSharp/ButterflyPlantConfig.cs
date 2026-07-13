@@ -49,15 +49,14 @@ public class ButterflyPlantConfig : IEntityConfig, IHasDlcRestrictions
 		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.BUTTERFLYPLANTSEED.NAME;
 		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.BUTTERFLYPLANTSEED.DESC;
 		KAnimFile anim = Assets.GetAnim("seed_pollinator_plant_kanim");
+		EdiblesManager.FoodInfo butterfly_SEED = FOOD.FOOD_TYPES.BUTTERFLY_SEED;
 		string text7 = "object";
 		int num2 = 1;
 		List<Tag> list = new List<Tag>();
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text8 = global::STRINGS.CREATURES.SPECIES.BUTTERFLYPLANT.DOMESTICATEDDESC;
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, this, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 2, text8, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", true);
-		EntityTemplates.ExtendEntityToFood(gameObject3, FOOD.FOOD_TYPES.BUTTERFLY_SEED);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "ButterflyPlant_preview", Assets.GetAnim("pollinator_plant_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlantAsFood(gameObject2, this, productionType, text4, text5, text6, anim, butterfly_SEED, text7, num2, list, receptacleDirection, default(Tag), 2, text8, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", true), "ButterflyPlant_preview", Assets.GetAnim("pollinator_plant_kanim"), "place", 1, 2);
 		gameObject.AddOrGet<Growing>().maxAge = 0f;
 		gameObject.AddOrGet<Crop>().cropSpawnOffset = new Vector3(-0.0365f, 1.26175f, 0f);
 		return gameObject;

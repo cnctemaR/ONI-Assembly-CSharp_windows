@@ -7,21 +7,32 @@ using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
 namespace Unity.Collections
 {
-	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
-	[DebuggerDisplay("Length = {m_Length}")]
-	[NativeContainerSupportsDeallocateOnJobCompletion]
 	[NativeContainerSupportsMinMaxWriteRestriction]
-	[NativeContainerSupportsDeferredConvertListToArray]
+	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
 	[NativeContainer]
+	[DebuggerDisplay("Length = {m_Length}")]
+	[NativeContainerSupportsDeferredConvertListToArray]
+	[NativeContainerSupportsDeallocateOnJobCompletion]
 	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEnumerable, IEquatable<NativeArray<T>> where T : struct
 	{
 		public NativeArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
 		{
-			NativeArray<T>.Allocate(length, allocator, out this);
+			NativeArray<T>.Allocate(length, allocator, default(MemoryLabel), out this);
+			bool flag = (options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory;
+			if (flag)
+			{
+				UnsafeUtility.MemClear(this.m_Buffer, (long)this.Length * (long)UnsafeUtility.SizeOf<T>());
+			}
+		}
+
+		public NativeArray(int length, MemoryLabel label, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
+		{
+			NativeArray<T>.Allocate(length, label.allocator, label, out this);
 			bool flag = (options & NativeArrayOptions.ClearMemory) == NativeArrayOptions.ClearMemory;
 			if (flag)
 			{
@@ -31,13 +42,25 @@ namespace Unity.Collections
 
 		public NativeArray(T[] array, Allocator allocator)
 		{
-			NativeArray<T>.Allocate(array.Length, allocator, out this);
+			NativeArray<T>.Allocate(array.Length, allocator, default(MemoryLabel), out this);
+			NativeArray<T>.Copy(array, this);
+		}
+
+		public NativeArray(T[] array, MemoryLabel label)
+		{
+			NativeArray<T>.Allocate(array.Length, label.allocator, label, out this);
 			NativeArray<T>.Copy(array, this);
 		}
 
 		public NativeArray(NativeArray<T> array, Allocator allocator)
 		{
-			NativeArray<T>.Allocate(array.Length, allocator, out this);
+			NativeArray<T>.Allocate(array.Length, allocator, default(MemoryLabel), out this);
+			NativeArray<T>.Copy(array, 0, this, 0, array.Length);
+		}
+
+		public NativeArray(NativeArray<T> array, MemoryLabel label)
+		{
+			NativeArray<T>.Allocate(array.Length, label.allocator, label, out this);
 			NativeArray<T>.Copy(array, 0, this, 0, array.Length);
 		}
 
@@ -52,7 +75,7 @@ namespace Unity.Collections
 			bool flag2 = allocator >= Allocator.FirstUserIndex;
 			if (flag2)
 			{
-				throw new ArgumentException("Use CollectionHelper.CreateNativeArray for custom allocator", "allocator");
+				throw new ArgumentException("Use CollectionHelper.CreateNativeArray in com.unity.collections package for custom allocator", "allocator");
 			}
 			bool flag3 = length < 0;
 			if (flag3)
@@ -61,11 +84,11 @@ namespace Unity.Collections
 			}
 		}
 
-		private static void Allocate(int length, Allocator allocator, out NativeArray<T> array)
+		private static void Allocate(int length, Allocator allocator, MemoryLabel label, out NativeArray<T> array)
 		{
 			long num = (long)UnsafeUtility.SizeOf<T>() * (long)length;
 			array = default(NativeArray<T>);
-			array.m_Buffer = UnsafeUtility.MallocTracked(num, UnsafeUtility.AlignOf<T>(), allocator, 0);
+			array.m_Buffer = UnsafeUtility.MallocTracked(num, UnsafeUtility.AlignOf<T>(), allocator, 0, label.pointer);
 			array.m_Length = length;
 			array.m_AllocatorLabel = allocator;
 		}
@@ -79,8 +102,8 @@ namespace Unity.Collections
 			}
 		}
 
-		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		[BurstDiscard]
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		internal static void IsUnmanagedAndThrow()
 		{
 			bool flag = !UnsafeUtility.IsUnmanaged<T>();
@@ -137,8 +160,13 @@ namespace Unity.Collections
 				{
 					throw new InvalidOperationException("The NativeArray can not be Disposed because it was not allocated with a valid allocator.");
 				}
-				bool flag3 = this.m_AllocatorLabel > Allocator.None;
+				bool flag3 = this.m_AllocatorLabel >= Allocator.FirstUserIndex;
 				if (flag3)
+				{
+					throw new InvalidOperationException("The NativeArray can not be Disposed because it was allocated with a custom allocator, use CollectionHelper.Dispose in com.unity.collections package.");
+				}
+				bool flag4 = this.m_AllocatorLabel > Allocator.None;
+				if (flag4)
 				{
 					UnsafeUtility.FreeTracked(this.m_Buffer, this.m_AllocatorLabel);
 					this.m_AllocatorLabel = Allocator.Invalid;
@@ -542,6 +570,7 @@ namespace Unity.Collections
 			return source.AsReadOnlySpan();
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.ContentLoadModule", "UnityEngine.TilemapModule" })]
 		[NativeDisableUnsafePtrRestriction]
 		internal unsafe void* m_Buffer;
 
@@ -613,9 +642,9 @@ namespace Unity.Collections
 		}
 
 		[NativeContainerIsReadOnly]
-		[DebuggerDisplay("Length = {Length}")]
-		[DebuggerTypeProxy(typeof(NativeArrayReadOnlyDebugView<>))]
 		[NativeContainer]
+		[DebuggerTypeProxy(typeof(NativeArrayReadOnlyDebugView<>))]
+		[DebuggerDisplay("Length = {Length}")]
 		public struct ReadOnly : IEnumerable<T>, IEnumerable
 		{
 			internal unsafe ReadOnly(void* buffer, int length)
@@ -662,6 +691,11 @@ namespace Unity.Collections
 				{
 					return UnsafeUtility.ReadArrayElement<T>(this.m_Buffer, index);
 				}
+			}
+
+			public readonly ref T UnsafeElementAt(int index)
+			{
+				return UnsafeUtility.ArrayElementAsRef<T>(this.m_Buffer, index);
 			}
 
 			[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]

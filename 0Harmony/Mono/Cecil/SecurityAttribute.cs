@@ -6,7 +6,7 @@ using Mono.Collections.Generic;
 namespace Mono.Cecil
 {
 	[DebuggerDisplay("{AttributeType}")]
-	public sealed class SecurityAttribute : ICustomAttribute
+	internal sealed class SecurityAttribute : ICustomAttribute
 	{
 		public TypeReference AttributeType
 		{

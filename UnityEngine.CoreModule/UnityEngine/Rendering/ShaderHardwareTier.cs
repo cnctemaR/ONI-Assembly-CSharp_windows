@@ -2,7 +2,7 @@
 
 namespace UnityEngine.Rendering
 {
-	[Obsolete("ShaderHardwareTier was renamed to GraphicsTier (UnityUpgradable) -> GraphicsTier", false)]
+	[Obsolete("ShaderHardwareTier was renamed to GraphicsTier (UnityUpgradable) -> GraphicsTier", true)]
 	public enum ShaderHardwareTier
 	{
 		Tier1,

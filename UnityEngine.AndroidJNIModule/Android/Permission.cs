@@ -20,6 +20,12 @@ namespace UnityEngine.Android
 			return androidJavaObject;
 		}
 
+		public static bool ShouldShowRequestPermissionRationale(string permission)
+		{
+			bool flag = string.IsNullOrWhiteSpace(permission);
+			return !flag;
+		}
+
 		public static bool HasUserAuthorizedPermission(string permission)
 		{
 			bool flag = permission == null;

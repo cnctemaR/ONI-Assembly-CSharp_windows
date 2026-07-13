@@ -9,7 +9,7 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling.Memory
 {
-	[NativeHeader("Modules/Profiler/Runtime/MemorySnapshotManager.h")]
+	[NativeHeader("Runtime/Profiler/Runtime/MemorySnapshotManager.h")]
 	public static class MemoryProfiler
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -24,8 +24,26 @@ namespace Unity.Profiling.Memory
 		[NativeMethod("StartOperation")]
 		[NativeConditional("ENABLE_PROFILER")]
 		[StaticAccessor("profiling::memory::GetMemorySnapshotManager()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void StartOperation(uint captureFlag, bool requestScreenshot, string path, bool isRemote);
+		private unsafe static void StartOperation(uint captureFlag, bool requestScreenshot, string path, bool isRemote)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = path.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				MemoryProfiler.StartOperation_Injected(captureFlag, requestScreenshot, ref managedSpanWrapper, isRemote);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		public static void TakeSnapshot(string path, Action<string, bool> finishCallback, CaptureFlags captureFlags = CaptureFlags.ManagedObjects | CaptureFlags.NativeObjects)
 		{
@@ -181,5 +199,8 @@ namespace Unity.Profiling.Memory
 				saveScreenshotToDisk(path, result, debugScreenCapture);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StartOperation_Injected(uint captureFlag, bool requestScreenshot, ref ManagedSpanWrapper path, bool isRemote);
 	}
 }

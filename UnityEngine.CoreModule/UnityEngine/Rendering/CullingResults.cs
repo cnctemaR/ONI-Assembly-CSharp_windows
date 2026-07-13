@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -8,8 +9,8 @@ using UnityEngine.Bindings;
 namespace UnityEngine.Rendering
 {
 	[NativeHeader("Runtime/Export/RenderPipeline/ScriptableRenderPipeline.bindings.h")]
-	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
 	[NativeHeader("Runtime/Scripting/ScriptingCommonStructDefinitions.h")]
+	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
 	public struct CullingResults : IEquatable<CullingResults>
 	{
 		[FreeFunction("ScriptableRenderPipeline_Bindings::GetLightIndexCount")]
@@ -21,12 +22,16 @@ namespace UnityEngine.Rendering
 		private static extern int GetReflectionProbeIndexCount(IntPtr cullingResultsPtr);
 
 		[FreeFunction("FillLightAndReflectionProbeIndices")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void FillLightAndReflectionProbeIndices(IntPtr cullingResultsPtr, ComputeBuffer computeBuffer);
+		private static void FillLightAndReflectionProbeIndices(IntPtr cullingResultsPtr, ComputeBuffer computeBuffer)
+		{
+			CullingResults.FillLightAndReflectionProbeIndices_Injected(cullingResultsPtr, (computeBuffer == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(computeBuffer));
+		}
 
 		[FreeFunction("FillLightAndReflectionProbeIndices")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void FillLightAndReflectionProbeIndicesGraphicsBuffer(IntPtr cullingResultsPtr, GraphicsBuffer buffer);
+		private static void FillLightAndReflectionProbeIndicesGraphicsBuffer(IntPtr cullingResultsPtr, GraphicsBuffer buffer)
+		{
+			CullingResults.FillLightAndReflectionProbeIndicesGraphicsBuffer_Injected(cullingResultsPtr, (buffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer));
+		}
 
 		[FreeFunction("GetLightIndexMapSize")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -212,8 +217,15 @@ namespace UnityEngine.Rendering
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool ComputeDirectionalShadowMatricesAndCullingPrimitives_Injected(IntPtr cullingResultsPtr, int activeLightIndex, int splitIndex, int splitCount, ref Vector3 splitRatio, int shadowResolution, float shadowNearPlaneOffset, out Matrix4x4 viewMatrix, out Matrix4x4 projMatrix, out ShadowSplitData shadowSplitData);
+		private static extern void FillLightAndReflectionProbeIndices_Injected(IntPtr cullingResultsPtr, IntPtr computeBuffer);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FillLightAndReflectionProbeIndicesGraphicsBuffer_Injected(IntPtr cullingResultsPtr, IntPtr buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ComputeDirectionalShadowMatricesAndCullingPrimitives_Injected(IntPtr cullingResultsPtr, int activeLightIndex, int splitIndex, int splitCount, [In] ref Vector3 splitRatio, int shadowResolution, float shadowNearPlaneOffset, out Matrix4x4 viewMatrix, out Matrix4x4 projMatrix, out ShadowSplitData shadowSplitData);
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.VFXModule" })]
 		internal IntPtr ptr;
 
 		private unsafe CullingAllocationInfo* m_AllocationInfo;

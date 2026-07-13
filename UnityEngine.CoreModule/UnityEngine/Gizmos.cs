@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
@@ -16,34 +17,35 @@ namespace UnityEngine
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe static extern void DrawLineStrip([Span("count", true)] Vector3* points, int count, bool looped);
-
 		public unsafe static void DrawLineStrip(ReadOnlySpan<Vector3> points, bool looped)
 		{
-			fixed (Vector3* pinnableReference = points.GetPinnableReference())
+			ReadOnlySpan<Vector3> readOnlySpan = points;
+			fixed (Vector3* pinnableReference = readOnlySpan.GetPinnableReference())
 			{
-				Vector3* ptr = pinnableReference;
-				Gizmos.DrawLineStrip(ptr, points.Length, looped);
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, readOnlySpan.Length);
+				Gizmos.DrawLineStrip_Injected(ref managedSpanWrapper, looped);
 			}
 		}
 
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe static extern void DrawLineList([Span("count", true)] Vector3* points, int count);
+		[NativeMethod(Name = "DrawLineList", ThrowsException = true)]
+		internal unsafe static void DrawLineListInternal(ReadOnlySpan<Vector3> points)
+		{
+			ReadOnlySpan<Vector3> readOnlySpan = points;
+			fixed (Vector3* pinnableReference = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, readOnlySpan.Length);
+				Gizmos.DrawLineListInternal_Injected(ref managedSpanWrapper);
+			}
+		}
 
-		public unsafe static void DrawLineList(ReadOnlySpan<Vector3> points)
+		public static void DrawLineList(ReadOnlySpan<Vector3> points)
 		{
 			bool flag = (points.Length & 1) != 0;
 			if (flag)
 			{
 				throw new UnityException("You cannot draw a line list from an odd number of points, with two points per line the number of points must be even");
 			}
-			fixed (Vector3* pinnableReference = points.GetPinnableReference())
-			{
-				Vector3* ptr = pinnableReference;
-				Gizmos.DrawLineList(ptr, points.Length);
-			}
+			Gizmos.DrawLineListInternal(points);
 		}
 
 		[NativeThrows]
@@ -73,13 +75,13 @@ namespace UnityEngine
 		[NativeThrows]
 		public static void DrawMesh(Mesh mesh, int submeshIndex, [DefaultValue("Vector3.zero")] Vector3 position, [DefaultValue("Quaternion.identity")] Quaternion rotation, [DefaultValue("Vector3.one")] Vector3 scale)
 		{
-			Gizmos.DrawMesh_Injected(mesh, submeshIndex, ref position, ref rotation, ref scale);
+			Gizmos.DrawMesh_Injected(Object.MarshalledUnityObject.Marshal<Mesh>(mesh), submeshIndex, ref position, ref rotation, ref scale);
 		}
 
 		[NativeThrows]
 		public static void DrawWireMesh(Mesh mesh, int submeshIndex, [DefaultValue("Vector3.zero")] Vector3 position, [DefaultValue("Quaternion.identity")] Quaternion rotation, [DefaultValue("Vector3.one")] Vector3 scale)
 		{
-			Gizmos.DrawWireMesh_Injected(mesh, submeshIndex, ref position, ref rotation, ref scale);
+			Gizmos.DrawWireMesh_Injected(Object.MarshalledUnityObject.Marshal<Mesh>(mesh), submeshIndex, ref position, ref rotation, ref scale);
 		}
 
 		[NativeThrows]
@@ -89,15 +91,31 @@ namespace UnityEngine
 		}
 
 		[NativeThrows]
-		public static void DrawIcon(Vector3 center, string name, [DefaultValue("true")] bool allowScaling, [DefaultValue("Color(255,255,255,255)")] Color tint)
+		public unsafe static void DrawIcon(Vector3 center, string name, [DefaultValue("true")] bool allowScaling, [DefaultValue("Color(255,255,255,255)")] Color tint)
 		{
-			Gizmos.DrawIcon_Injected(ref center, name, allowScaling, ref tint);
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Gizmos.DrawIcon_Injected(ref center, ref managedSpanWrapper, allowScaling, ref tint);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
 		}
 
 		[NativeThrows]
 		public static void DrawGUITexture(Rect screenRect, Texture texture, int leftBorder, int rightBorder, int topBorder, int bottomBorder, [DefaultValue("null")] Material mat)
 		{
-			Gizmos.DrawGUITexture_Injected(ref screenRect, texture, leftBorder, rightBorder, topBorder, bottomBorder, mat);
+			Gizmos.DrawGUITexture_Injected(ref screenRect, Object.MarshalledUnityObject.Marshal<Texture>(texture), leftBorder, rightBorder, topBorder, bottomBorder, Object.MarshalledUnityObject.Marshal<Material>(mat));
 		}
 
 		public static Color color
@@ -128,12 +146,16 @@ namespace UnityEngine
 			}
 		}
 
-		public static extern Texture exposure
+		public static Texture exposure
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Texture>(Gizmos.get_exposure_Injected());
+			}
+			set
+			{
+				Gizmos.set_exposure_Injected(Object.MarshalledUnityObject.Marshal<Texture>(value));
+			}
 		}
 
 		public static extern float probeSize
@@ -145,6 +167,11 @@ namespace UnityEngine
 		public static void DrawFrustum(Vector3 center, float fov, float maxRange, float minRange, float aspect)
 		{
 			Gizmos.DrawFrustum_Injected(ref center, fov, maxRange, minRange, aspect);
+		}
+
+		public static float CalculateLOD(Vector3 position, float radius)
+		{
+			return Gizmos.CalculateLOD_Injected(ref position, radius);
 		}
 
 		public static void DrawRay(Ray r)
@@ -290,45 +317,60 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawLine_Injected(ref Vector3 from, ref Vector3 to);
+		private static extern void DrawLine_Injected([In] ref Vector3 from, [In] ref Vector3 to);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawWireSphere_Injected(ref Vector3 center, float radius);
+		private static extern void DrawLineStrip_Injected(ref ManagedSpanWrapper points, bool looped);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawSphere_Injected(ref Vector3 center, float radius);
+		private static extern void DrawLineListInternal_Injected(ref ManagedSpanWrapper points);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawWireCube_Injected(ref Vector3 center, ref Vector3 size);
+		private static extern void DrawWireSphere_Injected([In] ref Vector3 center, float radius);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawCube_Injected(ref Vector3 center, ref Vector3 size);
+		private static extern void DrawSphere_Injected([In] ref Vector3 center, float radius);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawMesh_Injected(Mesh mesh, int submeshIndex, [DefaultValue("Vector3.zero")] ref Vector3 position, [DefaultValue("Quaternion.identity")] ref Quaternion rotation, [DefaultValue("Vector3.one")] ref Vector3 scale);
+		private static extern void DrawWireCube_Injected([In] ref Vector3 center, [In] ref Vector3 size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawWireMesh_Injected(Mesh mesh, int submeshIndex, [DefaultValue("Vector3.zero")] ref Vector3 position, [DefaultValue("Quaternion.identity")] ref Quaternion rotation, [DefaultValue("Vector3.one")] ref Vector3 scale);
+		private static extern void DrawCube_Injected([In] ref Vector3 center, [In] ref Vector3 size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawIcon_Injected(ref Vector3 center, string name, [DefaultValue("true")] bool allowScaling, [DefaultValue("Color(255,255,255,255)")] ref Color tint);
+		private static extern void DrawMesh_Injected(IntPtr mesh, int submeshIndex, [DefaultValue("Vector3.zero")] [In] ref Vector3 position, [DefaultValue("Quaternion.identity")] [In] ref Quaternion rotation, [DefaultValue("Vector3.one")] [In] ref Vector3 scale);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawGUITexture_Injected(ref Rect screenRect, Texture texture, int leftBorder, int rightBorder, int topBorder, int bottomBorder, [DefaultValue("null")] Material mat);
+		private static extern void DrawWireMesh_Injected(IntPtr mesh, int submeshIndex, [DefaultValue("Vector3.zero")] [In] ref Vector3 position, [DefaultValue("Quaternion.identity")] [In] ref Quaternion rotation, [DefaultValue("Vector3.one")] [In] ref Vector3 scale);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DrawIcon_Injected([In] ref Vector3 center, ref ManagedSpanWrapper name, [DefaultValue("true")] bool allowScaling, [DefaultValue("Color(255,255,255,255)")] [In] ref Color tint);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DrawGUITexture_Injected([In] ref Rect screenRect, IntPtr texture, int leftBorder, int rightBorder, int topBorder, int bottomBorder, [DefaultValue("null")] IntPtr mat);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_color_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_color_Injected(ref Color value);
+		private static extern void set_color_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_matrix_Injected(out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_matrix_Injected(ref Matrix4x4 value);
+		private static extern void set_matrix_Injected([In] ref Matrix4x4 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DrawFrustum_Injected(ref Vector3 center, float fov, float maxRange, float minRange, float aspect);
+		private static extern IntPtr get_exposure_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_exposure_Injected(IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DrawFrustum_Injected([In] ref Vector3 center, float fov, float maxRange, float minRange, float aspect);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float CalculateLOD_Injected([In] ref Vector3 position, float radius);
 	}
 }

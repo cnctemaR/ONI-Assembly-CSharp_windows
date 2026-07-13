@@ -285,6 +285,7 @@ namespace Mono.Cecil
 			for (int i = 0; i < types.Count; i++)
 			{
 				TypeDefinition typeDefinition = types[i];
+				typeDefinition.custom_infos = symbol_reader.Read(typeDefinition);
 				if (typeDefinition.HasNestedTypes)
 				{
 					this.ReadTypesSymbols(typeDefinition.NestedTypes, symbol_reader);

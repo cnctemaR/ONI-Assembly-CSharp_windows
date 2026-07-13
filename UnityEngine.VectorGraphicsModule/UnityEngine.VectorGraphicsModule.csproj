@@ -1,0 +1,125 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BDCA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.VectorGraphicsModule</RootNamespace>
+    <AssemblyName>UnityEngine.VectorGraphicsModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="ClipperLib\Clipper.cs" />
+    <Compile Include="ClipperLib\ClipperBase.cs" />
+    <Compile Include="ClipperLib\ClipperException.cs" />
+    <Compile Include="ClipperLib\ClipperOffset.cs" />
+    <Compile Include="ClipperLib\ClipType.cs" />
+    <Compile Include="ClipperLib\Direction.cs" />
+    <Compile Include="ClipperLib\DoublePoint.cs" />
+    <Compile Include="ClipperLib\EdgeSide.cs" />
+    <Compile Include="ClipperLib\EndType.cs" />
+    <Compile Include="ClipperLib\Int128.cs" />
+    <Compile Include="ClipperLib\IntersectNode.cs" />
+    <Compile Include="ClipperLib\IntPoint.cs" />
+    <Compile Include="ClipperLib\IntRect.cs" />
+    <Compile Include="ClipperLib\Join.cs" />
+    <Compile Include="ClipperLib\JoinType.cs" />
+    <Compile Include="ClipperLib\LocalMinima.cs" />
+    <Compile Include="ClipperLib\Maxima.cs" />
+    <Compile Include="ClipperLib\MyIntersectNodeSort.cs" />
+    <Compile Include="ClipperLib\OutPt.cs" />
+    <Compile Include="ClipperLib\OutRec.cs" />
+    <Compile Include="ClipperLib\PolyFillType.cs" />
+    <Compile Include="ClipperLib\PolyNode.cs" />
+    <Compile Include="ClipperLib\PolyTree.cs" />
+    <Compile Include="ClipperLib\PolyType.cs" />
+    <Compile Include="ClipperLib\Scanbeam.cs" />
+    <Compile Include="ClipperLib\TEdge.cs" />
+    <Compile Include="LibTessDotNet\CombineCallback.cs" />
+    <Compile Include="LibTessDotNet\ContourOrientation.cs" />
+    <Compile Include="LibTessDotNet\ContourVertex.cs" />
+    <Compile Include="LibTessDotNet\Dict.cs" />
+    <Compile Include="LibTessDotNet\ElementType.cs" />
+    <Compile Include="LibTessDotNet\Geom.cs" />
+    <Compile Include="LibTessDotNet\Mesh.cs" />
+    <Compile Include="LibTessDotNet\MeshUtils.cs" />
+    <Compile Include="LibTessDotNet\PQHandle.cs" />
+    <Compile Include="LibTessDotNet\PriorityHeap.cs" />
+    <Compile Include="LibTessDotNet\PriorityQueue.cs" />
+    <Compile Include="LibTessDotNet\Tess.cs" />
+    <Compile Include="LibTessDotNet\Vec3.cs" />
+    <Compile Include="LibTessDotNet\WindingRule.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Unity\VectorGraphics\AddressMode.cs" />
+    <Compile Include="Unity\VectorGraphics\BezierContour.cs" />
+    <Compile Include="Unity\VectorGraphics\BezierPathSegment.cs" />
+    <Compile Include="Unity\VectorGraphics\BezierSegment.cs" />
+    <Compile Include="Unity\VectorGraphics\FillMode.cs" />
+    <Compile Include="Unity\VectorGraphics\GradientFill.cs" />
+    <Compile Include="Unity\VectorGraphics\GradientFillType.cs" />
+    <Compile Include="Unity\VectorGraphics\GradientStop.cs" />
+    <Compile Include="Unity\VectorGraphics\IFill.cs" />
+    <Compile Include="Unity\VectorGraphics\Inheritance.cs" />
+    <Compile Include="Unity\VectorGraphics\Matrix2D.cs" />
+    <Compile Include="Unity\VectorGraphics\NamedWebColorDictionary.cs" />
+    <Compile Include="Unity\VectorGraphics\PathCorner.cs" />
+    <Compile Include="Unity\VectorGraphics\PathDistanceForwardIterator.cs" />
+    <Compile Include="Unity\VectorGraphics\PathEnding.cs" />
+    <Compile Include="Unity\VectorGraphics\PathPatternIterator.cs" />
+    <Compile Include="Unity\VectorGraphics\PathProperties.cs" />
+    <Compile Include="Unity\VectorGraphics\PatternFill.cs" />
+    <Compile Include="Unity\VectorGraphics\Scene.cs" />
+    <Compile Include="Unity\VectorGraphics\SceneNode.cs" />
+    <Compile Include="Unity\VectorGraphics\Shape.cs" />
+    <Compile Include="Unity\VectorGraphics\SolidFill.cs" />
+    <Compile Include="Unity\VectorGraphics\Stroke.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGAttribParser.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGDictionary.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGDocument.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGFormatException.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGParser.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGPostponedFills.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGPropertySheet.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGStyleResolver.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGStyleSheet.cs" />
+    <Compile Include="Unity\VectorGraphics\SVGStyleSheetUtils.cs" />
+    <Compile Include="Unity\VectorGraphics\TextureFill.cs" />
+    <Compile Include="Unity\VectorGraphics\VectorClip.cs" />
+    <Compile Include="Unity\VectorGraphics\VectorImageUtils.cs" />
+    <Compile Include="Unity\VectorGraphics\VectorUtils.cs" />
+    <Compile Include="Unity\VectorGraphics\ViewportOptions.cs" />
+    <Compile Include="Unity\VectorGraphics\XmlReaderIterator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.ImageConversionModule\UnityEngine.ImageConversionModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD99}</Project>
+      <Name>UnityEngine.ImageConversionModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD9A}</Project>
+      <Name>UnityEngine.IMGUIModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDAF}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.UIElementsModule\UnityEngine.UIElementsModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDBD}</Project>
+      <Name>UnityEngine.UIElementsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

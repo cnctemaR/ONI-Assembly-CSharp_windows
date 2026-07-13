@@ -157,8 +157,8 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Obsolete msg (UnityUpgradable) -> * UnityEngine.WWW.GetAudioClip()", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Obsolete msg (UnityUpgradable) -> * UnityEngine.WWW.GetAudioClip()", true)]
 		public Object audioClip
 		{
 			get
@@ -319,8 +319,8 @@ namespace UnityEngine
 			}
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Please use WWW.text instead. (UnityUpgradable) -> text", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public string data
 		{
 			get

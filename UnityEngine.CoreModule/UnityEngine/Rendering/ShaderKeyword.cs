@@ -5,9 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	public struct ShaderKeyword
 	{
 		[FreeFunction("ShaderScripting::GetGlobalKeywordCount")]
@@ -15,28 +15,112 @@ namespace UnityEngine.Rendering
 		internal static extern uint GetGlobalKeywordCount();
 
 		[FreeFunction("ShaderScripting::GetGlobalKeywordIndex")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint GetGlobalKeywordIndex(string keyword);
+		internal unsafe static uint GetGlobalKeywordIndex(string keyword)
+		{
+			uint globalKeywordIndex_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				globalKeywordIndex_Injected = ShaderKeyword.GetGlobalKeywordIndex_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return globalKeywordIndex_Injected;
+		}
 
 		[FreeFunction("ShaderScripting::GetKeywordCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint GetKeywordCount(Shader shader);
+		internal static uint GetKeywordCount(Shader shader)
+		{
+			return ShaderKeyword.GetKeywordCount_Injected(Object.MarshalledUnityObject.Marshal<Shader>(shader));
+		}
 
 		[FreeFunction("ShaderScripting::GetKeywordIndex")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint GetKeywordIndex(Shader shader, string keyword);
+		internal unsafe static uint GetKeywordIndex(Shader shader, string keyword)
+		{
+			uint keywordIndex_Injected;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.Marshal<Shader>(shader);
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				keywordIndex_Injected = ShaderKeyword.GetKeywordIndex_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return keywordIndex_Injected;
+		}
 
 		[FreeFunction("ShaderScripting::GetKeywordCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint GetComputeShaderKeywordCount(ComputeShader shader);
+		internal static uint GetComputeShaderKeywordCount(ComputeShader shader)
+		{
+			return ShaderKeyword.GetComputeShaderKeywordCount_Injected(Object.MarshalledUnityObject.Marshal<ComputeShader>(shader));
+		}
 
 		[FreeFunction("ShaderScripting::GetKeywordIndex")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint GetComputeShaderKeywordIndex(ComputeShader shader, string keyword);
+		internal unsafe static uint GetComputeShaderKeywordIndex(ComputeShader shader, string keyword)
+		{
+			uint computeShaderKeywordIndex_Injected;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.Marshal<ComputeShader>(shader);
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				computeShaderKeywordIndex_Injected = ShaderKeyword.GetComputeShaderKeywordIndex_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return computeShaderKeywordIndex_Injected;
+		}
 
 		[FreeFunction("ShaderScripting::CreateGlobalKeyword")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void CreateGlobalKeyword(string keyword);
+		internal unsafe static void CreateGlobalKeyword(string keyword)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ShaderKeyword.CreateGlobalKeyword_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("ShaderScripting::GetKeywordType")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -52,7 +136,7 @@ namespace UnityEngine.Rendering
 
 		public static ShaderKeywordType GetGlobalKeywordType(ShaderKeyword index)
 		{
-			bool flag = index.IsValid();
+			bool flag = index.IsValid() && !index.m_IsLocal;
 			ShaderKeywordType shaderKeywordType;
 			if (flag)
 			{
@@ -143,41 +227,59 @@ namespace UnityEngine.Rendering
 			return ShaderKeywordType.UserDefined;
 		}
 
-		[Obsolete("GetGlobalKeywordName is deprecated. Use the ShaderKeyword.name property instead.")]
+		[Obsolete("GetGlobalKeywordName is deprecated. Use the ShaderKeyword.name property instead.", true)]
 		public static string GetGlobalKeywordName(ShaderKeyword index)
 		{
-			return index.m_Name;
+			return "";
 		}
 
-		[Obsolete("GetKeywordName is deprecated. Use the ShaderKeyword.name property instead.")]
+		[Obsolete("GetKeywordName is deprecated. Use the ShaderKeyword.name property instead.", true)]
 		public static string GetKeywordName(Shader shader, ShaderKeyword index)
 		{
-			return index.m_Name;
+			return "";
 		}
 
-		[Obsolete("GetKeywordName is deprecated. Use the ShaderKeyword.name property instead.")]
+		[Obsolete("GetKeywordName is deprecated. Use the ShaderKeyword.name property instead.", true)]
 		public static string GetKeywordName(ComputeShader shader, ShaderKeyword index)
 		{
-			return index.m_Name;
+			return "";
 		}
 
-		[Obsolete("GetKeywordType is deprecated. Use ShaderKeyword.name instead.")]
+		[Obsolete("GetKeywordType is deprecated. Use ShaderKeyword.GetGlobalKeywordType instead.", true)]
 		public ShaderKeywordType GetKeywordType()
 		{
-			return ShaderKeyword.GetGlobalKeywordType(this);
+			return ShaderKeywordType.None;
 		}
 
-		[Obsolete("GetKeywordName is deprecated. Use ShaderKeyword.name instead.")]
+		[Obsolete("GetKeywordName is deprecated. Use ShaderKeyword.name instead.", true)]
 		public string GetKeywordName()
 		{
-			return ShaderKeyword.GetGlobalKeywordName(this);
+			return "";
 		}
 
-		[Obsolete("GetName() has been deprecated. Use ShaderKeyword.name instead.")]
+		[Obsolete("GetName() has been deprecated. Use ShaderKeyword.name instead.", true)]
 		public string GetName()
 		{
-			return this.GetKeywordName();
+			return "";
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetGlobalKeywordIndex_Injected(ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetKeywordCount_Injected(IntPtr shader);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetKeywordIndex_Injected(IntPtr shader, ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetComputeShaderKeywordCount_Injected(IntPtr shader);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetComputeShaderKeywordIndex_Injected(IntPtr shader, ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CreateGlobalKeyword_Injected(ref ManagedSpanWrapper keyword);
 
 		internal string m_Name;
 

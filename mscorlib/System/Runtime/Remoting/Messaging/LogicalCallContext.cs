@@ -7,8 +7,8 @@ using System.Security.Principal;
 
 namespace System.Runtime.Remoting.Messaging
 {
-	[ComVisible(true)]
 	[SecurityCritical]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class LogicalCallContext : ISerializable, ICloneable
 	{

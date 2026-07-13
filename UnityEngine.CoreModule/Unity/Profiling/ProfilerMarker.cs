@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace Unity.Profiling
 {
-	[IgnoredByDeepProfiler]
 	[UsedByNativeCode]
+	[IgnoredByDeepProfiler]
 	public struct ProfilerMarker
 	{
 		public IntPtr Handle
@@ -47,6 +47,18 @@ namespace Unity.Profiling
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ProfilerMarker(string name, MarkerFlags flags)
+		{
+			this.m_Ptr = ProfilerUnsafeUtility.CreateMarker(name, 1, flags, 0);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe ProfilerMarker(char* name, int nameLen, MarkerFlags flags)
+		{
+			this.m_Ptr = ProfilerUnsafeUtility.CreateMarker(name, nameLen, 1, flags, 0);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ProfilerMarker(ProfilerCategory category, string name, MarkerFlags flags)
 		{
 			this.m_Ptr = ProfilerUnsafeUtility.CreateMarker(name, category, flags, 0);
@@ -58,8 +70,8 @@ namespace Unity.Profiling
 			this.m_Ptr = ProfilerUnsafeUtility.CreateMarker(name, nameLen, category, flags, 0);
 		}
 
-		[Pure]
 		[Conditional("ENABLE_PROFILER")]
+		[Pure]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Begin()
 		{
@@ -98,8 +110,8 @@ namespace Unity.Profiling
 		[NonSerialized]
 		internal readonly IntPtr m_Ptr;
 
-		[UsedByNativeCode]
 		[IgnoredByDeepProfiler]
+		[UsedByNativeCode]
 		public struct AutoScope : IDisposable
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,6 +122,39 @@ namespace Unity.Profiling
 				if (flag)
 				{
 					ProfilerUnsafeUtility.BeginSample(markerPtr);
+				}
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			internal unsafe AutoScope(IntPtr markerPtr, string metadata)
+			{
+				this.m_Ptr = markerPtr;
+				bool flag = this.m_Ptr != IntPtr.Zero;
+				if (flag)
+				{
+					bool flag2 = string.IsNullOrEmpty(metadata);
+					if (flag2)
+					{
+						ProfilerUnsafeUtility.BeginSample(markerPtr);
+					}
+					else
+					{
+						ProfilerMarkerData profilerMarkerData = new ProfilerMarkerData
+						{
+							Type = 9
+						};
+						fixed (string text = metadata)
+						{
+							char* ptr = text;
+							if (ptr != null)
+							{
+								ptr += RuntimeHelpers.OffsetToStringData / 2;
+							}
+							profilerMarkerData.Size = (uint)((metadata.Length + 1) * 2);
+							profilerMarkerData.Ptr = (void*)ptr;
+							ProfilerUnsafeUtility.BeginSampleWithMetadata(markerPtr, 1, (void*)(&profilerMarkerData));
+						}
+					}
 				}
 			}
 

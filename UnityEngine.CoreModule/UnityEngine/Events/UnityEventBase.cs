@@ -10,6 +10,21 @@ namespace UnityEngine.Events
 	[Serializable]
 	public abstract class UnityEventBase : ISerializationCallbackReceiver
 	{
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void OnPlayModeStateChange()
+		{
+			foreach (WeakReference<UnityEventBase> weakReference in UnityEventBase.s_UnityEvents)
+			{
+				UnityEventBase unityEventBase;
+				bool flag = !weakReference.TryGetTarget(out unityEventBase);
+				if (!flag)
+				{
+					unityEventBase.DirtyPersistentCalls();
+				}
+			}
+			UnityEventBase.s_UnityEvents.Clear();
+		}
+
 		protected UnityEventBase()
 		{
 			this.m_Calls = new InvokableCallList();
@@ -19,11 +34,13 @@ namespace UnityEngine.Events
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
 			this.DirtyPersistentCalls();
+			UnityEventBase.s_UnityEvents.Add(new WeakReference<UnityEventBase>(this));
 		}
 
 		void ISerializationCallbackReceiver.OnAfterDeserialize()
 		{
 			this.DirtyPersistentCalls();
+			UnityEventBase.s_UnityEvents.Add(new WeakReference<UnityEventBase>(this));
 		}
 
 		protected MethodInfo FindMethod_Impl(string name, object targetObj)
@@ -217,6 +234,8 @@ namespace UnityEngine.Events
 			}
 			return null;
 		}
+
+		private static readonly List<WeakReference<UnityEventBase>> s_UnityEvents = new List<WeakReference<UnityEventBase>>();
 
 		private InvokableCallList m_Calls;
 

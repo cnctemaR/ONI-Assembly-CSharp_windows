@@ -10,9 +10,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Export/Graphics/GraphicsBuffer.bindings.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Shaders/GraphicsBuffer.h")]
+	[NativeHeader("Runtime/Export/Graphics/GraphicsBuffer.bindings.h")]
 	public sealed class GraphicsBuffer : IDisposable
 	{
 		~GraphicsBuffer()
@@ -60,8 +60,15 @@ namespace UnityEngine
 		private static extern IntPtr InitBuffer(GraphicsBuffer.Target target, GraphicsBuffer.UsageFlags usageFlags, int count, int stride);
 
 		[FreeFunction("GraphicsBuffer_Bindings::DestroyBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DestroyBuffer(GraphicsBuffer buf);
+		private static void DestroyBuffer(GraphicsBuffer buf)
+		{
+			GraphicsBuffer.DestroyBuffer_Injected((buf == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buf));
+		}
+
+		private GraphicsBuffer(IntPtr ptr)
+		{
+			this.m_Ptr = ptr;
+		}
 
 		public GraphicsBuffer(GraphicsBuffer.Target target, int count, int stride)
 		{
@@ -122,35 +129,65 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("GraphicsBuffer_Bindings::IsValidBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsValidBuffer(GraphicsBuffer buf);
+		private static bool IsValidBuffer(GraphicsBuffer buf)
+		{
+			return GraphicsBuffer.IsValidBuffer_Injected((buf == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buf));
+		}
 
 		public bool IsValid()
 		{
 			return this.m_Ptr != IntPtr.Zero && GraphicsBuffer.IsValidBuffer(this);
 		}
 
-		public extern int count
+		public int count
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GraphicsBuffer.get_count_Injected(intPtr);
+			}
 		}
 
-		public extern int stride
+		public int stride
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GraphicsBuffer.get_stride_Injected(intPtr);
+			}
 		}
 
-		public extern GraphicsBuffer.Target target
+		public GraphicsBuffer.Target target
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GraphicsBuffer.get_target_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::GetUsageFlags", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GraphicsBuffer.UsageFlags GetUsageFlags();
+		private GraphicsBuffer.UsageFlags GetUsageFlags()
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return GraphicsBuffer.GetUsageFlags_Injected(intPtr);
+		}
 
 		public GraphicsBuffer.UsageFlags usageFlags
 		{
@@ -164,8 +201,13 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				GraphicsBufferHandle graphicsBufferHandle;
-				this.get_bufferHandle_Injected(out graphicsBufferHandle);
+				GraphicsBuffer.get_bufferHandle_Injected(intPtr, out graphicsBufferHandle);
 				return graphicsBufferHandle;
 			}
 		}
@@ -199,7 +241,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentException(string.Format("List<{0}> passed to GraphicsBuffer.SetData(List<>) must be blittable.\n{1}", typeof(T), UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
 			}
-			this.InternalSetData(NoAllocHelpers.ExtractArrayFromList(data), 0, 0, NoAllocHelpers.SafeLength<T>(data), Marshal.SizeOf(typeof(T)));
+			this.InternalSetData(NoAllocHelpers.ExtractArrayFromList<T>(data), 0, 0, NoAllocHelpers.SafeLength<T>(data), Marshal.SizeOf(typeof(T)));
 		}
 
 		[SecuritySafeCritical]
@@ -247,7 +289,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (managedBufferStartIndex:{0} graphicsBufferStartIndex:{1} count:{2})", managedBufferStartIndex, graphicsBufferStartIndex, count));
 			}
-			this.InternalSetData(NoAllocHelpers.ExtractArrayFromList(data), managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(typeof(T)));
+			this.InternalSetData(NoAllocHelpers.ExtractArrayFromList<T>(data), managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(typeof(T)));
 		}
 
 		[SecuritySafeCritical]
@@ -261,15 +303,29 @@ namespace UnityEngine
 			this.InternalSetNativeData((IntPtr)data.GetUnsafeReadOnlyPtr<T>(), nativeBufferStartIndex, graphicsBufferStartIndex, count, UnsafeUtility.SizeOf<T>());
 		}
 
+		[SecurityCritical]
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalSetNativeData", HasExplicitThis = true, ThrowsException = true)]
-		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetNativeData(IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+		private void InternalSetNativeData(IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize)
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GraphicsBuffer.InternalSetNativeData_Injected(intPtr, data, nativeBufferStartIndex, graphicsBufferStartIndex, count, elemSize);
+		}
 
-		[SecurityCritical]
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalSetData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetData(Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+		[SecurityCritical]
+		private void InternalSetData(Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize)
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GraphicsBuffer.InternalSetData_Injected(intPtr, data, managedBufferStartIndex, graphicsBufferStartIndex, count, elemSize);
+		}
 
 		[SecurityCritical]
 		public void GetData(Array data)
@@ -310,15 +366,36 @@ namespace UnityEngine
 
 		[SecurityCritical]
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalGetData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalGetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
+		private void InternalGetData(Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize)
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GraphicsBuffer.InternalGetData_Injected(intPtr, data, managedBufferStartIndex, computeBufferStartIndex, count, elemSize);
+		}
 
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::InternalGetNativeBufferPtr", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetNativeBufferPtr();
+		public IntPtr GetNativeBufferPtr()
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return GraphicsBuffer.GetNativeBufferPtr_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void* BeginBufferWrite(int offset = 0, int size = 0);
+		private unsafe void* BeginBufferWrite(int offset = 0, int size = 0)
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return GraphicsBuffer.BeginBufferWrite_Injected(intPtr, offset, size);
+		}
 
 		public unsafe NativeArray<T> LockBufferForWrite<T>(int bufferStartIndex, int count) where T : struct
 		{
@@ -342,8 +419,15 @@ namespace UnityEngine
 			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, count, Allocator.Invalid);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EndBufferWrite(int bytesWritten = 0);
+		private void EndBufferWrite(int bytesWritten = 0)
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GraphicsBuffer.EndBufferWrite_Injected(intPtr, bytesWritten);
+		}
 
 		public void UnlockBufferAfterWrite<T>(int countWritten) where T : struct
 		{
@@ -365,27 +449,65 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::SetName", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetName(string name);
+		private unsafe void SetName(string name)
+		{
+			try
+			{
+				IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GraphicsBuffer.SetName_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetCounterValue(uint counterValue);
+		public void SetCounterValue(uint counterValue)
+		{
+			IntPtr intPtr = GraphicsBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GraphicsBuffer.SetCounterValue_Injected(intPtr, counterValue);
+		}
 
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::CopyCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CopyCountCC(ComputeBuffer src, ComputeBuffer dst, int dstOffsetBytes);
+		private static void CopyCountCC(ComputeBuffer src, ComputeBuffer dst, int dstOffsetBytes)
+		{
+			GraphicsBuffer.CopyCountCC_Injected((src == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
 
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::CopyCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CopyCountGC(GraphicsBuffer src, ComputeBuffer dst, int dstOffsetBytes);
+		private static void CopyCountGC(GraphicsBuffer src, ComputeBuffer dst, int dstOffsetBytes)
+		{
+			GraphicsBuffer.CopyCountGC_Injected((src == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
 
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::CopyCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CopyCountCG(ComputeBuffer src, GraphicsBuffer dst, int dstOffsetBytes);
+		private static void CopyCountCG(ComputeBuffer src, GraphicsBuffer dst, int dstOffsetBytes)
+		{
+			GraphicsBuffer.CopyCountCG_Injected((src == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
 
 		[FreeFunction(Name = "GraphicsBuffer_Bindings::CopyCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CopyCountGG(GraphicsBuffer src, GraphicsBuffer dst, int dstOffsetBytes);
+		private static void CopyCountGG(GraphicsBuffer src, GraphicsBuffer dst, int dstOffsetBytes)
+		{
+			GraphicsBuffer.CopyCountGG_Injected((src == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
 
 		public static void CopyCount(ComputeBuffer src, ComputeBuffer dst, int dstOffsetBytes)
 		{
@@ -408,7 +530,61 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_bufferHandle_Injected(out GraphicsBufferHandle ret);
+		private static extern void DestroyBuffer_Injected(IntPtr buf);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsValidBuffer_Injected(IntPtr buf);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_count_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_stride_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsBuffer.Target get_target_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsBuffer.UsageFlags GetUsageFlags_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_bufferHandle_Injected(IntPtr _unity_self, out GraphicsBufferHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetNativeData_Injected(IntPtr _unity_self, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetData_Injected(IntPtr _unity_self, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalGetData_Injected(IntPtr _unity_self, Array data, int managedBufferStartIndex, int computeBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetNativeBufferPtr_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void* BeginBufferWrite_Injected(IntPtr _unity_self, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EndBufferWrite_Injected(IntPtr _unity_self, int bytesWritten);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetName_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetCounterValue_Injected(IntPtr _unity_self, uint counterValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCountCC_Injected(IntPtr src, IntPtr dst, int dstOffsetBytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCountGC_Injected(IntPtr src, IntPtr dst, int dstOffsetBytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCountCG_Injected(IntPtr src, IntPtr dst, int dstOffsetBytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCountGG_Injected(IntPtr src, IntPtr dst, int dstOffsetBytes);
 
 		internal IntPtr m_Ptr;
 
@@ -460,6 +636,19 @@ namespace UnityEngine
 			public uint startInstance { readonly get; set; }
 
 			public const int size = 20;
+		}
+
+		internal static class BindingsMarshaller
+		{
+			public static GraphicsBuffer ConvertToManaged(IntPtr ptr)
+			{
+				return new GraphicsBuffer(ptr);
+			}
+
+			public static IntPtr ConvertToNative(GraphicsBuffer graphicsBuffer)
+			{
+				return graphicsBuffer.m_Ptr;
+			}
 		}
 	}
 }

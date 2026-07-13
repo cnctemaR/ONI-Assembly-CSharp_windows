@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -14,7 +15,7 @@ namespace UnityEngine
 
 		public static void SetCursor(Texture2D texture, Vector2 hotspot, CursorMode cursorMode)
 		{
-			Cursor.SetCursor_Injected(texture, ref hotspot, cursorMode);
+			Cursor.SetCursor_Injected(Object.MarshalledUnityObject.Marshal<Texture2D>(texture), ref hotspot, cursorMode);
 		}
 
 		public static extern bool visible
@@ -34,6 +35,6 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetCursor_Injected(Texture2D texture, ref Vector2 hotspot, CursorMode cursorMode);
+		private static extern void SetCursor_Injected(IntPtr texture, [In] ref Vector2 hotspot, CursorMode cursorMode);
 	}
 }

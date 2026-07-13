@@ -99,8 +99,8 @@ namespace UnityEngine.Experimental.Rendering
 		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_SRGB has been deprecated. Use GraphicsFormat.RGBA_DXT1_SRGB instead (UnityUpgradable) -> RGBA_DXT1_SRGB", true)]
 		RGB_DXT1_SRGB,
 		RGBA_DXT1_SRGB = 96,
-		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_UNorm has been deprecated. Use GraphicsFormat.RGBA_DXT1_UNorm instead (UnityUpgradable) -> RGBA_DXT1_UNorm", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member GraphicsFormat.RGB_DXT1_UNorm has been deprecated. Use GraphicsFormat.RGBA_DXT1_UNorm instead (UnityUpgradable) -> RGBA_DXT1_UNorm", true)]
 		RGB_DXT1_UNorm,
 		RGBA_DXT1_UNorm = 97,
 		RGBA_DXT3_SRGB,
@@ -115,13 +115,29 @@ namespace UnityEngine.Experimental.Rendering
 		RGB_BC6H_SFloat,
 		RGBA_BC7_SRGB,
 		RGBA_BC7_UNorm,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
 		RGB_PVRTC_2Bpp_SRGB,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
 		RGB_PVRTC_2Bpp_UNorm,
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		RGB_PVRTC_4Bpp_SRGB,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
 		RGB_PVRTC_4Bpp_UNorm,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
 		RGBA_PVRTC_2Bpp_SRGB,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
 		RGBA_PVRTC_2Bpp_UNorm,
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		RGBA_PVRTC_4Bpp_SRGB,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Texture compression format PVRTC has been deprecated and will be removed in a future release")]
 		RGBA_PVRTC_4Bpp_UNorm,
 		RGB_ETC_UNorm,
 		RGB_ETC2_SRGB,
@@ -147,11 +163,14 @@ namespace UnityEngine.Experimental.Rendering
 		RGBA_ASTC12X12_SRGB,
 		RGBA_ASTC12X12_UNorm,
 		YUV2,
-		[Obsolete("Enum member GraphicsFormat.DepthAuto has been deprecated. Use GraphicsFormat.None as a color format to indicate depth only rendering and DefaultFormat to get the default depth buffer format.", false)]
+		[Obsolete("Enum member GraphicsFormat.DepthAuto is obsolete. Use GraphicsFormat.None as a color format to indicate depth only rendering and DefaultFormat to get the default depth buffer format.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		DepthAuto,
-		[Obsolete("Enum member GraphicsFormat.ShadowAuto has been deprecated. Use GraphicsFormat.None as a color format to indicate depth only rendering and DefaultFormat to get the default shadow buffer format.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member GraphicsFormat.ShadowAuto is obsolete. Use GraphicsFormat.None as a color format to indicate depth only rendering, DefaultFormat to get the default shadow buffer format and ShadowSamplingMode.CompareDepths to enable shadowmap sampling.", true)]
 		ShadowAuto,
-		[Obsolete("Enum member GraphicsFormat.VideoAuto has been deprecated. Use DefaultFormat instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Enum member GraphicsFormat.VideoAuto is obsolete. Use DefaultFormat instead.", true)]
 		VideoAuto,
 		RGBA_ASTC4X4_UFloat,
 		RGBA_ASTC5X5_UFloat,

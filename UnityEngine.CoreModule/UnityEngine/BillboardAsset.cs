@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Billboard/BillboardAsset.h")]
 	[NativeHeader("Runtime/Export/Graphics/BillboardRenderer.bindings.h")]
+	[NativeHeader("Runtime/Graphics/Billboard/BillboardAsset.h")]
 	public sealed class BillboardAsset : Object
 	{
 		public BillboardAsset()
@@ -18,57 +18,134 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] BillboardAsset obj);
 
-		public extern float width
+		public float width
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return BillboardAsset.get_width_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BillboardAsset.set_width_Injected(intPtr, value);
+			}
 		}
 
-		public extern float height
+		public float height
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return BillboardAsset.get_height_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BillboardAsset.set_height_Injected(intPtr, value);
+			}
 		}
 
-		public extern float bottom
+		public float bottom
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return BillboardAsset.get_bottom_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BillboardAsset.set_bottom_Injected(intPtr, value);
+			}
 		}
 
-		public extern int imageCount
+		public int imageCount
 		{
 			[NativeMethod("GetNumImages")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return BillboardAsset.get_imageCount_Injected(intPtr);
+			}
 		}
 
-		public extern int vertexCount
+		public int vertexCount
 		{
 			[NativeMethod("GetNumVertices")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return BillboardAsset.get_vertexCount_Injected(intPtr);
+			}
 		}
 
-		public extern int indexCount
+		public int indexCount
 		{
 			[NativeMethod("GetNumIndices")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return BillboardAsset.get_indexCount_Injected(intPtr);
+			}
 		}
 
-		public extern Material material
+		public Material material
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Material>(BillboardAsset.get_material_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BillboardAsset.set_material_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(value));
+			}
 		}
 
 		public void GetImageTexCoords(List<Vector4> imageTexCoords)
@@ -82,12 +159,39 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("GetBillboardDataReadonly().GetImageTexCoords")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Vector4[] GetImageTexCoords();
+		public Vector4[] GetImageTexCoords()
+		{
+			Vector4[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				BillboardAsset.GetImageTexCoords_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Vector4[] array;
+				blittableArrayWrapper.Unmarshal<Vector4>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::GetImageTexCoordsInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetImageTexCoordsInternal(object list);
+		internal void GetImageTexCoordsInternal(object list)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BillboardAsset.GetImageTexCoordsInternal_Injected(intPtr, list);
+		}
 
 		public void SetImageTexCoords(List<Vector4> imageTexCoords)
 		{
@@ -100,12 +204,35 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetImageTexCoords", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetImageTexCoords([NotNull("ArgumentNullException")] [Unmarshalled] Vector4[] imageTexCoords);
+		public unsafe void SetImageTexCoords([NotNull] Vector4[] imageTexCoords)
+		{
+			if (imageTexCoords == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(imageTexCoords, "imageTexCoords");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector4> span = new Span<Vector4>(imageTexCoords);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				BillboardAsset.SetImageTexCoords_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetImageTexCoordsInternalList", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetImageTexCoordsInternalList(object list);
+		internal void SetImageTexCoordsInternalList(object list)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BillboardAsset.SetImageTexCoordsInternalList_Injected(intPtr, list);
+		}
 
 		public void GetVertices(List<Vector2> vertices)
 		{
@@ -118,12 +245,39 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("GetBillboardDataReadonly().GetVertices")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Vector2[] GetVertices();
+		public Vector2[] GetVertices()
+		{
+			Vector2[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				BillboardAsset.GetVertices_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Vector2[] array;
+				blittableArrayWrapper.Unmarshal<Vector2>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::GetVerticesInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetVerticesInternal(object list);
+		internal void GetVerticesInternal(object list)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BillboardAsset.GetVerticesInternal_Injected(intPtr, list);
+		}
 
 		public void SetVertices(List<Vector2> vertices)
 		{
@@ -136,12 +290,35 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVertices", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetVertices([Unmarshalled] [NotNull("ArgumentNullException")] Vector2[] vertices);
+		public unsafe void SetVertices([NotNull] Vector2[] vertices)
+		{
+			if (vertices == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(vertices, "vertices");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector2> span = new Span<Vector2>(vertices);
+			fixed (Vector2* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				BillboardAsset.SetVertices_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetVerticesInternalList", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetVerticesInternalList(object list);
+		internal void SetVerticesInternalList(object list)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BillboardAsset.SetVerticesInternalList_Injected(intPtr, list);
+		}
 
 		public void GetIndices(List<ushort> indices)
 		{
@@ -154,12 +331,39 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("GetBillboardDataReadonly().GetIndices")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern ushort[] GetIndices();
+		public ushort[] GetIndices()
+		{
+			ushort[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				BillboardAsset.GetIndices_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				ushort[] array;
+				blittableArrayWrapper.Unmarshal<ushort>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::GetIndicesInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetIndicesInternal(object list);
+		internal void GetIndicesInternal(object list)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BillboardAsset.GetIndicesInternal_Injected(intPtr, list);
+		}
 
 		public void SetIndices(List<ushort> indices)
 		{
@@ -172,15 +376,117 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetIndices", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetIndices([Unmarshalled] [NotNull("ArgumentNullException")] ushort[] indices);
+		public unsafe void SetIndices([NotNull] ushort[] indices)
+		{
+			if (indices == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(indices, "indices");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<ushort> span = new Span<ushort>(indices);
+			fixed (ushort* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				BillboardAsset.SetIndices_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::SetIndicesInternalList", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetIndicesInternalList(object list);
+		internal void SetIndicesInternalList(object list)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BillboardAsset.SetIndicesInternalList_Injected(intPtr, list);
+		}
 
 		[FreeFunction(Name = "BillboardRenderer_Bindings::MakeMaterialProperties", HasExplicitThis = true)]
+		internal void MakeMaterialProperties(MaterialPropertyBlock properties, Camera camera)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<BillboardAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			BillboardAsset.MakeMaterialProperties_Injected(intPtr, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties), Object.MarshalledUnityObject.Marshal<Camera>(camera));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void MakeMaterialProperties(MaterialPropertyBlock properties, Camera camera);
+		private static extern float get_width_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_width_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_height_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_height_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_bottom_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_bottom_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_imageCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_vertexCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_indexCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_material_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_material_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetImageTexCoords_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetImageTexCoordsInternal_Injected(IntPtr _unity_self, object list);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetImageTexCoords_Injected(IntPtr _unity_self, ref ManagedSpanWrapper imageTexCoords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetImageTexCoordsInternalList_Injected(IntPtr _unity_self, object list);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVertices_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVerticesInternal_Injected(IntPtr _unity_self, object list);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVertices_Injected(IntPtr _unity_self, ref ManagedSpanWrapper vertices);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVerticesInternalList_Injected(IntPtr _unity_self, object list);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetIndices_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetIndicesInternal_Injected(IntPtr _unity_self, object list);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIndices_Injected(IntPtr _unity_self, ref ManagedSpanWrapper indices);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIndicesInternalList_Injected(IntPtr _unity_self, object list);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MakeMaterialProperties_Injected(IntPtr _unity_self, IntPtr properties, IntPtr camera);
 	}
 }

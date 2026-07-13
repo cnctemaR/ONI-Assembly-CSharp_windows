@@ -1101,58 +1101,61 @@ public class StarmapScreen : KModalScreen
 			{
 				foreach (KeyValuePair<SimHashes, float> keyValuePair in this.selectedDestination.recoverableElements)
 				{
-					BreakdownListRow breakdownListRow5 = this.destinationDetailsComposition.AddRow();
-					float num3 = this.selectedDestination.GetResourceValue(keyValuePair.Key, keyValuePair.Value) / num * 100f;
 					Element element = ElementLoader.FindElementByHash(keyValuePair.Key);
-					global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(element, "ui", false);
-					if (num3 <= 1f)
+					if (element != null)
 					{
-						breakdownListRow5.ShowIconData(element.name, UI.STARMAP.COMPOSITION_SMALL_AMOUNT, uisprite.first, uisprite.second);
-					}
-					else
-					{
-						breakdownListRow5.ShowIconData(element.name, GameUtil.GetFormattedPercent(num3, GameUtil.TimeSlice.None), uisprite.first, uisprite.second);
-					}
-					if (element.IsGas)
-					{
-						string properName = Assets.GetPrefab("GasCargoBay".ToTag()).GetProperName();
-						if (this.currentRocketHasGasContainer)
+						BreakdownListRow breakdownListRow5 = this.destinationDetailsComposition.AddRow();
+						float num3 = this.selectedDestination.GetResourceValue(keyValuePair.Key, keyValuePair.Value) / num * 100f;
+						global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(element, "ui", false);
+						if (num3 <= 1f)
 						{
-							breakdownListRow5.SetHighlighted(true);
-							breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName));
+							breakdownListRow5.ShowIconData(element.name, UI.STARMAP.COMPOSITION_SMALL_AMOUNT, uisprite.first, uisprite.second);
 						}
 						else
 						{
-							breakdownListRow5.SetDisabled(true);
-							breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName));
+							breakdownListRow5.ShowIconData(element.name, GameUtil.GetFormattedPercent(num3, GameUtil.TimeSlice.None), uisprite.first, uisprite.second);
 						}
-					}
-					if (element.IsLiquid)
-					{
-						string properName2 = Assets.GetPrefab("LiquidCargoBay".ToTag()).GetProperName();
-						if (this.currentRocketHasLiquidContainer)
+						if (element.IsGas)
 						{
-							breakdownListRow5.SetHighlighted(true);
-							breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName2));
+							string properName = Assets.GetPrefab("GasCargoBay".ToTag()).GetProperName();
+							if (this.currentRocketHasGasContainer)
+							{
+								breakdownListRow5.SetHighlighted(true);
+								breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName));
+							}
+							else
+							{
+								breakdownListRow5.SetDisabled(true);
+								breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName));
+							}
 						}
-						else
+						if (element.IsLiquid)
 						{
-							breakdownListRow5.SetDisabled(true);
-							breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName2));
+							string properName2 = Assets.GetPrefab("LiquidCargoBay".ToTag()).GetProperName();
+							if (this.currentRocketHasLiquidContainer)
+							{
+								breakdownListRow5.SetHighlighted(true);
+								breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName2));
+							}
+							else
+							{
+								breakdownListRow5.SetDisabled(true);
+								breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName2));
+							}
 						}
-					}
-					if (element.IsSolid)
-					{
-						string properName3 = Assets.GetPrefab("CargoBay".ToTag()).GetProperName();
-						if (this.currentRocketHasSolidContainer)
+						if (element.IsSolid)
 						{
-							breakdownListRow5.SetHighlighted(true);
-							breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName3));
-						}
-						else
-						{
-							breakdownListRow5.SetDisabled(true);
-							breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName3));
+							string properName3 = Assets.GetPrefab("CargoBay".ToTag()).GetProperName();
+							if (this.currentRocketHasSolidContainer)
+							{
+								breakdownListRow5.SetHighlighted(true);
+								breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName3));
+							}
+							else
+							{
+								breakdownListRow5.SetDisabled(true);
+								breakdownListRow5.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName3));
+							}
 						}
 					}
 				}

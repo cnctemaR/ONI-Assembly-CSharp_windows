@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
-using Microsoft.Win32.SafeHandles;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -14,22 +12,7 @@ namespace UnityEngine
 			UnityLogWriter.Init();
 		}
 
-		[RequiredByNativeCode]
-		private static void InitStdErrWithHandle(IntPtr fileHandle)
-		{
-			SafeFileHandle safeFileHandle = new SafeFileHandle(fileHandle, false);
-			bool flag = !safeFileHandle.IsInvalid;
-			if (flag)
-			{
-				StreamWriter streamWriter = new StreamWriter(new FileStream(safeFileHandle, FileAccess.Write))
-				{
-					AutoFlush = true
-				};
-				Console.SetError(streamWriter);
-			}
-		}
-
-		[RequiredByNativeCode]
+		[RequiredByNativeCode(Optional = true)]
 		private static void InitAssemblyRedirections()
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += delegate(object _, ResolveEventArgs args)

@@ -212,6 +212,8 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 			: base(master)
 		{
 		}
+
+		public bool isDroppingAllCreatures;
 	}
 
 	public class States : GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint>
@@ -232,6 +234,11 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 		public static void DropAllCreatures(CreatureDeliveryPoint.SMInstance smi)
 		{
+			if (smi.isDroppingAllCreatures)
+			{
+				return;
+			}
+			smi.isDroppingAllCreatures = true;
 			Storage component = smi.master.GetComponent<Storage>();
 			if (component.IsEmpty())
 			{
@@ -257,6 +264,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 				gameObject.GetComponent<KBatchedAnimController>().SetSceneLayer(Grid.SceneLayer.Creatures);
 			}
 			smi.master.critterCapacity.RefreshCreatureCount(null);
+			smi.isDroppingAllCreatures = false;
 		}
 
 		public CreatureDeliveryPoint.States.OperationalState operational;

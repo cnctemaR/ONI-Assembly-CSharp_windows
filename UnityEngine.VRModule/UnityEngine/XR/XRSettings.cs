@@ -5,10 +5,10 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("Modules/VR/ScriptBindings/XR.bindings.h")]
-	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
-	[NativeHeader("Modules/VR/VRModule.h")]
 	[NativeHeader("Runtime/Interfaces/IVRDevice.h")]
+	[NativeHeader("Modules/VR/ScriptBindings/XR.bindings.h")]
+	[NativeHeader("Modules/VR/VRModule.h")]
+	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeConditional("ENABLE_VR")]
 	public static class XRSettings
 	{
@@ -31,8 +31,8 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[NativeName("Active")]
 		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("Active")]
 		public static extern bool isDeviceActive
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -72,9 +72,9 @@ namespace UnityEngine.XR
 			get;
 		}
 
-		[NativeConditional("ENABLE_VR", "RenderTextureDesc()")]
-		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("IntermediateEyeTextureDesc")]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeConditional("ENABLE_VR", "RenderTextureDesc()")]
 		public static RenderTextureDescriptor eyeTextureDesc
 		{
 			get
@@ -110,14 +110,21 @@ namespace UnityEngine.XR
 			}
 		}
 
-		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[NativeName("RenderViewportScale")]
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		internal static extern float renderViewportScaleInternal
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
+		}
+
+		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		public static extern float appliedRenderViewportScale
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
@@ -138,12 +145,25 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[NativeName("DeviceName")]
 		[StaticAccessor("GetIVRDeviceScripting()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
-		public static extern string loadedDeviceName
+		[NativeName("DeviceName")]
+		public static string loadedDeviceName
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					XRSettings.get_loadedDeviceName_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		[Obsolete("XRSettings.LoadDeviceByName is deprecated and should no longer be used. Instead, use the SubsystemManager to load XR devices by querying subsystem descriptors to create and start the subsystems of your choice.")]
@@ -171,6 +191,9 @@ namespace UnityEngine.XR
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_eyeTextureDesc_Injected(out RenderTextureDescriptor ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_loadedDeviceName_Injected(out ManagedSpanWrapper ret);
 
 		public enum StereoRenderingMode
 		{

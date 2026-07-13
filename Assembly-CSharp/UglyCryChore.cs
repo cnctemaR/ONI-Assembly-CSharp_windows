@@ -19,6 +19,7 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 		{
 			base.sm.crier.Set(crier, base.smi, false);
 			this.bodyTemperature = Db.Get().Amounts.Temperature.Lookup(crier);
+			this.suitEquipper = crier.GetComponent<SuitEquipper>();
 		}
 
 		public void ProduceTears(float dt)
@@ -27,17 +28,30 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 			{
 				return;
 			}
-			int num = Grid.PosToCell(base.smi.master.gameObject);
-			Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
+			float num = 1f * STRESS.TEARS_RATE * dt;
+			Equippable equippable = this.suitEquipper.IsWearingAirtightSuit();
 			if (equippable != null)
 			{
-				equippable.GetComponent<Storage>().AddLiquid(SimHashes.Water, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, false, true);
+				equippable.GetComponent<Storage>().AddLiquid(SimHashes.Water, num, this.bodyTemperature.value, byte.MaxValue, 0, false, true);
 				return;
 			}
-			SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, true, -1);
+			this.pendingTearsMass += num;
+			if (this.pendingTearsMass >= 0.0101f)
+			{
+				SimMessages.AddRemoveSubstance(Grid.PosToCell(base.smi.master.gameObject), SimHashes.Water, CellEventLogger.Instance.Tears, this.pendingTearsMass, this.bodyTemperature.value, byte.MaxValue, 0, true, -1);
+				this.pendingTearsMass = 0f;
+			}
 		}
 
 		private AmountInstance bodyTemperature;
+
+		private float pendingTearsMass;
+
+		private readonly SuitEquipper suitEquipper;
+
+		private const float MIN_LIQUID_MASS = 0.01f;
+
+		private const float TEARS_MASS_EMISSION_THRESHOLD = 0.0101f;
 	}
 
 	public class States : GameStateMachine<UglyCryChore.States, UglyCryChore.StatesInstance, UglyCryChore>

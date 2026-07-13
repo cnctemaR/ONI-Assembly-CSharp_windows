@@ -5,7 +5,10 @@ namespace UnityEngine.Rendering
 {
 	public abstract class RenderPipeline
 	{
-		protected abstract void Render(ScriptableRenderContext context, Camera[] cameras);
+		[Obsolete("Render with an array parameter is deprecated. Use Render with a list parameter instead. If you're extending the RenderPipeline class, override the Render method with a List parameter to perform rendering in order to avoid unnecessary allocations and copies. #from 6000.1", false)]
+		protected virtual void Render(ScriptableRenderContext context, Camera[] cameras)
+		{
+		}
 
 		protected virtual void ProcessRenderRequests<RequestData>(ScriptableRenderContext context, Camera camera, RequestData renderRequest)
 		{
@@ -16,6 +19,7 @@ namespace UnityEngine.Rendering
 			return false;
 		}
 
+		[Obsolete("BeginFrameRendering is deprecated. Use BeginContextRendering instead. #from 6000.1", false)]
 		protected static void BeginFrameRendering(ScriptableRenderContext context, Camera[] cameras)
 		{
 			RenderPipelineManager.BeginContextRendering(context, new List<Camera>(cameras));
@@ -36,6 +40,7 @@ namespace UnityEngine.Rendering
 			RenderPipelineManager.EndContextRendering(context, cameras);
 		}
 
+		[Obsolete("EndFrameRendering is deprecated. Use EndContextRendering instead. #from 6000.1", false)]
 		protected static void EndFrameRendering(ScriptableRenderContext context, Camera[] cameras)
 		{
 			RenderPipelineManager.EndContextRendering(context, new List<Camera>(cameras));
@@ -80,9 +85,14 @@ namespace UnityEngine.Rendering
 				bool flag3 = RenderPipelineManager.currentPipeline == null;
 				if (flag3)
 				{
-					RenderPipelineManager.PrepareRenderPipeline(GraphicsSettings.currentRenderPipeline);
+					bool flag4 = RenderPipelineManager.TryPrepareRenderPipeline(GraphicsSettings.currentRenderPipeline);
+					Debug.Assert(flag4);
 				}
-				flag = RenderPipelineManager.currentPipeline.IsRenderRequestSupported<RequestData>(camera, data);
+				bool flag5 = RenderPipelineManager.currentPipeline != null;
+				if (flag5)
+				{
+					flag = RenderPipelineManager.currentPipeline.IsRenderRequestSupported<RequestData>(camera, data);
+				}
 			}
 			return flag;
 		}

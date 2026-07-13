@@ -8,11 +8,33 @@ namespace UnityEngine
 	public sealed class Microphone
 	{
 		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetMicrophoneDeviceIDFromName(string name);
+		private unsafe static int GetMicrophoneDeviceIDFromName(string name)
+		{
+			int microphoneDeviceIDFromName_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				microphoneDeviceIDFromName_Injected = Microphone.GetMicrophoneDeviceIDFromName_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return microphoneDeviceIDFromName_Injected;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AudioClip StartRecord(int deviceID, bool loop, float lengthSec, int frequency);
+		private static AudioClip StartRecord(int deviceID, bool loop, float lengthSec, int frequency)
+		{
+			return Unmarshal.UnmarshalUnityObject<AudioClip>(Microphone.StartRecord_Injected(deviceID, loop, lengthSec, frequency));
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void EndRecord(int deviceID);
@@ -111,5 +133,11 @@ namespace UnityEngine
 				Microphone.GetDeviceCaps(microphoneDeviceIDFromName, out minFreq, out maxFreq);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMicrophoneDeviceIDFromName_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr StartRecord_Injected(int deviceID, bool loop, float lengthSec, int frequency);
 	}
 }

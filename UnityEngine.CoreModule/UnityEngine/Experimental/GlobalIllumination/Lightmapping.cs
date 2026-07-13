@@ -73,7 +73,7 @@ namespace UnityEngine.Experimental.GlobalIllumination
 					lightDataGI.Init(ref discLight, ref cookie);
 					break;
 				default:
-					lightDataGI.InitNoBake(light.GetInstanceID());
+					lightDataGI.InitNoBake(light.GetEntityId());
 					break;
 				}
 				lightsOutput[i] = lightDataGI;

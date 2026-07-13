@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Unity.Collections;
-using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -10,7 +8,8 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public readonly struct ContactPair
 	{
-		public int ColliderInstanceID
+		[Obsolete("colliderInstanceID is deprecated, use colliderEntityId instead.", false)]
+		public int colliderInstanceID
 		{
 			get
 			{
@@ -18,7 +17,8 @@ namespace UnityEngine
 			}
 		}
 
-		public int OtherColliderInstanceID
+		[Obsolete("otherColliderInstanceID is deprecated, use otherColliderEntityId instead.", false)]
+		public int otherColliderInstanceID
 		{
 			get
 			{
@@ -26,7 +26,23 @@ namespace UnityEngine
 			}
 		}
 
-		public Collider Collider
+		public EntityId colliderEntityId
+		{
+			get
+			{
+				return this.m_ColliderID;
+			}
+		}
+
+		public EntityId otherColliderEntityId
+		{
+			get
+			{
+				return this.m_OtherColliderID;
+			}
+		}
+
+		public Collider collider
 		{
 			get
 			{
@@ -34,7 +50,7 @@ namespace UnityEngine
 			}
 		}
 
-		public Collider OtherCollider
+		public Collider otherCollider
 		{
 			get
 			{
@@ -42,7 +58,7 @@ namespace UnityEngine
 			}
 		}
 
-		public int ContactCount
+		public int contactCount
 		{
 			get
 			{
@@ -50,7 +66,7 @@ namespace UnityEngine
 			}
 		}
 
-		public Vector3 ImpulseSum
+		public Vector3 impulseSum
 		{
 			get
 			{
@@ -58,7 +74,7 @@ namespace UnityEngine
 			}
 		}
 
-		public bool IsCollisionEnter
+		public bool isCollisionEnter
 		{
 			get
 			{
@@ -66,7 +82,7 @@ namespace UnityEngine
 			}
 		}
 
-		public bool IsCollisionExit
+		public bool isCollisionExit
 		{
 			get
 			{
@@ -74,7 +90,7 @@ namespace UnityEngine
 			}
 		}
 
-		public bool IsCollisionStay
+		public bool isCollisionStay
 		{
 			get
 			{
@@ -82,7 +98,7 @@ namespace UnityEngine
 			}
 		}
 
-		internal bool HasRemovedCollider
+		internal bool hasRemovedCollider
 		{
 			get
 			{
@@ -92,17 +108,66 @@ namespace UnityEngine
 
 		internal int ExtractContacts(List<ContactPoint> managedContainer, bool flipped)
 		{
-			return ContactPair.ExtractContacts_Injected(ref this, managedContainer, flipped);
+			int num = (int)Math.Min((long)managedContainer.Capacity, (long)((ulong)this.m_NbPoints));
+			managedContainer.Clear();
+			for (int i = 0; i < num; i++)
+			{
+				readonly ref ContactPairPoint contactPoint = ref this.GetContactPoint(i);
+				ContactPoint contactPoint2 = new ContactPoint
+				{
+					m_Point = contactPoint.position,
+					m_Impulse = contactPoint.impulse,
+					m_Separation = contactPoint.separation
+				};
+				if (flipped)
+				{
+					contactPoint2.m_Normal = -contactPoint.normal;
+					contactPoint2.m_ThisColliderEntityId = this.m_OtherColliderID;
+					contactPoint2.m_OtherColliderEntityId = this.m_ColliderID;
+				}
+				else
+				{
+					contactPoint2.m_Normal = contactPoint.normal;
+					contactPoint2.m_ThisColliderEntityId = this.m_ColliderID;
+					contactPoint2.m_OtherColliderEntityId = this.m_OtherColliderID;
+				}
+				managedContainer.Add(contactPoint2);
+			}
+			return num;
 		}
 
-		internal int ExtractContactsArray([Unmarshalled] ContactPoint[] managedContainer, bool flipped)
+		internal int ExtractContactsArray(ContactPoint[] managedContainer, bool flipped)
 		{
-			return ContactPair.ExtractContactsArray_Injected(ref this, managedContainer, flipped);
+			int num = (int)Math.Min((long)managedContainer.Length, (long)((ulong)this.m_NbPoints));
+			for (int i = 0; i < num; i++)
+			{
+				readonly ref ContactPairPoint contactPoint = ref this.GetContactPoint(i);
+				ContactPoint contactPoint2 = new ContactPoint
+				{
+					m_Point = contactPoint.position,
+					m_Impulse = contactPoint.impulse,
+					m_Separation = contactPoint.separation
+				};
+				if (flipped)
+				{
+					contactPoint2.m_Normal = -contactPoint.normal;
+					contactPoint2.m_ThisColliderEntityId = this.m_OtherColliderID;
+					contactPoint2.m_OtherColliderEntityId = this.m_ColliderID;
+				}
+				else
+				{
+					contactPoint2.m_Normal = contactPoint.normal;
+					contactPoint2.m_ThisColliderEntityId = this.m_ColliderID;
+					contactPoint2.m_OtherColliderEntityId = this.m_OtherColliderID;
+				}
+				managedContainer[i] = contactPoint2;
+			}
+			return num;
 		}
 
 		public unsafe void CopyToNativeArray(NativeArray<ContactPairPoint> buffer)
 		{
-			int num = Mathf.Min(buffer.Length, this.ContactCount);
+			int num = Mathf.Min(buffer.Length, this.contactCount);
 			for (int i = 0; i < num; i++)
 			{
 				buffer[i] = *this.GetContactPoint(i);
@@ -149,17 +214,92 @@ namespace UnityEngine
 			return this.m_StartPtr.ToInt64() / (long)sizeof(ContactPairPoint) + index * sizeof(ContactPairPoint);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int ExtractContacts_Injected(ref ContactPair _unity_self, List<ContactPoint> managedContainer, bool flipped);
+		[Obsolete("Please use ContactPair.colliderInstanceID instead. (UnityUpgradable) -> colliderInstanceID", false)]
+		public int ColliderInstanceID
+		{
+			get
+			{
+				return this.colliderInstanceID;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int ExtractContactsArray_Injected(ref ContactPair _unity_self, ContactPoint[] managedContainer, bool flipped);
+		[Obsolete("Please use ContactPair.otherColliderInstanceID instead. (UnityUpgradable) -> otherColliderInstanceID", false)]
+		public int OtherColliderInstanceID
+		{
+			get
+			{
+				return this.otherColliderInstanceID;
+			}
+		}
+
+		[Obsolete("Please use ContactPair.collider instead. (UnityUpgradable) -> collider", false)]
+		public Collider Collider
+		{
+			get
+			{
+				return this.collider;
+			}
+		}
+
+		[Obsolete("Please use ContactPair.otherCollider instead. (UnityUpgradable) -> otherCollider", false)]
+		public Collider OtherCollider
+		{
+			get
+			{
+				return this.otherCollider;
+			}
+		}
+
+		[Obsolete("Please use ContactPair.contactCount instead. (UnityUpgradable) -> contactCount", false)]
+		public int ContactCount
+		{
+			get
+			{
+				return this.contactCount;
+			}
+		}
+
+		[Obsolete("Please use ContactPair.impulseSum instead. (UnityUpgradable) -> impulseSum", false)]
+		public Vector3 ImpulseSum
+		{
+			get
+			{
+				return this.impulseSum;
+			}
+		}
+
+		[Obsolete("Please use ContactPair.isCollisionEnter instead. (UnityUpgradable) -> isCollisionEnter", false)]
+		public bool IsCollisionEnter
+		{
+			get
+			{
+				return this.isCollisionEnter;
+			}
+		}
+
+		[Obsolete("Please use ContactPair.isCollisionExit instead. (UnityUpgradable) -> isCollisionExit", false)]
+		public bool IsCollisionExit
+		{
+			get
+			{
+				return this.isCollisionExit;
+			}
+		}
+
+		[Obsolete("Please use ContactPair.isCollisionStay instead. (UnityUpgradable) -> isCollisionStay", false)]
+		public bool IsCollisionStay
+		{
+			get
+			{
+				return this.isCollisionStay;
+			}
+		}
 
 		private const uint c_InvalidFaceIndex = 4294967295U;
 
-		internal readonly int m_ColliderID;
+		internal readonly EntityId m_ColliderID;
 
-		internal readonly int m_OtherColliderID;
+		internal readonly EntityId m_OtherColliderID;
 
 		internal readonly IntPtr m_StartPtr;
 

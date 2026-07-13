@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("b196b284-bab4-101a-b69c-00aa00341d07")]
+	[Obsolete]
 	[ComImport]
 	public interface UCOMIConnectionPointContainer
 	{

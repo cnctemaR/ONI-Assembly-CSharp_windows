@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("ISocialPlatform is deprecated and will be removed in a future release.", false)]
 	public interface ISocialPlatform
 	{
 		ILocalUser localUser { get; }

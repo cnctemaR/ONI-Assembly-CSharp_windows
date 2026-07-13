@@ -35,15 +35,15 @@ namespace FMODUnity
 				{
 					if (this.TrackTargetObject.GetComponent<Rigidbody>())
 					{
-						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject.transform, this.TrackTargetObject.GetComponent<Rigidbody>());
+						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject, this.TrackTargetObject.GetComponent<Rigidbody>());
 					}
 					else if (this.TrackTargetObject.GetComponent<Rigidbody2D>())
 					{
-						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject.transform, this.TrackTargetObject.GetComponent<Rigidbody2D>());
+						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject, this.TrackTargetObject.GetComponent<Rigidbody2D>());
 					}
 					else
 					{
-						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject.transform, false);
+						RuntimeManager.AttachInstanceToGameObject(this.eventInstance, this.TrackTargetObject, false);
 					}
 				}
 				else

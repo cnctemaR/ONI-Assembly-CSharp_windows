@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.SceneManagement;
 
@@ -33,6 +34,6 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetPhysicsScene_Internal_Injected(ref Scene scene, out PhysicsScene ret);
+		private static extern void GetPhysicsScene_Internal_Injected([In] ref Scene scene, out PhysicsScene ret);
 	}
 }

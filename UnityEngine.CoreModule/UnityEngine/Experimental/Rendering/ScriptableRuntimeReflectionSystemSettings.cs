@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Rendering
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Camera/ScriptableRuntimeReflectionSystem.h")]
+	[RequiredByNativeCode]
 	public static class ScriptableRuntimeReflectionSystemSettings
 	{
 		public static IScriptableRuntimeReflectionSystem system
@@ -69,8 +69,8 @@ namespace UnityEngine.Experimental.Rendering
 			}
 		}
 
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		[StaticAccessor("ScriptableRuntimeReflectionSystem", StaticAccessorType.DoubleColon)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ScriptingDirtyReflectionSystemInstance();
 

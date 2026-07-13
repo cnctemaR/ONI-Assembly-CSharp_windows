@@ -7,7 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Edible")]
-public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExtendSplitting
+public class Edible : Workable, ISaveLoadable, IExtendSplitting
 {
 	public float Units
 	{
@@ -367,7 +367,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor, ISaveLoadable, IExt
 		{
 			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);
 		}
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.EATEN, "{0}", this.GetProperName()), worker.GetProperName());
+		ReportManager.Instance.ReportValueWithGameObjectContext(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, worker.gameObject, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.EATEN, "{0}", this.GetProperName()));
 		this.AddOnConsumeEffects(worker);
 		worker.Trigger(1121894420, this);
 		base.Trigger(-10536414, worker.gameObject);

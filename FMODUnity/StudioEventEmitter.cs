@@ -9,6 +9,32 @@ namespace FMODUnity
 	[AddComponentMenu("FMOD Studio/FMOD Studio Event Emitter")]
 	public class StudioEventEmitter : EventHandler
 	{
+		[Obsolete("Use the EventPlayTrigger field instead")]
+		public EmitterGameEvent PlayEvent
+		{
+			get
+			{
+				return this.EventPlayTrigger;
+			}
+			set
+			{
+				this.EventPlayTrigger = value;
+			}
+		}
+
+		[Obsolete("Use the EventStopTrigger field instead")]
+		public EmitterGameEvent StopEvent
+		{
+			get
+			{
+				return this.EventStopTrigger;
+			}
+			set
+			{
+				this.EventStopTrigger = value;
+			}
+		}
+
 		public EventDescription EventDescription
 		{
 			get
@@ -131,11 +157,11 @@ namespace FMODUnity
 
 		protected override void HandleGameEvent(EmitterGameEvent gameEvent)
 		{
-			if (this.PlayEvent == gameEvent)
+			if (this.EventPlayTrigger == gameEvent)
 			{
 				this.Play();
 			}
-			if (this.StopEvent == gameEvent)
+			if (this.EventStopTrigger == gameEvent)
 			{
 				this.Stop();
 			}
@@ -179,9 +205,12 @@ namespace FMODUnity
 			bool flag2;
 			this.eventDescription.is3D(out flag2);
 			this.IsActive = true;
-			if (flag2 && !this.isOneshot && Settings.Instance.StopEventsOutsideMaxDistance)
+			if (flag2 && Settings.Instance.StopEventsOutsideMaxDistance)
 			{
-				StudioEventEmitter.RegisterActiveEmitter(this);
+				if (!this.isOneshot)
+				{
+					StudioEventEmitter.RegisterActiveEmitter(this);
+				}
 				this.UpdatePlayingStatus(true);
 				return;
 			}
@@ -206,23 +235,23 @@ namespace FMODUnity
 				this.eventDescription.createInstance(out this.instance);
 				if (flag)
 				{
-					Transform component = base.GetComponent<Transform>();
+					base.GetComponent<Transform>();
 					if (base.GetComponent<Rigidbody>())
 					{
-						Rigidbody component2 = base.GetComponent<Rigidbody>();
-						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component2));
-						RuntimeManager.AttachInstanceToGameObject(this.instance, component, component2);
+						Rigidbody component = base.GetComponent<Rigidbody>();
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, base.gameObject, component);
 					}
 					else if (base.GetComponent<Rigidbody2D>())
 					{
-						Rigidbody2D component3 = base.GetComponent<Rigidbody2D>();
-						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component3));
-						RuntimeManager.AttachInstanceToGameObject(this.instance, component, component3);
+						Rigidbody2D component2 = base.GetComponent<Rigidbody2D>();
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component2));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, base.gameObject, component2);
 					}
 					else
 					{
 						this.instance.set3DAttributes(base.gameObject.To3DAttributes());
-						RuntimeManager.AttachInstanceToGameObject(this.instance, component, this.NonRigidbodyVelocity);
+						RuntimeManager.AttachInstanceToGameObject(this.instance, base.gameObject, this.NonRigidbodyVelocity);
 					}
 				}
 			}
@@ -330,9 +359,11 @@ namespace FMODUnity
 		[Obsolete("Use the EventReference field instead")]
 		public string Event = "";
 
-		public EmitterGameEvent PlayEvent;
+		[FormerlySerializedAs("PlayEvent")]
+		public EmitterGameEvent EventPlayTrigger;
 
-		public EmitterGameEvent StopEvent;
+		[FormerlySerializedAs("StopEvent")]
+		public EmitterGameEvent EventStopTrigger;
 
 		public bool AllowFadeout = true;
 

@@ -9,6 +9,7 @@ namespace UnityEngine.Rendering
 		DontValidateIndices = 1,
 		DontResetBoneBounds = 2,
 		DontNotifyMeshUsers = 4,
-		DontRecalculateBounds = 8
+		DontRecalculateBounds = 8,
+		DontValidateLodRanges = 16
 	}
 }

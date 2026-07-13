@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum MetadataScopeType
+	internal enum MetadataScopeType
 	{
 		AssemblyNameReference,
 		ModuleReference,

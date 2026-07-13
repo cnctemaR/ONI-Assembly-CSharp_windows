@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 
 namespace HarmonyLib
 {
@@ -10,26 +9,11 @@ namespace HarmonyLib
 	{
 		public static IEnumerable<CodeInstruction> MethodReplacer(this IEnumerable<CodeInstruction> instructions, MethodBase from, MethodBase to)
 		{
-			if (from == null)
-			{
-				throw new ArgumentException("Unexpected null argument", "from");
-			}
-			if (to == null)
-			{
-				throw new ArgumentException("Unexpected null argument", "to");
-			}
-			foreach (CodeInstruction codeInstruction in instructions)
-			{
-				if (codeInstruction.operand as MethodBase == from)
-				{
-					codeInstruction.opcode = (to.IsConstructor ? OpCodes.Newobj : OpCodes.Call);
-					codeInstruction.operand = to;
-				}
-				yield return codeInstruction;
-			}
-			IEnumerator<CodeInstruction> enumerator = null;
-			yield break;
-			yield break;
+			Transpilers.<MethodReplacer>d__0 <MethodReplacer>d__ = new Transpilers.<MethodReplacer>d__0(-2);
+			<MethodReplacer>d__.<>3__instructions = instructions;
+			<MethodReplacer>d__.<>3__from = from;
+			<MethodReplacer>d__.<>3__to = to;
+			return <MethodReplacer>d__;
 		}
 
 		public static IEnumerable<CodeInstruction> Manipulator(this IEnumerable<CodeInstruction> instructions, Func<CodeInstruction, bool> predicate, Action<CodeInstruction> action)
@@ -54,15 +38,10 @@ namespace HarmonyLib
 
 		public static IEnumerable<CodeInstruction> DebugLogger(this IEnumerable<CodeInstruction> instructions, string text)
 		{
-			yield return new CodeInstruction(OpCodes.Ldstr, text);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(FileLog), "Debug", null, null));
-			foreach (CodeInstruction codeInstruction in instructions)
-			{
-				yield return codeInstruction;
-			}
-			IEnumerator<CodeInstruction> enumerator = null;
-			yield break;
-			yield break;
+			Transpilers.<DebugLogger>d__2 <DebugLogger>d__ = new Transpilers.<DebugLogger>d__2(-2);
+			<DebugLogger>d__.<>3__instructions = instructions;
+			<DebugLogger>d__.<>3__text = text;
+			return <DebugLogger>d__;
 		}
 	}
 }

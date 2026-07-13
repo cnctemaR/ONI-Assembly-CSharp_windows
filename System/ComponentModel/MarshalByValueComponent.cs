@@ -3,9 +3,9 @@ using System.ComponentModel.Design;
 
 namespace System.ComponentModel
 {
-	[TypeConverter(typeof(ComponentConverter))]
 	[DesignerCategory("Component")]
 	[Designer("System.Windows.Forms.Design.ComponentDocumentDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(IRootDesigner))]
+	[TypeConverter(typeof(ComponentConverter))]
 	public class MarshalByValueComponent : IComponent, IDisposable, IServiceProvider
 	{
 		~MarshalByValueComponent()
@@ -38,8 +38,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[Browsable(false)]
 		public virtual ISite Site
 		{
 			get

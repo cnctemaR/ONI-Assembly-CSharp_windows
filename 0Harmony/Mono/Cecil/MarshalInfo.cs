@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public class MarshalInfo
+	internal class MarshalInfo
 	{
 		public NativeType NativeType
 		{

@@ -1,75 +1,96 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
-using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[NativeHeader("Modules/Physics/MeshCollider.h")]
 	[NativeHeader("Runtime/Graphics/Mesh/Mesh.h")]
-	[RequiredByNativeCode]
+	[RequireComponent(typeof(Transform))]
 	public class MeshCollider : Collider
 	{
-		public extern Mesh sharedMesh
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		public extern bool convex
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		public extern MeshColliderCookingOptions cookingOptions
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Configuring smooth sphere collisions is no longer needed.", true)]
-		public bool smoothSphereCollisions
+		public Mesh sharedMesh
 		{
 			get
 			{
-				return true;
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MeshCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Mesh>(MeshCollider.get_sharedMesh_Injected(intPtr));
 			}
 			set
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MeshCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				MeshCollider.set_sharedMesh_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Mesh>(value));
 			}
 		}
 
-		[Obsolete("MeshCollider.skinWidth is no longer used.")]
-		public float skinWidth
+		public bool convex
 		{
 			get
 			{
-				return 0f;
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MeshCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return MeshCollider.get_convex_Injected(intPtr);
 			}
 			set
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MeshCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				MeshCollider.set_convex_Injected(intPtr, value);
 			}
 		}
 
-		[Obsolete("MeshCollider.inflateMesh is no longer supported. The new cooking algorithm doesn't need inflation to be used.")]
-		public bool inflateMesh
+		public MeshColliderCookingOptions cookingOptions
 		{
 			get
 			{
-				return false;
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MeshCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return MeshCollider.get_cookingOptions_Injected(intPtr);
 			}
 			set
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MeshCollider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				MeshCollider.set_cookingOptions_Injected(intPtr, value);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_sharedMesh_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sharedMesh_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_convex_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_convex_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern MeshColliderCookingOptions get_cookingOptions_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cookingOptions_Injected(IntPtr _unity_self, MeshColliderCookingOptions value);
 	}
 }

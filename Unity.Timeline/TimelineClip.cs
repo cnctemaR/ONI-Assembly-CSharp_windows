@@ -62,13 +62,16 @@ namespace UnityEngine.Timeline
 			}
 			set
 			{
-				this.UpdateDirty(value, this.m_Start);
 				double num = Math.Max(TimelineClip.SanitizeTimeValue(value, this.m_Start), 0.0);
-				if (this.m_ParentTrack != null && this.m_Start != num)
+				if (Math.Abs(this.m_Start - num) > 5E-324)
 				{
-					this.m_ParentTrack.OnClipMove();
+					this.UpdateDirty(this.m_Start, num);
+					this.m_Start = num;
+					if (this.m_ParentTrack != null)
+					{
+						this.m_ParentTrack.OnClipMove(this.asset as ITimelineClipAsset);
+					}
 				}
-				this.m_Start = num;
 			}
 		}
 
@@ -80,8 +83,16 @@ namespace UnityEngine.Timeline
 			}
 			set
 			{
-				this.UpdateDirty(this.m_Duration, value);
-				this.m_Duration = Math.Max(TimelineClip.SanitizeTimeValue(value, this.m_Duration), double.Epsilon);
+				double num = Math.Max(TimelineClip.SanitizeTimeValue(value, this.m_Duration), double.Epsilon);
+				if (Math.Abs(this.m_Duration - num) > 5E-324)
+				{
+					this.UpdateDirty(this.m_Duration, num);
+					this.m_Duration = num;
+					if (this.clipCaps.HasAny(ClipCaps.Blending) && this.m_ParentTrack != null)
+					{
+						this.m_ParentTrack.blendsValid = false;
+					}
+				}
 			}
 		}
 
@@ -746,7 +757,7 @@ namespace UnityEngine.Timeline
 
 		public override string ToString()
 		{
-			return UnityString.Format("{0} ({1:F2}, {2:F2}):{3:F2} | {4}", new object[]
+			return string.Format("{0} ({1:F2}, {2:F2}):{3:F2} | {4}", new object[]
 			{
 				this.displayName,
 				this.start,

@@ -13,23 +13,41 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Shaders/Material.h")]
 	public class Material : Object
 	{
-		[Obsolete("Creating materials from shader source string will be removed in the future. Use Shader assets instead.", false)]
+		[Obsolete("Creating materials from shader source string will be removed in the future. Use Shader assets instead.", true)]
 		public static Material Create(string scriptContents)
 		{
 			return new Material(scriptContents);
 		}
 
 		[FreeFunction("MaterialScripting::CreateWithShader")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateWithShader([Writable] Material self, [NotNull("ArgumentNullException")] Shader shader);
+		private static void CreateWithShader([Writable] Material self, [NotNull] Shader shader)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			Material.CreateWithShader_Injected(self, intPtr);
+		}
 
 		[FreeFunction("MaterialScripting::CreateWithMaterial")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateWithMaterial([Writable] Material self, [NotNull("ArgumentNullException")] Material source);
-
-		[FreeFunction("MaterialScripting::CreateWithString")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateWithString([Writable] Material self);
+		private static void CreateWithMaterial([Writable] Material self, [NotNull] Material source)
+		{
+			if (source == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(source);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			Material.CreateWithMaterial_Injected(self, intPtr);
+		}
 
 		public Material(Shader shader)
 		{
@@ -42,28 +60,47 @@ namespace UnityEngine
 			Material.CreateWithMaterial(this, source);
 		}
 
+		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Creating materials from shader source string is no longer supported. Use Shader assets instead.", false)]
 		public Material(string contents)
 		{
-			Material.CreateWithString(this);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Material GetDefaultMaterial();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Material GetDefaultParticleMaterial();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Material GetDefaultLineMaterial();
-
-		public extern Shader shader
+		internal static Material GetDefaultMaterial()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			return Unmarshal.UnmarshalUnityObject<Material>(Material.GetDefaultMaterial_Injected());
+		}
+
+		internal static Material GetDefaultParticleMaterial()
+		{
+			return Unmarshal.UnmarshalUnityObject<Material>(Material.GetDefaultParticleMaterial_Injected());
+		}
+
+		internal static Material GetDefaultLineMaterial()
+		{
+			return Unmarshal.UnmarshalUnityObject<Material>(Material.GetDefaultLineMaterial_Injected());
+		}
+
+		public Shader shader
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Shader>(Material.get_shader_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Material.set_shader_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Shader>(value));
+			}
 		}
 
 		public Color color
@@ -79,7 +116,7 @@ namespace UnityEngine
 				}
 				else
 				{
-					color = this.GetColor("_Color");
+					color = this.GetColor(Material.k_ColorId);
 				}
 				return color;
 			}
@@ -93,7 +130,7 @@ namespace UnityEngine
 				}
 				else
 				{
-					this.SetColor("_Color", value);
+					this.SetColor(Material.k_ColorId, value);
 				}
 			}
 		}
@@ -111,7 +148,7 @@ namespace UnityEngine
 				}
 				else
 				{
-					texture = this.GetTexture("_MainTex");
+					texture = this.GetTexture(Material.k_MainTexId);
 				}
 				return texture;
 			}
@@ -125,7 +162,7 @@ namespace UnityEngine
 				}
 				else
 				{
-					this.SetTexture("_MainTex", value);
+					this.SetTexture(Material.k_MainTexId, value);
 				}
 			}
 		}
@@ -143,7 +180,7 @@ namespace UnityEngine
 				}
 				else
 				{
-					vector = this.GetTextureOffset("_MainTex");
+					vector = this.GetTextureOffset(Material.k_MainTexId);
 				}
 				return vector;
 			}
@@ -157,7 +194,7 @@ namespace UnityEngine
 				}
 				else
 				{
-					this.SetTextureOffset("_MainTex", value);
+					this.SetTextureOffset(Material.k_MainTexId, value);
 				}
 			}
 		}
@@ -175,7 +212,7 @@ namespace UnityEngine
 				}
 				else
 				{
-					vector = this.GetTextureScale("_MainTex");
+					vector = this.GetTextureScale(Material.k_MainTexId);
 				}
 				return vector;
 			}
@@ -189,18 +226,32 @@ namespace UnityEngine
 				}
 				else
 				{
-					this.SetTextureScale("_MainTex", value);
+					this.SetTextureScale(Material.k_MainTexId, value);
 				}
 			}
 		}
 
 		[NativeName("GetFirstPropertyNameIdByAttributeFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags attributeFlag);
+		private int GetFirstPropertyNameIdByAttribute(ShaderPropertyFlags attributeFlag)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetFirstPropertyNameIdByAttribute_Injected(intPtr, attributeFlag);
+		}
 
 		[NativeName("HasPropertyFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasProperty(int nameID);
+		public bool HasProperty(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasProperty_Injected(intPtr, nameID);
+		}
 
 		public bool HasProperty(string name)
 		{
@@ -208,8 +259,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("HasFloatFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasFloatImpl(int name);
+		private bool HasFloatImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasFloatImpl_Injected(intPtr, name);
+		}
 
 		public bool HasFloat(string name)
 		{
@@ -232,8 +290,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("HasIntegerFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasIntImpl(int name);
+		private bool HasIntImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasIntImpl_Injected(intPtr, name);
+		}
 
 		public bool HasInteger(string name)
 		{
@@ -246,8 +311,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("HasTextureFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasTextureImpl(int name);
+		private bool HasTextureImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasTextureImpl_Injected(intPtr, name);
+		}
 
 		public bool HasTexture(string name)
 		{
@@ -260,8 +332,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("HasMatrixFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasMatrixImpl(int name);
+		private bool HasMatrixImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasMatrixImpl_Injected(intPtr, name);
+		}
 
 		public bool HasMatrix(string name)
 		{
@@ -274,8 +353,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("HasVectorFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasVectorImpl(int name);
+		private bool HasVectorImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasVectorImpl_Injected(intPtr, name);
+		}
 
 		public bool HasVector(string name)
 		{
@@ -298,8 +384,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("HasBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasBufferImpl(int name);
+		private bool HasBufferImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasBufferImpl_Injected(intPtr, name);
+		}
 
 		public bool HasBuffer(string name)
 		{
@@ -312,8 +405,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("HasConstantBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasConstantBufferImpl(int name);
+		private bool HasConstantBufferImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.HasConstantBufferImpl_Injected(intPtr, name);
+		}
 
 		public bool HasConstantBuffer(string name)
 		{
@@ -325,54 +425,166 @@ namespace UnityEngine
 			return this.HasConstantBufferImpl(nameID);
 		}
 
-		public extern int renderQueue
+		public int renderQueue
 		{
 			[NativeName("GetActualRenderQueue")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Material.get_renderQueue_Injected(intPtr);
+			}
 			[NativeName("SetCustomRenderQueue")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Material.set_renderQueue_Injected(intPtr, value);
+			}
 		}
 
-		internal extern int rawRenderQueue
+		public int rawRenderQueue
 		{
 			[NativeName("GetCustomRenderQueue")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Material.get_rawRenderQueue_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EnableKeyword(string keyword);
+		public unsafe void EnableKeyword(string keyword)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Material.EnableKeyword_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void DisableKeyword(string keyword);
+		public unsafe void DisableKeyword(string keyword)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Material.DisableKeyword_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsKeywordEnabled(string keyword);
+		public unsafe bool IsKeywordEnabled(string keyword)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = Material.IsKeywordEnabled_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		[FreeFunction("MaterialScripting::EnableKeyword", HasExplicitThis = true)]
 		private void EnableLocalKeyword(LocalKeyword keyword)
 		{
-			this.EnableLocalKeyword_Injected(ref keyword);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.EnableLocalKeyword_Injected(intPtr, ref keyword);
 		}
 
 		[FreeFunction("MaterialScripting::DisableKeyword", HasExplicitThis = true)]
 		private void DisableLocalKeyword(LocalKeyword keyword)
 		{
-			this.DisableLocalKeyword_Injected(ref keyword);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.DisableLocalKeyword_Injected(intPtr, ref keyword);
 		}
 
 		[FreeFunction("MaterialScripting::SetKeyword", HasExplicitThis = true)]
 		private void SetLocalKeyword(LocalKeyword keyword, bool value)
 		{
-			this.SetLocalKeyword_Injected(ref keyword, value);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetLocalKeyword_Injected(intPtr, ref keyword, value);
 		}
 
 		[FreeFunction("MaterialScripting::IsKeywordEnabled", HasExplicitThis = true)]
 		private bool IsLocalKeywordEnabled(LocalKeyword keyword)
 		{
-			return this.IsLocalKeywordEnabled_Injected(ref keyword);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.IsLocalKeywordEnabled_Injected(intPtr, ref keyword);
 		}
 
 		public void EnableKeyword(in LocalKeyword keyword)
@@ -396,12 +608,26 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("MaterialScripting::GetEnabledKeywords", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern LocalKeyword[] GetEnabledKeywords();
+		private LocalKeyword[] GetEnabledKeywords()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetEnabledKeywords_Injected(intPtr);
+		}
 
 		[FreeFunction("MaterialScripting::SetEnabledKeywords", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetEnabledKeywords(LocalKeyword[] keywords);
+		private void SetEnabledKeywords(LocalKeyword[] keywords)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetEnabledKeywords_Injected(intPtr, keywords);
+		}
 
 		public LocalKeyword[] enabledKeywords
 		{
@@ -415,58 +641,269 @@ namespace UnityEngine
 			}
 		}
 
-		public extern MaterialGlobalIlluminationFlags globalIlluminationFlags
+		public MaterialGlobalIlluminationFlags globalIlluminationFlags
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Material.get_globalIlluminationFlags_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Material.set_globalIlluminationFlags_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool doubleSidedGI
+		public bool doubleSidedGI
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Material.get_doubleSidedGI_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Material.set_doubleSidedGI_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("EnableInstancingVariants")]
-		public extern bool enableInstancing
+		public bool enableInstancing
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Material.get_enableInstancing_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Material.set_enableInstancing_Injected(intPtr, value);
+			}
 		}
 
-		public extern int passCount
+		public int passCount
 		{
 			[NativeName("GetShader()->GetPassCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Material.get_passCount_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction("MaterialScripting::SetShaderPassEnabled", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetShaderPassEnabled(string passName, bool enabled);
+		public unsafe void SetShaderPassEnabled(string passName, bool enabled)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(passName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = passName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Material.SetShaderPassEnabled_Injected(intPtr, ref managedSpanWrapper, enabled);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("MaterialScripting::GetShaderPassEnabled", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetShaderPassEnabled(string passName);
+		public unsafe bool GetShaderPassEnabled(string passName)
+		{
+			bool shaderPassEnabled_Injected;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(passName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = passName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				shaderPassEnabled_Injected = Material.GetShaderPassEnabled_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return shaderPassEnabled_Injected;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string GetPassName(int pass);
+		public string GetPassName(int pass)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				Material.GetPassName_Injected(intPtr, pass, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int FindPass(string passName);
+		public unsafe int FindPass(string passName)
+		{
+			int num;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(passName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = passName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = Material.FindPass_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetOverrideTag(string tag, string val);
+		public unsafe void SetOverrideTag(string tag, string val)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(tag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = tag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(val, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = val.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				Material.SetOverrideTag_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+		}
 
 		[NativeName("GetTag")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string GetTagImpl(string tag, bool currentSubShaderOnly, string defaultValue);
+		private unsafe string GetTagImpl(string tag, bool currentSubShaderOnly, string defaultValue)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(tag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = tag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(defaultValue, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = defaultValue.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				Material.GetTagImpl_Injected(intPtr, ref managedSpanWrapper, currentSubShaderOnly, ref managedSpanWrapper2, out managedSpanWrapper3);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				ManagedSpanWrapper managedSpanWrapper3;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper3);
+			}
+			return stringAndDispose;
+		}
 
 		public string GetTag(string tag, bool searchFallbacks, string defaultValue)
 		{
@@ -478,30 +915,72 @@ namespace UnityEngine
 			return this.GetTagImpl(tag, !searchFallbacks, "");
 		}
 
-		[FreeFunction("MaterialScripting::Lerp", HasExplicitThis = true)]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Lerp(Material start, Material end, float t);
+		[FreeFunction("MaterialScripting::Lerp", HasExplicitThis = true)]
+		public void Lerp(Material start, Material end, float t)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.Lerp_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(start), Object.MarshalledUnityObject.Marshal<Material>(end), t);
+		}
 
 		[FreeFunction("MaterialScripting::SetPass", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool SetPass(int pass);
+		public bool SetPass(int pass)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.SetPass_Injected(intPtr, pass);
+		}
 
 		[FreeFunction("MaterialScripting::CopyPropertiesFrom", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CopyPropertiesFromMaterial(Material mat);
+		public void CopyPropertiesFromMaterial(Material mat)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.CopyPropertiesFromMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(mat));
+		}
 
 		[FreeFunction("MaterialScripting::CopyMatchingPropertiesFrom", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CopyMatchingPropertiesFromMaterial(Material mat);
+		public void CopyMatchingPropertiesFromMaterial(Material mat)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.CopyMatchingPropertiesFromMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(mat));
+		}
 
 		[FreeFunction("MaterialScripting::GetShaderKeywords", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string[] GetShaderKeywords();
+		private string[] GetShaderKeywords()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetShaderKeywords_Injected(intPtr);
+		}
 
 		[FreeFunction("MaterialScripting::SetShaderKeywords", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetShaderKeywords(string[] names);
+		private void SetShaderKeywords(string[] names)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetShaderKeywords_Injected(intPtr, names);
+		}
 
 		public string[] shaderKeywords
 		{
@@ -516,27 +995,94 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("MaterialScripting::GetPropertyNames", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string[] GetPropertyNamesImpl(int propertyType);
+		private string[] GetPropertyNamesImpl(int propertyType)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetPropertyNamesImpl_Injected(intPtr, propertyType);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int ComputeCRC();
+		[FreeFunction("MaterialScripting::GetPropertyCount", HasExplicitThis = true)]
+		internal int GetPropertyCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetPropertyCount_Injected(intPtr);
+		}
+
+		public int ComputeCRC()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.ComputeCRC_Injected(intPtr);
+		}
 
 		[FreeFunction("MaterialScripting::GetTexturePropertyNames", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string[] GetTexturePropertyNames();
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public string[] GetTexturePropertyNames()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetTexturePropertyNames_Injected(intPtr);
+		}
 
 		[FreeFunction("MaterialScripting::GetTexturePropertyNameIDs", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int[] GetTexturePropertyNameIDs();
+		public int[] GetTexturePropertyNameIDs()
+		{
+			int[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Material.GetTexturePropertyNameIDs_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				int[] array;
+				blittableArrayWrapper.Unmarshal<int>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("MaterialScripting::GetTexturePropertyNamesInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTexturePropertyNamesInternal(object outNames);
+		private void GetTexturePropertyNamesInternal(object outNames)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.GetTexturePropertyNamesInternal_Injected(intPtr, outNames);
+		}
 
 		[FreeFunction("MaterialScripting::GetTexturePropertyNameIDsInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTexturePropertyNameIDsInternal(object outNames);
+		private void GetTexturePropertyNameIDsInternal(object outNames)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.GetTexturePropertyNameIDsInternal_Injected(intPtr, outNames);
+		}
 
 		public void GetTexturePropertyNames(List<string> outNames)
 		{
@@ -559,175 +1105,561 @@ namespace UnityEngine
 		}
 
 		[NativeName("SetIntFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetIntImpl(int name, int value);
+		private void SetIntImpl(int name, int value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetIntImpl_Injected(intPtr, name, value);
+		}
 
 		[NativeName("SetFloatFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFloatImpl(int name, float value);
+		private void SetFloatImpl(int name, float value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetFloatImpl_Injected(intPtr, name, value);
+		}
 
 		[NativeName("SetColorFromScript")]
 		private void SetColorImpl(int name, Color value)
 		{
-			this.SetColorImpl_Injected(name, ref value);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetColorImpl_Injected(intPtr, name, ref value);
 		}
 
 		[NativeName("SetMatrixFromScript")]
 		private void SetMatrixImpl(int name, Matrix4x4 value)
 		{
-			this.SetMatrixImpl_Injected(name, ref value);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetMatrixImpl_Injected(intPtr, name, ref value);
 		}
 
 		[NativeName("SetTextureFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTextureImpl(int name, Texture value);
+		private void SetTextureImpl(int name, Texture value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetTextureImpl_Injected(intPtr, name, Object.MarshalledUnityObject.Marshal<Texture>(value));
+		}
 
 		[NativeName("SetRenderTextureFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTextureImpl(int name, RenderTexture value, RenderTextureSubElement element);
+		private void SetRenderTextureImpl(int name, RenderTexture value, RenderTextureSubElement element)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetRenderTextureImpl_Injected(intPtr, name, Object.MarshalledUnityObject.Marshal<RenderTexture>(value), element);
+		}
 
 		[NativeName("SetBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetBufferImpl(int name, ComputeBuffer value);
+		private void SetBufferImpl(int name, ComputeBuffer value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
 
 		[NativeName("SetBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGraphicsBufferImpl(int name, GraphicsBuffer value);
+		private void SetGraphicsBufferImpl(int name, GraphicsBuffer value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetGraphicsBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
 
 		[NativeName("SetConstantBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
+		private void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetConstantBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(value), offset, size);
+		}
 
 		[NativeName("SetConstantBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
+		private void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetConstantGraphicsBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(value), offset, size);
+		}
 
 		[NativeName("GetIntFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetIntImpl(int name);
+		private int GetIntImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetIntImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("GetFloatFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float GetFloatImpl(int name);
+		private float GetFloatImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetFloatImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("GetColorFromScript")]
 		private Color GetColorImpl(int name)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Color color;
-			this.GetColorImpl_Injected(name, out color);
+			Material.GetColorImpl_Injected(intPtr, name, out color);
 			return color;
 		}
 
 		[NativeName("GetMatrixFromScript")]
 		private Matrix4x4 GetMatrixImpl(int name)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetMatrixImpl_Injected(name, out matrix4x);
+			Material.GetMatrixImpl_Injected(intPtr, name, out matrix4x);
 			return matrix4x;
 		}
 
 		[NativeName("GetTextureFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Texture GetTextureImpl(int name);
+		private Texture GetTextureImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture>(Material.GetTextureImpl_Injected(intPtr, name));
+		}
 
 		[NativeName("GetBufferFromScript")]
 		private GraphicsBufferHandle GetBufferImpl(int name)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			GraphicsBufferHandle graphicsBufferHandle;
-			this.GetBufferImpl_Injected(name, out graphicsBufferHandle);
+			Material.GetBufferImpl_Injected(intPtr, name, out graphicsBufferHandle);
 			return graphicsBufferHandle;
 		}
 
 		[NativeName("GetConstantBufferFromScript")]
 		private GraphicsBufferHandle GetConstantBufferImpl(int name)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			GraphicsBufferHandle graphicsBufferHandle;
-			this.GetConstantBufferImpl_Injected(name, out graphicsBufferHandle);
+			Material.GetConstantBufferImpl_Injected(intPtr, name, out graphicsBufferHandle);
 			return graphicsBufferHandle;
 		}
 
 		[FreeFunction(Name = "MaterialScripting::SetFloatArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFloatArrayImpl(int name, float[] values, int count);
+		private unsafe void SetFloatArrayImpl(int name, float[] values, int count)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<float> span = new Span<float>(values);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Material.SetFloatArrayImpl_Injected(intPtr, name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[FreeFunction(Name = "MaterialScripting::SetVectorArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVectorArrayImpl(int name, Vector4[] values, int count);
+		private unsafe void SetVectorArrayImpl(int name, Vector4[] values, int count)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector4> span = new Span<Vector4>(values);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Material.SetVectorArrayImpl_Injected(intPtr, name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[FreeFunction(Name = "MaterialScripting::SetColorArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColorArrayImpl(int name, Color[] values, int count);
+		private unsafe void SetColorArrayImpl(int name, Color[] values, int count)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color> span = new Span<Color>(values);
+			fixed (Color* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Material.SetColorArrayImpl_Injected(intPtr, name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[FreeFunction(Name = "MaterialScripting::SetMatrixArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMatrixArrayImpl(int name, Matrix4x4[] values, int count);
+		private unsafe void SetMatrixArrayImpl(int name, Matrix4x4[] values, int count)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Matrix4x4> span = new Span<Matrix4x4>(values);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Material.SetMatrixArrayImpl_Injected(intPtr, name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetFloatArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float[] GetFloatArrayImpl(int name);
+		private float[] GetFloatArrayImpl(int name)
+		{
+			float[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Material.GetFloatArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				float[] array;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetVectorArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Vector4[] GetVectorArrayImpl(int name);
+		private Vector4[] GetVectorArrayImpl(int name)
+		{
+			Vector4[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Material.GetVectorArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Vector4[] array;
+				blittableArrayWrapper.Unmarshal<Vector4>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetColorArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Color[] GetColorArrayImpl(int name);
+		private Color[] GetColorArrayImpl(int name)
+		{
+			Color[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Material.GetColorArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Color[] array;
+				blittableArrayWrapper.Unmarshal<Color>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetMatrixArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Matrix4x4[] GetMatrixArrayImpl(int name);
+		private Matrix4x4[] GetMatrixArrayImpl(int name)
+		{
+			Matrix4x4[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Material.GetMatrixArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Matrix4x4[] array;
+				blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetFloatArrayCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetFloatArrayCountImpl(int name);
+		private int GetFloatArrayCountImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetFloatArrayCountImpl_Injected(intPtr, name);
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetVectorArrayCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVectorArrayCountImpl(int name);
+		private int GetVectorArrayCountImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetVectorArrayCountImpl_Injected(intPtr, name);
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetColorArrayCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetColorArrayCountImpl(int name);
+		private int GetColorArrayCountImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetColorArrayCountImpl_Injected(intPtr, name);
+		}
 
 		[FreeFunction(Name = "MaterialScripting::GetMatrixArrayCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetMatrixArrayCountImpl(int name);
+		private int GetMatrixArrayCountImpl(int name)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Material.GetMatrixArrayCountImpl_Injected(intPtr, name);
+		}
 
 		[FreeFunction(Name = "MaterialScripting::ExtractFloatArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ExtractFloatArrayImpl(int name, [Out] float[] val);
+		private unsafe void ExtractFloatArrayImpl(int name, [Out] float[] val)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (float[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Material.ExtractFloatArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				float[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MaterialScripting::ExtractVectorArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ExtractVectorArrayImpl(int name, [Out] Vector4[] val);
+		private unsafe void ExtractVectorArrayImpl(int name, [Out] Vector4[] val)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (Vector4[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Material.ExtractVectorArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Vector4[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Vector4>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MaterialScripting::ExtractColorArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ExtractColorArrayImpl(int name, [Out] Color[] val);
+		private unsafe void ExtractColorArrayImpl(int name, [Out] Color[] val)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (Color[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Material.ExtractColorArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Color[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Color>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MaterialScripting::ExtractMatrixArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ExtractMatrixArrayImpl(int name, [Out] Matrix4x4[] val);
+		private unsafe void ExtractMatrixArrayImpl(int name, [Out] Matrix4x4[] val)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (Matrix4x4[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Material.ExtractMatrixArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Matrix4x4[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+			}
+		}
 
 		[NativeName("GetTextureScaleAndOffsetFromScript")]
 		private Vector4 GetTextureScaleAndOffsetImpl(int name)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetTextureScaleAndOffsetImpl_Injected(name, out vector);
+			Material.GetTextureScaleAndOffsetImpl_Injected(intPtr, name, out vector);
 			return vector;
 		}
 
 		[NativeName("SetTextureOffsetFromScript")]
 		private void SetTextureOffsetImpl(int name, Vector2 offset)
 		{
-			this.SetTextureOffsetImpl_Injected(name, ref offset);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetTextureOffsetImpl_Injected(intPtr, name, ref offset);
 		}
 
 		[NativeName("SetTextureScaleFromScript")]
 		private void SetTextureScaleImpl(int name, Vector2 scale)
 		{
-			this.SetTextureScaleImpl_Injected(name, ref scale);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Material.SetTextureScaleImpl_Injected(intPtr, name, ref scale);
 		}
 
 		private void SetFloatArray(int name, float[] values, int count)
@@ -823,7 +1755,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<float>(values, floatArrayCountImpl);
-				this.ExtractFloatArrayImpl(name, (float[])NoAllocHelpers.ExtractArrayFromList(values));
+				this.ExtractFloatArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<float>(values));
 			}
 		}
 
@@ -840,7 +1772,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Vector4>(values, vectorArrayCountImpl);
-				this.ExtractVectorArrayImpl(name, (Vector4[])NoAllocHelpers.ExtractArrayFromList(values));
+				this.ExtractVectorArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<Vector4>(values));
 			}
 		}
 
@@ -857,7 +1789,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Color>(values, colorArrayCountImpl);
-				this.ExtractColorArrayImpl(name, (Color[])NoAllocHelpers.ExtractArrayFromList(values));
+				this.ExtractColorArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<Color>(values));
 			}
 		}
 
@@ -874,7 +1806,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Matrix4x4>(values, matrixArrayCountImpl);
-				this.ExtractMatrixArrayImpl(name, (Matrix4x4[])NoAllocHelpers.ExtractArrayFromList(values));
+				this.ExtractMatrixArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values));
 			}
 		}
 
@@ -1000,12 +1932,12 @@ namespace UnityEngine
 
 		public void SetFloatArray(string name, List<float> values)
 		{
-			this.SetFloatArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
+			this.SetFloatArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<float>(values), values.Count);
 		}
 
 		public void SetFloatArray(int nameID, List<float> values)
 		{
-			this.SetFloatArray(nameID, NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
+			this.SetFloatArray(nameID, NoAllocHelpers.ExtractArrayFromList<float>(values), values.Count);
 		}
 
 		public void SetFloatArray(string name, float[] values)
@@ -1020,12 +1952,12 @@ namespace UnityEngine
 
 		public void SetColorArray(string name, List<Color> values)
 		{
-			this.SetColorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<Color>(values), values.Count);
+			this.SetColorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<Color>(values), values.Count);
 		}
 
 		public void SetColorArray(int nameID, List<Color> values)
 		{
-			this.SetColorArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Color>(values), values.Count);
+			this.SetColorArray(nameID, NoAllocHelpers.ExtractArrayFromList<Color>(values), values.Count);
 		}
 
 		public void SetColorArray(string name, Color[] values)
@@ -1040,12 +1972,12 @@ namespace UnityEngine
 
 		public void SetVectorArray(string name, List<Vector4> values)
 		{
-			this.SetVectorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
+			this.SetVectorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<Vector4>(values), values.Count);
 		}
 
 		public void SetVectorArray(int nameID, List<Vector4> values)
 		{
-			this.SetVectorArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
+			this.SetVectorArray(nameID, NoAllocHelpers.ExtractArrayFromList<Vector4>(values), values.Count);
 		}
 
 		public void SetVectorArray(string name, Vector4[] values)
@@ -1060,12 +1992,12 @@ namespace UnityEngine
 
 		public void SetMatrixArray(string name, List<Matrix4x4> values)
 		{
-			this.SetMatrixArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
+			this.SetMatrixArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values), values.Count);
 		}
 
 		public void SetMatrixArray(int nameID, List<Matrix4x4> values)
 		{
-			this.SetMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
+			this.SetMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values), values.Count);
 		}
 
 		public void SetMatrixArray(string name, Matrix4x4[] values)
@@ -1286,42 +2218,277 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EnableLocalKeyword_Injected(ref LocalKeyword keyword);
+		private static extern void CreateWithShader_Injected([Writable] Material self, IntPtr shader);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DisableLocalKeyword_Injected(ref LocalKeyword keyword);
+		private static extern void CreateWithMaterial_Injected([Writable] Material self, IntPtr source);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLocalKeyword_Injected(ref LocalKeyword keyword, bool value);
+		private static extern IntPtr GetDefaultMaterial_Injected();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsLocalKeywordEnabled_Injected(ref LocalKeyword keyword);
+		private static extern IntPtr GetDefaultParticleMaterial_Injected();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColorImpl_Injected(int name, ref Color value);
+		private static extern IntPtr GetDefaultLineMaterial_Injected();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMatrixImpl_Injected(int name, ref Matrix4x4 value);
+		private static extern IntPtr get_shader_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetColorImpl_Injected(int name, out Color ret);
+		private static extern void set_shader_Injected(IntPtr _unity_self, IntPtr value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetMatrixImpl_Injected(int name, out Matrix4x4 ret);
+		private static extern int GetFirstPropertyNameIdByAttribute_Injected(IntPtr _unity_self, ShaderPropertyFlags attributeFlag);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetBufferImpl_Injected(int name, out GraphicsBufferHandle ret);
+		private static extern bool HasProperty_Injected(IntPtr _unity_self, int nameID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetConstantBufferImpl_Injected(int name, out GraphicsBufferHandle ret);
+		private static extern bool HasFloatImpl_Injected(IntPtr _unity_self, int name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTextureScaleAndOffsetImpl_Injected(int name, out Vector4 ret);
+		private static extern bool HasIntImpl_Injected(IntPtr _unity_self, int name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTextureOffsetImpl_Injected(int name, ref Vector2 offset);
+		private static extern bool HasTextureImpl_Injected(IntPtr _unity_self, int name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTextureScaleImpl_Injected(int name, ref Vector2 scale);
+		private static extern bool HasMatrixImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasVectorImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasBufferImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasConstantBufferImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_renderQueue_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_renderQueue_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_rawRenderQueue_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableKeyword_Injected(IntPtr _unity_self, ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableKeyword_Injected(IntPtr _unity_self, ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsKeywordEnabled_Injected(IntPtr _unity_self, ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableLocalKeyword_Injected(IntPtr _unity_self, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableLocalKeyword_Injected(IntPtr _unity_self, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLocalKeyword_Injected(IntPtr _unity_self, [In] ref LocalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsLocalKeywordEnabled_Injected(IntPtr _unity_self, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LocalKeyword[] GetEnabledKeywords_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetEnabledKeywords_Injected(IntPtr _unity_self, LocalKeyword[] keywords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern MaterialGlobalIlluminationFlags get_globalIlluminationFlags_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_globalIlluminationFlags_Injected(IntPtr _unity_self, MaterialGlobalIlluminationFlags value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_doubleSidedGI_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_doubleSidedGI_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enableInstancing_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enableInstancing_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_passCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetShaderPassEnabled_Injected(IntPtr _unity_self, ref ManagedSpanWrapper passName, bool enabled);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetShaderPassEnabled_Injected(IntPtr _unity_self, ref ManagedSpanWrapper passName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPassName_Injected(IntPtr _unity_self, int pass, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int FindPass_Injected(IntPtr _unity_self, ref ManagedSpanWrapper passName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetOverrideTag_Injected(IntPtr _unity_self, ref ManagedSpanWrapper tag, ref ManagedSpanWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTagImpl_Injected(IntPtr _unity_self, ref ManagedSpanWrapper tag, bool currentSubShaderOnly, ref ManagedSpanWrapper defaultValue, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Lerp_Injected(IntPtr _unity_self, IntPtr start, IntPtr end, float t);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPass_Injected(IntPtr _unity_self, int pass);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPropertiesFromMaterial_Injected(IntPtr _unity_self, IntPtr mat);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyMatchingPropertiesFromMaterial_Injected(IntPtr _unity_self, IntPtr mat);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetShaderKeywords_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetShaderKeywords_Injected(IntPtr _unity_self, string[] names);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetPropertyNamesImpl_Injected(IntPtr _unity_self, int propertyType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPropertyCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ComputeCRC_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetTexturePropertyNames_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTexturePropertyNameIDs_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTexturePropertyNamesInternal_Injected(IntPtr _unity_self, object outNames);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTexturePropertyNameIDsInternal_Injected(IntPtr _unity_self, object outNames);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIntImpl_Injected(IntPtr _unity_self, int name, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetFloatImpl_Injected(IntPtr _unity_self, int name, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetColorImpl_Injected(IntPtr _unity_self, int name, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMatrixImpl_Injected(IntPtr _unity_self, int name, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTextureImpl_Injected(IntPtr _unity_self, int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTextureImpl_Injected(IntPtr _unity_self, int name, IntPtr value, RenderTextureSubElement element);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGraphicsBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetConstantBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetConstantGraphicsBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetIntImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetFloatImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetColorImpl_Injected(IntPtr _unity_self, int name, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMatrixImpl_Injected(IntPtr _unity_self, int name, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetTextureImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBufferImpl_Injected(IntPtr _unity_self, int name, out GraphicsBufferHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetConstantBufferImpl_Injected(IntPtr _unity_self, int name, out GraphicsBufferHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetFloatArrayImpl_Injected(IntPtr _unity_self, int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVectorArrayImpl_Injected(IntPtr _unity_self, int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetColorArrayImpl_Injected(IntPtr _unity_self, int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMatrixArrayImpl_Injected(IntPtr _unity_self, int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetFloatArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVectorArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetColorArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMatrixArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetFloatArrayCountImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVectorArrayCountImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetColorArrayCountImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMatrixArrayCountImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractFloatArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractVectorArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractColorArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractMatrixArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTextureScaleAndOffsetImpl_Injected(IntPtr _unity_self, int name, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTextureOffsetImpl_Injected(IntPtr _unity_self, int name, [In] ref Vector2 offset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTextureScaleImpl_Injected(IntPtr _unity_self, int name, [In] ref Vector2 scale);
+
+		private static readonly int k_ColorId = Shader.PropertyToID("_Color");
+
+		private static readonly int k_MainTexId = Shader.PropertyToID("_MainTex");
 	}
 }

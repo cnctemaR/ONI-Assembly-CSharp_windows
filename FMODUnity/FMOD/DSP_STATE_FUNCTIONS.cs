@@ -1,9 +1,26 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace FMOD
 {
 	public struct DSP_STATE_FUNCTIONS
 	{
+		public DSP_STATE_DFT_FUNCTIONS dft
+		{
+			get
+			{
+				return Marshal.PtrToStructure<DSP_STATE_DFT_FUNCTIONS>(this.dft_internal);
+			}
+		}
+
+		public DSP_STATE_PAN_FUNCTIONS pan
+		{
+			get
+			{
+				return Marshal.PtrToStructure<DSP_STATE_PAN_FUNCTIONS>(this.pan_internal);
+			}
+		}
+
 		public DSP_ALLOC_FUNC alloc;
 
 		public DSP_REALLOC_FUNC realloc;
@@ -14,9 +31,9 @@ namespace FMOD
 
 		public DSP_GETBLOCKSIZE_FUNC getblocksize;
 
-		public IntPtr dft;
+		public IntPtr dft_internal;
 
-		public IntPtr pan;
+		public IntPtr pan_internal;
 
 		public DSP_GETSPEAKERMODE_FUNC getspeakermode;
 

@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
-	[NativeClass(null)]
-	[ExtensionOfNativeClass]
 	[RequiredByNativeCode]
+	[ExtensionOfNativeClass]
+	[NativeClass(null)]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ScriptableObject : Object
 	{
@@ -19,10 +19,17 @@ namespace UnityEngine
 			ScriptableObject.CreateScriptableObject(this);
 		}
 
-		[NativeConditional("ENABLE_MONO")]
 		[Obsolete("Use EditorUtility.SetDirty instead")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetDirty();
+		[NativeConditional("ENABLE_MONO")]
+		public void SetDirty()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ScriptableObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ScriptableObject.SetDirty_Injected(intPtr);
+		}
 
 		public static ScriptableObject CreateInstance(string className)
 		{
@@ -59,20 +66,67 @@ namespace UnityEngine
 			return scriptableObject;
 		}
 
-		[NativeMethod(IsThreadSafe = true)]
+		[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void CreateScriptableObject([Writable] ScriptableObject self);
 
 		[FreeFunction("Scripting::CreateScriptableObject")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ScriptableObject CreateScriptableObjectInstanceFromName(string className);
+		private unsafe static ScriptableObject CreateScriptableObjectInstanceFromName(string className)
+		{
+			ScriptableObject scriptableObject;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(className, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = className.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr = ScriptableObject.CreateScriptableObjectInstanceFromName_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				IntPtr intPtr;
+				scriptableObject = Unmarshal.UnmarshalUnityObject<ScriptableObject>(intPtr);
+				char* ptr = null;
+			}
+			return scriptableObject;
+		}
 
 		[NativeMethod(Name = "Scripting::CreateScriptableObjectWithType", IsFreeFunction = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern ScriptableObject CreateScriptableObjectInstanceFromType(Type type, bool applyDefaultsAndReset);
+		internal static ScriptableObject CreateScriptableObjectInstanceFromType(Type type, bool applyDefaultsAndReset)
+		{
+			return Unmarshal.UnmarshalUnityObject<ScriptableObject>(ScriptableObject.CreateScriptableObjectInstanceFromType_Injected(type, applyDefaultsAndReset));
+		}
 
 		[FreeFunction("Scripting::ResetAndApplyDefaultInstances")]
+		internal static void ResetAndApplyDefaultInstances([NotNull] Object obj)
+		{
+			if (obj == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Object>(obj);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			ScriptableObject.ResetAndApplyDefaultInstances_Injected(intPtr);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ResetAndApplyDefaultInstances([NotNull("NullExceptionObject")] Object obj);
+		private static extern void SetDirty_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr CreateScriptableObjectInstanceFromName_Injected(ref ManagedSpanWrapper className);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr CreateScriptableObjectInstanceFromType_Injected(Type type, bool applyDefaultsAndReset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetAndApplyDefaultInstances_Injected(IntPtr obj);
 	}
 }

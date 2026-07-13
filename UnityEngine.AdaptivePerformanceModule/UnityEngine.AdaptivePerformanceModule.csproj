@@ -1,0 +1,128 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD80}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.AdaptivePerformanceModule</RootNamespace>
+    <AssemblyName>UnityEngine.AdaptivePerformanceModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsUnmanagedAttribute.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveBatching.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveDecals.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveFramerate.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveLayerCulling.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveLOD.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveLut.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveMSAA.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceAnalytics.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceConfigurationDataAttribute.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceGeneralSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceIndexer.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceIndexerSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceInitializer.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceLoader.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceLoaderHelper.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceManager.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceManagerSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceManagerSpawner.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceProfilerStats.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceRenderSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceScaler.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceScalerEfficiencyTracker.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceScalerProfile.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceScalerSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePerformanceScalerSettingsBase.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptivePhysics.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveResolution.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveShadowCascade.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveShadowDistance.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveShadowmapResolution.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveShadowQuality.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveSorting.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveTransparency.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AdaptiveViewDistance.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\APLog.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AutoPerformanceLevelController.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\AutoPerformanceModeController.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Basic\BasicAdaptivePerformanceSubsystem.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Basic\BasicProviderConstants.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Basic\BasicProviderDescriptorRegistration.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Basic\BasicProviderLoader.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Basic\BasicProviderSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\BottleneckUtil.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\ClusterInfo.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Constants.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\CpuTimeProvider.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\DevicePerformanceControlImpl.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\FrameTiming.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\GpuTimeProvider.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Holder.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\IAdaptivePerformance.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\IAdaptivePerformanceSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\IDevelopmentSettings.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\IDevicePerformanceControl.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\IPerformanceModeStatus.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\IPerformanceStatus.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\IThermalStatus.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\LifecycleChangeType.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\LifecycleEventHandler.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceBoostChangeEventArgs.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceBoostChangeHandler.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceBottleneck.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceBottleneckChangeEventArgs.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceBottleneckChangeHandler.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceControlMode.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceLevelChangeEventArgs.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceLevelChangeHandler.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceMetrics.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceMode.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceModeEventHandler.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\PerformanceStateTracker.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\AdaptivePerformanceSubsystem.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\AdaptivePerformanceSubsystemBase.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\AdaptivePerformanceSubsystemDescriptor.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\AdaptivePerformanceSubsystemRegistry.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\Feature.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\IApplicationLifecycle.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\IDevicePerformanceLevelControl.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\Provider\PerformanceDataRecord.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\RunningAverage.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\ScalerTarget.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\ScalerVisualImpact.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\StateAction.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\TemperatureTrend.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\ThermalEventHandler.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\ThermalMetrics.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\ThermalStateTracker.cs" />
+    <Compile Include="UnityEngine\AdaptivePerformance\WarningLevel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDAF}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SubsystemsModule\UnityEngine.SubsystemsModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDB4}</Project>
+      <Name>UnityEngine.SubsystemsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

@@ -23,7 +23,8 @@ namespace Mono.Cecil.Cil
 
 		private ISymbolReader GetSymbolReader(ModuleDefinition module, Disposable<Stream> symbolStream, string fileName)
 		{
-			return new PortablePdbReader(ImageReader.ReadPortablePdb(symbolStream, fileName), module);
+			uint num;
+			return new PortablePdbReader(ImageReader.ReadPortablePdb(symbolStream, fileName, out num), module);
 		}
 	}
 }

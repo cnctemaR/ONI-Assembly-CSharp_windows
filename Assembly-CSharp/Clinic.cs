@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Clinic")]
-public class Clinic : Workable, IGameObjectEffectDescriptor, ISingleSliderControl, ISliderControl
+public class Clinic : Workable, ISingleSliderControl, ISliderControl
 {
 	protected override void OnPrefabInit()
 	{

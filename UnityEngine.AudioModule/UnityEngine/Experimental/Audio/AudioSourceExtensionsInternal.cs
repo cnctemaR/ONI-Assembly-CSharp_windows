@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Experimental.Audio
 {
-	[NativeHeader("AudioScriptingClasses.h")]
 	[NativeHeader("Modules/Audio/Public/AudioSource.h")]
+	[NativeHeader("AudioScriptingClasses.h")]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioSourceExtensions.bindings.h")]
 	internal static class AudioSourceExtensionsInternal
 	{
@@ -20,11 +20,39 @@ namespace UnityEngine.Experimental.Audio
 		}
 
 		[NativeMethod(IsFreeFunction = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_RegisterSampleProviderWithAudioSource([NotNull("NullExceptionObject")] AudioSource source, uint providerId);
+		private static void Internal_RegisterSampleProviderWithAudioSource([NotNull] AudioSource source, uint providerId)
+		{
+			if (source == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AudioSource>(source);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			AudioSourceExtensionsInternal.Internal_RegisterSampleProviderWithAudioSource_Injected(intPtr, providerId);
+		}
 
 		[NativeMethod(IsFreeFunction = true, ThrowsException = true)]
+		private static void Internal_UnregisterSampleProviderFromAudioSource([NotNull] AudioSource source, uint providerId)
+		{
+			if (source == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AudioSource>(source);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			AudioSourceExtensionsInternal.Internal_UnregisterSampleProviderFromAudioSource_Injected(intPtr, providerId);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_UnregisterSampleProviderFromAudioSource([NotNull("NullExceptionObject")] AudioSource source, uint providerId);
+		private static extern void Internal_RegisterSampleProviderWithAudioSource_Injected(IntPtr source, uint providerId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_UnregisterSampleProviderFromAudioSource_Injected(IntPtr source, uint providerId);
 	}
 }

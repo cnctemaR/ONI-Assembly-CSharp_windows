@@ -7,17 +7,17 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Shaders/Shader.h")]
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Misc/ResourceManager.h")]
-	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
 	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
+	[NativeHeader("Runtime/Shaders/Keywords/KeywordSpaceScriptBindings.h")]
+	[NativeHeader("Runtime/Misc/ResourceManager.h")]
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
+	[NativeHeader("Runtime/Shaders/Shader.h")]
 	public sealed class Shader : Object
 	{
-		[Obsolete("Use Graphics.activeTier instead (UnityUpgradable) -> UnityEngine.Graphics.activeTier", false)]
+		[Obsolete("Use Graphics.activeTier instead (UnityUpgradable) -> UnityEngine.Graphics.activeTier", true)]
 		public static ShaderHardwareTier globalShaderHardwareTier
 		{
 			get
@@ -36,8 +36,43 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("GetBuiltinResource<Shader>")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Shader FindBuiltin(string name);
+		internal unsafe static Shader FindBuiltin(string name)
+		{
+			Shader shader;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr = Shader.FindBuiltin_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				IntPtr intPtr;
+				shader = Unmarshal.UnmarshalUnityObject<Shader>(intPtr);
+				char* ptr = null;
+			}
+			return shader;
+		}
+
+		[FreeFunction("ShaderScripting::CreateFromCompiledData")]
+		internal unsafe static Shader CreateFromCompiledData(byte[] compiledData, Shader[] dependencies)
+		{
+			Span<byte> span = new Span<byte>(compiledData);
+			Shader shader;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				shader = Unmarshal.UnmarshalUnityObject<Shader>(Shader.CreateFromCompiledData_Injected(ref managedSpanWrapper, dependencies));
+			}
+			return shader;
+		}
 
 		[NativeProperty("MaxChunksRuntimeOverride")]
 		public static extern int maximumChunksOverride
@@ -49,12 +84,26 @@ namespace UnityEngine
 		}
 
 		[NativeProperty("MaximumShaderLOD")]
-		public extern int maximumLOD
+		public int maximumLOD
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Shader.get_maximumLOD_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Shader.set_maximumLOD_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("GlobalMaximumShaderLOD")]
@@ -66,19 +115,57 @@ namespace UnityEngine
 			set;
 		}
 
-		public extern bool isSupported
+		public bool isSupported
 		{
 			[NativeMethod("IsSupported")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Shader.get_isSupported_Injected(intPtr);
+			}
 		}
 
-		public static extern string globalRenderPipeline
+		public unsafe static string globalRenderPipeline
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Shader.get_globalRenderPipeline_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Shader.set_globalRenderPipeline_Injected(ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
 		public static GlobalKeyword[] enabledGlobalKeywords
@@ -101,31 +188,122 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				LocalKeywordSpace localKeywordSpace;
-				this.get_keywordSpace_Injected(out localKeywordSpace);
+				Shader.get_keywordSpace_Injected(intPtr, out localKeywordSpace);
 				return localKeywordSpace;
 			}
 		}
 
 		[FreeFunction("keywords::GetEnabledGlobalKeywords")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern GlobalKeyword[] GetEnabledGlobalKeywords();
+		internal static GlobalKeyword[] GetEnabledGlobalKeywords()
+		{
+			GlobalKeyword[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Shader.GetEnabledGlobalKeywords_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				GlobalKeyword[] array;
+				blittableArrayWrapper.Unmarshal<GlobalKeyword>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("keywords::GetAllGlobalKeywords")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern GlobalKeyword[] GetAllGlobalKeywords();
+		internal static GlobalKeyword[] GetAllGlobalKeywords()
+		{
+			GlobalKeyword[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Shader.GetAllGlobalKeywords_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				GlobalKeyword[] array;
+				blittableArrayWrapper.Unmarshal<GlobalKeyword>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("ShaderScripting::EnableKeyword")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void EnableKeyword(string keyword);
+		public unsafe static void EnableKeyword(string keyword)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Shader.EnableKeyword_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("ShaderScripting::DisableKeyword")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DisableKeyword(string keyword);
+		public unsafe static void DisableKeyword(string keyword)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Shader.DisableKeyword_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("ShaderScripting::IsKeywordEnabled")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsKeywordEnabled(string keyword);
+		public unsafe static bool IsKeywordEnabled(string keyword)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = Shader.IsKeywordEnabled_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		[FreeFunction("ShaderScripting::EnableKeyword")]
 		internal static void EnableKeywordFast(GlobalKeyword keyword)
@@ -171,18 +349,44 @@ namespace UnityEngine
 			return Shader.IsKeywordEnabledFast(keyword);
 		}
 
-		public extern int renderQueue
+		[FreeFunction("ShaderScripting::GetGlobalPropertyCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int GetGlobalPropertyCount();
+
+		[FreeFunction("ShaderScripting::GetGlobalPropertyCount")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetGlobalPropertyCountImpl(int propertyType);
+
+		[FreeFunction("ShaderScripting::ExtractGlobalPropertyNames")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractGlobalPropertyNamesImpl(int propertyType, [Out] string[] names);
+
+		public int renderQueue
 		{
 			[FreeFunction("ShaderScripting::GetRenderQueue", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Shader.get_renderQueue_Injected(intPtr);
+			}
 		}
 
-		internal extern DisableBatchingType disableBatching
+		internal DisableBatchingType disableBatching
 		{
 			[FreeFunction("ShaderScripting::GetDisableBatchingType", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Shader.get_disableBatching_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction]
@@ -190,37 +394,138 @@ namespace UnityEngine
 		public static extern void WarmupAllShaders();
 
 		[FreeFunction("ShaderScripting::TagToID")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int TagToID(string name);
-
-		[FreeFunction("ShaderScripting::IDToTag")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string IDToTag(int name);
-
-		[FreeFunction(Name = "ShaderScripting::PropertyToID", IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int PropertyToID(string name);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Shader GetDependency(string name);
-
-		public extern int passCount
+		internal unsafe static int TagToID(string name)
 		{
-			[FreeFunction(Name = "ShaderScripting::GetPassCount", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = Shader.TagToID_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
 		}
 
-		public extern int subshaderCount
+		[FreeFunction("ShaderScripting::IDToTag")]
+		internal static string IDToTag(int name)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				Shader.IDToTag_Injected(name, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		[FreeFunction(Name = "ShaderScripting::PropertyToID", IsThreadSafe = true)]
+		public unsafe static int PropertyToID(string name)
+		{
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = Shader.PropertyToID_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
+
+		public unsafe Shader GetDependency(string name)
+		{
+			Shader shader;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr dependency_Injected = Shader.GetDependency_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				IntPtr dependency_Injected;
+				shader = Unmarshal.UnmarshalUnityObject<Shader>(dependency_Injected);
+				char* ptr = null;
+			}
+			return shader;
+		}
+
+		public int passCount
+		{
+			[FreeFunction(Name = "ShaderScripting::GetPassCount", HasExplicitThis = true)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Shader.get_passCount_Injected(intPtr);
+			}
+		}
+
+		public int subshaderCount
 		{
 			[FreeFunction(Name = "ShaderScripting::GetSubshaderCount", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Shader.get_subshaderCount_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction(Name = "ShaderScripting::GetPassCountInSubshader", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetPassCountInSubshader(int subshaderIndex);
+		public int GetPassCountInSubshader(int subshaderIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Shader.GetPassCountInSubshader_Injected(intPtr, subshaderIndex);
+		}
 
 		public ShaderTagId FindPassTagValue(int passIndex, ShaderTagId tagName)
 		{
@@ -270,16 +575,37 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "ShaderScripting::FindPassTagValue", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int Internal_FindPassTagValue(int passIndex, int tagName);
+		private int Internal_FindPassTagValue(int passIndex, int tagName)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Shader.Internal_FindPassTagValue_Injected(intPtr, passIndex, tagName);
+		}
 
 		[FreeFunction(Name = "ShaderScripting::FindPassTagValue", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int Internal_FindPassTagValueInSubShader(int subShaderIndex, int passIndex, int tagName);
+		private int Internal_FindPassTagValueInSubShader(int subShaderIndex, int passIndex, int tagName)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Shader.Internal_FindPassTagValueInSubShader_Injected(intPtr, subShaderIndex, passIndex, tagName);
+		}
 
 		[FreeFunction(Name = "ShaderScripting::FindSubshaderTagValue", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int Internal_FindSubshaderTagValue(int subShaderIndex, int tagName);
+		private int Internal_FindSubshaderTagValue(int subShaderIndex, int tagName)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Shader.Internal_FindSubshaderTagValue_Injected(intPtr, subShaderIndex, tagName);
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalInt")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -302,28 +628,46 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("ShaderScripting::SetGlobalTexture")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalTextureImpl(int name, Texture value);
+		private static void SetGlobalTextureImpl(int name, Texture value)
+		{
+			Shader.SetGlobalTextureImpl_Injected(name, Object.MarshalledUnityObject.Marshal<Texture>(value));
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalRenderTexture")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalRenderTextureImpl(int name, RenderTexture value, RenderTextureSubElement element);
+		private static void SetGlobalRenderTextureImpl(int name, RenderTexture value, RenderTextureSubElement element)
+		{
+			Shader.SetGlobalRenderTextureImpl_Injected(name, Object.MarshalledUnityObject.Marshal<RenderTexture>(value), element);
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalBufferImpl(int name, ComputeBuffer value);
+		private static void SetGlobalBufferImpl(int name, ComputeBuffer value)
+		{
+			Shader.SetGlobalBufferImpl_Injected(name, (value == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalGraphicsBufferImpl(int name, GraphicsBuffer value);
+		private static void SetGlobalGraphicsBufferImpl(int name, GraphicsBuffer value)
+		{
+			Shader.SetGlobalGraphicsBufferImpl_Injected(name, (value == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalConstantBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
+		private static void SetGlobalConstantBufferImpl(int name, ComputeBuffer value, int offset, int size)
+		{
+			Shader.SetGlobalConstantBufferImpl_Injected(name, (value == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(value), offset, size);
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalConstantBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
+		private static void SetGlobalConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size)
+		{
+			Shader.SetGlobalConstantGraphicsBufferImpl_Injected(name, (value == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(value), offset, size);
+		}
+
+		[FreeFunction("ShaderScripting::SetGlobalRayTracingAccelerationStructure")]
+		private static void SetGlobalRayTracingAccelerationStructureImpl(int name, RayTracingAccelerationStructure accelerationStructure)
+		{
+			Shader.SetGlobalRayTracingAccelerationStructureImpl_Injected(name, (accelerationStructure == null) ? ((IntPtr)0) : RayTracingAccelerationStructure.BindingsMarshaller.ConvertToNative(accelerationStructure));
+		}
 
 		[FreeFunction("ShaderScripting::GetGlobalInt")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -350,32 +694,100 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("ShaderScripting::GetGlobalTexture")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Texture GetGlobalTextureImpl(int name);
+		private static Texture GetGlobalTextureImpl(int name)
+		{
+			return Unmarshal.UnmarshalUnityObject<Texture>(Shader.GetGlobalTextureImpl_Injected(name));
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalFloatArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalFloatArrayImpl(int name, float[] values, int count);
+		private unsafe static void SetGlobalFloatArrayImpl(int name, float[] values, int count)
+		{
+			Span<float> span = new Span<float>(values);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Shader.SetGlobalFloatArrayImpl_Injected(name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalVectorArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalVectorArrayImpl(int name, Vector4[] values, int count);
+		private unsafe static void SetGlobalVectorArrayImpl(int name, Vector4[] values, int count)
+		{
+			Span<Vector4> span = new Span<Vector4>(values);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Shader.SetGlobalVectorArrayImpl_Injected(name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[FreeFunction("ShaderScripting::SetGlobalMatrixArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalMatrixArrayImpl(int name, Matrix4x4[] values, int count);
+		private unsafe static void SetGlobalMatrixArrayImpl(int name, Matrix4x4[] values, int count)
+		{
+			Span<Matrix4x4> span = new Span<Matrix4x4>(values);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Shader.SetGlobalMatrixArrayImpl_Injected(name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[FreeFunction("ShaderScripting::GetGlobalFloatArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float[] GetGlobalFloatArrayImpl(int name);
+		private static float[] GetGlobalFloatArrayImpl(int name)
+		{
+			float[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Shader.GetGlobalFloatArrayImpl_Injected(name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				float[] array;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("ShaderScripting::GetGlobalVectorArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Vector4[] GetGlobalVectorArrayImpl(int name);
+		private static Vector4[] GetGlobalVectorArrayImpl(int name)
+		{
+			Vector4[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Shader.GetGlobalVectorArrayImpl_Injected(name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Vector4[] array;
+				blittableArrayWrapper.Unmarshal<Vector4>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("ShaderScripting::GetGlobalMatrixArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Matrix4x4[] GetGlobalMatrixArrayImpl(int name);
+		private static Matrix4x4[] GetGlobalMatrixArrayImpl(int name)
+		{
+			Matrix4x4[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Shader.GetGlobalMatrixArrayImpl_Injected(name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Matrix4x4[] array;
+				blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("ShaderScripting::GetGlobalFloatArrayCount")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -390,16 +802,82 @@ namespace UnityEngine
 		private static extern int GetGlobalMatrixArrayCountImpl(int name);
 
 		[FreeFunction("ShaderScripting::ExtractGlobalFloatArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ExtractGlobalFloatArrayImpl(int name, [Out] float[] val);
+		private unsafe static void ExtractGlobalFloatArrayImpl(int name, [Out] float[] val)
+		{
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (float[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Shader.ExtractGlobalFloatArrayImpl_Injected(name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				float[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+			}
+		}
 
 		[FreeFunction("ShaderScripting::ExtractGlobalVectorArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ExtractGlobalVectorArrayImpl(int name, [Out] Vector4[] val);
+		private unsafe static void ExtractGlobalVectorArrayImpl(int name, [Out] Vector4[] val)
+		{
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (Vector4[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Shader.ExtractGlobalVectorArrayImpl_Injected(name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Vector4[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Vector4>(ref array);
+			}
+		}
 
 		[FreeFunction("ShaderScripting::ExtractGlobalMatrixArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ExtractGlobalMatrixArrayImpl(int name, [Out] Matrix4x4[] val);
+		private unsafe static void ExtractGlobalMatrixArrayImpl(int name, [Out] Matrix4x4[] val)
+		{
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (Matrix4x4[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Shader.ExtractGlobalMatrixArrayImpl_Injected(name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Matrix4x4[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+			}
+		}
 
 		private static void SetGlobalFloatArray(int name, float[] values, int count)
 		{
@@ -474,7 +952,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<float>(values, globalFloatArrayCountImpl);
-				Shader.ExtractGlobalFloatArrayImpl(name, (float[])NoAllocHelpers.ExtractArrayFromList(values));
+				Shader.ExtractGlobalFloatArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<float>(values));
 			}
 		}
 
@@ -491,7 +969,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Vector4>(values, globalVectorArrayCountImpl);
-				Shader.ExtractGlobalVectorArrayImpl(name, (Vector4[])NoAllocHelpers.ExtractArrayFromList(values));
+				Shader.ExtractGlobalVectorArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<Vector4>(values));
 			}
 		}
 
@@ -508,7 +986,24 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Matrix4x4>(values, globalMatrixArrayCountImpl);
-				Shader.ExtractGlobalMatrixArrayImpl(name, (Matrix4x4[])NoAllocHelpers.ExtractArrayFromList(values));
+				Shader.ExtractGlobalMatrixArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values));
+			}
+		}
+
+		private static void ExtractGlobalPropertyNames(MaterialPropertyType type, List<string> names)
+		{
+			bool flag = names == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("names");
+			}
+			names.Clear();
+			int globalPropertyCountImpl = Shader.GetGlobalPropertyCountImpl((int)type);
+			bool flag2 = globalPropertyCountImpl > 0;
+			if (flag2)
+			{
+				NoAllocHelpers.EnsureListElemCount<string>(names, globalPropertyCountImpl);
+				Shader.ExtractGlobalPropertyNamesImpl((int)type, NoAllocHelpers.ExtractArrayFromList<string>(names));
 			}
 		}
 
@@ -632,14 +1127,24 @@ namespace UnityEngine
 			Shader.SetGlobalConstantGraphicsBufferImpl(nameID, value, offset, size);
 		}
 
+		public static void SetGlobalRayTracingAccelerationStructure(string name, RayTracingAccelerationStructure value)
+		{
+			Shader.SetGlobalRayTracingAccelerationStructureImpl(Shader.PropertyToID(name), value);
+		}
+
+		public static void SetGlobalRayTracingAccelerationStructure(int nameID, RayTracingAccelerationStructure value)
+		{
+			Shader.SetGlobalRayTracingAccelerationStructureImpl(nameID, value);
+		}
+
 		public static void SetGlobalFloatArray(string name, List<float> values)
 		{
-			Shader.SetGlobalFloatArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
+			Shader.SetGlobalFloatArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<float>(values), values.Count);
 		}
 
 		public static void SetGlobalFloatArray(int nameID, List<float> values)
 		{
-			Shader.SetGlobalFloatArray(nameID, NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
+			Shader.SetGlobalFloatArray(nameID, NoAllocHelpers.ExtractArrayFromList<float>(values), values.Count);
 		}
 
 		public static void SetGlobalFloatArray(string name, float[] values)
@@ -654,12 +1159,12 @@ namespace UnityEngine
 
 		public static void SetGlobalVectorArray(string name, List<Vector4> values)
 		{
-			Shader.SetGlobalVectorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
+			Shader.SetGlobalVectorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<Vector4>(values), values.Count);
 		}
 
 		public static void SetGlobalVectorArray(int nameID, List<Vector4> values)
 		{
-			Shader.SetGlobalVectorArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
+			Shader.SetGlobalVectorArray(nameID, NoAllocHelpers.ExtractArrayFromList<Vector4>(values), values.Count);
 		}
 
 		public static void SetGlobalVectorArray(string name, Vector4[] values)
@@ -674,12 +1179,12 @@ namespace UnityEngine
 
 		public static void SetGlobalMatrixArray(string name, List<Matrix4x4> values)
 		{
-			Shader.SetGlobalMatrixArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
+			Shader.SetGlobalMatrixArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values), values.Count);
 		}
 
 		public static void SetGlobalMatrixArray(int nameID, List<Matrix4x4> values)
 		{
-			Shader.SetGlobalMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
+			Shader.SetGlobalMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values), values.Count);
 		}
 
 		public static void SetGlobalMatrixArray(string name, Matrix4x4[] values)
@@ -822,57 +1327,225 @@ namespace UnityEngine
 			Shader.ExtractGlobalMatrixArray(nameID, values);
 		}
 
+		internal static void GetGlobalPropertyNames(MaterialPropertyType type, List<string> names)
+		{
+			Shader.ExtractGlobalPropertyNames(type, names);
+		}
+
 		private Shader()
 		{
 		}
 
 		[FreeFunction("ShaderScripting::GetPropertyName")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetPropertyName([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static string GetPropertyName([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(shader, "shader");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				Shader.GetPropertyName_Injected(intPtr, propertyIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyNameId")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetPropertyNameId([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static int GetPropertyNameId([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			return Shader.GetPropertyNameId_Injected(intPtr, propertyIndex);
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyType")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderPropertyType GetPropertyType([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static ShaderPropertyType GetPropertyType([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			return Shader.GetPropertyType_Injected(intPtr, propertyIndex);
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyDescription")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetPropertyDescription([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static string GetPropertyDescription([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(shader, "shader");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				Shader.GetPropertyDescription_Injected(intPtr, propertyIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyFlags")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderPropertyFlags GetPropertyFlags([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static ShaderPropertyFlags GetPropertyFlags([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			return Shader.GetPropertyFlags_Injected(intPtr, propertyIndex);
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyAttributes")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string[] GetPropertyAttributes([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static string[] GetPropertyAttributes([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			return Shader.GetPropertyAttributes_Injected(intPtr, propertyIndex);
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyDefaultIntValue")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetPropertyDefaultIntValue([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static int GetPropertyDefaultIntValue([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			return Shader.GetPropertyDefaultIntValue_Injected(intPtr, propertyIndex);
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyDefaultValue")]
-		private static Vector4 GetPropertyDefaultValue([NotNull("ArgumentNullException")] Shader shader, int propertyIndex)
+		private static Vector4 GetPropertyDefaultValue([NotNull] Shader shader, int propertyIndex)
 		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
 			Vector4 vector;
-			Shader.GetPropertyDefaultValue_Injected(shader, propertyIndex, out vector);
+			Shader.GetPropertyDefaultValue_Injected(intPtr, propertyIndex, out vector);
 			return vector;
 		}
 
 		[FreeFunction("ShaderScripting::GetPropertyTextureDimension")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern TextureDimension GetPropertyTextureDimension([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static TextureDimension GetPropertyTextureDimension([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			return Shader.GetPropertyTextureDimension_Injected(intPtr, propertyIndex);
+		}
 
 		[FreeFunction("ShaderScripting::GetPropertyTextureDefaultName")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetPropertyTextureDefaultName([NotNull("ArgumentNullException")] Shader shader, int propertyIndex);
+		private static string GetPropertyTextureDefaultName([NotNull] Shader shader, int propertyIndex)
+		{
+			if (shader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(shader, "shader");
+			}
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(shader);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(shader, "shader");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				Shader.GetPropertyTextureDefaultName_Injected(intPtr, propertyIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("ShaderScripting::FindTextureStack")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool FindTextureStackImpl([NotNull("ArgumentNullException")] Shader s, int propertyIdx, out string stackName, out int layerIndex);
+		private static bool FindTextureStackImpl([NotNull] Shader s, int propertyIdx, out string stackName, out int layerIndex)
+		{
+			if (s == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(s, "s");
+			}
+			bool flag;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(s);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(s, "s");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				flag = Shader.FindTextureStackImpl_Injected(intPtr, propertyIdx, out managedSpanWrapper, out layerIndex);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stackName = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return flag;
+		}
 
 		private static void CheckPropertyIndex(Shader s, int propertyIndex)
 		{
@@ -883,11 +1556,43 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetPropertyCount();
+		public int GetPropertyCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Shader.GetPropertyCount_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int FindPropertyIndex(string propertyName);
+		public unsafe int FindPropertyIndex(string propertyName)
+		{
+			int num;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Shader>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(propertyName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = propertyName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = Shader.FindPropertyIndex_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
 
 		public string GetPropertyName(int propertyIndex)
 		{
@@ -1008,25 +1713,118 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_keywordSpace_Injected(out LocalKeywordSpace ret);
+		private static extern IntPtr FindBuiltin_Injected(ref ManagedSpanWrapper name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void EnableKeywordFast_Injected(ref GlobalKeyword keyword);
+		private static extern IntPtr CreateFromCompiledData_Injected(ref ManagedSpanWrapper compiledData, Shader[] dependencies);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DisableKeywordFast_Injected(ref GlobalKeyword keyword);
+		private static extern int get_maximumLOD_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetKeywordFast_Injected(ref GlobalKeyword keyword, bool value);
+		private static extern void set_maximumLOD_Injected(IntPtr _unity_self, int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsKeywordEnabledFast_Injected(ref GlobalKeyword keyword);
+		private static extern bool get_isSupported_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalVectorImpl_Injected(int name, ref Vector4 value);
+		private static extern void get_globalRenderPipeline_Injected(out ManagedSpanWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetGlobalMatrixImpl_Injected(int name, ref Matrix4x4 value);
+		private static extern void set_globalRenderPipeline_Injected(ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_keywordSpace_Injected(IntPtr _unity_self, out LocalKeywordSpace ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetEnabledGlobalKeywords_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAllGlobalKeywords_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableKeyword_Injected(ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableKeyword_Injected(ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsKeywordEnabled_Injected(ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableKeywordFast_Injected([In] ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableKeywordFast_Injected([In] ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetKeywordFast_Injected([In] ref GlobalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsKeywordEnabledFast_Injected([In] ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_renderQueue_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern DisableBatchingType get_disableBatching_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int TagToID_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IDToTag_Injected(int name, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PropertyToID_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetDependency_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_passCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_subshaderCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPassCountInSubshader_Injected(IntPtr _unity_self, int subshaderIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_FindPassTagValue_Injected(IntPtr _unity_self, int passIndex, int tagName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_FindPassTagValueInSubShader_Injected(IntPtr _unity_self, int subShaderIndex, int passIndex, int tagName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_FindSubshaderTagValue_Injected(IntPtr _unity_self, int subShaderIndex, int tagName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalVectorImpl_Injected(int name, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalMatrixImpl_Injected(int name, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalTextureImpl_Injected(int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalRenderTextureImpl_Injected(int name, IntPtr value, RenderTextureSubElement element);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalBufferImpl_Injected(int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalGraphicsBufferImpl_Injected(int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalConstantBufferImpl_Injected(int name, IntPtr value, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalConstantGraphicsBufferImpl_Injected(int name, IntPtr value, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalRayTracingAccelerationStructureImpl_Injected(int name, IntPtr accelerationStructure);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetGlobalVectorImpl_Injected(int name, out Vector4 ret);
@@ -1035,6 +1833,72 @@ namespace UnityEngine
 		private static extern void GetGlobalMatrixImpl_Injected(int name, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetPropertyDefaultValue_Injected(Shader shader, int propertyIndex, out Vector4 ret);
+		private static extern IntPtr GetGlobalTextureImpl_Injected(int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalFloatArrayImpl_Injected(int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalVectorArrayImpl_Injected(int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalMatrixArrayImpl_Injected(int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGlobalFloatArrayImpl_Injected(int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGlobalVectorArrayImpl_Injected(int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGlobalMatrixArrayImpl_Injected(int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractGlobalFloatArrayImpl_Injected(int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractGlobalVectorArrayImpl_Injected(int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractGlobalMatrixArrayImpl_Injected(int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPropertyName_Injected(IntPtr shader, int propertyIndex, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPropertyNameId_Injected(IntPtr shader, int propertyIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShaderPropertyType GetPropertyType_Injected(IntPtr shader, int propertyIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPropertyDescription_Injected(IntPtr shader, int propertyIndex, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShaderPropertyFlags GetPropertyFlags_Injected(IntPtr shader, int propertyIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetPropertyAttributes_Injected(IntPtr shader, int propertyIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPropertyDefaultIntValue_Injected(IntPtr shader, int propertyIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPropertyDefaultValue_Injected(IntPtr shader, int propertyIndex, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureDimension GetPropertyTextureDimension_Injected(IntPtr shader, int propertyIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPropertyTextureDefaultName_Injected(IntPtr shader, int propertyIndex, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool FindTextureStackImpl_Injected(IntPtr s, int propertyIdx, out ManagedSpanWrapper stackName, out int layerIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPropertyCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int FindPropertyIndex_Injected(IntPtr _unity_self, ref ManagedSpanWrapper propertyName);
 	}
 }

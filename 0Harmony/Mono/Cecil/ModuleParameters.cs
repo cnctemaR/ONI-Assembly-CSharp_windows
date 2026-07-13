@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public sealed class ModuleParameters
+	internal sealed class ModuleParameters
 	{
 		public ModuleKind Kind
 		{

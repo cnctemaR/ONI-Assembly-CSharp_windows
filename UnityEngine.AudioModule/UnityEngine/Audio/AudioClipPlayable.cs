@@ -9,9 +9,9 @@ namespace UnityEngine.Audio
 {
 	[RequiredByNativeCode]
 	[StaticAccessor("AudioClipPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioClipPlayable.bindings.h")]
+	[NativeHeader("Modules/Audio/Public/Director/AudioClipPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	public struct AudioClipPlayable : IPlayable, IEquatable<AudioClipPlayable>
 	{
 		public static AudioClipPlayable Create(PlayableGraph graph, AudioClip clip, bool looping)
@@ -109,6 +109,11 @@ namespace UnityEngine.Audio
 				throw new ArgumentException("Trying to set AudioClipPlayable volume outside of range (0.0 - 1.0): " + value.ToString());
 			}
 			AudioClipPlayable.SetVolumeInternal(ref this.m_Handle, value);
+		}
+
+		internal float GetClipPositionSec()
+		{
+			return AudioClipPlayable.GetClipPositionSecInternal(ref this.m_Handle);
 		}
 
 		internal float GetStereoPan()
@@ -210,12 +215,16 @@ namespace UnityEngine.Audio
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AudioClip GetClipInternal(ref PlayableHandle hdl);
+		private static AudioClip GetClipInternal(ref PlayableHandle hdl)
+		{
+			return Unmarshal.UnmarshalUnityObject<AudioClip>(AudioClipPlayable.GetClipInternal_Injected(ref hdl));
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetClipInternal(ref PlayableHandle hdl, AudioClip clip);
+		private static void SetClipInternal(ref PlayableHandle hdl, AudioClip clip)
+		{
+			AudioClipPlayable.SetClipInternal_Injected(ref hdl, Object.MarshalledUnityObject.Marshal<AudioClip>(clip));
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -232,6 +241,10 @@ namespace UnityEngine.Audio
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetVolumeInternal(ref PlayableHandle hdl, float volume);
+
+		[NativeThrows]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetClipPositionSecInternal(ref PlayableHandle hdl);
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -270,12 +283,23 @@ namespace UnityEngine.Audio
 		private static extern void SetPauseDelayInternal(ref PlayableHandle hdl, double delay);
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool InternalCreateAudioClipPlayable(ref PlayableGraph graph, AudioClip clip, bool looping, ref PlayableHandle handle);
+		private static bool InternalCreateAudioClipPlayable(ref PlayableGraph graph, AudioClip clip, bool looping, ref PlayableHandle handle)
+		{
+			return AudioClipPlayable.InternalCreateAudioClipPlayable_Injected(ref graph, Object.MarshalledUnityObject.Marshal<AudioClip>(clip), looping, ref handle);
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ValidateType(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetClipInternal_Injected(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetClipInternal_Injected(ref PlayableHandle hdl, IntPtr clip);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool InternalCreateAudioClipPlayable_Injected(ref PlayableGraph graph, IntPtr clip, bool looping, ref PlayableHandle handle);
 
 		private PlayableHandle m_Handle;
 	}

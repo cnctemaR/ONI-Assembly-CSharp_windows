@@ -11,12 +11,32 @@ namespace UnityEngine.Windows.Speech
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		protected static extern IntPtr CreateFromKeywords(object self, [Unmarshalled] string[] keywords, ConfidenceLevel minimumConfidence);
+		protected static extern IntPtr CreateFromKeywords(object self, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] string[] keywords, ConfidenceLevel minimumConfidence);
 
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		protected static extern IntPtr CreateFromGrammarFile(object self, string grammarFilePath, ConfidenceLevel minimumConfidence);
+		protected unsafe static IntPtr CreateFromGrammarFile(object self, string grammarFilePath, ConfidenceLevel minimumConfidence)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(grammarFilePath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = grammarFilePath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = PhraseRecognizer.CreateFromGrammarFile_Injected(self, ref managedSpanWrapper, minimumConfidence);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
 
 		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
@@ -103,13 +123,13 @@ namespace UnityEngine.Windows.Speech
 		}
 
 		[RequiredByNativeCode]
-		private void InvokePhraseRecognizedEvent(string text, ConfidenceLevel confidence, SemanticMeaning[] semanticMeanings, long phraseStartFileTime, long phraseDurationTicks)
+		private unsafe void InvokePhraseRecognizedEvent(IntPtr rawText, int rawTextLength, ConfidenceLevel confidence, SemanticMeaning[] semanticMeanings, long phraseStartFileTime, long phraseDurationTicks)
 		{
 			PhraseRecognizer.PhraseRecognizedDelegate onPhraseRecognized = this.OnPhraseRecognized;
 			bool flag = onPhraseRecognized != null;
 			if (flag)
 			{
-				onPhraseRecognized(new PhraseRecognizedEventArgs(text, confidence, semanticMeanings, DateTime.FromFileTime(phraseStartFileTime), TimeSpan.FromTicks(phraseDurationTicks)));
+				onPhraseRecognized(new PhraseRecognizedEventArgs(new string((char*)(void*)rawText, 0, rawTextLength), confidence, semanticMeanings, DateTime.FromFileTime(phraseStartFileTime), TimeSpan.FromTicks(phraseDurationTicks)));
 			}
 		}
 
@@ -137,6 +157,9 @@ namespace UnityEngine.Windows.Speech
 			}
 			return array;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr CreateFromGrammarFile_Injected(object self, ref ManagedSpanWrapper grammarFilePath, ConfidenceLevel minimumConfidence);
 
 		protected IntPtr m_Recognizer;
 

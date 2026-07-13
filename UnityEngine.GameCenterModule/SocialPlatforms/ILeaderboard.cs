@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("ILeaderboard is deprecated and will be removed in a future release.", false)]
 	public interface ILeaderboard
 	{
 		void SetUserFilter(string[] userIDs);

@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Input
 {
-	[NativeHeader("Modules/Input/Private/InputModuleBindings.h")]
 	[NativeHeader("Modules/Input/Private/InputInternal.h")]
+	[NativeHeader("Modules/Input/Private/InputModuleBindings.h")]
 	internal class NativeInputSystem
 	{
 		public static Action<int, string> onDeviceDiscovered
@@ -109,6 +109,9 @@ namespace UnityEngineInternal.Input
 		public static extern void SetPollingFrequency(float hertz);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern float GetPollingFrequency();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Update(NativeInputUpdateType updateType);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -127,6 +130,18 @@ namespace UnityEngineInternal.Input
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		[NativeProperty("NormalizeScrollWheelDelta")]
+		internal static extern bool normalizeScrollWheelDelta
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern float GetScrollWheelDeltaPerTick();
 
 		public static NativeUpdateCallback onUpdate;
 

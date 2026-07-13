@@ -10,5 +10,7 @@ namespace UnityEngine
 		public Scene scene;
 
 		public bool worldSpace;
+
+		public bool originalImmutable;
 	}
 }

@@ -290,7 +290,7 @@ namespace KMod
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => DlcManager.IsCorrectDlcSubscribed(v.info)).ToList<Mod.ArchivedVersion>();
 					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => v.info.APIVersion == 2 || v.info.APIVersion == 0).ToList<Mod.ArchivedVersion>();
 					Mod.ArchivedVersion archivedVersion2 = (from v in list2
-						where (long)v.info.minimumSupportedBuild <= 707956L
+						where (long)v.info.minimumSupportedBuild <= 719533L
 						orderby v.info.minimumSupportedBuild descending
 						select v).FirstOrDefault<Mod.ArchivedVersion>();
 					if (archivedVersion2 != null)
@@ -592,41 +592,68 @@ namespace KMod
 				this.status = Mod.Status.Installed;
 				return;
 			}
-			this.status = Mod.Status.ReinstallPending;
+			if (this.status != Mod.Status.CannotInstall)
+			{
+				this.status = Mod.Status.ReinstallPending;
+			}
 			if (this.file_source == null)
 			{
 				return;
 			}
-			if (!FileUtil.DeleteDirectory(this.label.install_path, 0))
+			if (!this.DeleteInstallPathDirectory())
 			{
 				return;
 			}
-			if (!FileUtil.CreateDirectory(this.label.install_path, 0))
+			if (!this.CreateInstallPathDirectory())
 			{
 				return;
 			}
-			this.file_source.CopyTo(this.label.install_path, null);
+			if (!this.file_source.TryCopyTo(this.label.install_path, null))
+			{
+				return;
+			}
 			this.file_source = new Directory(this.label.install_path);
 			this.status = Mod.Status.Installed;
+		}
+
+		private bool DeleteInstallPathDirectory()
+		{
+			return FileUtil.DeleteDirectory(this.label.install_path, 0);
+		}
+
+		private bool CreateInstallPathDirectory()
+		{
+			return FileUtil.CreateDirectory(this.label.install_path, 0);
 		}
 
 		public bool Uninstall()
 		{
 			this.SetEnabledForActiveDlc(false);
+			bool flag = true;
 			if (this.loaded_content != (Content)0)
 			{
 				global::Debug.Log(string.Format("Can't uninstall {0}: still has loaded content: {1}", this.label.ToString(), this.loaded_content.ToString()));
-				this.status = Mod.Status.UninstallPending;
-				return false;
+				flag = false;
 			}
-			if (!this.IsLocal && !FileUtil.DeleteDirectory(this.label.install_path, 0))
+			if (!this.IsLocal && !this.DeleteInstallPathDirectory())
 			{
 				global::Debug.Log(string.Format("Can't uninstall {0}: directory deletion failed", this.label.ToString()));
-				this.status = Mod.Status.UninstallPending;
-				return false;
+				flag = false;
 			}
-			this.status = Mod.Status.NotInstalled;
-			return true;
+			if (flag)
+			{
+				this.status = Mod.Status.NotInstalled;
+			}
+			else
+			{
+				switch (this.status)
+				{
+				case Mod.Status.Installed:
+					this.status = Mod.Status.UninstallPending;
+					break;
+				}
+			}
+			return flag;
 		}
 
 		private bool LoadStrings()
@@ -959,7 +986,8 @@ namespace KMod
 			NotInstalled,
 			Installed,
 			UninstallPending,
-			ReinstallPending
+			ReinstallPending,
+			CannotInstall
 		}
 
 		public class ArchivedVersion

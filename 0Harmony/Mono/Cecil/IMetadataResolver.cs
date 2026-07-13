@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public interface IMetadataResolver
+	internal interface IMetadataResolver
 	{
 		TypeDefinition Resolve(TypeReference type);
 

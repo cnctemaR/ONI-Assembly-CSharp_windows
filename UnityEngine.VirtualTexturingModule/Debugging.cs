@@ -18,8 +18,21 @@ namespace UnityEngine.Rendering.VirtualTexturing
 		public static extern void GrabHandleInfo(out Debugging.Handle debugHandle, int index);
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetInfoDump();
+		public static string GetInfoDump()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				Debugging.GetInfoDump_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[NativeThrows]
 		public static extern bool debugTilesEnabled
@@ -54,6 +67,9 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetInfoDump_Injected(out ManagedSpanWrapper ret);
 
 		[NativeHeader("Modules/VirtualTexturing/Public/VirtualTexturingDebugHandle.h")]
 		[UsedByNativeCode]

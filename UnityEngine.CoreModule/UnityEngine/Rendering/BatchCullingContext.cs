@@ -5,11 +5,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
 	public struct BatchCullingContext
 	{
-		internal BatchCullingContext(NativeArray<Plane> inCullingPlanes, NativeArray<CullingSplit> inCullingSplits, LODParameters inLodParameters, Matrix4x4 inLocalToWorldMatrix, BatchCullingViewType inViewType, BatchCullingProjectionType inProjectionType, BatchCullingFlags inBatchCullingFlags, ulong inViewID, uint inCullingLayerMask, ulong inSceneCullingMask, int inReceiverPlaneOffset, int inReceiverPlaneCount)
+		internal BatchCullingContext(NativeArray<Plane> inCullingPlanes, NativeArray<CullingSplit> inCullingSplits, LODParameters inLodParameters, Matrix4x4 inLocalToWorldMatrix, BatchCullingViewType inViewType, BatchCullingProjectionType inProjectionType, BatchCullingFlags inBatchCullingFlags, ulong inViewID, uint inCullingLayerMask, ulong inSceneCullingMask, byte inExclusionSplitMask, int inReceiverPlaneOffset, int inReceiverPlaneCount, IntPtr inOcclusionBuffer)
 		{
 			this.cullingPlanes = inCullingPlanes;
 			this.cullingSplits = inCullingSplits;
@@ -24,9 +24,11 @@ namespace UnityEngine.Rendering
 			};
 			this.cullingLayerMask = inCullingLayerMask;
 			this.sceneCullingMask = inSceneCullingMask;
+			this.splitExclusionMask = (ushort)inExclusionSplitMask;
 			this.receiverPlaneOffset = inReceiverPlaneOffset;
 			this.receiverPlaneCount = inReceiverPlaneCount;
 			this.isOrthographic = 0;
+			this.occlusionBuffer = inOcclusionBuffer;
 		}
 
 		public readonly NativeArray<Plane> cullingPlanes;
@@ -49,11 +51,15 @@ namespace UnityEngine.Rendering
 
 		public readonly ulong sceneCullingMask;
 
+		public readonly ushort splitExclusionMask;
+
 		[Obsolete("BatchCullingContext.isOrthographic is deprecated. Use BatchCullingContext.projectionType instead.")]
 		public readonly byte isOrthographic;
 
 		public readonly int receiverPlaneOffset;
 
 		public readonly int receiverPlaneCount;
+
+		internal readonly IntPtr occlusionBuffer;
 	}
 }

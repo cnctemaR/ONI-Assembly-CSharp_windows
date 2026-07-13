@@ -9,23 +9,44 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Graphics/SparseTexture.h")]
 	public sealed class SparseTexture : Texture
 	{
-		public extern int tileWidth
+		public int tileWidth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SparseTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SparseTexture.get_tileWidth_Injected(intPtr);
+			}
 		}
 
-		public extern int tileHeight
+		public int tileHeight
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SparseTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SparseTexture.get_tileHeight_Injected(intPtr);
+			}
 		}
 
-		public extern bool isCreated
+		public bool isCreated
 		{
 			[NativeName("IsInitialized")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SparseTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SparseTexture.get_isCreated_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction(Name = "SparseTextureScripting::Create", ThrowsException = true)]
@@ -33,12 +54,36 @@ namespace UnityEngine
 		private static extern void Internal_Create([Writable] SparseTexture mono, int width, int height, GraphicsFormat format, TextureColorSpace colorSpace, int mipCount);
 
 		[FreeFunction(Name = "SparseTextureScripting::UpdateTile", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void UpdateTile(int tileX, int tileY, int miplevel, [Unmarshalled] Color32[] data);
+		public unsafe void UpdateTile(int tileX, int tileY, int miplevel, Color32[] data)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SparseTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color32> span = new Span<Color32>(data);
+			fixed (Color32* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				SparseTexture.UpdateTile_Injected(intPtr, tileX, tileY, miplevel, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction(Name = "SparseTextureScripting::UpdateTileRaw", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void UpdateTileRaw(int tileX, int tileY, int miplevel, [Unmarshalled] byte[] data);
+		public unsafe void UpdateTileRaw(int tileX, int tileY, int miplevel, byte[] data)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SparseTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<byte> span = new Span<byte>(data);
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				SparseTexture.UpdateTileRaw_Injected(intPtr, tileX, tileY, miplevel, ref managedSpanWrapper);
+			}
+		}
 
 		public void UnloadTile(int tileX, int tileY, int miplevel)
 		{
@@ -63,7 +108,7 @@ namespace UnityEngine
 
 		internal bool ValidateFormat(GraphicsFormat format, int width, int height)
 		{
-			bool flag = base.ValidateFormat(format, FormatUsage.Sparse);
+			bool flag = base.ValidateFormat(format, GraphicsFormatUsage.Sparse);
 			bool flag2 = flag;
 			if (flag2)
 			{
@@ -135,7 +180,7 @@ namespace UnityEngine
 			{
 				SparseTexture.ValidateIsNotCrunched(textureFormat);
 				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(textureFormat, !linear);
-				bool flag2 = !SystemInfo.IsFormatSupported(graphicsFormat, FormatUsage.Sparse);
+				bool flag2 = !SystemInfo.IsFormatSupported(graphicsFormat, GraphicsFormatUsage.Sparse);
 				if (flag2)
 				{
 					Debug.LogError(string.Format("Creation of a SparseTexture with '{0}' is not supported on this platform.", textureFormat));
@@ -150,5 +195,20 @@ namespace UnityEngine
 				}
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_tileWidth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_tileHeight_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isCreated_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UpdateTile_Injected(IntPtr _unity_self, int tileX, int tileY, int miplevel, ref ManagedSpanWrapper data);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UpdateTileRaw_Injected(IntPtr _unity_self, int tileX, int tileY, int miplevel, ref ManagedSpanWrapper data);
 	}
 }

@@ -132,12 +132,6 @@ namespace FMOD
 			return Sound.FMOD5_Sound_ReadData(this.handle, buffer, (uint)buffer.Length, out read);
 		}
 
-		[Obsolete("Use Sound.readData(byte[], out uint) or Sound.readData(byte[]) instead.")]
-		public RESULT readData(IntPtr buffer, uint length, out uint read)
-		{
-			return Sound.FMOD5_Sound_ReadData(this.handle, buffer, length, out read);
-		}
-
 		public RESULT seekData(uint pcm)
 		{
 			return Sound.FMOD5_Sound_SeekData(this.handle, pcm);
@@ -328,9 +322,6 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Sound_ReadData(IntPtr sound, byte[] buffer, uint length, out uint read);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_Sound_ReadData(IntPtr sound, IntPtr buffer, uint length, out uint read);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Sound_SeekData(IntPtr sound, uint pcm);

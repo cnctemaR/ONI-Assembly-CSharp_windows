@@ -52,7 +52,7 @@ public class KFMOD
 					}
 				}
 			}
-			if (global::UnityEngine.Object.FindObjectsOfType<RuntimeManager>().Length != 0)
+			if (global::UnityEngine.Object.FindObjectsByType<RuntimeManager>(FindObjectsSortMode.None).Length != 0)
 			{
 				global::Debug.LogError("FMOD got initialized before we tried to initialize it! This will cause bad things to happen!");
 			}

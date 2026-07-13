@@ -7,9 +7,9 @@ namespace UnityEngine
 	internal class AsyncInstantiateOperationHelper
 	{
 		[RequiredByNativeCode]
-		public static void SetAsyncInstantiateOperationResult(AsyncInstantiateOperation op, Object[] result)
+		public static Object[] CreateAsyncInstantiateOperationResultArray(AsyncInstantiateOperation op, int size)
 		{
-			op.m_Result = result;
+			return op.CreateResultArray(size);
 		}
 	}
 }

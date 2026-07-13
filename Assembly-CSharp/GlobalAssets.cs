@@ -113,7 +113,7 @@ public class GlobalAssets : KMonoBehaviour
 		TMP_StyleSheet.instance.AddStyle(tmp_Style);
 		TMP_Style tmp_Style2 = new TMP_Style("logic_off", string.Format("<color=#{0}>", ColorUtility.ToHtmlStringRGB(this.colorSet.logicOff)), "</color>");
 		TMP_StyleSheet.instance.AddStyle(tmp_Style2);
-		TMP_StyleSheet.RefreshStyles();
+		TMP_StyleSheet.instance.RefreshStyles();
 	}
 
 	protected override void OnCleanUp()

@@ -14,8 +14,15 @@ namespace UnityEngine.Networking
 	public class DownloadHandler : IDisposable
 	{
 		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Release();
+		private void ReleaseFromScripting()
+		{
+			IntPtr intPtr = DownloadHandler.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			DownloadHandler.ReleaseFromScripting_Injected(intPtr);
+		}
 
 		[VisibleToOtherModules]
 		internal DownloadHandler()
@@ -32,7 +39,7 @@ namespace UnityEngine.Networking
 			bool flag = this.m_Ptr != IntPtr.Zero;
 			if (flag)
 			{
-				this.Release();
+				this.ReleaseFromScripting();
 				this.m_Ptr = IntPtr.Zero;
 			}
 		}
@@ -45,8 +52,15 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsDone();
+		private bool IsDone()
+		{
+			IntPtr intPtr = DownloadHandler.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return DownloadHandler.IsDone_Injected(intPtr);
+		}
 
 		public string error
 		{
@@ -56,8 +70,26 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string GetErrorMsg();
+		private string GetErrorMsg()
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = DownloadHandler.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				DownloadHandler.GetErrorMsg_Injected(intPtr, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public NativeArray<byte>.ReadOnly nativeData
 		{
@@ -149,8 +181,26 @@ namespace UnityEngine.Networking
 			return Encoding.UTF8;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string GetContentType();
+		private string GetContentType()
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = DownloadHandler.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				DownloadHandler.GetContentType_Injected(intPtr, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[RequiredByNativeCode]
 		protected virtual bool ReceiveData(byte[] data, int dataLength)
@@ -202,8 +252,10 @@ namespace UnityEngine.Networking
 
 		[VisibleToOtherModules]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe static extern byte* InternalGetByteArray(DownloadHandler dh, out int length);
+		internal unsafe static byte* InternalGetByteArray(DownloadHandler dh, out int length)
+		{
+			return DownloadHandler.InternalGetByteArray_Injected((dh == null) ? ((IntPtr)0) : DownloadHandler.BindingsMarshaller.ConvertToNative(dh), out length);
+		}
 
 		internal static byte[] InternalGetByteArray(DownloadHandler dh)
 		{
@@ -221,6 +273,7 @@ namespace UnityEngine.Networking
 			return array;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UnityWebRequestAudioModule", "UnityEngine.UnityWebRequestTextureModule" })]
 		internal unsafe static NativeArray<byte> InternalGetNativeArray(DownloadHandler dh, ref NativeArray<byte> nativeArray)
 		{
 			int num;
@@ -239,6 +292,7 @@ namespace UnityEngine.Networking
 			return nativeArray;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UnityWebRequestAudioModule", "UnityEngine.UnityWebRequestTextureModule" })]
 		internal static void DisposeNativeArray(ref NativeArray<byte> data)
 		{
 			bool flag = !data.IsCreated;
@@ -253,8 +307,31 @@ namespace UnityEngine.Networking
 			data = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>((void*)bytes, length, Allocator.Persistent);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseFromScripting_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsDone_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetErrorMsg_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetContentType_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern byte* InternalGetByteArray_Injected(IntPtr dh, out int length);
+
 		[VisibleToOtherModules]
 		[NonSerialized]
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(DownloadHandler handler)
+			{
+				return handler.m_Ptr;
+			}
+		}
 	}
 }

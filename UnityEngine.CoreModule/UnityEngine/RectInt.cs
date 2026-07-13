@@ -13,7 +13,7 @@ namespace UnityEngine
 		public int x
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_XMin;
 			}
@@ -27,7 +27,7 @@ namespace UnityEngine
 		public int y
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_YMin;
 			}
@@ -38,19 +38,23 @@ namespace UnityEngine
 			}
 		}
 
-		public Vector2 center
+		public readonly Vector2 center
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return new Vector2((float)this.x + (float)this.m_Width / 2f, (float)this.y + (float)this.m_Height / 2f);
+				return new Vector2
+				{
+					x = (float)this.m_XMin + (float)this.m_Width * 0.5f,
+					y = (float)this.m_YMin + (float)this.m_Height * 0.5f
+				};
 			}
 		}
 
 		public Vector2Int min
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return new Vector2Int(this.xMin, this.yMin);
 			}
@@ -65,7 +69,7 @@ namespace UnityEngine
 		public Vector2Int max
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return new Vector2Int(this.xMax, this.yMax);
 			}
@@ -80,7 +84,7 @@ namespace UnityEngine
 		public int width
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_Width;
 			}
@@ -94,7 +98,7 @@ namespace UnityEngine
 		public int height
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_Height;
 			}
@@ -108,9 +112,9 @@ namespace UnityEngine
 		public int xMin
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
-				return Math.Min(this.m_XMin, this.m_XMin + this.m_Width);
+				return Mathf.Min(this.m_XMin, this.m_XMin + this.m_Width);
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
@@ -124,9 +128,9 @@ namespace UnityEngine
 		public int yMin
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
-				return Math.Min(this.m_YMin, this.m_YMin + this.m_Height);
+				return Mathf.Min(this.m_YMin, this.m_YMin + this.m_Height);
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
@@ -140,9 +144,9 @@ namespace UnityEngine
 		public int xMax
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
-				return Math.Max(this.m_XMin, this.m_XMin + this.m_Width);
+				return Mathf.Max(this.m_XMin, this.m_XMin + this.m_Width);
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
@@ -154,9 +158,9 @@ namespace UnityEngine
 		public int yMax
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
-				return Math.Max(this.m_YMin, this.m_YMin + this.m_Height);
+				return Mathf.Max(this.m_YMin, this.m_YMin + this.m_Height);
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
@@ -168,7 +172,7 @@ namespace UnityEngine
 		public Vector2Int position
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return new Vector2Int(this.m_XMin, this.m_YMin);
 			}
@@ -183,7 +187,7 @@ namespace UnityEngine
 		public Vector2Int size
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return new Vector2Int(this.m_Width, this.m_Height);
 			}
@@ -197,6 +201,13 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetMinMax(Vector2Int minPosition, Vector2Int maxPosition)
+		{
+			this.min = minPosition;
+			this.max = maxPosition;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void SetMinMax(in Vector2Int minPosition, in Vector2Int maxPosition)
 		{
 			this.min = minPosition;
 			this.max = maxPosition;
@@ -221,45 +232,98 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public RectInt(in Vector2Int position, in Vector2Int size)
+		{
+			this.m_XMin = position.x;
+			this.m_YMin = position.y;
+			this.m_Width = size.x;
+			this.m_Height = size.y;
+		}
+
+		public static RectInt zero
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				return RectInt.kZero;
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void ClampToBounds(RectInt bounds)
 		{
-			this.position = new Vector2Int(Math.Max(Math.Min(bounds.xMax, this.position.x), bounds.xMin), Math.Max(Math.Min(bounds.yMax, this.position.y), bounds.yMin));
-			this.size = new Vector2Int(Math.Min(bounds.xMax - this.position.x, this.size.x), Math.Min(bounds.yMax - this.position.y, this.size.y));
+			int xMin = bounds.xMin;
+			int xMax = bounds.xMax;
+			int yMin = bounds.yMin;
+			int yMax = bounds.yMax;
+			this.m_XMin = Math.Max(Math.Min(xMax, this.m_XMin), xMin);
+			this.m_YMin = Math.Max(Math.Min(yMax, this.m_YMin), yMin);
+			this.m_Width = Math.Min(xMax - this.m_XMin, this.m_Width);
+			this.m_Height = Math.Min(yMax - this.m_YMin, this.m_Height);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(Vector2Int position)
+		public void ClampToBounds(in RectInt bounds)
 		{
-			return position.x >= this.xMin && position.y >= this.yMin && position.x < this.xMax && position.y < this.yMax;
+			int xMin = bounds.xMin;
+			int xMax = bounds.xMax;
+			int yMin = bounds.yMin;
+			int yMax = bounds.yMax;
+			this.m_XMin = Math.Max(Math.Min(xMax, this.m_XMin), xMin);
+			this.m_YMin = Math.Max(Math.Min(yMax, this.m_YMin), yMin);
+			this.m_Width = Math.Min(xMax - this.m_XMin, this.m_Width);
+			this.m_Height = Math.Min(yMax - this.m_YMin, this.m_Height);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Overlaps(RectInt other)
+		public readonly bool Contains(Vector2Int position)
+		{
+			int x = position.x;
+			int y = position.y;
+			return x >= this.xMin && y >= this.yMin && x < this.xMax && y < this.yMax;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Contains(in Vector2Int position)
+		{
+			int x = position.x;
+			int y = position.y;
+			return x >= this.xMin && y >= this.yMin && x < this.xMax && y < this.yMax;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Overlaps(RectInt other)
 		{
 			return other.xMin < this.xMax && other.xMax > this.xMin && other.yMin < this.yMax && other.yMax > this.yMin;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override string ToString()
+		public readonly bool Overlaps(in RectInt other)
+		{
+			return other.xMin < this.xMax && other.xMax > this.xMin && other.yMin < this.yMax && other.yMax > this.yMin;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override readonly string ToString()
 		{
 			return this.ToString(null, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format)
+		public readonly string ToString(string format)
 		{
 			return this.ToString(format, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format, IFormatProvider formatProvider)
+		public readonly string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = formatProvider == null;
 			if (flag)
 			{
 				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
-			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
+			return string.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
 			{
 				this.x.ToString(format, formatProvider),
 				this.y.ToString(format, formatProvider),
@@ -269,17 +333,65 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Equals(RectInt other)
+		public static bool operator !=(RectInt lhs, RectInt rhs)
+		{
+			return !(lhs == rhs);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool operator ==(RectInt lhs, RectInt rhs)
+		{
+			return lhs.m_XMin == rhs.m_XMin && lhs.m_YMin == rhs.m_YMin && lhs.m_Width == rhs.m_Width && lhs.m_Height == rhs.m_Height;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override readonly int GetHashCode()
+		{
+			int hashCode = this.m_XMin.GetHashCode();
+			int hashCode2 = this.m_YMin.GetHashCode();
+			int hashCode3 = this.m_Width.GetHashCode();
+			int hashCode4 = this.m_Height.GetHashCode();
+			return hashCode ^ (hashCode2 << 4) ^ (hashCode2 >> 28) ^ (hashCode3 >> 4) ^ (hashCode3 << 28) ^ (hashCode4 >> 4) ^ (hashCode4 << 28);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override readonly bool Equals(object other)
+		{
+			RectInt rectInt;
+			bool flag;
+			if (other is RectInt)
+			{
+				rectInt = (RectInt)other;
+				flag = true;
+			}
+			else
+			{
+				flag = false;
+			}
+			bool flag2 = flag;
+			return flag2 && this.Equals(in rectInt);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Equals(RectInt other)
 		{
 			return this.m_XMin == other.m_XMin && this.m_YMin == other.m_YMin && this.m_Width == other.m_Width && this.m_Height == other.m_Height;
 		}
 
-		public RectInt.PositionEnumerator allPositionsWithin
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Equals(in RectInt other)
+		{
+			return this.m_XMin == other.m_XMin && this.m_YMin == other.m_YMin && this.m_Width == other.m_Width && this.m_Height == other.m_Height;
+		}
+
+		public readonly RectInt.PositionEnumerator allPositionsWithin
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return new RectInt.PositionEnumerator(this.min, this.max);
+				Vector2Int min = this.min;
+				Vector2Int max = this.max;
+				return new RectInt.PositionEnumerator(in min, in max);
 			}
 		}
 
@@ -291,15 +403,18 @@ namespace UnityEngine
 
 		private int m_Height;
 
+		private static readonly RectInt kZero = new RectInt(0, 0, 0, 0);
+
 		public struct PositionEnumerator : IEnumerator<Vector2Int>, IEnumerator, IDisposable
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			public PositionEnumerator(Vector2Int min, Vector2Int max)
+			public PositionEnumerator(in Vector2Int min, in Vector2Int max)
 			{
-				this._current = min;
 				this._min = min;
 				this._max = max;
-				this.Reset();
+				this._current = this._min;
+				int x = this._current.x;
+				this._current.x = x - 1;
 			}
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -351,7 +466,7 @@ namespace UnityEngine
 				this._current.x = x - 1;
 			}
 
-			public Vector2Int Current
+			public readonly Vector2Int Current
 			{
 				[MethodImpl(MethodImplOptions.AggressiveInlining)]
 				get

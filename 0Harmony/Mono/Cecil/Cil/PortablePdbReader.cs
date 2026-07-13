@@ -1,6 +1,7 @@
 ﻿using System;
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
+using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
@@ -100,6 +101,11 @@ namespace Mono.Cecil.Cil
 		private void ReadStateMachineKickOffMethod(MethodDebugInformation method_info)
 		{
 			method_info.kickoff_method = this.debug_reader.ReadStateMachineKickoffMethod(method_info.method);
+		}
+
+		public Collection<CustomDebugInformation> Read(ICustomDebugInformationProvider provider)
+		{
+			return this.debug_reader.GetCustomDebugInformation(provider);
 		}
 
 		private void ReadCustomDebugInformations(MethodDebugInformation info)

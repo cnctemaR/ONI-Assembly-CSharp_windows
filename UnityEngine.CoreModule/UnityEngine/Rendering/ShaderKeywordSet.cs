@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Assertions;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Editor/Src/Graphics/ShaderCompilerData.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Editor/Src/Graphics/ShaderCompilerData.h")]
 	public struct ShaderKeywordSet
 	{
 		[FreeFunction("keywords::IsKeywordEnabled")]
@@ -23,9 +24,27 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction("keywords::IsKeywordEnabled")]
-		private static bool IsKeywordNameEnabled(ShaderKeywordSet state, string name)
+		private unsafe static bool IsKeywordNameEnabled(ShaderKeywordSet state, string name)
 		{
-			return ShaderKeywordSet.IsKeywordNameEnabled_Injected(ref state, name);
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = ShaderKeywordSet.IsKeywordNameEnabled_Injected(ref state, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
 		}
 
 		[FreeFunction("keywords::EnableKeyword")]
@@ -35,9 +54,25 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction("keywords::EnableKeyword")]
-		private static void EnableKeywordName(ShaderKeywordSet state, string name)
+		private unsafe static void EnableKeywordName(ShaderKeywordSet state, string name)
 		{
-			ShaderKeywordSet.EnableKeywordName_Injected(ref state, name);
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ShaderKeywordSet.EnableKeywordName_Injected(ref state, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
 		}
 
 		[FreeFunction("keywords::DisableKeyword")]
@@ -47,9 +82,25 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction("keywords::DisableKeyword")]
-		private static void DisableKeywordName(ShaderKeywordSet state, string name)
+		private unsafe static void DisableKeywordName(ShaderKeywordSet state, string name)
 		{
-			ShaderKeywordSet.DisableKeywordName_Injected(ref state, name);
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ShaderKeywordSet.DisableKeywordName_Injected(ref state, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
 		}
 
 		[FreeFunction("keywords::GetEnabledKeywords")]
@@ -123,29 +174,41 @@ namespace UnityEngine.Rendering
 			return ShaderKeywordSet.GetEnabledKeywords(this);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsGlobalKeywordEnabled_Injected(ref ShaderKeywordSet state, uint index);
+		public override string ToString()
+		{
+			ShaderKeyword[] enabledKeywords = ShaderKeywordSet.GetEnabledKeywords(this);
+			Array.Sort<ShaderKeyword>(enabledKeywords, new Comparison<ShaderKeyword>(ShaderKeywordSet.ShaderKeywordComparer));
+			return string.Join<ShaderKeyword>(' ', enabledKeywords);
+		}
+
+		private static int ShaderKeywordComparer(ShaderKeyword kw1, ShaderKeyword kw2)
+		{
+			return kw1.m_Name.CompareTo(kw2.m_Name);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsKeywordEnabled_Injected(ref ShaderKeywordSet state, ref LocalKeywordSpace keywordSpace, uint index);
+		private static extern bool IsGlobalKeywordEnabled_Injected([In] ref ShaderKeywordSet state, uint index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsKeywordNameEnabled_Injected(ref ShaderKeywordSet state, string name);
+		private static extern bool IsKeywordEnabled_Injected([In] ref ShaderKeywordSet state, [In] ref LocalKeywordSpace keywordSpace, uint index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void EnableGlobalKeyword_Injected(ref ShaderKeywordSet state, uint index);
+		private static extern bool IsKeywordNameEnabled_Injected([In] ref ShaderKeywordSet state, ref ManagedSpanWrapper name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void EnableKeywordName_Injected(ref ShaderKeywordSet state, string name);
+		private static extern void EnableGlobalKeyword_Injected([In] ref ShaderKeywordSet state, uint index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DisableGlobalKeyword_Injected(ref ShaderKeywordSet state, uint index);
+		private static extern void EnableKeywordName_Injected([In] ref ShaderKeywordSet state, ref ManagedSpanWrapper name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DisableKeywordName_Injected(ref ShaderKeywordSet state, string name);
+		private static extern void DisableGlobalKeyword_Injected([In] ref ShaderKeywordSet state, uint index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ShaderKeyword[] GetEnabledKeywords_Injected(ref ShaderKeywordSet state);
+		private static extern void DisableKeywordName_Injected([In] ref ShaderKeywordSet state, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShaderKeyword[] GetEnabledKeywords_Injected([In] ref ShaderKeywordSet state);
 
 		private IntPtr m_KeywordState;
 

@@ -7,16 +7,23 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[StaticAccessor("GUIEvent", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/IMGUI/Event.bindings.h")]
+	[StaticAccessor("GUIEvent", StaticAccessorType.DoubleColon)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class Event
 	{
 		[NativeProperty("type", false, TargetType.Field)]
-		public extern EventType rawType
+		public EventType rawType
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_rawType_Injected(intPtr);
+			}
 		}
 
 		[NativeProperty("mousePosition", false, TargetType.Field)]
@@ -24,13 +31,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_mousePosition_Injected(out vector);
+				Event.get_mousePosition_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_mousePosition_Injected(ref value);
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_mousePosition_Injected(intPtr, ref value);
 			}
 		}
 
@@ -39,59 +56,139 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_delta_Injected(out vector);
+				Event.get_delta_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_delta_Injected(ref value);
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_delta_Injected(intPtr, ref value);
 			}
 		}
 
 		[NativeProperty("pointerType", false, TargetType.Field)]
-		public extern PointerType pointerType
+		public PointerType pointerType
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_pointerType_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_pointerType_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("button", false, TargetType.Field)]
-		public extern int button
+		public int button
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_button_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_button_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("modifiers", false, TargetType.Field)]
-		public extern EventModifiers modifiers
+		public EventModifiers modifiers
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_modifiers_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_modifiers_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("pressure", false, TargetType.Field)]
-		public extern float pressure
+		public float pressure
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_pressure_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_pressure_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("twist", false, TargetType.Field)]
-		public extern float twist
+		public float twist
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_twist_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_twist_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("tilt", false, TargetType.Field)]
@@ -99,84 +196,244 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_tilt_Injected(out vector);
+				Event.get_tilt_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_tilt_Injected(ref value);
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_tilt_Injected(intPtr, ref value);
 			}
 		}
 
 		[NativeProperty("penStatus", false, TargetType.Field)]
-		public extern PenStatus penStatus
+		public PenStatus penStatus
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_penStatus_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_penStatus_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("clickCount", false, TargetType.Field)]
-		public extern int clickCount
+		public int clickCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_clickCount_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_clickCount_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("character", false, TargetType.Field)]
-		public extern char character
+		public char character
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_character_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_character_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("keycode", false, TargetType.Field)]
-		public extern KeyCode keyCode
+		private KeyCode Internal_keyCode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_Internal_keyCode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_Internal_keyCode_Injected(intPtr, value);
+			}
+		}
+
+		public KeyCode keyCode
+		{
+			get
+			{
+				KeyCode keyCode = (this.isMouse ? (KeyCode.Mouse0 + this.button) : this.Internal_keyCode);
+				bool isScrollWheel = this.isScrollWheel;
+				if (isScrollWheel)
+				{
+					keyCode = ((this.delta.y < 0f || (this.delta.y == 0f && this.delta.x < 0f)) ? KeyCode.WheelUp : KeyCode.WheelDown);
+				}
+				return keyCode;
+			}
+			set
+			{
+				this.Internal_keyCode = value;
+			}
 		}
 
 		[NativeProperty("displayIndex", false, TargetType.Field)]
-		public extern int displayIndex
+		public int displayIndex
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_displayIndex_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_displayIndex_Injected(intPtr, value);
+			}
 		}
 
-		public extern EventType type
+		public EventType type
 		{
 			[FreeFunction("GUIEvent::GetType", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Event.get_type_Injected(intPtr);
+			}
 			[FreeFunction("GUIEvent::SetType", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Event.set_type_Injected(intPtr, value);
+			}
 		}
 
-		public extern string commandName
+		public unsafe string commandName
 		{
 			[FreeFunction("GUIEvent::GetCommandName", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					Event.get_commandName_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 			[FreeFunction("GUIEvent::SetCommandName", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Event.set_commandName_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
 		[NativeMethod("Use")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_Use();
+		private void Internal_Use()
+		{
+			IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Event.Internal_Use_Injected(intPtr);
+		}
 
 		[FreeFunction("GUIEvent::Internal_Create", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -191,19 +448,70 @@ namespace UnityEngine
 		private static extern IntPtr Internal_Copy(IntPtr otherPtr);
 
 		[FreeFunction("GUIEvent::GetTypeForControl", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern EventType GetTypeForControl(int controlID);
+		public EventType GetTypeForControl(int controlID)
+		{
+			IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Event.GetTypeForControl_Injected(intPtr, controlID);
+		}
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[FreeFunction("GUIEvent::CopyFromPtr", IsThreadSafe = true, HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void CopyFromPtr(IntPtr ptr);
+		internal void CopyFromPtr(IntPtr ptr)
+		{
+			IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Event.CopyFromPtr_Injected(intPtr, ptr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool PopEvent([NotNull("ArgumentNullException")] Event outEvent);
+		public static bool PopEvent([NotNull] Event outEvent)
+		{
+			if (outEvent == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(outEvent, "outEvent");
+			}
+			IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(outEvent);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(outEvent, "outEvent");
+			}
+			return Event.PopEvent_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void QueueEvent([NotNull("ArgumentNullException")] Event outEvent);
+		internal static void QueueEvent([NotNull] Event outEvent)
+		{
+			if (outEvent == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(outEvent, "outEvent");
+			}
+			IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(outEvent);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(outEvent, "outEvent");
+			}
+			Event.QueueEvent_Injected(intPtr);
+		}
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.InputForUIModule" })]
+		internal static void GetEventAtIndex(int index, [NotNull] Event outEvent)
+		{
+			if (outEvent == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(outEvent, "outEvent");
+			}
+			IntPtr intPtr = Event.BindingsMarshaller.ConvertToNative(outEvent);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(outEvent, "outEvent");
+			}
+			Event.GetEventAtIndex_Injected(index, intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetEventCount();
@@ -227,7 +535,7 @@ namespace UnityEngine
 			Event.Internal_SetNativeEvent(Event.s_MasterEvent.m_Ptr);
 		}
 
-		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEngine.InputForUIModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int GetDoubleClickTime();
 
@@ -274,6 +582,7 @@ namespace UnityEngine
 			Event.s_MasterEvent = null;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal void CopyFrom(Event e)
 		{
 			bool flag = e.m_Ptr != this.m_Ptr;
@@ -466,6 +775,7 @@ namespace UnityEngine
 
 		internal bool isDirectManipulationDevice
 		{
+			[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			get
 			{
 				return this.pointerType == PointerType.Pen || this.pointerType == PointerType.Touch;
@@ -554,7 +864,7 @@ namespace UnityEngine
 											{
 												@event.keyCode = KeyCode.F9;
 												@event.modifiers |= EventModifiers.FunctionKey;
-												goto IL_11D1;
+												goto IL_11C8;
 											}
 										}
 									}
@@ -562,14 +872,14 @@ namespace UnityEngine
 									{
 										@event.keyCode = KeyCode.F17;
 										@event.modifiers |= EventModifiers.FunctionKey;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 								else if (text3 == "f16")
 								{
 									@event.keyCode = KeyCode.F16;
 									@event.modifiers |= EventModifiers.FunctionKey;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 							else if (num2 <= 306900080U)
@@ -582,7 +892,7 @@ namespace UnityEngine
 										{
 											@event.keyCode = KeyCode.LeftArrow;
 											@event.modifiers |= EventModifiers.FunctionKey;
-											goto IL_11D1;
+											goto IL_11C8;
 										}
 									}
 								}
@@ -590,7 +900,7 @@ namespace UnityEngine
 								{
 									@event.keyCode = KeyCode.F8;
 									@event.modifiers |= EventModifiers.FunctionKey;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 							else if (num2 != 337800568U)
@@ -601,7 +911,7 @@ namespace UnityEngine
 									{
 										@event.keyCode = KeyCode.F3;
 										@event.modifiers |= EventModifiers.FunctionKey;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 							}
@@ -609,7 +919,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.F1;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 <= 421688663U)
@@ -624,7 +934,7 @@ namespace UnityEngine
 										{
 											@event.keyCode = KeyCode.F4;
 											@event.modifiers |= EventModifiers.FunctionKey;
-											goto IL_11D1;
+											goto IL_11C8;
 										}
 									}
 								}
@@ -632,14 +942,14 @@ namespace UnityEngine
 								{
 									@event.keyCode = KeyCode.F5;
 									@event.modifiers |= EventModifiers.FunctionKey;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 							else if (text3 == "f2")
 							{
 								@event.keyCode = KeyCode.F2;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 <= 455243901U)
@@ -652,7 +962,7 @@ namespace UnityEngine
 									{
 										@event.keyCode = KeyCode.F6;
 										@event.modifiers |= EventModifiers.FunctionKey;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 							}
@@ -660,7 +970,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.F7;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 != 894689925U)
@@ -671,7 +981,7 @@ namespace UnityEngine
 								{
 									@event.keyCode = KeyCode.DownArrow;
 									@event.modifiers |= EventModifiers.FunctionKey;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -680,7 +990,7 @@ namespace UnityEngine
 							@event.keyCode = KeyCode.Space;
 							@event.character = ' ';
 							@event.modifiers &= ~EventModifiers.FunctionKey;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 <= 1815705491U)
@@ -697,7 +1007,7 @@ namespace UnityEngine
 										{
 											@event.keyCode = KeyCode.PageUp;
 											@event.modifiers |= EventModifiers.FunctionKey;
-											goto IL_11D1;
+											goto IL_11C8;
 										}
 									}
 								}
@@ -705,14 +1015,14 @@ namespace UnityEngine
 								{
 									@event.keyCode = KeyCode.UpArrow;
 									@event.modifiers |= EventModifiers.FunctionKey;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 							else if (text3 == "[equals]")
 							{
 								@event.character = '=';
 								@event.keyCode = KeyCode.KeypadEquals;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 <= 1787721130U)
@@ -725,7 +1035,7 @@ namespace UnityEngine
 									{
 										@event.keyCode = KeyCode.End;
 										@event.modifiers |= EventModifiers.FunctionKey;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 							}
@@ -733,7 +1043,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.Delete;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 != 1798927872U)
@@ -744,7 +1054,7 @@ namespace UnityEngine
 								{
 									@event.keyCode = KeyCode.F20;
 									@event.modifiers |= EventModifiers.FunctionKey;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -752,7 +1062,7 @@ namespace UnityEngine
 						{
 							@event.keyCode = KeyCode.F21;
 							@event.modifiers |= EventModifiers.FunctionKey;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 <= 1980614408U)
@@ -767,7 +1077,7 @@ namespace UnityEngine
 									{
 										@event.keyCode = KeyCode.F22;
 										@event.modifiers |= EventModifiers.FunctionKey;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 							}
@@ -775,7 +1085,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.F23;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 != 1882815967U)
@@ -786,7 +1096,7 @@ namespace UnityEngine
 								{
 									@event.character = '=';
 									@event.keyCode = KeyCode.KeypadEquals;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -794,7 +1104,7 @@ namespace UnityEngine
 						{
 							@event.keyCode = KeyCode.F24;
 							@event.modifiers |= EventModifiers.FunctionKey;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 <= 1981202788U)
@@ -807,7 +1117,7 @@ namespace UnityEngine
 								{
 									@event.character = '1';
 									@event.keyCode = KeyCode.Keypad1;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -815,7 +1125,7 @@ namespace UnityEngine
 						{
 							@event.character = '2';
 							@event.keyCode = KeyCode.Keypad2;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 != 1981894336U)
@@ -826,7 +1136,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.RightArrow;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 					}
@@ -834,7 +1144,7 @@ namespace UnityEngine
 					{
 						@event.character = '5';
 						@event.keyCode = KeyCode.Keypad5;
-						goto IL_11D1;
+						goto IL_11C8;
 					}
 				}
 				else if (num2 <= 3121933785U)
@@ -853,7 +1163,7 @@ namespace UnityEngine
 										{
 											@event.character = '/';
 											@event.keyCode = KeyCode.KeypadDivide;
-											goto IL_11D1;
+											goto IL_11C8;
 										}
 									}
 								}
@@ -861,14 +1171,14 @@ namespace UnityEngine
 								{
 									@event.character = '+';
 									@event.keyCode = KeyCode.KeypadPlus;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 							else if (text3 == "[4]")
 							{
 								@event.character = '4';
 								@event.keyCode = KeyCode.Keypad4;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 <= 2235328556U)
@@ -881,7 +1191,7 @@ namespace UnityEngine
 									{
 										@event.keyCode = KeyCode.Backspace;
 										@event.modifiers |= EventModifiers.FunctionKey;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 							}
@@ -889,7 +1199,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.PageDown;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (num2 != 2246981567U)
@@ -899,7 +1209,7 @@ namespace UnityEngine
 								if (text3 == "tab")
 								{
 									@event.keyCode = KeyCode.Tab;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -908,7 +1218,7 @@ namespace UnityEngine
 							@event.character = '\n';
 							@event.keyCode = KeyCode.Return;
 							@event.modifiers &= ~EventModifiers.FunctionKey;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 <= 3056397427U)
@@ -923,7 +1233,7 @@ namespace UnityEngine
 									{
 										@event.character = '.';
 										@event.keyCode = KeyCode.KeypadPeriod;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 							}
@@ -931,14 +1241,14 @@ namespace UnityEngine
 							{
 								@event.character = '6';
 								@event.keyCode = KeyCode.Keypad6;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (text3 == "[9]")
 						{
 							@event.character = '9';
 							@event.keyCode = KeyCode.Keypad9;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 <= 3120653857U)
@@ -951,7 +1261,7 @@ namespace UnityEngine
 								{
 									@event.character = '8';
 									@event.keyCode = KeyCode.Keypad8;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -959,7 +1269,7 @@ namespace UnityEngine
 						{
 							@event.character = '-';
 							@event.keyCode = KeyCode.KeypadMinus;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 != 3121786690U)
@@ -970,7 +1280,7 @@ namespace UnityEngine
 							{
 								@event.character = '0';
 								@event.keyCode = KeyCode.Keypad0;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 					}
@@ -978,7 +1288,7 @@ namespace UnityEngine
 					{
 						@event.character = '3';
 						@event.keyCode = KeyCode.Keypad3;
-						goto IL_11D1;
+						goto IL_11C8;
 					}
 				}
 				else if (num2 <= 4080139603U)
@@ -995,7 +1305,7 @@ namespace UnityEngine
 									{
 										@event.keyCode = KeyCode.Home;
 										@event.modifiers |= EventModifiers.FunctionKey;
-										goto IL_11D1;
+										goto IL_11C8;
 									}
 								}
 							}
@@ -1003,14 +1313,14 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.Insert;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 						else if (text3 == "[7]")
 						{
 							@event.character = '7';
 							@event.keyCode = KeyCode.Keypad7;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 <= 3984432914U)
@@ -1022,7 +1332,7 @@ namespace UnityEngine
 								if (text3 == "[esc]")
 								{
 									@event.keyCode = KeyCode.Escape;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -1030,7 +1340,7 @@ namespace UnityEngine
 						{
 							@event.keyCode = KeyCode.PageDown;
 							@event.modifiers |= EventModifiers.FunctionKey;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 != 4063361984U)
@@ -1041,7 +1351,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.F19;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 					}
@@ -1049,7 +1359,7 @@ namespace UnityEngine
 					{
 						@event.keyCode = KeyCode.F18;
 						@event.modifiers |= EventModifiers.FunctionKey;
-						goto IL_11D1;
+						goto IL_11C8;
 					}
 				}
 				else if (num2 <= 4227375619U)
@@ -1064,7 +1374,7 @@ namespace UnityEngine
 								{
 									@event.keyCode = KeyCode.PageUp;
 									@event.modifiers |= EventModifiers.FunctionKey;
-									goto IL_11D1;
+									goto IL_11C8;
 								}
 							}
 						}
@@ -1072,7 +1382,7 @@ namespace UnityEngine
 						{
 							@event.keyCode = KeyCode.F10;
 							@event.modifiers |= EventModifiers.FunctionKey;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 					else if (num2 != 4214360555U)
@@ -1083,7 +1393,7 @@ namespace UnityEngine
 							{
 								@event.character = '\n';
 								@event.keyCode = KeyCode.KeypadEnter;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 					}
@@ -1091,7 +1401,7 @@ namespace UnityEngine
 					{
 						@event.keyCode = KeyCode.F11;
 						@event.modifiers |= EventModifiers.FunctionKey;
-						goto IL_11D1;
+						goto IL_11C8;
 					}
 				}
 				else if (num2 <= 4247915793U)
@@ -1104,7 +1414,7 @@ namespace UnityEngine
 							{
 								@event.keyCode = KeyCode.F13;
 								@event.modifiers |= EventModifiers.FunctionKey;
-								goto IL_11D1;
+								goto IL_11C8;
 							}
 						}
 					}
@@ -1112,7 +1422,7 @@ namespace UnityEngine
 					{
 						@event.keyCode = KeyCode.F12;
 						@event.modifiers |= EventModifiers.FunctionKey;
-						goto IL_11D1;
+						goto IL_11C8;
 					}
 				}
 				else if (num2 != 4264693412U)
@@ -1123,7 +1433,7 @@ namespace UnityEngine
 						{
 							@event.keyCode = KeyCode.F15;
 							@event.modifiers |= EventModifiers.FunctionKey;
-							goto IL_11D1;
+							goto IL_11C8;
 						}
 					}
 				}
@@ -1131,7 +1441,7 @@ namespace UnityEngine
 				{
 					@event.keyCode = KeyCode.F14;
 					@event.modifiers |= EventModifiers.FunctionKey;
-					goto IL_11D1;
+					goto IL_11C8;
 				}
 				bool flag4 = text.Length != 1;
 				if (flag4)
@@ -1142,7 +1452,7 @@ namespace UnityEngine
 					}
 					catch (ArgumentException)
 					{
-						Debug.LogError(UnityString.Format("Unable to find key name that matches '{0}'", new object[] { text }));
+						Debug.LogError(string.Format("Unable to find key name that matches '{0}'", text));
 					}
 				}
 				else
@@ -1155,7 +1465,7 @@ namespace UnityEngine
 						@event.character = '\0';
 					}
 				}
-				IL_11D1:
+				IL_11C8:
 				event2 = @event;
 			}
 			return event2;
@@ -1235,7 +1545,7 @@ namespace UnityEngine
 				bool flag = this.character == '\0';
 				if (flag)
 				{
-					text = UnityString.Format("Event:{0}   Character:\\0   Modifiers:{1}   KeyCode:{2}", new object[] { this.type, this.modifiers, this.keyCode });
+					text = string.Format("Event:{0}   Character:\\0   Modifiers:{1}   KeyCode:{2}", this.type, this.modifiers, this.keyCode);
 				}
 				else
 				{
@@ -1257,14 +1567,14 @@ namespace UnityEngine
 				bool isMouse = this.isMouse;
 				if (isMouse)
 				{
-					text = UnityString.Format("Event: {0}   Position: {1} Modifiers: {2}", new object[] { this.type, this.mousePosition, this.modifiers });
+					text = string.Format("Event: {0}   Position: {1} Modifiers: {2}", this.type, this.mousePosition, this.modifiers);
 				}
 				else
 				{
 					bool flag2 = this.type == EventType.ExecuteCommand || this.type == EventType.ValidateCommand;
 					if (flag2)
 					{
-						text = UnityString.Format("Event: {0}  \"{1}\"", new object[] { this.type, this.commandName });
+						text = string.Format("Event: {0}  \"{1}\"", this.type, this.commandName);
 					}
 					else
 					{
@@ -1280,34 +1590,139 @@ namespace UnityEngine
 			bool flag = this.type == EventType.Repaint || this.type == EventType.Layout;
 			if (flag)
 			{
-				Debug.LogWarning(UnityString.Format("Event.Use() should not be called for events of type {0}", new object[] { this.type }));
+				Debug.LogWarning(string.Format("Event.Use() should not be called for events of type {0}", this.type));
 			}
 			this.Internal_Use();
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_mousePosition_Injected(out Vector2 ret);
+		private static extern EventType get_rawType_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_mousePosition_Injected(ref Vector2 value);
+		private static extern void get_mousePosition_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_delta_Injected(out Vector2 ret);
+		private static extern void set_mousePosition_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_delta_Injected(ref Vector2 value);
+		private static extern void get_delta_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_tilt_Injected(out Vector2 ret);
+		private static extern void set_delta_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_tilt_Injected(ref Vector2 value);
+		private static extern PointerType get_pointerType_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_pointerType_Injected(IntPtr _unity_self, PointerType value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_button_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_button_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern EventModifiers get_modifiers_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_modifiers_Injected(IntPtr _unity_self, EventModifiers value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_pressure_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_pressure_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_twist_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_twist_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_tilt_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_tilt_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern PenStatus get_penStatus_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_penStatus_Injected(IntPtr _unity_self, PenStatus value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_clickCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_clickCount_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern char get_character_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_character_Injected(IntPtr _unity_self, char value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern KeyCode get_Internal_keyCode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_Internal_keyCode_Injected(IntPtr _unity_self, KeyCode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_displayIndex_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_displayIndex_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern EventType get_type_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_type_Injected(IntPtr _unity_self, EventType value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_commandName_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_commandName_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_Use_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern EventType GetTypeForControl_Injected(IntPtr _unity_self, int controlID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyFromPtr_Injected(IntPtr _unity_self, IntPtr ptr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool PopEvent_Injected(IntPtr outEvent);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void QueueEvent_Injected(IntPtr outEvent);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetEventAtIndex_Injected(int index, IntPtr outEvent);
 
 		[NonSerialized]
 		internal IntPtr m_Ptr;
 
+		internal const float scrollWheelDeltaPerTick = 3f;
+
+		internal static bool s_AllowOutsideOnGUI;
+
 		private static Event s_Current;
 
 		private static Event s_MasterEvent;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(Event e)
+			{
+				return e.m_Ptr;
+			}
+		}
 	}
 }

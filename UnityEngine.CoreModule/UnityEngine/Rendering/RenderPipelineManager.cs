@@ -1,12 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEngine.Pool;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
 	public static class RenderPipelineManager
 	{
+		internal static RenderPipelineAsset currentPipelineAsset
+		{
+			get
+			{
+				return RenderPipelineManager.s_CurrentPipelineAsset;
+			}
+		}
+
 		public static RenderPipeline currentPipeline
 		{
 			get
@@ -15,16 +24,19 @@ namespace UnityEngine.Rendering
 			}
 			private set
 			{
-				RenderPipelineManager.s_CurrentPipelineType = ((value != null) ? value.GetType().ToString() : "Built-in Pipeline");
 				RenderPipelineManager.s_CurrentPipeline = value;
+				bool flag = RenderPipelineManager.s_PendingRPAssignationToRaise;
+				if (flag)
+				{
+					RenderPipelineManager.s_PendingRPAssignationToRaise = false;
+					Action action = RenderPipelineManager.activeRenderPipelineTypeChanged;
+					if (action != null)
+					{
+						action();
+					}
+				}
 			}
 		}
-
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public static event Action<ScriptableRenderContext, Camera[]> beginFrameRendering;
-
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public static event Action<ScriptableRenderContext, Camera[]> endFrameRendering;
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<ScriptableRenderContext, List<Camera>> beginContextRendering;
@@ -105,22 +117,32 @@ namespace UnityEngine.Rendering
 		}
 
 		[RequiredByNativeCode]
-		internal static void OnActiveRenderPipelineTypeChanged()
+		private static void OnActiveRenderPipelineAssetChanged(ScriptableObject from, ScriptableObject to, bool raiseTypeChanged)
 		{
-			Action action = RenderPipelineManager.activeRenderPipelineTypeChanged;
-			if (action != null)
-			{
-				action();
-			}
-		}
-
-		[RequiredByNativeCode]
-		internal static void OnActiveRenderPipelineAssetChanged(ScriptableObject from, ScriptableObject to)
-		{
+			RenderPipelineAsset renderPipelineAsset = from as RenderPipelineAsset;
+			RenderPipelineAsset renderPipelineAsset2 = to as RenderPipelineAsset;
 			Action<RenderPipelineAsset, RenderPipelineAsset> action = RenderPipelineManager.activeRenderPipelineAssetChanged;
 			if (action != null)
 			{
-				action(from as RenderPipelineAsset, to as RenderPipelineAsset);
+				action(renderPipelineAsset, renderPipelineAsset2);
+			}
+			if (raiseTypeChanged)
+			{
+				Type type = ((renderPipelineAsset2 == null) ? null : renderPipelineAsset2.pipelineType);
+				RenderPipeline currentPipeline = RenderPipelineManager.currentPipeline;
+				bool flag = ((currentPipeline != null) ? currentPipeline.GetType() : null) != type;
+				if (flag)
+				{
+					RenderPipelineManager.s_PendingRPAssignationToRaise = true;
+				}
+				else
+				{
+					Action action2 = RenderPipelineManager.activeRenderPipelineTypeChanged;
+					if (action2 != null)
+					{
+						action2();
+					}
+				}
 			}
 		}
 
@@ -128,7 +150,7 @@ namespace UnityEngine.Rendering
 		internal static void HandleRenderPipelineChange(RenderPipelineAsset pipelineAsset)
 		{
 			bool flag = RenderPipelineManager.s_CurrentPipelineAsset != pipelineAsset;
-			bool flag2 = flag;
+			bool flag2 = RenderPipelineManager.s_CleanUpPipeline || flag;
 			if (flag2)
 			{
 				RenderPipelineManager.CleanupRenderPipeline();
@@ -137,64 +159,92 @@ namespace UnityEngine.Rendering
 		}
 
 		[RequiredByNativeCode]
-		internal static void CleanupRenderPipeline()
+		internal static void RecreateCurrentPipeline(RenderPipelineAsset pipelineAsset)
 		{
-			bool flag = RenderPipelineManager.currentPipeline != null && !RenderPipelineManager.currentPipeline.disposed;
+			bool flag = RenderPipelineManager.s_CurrentPipelineAsset == pipelineAsset;
 			if (flag)
 			{
+				RenderPipelineManager.s_CleanUpPipeline = true;
+			}
+		}
+
+		[RequiredByNativeCode]
+		internal static void CleanupRenderPipeline()
+		{
+			bool flag = !RenderPipelineManager.isCurrentPipelineValid;
+			if (!flag)
+			{
+				bool flag2 = GraphicsSettings.currentRenderPipeline == null;
+				if (flag2)
+				{
+					Shader.globalRenderPipeline = string.Empty;
+				}
 				Action action = RenderPipelineManager.activeRenderPipelineDisposed;
 				if (action != null)
 				{
 					action();
 				}
 				RenderPipelineManager.currentPipeline.Dispose();
-				RenderPipelineManager.s_CurrentPipelineAsset = null;
 				RenderPipelineManager.currentPipeline = null;
-				SupportedRenderingFeatures.active = new SupportedRenderingFeatures();
+				RenderPipelineManager.s_CleanUpPipeline = false;
+				RenderPipelineManager.s_CurrentPipelineAsset = null;
+				SupportedRenderingFeatures.active = null;
 			}
 		}
 
 		[RequiredByNativeCode]
-		private static string GetCurrentPipelineAssetType()
+		private static void DoRenderLoop_Internal(RenderPipelineAsset pipelineAsset, IntPtr loopPtr, Object renderRequest)
 		{
-			return RenderPipelineManager.s_CurrentPipelineType;
-		}
-
-		[RequiredByNativeCode]
-		private static void DoRenderLoop_Internal(RenderPipelineAsset pipe, IntPtr loopPtr, Object renderRequest)
-		{
-			RenderPipelineManager.PrepareRenderPipeline(pipe);
-			bool flag = RenderPipelineManager.currentPipeline == null;
+			bool flag = !RenderPipelineManager.TryPrepareRenderPipeline(pipelineAsset);
 			if (!flag)
 			{
 				ScriptableRenderContext scriptableRenderContext = new ScriptableRenderContext(loopPtr);
-				RenderPipelineManager.s_Cameras.Clear();
-				scriptableRenderContext.GetCameras(RenderPipelineManager.s_Cameras);
-				bool flag2 = renderRequest == null;
-				if (flag2)
+				List<Camera> list;
+				using (CollectionPool<List<Camera>, Camera>.Get(out list))
 				{
-					RenderPipelineManager.currentPipeline.InternalRender(scriptableRenderContext, RenderPipelineManager.s_Cameras);
+					scriptableRenderContext.GetCameras(list);
+					bool flag2 = renderRequest == null;
+					if (flag2)
+					{
+						RenderPipelineManager.currentPipeline.InternalRender(scriptableRenderContext, list);
+					}
+					else
+					{
+						RenderPipelineManager.currentPipeline.InternalProcessRenderRequests<Object>(scriptableRenderContext, list[0], renderRequest);
+					}
 				}
-				else
-				{
-					RenderPipelineManager.currentPipeline.InternalProcessRenderRequests<Object>(scriptableRenderContext, RenderPipelineManager.s_Cameras[0], renderRequest);
-				}
-				RenderPipelineManager.s_Cameras.Clear();
 			}
 		}
 
-		internal static void PrepareRenderPipeline(RenderPipelineAsset pipelineAsset)
+		internal static bool TryPrepareRenderPipeline(RenderPipelineAsset pipelineAsset)
 		{
 			RenderPipelineManager.HandleRenderPipelineChange(pipelineAsset);
-			bool flag = RenderPipelineManager.IsPipelineRequireCreation();
+			bool flag = !RenderPipelineManager.IsPipelineRequireCreation();
+			bool flag2;
 			if (flag)
 			{
+				flag2 = RenderPipelineManager.currentPipeline != null;
+			}
+			else
+			{
 				RenderPipelineManager.currentPipeline = RenderPipelineManager.s_CurrentPipelineAsset.InternalCreatePipeline();
+				Shader.globalRenderPipeline = RenderPipelineManager.s_CurrentPipelineAsset.renderPipelineShaderTag;
 				Action action = RenderPipelineManager.activeRenderPipelineCreated;
 				if (action != null)
 				{
 					action();
 				}
+				flag2 = RenderPipelineManager.currentPipeline != null;
+			}
+			return flag2;
+		}
+
+		internal static bool isCurrentPipelineValid
+		{
+			get
+			{
+				RenderPipeline currentPipeline = RenderPipelineManager.currentPipeline;
+				return currentPipeline != null && !currentPipeline.disposed;
 			}
 		}
 
@@ -203,14 +253,20 @@ namespace UnityEngine.Rendering
 			return RenderPipelineManager.s_CurrentPipelineAsset != null && (RenderPipelineManager.currentPipeline == null || RenderPipelineManager.currentPipeline.disposed);
 		}
 
-		internal static RenderPipelineAsset s_CurrentPipelineAsset;
+		[Obsolete("beginFrameRendering is deprecated. Use beginContextRendering instead. #from 2023.3", false)]
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<ScriptableRenderContext, Camera[]> beginFrameRendering;
 
-		private static List<Camera> s_Cameras = new List<Camera>();
+		[Obsolete("endFrameRendering is deprecated. Use endContextRendering instead. #from 2023.3", false)]
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<ScriptableRenderContext, Camera[]> endFrameRendering;
 
-		private static string s_CurrentPipelineType = "Built-in Pipeline";
+		private static bool s_CleanUpPipeline;
 
-		private const string k_BuiltinPipelineName = "Built-in Pipeline";
+		private static RenderPipelineAsset s_CurrentPipelineAsset;
 
-		private static RenderPipeline s_CurrentPipeline = null;
+		private static RenderPipeline s_CurrentPipeline;
+
+		private static bool s_PendingRPAssignationToRaise;
 	}
 }

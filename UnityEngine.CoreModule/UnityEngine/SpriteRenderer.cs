@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Events;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType("Runtime/Graphics/Mesh/SpriteRenderer.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeType("Runtime/Graphics/Mesh/SpriteRenderer.h")]
 	public sealed class SpriteRenderer : Renderer
 	{
 		public void RegisterSpriteChangeCallback(UnityAction<SpriteRenderer> callback)
@@ -52,115 +53,275 @@ namespace UnityEngine
 			}
 		}
 
-		internal extern bool shouldSupportTiling
+		internal bool shouldSupportTiling
 		{
 			[NativeMethod("ShouldSupportTiling")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_shouldSupportTiling_Injected(intPtr);
+			}
 		}
 
-		internal extern bool hasSpriteChangeEvents
+		internal bool hasSpriteChangeEvents
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_hasSpriteChangeEvents_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_hasSpriteChangeEvents_Injected(intPtr, value);
+			}
 		}
 
-		public extern Sprite sprite
+		public Sprite sprite
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Sprite>(SpriteRenderer.get_sprite_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_sprite_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Sprite>(value));
+			}
 		}
 
-		public extern SpriteDrawMode drawMode
+		public SpriteDrawMode drawMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_drawMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_drawMode_Injected(intPtr, value);
+			}
 		}
 
 		public Vector2 size
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_size_Injected(out vector);
+				SpriteRenderer.get_size_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_size_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_size_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern float adaptiveModeThreshold
+		public float adaptiveModeThreshold
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_adaptiveModeThreshold_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_adaptiveModeThreshold_Injected(intPtr, value);
+			}
 		}
 
-		public extern SpriteTileMode tileMode
+		public SpriteTileMode tileMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_tileMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_tileMode_Injected(intPtr, value);
+			}
 		}
 
 		public Color color
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_color_Injected(out color);
+				SpriteRenderer.get_color_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_color_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_color_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern SpriteMaskInteraction maskInteraction
+		public SpriteMaskInteraction maskInteraction
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_maskInteraction_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_maskInteraction_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool flipX
+		public bool flipX
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_flipX_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_flipX_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool flipY
+		public bool flipY
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_flipY_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_flipY_Injected(intPtr, value);
+			}
 		}
 
-		public extern SpriteSortPoint spriteSortPoint
+		public SpriteSortPoint spriteSortPoint
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteRenderer.get_spriteSortPoint_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteRenderer.set_spriteSortPoint_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetCurrentMeshDataPtr();
+		private IntPtr GetCurrentMeshDataPtr()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return SpriteRenderer.GetCurrentMeshDataPtr_Injected(intPtr);
+		}
 
 		internal unsafe Mesh.MeshDataArray GetCurrentMeshData()
 		{
@@ -183,13 +344,34 @@ namespace UnityEngine
 		[NativeMethod(Name = "GetSpriteBounds")]
 		internal Bounds Internal_GetSpriteBounds(SpriteDrawMode mode)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Bounds bounds;
-			this.Internal_GetSpriteBounds_Injected(mode, out bounds);
+			SpriteRenderer.Internal_GetSpriteBounds_Injected(intPtr, mode, out bounds);
 			return bounds;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetSecondaryTextureProperties([NotNull("ArgumentNullException")] MaterialPropertyBlock mbp);
+		internal void GetSecondaryTextureProperties([NotNull] MaterialPropertyBlock mbp)
+		{
+			if (mbp == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(mbp, "mbp");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(mbp);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(mbp, "mbp");
+			}
+			SpriteRenderer.GetSecondaryTextureProperties_Injected(intPtr, intPtr2);
+		}
 
 		internal Bounds GetSpriteBounds()
 		{
@@ -197,19 +379,82 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_size_Injected(out Vector2 ret);
+		private static extern bool get_shouldSupportTiling_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_size_Injected(ref Vector2 value);
+		private static extern bool get_hasSpriteChangeEvents_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_color_Injected(out Color ret);
+		private static extern void set_hasSpriteChangeEvents_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_color_Injected(ref Color value);
+		private static extern IntPtr get_sprite_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_GetSpriteBounds_Injected(SpriteDrawMode mode, out Bounds ret);
+		private static extern void set_sprite_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteDrawMode get_drawMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_drawMode_Injected(IntPtr _unity_self, SpriteDrawMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_size_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_size_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_adaptiveModeThreshold_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_adaptiveModeThreshold_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteTileMode get_tileMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_tileMode_Injected(IntPtr _unity_self, SpriteTileMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_color_Injected(IntPtr _unity_self, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_color_Injected(IntPtr _unity_self, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteMaskInteraction get_maskInteraction_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maskInteraction_Injected(IntPtr _unity_self, SpriteMaskInteraction value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_flipX_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_flipX_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_flipY_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_flipY_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteSortPoint get_spriteSortPoint_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_spriteSortPoint_Injected(IntPtr _unity_self, SpriteSortPoint value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetCurrentMeshDataPtr_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetSpriteBounds_Injected(IntPtr _unity_self, SpriteDrawMode mode, out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSecondaryTextureProperties_Injected(IntPtr _unity_self, IntPtr mbp);
 
 		private UnityEvent<SpriteRenderer> m_SpriteChangeEvent;
 	}

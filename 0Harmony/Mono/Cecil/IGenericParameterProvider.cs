@@ -3,7 +3,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public interface IGenericParameterProvider : IMetadataTokenProvider
+	internal interface IGenericParameterProvider : IMetadataTokenProvider
 	{
 		bool HasGenericParameters { get; }
 

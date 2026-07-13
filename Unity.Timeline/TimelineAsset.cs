@@ -313,6 +313,17 @@ namespace UnityEngine.Timeline
 			}
 		}
 
+		internal void RemoveMarkerTrack()
+		{
+			if (this.m_MarkerTrack != null)
+			{
+				Object markerTrack = this.m_MarkerTrack;
+				this.m_MarkerTrack = null;
+				TimelineCreateUtilities.RemoveAssetFromObject(markerTrack, this);
+				this.Invalidate();
+			}
+		}
+
 		internal void Invalidate()
 		{
 			this.m_CacheRootTracks = null;
@@ -330,7 +341,7 @@ namespace UnityEngine.Timeline
 			DiscreteTime discreteTime = new DiscreteTime(0);
 			foreach (TrackAsset trackAsset in this.flattenedTracks)
 			{
-				if (!trackAsset.muted)
+				if (!trackAsset.mutedInHierarchy)
 				{
 					discreteTime = DiscreteTime.Max(discreteTime, (DiscreteTime)trackAsset.end);
 				}

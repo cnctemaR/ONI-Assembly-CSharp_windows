@@ -10,23 +10,31 @@ namespace UnityEngine.Networking
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DownloadHandlerTexture : DownloadHandler
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerTexture obj, bool readable);
-
-		private void InternalCreateTexture(bool readable)
+		private static IntPtr Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] DownloadHandlerTexture obj, DownloadedTextureParams parameters)
 		{
-			this.m_Ptr = DownloadHandlerTexture.Create(this, readable);
+			return DownloadHandlerTexture.Create_Injected(obj, ref parameters);
+		}
+
+		private void InternalCreateTexture(DownloadedTextureParams parameters)
+		{
+			this.m_Ptr = DownloadHandlerTexture.Create(this, parameters);
 		}
 
 		public DownloadHandlerTexture()
+			: this(true)
 		{
-			this.InternalCreateTexture(true);
 		}
 
 		public DownloadHandlerTexture(bool readable)
 		{
-			this.InternalCreateTexture(readable);
-			this.mNonReadable = !readable;
+			DownloadedTextureParams @default = DownloadedTextureParams.Default;
+			@default.readable = readable;
+			this.InternalCreateTexture(@default);
+		}
+
+		public DownloadHandlerTexture(DownloadedTextureParams parameters)
+		{
+			this.InternalCreateTexture(parameters);
 		}
 
 		protected override NativeArray<byte> GetNativeData()
@@ -49,16 +57,35 @@ namespace UnityEngine.Networking
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Texture2D InternalGetTextureNative();
+		private Texture2D InternalGetTextureNative()
+		{
+			IntPtr intPtr = DownloadHandlerTexture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture2D>(DownloadHandlerTexture.InternalGetTextureNative_Injected(intPtr));
+		}
 
 		public static Texture2D GetContent(UnityWebRequest www)
 		{
 			return DownloadHandler.GetCheckedDownloader<DownloadHandlerTexture>(www).texture;
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Create_Injected(DownloadHandlerTexture obj, [In] ref DownloadedTextureParams parameters);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr InternalGetTextureNative_Injected(IntPtr _unity_self);
+
 		private NativeArray<byte> m_NativeData;
 
-		private bool mNonReadable;
+		internal new static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(DownloadHandlerTexture handler)
+			{
+				return handler.m_Ptr;
+			}
+		}
 	}
 }

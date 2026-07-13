@@ -93,7 +93,10 @@ namespace FMODUnity
 					RuntimeUtils.DebugLogException(ex);
 				}
 			}
-			RuntimeManager.WaitForAllSampleLoading();
+			if (this.PreloadSamples)
+			{
+				RuntimeManager.WaitForAllSampleLoading();
+			}
 		}
 
 		public void Unload()

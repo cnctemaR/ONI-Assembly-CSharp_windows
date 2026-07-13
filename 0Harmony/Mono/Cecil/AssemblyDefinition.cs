@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class AssemblyDefinition : ICustomAttributeProvider, IMetadataTokenProvider, ISecurityDeclarationProvider, IDisposable
+	internal sealed class AssemblyDefinition : ICustomAttributeProvider, IMetadataTokenProvider, ISecurityDeclarationProvider, IDisposable
 	{
 		public AssemblyNameDefinition Name
 		{

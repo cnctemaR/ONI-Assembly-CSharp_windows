@@ -1,57 +1,117 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
-using UnityEngine.Scripting;
+using UnityEngine.LowLevelPhysics;
 
 namespace UnityEngine
 {
 	[NativeHeader("Modules/Physics/Collider.h")]
-	[RequireComponent(typeof(Transform))]
-	[RequiredByNativeCode]
 	public class Collider : Component
 	{
-		public extern bool enabled
+		public bool enabled
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Collider.get_enabled_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_enabled_Injected(intPtr, value);
+			}
 		}
 
-		public extern Rigidbody attachedRigidbody
+		public Rigidbody attachedRigidbody
 		{
 			[NativeMethod("GetRigidbody")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Rigidbody>(Collider.get_attachedRigidbody_Injected(intPtr));
+			}
 		}
 
-		public extern ArticulationBody attachedArticulationBody
+		public ArticulationBody attachedArticulationBody
 		{
 			[NativeMethod("GetArticulationBody")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<ArticulationBody>(Collider.get_attachedArticulationBody_Injected(intPtr));
+			}
 		}
 
-		public extern bool isTrigger
+		public bool isTrigger
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Collider.get_isTrigger_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_isTrigger_Injected(intPtr, value);
+			}
 		}
 
-		public extern float contactOffset
+		public float contactOffset
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Collider.get_contactOffset_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_contactOffset_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 ClosestPoint(Vector3 position)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.ClosestPoint_Injected(ref position, out vector);
+			Collider.ClosestPoint_Injected(intPtr, ref position, out vector);
 			return vector;
 		}
 
@@ -59,47 +119,104 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_bounds_Injected(out bounds);
+				Collider.get_bounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 		}
 
-		public extern bool hasModifiableContacts
+		public bool hasModifiableContacts
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Collider.get_hasModifiableContacts_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_hasModifiableContacts_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool providesContacts
+		public bool providesContacts
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Collider.get_providesContacts_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_providesContacts_Injected(intPtr, value);
+			}
 		}
 
-		public extern int layerOverridePriority
+		public int layerOverridePriority
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Collider.get_layerOverridePriority_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_layerOverridePriority_Injected(intPtr, value);
+			}
 		}
 
 		public LayerMask excludeLayers
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				LayerMask layerMask;
-				this.get_excludeLayers_Injected(out layerMask);
+				Collider.get_excludeLayers_Injected(intPtr, out layerMask);
 				return layerMask;
 			}
 			set
 			{
-				this.set_excludeLayers_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_excludeLayers_Injected(intPtr, ref value);
 			}
 		}
 
@@ -107,39 +224,95 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				LayerMask layerMask;
-				this.get_includeLayers_Injected(out layerMask);
+				Collider.get_includeLayers_Injected(intPtr, out layerMask);
 				return layerMask;
 			}
 			set
 			{
-				this.set_includeLayers_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_includeLayers_Injected(intPtr, ref value);
 			}
 		}
 
-		[NativeMethod("Material")]
-		public extern PhysicMaterial sharedMaterial
+		public GeometryHolder GeometryHolder
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return this.GetGeometryHolder();
+			}
 		}
 
-		public extern PhysicMaterial material
+		public T GetGeometry<T>() where T : struct, IGeometry
+		{
+			return this.GetGeometryHolder().As<T>();
+		}
+
+		[NativeMethod("Material")]
+		public PhysicsMaterial sharedMaterial
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<PhysicsMaterial>(Collider.get_sharedMaterial_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_sharedMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<PhysicsMaterial>(value));
+			}
+		}
+
+		public PhysicsMaterial material
 		{
 			[NativeMethod("GetClonedMaterial")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<PhysicsMaterial>(Collider.get_material_Injected(intPtr));
+			}
 			[NativeMethod("SetMaterial")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Collider.set_material_Injected(intPtr, Object.MarshalledUnityObject.Marshal<PhysicsMaterial>(value));
+			}
 		}
 
 		private RaycastHit Raycast(Ray ray, float maxDistance, ref bool hasHit)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			RaycastHit raycastHit;
-			this.Raycast_Injected(ref ray, maxDistance, ref hasHit, out raycastHit);
+			Collider.Raycast_Injected(intPtr, ref ray, maxDistance, ref hasHit, out raycastHit);
 			return raycastHit;
 		}
 
@@ -153,7 +326,12 @@ namespace UnityEngine
 		[NativeName("ClosestPointOnBounds")]
 		private void Internal_ClosestPointOnBounds(Vector3 point, ref Vector3 outPos, ref float distance)
 		{
-			this.Internal_ClosestPointOnBounds_Injected(ref point, ref outPos, ref distance);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Collider.Internal_ClosestPointOnBounds_Injected(intPtr, ref point, ref outPos, ref distance);
 		}
 
 		public Vector3 ClosestPointOnBounds(Vector3 position)
@@ -165,27 +343,81 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ClosestPoint_Injected(ref Vector3 position, out Vector3 ret);
+		private static extern bool get_enabled_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_bounds_Injected(out Bounds ret);
+		private static extern void set_enabled_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_excludeLayers_Injected(out LayerMask ret);
+		private static extern IntPtr get_attachedRigidbody_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_excludeLayers_Injected(ref LayerMask value);
+		private static extern IntPtr get_attachedArticulationBody_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_includeLayers_Injected(out LayerMask ret);
+		private static extern bool get_isTrigger_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_includeLayers_Injected(ref LayerMask value);
+		private static extern void set_isTrigger_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Raycast_Injected(ref Ray ray, float maxDistance, ref bool hasHit, out RaycastHit ret);
+		private static extern float get_contactOffset_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_ClosestPointOnBounds_Injected(ref Vector3 point, ref Vector3 outPos, ref float distance);
+		private static extern void set_contactOffset_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClosestPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_bounds_Injected(IntPtr _unity_self, out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_hasModifiableContacts_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_hasModifiableContacts_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_providesContacts_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_providesContacts_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_layerOverridePriority_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_layerOverridePriority_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_excludeLayers_Injected(IntPtr _unity_self, out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_excludeLayers_Injected(IntPtr _unity_self, [In] ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_includeLayers_Injected(IntPtr _unity_self, out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_includeLayers_Injected(IntPtr _unity_self, [In] ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_sharedMaterial_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sharedMaterial_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_material_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_material_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Raycast_Injected(IntPtr _unity_self, [In] ref Ray ray, float maxDistance, ref bool hasHit, out RaycastHit ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_ClosestPointOnBounds_Injected(IntPtr _unity_self, [In] ref Vector3 point, ref Vector3 outPos, ref float distance);
 	}
 }

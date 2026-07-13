@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D42E}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD76}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Collections</RootNamespace>
     <AssemblyName>Unity.Collections</AssemblyName>
@@ -15,233 +15,236 @@
   <PropertyGroup />
   <ItemGroup>
     <Compile Include="$BurstDirectCallInitializer.cs" />
-    <Compile Include="AllocatorHelper.cs" />
-    <Compile Include="AllocatorManager.cs" />
-    <Compile Include="BitField32.cs" />
-    <Compile Include="BitField32DebugView.cs" />
-    <Compile Include="BitField64.cs" />
-    <Compile Include="BitField64DebugView.cs" />
-    <Compile Include="Bitwise.cs" />
-    <Compile Include="BurstCompatibleAttribute.cs" />
-    <Compile Include="CollectionHelper.cs" />
-    <Compile Include="ConcurrentMask.cs" />
-    <Compile Include="ConversionError.cs" />
-    <Compile Include="CopyError.cs" />
-    <Compile Include="CreatePropertyAttribute.cs" />
-    <Compile Include="FixedBytes126.cs" />
-    <Compile Include="FixedBytes16.cs" />
-    <Compile Include="FixedBytes30.cs" />
-    <Compile Include="FixedBytes4094.cs" />
-    <Compile Include="FixedBytes510.cs" />
-    <Compile Include="FixedBytes62.cs" />
-    <Compile Include="FixedList.2.cs" />
-    <Compile Include="FixedList.cs" />
-    <Compile Include="FixedList128.cs" />
-    <Compile Include="FixedList128Bytes.cs" />
-    <Compile Include="FixedList128BytesDebugView.cs" />
-    <Compile Include="FixedList128BytesExtensions.cs" />
-    <Compile Include="FixedList32.cs" />
-    <Compile Include="FixedList32Bytes.cs" />
-    <Compile Include="FixedList32BytesDebugView.cs" />
-    <Compile Include="FixedList32BytesExtensions.cs" />
-    <Compile Include="FixedList4096.cs" />
-    <Compile Include="FixedList4096Bytes.cs" />
-    <Compile Include="FixedList4096BytesDebugView.cs" />
-    <Compile Include="FixedList4096BytesExtensions.cs" />
-    <Compile Include="FixedList512.cs" />
-    <Compile Include="FixedList512Bytes.cs" />
-    <Compile Include="FixedList512BytesDebugView.cs" />
-    <Compile Include="FixedList512BytesExtensions.cs" />
-    <Compile Include="FixedList64.cs" />
-    <Compile Include="FixedList64Bytes.cs" />
-    <Compile Include="FixedList64BytesDebugView.cs" />
-    <Compile Include="FixedList64BytesExtensions.cs" />
-    <Compile Include="FixedListByte128.cs" />
-    <Compile Include="FixedListByte128DebugView.cs" />
-    <Compile Include="FixedListByte32.cs" />
-    <Compile Include="FixedListByte32DebugView.cs" />
-    <Compile Include="FixedListByte4096.cs" />
-    <Compile Include="FixedListByte4096DebugView.cs" />
-    <Compile Include="FixedListByte512.cs" />
-    <Compile Include="FixedListByte512DebugView.cs" />
-    <Compile Include="FixedListByte64.cs" />
-    <Compile Include="FixedListByte64DebugView.cs" />
-    <Compile Include="FixedListExtensions.cs" />
-    <Compile Include="FixedListFloat128.cs" />
-    <Compile Include="FixedListFloat128DebugView.cs" />
-    <Compile Include="FixedListFloat32.cs" />
-    <Compile Include="FixedListFloat32DebugView.cs" />
-    <Compile Include="FixedListFloat4096.cs" />
-    <Compile Include="FixedListFloat4096DebugView.cs" />
-    <Compile Include="FixedListFloat512.cs" />
-    <Compile Include="FixedListFloat512DebugView.cs" />
-    <Compile Include="FixedListFloat64.cs" />
-    <Compile Include="FixedListFloat64DebugView.cs" />
-    <Compile Include="FixedListInt128.cs" />
-    <Compile Include="FixedListInt128DebugView.cs" />
-    <Compile Include="FixedListInt32.cs" />
-    <Compile Include="FixedListInt32DebugView.cs" />
-    <Compile Include="FixedListInt4096.cs" />
-    <Compile Include="FixedListInt4096DebugView.cs" />
-    <Compile Include="FixedListInt512.cs" />
-    <Compile Include="FixedListInt512DebugView.cs" />
-    <Compile Include="FixedListInt64.cs" />
-    <Compile Include="FixedListInt64DebugView.cs" />
-    <Compile Include="FixedString.cs" />
-    <Compile Include="FixedString128.cs" />
-    <Compile Include="FixedString128Bytes.cs" />
-    <Compile Include="FixedString32.cs" />
-    <Compile Include="FixedString32Bytes.cs" />
-    <Compile Include="FixedString4096.cs" />
-    <Compile Include="FixedString4096Bytes.cs" />
-    <Compile Include="FixedString512.cs" />
-    <Compile Include="FixedString512Bytes.cs" />
-    <Compile Include="FixedString64.cs" />
-    <Compile Include="FixedString64Bytes.cs" />
-    <Compile Include="FixedStringMethods.cs" />
-    <Compile Include="FixedStringUtils.cs" />
-    <Compile Include="FormatError.cs" />
-    <Compile Include="HashSetExtensions.cs" />
-    <Compile Include="HeapString.cs" />
-    <Compile Include="IIndexable.cs" />
-    <Compile Include="INativeDisposable.cs" />
-    <Compile Include="INativeList.cs" />
-    <Compile Include="IUTF8Bytes.cs" />
-    <Compile Include="ListExtensions.cs" />
-    <Compile Include="ListPair.cs" />
-    <Compile Include="Long1024.cs" />
-    <Compile Include="Long512.cs" />
-    <Compile Include="Long64.cs" />
-    <Compile Include="Long8.cs" />
-    <Compile Include="LowLevel\Unsafe\HashSetExtensions.cs" />
-    <Compile Include="LowLevel\Unsafe\KeyValue.cs" />
-    <Compile Include="LowLevel\Unsafe\NativeBitArrayUnsafeUtility.cs" />
-    <Compile Include="LowLevel\Unsafe\NativeListUnsafeUtility.cs" />
-    <Compile Include="LowLevel\Unsafe\NativeReferenceUnsafeUtility.cs" />
-    <Compile Include="LowLevel\Unsafe\NotBurstCompatible\Extensions.cs" />
-    <Compile Include="LowLevel\Unsafe\NumberedWords.cs" />
-    <Compile Include="LowLevel\Unsafe\RingControl.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeAppendBuffer.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeAtomicCounter32.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeAtomicCounter64.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeBitArray.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeBitArrayDebugView.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeDisposeJob.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMap.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapBase.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapBucketData.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapData.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDataDispose.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDataDisposeJob.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDataEnumerator.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDebuggerTypeProxy.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashMapDisposeJob.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashSet.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeHashSetDebuggerTypeProxy.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeList.2.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeList.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeListExtension.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeListExtensions.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeListTDebugView.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeMultiHashMap.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeMultiHashMapDebuggerTypeProxy.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafePtrList.2.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafePtrList.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafePtrListDebugView.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafePtrListExtensions.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafePtrListTDebugView.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafePtrListTExtensions.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeRingQueue.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeRingQueueDebugView.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeScratchAllocator.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeStream.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeStreamBlock.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeStreamBlockData.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeStreamRange.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeText.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeTextExtensions.cs" />
-    <Compile Include="LowLevel\Unsafe\UnsafeUtilityExtensions.cs" />
-    <Compile Include="LowLevel\Unsafe\UntypedUnsafeHashMap.cs" />
-    <Compile Include="LowLevel\Unsafe\UntypedUnsafeList.cs" />
-    <Compile Include="LowLevel\Unsafe\Words.cs" />
-    <Compile Include="LowLevel\Unsafe\WordStorage.cs" />
-    <Compile Include="LowLevel\Unsafe\WordStorageDebugView.cs" />
-    <Compile Include="LowLevel\Unsafe\WordStorageStatic.cs" />
-    <Compile Include="Memory.cs" />
     <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
-    <Compile Include="NativeArrayExtensions.cs" />
-    <Compile Include="NativeBitArray.cs" />
-    <Compile Include="NativeHashMap.cs" />
-    <Compile Include="NativeHashMapDebuggerTypeProxy.cs" />
-    <Compile Include="NativeHashMapExtensions.cs" />
-    <Compile Include="NativeHashSet.cs" />
-    <Compile Include="NativeHashSetDebuggerTypeProxy.cs" />
-    <Compile Include="NativeKeyValueArrays.cs" />
-    <Compile Include="NativeList.cs" />
-    <Compile Include="NativeListDebugView.cs" />
-    <Compile Include="NativeListDispose.cs" />
-    <Compile Include="NativeListDisposeJob.cs" />
-    <Compile Include="NativeMultiHashMap.cs" />
-    <Compile Include="NativeMultiHashMapDebuggerTypeProxy.cs" />
-    <Compile Include="NativeMultiHashMapExtensions.cs" />
-    <Compile Include="NativeMultiHashMapIterator.cs" />
-    <Compile Include="NativeQueue.cs" />
-    <Compile Include="NativeQueueBlockHeader.cs" />
-    <Compile Include="NativeQueueBlockPool.cs" />
-    <Compile Include="NativeQueueBlockPoolData.cs" />
-    <Compile Include="NativeQueueData.cs" />
-    <Compile Include="NativeQueueDispose.cs" />
-    <Compile Include="NativeQueueDisposeJob.cs" />
-    <Compile Include="NativeReference.cs" />
-    <Compile Include="NativeReferenceDispose.cs" />
-    <Compile Include="NativeReferenceDisposeJob.cs" />
-    <Compile Include="NativeSortExtension.cs" />
-    <Compile Include="NativeStream.cs" />
-    <Compile Include="NativeText.cs" />
-    <Compile Include="NotBurstCompatibleAttribute.cs" />
-    <Compile Include="NotBurstCompatible\Extensions.cs" />
-    <Compile Include="Pair.cs" />
-    <Compile Include="ParseError.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RewindableAllocator.cs" />
-    <Compile Include="SortJob.cs" />
-    <Compile Include="Spinner.cs" />
     <Compile Include="System\Runtime\CompilerServices\IsUnmanagedAttribute.cs" />
-    <Compile Include="Unicode.cs" />
     <Compile Include="UnitySourceGeneratedAssemblyMonoScriptTypes_v1.cs" />
-    <Compile Include="UnmanagedArray.cs" />
-    <Compile Include="UTF8ArrayUnsafeUtility.cs" />
-    <Compile Include="xxHash3.cs" />
-    <Compile Include="xxHashDefaultKey.cs" />
+    <Compile Include="Unity\Collections\AllocatorHelper.cs" />
+    <Compile Include="Unity\Collections\AllocatorManager.cs" />
+    <Compile Include="Unity\Collections\ArrayOfArrays.cs" />
+    <Compile Include="Unity\Collections\AutoFreeAllocator.cs" />
+    <Compile Include="Unity\Collections\BitField32.cs" />
+    <Compile Include="Unity\Collections\BitField32DebugView.cs" />
+    <Compile Include="Unity\Collections\BitField64.cs" />
+    <Compile Include="Unity\Collections\BitField64DebugView.cs" />
+    <Compile Include="Unity\Collections\Bitwise.cs" />
+    <Compile Include="Unity\Collections\BurstCompatibleAttribute.cs" />
+    <Compile Include="Unity\Collections\CollectionHelper.cs" />
+    <Compile Include="Unity\Collections\ConcurrentMask.cs" />
+    <Compile Include="Unity\Collections\ConversionError.cs" />
+    <Compile Include="Unity\Collections\CopyError.cs" />
+    <Compile Include="Unity\Collections\DataStreamReader.cs" />
+    <Compile Include="Unity\Collections\DataStreamWriter.cs" />
+    <Compile Include="Unity\Collections\DoubleRewindableAllocators.cs" />
+    <Compile Include="Unity\Collections\ExcludeFromBurstCompatTestingAttribute.cs" />
+    <Compile Include="Unity\Collections\FixedBytes126.cs" />
+    <Compile Include="Unity\Collections\FixedBytes128Align8.cs" />
+    <Compile Include="Unity\Collections\FixedBytes16.cs" />
+    <Compile Include="Unity\Collections\FixedBytes16Align8.cs" />
+    <Compile Include="Unity\Collections\FixedBytes30.cs" />
+    <Compile Include="Unity\Collections\FixedBytes32Align8.cs" />
+    <Compile Include="Unity\Collections\FixedBytes4094.cs" />
+    <Compile Include="Unity\Collections\FixedBytes4096Align8.cs" />
+    <Compile Include="Unity\Collections\FixedBytes510.cs" />
+    <Compile Include="Unity\Collections\FixedBytes512Align8.cs" />
+    <Compile Include="Unity\Collections\FixedBytes62.cs" />
+    <Compile Include="Unity\Collections\FixedBytes64Align8.cs" />
+    <Compile Include="Unity\Collections\FixedList.2.cs" />
+    <Compile Include="Unity\Collections\FixedList.cs" />
+    <Compile Include="Unity\Collections\FixedList128Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedList128BytesDebugView.cs" />
+    <Compile Include="Unity\Collections\FixedList128BytesExtensions.cs" />
+    <Compile Include="Unity\Collections\FixedList32Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedList32BytesDebugView.cs" />
+    <Compile Include="Unity\Collections\FixedList32BytesExtensions.cs" />
+    <Compile Include="Unity\Collections\FixedList4096Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedList4096BytesDebugView.cs" />
+    <Compile Include="Unity\Collections\FixedList4096BytesExtensions.cs" />
+    <Compile Include="Unity\Collections\FixedList512Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedList512BytesDebugView.cs" />
+    <Compile Include="Unity\Collections\FixedList512BytesExtensions.cs" />
+    <Compile Include="Unity\Collections\FixedList64Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedList64BytesDebugView.cs" />
+    <Compile Include="Unity\Collections\FixedList64BytesExtensions.cs" />
+    <Compile Include="Unity\Collections\FixedListExtensions.cs" />
+    <Compile Include="Unity\Collections\FixedString.cs" />
+    <Compile Include="Unity\Collections\FixedString128Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedString32Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedString4096Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedString512Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedString64Bytes.cs" />
+    <Compile Include="Unity\Collections\FixedStringMethods.cs" />
+    <Compile Include="Unity\Collections\FixedStringUtils.cs" />
+    <Compile Include="Unity\Collections\FormatError.cs" />
+    <Compile Include="Unity\Collections\GenerateTestsForBurstCompatibilityAttribute.cs" />
+    <Compile Include="Unity\Collections\HashSetExtensions.cs" />
+    <Compile Include="Unity\Collections\IIndexable.cs" />
+    <Compile Include="Unity\Collections\INativeDisposable.cs" />
+    <Compile Include="Unity\Collections\INativeList.cs" />
+    <Compile Include="Unity\Collections\IUTF8Bytes.cs" />
+    <Compile Include="Unity\Collections\KVPair.cs" />
+    <Compile Include="Unity\Collections\ListExtensions.cs" />
+    <Compile Include="Unity\Collections\ListPair.cs" />
+    <Compile Include="Unity\Collections\Long1024.cs" />
+    <Compile Include="Unity\Collections\Long512.cs" />
+    <Compile Include="Unity\Collections\Long64.cs" />
+    <Compile Include="Unity\Collections\Long8.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\DataStreamExtensions.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\HashMapHelper.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\HashSetExtensions.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\KeyValue.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\NativeBitArrayUnsafeUtility.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\NativeListUnsafeUtility.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\NativeReferenceUnsafeUtility.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\NotBurstCompatible\Extensions.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeAppendBuffer.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeAtomicCounter32.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeAtomicCounter64.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeBitArray.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeBitArrayDebugView.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeDisposeJob.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeHashMap.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeHashSet.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeHashSetDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeList.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeListExtensions.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeListTDebugView.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMap.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapBase.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapBucketData.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapData.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapDataDispose.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapDataDisposeJob.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapDataEnumerator.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashMapDisposeJob.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashSet.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelHashSetDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelMultiHashMap.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeParallelMultiHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafePtrList.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafePtrListDebugView.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafePtrListExtensions.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeRingQueue.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeRingQueueDebugView.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeScratchAllocator.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeStream.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeStreamBlock.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeStreamBlockData.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeStreamRange.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeText.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeTextExtensions.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UnsafeUtilityExtensions.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UntypedUnsafeList.cs" />
+    <Compile Include="Unity\Collections\LowLevel\Unsafe\UntypedUnsafeParallelHashMap.cs" />
+    <Compile Include="Unity\Collections\Memory.cs" />
+    <Compile Include="Unity\Collections\NativeArrayExtensions.cs" />
+    <Compile Include="Unity\Collections\NativeBitArray.cs" />
+    <Compile Include="Unity\Collections\NativeBitArrayDispose.cs" />
+    <Compile Include="Unity\Collections\NativeBitArrayDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NativeHashMap.cs" />
+    <Compile Include="Unity\Collections\NativeHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\NativeHashMapDispose.cs" />
+    <Compile Include="Unity\Collections\NativeHashMapDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NativeHashSet.cs" />
+    <Compile Include="Unity\Collections\NativeHashSetDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\NativeKeyValueArrays.cs" />
+    <Compile Include="Unity\Collections\NativeList.cs" />
+    <Compile Include="Unity\Collections\NativeListDebugView.cs" />
+    <Compile Include="Unity\Collections\NativeListDispose.cs" />
+    <Compile Include="Unity\Collections\NativeListDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NativeListExtensions.cs" />
+    <Compile Include="Unity\Collections\NativeParallelHashMap.cs" />
+    <Compile Include="Unity\Collections\NativeParallelHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\NativeParallelHashMapExtensions.cs" />
+    <Compile Include="Unity\Collections\NativeParallelHashSet.cs" />
+    <Compile Include="Unity\Collections\NativeParallelHashSetDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\NativeParallelMultiHashMap.cs" />
+    <Compile Include="Unity\Collections\NativeParallelMultiHashMapDebuggerTypeProxy.cs" />
+    <Compile Include="Unity\Collections\NativeParallelMultiHashMapExtensions.cs" />
+    <Compile Include="Unity\Collections\NativeParallelMultiHashMapIterator.cs" />
+    <Compile Include="Unity\Collections\NativeQueue.cs" />
+    <Compile Include="Unity\Collections\NativeQueueDispose.cs" />
+    <Compile Include="Unity\Collections\NativeQueueDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NativeReference.cs" />
+    <Compile Include="Unity\Collections\NativeReferenceDispose.cs" />
+    <Compile Include="Unity\Collections\NativeReferenceDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NativeRingQueue.cs" />
+    <Compile Include="Unity\Collections\NativeRingQueueDebugView.cs" />
+    <Compile Include="Unity\Collections\NativeRingQueueDispose.cs" />
+    <Compile Include="Unity\Collections\NativeRingQueueDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NativeSortExtension.cs" />
+    <Compile Include="Unity\Collections\NativeStream.cs" />
+    <Compile Include="Unity\Collections\NativeStreamDispose.cs" />
+    <Compile Include="Unity\Collections\NativeStreamDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NativeText.cs" />
+    <Compile Include="Unity\Collections\NativeTextDispose.cs" />
+    <Compile Include="Unity\Collections\NativeTextDisposeJob.cs" />
+    <Compile Include="Unity\Collections\NotBurstCompatible\Extensions.cs" />
+    <Compile Include="Unity\Collections\Pair.cs" />
+    <Compile Include="Unity\Collections\ParseError.cs" />
+    <Compile Include="Unity\Collections\RewindableAllocator.cs" />
+    <Compile Include="Unity\Collections\SortJob.cs" />
+    <Compile Include="Unity\Collections\SortJobDefer.cs" />
+    <Compile Include="Unity\Collections\Spinner.cs" />
+    <Compile Include="Unity\Collections\StreamCompressionModel.cs" />
+    <Compile Include="Unity\Collections\UIntFloat.cs" />
+    <Compile Include="Unity\Collections\Unicode.cs" />
+    <Compile Include="Unity\Collections\UnmanagedArray.cs" />
+    <Compile Include="Unity\Collections\UnsafeQueue.cs" />
+    <Compile Include="Unity\Collections\UnsafeQueueBlockHeader.cs" />
+    <Compile Include="Unity\Collections\UnsafeQueueData.cs" />
+    <Compile Include="Unity\Collections\UnsafeQueueDispose.cs" />
+    <Compile Include="Unity\Collections\UnsafeQueueDisposeJob.cs" />
+    <Compile Include="Unity\Collections\UTF8ArrayUnsafeUtility.cs" />
+    <Compile Include="Unity\Collections\xxHash3.cs" />
+    <Compile Include="Unity\Collections\xxHashDefaultKey.cs" />
+    <Compile Include="Unity\Jobs\DOTSCompilerGeneratedAttribute.cs" />
+    <Compile Include="Unity\Jobs\EarlyInitHelpers.cs" />
+    <Compile Include="Unity\Jobs\IJobFilter.cs" />
+    <Compile Include="Unity\Jobs\IJobFilterExtensions.cs" />
+    <Compile Include="Unity\Jobs\IJobParallelForBatch.cs" />
+    <Compile Include="Unity\Jobs\IJobParallelForBatchExtensions.cs" />
+    <Compile Include="Unity\Jobs\IJobParallelForDefer.cs" />
+    <Compile Include="Unity\Jobs\IJobParallelForDeferExtensions.cs" />
+    <Compile Include="Unity\Jobs\IJobParallelForFilter.cs" />
+    <Compile Include="Unity\Jobs\JobParallelIndexListExtensions.cs" />
+    <Compile Include="Unity\Jobs\RegisterGenericJobTypeAttribute.cs" />
+    <Compile Include="__JobReflectionRegistrationOutput__1652832624114795843.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D415}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5B}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D416}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D41D}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD63}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Burst\Unity.Burst.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D42C}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD74}</Project>
       <Name>Unity.Burst</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D42F}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD77}</Project>
       <Name>Unity.Collections.LowLevel.ILSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Mathematics\Unity.Mathematics.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D430}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD79}</Project>
       <Name>Unity.Mathematics</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D440}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
       <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.PropertiesModule\UnityEngine.PropertiesModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDA9}</Project>
+      <Name>UnityEngine.PropertiesModule</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

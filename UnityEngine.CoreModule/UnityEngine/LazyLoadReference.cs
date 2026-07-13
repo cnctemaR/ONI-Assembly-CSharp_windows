@@ -9,7 +9,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_InstanceID != 0;
+				return this.m_InstanceID != EntityId.None;
 			}
 		}
 
@@ -17,7 +17,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_InstanceID != 0 && !Object.DoesObjectWithInstanceIDExist(this.m_InstanceID);
+				return this.m_InstanceID != EntityId.None && !Object.DoesObjectWithInstanceIDExist(this.m_InstanceID);
 			}
 		}
 
@@ -25,7 +25,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				bool flag = this.m_InstanceID == 0;
+				bool flag = this.m_InstanceID == EntityId.None;
 				T t;
 				if (flag)
 				{
@@ -42,7 +42,7 @@ namespace UnityEngine
 				bool flag = value == null;
 				if (flag)
 				{
-					this.m_InstanceID = 0;
+					this.m_InstanceID = EntityId.None;
 				}
 				else
 				{
@@ -51,12 +51,12 @@ namespace UnityEngine
 					{
 						throw new ArgumentException("Object that does not belong to a persisted asset cannot be set as the target of a LazyLoadReference.");
 					}
-					this.m_InstanceID = value.GetInstanceID();
+					this.m_InstanceID = value.GetEntityId();
 				}
 			}
 		}
 
-		public int instanceID
+		public EntityId entityId
 		{
 			get
 			{
@@ -68,12 +68,25 @@ namespace UnityEngine
 			}
 		}
 
+		[Obsolete("Use entityId instead, this will be removed in a future version", false)]
+		public int instanceID
+		{
+			get
+			{
+				return this.entityId;
+			}
+			set
+			{
+				this.entityId = value;
+			}
+		}
+
 		public LazyLoadReference(T asset)
 		{
 			bool flag = asset == null;
 			if (flag)
 			{
-				this.m_InstanceID = 0;
+				this.m_InstanceID = EntityId.None;
 			}
 			else
 			{
@@ -82,10 +95,16 @@ namespace UnityEngine
 				{
 					throw new ArgumentException("Object that does not belong to a persisted asset cannot be set as the target of a LazyLoadReference.");
 				}
-				this.m_InstanceID = asset.GetInstanceID();
+				this.m_InstanceID = asset.GetEntityId();
 			}
 		}
 
+		public LazyLoadReference(EntityId entityId)
+		{
+			this.m_InstanceID = entityId;
+		}
+
+		[Obsolete("Use LazyLoadReference(EntityId entityId) instead, this will be removed in a future version", false)]
 		public LazyLoadReference(int instanceID)
 		{
 			this.m_InstanceID = instanceID;
@@ -99,15 +118,22 @@ namespace UnityEngine
 			};
 		}
 
+		public static implicit operator LazyLoadReference<T>(EntityId entityId)
+		{
+			return new LazyLoadReference<T>
+			{
+				m_InstanceID = entityId
+			};
+		}
+
+		[Obsolete("Use LazyLoadReference(EntityId entityId) instead, this will be removed in a future version", false)]
 		public static implicit operator LazyLoadReference<T>(int instanceID)
 		{
 			return new LazyLoadReference<T>
 			{
-				instanceID = instanceID
+				m_InstanceID = instanceID
 			};
 		}
-
-		private const int kInstanceID_None = 0;
 
 		[SerializeField]
 		private int m_InstanceID;

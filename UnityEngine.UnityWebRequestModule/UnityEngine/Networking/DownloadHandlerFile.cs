@@ -12,8 +12,28 @@ namespace UnityEngine.Networking
 	public sealed class DownloadHandlerFile : DownloadHandler
 	{
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerFile obj, string path, bool append);
+		private unsafe static IntPtr Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] DownloadHandlerFile obj, string path, bool append)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = path.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = DownloadHandlerFile.Create_Injected(obj, ref managedSpanWrapper, append);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
 
 		private void InternalCreateVFS(string path, bool append)
 		{
@@ -51,12 +71,43 @@ namespace UnityEngine.Networking
 			throw new NotSupportedException("String access is not supported");
 		}
 
-		public extern bool removeFileOnAbort
+		public bool removeFileOnAbort
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = DownloadHandlerFile.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return DownloadHandlerFile.get_removeFileOnAbort_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = DownloadHandlerFile.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				DownloadHandlerFile.set_removeFileOnAbort_Injected(intPtr, value);
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Create_Injected(DownloadHandlerFile obj, ref ManagedSpanWrapper path, bool append);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_removeFileOnAbort_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_removeFileOnAbort_Injected(IntPtr _unity_self, bool value);
+
+		internal new static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(DownloadHandlerFile handler)
+			{
+				return handler.m_Ptr;
+			}
 		}
 	}
 }

@@ -147,6 +147,38 @@ namespace HarmonyLib
 			return null;
 		}
 
+		public bool IsField
+		{
+			get
+			{
+				return this._info is FieldInfo;
+			}
+		}
+
+		public bool IsProperty
+		{
+			get
+			{
+				return this._info is PropertyInfo;
+			}
+		}
+
+		public bool IsWriteable
+		{
+			get
+			{
+				FieldInfo fieldInfo = this._info as FieldInfo;
+				if (fieldInfo != null)
+				{
+					bool flag = fieldInfo.IsLiteral && !fieldInfo.IsInitOnly && fieldInfo.IsStatic;
+					bool flag2 = !fieldInfo.IsLiteral && fieldInfo.IsInitOnly && fieldInfo.IsStatic;
+					return !flag && !flag2;
+				}
+				PropertyInfo propertyInfo = this._info as PropertyInfo;
+				return propertyInfo != null && propertyInfo.CanWrite;
+			}
+		}
+
 		private Traverse Resolve()
 		{
 			if (this._root == null)
@@ -221,7 +253,8 @@ namespace HarmonyLib
 
 		public List<string> Fields()
 		{
-			return AccessTools.GetFieldNames(this.Resolve()._type);
+			Traverse traverse = this.Resolve();
+			return AccessTools.GetFieldNames(traverse._type);
 		}
 
 		public Traverse Property(string name, object[] index = null)
@@ -250,7 +283,8 @@ namespace HarmonyLib
 
 		public List<string> Properties()
 		{
-			return AccessTools.GetPropertyNames(this.Resolve()._type);
+			Traverse traverse = this.Resolve();
+			return AccessTools.GetPropertyNames(traverse._type);
 		}
 
 		public Traverse Method(string name, params object[] arguments)
@@ -294,7 +328,8 @@ namespace HarmonyLib
 
 		public List<string> Methods()
 		{
-			return AccessTools.GetMethodNames(this.Resolve()._type);
+			Traverse traverse = this.Resolve();
+			return AccessTools.GetMethodNames(traverse._type);
 		}
 
 		public bool FieldExists()
@@ -377,12 +412,12 @@ namespace HarmonyLib
 
 		public override string ToString()
 		{
-			MethodBase methodBase = this._method ?? this.GetValue();
-			if (methodBase == null)
+			object obj = this._method ?? this.GetValue();
+			if (obj == null)
 			{
 				return null;
 			}
-			return methodBase.ToString();
+			return obj.ToString();
 		}
 
 		private static readonly AccessCache Cache;
@@ -399,7 +434,10 @@ namespace HarmonyLib
 
 		public static Action<Traverse, Traverse> CopyFields = delegate(Traverse from, Traverse to)
 		{
-			to.SetValue(from.GetValue());
+			if (to.IsWriteable)
+			{
+				to.SetValue(from.GetValue());
+			}
 		};
 	}
 }

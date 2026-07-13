@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -17,27 +18,56 @@ namespace UnityEngine.U2D
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_color_Injected(out color);
+				SpriteShapeRenderer.get_color_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_color_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteShapeRenderer.set_color_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern SpriteMaskInteraction maskInteraction
+		public SpriteMaskInteraction maskInteraction
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return SpriteShapeRenderer.get_maskInteraction_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				SpriteShapeRenderer.set_maskInteraction_Injected(intPtr, value);
+			}
 		}
 
 		public void Prepare(JobHandle handle, SpriteShapeParameters shapeParams, Sprite[] sprites)
 		{
-			this.Prepare_Injected(ref handle, ref shapeParams, sprites);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			SpriteShapeRenderer.Prepare_Injected(intPtr, ref handle, ref shapeParams, sprites);
 		}
 
 		private NativeArray<T> GetNativeDataArray<T>(SpriteShapeDataType dataType) where T : struct
@@ -53,32 +83,78 @@ namespace UnityEngine.U2D
 			return NativeSliceUnsafeUtility.ConvertExistingDataToNativeSlice<T>((void*)ptr, channelInfo.stride, channelInfo.count);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetSegmentCount(int geomCount);
+		private void SetSegmentCount(int geomCount)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			SpriteShapeRenderer.SetSegmentCount_Injected(intPtr, geomCount);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMeshDataCount(int vertexCount, int indexCount);
+		private void SetMeshDataCount(int vertexCount, int indexCount)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			SpriteShapeRenderer.SetMeshDataCount_Injected(intPtr, vertexCount, indexCount);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMeshChannelInfo(int vertexCount, int indexCount, int hotChannelMask);
+		private void SetMeshChannelInfo(int vertexCount, int indexCount, int hotChannelMask)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			SpriteShapeRenderer.SetMeshChannelInfo_Injected(intPtr, vertexCount, indexCount, hotChannelMask);
+		}
 
 		private SpriteChannelInfo GetDataInfo(SpriteShapeDataType arrayType)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			SpriteChannelInfo spriteChannelInfo;
-			this.GetDataInfo_Injected(arrayType, out spriteChannelInfo);
+			SpriteShapeRenderer.GetDataInfo_Injected(intPtr, arrayType, out spriteChannelInfo);
 			return spriteChannelInfo;
 		}
 
 		private SpriteChannelInfo GetChannelInfo(VertexAttribute channel)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			SpriteChannelInfo spriteChannelInfo;
-			this.GetChannelInfo_Injected(channel, out spriteChannelInfo);
+			SpriteShapeRenderer.GetChannelInfo_Injected(intPtr, channel, out spriteChannelInfo);
 			return spriteChannelInfo;
 		}
 
 		public void SetLocalAABB(Bounds bounds)
 		{
-			this.SetLocalAABB_Injected(ref bounds);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			SpriteShapeRenderer.SetLocalAABB_Injected(intPtr, ref bounds);
+		}
+
+		public int GetSplineMeshCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteShapeRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return SpriteShapeRenderer.GetSplineMeshCount_Injected(intPtr);
 		}
 
 		public NativeArray<Bounds> GetBounds()
@@ -150,21 +226,39 @@ namespace UnityEngine.U2D
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_color_Injected(out Color ret);
+		private static extern void get_color_Injected(IntPtr _unity_self, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_color_Injected(ref Color value);
+		private static extern void set_color_Injected(IntPtr _unity_self, [In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Prepare_Injected(ref JobHandle handle, ref SpriteShapeParameters shapeParams, Sprite[] sprites);
+		private static extern SpriteMaskInteraction get_maskInteraction_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetDataInfo_Injected(SpriteShapeDataType arrayType, out SpriteChannelInfo ret);
+		private static extern void set_maskInteraction_Injected(IntPtr _unity_self, SpriteMaskInteraction value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetChannelInfo_Injected(VertexAttribute channel, out SpriteChannelInfo ret);
+		private static extern void Prepare_Injected(IntPtr _unity_self, [In] ref JobHandle handle, [In] ref SpriteShapeParameters shapeParams, Sprite[] sprites);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLocalAABB_Injected(ref Bounds bounds);
+		private static extern void SetSegmentCount_Injected(IntPtr _unity_self, int geomCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMeshDataCount_Injected(IntPtr _unity_self, int vertexCount, int indexCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMeshChannelInfo_Injected(IntPtr _unity_self, int vertexCount, int indexCount, int hotChannelMask);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDataInfo_Injected(IntPtr _unity_self, SpriteShapeDataType arrayType, out SpriteChannelInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetChannelInfo_Injected(IntPtr _unity_self, VertexAttribute channel, out SpriteChannelInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLocalAABB_Injected(IntPtr _unity_self, [In] ref Bounds bounds);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetSplineMeshCount_Injected(IntPtr _unity_self);
 	}
 }

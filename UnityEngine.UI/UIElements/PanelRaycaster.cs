@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngineInternal;
 
 namespace UnityEngine.UIElements
 {
@@ -82,54 +83,31 @@ namespace UnityEngine.UIElements
 
 		public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
 		{
-			if (this.m_Panel == null)
+			if (this.m_Panel == null || !this.m_Panel.isFlat)
 			{
 				return;
 			}
 			int targetDisplay = this.m_Panel.targetDisplay;
 			Vector3 relativeMousePositionForRaycast = MultipleDisplayUtilities.GetRelativeMousePositionForRaycast(eventData);
-			if ((int)relativeMousePositionForRaycast.z != targetDisplay)
-			{
-				return;
-			}
 			Vector3 vector = relativeMousePositionForRaycast;
 			Vector2 delta = eventData.delta;
 			float num = (float)Screen.height;
-			if (targetDisplay > 0 && targetDisplay < Display.displays.Length)
+			if (DisplayInternal.IsASecondaryDisplayIndex(targetDisplay))
 			{
 				num = (float)Display.displays[targetDisplay].systemHeight;
 			}
 			vector.y = num - vector.y;
 			delta.y = -delta.y;
-			EventSystem eventSystem = UIElementsRuntimeUtility.activeEventSystem as EventSystem;
-			if (eventSystem == null || eventSystem.currentInputModule == null)
+			BaseInputModule currentInputModule = eventData.currentInputModule;
+			if (currentInputModule == null)
 			{
 				return;
 			}
-			int num2 = eventSystem.currentInputModule.ConvertUIToolkitPointerId(eventData);
-			IEventHandler capturingElement = this.m_Panel.GetCapturingElement(num2);
-			VisualElement visualElement = capturingElement as VisualElement;
-			if (visualElement != null && visualElement.panel != this.m_Panel)
+			int num2 = currentInputModule.ConvertUIToolkitPointerId(eventData);
+			bool flag;
+			if (!PanelRaycaster.panelPicker.TryPick((RuntimePanel)this.m_Panel, num2, vector, delta, new int?((int)relativeMousePositionForRaycast.z), out flag))
 			{
 				return;
-			}
-			IPanel playerPanelWithSoftPointerCapture = PointerDeviceState.GetPlayerPanelWithSoftPointerCapture(num2);
-			if (playerPanelWithSoftPointerCapture != null && playerPanelWithSoftPointerCapture != this.m_Panel)
-			{
-				return;
-			}
-			if (capturingElement == null && playerPanelWithSoftPointerCapture == null)
-			{
-				Vector2 vector2;
-				Vector2 vector3;
-				if (!this.m_Panel.ScreenToPanel(vector, delta, out vector2, out vector3, false))
-				{
-					return;
-				}
-				if (this.m_Panel.Pick(vector2) == null)
-				{
-					return;
-				}
 			}
 			resultAppendList.Add(new RaycastResult
 			{
@@ -149,5 +127,7 @@ namespace UnityEngine.UIElements
 		}
 
 		private BaseRuntimePanel m_Panel;
+
+		private static ScreenOverlayPanelPicker panelPicker = new ScreenOverlayPanelPicker();
 	}
 }

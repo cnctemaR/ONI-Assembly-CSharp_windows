@@ -9,13 +9,50 @@ namespace UnityEngine
 	{
 		[FreeFunction("ToJsonInternal", true)]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string ToJsonInternal([NotNull("ArgumentNullException")] object obj, bool prettyPrint);
+		private static string ToJsonInternal([NotNull] object obj, bool prettyPrint)
+		{
+			if (obj == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				JsonUtility.ToJsonInternal_Injected(obj, prettyPrint, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("FromJsonInternal", true, ThrowsException = true)]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern object FromJsonInternal(string json, object objectToOverwrite, Type type);
+		private unsafe static object FromJsonInternal(string json, object objectToOverwrite, Type type)
+		{
+			object obj;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(json, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = json.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				obj = JsonUtility.FromJsonInternal_Injected(ref managedSpanWrapper, objectToOverwrite, type);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return obj;
+		}
 
 		public static string ToJson(object obj)
 		{
@@ -90,5 +127,11 @@ namespace UnityEngine
 				JsonUtility.FromJsonInternal(json, objectToOverwrite, objectToOverwrite.GetType());
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ToJsonInternal_Injected(object obj, bool prettyPrint, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern object FromJsonInternal_Injected(ref ManagedSpanWrapper json, object objectToOverwrite, Type type);
 	}
 }

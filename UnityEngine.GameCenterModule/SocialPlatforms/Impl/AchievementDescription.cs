@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms.Impl
 {
+	[Obsolete("AchievementDescription is deprecated and will be removed in a future release.", false)]
 	public class AchievementDescription : IAchievementDescription
 	{
 		public AchievementDescription(string id, string title, Texture2D image, string achievedDescription, string unachievedDescription, bool hidden, int points)

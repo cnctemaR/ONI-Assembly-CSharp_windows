@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[RequiredByNativeCode]
+	[StaticAccessor("XRInputTrackingFacade::Get()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTrackingFacade.h")]
 	[NativeConditional("ENABLE_VR")]
-	[StaticAccessor("XRInputTrackingFacade::Get()", StaticAccessorType.Dot)]
+	[RequiredByNativeCode]
 	public static class InputTracking
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -66,8 +66,8 @@ namespace UnityEngine.XR
 			return vector;
 		}
 
-		[Obsolete("This API is obsolete, and should no longer be used. Please use InputDevice.TryGetFeatureValue with the CommonUsages.deviceRotation usage instead.")]
 		[NativeConditional("ENABLE_VR", "Quaternionf::identity()")]
+		[Obsolete("This API is obsolete, and should no longer be used. Please use InputDevice.TryGetFeatureValue with the CommonUsages.deviceRotation usage instead.")]
 		public static Quaternion GetLocalRotation(XRNode node)
 		{
 			Quaternion quaternion;
@@ -80,10 +80,23 @@ namespace UnityEngine.XR
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Recenter();
 
-		[Obsolete("This API is obsolete, and should no longer be used. Please use InputDevice.name with the device associated with that tracking data instead.")]
 		[NativeConditional("ENABLE_VR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetNodeName(ulong uniqueId);
+		[Obsolete("This API is obsolete, and should no longer be used. Please use InputDevice.name with the device associated with that tracking data instead.")]
+		public static string GetNodeName(ulong uniqueId)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				InputTracking.GetNodeName_Injected(uniqueId, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public static void GetNodeStates(List<XRNodeState> nodeStates)
 		{
@@ -97,8 +110,31 @@ namespace UnityEngine.XR
 		}
 
 		[NativeConditional("ENABLE_VR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetNodeStates_Internal([NotNull("ArgumentNullException")] List<XRNodeState> nodeStates);
+		private unsafe static void GetNodeStates_Internal([NotNull] List<XRNodeState> nodeStates)
+		{
+			if (nodeStates == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(nodeStates, "nodeStates");
+			}
+			try
+			{
+				fixed (XRNodeState[] array = NoAllocHelpers.ExtractArrayFromList<XRNodeState>(nodeStates))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, nodeStates.Count);
+					InputTracking.GetNodeStates_Internal_Injected(ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<XRNodeState>(nodeStates);
+			}
+		}
 
 		[NativeConditional("ENABLE_VR")]
 		[Obsolete("This API is obsolete, and should no longer be used. Please use the TrackedPoseDriver in the Legacy Input Helpers package for controlling a camera in XR.")]
@@ -112,21 +148,53 @@ namespace UnityEngine.XR
 			set;
 		}
 
-		[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTracking.h")]
 		[StaticAccessor("XRInputTracking::Get()", StaticAccessorType.Dot)]
+		[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTracking.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern ulong GetDeviceIdAtXRNode(XRNode node);
 
 		[StaticAccessor("XRInputTracking::Get()", StaticAccessorType.Dot)]
 		[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputTracking.h")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void GetDeviceIdsAtXRNode_Internal(XRNode node, [NotNull("ArgumentNullException")] List<ulong> deviceIds);
+		internal unsafe static void GetDeviceIdsAtXRNode_Internal(XRNode node, [NotNull] List<ulong> deviceIds)
+		{
+			if (deviceIds == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(deviceIds, "deviceIds");
+			}
+			try
+			{
+				fixed (ulong[] array = NoAllocHelpers.ExtractArrayFromList<ulong>(deviceIds))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, deviceIds.Count);
+					InputTracking.GetDeviceIdsAtXRNode_Internal_Injected(node, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ulong>(deviceIds);
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetLocalPosition_Injected(XRNode node, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetLocalRotation_Injected(XRNode node, out Quaternion ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetNodeName_Injected(ulong uniqueId, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetNodeStates_Internal_Injected(ref BlittableListWrapper nodeStates);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDeviceIdsAtXRNode_Internal_Injected(XRNode node, ref BlittableListWrapper deviceIds);
 
 		private enum TrackingStateEventType
 		{

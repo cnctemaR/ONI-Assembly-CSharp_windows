@@ -112,7 +112,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		}
 		Game.Instance.accumulators.Accumulate(this.O2Accumulator, massConsumed);
 		float num = -massConsumed;
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num, this.selectable.GetProperName(), null);
+		ReportManager.Instance.ReportValueWithPrefabInstanceContext(ReportManager.ReportType.OxygenCreated, num, this.prefabID, this.selectable.GetProperName());
 		if (this.onBreathableGasConsumed != null)
 		{
 			this.onBreathableGasConsumed(elementConsumed, massConsumed, temperature, disseaseIDX, disseaseCount);

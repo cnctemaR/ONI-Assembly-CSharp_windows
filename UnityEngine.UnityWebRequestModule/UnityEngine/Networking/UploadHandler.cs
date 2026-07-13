@@ -10,8 +10,15 @@ namespace UnityEngine.Networking
 	public class UploadHandler : IDisposable
 	{
 		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Release();
+		private void ReleaseFromScripting()
+		{
+			IntPtr intPtr = UploadHandler.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			UploadHandler.ReleaseFromScripting_Injected(intPtr);
+		}
 
 		internal UploadHandler()
 		{
@@ -27,7 +34,7 @@ namespace UnityEngine.Networking
 			bool flag = this.m_Ptr != IntPtr.Zero;
 			if (flag)
 			{
-				this.Release();
+				this.ReleaseFromScripting();
 				this.m_Ptr = IntPtr.Zero;
 			}
 		}
@@ -81,18 +88,86 @@ namespace UnityEngine.Networking
 		}
 
 		[NativeMethod("GetContentType")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string InternalGetContentType();
+		private string InternalGetContentType()
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = UploadHandler.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				UploadHandler.InternalGetContentType_Injected(intPtr, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[NativeMethod("SetContentType")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetContentType(string newContentType);
+		private unsafe void InternalSetContentType(string newContentType)
+		{
+			try
+			{
+				IntPtr intPtr = UploadHandler.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(newContentType, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = newContentType.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				UploadHandler.InternalSetContentType_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[NativeMethod("GetProgress")]
+		private float InternalGetProgress()
+		{
+			IntPtr intPtr = UploadHandler.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UploadHandler.InternalGetProgress_Injected(intPtr);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float InternalGetProgress();
+		private static extern void ReleaseFromScripting_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalGetContentType_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetContentType_Injected(IntPtr _unity_self, ref ManagedSpanWrapper newContentType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float InternalGetProgress_Injected(IntPtr _unity_self);
 
 		[NonSerialized]
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(UploadHandler uploadHandler)
+			{
+				return uploadHandler.m_Ptr;
+			}
+		}
 	}
 }

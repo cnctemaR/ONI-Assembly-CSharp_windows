@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 	[UsedByNativeCode]
 	[Serializable]
 	internal struct MarkToBaseAdjustmentRecord
@@ -60,12 +61,12 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeName("baseGlyphID")]
 		private uint m_BaseGlyphID;
 
-		[NativeName("baseAnchor")]
 		[SerializeField]
+		[NativeName("baseAnchor")]
 		private GlyphAnchorPoint m_BaseGlyphAnchorPoint;
 
-		[SerializeField]
 		[NativeName("markGlyphID")]
+		[SerializeField]
 		private uint m_MarkGlyphID;
 
 		[NativeName("markPositionAdjustment")]

@@ -8,6 +8,7 @@ namespace FMOD
 		SIDECHAIN,
 		SEND,
 		SEND_SIDECHAIN,
+		PREALLOCATED,
 		MAX
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 {
@@ -67,10 +68,13 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 
 	public Pickupable FindClosestPickupable(Storage destination, HashSet<Tag> exclude_tags, out int cost, Tag categoryTag, Tag[] otherRequiredTags = null)
 	{
-		ICollection<Pickupable> pickupables = base.gameObject.GetMyWorld().worldInventory.GetPickupables(categoryTag, false);
-		if (pickupables == null)
+		WorldContainer myWorld = base.gameObject.GetMyWorld();
+		List<Pickupable> list = CollectionPool<List<Pickupable>, Pickupable>.Get();
+		myWorld.worldInventory.GetPickupablesFromRelatedWorlds(categoryTag, ref list);
+		if (list == null || list.Count == 0)
 		{
 			cost = int.MaxValue;
+			CollectionPool<List<Pickupable>, Pickupable>.Release(list);
 			return null;
 		}
 		if (otherRequiredTags == null)
@@ -79,7 +83,7 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 		}
 		Pickupable pickupable = null;
 		int num = int.MaxValue;
-		foreach (Pickupable pickupable2 in pickupables)
+		foreach (Pickupable pickupable2 in list)
 		{
 			if (FetchManager.IsFetchablePickup_Exclude(pickupable2.KPrefabID, pickupable2.storage, pickupable2.UnreservedFetchAmount, exclude_tags, otherRequiredTags, destination))
 			{
@@ -92,6 +96,7 @@ public abstract class ClosestPickupableSensor<T> : Sensor where T : Component
 			}
 		}
 		cost = num;
+		CollectionPool<List<Pickupable>, Pickupable>.Release(list);
 		return pickupable;
 	}
 

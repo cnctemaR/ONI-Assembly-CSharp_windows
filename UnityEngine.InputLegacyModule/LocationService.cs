@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Input/LocationService.h")]
 	[NativeHeader("Runtime/Input/InputBindings.h")]
+	[NativeHeader("Runtime/Input/LocationService.h")]
 	public class LocationService
 	{
 		[FreeFunction("LocationService::IsServiceEnabledByUser")]

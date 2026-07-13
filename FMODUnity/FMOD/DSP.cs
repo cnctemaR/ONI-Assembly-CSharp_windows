@@ -25,6 +25,11 @@ namespace FMOD
 			return DSP.FMOD5_DSP_AddInput(this.handle, input.handle, out connection.handle, type);
 		}
 
+		public RESULT addInputPreallocated(DSP input, DSPConnection connection)
+		{
+			return DSP.FMOD5_DSP_AddInput(this.handle, input.handle, out connection.handle, DSPCONNECTION_TYPE.PREALLOCATED);
+		}
+
 		public RESULT disconnectFrom(DSP target, DSPConnection connection)
 		{
 			return DSP.FMOD5_DSP_DisconnectFrom(this.handle, target.handle, connection.handle);
@@ -127,7 +132,7 @@ namespace FMOD
 
 		public RESULT setParameterData(int index, byte[] data)
 		{
-			return DSP.FMOD5_DSP_SetParameterData(this.handle, index, Marshal.UnsafeAddrOfPinnedArrayElement<byte>(data, 0), (uint)data.Length);
+			return DSP.FMOD5_DSP_SetParameterData(this.handle, index, data, (uint)((data == null) ? 0 : data.Length));
 		}
 
 		public RESULT getParameterFloat(int index, out float value)
@@ -159,7 +164,7 @@ namespace FMOD
 		{
 			IntPtr intPtr;
 			RESULT result = DSP.FMOD5_DSP_GetParameterInfo(this.handle, index, out intPtr);
-			desc = (DSP_PARAMETER_DESC)MarshalHelper.PtrToStructure(intPtr, typeof(DSP_PARAMETER_DESC));
+			desc = Marshal.PtrToStructure<DSP_PARAMETER_DESC>(intPtr);
 			return result;
 		}
 
@@ -253,6 +258,9 @@ namespace FMOD
 		private static extern RESULT FMOD5_DSP_AddInput(IntPtr dsp, IntPtr input, out IntPtr connection, DSPCONNECTION_TYPE type);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_DSP_AddInputPreallocated(IntPtr dsp, IntPtr input, out IntPtr connection);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_DSP_DisconnectFrom(IntPtr dsp, IntPtr target, IntPtr connection);
 
 		[DllImport("fmodstudio")]
@@ -313,7 +321,7 @@ namespace FMOD
 		private static extern RESULT FMOD5_DSP_SetParameterBool(IntPtr dsp, int index, bool value);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_DSP_SetParameterData(IntPtr dsp, int index, IntPtr data, uint length);
+		private static extern RESULT FMOD5_DSP_SetParameterData(IntPtr dsp, int index, byte[] data, uint length);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_DSP_GetParameterFloat(IntPtr dsp, int index, out float value, IntPtr valuestr, int valuestrlen);

@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/LightmapData.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/LightmapData.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class LightmapData
 	{

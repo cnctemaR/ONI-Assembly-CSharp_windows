@@ -127,32 +127,32 @@ public class PrinterceptorScreen : KModalScreen
 		{
 			return;
 		}
-		GameObject prefab = Assets.GetPrefab(id);
-		if (prefab == null)
+		GameObject gameObject = Assets.TryGetPrefab(id);
+		if (gameObject == null)
 		{
 			return;
 		}
-		if (!Game.IsCorrectDlcActiveForCurrentSave(prefab.GetComponent<KPrefabID>()))
+		if (!Game.IsCorrectDlcActiveForCurrentSave(gameObject.GetComponent<KPrefabID>()))
 		{
 			return;
 		}
-		if (prefab.HasTag(GameTags.DeprecatedContent))
+		if (gameObject.HasTag(GameTags.DeprecatedContent))
 		{
 			return;
 		}
-		PlantableSeed component = prefab.GetComponent<PlantableSeed>();
+		PlantableSeed component = gameObject.GetComponent<PlantableSeed>();
 		if (component != null)
 		{
-			GameObject prefab2 = Assets.GetPrefab(component.PlantID);
-			if (prefab2 != null && prefab2.HasTag(GameTags.DeprecatedContent))
+			GameObject prefab = Assets.GetPrefab(component.PlantID);
+			if (prefab != null && prefab.HasTag(GameTags.DeprecatedContent))
 			{
 				return;
 			}
 		}
-		GameObject gameObject = global::Util.KInstantiateUI(this.optionButtonPrefab, this.optionGridContainer.gameObject, true);
-		MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
+		GameObject gameObject2 = global::Util.KInstantiateUI(this.optionButtonPrefab, this.optionGridContainer.gameObject, true);
+		MultiToggle component2 = gameObject2.GetComponent<MultiToggle>();
 		this.optionButtons.Add(id, component2);
-		HierarchyReferences component3 = gameObject.GetComponent<HierarchyReferences>();
+		HierarchyReferences component3 = gameObject2.GetComponent<HierarchyReferences>();
 		MultiToggle multiToggle = component2;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{

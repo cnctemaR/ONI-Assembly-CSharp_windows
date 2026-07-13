@@ -45,7 +45,7 @@ namespace UnityEngine.Rendering
 		{
 			get
 			{
-				bool flag = GraphicsFormatUtility.IsDepthStencilFormat(this.m_Format) && this.m_Format != GraphicsFormat.ShadowAuto;
+				bool flag = GraphicsFormatUtility.IsDepthStencilFormat(this.m_Format);
 				RenderTextureFormat renderTextureFormat;
 				if (flag)
 				{
@@ -59,7 +59,7 @@ namespace UnityEngine.Rendering
 			}
 			set
 			{
-				this.m_Format = GraphicsFormatUtility.GetGraphicsFormat(value, RenderTextureReadWrite.Default);
+				this.m_Format = AttachmentDescriptor.GetAdjustedFormat(value, RenderTextureReadWrite.Default);
 			}
 		}
 
@@ -181,12 +181,26 @@ namespace UnityEngine.Rendering
 
 		public AttachmentDescriptor(RenderTextureFormat format)
 		{
-			this = new AttachmentDescriptor(GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Default));
+			this = new AttachmentDescriptor(AttachmentDescriptor.GetAdjustedFormat(format, RenderTextureReadWrite.Default));
 		}
 
 		public AttachmentDescriptor(RenderTextureFormat format, RenderTargetIdentifier target, bool loadExistingContents = false, bool storeResults = false, bool resolve = false)
 		{
-			this = new AttachmentDescriptor(GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Default));
+			this = new AttachmentDescriptor(AttachmentDescriptor.GetAdjustedFormat(format, RenderTextureReadWrite.Default));
+		}
+
+		private static GraphicsFormat GetAdjustedFormat(RenderTextureFormat format, RenderTextureReadWrite readWrite)
+		{
+			GraphicsFormat graphicsFormat;
+			if (format != RenderTextureFormat.Depth && format != RenderTextureFormat.Shadowmap)
+			{
+				graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(format, readWrite);
+			}
+			else
+			{
+				graphicsFormat = SystemInfo.GetGraphicsFormat((format == RenderTextureFormat.Depth) ? DefaultFormat.DepthStencil : DefaultFormat.Shadow);
+			}
+			return graphicsFormat;
 		}
 
 		public bool Equals(AttachmentDescriptor other)

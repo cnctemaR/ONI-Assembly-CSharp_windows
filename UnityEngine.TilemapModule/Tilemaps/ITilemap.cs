@@ -196,9 +196,8 @@ namespace UnityEngine.Tilemaps
 				if (flag)
 				{
 					TileBase tileBase = (TileBase)Object.ForceLoadFromInstanceID(num);
-					tileBase.GetTileData(nativeArray2[i], tilemap, ref @default);
+					tileBase.GetTileData(nativeArray2[i], tilemap, UnsafeUtility.ArrayElementAsRef<TileData>(nativeArray3.GetUnsafePtr<TileData>(), i));
 				}
-				nativeArray3[i] = @default;
 			}
 		}
 

@@ -40,33 +40,238 @@ namespace UnityEngine.Analytics
 			GC.SuppressFinalize(this);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern IntPtr Internal_Create(CustomEventData ced, string name);
+		internal unsafe static IntPtr Internal_Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] CustomEventData ced, string name)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = CustomEventData.Internal_Create_Injected(ced, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_Destroy(IntPtr ptr);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddString(string key, string value);
+		public unsafe bool AddString(string key, string value)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = CustomEventData.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = value.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				flag = CustomEventData.AddString_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddInt32(string key, int value);
+		public unsafe bool AddInt32(string key, int value)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = CustomEventData.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = CustomEventData.AddInt32_Injected(intPtr, ref managedSpanWrapper, value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddUInt32(string key, uint value);
+		public unsafe bool AddUInt32(string key, uint value)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = CustomEventData.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = CustomEventData.AddUInt32_Injected(intPtr, ref managedSpanWrapper, value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddInt64(string key, long value);
+		public unsafe bool AddInt64(string key, long value)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = CustomEventData.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = CustomEventData.AddInt64_Injected(intPtr, ref managedSpanWrapper, value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddUInt64(string key, ulong value);
+		public unsafe bool AddUInt64(string key, ulong value)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = CustomEventData.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = CustomEventData.AddUInt64_Injected(intPtr, ref managedSpanWrapper, value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddBool(string key, bool value);
+		public unsafe bool AddBool(string key, bool value)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = CustomEventData.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = CustomEventData.AddBool_Injected(intPtr, ref managedSpanWrapper, value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddDouble(string key, double value);
+		public unsafe bool AddDouble(string key, double value)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = CustomEventData.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = CustomEventData.AddDouble_Injected(intPtr, ref managedSpanWrapper, value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		public bool AddDictionary(IDictionary<string, object> eventData)
 		{
@@ -205,7 +410,39 @@ namespace UnityEngine.Analytics
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Internal_Create_Injected(CustomEventData ced, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddString_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddInt32_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddUInt32_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, uint value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddInt64_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, long value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddUInt64_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, ulong value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddBool_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddDouble_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, double value);
+
 		[NonSerialized]
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(CustomEventData customEventData)
+			{
+				return customEventData.m_Ptr;
+			}
+		}
 	}
 }

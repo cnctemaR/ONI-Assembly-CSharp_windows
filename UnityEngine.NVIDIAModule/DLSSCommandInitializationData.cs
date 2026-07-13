@@ -64,6 +64,66 @@ namespace UnityEngine.NVIDIA
 			}
 		}
 
+		public DLSSPreset presetQualityMode
+		{
+			get
+			{
+				return this.m_PresetQualityMode;
+			}
+			set
+			{
+				this.m_PresetQualityMode = value;
+			}
+		}
+
+		public DLSSPreset presetBalancedMode
+		{
+			get
+			{
+				return this.m_PresetBalancedMode;
+			}
+			set
+			{
+				this.m_PresetBalancedMode = value;
+			}
+		}
+
+		public DLSSPreset presetPerformanceMode
+		{
+			get
+			{
+				return this.m_PresetPerformanceMode;
+			}
+			set
+			{
+				this.m_PresetPerformanceMode = value;
+			}
+		}
+
+		public DLSSPreset presetUltraPerformanceMode
+		{
+			get
+			{
+				return this.m_PresetUltraPerformanceMode;
+			}
+			set
+			{
+				this.m_PresetUltraPerformanceMode = value;
+			}
+		}
+
+		public DLSSPreset presetDlaaMode
+		{
+			get
+			{
+				return this.m_PresetDlaaMode;
+			}
+			set
+			{
+				this.m_PresetDlaaMode = value;
+			}
+		}
+
 		public DLSSFeatureFlags featureFlags
 		{
 			get
@@ -114,6 +174,16 @@ namespace UnityEngine.NVIDIA
 		private uint m_OutputRTHeight;
 
 		private DLSSQuality m_Quality;
+
+		private DLSSPreset m_PresetQualityMode;
+
+		private DLSSPreset m_PresetBalancedMode;
+
+		private DLSSPreset m_PresetPerformanceMode;
+
+		private DLSSPreset m_PresetUltraPerformanceMode;
+
+		private DLSSPreset m_PresetDlaaMode;
 
 		private DLSSFeatureFlags m_Flags;
 

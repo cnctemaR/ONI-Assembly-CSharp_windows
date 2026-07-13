@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -14,10 +13,7 @@ namespace HarmonyLib
 			{
 				if (this.patchMethod == null)
 				{
-					Module module = (from a in AppDomain.CurrentDomain.GetAssemblies()
-						where !a.FullName.StartsWith("Microsoft.VisualStudio")
-						select a).SelectMany<Assembly, Module>((Assembly a) => a.GetLoadedModules()).First<Module>((Module m) => m.ModuleVersionId.ToString() == this.moduleGUID);
-					this.patchMethod = (MethodInfo)module.ResolveMethod(this.methodToken);
+					this.patchMethod = AccessTools.GetMethodByModuleAndToken(this.moduleGUID, this.methodToken);
 				}
 				return this.patchMethod;
 			}
@@ -38,8 +34,8 @@ namespace HarmonyLib
 			this.index = index;
 			this.owner = owner;
 			this.priority = ((priority == -1) ? 400 : priority);
-			this.before = before ?? new string[0];
-			this.after = after ?? new string[0];
+			this.before = before ?? Array.Empty<string>();
+			this.after = after ?? Array.Empty<string>();
 			this.debug = debug;
 			this.PatchMethod = patch;
 		}
@@ -54,8 +50,8 @@ namespace HarmonyLib
 			this.index = index;
 			this.owner = owner;
 			this.priority = ((priority == -1) ? 400 : priority);
-			this.before = before ?? new string[0];
-			this.after = after ?? new string[0];
+			this.before = before ?? Array.Empty<string>();
+			this.after = after ?? Array.Empty<string>();
 			this.debug = debug;
 			this.methodToken = methodToken;
 			this.moduleGUID = moduleGUID;
@@ -117,5 +113,7 @@ namespace HarmonyLib
 		private int methodToken;
 
 		private string moduleGUID;
+
+		public readonly InnerMethod innerMethod;
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class ImageDebugHeader
+	internal sealed class ImageDebugHeader
 	{
 		public bool HasEntries
 		{

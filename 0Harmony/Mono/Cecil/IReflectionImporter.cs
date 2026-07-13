@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Mono.Cecil
 {
-	public interface IReflectionImporter
+	internal interface IReflectionImporter
 	{
 		AssemblyNameReference ImportReference(AssemblyName reference);
 

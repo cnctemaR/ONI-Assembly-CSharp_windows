@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -19,8 +20,13 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_boundsGlobal_Injected(out bounds);
+				LightProbeProxyVolume.get_boundsGlobal_Injected(intPtr, out bounds);
 				return bounds;
 			}
 		}
@@ -30,13 +36,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_sizeCustom_Injected(out vector);
+				LightProbeProxyVolume.get_sizeCustom_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_sizeCustom_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_sizeCustom_Injected(intPtr, ref value);
 			}
 		}
 
@@ -45,94 +61,244 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_originCustom_Injected(out vector);
+				LightProbeProxyVolume.get_originCustom_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_originCustom_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_originCustom_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern float probeDensity
+		public float probeDensity
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_probeDensity_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_probeDensity_Injected(intPtr, value);
+			}
 		}
 
-		public extern int gridResolutionX
+		public int gridResolutionX
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_gridResolutionX_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_gridResolutionX_Injected(intPtr, value);
+			}
 		}
 
-		public extern int gridResolutionY
+		public int gridResolutionY
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_gridResolutionY_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_gridResolutionY_Injected(intPtr, value);
+			}
 		}
 
-		public extern int gridResolutionZ
+		public int gridResolutionZ
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_gridResolutionZ_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_gridResolutionZ_Injected(intPtr, value);
+			}
 		}
 
-		public extern LightProbeProxyVolume.BoundingBoxMode boundingBoxMode
+		public LightProbeProxyVolume.BoundingBoxMode boundingBoxMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_boundingBoxMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_boundingBoxMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern LightProbeProxyVolume.ResolutionMode resolutionMode
+		public LightProbeProxyVolume.ResolutionMode resolutionMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_resolutionMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_resolutionMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern LightProbeProxyVolume.ProbePositionMode probePositionMode
+		public LightProbeProxyVolume.ProbePositionMode probePositionMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_probePositionMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_probePositionMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern LightProbeProxyVolume.RefreshMode refreshMode
+		public LightProbeProxyVolume.RefreshMode refreshMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_refreshMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_refreshMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern LightProbeProxyVolume.QualityMode qualityMode
+		public LightProbeProxyVolume.QualityMode qualityMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_qualityMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_qualityMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern LightProbeProxyVolume.DataFormat dataFormat
+		public LightProbeProxyVolume.DataFormat dataFormat
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return LightProbeProxyVolume.get_dataFormat_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				LightProbeProxyVolume.set_dataFormat_Injected(intPtr, value);
+			}
 		}
 
 		public void Update()
@@ -140,23 +306,93 @@ namespace UnityEngine
 			this.SetDirtyFlag(true);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetDirtyFlag(bool flag);
+		private void SetDirtyFlag(bool flag)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<LightProbeProxyVolume>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			LightProbeProxyVolume.SetDirtyFlag_Injected(intPtr, flag);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_boundsGlobal_Injected(out Bounds ret);
+		private static extern void get_boundsGlobal_Injected(IntPtr _unity_self, out Bounds ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_sizeCustom_Injected(out Vector3 ret);
+		private static extern void get_sizeCustom_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_sizeCustom_Injected(ref Vector3 value);
+		private static extern void set_sizeCustom_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_originCustom_Injected(out Vector3 ret);
+		private static extern void get_originCustom_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_originCustom_Injected(ref Vector3 value);
+		private static extern void set_originCustom_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_probeDensity_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_probeDensity_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_gridResolutionX_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_gridResolutionX_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_gridResolutionY_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_gridResolutionY_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_gridResolutionZ_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_gridResolutionZ_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LightProbeProxyVolume.BoundingBoxMode get_boundingBoxMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_boundingBoxMode_Injected(IntPtr _unity_self, LightProbeProxyVolume.BoundingBoxMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LightProbeProxyVolume.ResolutionMode get_resolutionMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_resolutionMode_Injected(IntPtr _unity_self, LightProbeProxyVolume.ResolutionMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LightProbeProxyVolume.ProbePositionMode get_probePositionMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_probePositionMode_Injected(IntPtr _unity_self, LightProbeProxyVolume.ProbePositionMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LightProbeProxyVolume.RefreshMode get_refreshMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_refreshMode_Injected(IntPtr _unity_self, LightProbeProxyVolume.RefreshMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LightProbeProxyVolume.QualityMode get_qualityMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_qualityMode_Injected(IntPtr _unity_self, LightProbeProxyVolume.QualityMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LightProbeProxyVolume.DataFormat get_dataFormat_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_dataFormat_Injected(IntPtr _unity_self, LightProbeProxyVolume.DataFormat value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetDirtyFlag_Injected(IntPtr _unity_self, bool flag);
 
 		public enum ResolutionMode
 		{

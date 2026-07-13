@@ -7,8 +7,8 @@ namespace UnityEngine.Windows
 	[NativeHeader("PlatformDependent/Win/Bindings/InputBindings.h")]
 	public static class Input
 	{
-		[NativeName("ForwardRawInput")]
 		[StaticAccessor("", StaticAccessorType.DoubleColon)]
+		[NativeName("ForwardRawInput")]
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void ForwardRawInputImpl(uint* rawInputHeaderIndices, uint* rawInputDataIndices, uint indicesCount, byte* rawInputData, uint rawInputDataSize);

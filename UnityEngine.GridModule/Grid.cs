@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Modules/Grid/Public/Grid.h")]
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Grid/Public/GridMarshalling.h")]
+	[RequireComponent(typeof(Transform))]
+	[NativeType(Header = "Modules/Grid/Public/Grid.h")]
 	public sealed class Grid : GridLayout
 	{
 		public Vector3 GetCellCenterLocal(Vector3Int position)
@@ -24,14 +25,24 @@ namespace UnityEngine
 			[FreeFunction("GridBindings::GetCellSize", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_cellSize_Injected(out vector);
+				Grid.get_cellSize_Injected(intPtr, out vector);
 				return vector;
 			}
 			[FreeFunction("GridBindings::SetCellSize", HasExplicitThis = true)]
 			set
 			{
-				this.set_cellSize_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Grid.set_cellSize_Injected(intPtr, ref value);
 			}
 		}
 
@@ -40,31 +51,69 @@ namespace UnityEngine
 			[FreeFunction("GridBindings::GetCellGap", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_cellGap_Injected(out vector);
+				Grid.get_cellGap_Injected(intPtr, out vector);
 				return vector;
 			}
 			[FreeFunction("GridBindings::SetCellGap", HasExplicitThis = true)]
 			set
 			{
-				this.set_cellGap_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Grid.set_cellGap_Injected(intPtr, ref value);
 			}
 		}
 
-		public new extern GridLayout.CellLayout cellLayout
+		public new GridLayout.CellLayout cellLayout
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Grid.get_cellLayout_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Grid.set_cellLayout_Injected(intPtr, value);
+			}
 		}
 
-		public new extern GridLayout.CellSwizzle cellSwizzle
+		public new GridLayout.CellSwizzle cellSwizzle
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Grid.get_cellSwizzle_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Grid>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Grid.set_cellSwizzle_Injected(intPtr, value);
+			}
 		}
 
 		[FreeFunction("GridBindings::CellSwizzle")]
@@ -84,21 +133,33 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_cellSize_Injected(out Vector3 ret);
+		private static extern void get_cellSize_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_cellSize_Injected(ref Vector3 value);
+		private static extern void set_cellSize_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_cellGap_Injected(out Vector3 ret);
+		private static extern void get_cellGap_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_cellGap_Injected(ref Vector3 value);
+		private static extern void set_cellGap_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Swizzle_Injected(GridLayout.CellSwizzle swizzle, ref Vector3 position, out Vector3 ret);
+		private static extern GridLayout.CellLayout get_cellLayout_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InverseSwizzle_Injected(GridLayout.CellSwizzle swizzle, ref Vector3 position, out Vector3 ret);
+		private static extern void set_cellLayout_Injected(IntPtr _unity_self, GridLayout.CellLayout value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GridLayout.CellSwizzle get_cellSwizzle_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cellSwizzle_Injected(IntPtr _unity_self, GridLayout.CellSwizzle value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Swizzle_Injected(GridLayout.CellSwizzle swizzle, [In] ref Vector3 position, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InverseSwizzle_Injected(GridLayout.CellSwizzle swizzle, [In] ref Vector3 position, out Vector3 ret);
 	}
 }

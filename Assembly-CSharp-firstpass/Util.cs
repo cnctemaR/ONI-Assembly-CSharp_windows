@@ -288,7 +288,7 @@ public static class Util
 		KMonoBehaviour.isPoolPreInit = false;
 	}
 
-	public static T KInstantiate<T>(GameObject original, GameObject parent = null, string name = null) where T : global::UnityEngine.Object
+	public static T KInstantiate<T>(GameObject original, GameObject parent = null, string name = null) where T : class
 	{
 		GameObject gameObject = Util.KInstantiate(original, parent, null);
 		if (!(gameObject == null))

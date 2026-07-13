@@ -625,7 +625,7 @@ public static class TemplateLoader
 
 	private static void ClearEntities<T>(int rootX, int rootY, CellOffset[] TemplateOffsets) where T : KMonoBehaviour
 	{
-		foreach (T t in (T[])global::UnityEngine.Object.FindObjectsOfType(typeof(T)))
+		foreach (T t in (T[])global::UnityEngine.Object.FindObjectsByType(typeof(T), FindObjectsSortMode.None))
 		{
 			if (Grid.IsCellOffsetOf(Grid.PosToCell(t.gameObject), Grid.XYToCell(rootX, rootY), TemplateOffsets))
 			{

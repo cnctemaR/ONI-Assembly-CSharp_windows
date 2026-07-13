@@ -5,16 +5,14 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/RendererList.h")]
 	[MovedFrom("UnityEngine.Rendering.RendererUtils")]
+	[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/RendererList.h")]
 	public struct RendererList
 	{
-		public bool isValid
+		public extern bool isValid
 		{
-			get
-			{
-				return RendererList.get_isValid_Injected(ref this);
-			}
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 		}
 
 		internal RendererList(UIntPtr ctx, uint indx)
@@ -23,10 +21,8 @@ namespace UnityEngine.Rendering
 			this.index = indx;
 			this.frame = 0U;
 			this.type = 0U;
+			this.contextID = 0U;
 		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool get_isValid_Injected(ref RendererList _unity_self);
 
 		internal UIntPtr context;
 
@@ -35,6 +31,8 @@ namespace UnityEngine.Rendering
 		internal uint frame;
 
 		internal uint type;
+
+		internal uint contextID;
 
 		public static readonly RendererList nullRendererList = new RendererList(UIntPtr.Zero, uint.MaxValue);
 	}

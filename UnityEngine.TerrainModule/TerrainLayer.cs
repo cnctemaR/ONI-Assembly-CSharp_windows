@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("TerrainScriptingClasses.h")]
 	[NativeHeader("Modules/Terrain/Public/TerrainLayerScriptingInterface.h")]
+	[NativeHeader("TerrainScriptingClasses.h")]
 	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TerrainLayer : Object
@@ -21,41 +21,93 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] TerrainLayer layer);
 
-		public extern Texture2D diffuseTexture
+		public Texture2D diffuseTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(TerrainLayer.get_diffuseTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_diffuseTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture2D>(value));
+			}
 		}
 
-		public extern Texture2D normalMapTexture
+		public Texture2D normalMapTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(TerrainLayer.get_normalMapTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_normalMapTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture2D>(value));
+			}
 		}
 
-		public extern Texture2D maskMapTexture
+		public Texture2D maskMapTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(TerrainLayer.get_maskMapTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_maskMapTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture2D>(value));
+			}
 		}
 
 		public Vector2 tileSize
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_tileSize_Injected(out vector);
+				TerrainLayer.get_tileSize_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_tileSize_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_tileSize_Injected(intPtr, ref value);
 			}
 		}
 
@@ -63,13 +115,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_tileOffset_Injected(out vector);
+				TerrainLayer.get_tileOffset_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_tileOffset_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_tileOffset_Injected(intPtr, ref value);
 			}
 		}
 
@@ -78,51 +140,113 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_specular_Injected(out color);
+				TerrainLayer.get_specular_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_specular_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_specular_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern float metallic
+		public float metallic
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TerrainLayer.get_metallic_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_metallic_Injected(intPtr, value);
+			}
 		}
 
-		public extern float smoothness
+		public float smoothness
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TerrainLayer.get_smoothness_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_smoothness_Injected(intPtr, value);
+			}
 		}
 
-		public extern float normalScale
+		public float normalScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TerrainLayer.get_normalScale_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_normalScale_Injected(intPtr, value);
+			}
 		}
 
 		public Vector4 diffuseRemapMin
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_diffuseRemapMin_Injected(out vector);
+				TerrainLayer.get_diffuseRemapMin_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_diffuseRemapMin_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_diffuseRemapMin_Injected(intPtr, ref value);
 			}
 		}
 
@@ -130,13 +254,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_diffuseRemapMax_Injected(out vector);
+				TerrainLayer.get_diffuseRemapMax_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_diffuseRemapMax_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_diffuseRemapMax_Injected(intPtr, ref value);
 			}
 		}
 
@@ -144,13 +278,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_maskMapRemapMin_Injected(out vector);
+				TerrainLayer.get_maskMapRemapMin_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_maskMapRemapMin_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_maskMapRemapMin_Injected(intPtr, ref value);
 			}
 		}
 
@@ -158,56 +302,130 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_maskMapRemapMax_Injected(out vector);
+				TerrainLayer.get_maskMapRemapMax_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_maskMapRemapMax_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_maskMapRemapMax_Injected(intPtr, ref value);
+			}
+		}
+
+		public TerrainLayerSmoothnessSource smoothnessSource
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TerrainLayer.get_smoothnessSource_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TerrainLayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TerrainLayer.set_smoothnessSource_Injected(intPtr, value);
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_tileSize_Injected(out Vector2 ret);
+		private static extern IntPtr get_diffuseTexture_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_tileSize_Injected(ref Vector2 value);
+		private static extern void set_diffuseTexture_Injected(IntPtr _unity_self, IntPtr value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_tileOffset_Injected(out Vector2 ret);
+		private static extern IntPtr get_normalMapTexture_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_tileOffset_Injected(ref Vector2 value);
+		private static extern void set_normalMapTexture_Injected(IntPtr _unity_self, IntPtr value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_specular_Injected(out Color ret);
+		private static extern IntPtr get_maskMapTexture_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_specular_Injected(ref Color value);
+		private static extern void set_maskMapTexture_Injected(IntPtr _unity_self, IntPtr value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_diffuseRemapMin_Injected(out Vector4 ret);
+		private static extern void get_tileSize_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_diffuseRemapMin_Injected(ref Vector4 value);
+		private static extern void set_tileSize_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_diffuseRemapMax_Injected(out Vector4 ret);
+		private static extern void get_tileOffset_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_diffuseRemapMax_Injected(ref Vector4 value);
+		private static extern void set_tileOffset_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_maskMapRemapMin_Injected(out Vector4 ret);
+		private static extern void get_specular_Injected(IntPtr _unity_self, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_maskMapRemapMin_Injected(ref Vector4 value);
+		private static extern void set_specular_Injected(IntPtr _unity_self, [In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_maskMapRemapMax_Injected(out Vector4 ret);
+		private static extern float get_metallic_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_maskMapRemapMax_Injected(ref Vector4 value);
+		private static extern void set_metallic_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_smoothness_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_smoothness_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_normalScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_normalScale_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_diffuseRemapMin_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_diffuseRemapMin_Injected(IntPtr _unity_self, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_diffuseRemapMax_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_diffuseRemapMax_Injected(IntPtr _unity_self, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_maskMapRemapMin_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maskMapRemapMin_Injected(IntPtr _unity_self, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_maskMapRemapMax_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maskMapRemapMax_Injected(IntPtr _unity_self, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TerrainLayerSmoothnessSource get_smoothnessSource_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_smoothnessSource_Injected(IntPtr _unity_self, TerrainLayerSmoothnessSource value);
 	}
 }

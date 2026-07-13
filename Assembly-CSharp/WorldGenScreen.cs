@@ -25,7 +25,7 @@ public class WorldGenScreen : NewGameFlowScreen
 			MainMenu.Instance.StopAmbience();
 		}
 		this.TriggerLoadingMusic();
-		global::UnityEngine.Object.FindObjectOfType<FrontEndBackground>().gameObject.SetActive(false);
+		global::UnityEngine.Object.FindFirstObjectByType<FrontEndBackground>().gameObject.SetActive(false);
 		SaveLoader.SetActiveSaveFilePath(null);
 		try
 		{

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -17,8 +18,13 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Rect rect;
-				this.get_rect_Injected(out rect);
+				RectTransform.get_rect_Injected(intPtr, out rect);
 				return rect;
 			}
 		}
@@ -27,13 +33,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_anchorMin_Injected(out vector);
+				RectTransform.get_anchorMin_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_anchorMin_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_anchorMin_Injected(intPtr, ref value);
 			}
 		}
 
@@ -41,13 +57,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_anchorMax_Injected(out vector);
+				RectTransform.get_anchorMax_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_anchorMax_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_anchorMax_Injected(intPtr, ref value);
 			}
 		}
 
@@ -55,13 +81,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_anchoredPosition_Injected(out vector);
+				RectTransform.get_anchoredPosition_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_anchoredPosition_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_anchoredPosition_Injected(intPtr, ref value);
 			}
 		}
 
@@ -69,13 +105,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_sizeDelta_Injected(out vector);
+				RectTransform.get_sizeDelta_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_sizeDelta_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_sizeDelta_Injected(intPtr, ref value);
 			}
 		}
 
@@ -83,13 +129,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_pivot_Injected(out vector);
+				RectTransform.get_pivot_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_pivot_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_pivot_Injected(intPtr, ref value);
 			}
 		}
 
@@ -137,25 +193,82 @@ namespace UnityEngine
 			}
 		}
 
-		public extern Object drivenByObject
+		public Object drivenByObject
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			internal set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Object>(RectTransform.get_drivenByObject_Injected(intPtr));
+			}
+			internal set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_drivenByObject_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Object>(value));
+			}
 		}
 
-		internal extern DrivenTransformProperties drivenProperties
+		internal DrivenTransformProperties drivenProperties
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectTransform.get_drivenProperties_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_drivenProperties_Injected(intPtr, value);
+			}
+		}
+
+		public bool sendChildDimensionsChange
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectTransform.get_sendChildDimensionsChange_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectTransform.set_sendChildDimensionsChange_Injected(intPtr, value);
+			}
 		}
 
 		[NativeMethod("UpdateIfTransformDispatchIsDirty")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ForceUpdateRectTransforms();
+		public void ForceUpdateRectTransforms()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<RectTransform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RectTransform.ForceUpdateRectTransforms_Injected(intPtr);
+		}
 
 		public void GetLocalCorners(Vector3[] fourCornersArray)
 		{
@@ -188,7 +301,7 @@ namespace UnityEngine
 			else
 			{
 				this.GetLocalCorners(fourCornersArray);
-				Matrix4x4 localToWorldMatrix = base.transform.localToWorldMatrix;
+				Matrix4x4 localToWorldMatrix = base.localToWorldMatrix;
 				for (int i = 0; i < 4; i++)
 				{
 					fourCornersArray[i] = localToWorldMatrix.MultiplyPoint(fourCornersArray[i]);
@@ -236,10 +349,10 @@ namespace UnityEngine
 		{
 			Rect rect = this.rect;
 			Vector2 vector = this.offsetMin + Vector2.Scale(this.pivot, rect.size);
-			bool flag = base.transform.parent;
+			bool flag = base.parent;
 			if (flag)
 			{
-				RectTransform component = base.transform.parent.GetComponent<RectTransform>();
+				RectTransform component = base.parent.GetComponent<RectTransform>();
 				bool flag2 = component;
 				if (flag2)
 				{
@@ -268,37 +381,58 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_rect_Injected(out Rect ret);
+		private static extern void get_rect_Injected(IntPtr _unity_self, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_anchorMin_Injected(out Vector2 ret);
+		private static extern void get_anchorMin_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_anchorMin_Injected(ref Vector2 value);
+		private static extern void set_anchorMin_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_anchorMax_Injected(out Vector2 ret);
+		private static extern void get_anchorMax_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_anchorMax_Injected(ref Vector2 value);
+		private static extern void set_anchorMax_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_anchoredPosition_Injected(out Vector2 ret);
+		private static extern void get_anchoredPosition_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_anchoredPosition_Injected(ref Vector2 value);
+		private static extern void set_anchoredPosition_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_sizeDelta_Injected(out Vector2 ret);
+		private static extern void get_sizeDelta_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_sizeDelta_Injected(ref Vector2 value);
+		private static extern void set_sizeDelta_Injected(IntPtr _unity_self, [In] ref Vector2 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_pivot_Injected(out Vector2 ret);
+		private static extern void get_pivot_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_pivot_Injected(ref Vector2 value);
+		private static extern void set_pivot_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_drivenByObject_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_drivenByObject_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern DrivenTransformProperties get_drivenProperties_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_drivenProperties_Injected(IntPtr _unity_self, DrivenTransformProperties value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_sendChildDimensionsChange_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sendChildDimensionsChange_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ForceUpdateRectTransforms_Injected(IntPtr _unity_self);
 
 		public enum Edge
 		{

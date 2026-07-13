@@ -4,9 +4,9 @@ using System.Reflection.Emit;
 namespace System.Runtime.InteropServices
 {
 	[TypeLibImportClass(typeof(ParameterBuilder))]
-	[Guid("36329EBA-F97A-3565-BC07-0ED5C6EF19FC")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[CLSCompliant(false)]
+	[Guid("36329EBA-F97A-3565-BC07-0ED5C6EF19FC")]
 	[ComVisible(true)]
 	public interface _ParameterBuilder
 	{

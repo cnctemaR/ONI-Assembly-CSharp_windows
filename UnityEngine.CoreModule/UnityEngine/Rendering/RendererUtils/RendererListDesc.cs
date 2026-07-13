@@ -5,6 +5,8 @@ namespace UnityEngine.Rendering.RendererUtils
 {
 	public struct RendererListDesc
 	{
+		public uint batchLayerMask { readonly get; set; }
+
 		internal CullingResults cullingResult { readonly get; private set; }
 
 		internal Camera camera { readonly get; set; }
@@ -22,6 +24,7 @@ namespace UnityEngine.Rendering.RendererUtils
 			this.camera = camera;
 			this.layerMask = -1;
 			this.renderingLayerMask = uint.MaxValue;
+			this.batchLayerMask = uint.MaxValue;
 			this.overrideMaterialPassIndex = 0;
 			this.overrideShaderPassIndex = 0;
 		}
@@ -35,6 +38,7 @@ namespace UnityEngine.Rendering.RendererUtils
 			this.camera = camera;
 			this.layerMask = -1;
 			this.renderingLayerMask = uint.MaxValue;
+			this.batchLayerMask = uint.MaxValue;
 			this.overrideMaterialPassIndex = 0;
 		}
 
@@ -91,7 +95,8 @@ namespace UnityEngine.Rendering.RendererUtils
 				}
 				FilteringSettings filteringSettings = new FilteringSettings(new RenderQueueRange?(desc.renderQueueRange), desc.layerMask, desc.renderingLayerMask, 0)
 				{
-					excludeMotionVectorObjects = desc.excludeObjectMotionVectors
+					excludeMotionVectorObjects = desc.excludeObjectMotionVectors,
+					batchLayerMask = desc.batchLayerMask
 				};
 				rendererListParams2.cullingResults = desc.cullingResult;
 				rendererListParams2.drawSettings = drawingSettings;

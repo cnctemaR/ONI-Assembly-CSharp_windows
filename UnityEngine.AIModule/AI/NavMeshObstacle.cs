@@ -1,98 +1,217 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	[HelpURL("https://docs.unity3d.com/Packages/com.unity.ai.navigation@1.1/manual/NavMeshObstacle.html")]
 	[NativeHeader("Modules/AI/Components/NavMeshObstacle.bindings.h")]
+	[HelpURL("https://docs.unity3d.com/Packages/com.unity.ai.navigation@2.0/manual/NavMeshObstacle.html")]
 	[MovedFrom("UnityEngine")]
 	public sealed class NavMeshObstacle : Behaviour
 	{
-		public extern float height
+		public float height
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshObstacle.get_height_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_height_Injected(intPtr, value);
+			}
 		}
 
-		public extern float radius
+		public float radius
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshObstacle.get_radius_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_radius_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 velocity
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_velocity_Injected(out vector);
+				NavMeshObstacle.get_velocity_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_velocity_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_velocity_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern bool carving
+		public bool carving
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshObstacle.get_carving_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_carving_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool carveOnlyStationary
+		public bool carveOnlyStationary
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshObstacle.get_carveOnlyStationary_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_carveOnlyStationary_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("MoveThreshold")]
-		public extern float carvingMoveThreshold
+		public float carvingMoveThreshold
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshObstacle.get_carvingMoveThreshold_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_carvingMoveThreshold_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("TimeToStationary")]
-		public extern float carvingTimeToStationary
+		public float carvingTimeToStationary
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshObstacle.get_carvingTimeToStationary_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_carvingTimeToStationary_Injected(intPtr, value);
+			}
 		}
 
-		public extern NavMeshObstacleShape shape
+		public NavMeshObstacleShape shape
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshObstacle.get_shape_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_shape_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 center
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_center_Injected(out vector);
+				NavMeshObstacle.get_center_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_center_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_center_Injected(intPtr, ref value);
 			}
 		}
 
@@ -101,37 +220,99 @@ namespace UnityEngine.AI
 			[FreeFunction("NavMeshObstacleScriptBindings::GetSize", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_size_Injected(out vector);
+				NavMeshObstacle.get_size_Injected(intPtr, out vector);
 				return vector;
 			}
 			[FreeFunction("NavMeshObstacleScriptBindings::SetSize", HasExplicitThis = true)]
 			set
 			{
-				this.set_size_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshObstacle.set_size_Injected(intPtr, ref value);
 			}
 		}
 
 		[FreeFunction("NavMeshObstacleScriptBindings::FitExtents", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void FitExtents();
+		internal void FitExtents()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshObstacle>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			NavMeshObstacle.FitExtents_Injected(intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_velocity_Injected(out Vector3 ret);
+		private static extern float get_height_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_velocity_Injected(ref Vector3 value);
+		private static extern void set_height_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_center_Injected(out Vector3 ret);
+		private static extern float get_radius_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_center_Injected(ref Vector3 value);
+		private static extern void set_radius_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_size_Injected(out Vector3 ret);
+		private static extern void get_velocity_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_size_Injected(ref Vector3 value);
+		private static extern void set_velocity_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_carving_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_carving_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_carveOnlyStationary_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_carveOnlyStationary_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_carvingMoveThreshold_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_carvingMoveThreshold_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_carvingTimeToStationary_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_carvingTimeToStationary_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern NavMeshObstacleShape get_shape_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_shape_Injected(IntPtr _unity_self, NavMeshObstacleShape value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_center_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_center_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_size_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_size_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FitExtents_Injected(IntPtr _unity_self);
 	}
 }

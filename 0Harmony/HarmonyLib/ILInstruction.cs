@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
@@ -77,9 +78,14 @@ namespace HarmonyLib
 				{
 					if (operandType != OperandType.InlineString)
 					{
-						goto IL_00BE;
+						goto IL_00EC;
 					}
-					return text + string.Format("\"{0}\"", this.operand);
+					string text2 = text;
+					DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(2, 1);
+					defaultInterpolatedStringHandler.AppendLiteral("\"");
+					defaultInterpolatedStringHandler.AppendFormatted<object>(this.operand);
+					defaultInterpolatedStringHandler.AppendLiteral("\"");
+					return text2 + defaultInterpolatedStringHandler.ToStringAndClear();
 				}
 			}
 			else
@@ -99,22 +105,26 @@ namespace HarmonyLib
 				}
 				if (operandType != OperandType.ShortInlineBrTarget)
 				{
-					goto IL_00BE;
+					goto IL_00EC;
 				}
 			}
 			ILInstruction.AppendLabel(ref text, this.operand);
 			return text;
-			IL_00BE:
-			string text2 = text;
+			IL_00EC:
+			string text3 = text;
 			object obj = this.operand;
-			text = text2 + ((obj != null) ? obj.ToString() : null);
+			text = text3 + ((obj != null) ? obj.ToString() : null);
 			return text;
 		}
 
 		private static void AppendLabel(ref string str, object argument)
 		{
 			ILInstruction ilinstruction = argument as ILInstruction;
-			str += string.Format("IL_{0}", ((ilinstruction != null) ? ilinstruction.offset.ToString("X4") : null) ?? argument);
+			string text = str;
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(3, 1);
+			defaultInterpolatedStringHandler.AppendLiteral("IL_");
+			defaultInterpolatedStringHandler.AppendFormatted<object>(((ilinstruction != null) ? ilinstruction.offset.ToString("X4") : null) ?? argument);
+			str = text + defaultInterpolatedStringHandler.ToStringAndClear();
 		}
 
 		internal int offset;

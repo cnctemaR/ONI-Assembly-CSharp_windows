@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Burst;
+using UnityEngine;
 using UnityEngine.Bindings;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
-	[StaticAccessor("UnsafeUtility", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Export/Unsafe/UnsafeUtility.bindings.h")]
+	[StaticAccessor("UnsafeUtility", StaticAccessorType.DoubleColon)]
 	public static class UnsafeUtility
 	{
 		[ThreadSafe]
@@ -80,8 +83,8 @@ namespace Unity.Collections.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int ForgiveLeaks();
 
-		[ThreadSafe(ThrowsException = false)]
 		[BurstAuthorizedExternalMethod]
+		[ThreadSafe(ThrowsException = false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern NativeLeakDetectionMode GetLeakDetectionMode();
 
@@ -90,31 +93,63 @@ namespace Unity.Collections.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetLeakDetectionMode(NativeLeakDetectionMode value);
 
-		[ThreadSafe(ThrowsException = false)]
+		[VisibleToOtherModules(new string[] { "UnityEngine.AIModule" })]
 		[BurstAuthorizedExternalMethod]
+		[ThreadSafe(ThrowsException = false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int LeakRecord(IntPtr handle, LeakCategory category, int callstacksToSkip);
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.AIModule" })]
 		[BurstAuthorizedExternalMethod]
 		[ThreadSafe(ThrowsException = false)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int LeakErase(IntPtr handle, LeakCategory category);
 
+		public unsafe static void* MallocTracked(long size, int alignment, Allocator allocator, int callstacksToSkip)
+		{
+			return UnsafeUtility.MallocTracked(size, alignment, allocator, callstacksToSkip + 1, IntPtr.Zero);
+		}
+
+		public unsafe static void* MallocTracked(long size, int alignment, MemoryLabel label, int callstacksToSkip)
+		{
+			return UnsafeUtility.MallocTracked(size, alignment, label.allocator, callstacksToSkip + 1, label.pointer);
+		}
+
 		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe static extern void* MallocTracked(long size, int alignment, Allocator allocator, int callstacksToSkip);
+		internal unsafe static extern void* MallocTracked(long size, int alignment, Allocator allocator, int callstacksToSkip, IntPtr label);
 
 		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void FreeTracked(void* memory, Allocator allocator);
 
+		public unsafe static void FreeTracked(void* memory, MemoryLabel label)
+		{
+			UnsafeUtility.FreeTracked(memory, label.allocator);
+		}
+
+		public unsafe static void* Malloc(long size, int alignment, Allocator allocator)
+		{
+			return UnsafeUtility.Malloc(size, alignment, allocator, IntPtr.Zero);
+		}
+
+		public unsafe static void* Malloc(long size, int alignment, MemoryLabel label)
+		{
+			return UnsafeUtility.Malloc(size, alignment, label.allocator, label.pointer);
+		}
+
 		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe static extern void* Malloc(long size, int alignment, Allocator allocator);
+		private unsafe static extern void* Malloc(long size, int alignment, Allocator allocator, IntPtr label);
 
 		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void Free(void* memory, Allocator allocator);
+
+		public unsafe static void Free(void* memory, MemoryLabel label)
+		{
+			UnsafeUtility.Free(memory, label.allocator);
+		}
 
 		public static bool IsValidAllocator(Allocator allocator)
 		{
@@ -136,6 +171,10 @@ namespace Unity.Collections.LowLevel.Unsafe
 		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void MemMove(void* destination, void* source, long size);
+
+		[ThreadSafe(ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void MemSwap(void* ptr1, void* ptr2, long size);
 
 		[ThreadSafe(ThrowsException = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -171,8 +210,36 @@ namespace Unity.Collections.LowLevel.Unsafe
 		internal static extern int GetScriptingTypeFlags(Type type);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void LogError(string msg, string filename, int linenumber);
+		internal unsafe static void LogError(string msg, string filename, int linenumber)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(msg, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = msg.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(filename, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = filename.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				UnsafeUtility.LogError_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, linenumber);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+		}
 
 		private static bool IsBlittableValueType(Type t)
 		{
@@ -264,6 +331,30 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return UnsafeUtility.SizeOf<UnsafeUtility.AlignOfHelper<T>>() - UnsafeUtility.SizeOf<T>();
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.ImageConversionModule" })]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal unsafe static Span<byte> GetByteSpanFromArray(Array array, int elementSize)
+		{
+			bool flag = array == null || array.Length == 0;
+			Span<byte> span;
+			if (flag)
+			{
+				span = default(Span<byte>);
+			}
+			else
+			{
+				byte[] array2 = *UnsafeUtility.As<Array, byte[]>(ref array);
+				span = new Span<byte>(UnsafeUtility.AddressOf<byte>(ref array2[0]), array.Length * elementSize);
+			}
+			return span;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static Span<byte> GetByteSpanFromList<T>(List<T> list) where T : struct
+		{
+			return MemoryMarshal.AsBytes<T>(NoAllocHelpers.ExtractArrayFromList<T>(list).AsSpan<T>());
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static void CopyPtrToStructure<T>(void* ptr, out T output) where T : struct
 		{
@@ -322,13 +413,24 @@ namespace Unity.Collections.LowLevel.Unsafe
 			return sizeof(T);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static ref T As<U, T>(ref U from)
 		{
 			return ref from;
 		}
 
+		internal static T As<T>(object from) where T : class
+		{
+			return from;
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static ref T AsRef<T>(void* ptr) where T : struct
+		{
+			return ref *(T*)ptr;
+		}
+
+		internal unsafe static ref T ClassAsRef<T>(void* ptr) where T : class
 		{
 			return ref *(T*)ptr;
 		}
@@ -358,6 +460,21 @@ namespace Unity.Collections.LowLevel.Unsafe
 		{
 			return lhs == rhs;
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static ref T Add<[IsUnmanaged] T>(ref T source, int elementOffset) where T : struct, ValueType
+		{
+			return (ref source) + sizeof(T) * elementOffset;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal unsafe static void* AsPointer<T>(ref T output)
+		{
+			return (void*)(&output);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void LogError_Injected(ref ManagedSpanWrapper msg, ref ManagedSpanWrapper filename, int linenumber);
 
 		private const int kIsManaged = 1;
 

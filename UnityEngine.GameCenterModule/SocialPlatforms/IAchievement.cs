@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("IAchievement is deprecated and will be removed in a future release.", false)]
 	public interface IAchievement
 	{
 		void ReportProgress(Action<bool> callback);

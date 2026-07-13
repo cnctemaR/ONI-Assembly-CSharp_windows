@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class AnonymousScopeEntry
+	internal class AnonymousScopeEntry
 	{
 		public AnonymousScopeEntry(int id)
 		{

@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.UIElements;
 
 namespace UnityEngine.EventSystems
 {
@@ -33,9 +34,13 @@ namespace UnityEngine.EventSystems
 			this.depth = 0;
 			this.sortingLayer = 0;
 			this.sortingOrder = 0;
+			this.origin = Vector3.zero;
 			this.worldNormal = Vector3.up;
 			this.worldPosition = Vector3.zero;
 			this.screenPosition = Vector3.zero;
+			this.displayIndex = 0;
+			this.document = null;
+			this.element = null;
 		}
 
 		public override string ToString()
@@ -60,17 +65,11 @@ namespace UnityEngine.EventSystems
 			array[8] = "\ndepth: ";
 			array[9] = this.depth.ToString();
 			array[10] = "\nworldNormal: ";
-			int num3 = 11;
-			Vector3 vector = this.worldNormal;
-			array[num3] = vector.ToString();
+			array[11] = this.worldNormal.ToString();
 			array[12] = "\nworldPosition: ";
-			int num4 = 13;
-			vector = this.worldPosition;
-			array[num4] = vector.ToString();
+			array[13] = this.worldPosition.ToString();
 			array[14] = "\nscreenPosition: ";
-			int num5 = 15;
-			Vector2 vector2 = this.screenPosition;
-			array[num5] = vector2.ToString();
+			array[15] = this.screenPosition.ToString();
 			array[16] = "\nmodule.sortOrderPriority: ";
 			array[17] = this.module.sortOrderPriority.ToString();
 			array[18] = "\nmodule.renderOrderPriority: ";
@@ -100,6 +99,8 @@ namespace UnityEngine.EventSystems
 
 		public int sortingOrder;
 
+		public Vector3 origin;
+
 		public Vector3 worldPosition;
 
 		public Vector3 worldNormal;
@@ -107,5 +108,9 @@ namespace UnityEngine.EventSystems
 		public Vector2 screenPosition;
 
 		public int displayIndex;
+
+		public UIDocument document;
+
+		public VisualElement element;
 	}
 }

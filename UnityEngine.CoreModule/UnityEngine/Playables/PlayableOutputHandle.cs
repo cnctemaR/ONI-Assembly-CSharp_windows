@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Director/PlayableOutputHandle.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	public struct PlayableOutputHandle : IEquatable<PlayableOutputHandle>
 	{
@@ -56,46 +57,38 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
-		internal bool IsNull()
-		{
-			return PlayableOutputHandle.IsNull_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool IsNull();
 
 		[VisibleToOtherModules]
-		internal bool IsValid()
-		{
-			return PlayableOutputHandle.IsValid_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool IsValid();
 
 		[FreeFunction("PlayableOutputHandleBindings::GetPlayableOutputType", HasExplicitThis = true, ThrowsException = true)]
-		internal Type GetPlayableOutputType()
-		{
-			return PlayableOutputHandle.GetPlayableOutputType_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Type GetPlayableOutputType();
 
 		[FreeFunction("PlayableOutputHandleBindings::GetReferenceObject", HasExplicitThis = true, ThrowsException = true)]
 		internal Object GetReferenceObject()
 		{
-			return PlayableOutputHandle.GetReferenceObject_Injected(ref this);
+			return Unmarshal.UnmarshalUnityObject<Object>(PlayableOutputHandle.GetReferenceObject_Injected(ref this));
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::SetReferenceObject", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetReferenceObject(Object target)
 		{
-			PlayableOutputHandle.SetReferenceObject_Injected(ref this, target);
+			PlayableOutputHandle.SetReferenceObject_Injected(ref this, Object.MarshalledUnityObject.Marshal<Object>(target));
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::GetUserData", HasExplicitThis = true, ThrowsException = true)]
 		internal Object GetUserData()
 		{
-			return PlayableOutputHandle.GetUserData_Injected(ref this);
+			return Unmarshal.UnmarshalUnityObject<Object>(PlayableOutputHandle.GetUserData_Injected(ref this));
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::SetUserData", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetUserData([Writable] Object target)
-		{
-			PlayableOutputHandle.SetUserData_Injected(ref this, target);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetUserData([Writable] Object target);
 
 		[FreeFunction("PlayableOutputHandleBindings::GetSourcePlayable", HasExplicitThis = true, ThrowsException = true)]
 		internal PlayableHandle GetSourcePlayable()
@@ -112,22 +105,16 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::GetSourceOutputPort", HasExplicitThis = true, ThrowsException = true)]
-		internal int GetSourceOutputPort()
-		{
-			return PlayableOutputHandle.GetSourceOutputPort_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetSourceOutputPort();
 
 		[FreeFunction("PlayableOutputHandleBindings::GetWeight", HasExplicitThis = true, ThrowsException = true)]
-		internal float GetWeight()
-		{
-			return PlayableOutputHandle.GetWeight_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern float GetWeight();
 
 		[FreeFunction("PlayableOutputHandleBindings::SetWeight", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetWeight(float weight)
-		{
-			PlayableOutputHandle.SetWeight_Injected(ref this, weight);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetWeight(float weight);
 
 		[FreeFunction("PlayableOutputHandleBindings::PushNotification", HasExplicitThis = true, ThrowsException = true)]
 		internal void PushNotification(PlayableHandle origin, INotification notification, object context)
@@ -136,70 +123,35 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableOutputHandleBindings::GetNotificationReceivers", HasExplicitThis = true, ThrowsException = true)]
-		internal INotificationReceiver[] GetNotificationReceivers()
-		{
-			return PlayableOutputHandle.GetNotificationReceivers_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		internal extern INotificationReceiver[] GetNotificationReceivers();
 
 		[FreeFunction("PlayableOutputHandleBindings::AddNotificationReceiver", HasExplicitThis = true, ThrowsException = true)]
-		internal void AddNotificationReceiver(INotificationReceiver receiver)
-		{
-			PlayableOutputHandle.AddNotificationReceiver_Injected(ref this, receiver);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void AddNotificationReceiver(INotificationReceiver receiver);
 
 		[FreeFunction("PlayableOutputHandleBindings::RemoveNotificationReceiver", HasExplicitThis = true, ThrowsException = true)]
-		internal void RemoveNotificationReceiver(INotificationReceiver receiver)
-		{
-			PlayableOutputHandle.RemoveNotificationReceiver_Injected(ref this, receiver);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void RemoveNotificationReceiver(INotificationReceiver receiver);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsNull_Injected(ref PlayableOutputHandle _unity_self);
+		private static extern IntPtr GetReferenceObject_Injected(ref PlayableOutputHandle _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsValid_Injected(ref PlayableOutputHandle _unity_self);
+		private static extern void SetReferenceObject_Injected(ref PlayableOutputHandle _unity_self, IntPtr target);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Type GetPlayableOutputType_Injected(ref PlayableOutputHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Object GetReferenceObject_Injected(ref PlayableOutputHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetReferenceObject_Injected(ref PlayableOutputHandle _unity_self, Object target);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Object GetUserData_Injected(ref PlayableOutputHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetUserData_Injected(ref PlayableOutputHandle _unity_self, [Writable] Object target);
+		private static extern IntPtr GetUserData_Injected(ref PlayableOutputHandle _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetSourcePlayable_Injected(ref PlayableOutputHandle _unity_self, out PlayableHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetSourcePlayable_Injected(ref PlayableOutputHandle _unity_self, ref PlayableHandle target, int port);
+		private static extern void SetSourcePlayable_Injected(ref PlayableOutputHandle _unity_self, [In] ref PlayableHandle target, int port);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetSourceOutputPort_Injected(ref PlayableOutputHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float GetWeight_Injected(ref PlayableOutputHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetWeight_Injected(ref PlayableOutputHandle _unity_self, float weight);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PushNotification_Injected(ref PlayableOutputHandle _unity_self, ref PlayableHandle origin, INotification notification, object context);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern INotificationReceiver[] GetNotificationReceivers_Injected(ref PlayableOutputHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddNotificationReceiver_Injected(ref PlayableOutputHandle _unity_self, INotificationReceiver receiver);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void RemoveNotificationReceiver_Injected(ref PlayableOutputHandle _unity_self, INotificationReceiver receiver);
+		private static extern void PushNotification_Injected(ref PlayableOutputHandle _unity_self, [In] ref PlayableHandle origin, INotification notification, object context);
 
 		internal IntPtr m_Handle;
 

@@ -673,7 +673,7 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 	private bool check_fertilizer(GameObject go)
 	{
 		FertilizationMonitor.Instance smi = go.GetSMI<FertilizationMonitor.Instance>();
-		return smi == null || smi.sm.hasCorrectFertilizer.Get(smi);
+		return smi != null && smi.sm.isFertilized.Get(smi);
 	}
 
 	private bool check_atmosphere(GameObject go)

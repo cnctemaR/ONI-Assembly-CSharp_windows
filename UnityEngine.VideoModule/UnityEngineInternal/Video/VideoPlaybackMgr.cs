@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngineInternal.Video
 {
-	[UsedByNativeCode]
 	[NativeHeader("Modules/Video/Public/Base/VideoMediaPlayback.h")]
+	[UsedByNativeCode]
 	internal class VideoPlaybackMgr : IDisposable
 	{
 		public VideoPlaybackMgr()
@@ -31,28 +31,94 @@ namespace UnityEngineInternal.Video
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Destroy(IntPtr ptr);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern VideoPlayback CreateVideoPlayback(string fileName, VideoPlaybackMgr.MessageCallback errorCallback, VideoPlaybackMgr.Callback readyCallback, VideoPlaybackMgr.Callback reachedEndCallback, bool splitAlpha = false);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ReleaseVideoPlayback(VideoPlayback playback);
-
-		public extern ulong videoPlaybackCount
+		public unsafe VideoPlayback CreateVideoPlayback(string fileName, VideoPlaybackMgr.MessageCallback errorCallback, VideoPlaybackMgr.Callback readyCallback, VideoPlaybackMgr.Callback reachedEndCallback, bool splitAlpha = false)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			VideoPlayback videoPlayback;
+			try
+			{
+				IntPtr intPtr = VideoPlaybackMgr.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(fileName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = fileName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr2 = VideoPlaybackMgr.CreateVideoPlayback_Injected(intPtr, ref managedSpanWrapper, errorCallback, readyCallback, reachedEndCallback, splitAlpha);
+			}
+			finally
+			{
+				IntPtr intPtr2;
+				IntPtr intPtr3 = intPtr2;
+				videoPlayback = ((intPtr3 == 0) ? null : VideoPlayback.BindingsMarshaller.ConvertToManaged(intPtr3));
+				char* ptr = null;
+			}
+			return videoPlayback;
+		}
+
+		public void ReleaseVideoPlayback(VideoPlayback playback)
+		{
+			IntPtr intPtr = VideoPlaybackMgr.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlaybackMgr.ReleaseVideoPlayback_Injected(intPtr, (playback == null) ? ((IntPtr)0) : VideoPlayback.BindingsMarshaller.ConvertToNative(playback));
+		}
+
+		public ulong videoPlaybackCount
+		{
+			get
+			{
+				IntPtr intPtr = VideoPlaybackMgr.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlaybackMgr.get_videoPlaybackCount_Injected(intPtr);
+			}
+		}
+
+		public void Update()
+		{
+			IntPtr intPtr = VideoPlaybackMgr.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlaybackMgr.Update_Injected(intPtr);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Update();
+		private static extern IntPtr CreateVideoPlayback_Injected(IntPtr _unity_self, ref ManagedSpanWrapper fileName, VideoPlaybackMgr.MessageCallback errorCallback, VideoPlaybackMgr.Callback readyCallback, VideoPlaybackMgr.Callback reachedEndCallback, bool splitAlpha);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ProcessOSMainLoopMessagesForTesting();
+		private static extern void ReleaseVideoPlayback_Injected(IntPtr _unity_self, IntPtr playback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong get_videoPlaybackCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Update_Injected(IntPtr _unity_self);
 
 		internal IntPtr m_Ptr;
 
 		public delegate void Callback();
 
 		public delegate void MessageCallback(string message);
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(VideoPlaybackMgr videoPlaybackMgr)
+			{
+				return videoPlaybackMgr.m_Ptr;
+			}
+		}
 	}
 }

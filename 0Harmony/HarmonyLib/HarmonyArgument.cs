@@ -2,7 +2,7 @@
 
 namespace HarmonyLib
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Parameter, AllowMultiple = true)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Parameter, AllowMultiple = true)]
 	public class HarmonyArgument : Attribute
 	{
 		public string OriginalName { get; private set; }

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace Unity.Curl
 {
-	[StaticAccessor("UnityCurl", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/UnityCurl/Public/UnityCurl.h")]
+	[StaticAccessor("UnityCurl", StaticAccessorType.DoubleColon)]
 	internal static class UnityCurl
 	{
 		[NativeMethod(IsThreadSafe = true)]

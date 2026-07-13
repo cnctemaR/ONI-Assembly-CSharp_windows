@@ -6,8 +6,8 @@ namespace FMOD
 	{
 		public const string dll = "fmodstudio";
 
-		public const string dllSuffix = "";
+		public const int number = 131858;
 
-		public const int number = 131619;
+		public const string suffix = "";
 	}
 }

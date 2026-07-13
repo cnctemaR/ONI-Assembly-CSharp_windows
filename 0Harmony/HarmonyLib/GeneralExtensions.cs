@@ -90,6 +90,15 @@ namespace HarmonyLib
 			return pinfo.Select<ParameterInfo, Type>((ParameterInfo pi) => pi.ParameterType).ToArray<Type>();
 		}
 
+		public static bool HasHarmonyAttribute(this Type type)
+		{
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			return HarmonyMethodExtensions.GetFromType(type).Count > 0;
+		}
+
 		public static T GetValueSafe<S, T>(this Dictionary<S, T> dictionary, S key)
 		{
 			T t;

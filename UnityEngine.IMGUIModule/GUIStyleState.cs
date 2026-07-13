@@ -11,12 +11,26 @@ namespace UnityEngine
 	public sealed class GUIStyleState
 	{
 		[NativeProperty("Background", false, TargetType.Function)]
-		public extern Texture2D background
+		public Texture2D background
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = GUIStyleState.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(GUIStyleState.get_background_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = GUIStyleState.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				GUIStyleState.set_background_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture2D>(value));
+			}
 		}
 
 		[NativeProperty("textColor", false, TargetType.Field)]
@@ -24,13 +38,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = GUIStyleState.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_textColor_Injected(out color);
+				GUIStyleState.get_textColor_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_textColor_Injected(ref value);
+				IntPtr intPtr = GUIStyleState.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				GUIStyleState.set_textColor_Injected(intPtr, ref value);
 			}
 		}
 
@@ -39,8 +63,15 @@ namespace UnityEngine
 		private static extern IntPtr Init();
 
 		[FreeFunction(Name = "GUIStyleState_Bindings::Cleanup", IsThreadSafe = true, HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Cleanup();
+		private void Cleanup()
+		{
+			IntPtr intPtr = GUIStyleState.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GUIStyleState.Cleanup_Injected(intPtr);
+		}
 
 		public GUIStyleState()
 		{
@@ -81,14 +112,31 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_textColor_Injected(out Color ret);
+		private static extern IntPtr get_background_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_textColor_Injected(ref Color value);
+		private static extern void set_background_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_textColor_Injected(IntPtr _unity_self, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_textColor_Injected(IntPtr _unity_self, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Cleanup_Injected(IntPtr _unity_self);
 
 		[NonSerialized]
 		internal IntPtr m_Ptr;
 
 		private readonly GUIStyle m_SourceStyle;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(GUIStyleState guiStyleState)
+			{
+				return guiStyleState.m_Ptr;
+			}
+		}
 	}
 }

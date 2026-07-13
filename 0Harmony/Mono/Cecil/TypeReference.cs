@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public class TypeReference : MemberReference, IGenericParameterProvider, IMetadataTokenProvider, IGenericContext
+	internal class TypeReference : MemberReference, IGenericParameterProvider, IMetadataTokenProvider, IGenericContext
 	{
 		public override string Name
 		{

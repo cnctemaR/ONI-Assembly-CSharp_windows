@@ -8,6 +8,7 @@ namespace UnityEngine.XR
 		LeftEye,
 		RightEye,
 		BothEyes,
-		OcclusionMesh
+		OcclusionMesh,
+		MotionVectors
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public abstract class ParameterReference : IMetadataTokenProvider
+	internal abstract class ParameterReference : IMetadataTokenProvider
 	{
 		public string Name
 		{

@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
 namespace HarmonyLib
 {
-	[Serializable]
 	public class HarmonyException : Exception
 	{
 		internal HarmonyException()
@@ -22,11 +20,6 @@ namespace HarmonyLib
 		internal HarmonyException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-		}
-
-		protected HarmonyException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-		{
-			throw new NotImplementedException();
 		}
 
 		internal HarmonyException(Exception innerException, Dictionary<int, CodeInstruction> instructions, int errorOffset)

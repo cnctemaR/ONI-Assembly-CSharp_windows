@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public abstract class TypeSystem
+	internal abstract class TypeSystem
 	{
 		private TypeSystem(ModuleDefinition module)
 		{

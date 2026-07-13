@@ -48,11 +48,48 @@ namespace UnityEngine.Advertisements
 		}
 
 		[StaticAccessor("GetUnityAdsSettings()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetGameId(RuntimePlatform platform);
+		public static string GetGameId(RuntimePlatform platform)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				UnityAdsSettings.GetGameId_Injected(platform, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[StaticAccessor("GetUnityAdsSettings()", StaticAccessorType.Dot)]
+		public unsafe static void SetGameId(RuntimePlatform platform, string gameId)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(gameId, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = gameId.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				UnityAdsSettings.SetGameId_Injected(platform, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetGameId(RuntimePlatform platform, string gameId);
+		private static extern void GetGameId_Injected(RuntimePlatform platform, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGameId_Injected(RuntimePlatform platform, ref ManagedSpanWrapper gameId);
 	}
 }

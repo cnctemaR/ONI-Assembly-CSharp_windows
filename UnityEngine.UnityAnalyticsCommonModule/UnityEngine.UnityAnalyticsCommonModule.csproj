@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D469}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BDC0}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnityEngine.Analytics</RootNamespace>
+    <RootNamespace>UnityEngine.UnityAnalyticsCommonModule</RootNamespace>
     <AssemblyName>UnityEngine.UnityAnalyticsCommonModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
@@ -14,17 +14,59 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="AnalyticsCommon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UGSAnalyticsInternalTools.cs" />
+    <Compile Include="UnityEditor\Analytics\AssetDatabaseRefreshAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\AssetExportAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\AssetImportAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\AssetImportStatusAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\BuildAssetBundleAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\CollabOperationAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\LicensingErrorAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\LicensingInitAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\MetalPatchShaderComputeBufferAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\NavmeshBakingAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerAddPackageAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerBaseAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerEmbedPackageAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerRemovePackageAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerResetPackageAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerResolveErrorPackageAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerResolvePackageAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerStartServerPackageAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\PackageManagerTestAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\ProjectSettingsInformationAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\SendGameBuildAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\StallMarkerAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\StallSummaryAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\TestAnalytic.cs" />
+    <Compile Include="UnityEditor\Analytics\VCProviderAnalytics.cs" />
+    <Compile Include="UnityEngine\Analytics\Analytic.cs" />
+    <Compile Include="UnityEngine\Analytics\AnalyticInfoAttribute.cs" />
+    <Compile Include="UnityEngine\Analytics\AnalyticsCommon.cs" />
+    <Compile Include="UnityEngine\Analytics\AnalyticsResult.cs" />
+    <Compile Include="UnityEngine\Analytics\IAnalytic.cs" />
+    <Compile Include="UnityEngine\Analytics\SubsystemsAnalyticBase.cs" />
+    <Compile Include="UnityEngine\Analytics\SubsystemsAnalyticInfo.cs" />
+    <Compile Include="UnityEngine\Analytics\SubsystemsAnalyticStart.cs" />
+    <Compile Include="UnityEngine\Analytics\SubsystemsAnalyticStop.cs" />
+    <Compile Include="UnityEngine\Analytics\UGSAnalyticsInternalTools.cs" />
+    <Compile Include="UnityEngine\Analytics\VRDeviceActiveControllersAnalytic.cs" />
+    <Compile Include="UnityEngine\Analytics\VRDeviceAnalyticAspect.cs" />
+    <Compile Include="UnityEngine\Analytics\VRDeviceAnalyticBase.cs" />
+    <Compile Include="UnityEngine\Analytics\VRDeviceMirrorAnalytic.cs" />
+    <Compile Include="UnityEngine\Analytics\VRDeviceUserAnalytic.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D416}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D458}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDAF}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

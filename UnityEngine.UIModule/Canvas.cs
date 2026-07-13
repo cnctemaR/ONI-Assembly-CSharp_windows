@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/UI/CanvasManager.h")]
 	[NativeHeader("Modules/UI/UIStructs.h")]
-	[RequireComponent(typeof(RectTransform))]
-	[NativeHeader("Modules/UI/Canvas.h")]
 	[NativeClass("UI::Canvas")]
+	[RequireComponent(typeof(RectTransform))]
+	[NativeHeader("Modules/UI/CanvasManager.h")]
+	[NativeHeader("Modules/UI/Canvas.h")]
 	public sealed class Canvas : Behaviour
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -19,215 +19,544 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Canvas.WillRenderCanvases willRenderCanvases;
 
-		public extern RenderMode renderMode
+		public RenderMode renderMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_renderMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_renderMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool isRootCanvas
+		public bool isRootCanvas
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_isRootCanvas_Injected(intPtr);
+			}
 		}
 
 		public Rect pixelRect
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Rect rect;
-				this.get_pixelRect_Injected(out rect);
+				Canvas.get_pixelRect_Injected(intPtr, out rect);
 				return rect;
 			}
 		}
 
-		public extern float scaleFactor
+		public float scaleFactor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_scaleFactor_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_scaleFactor_Injected(intPtr, value);
+			}
 		}
 
-		public extern float referencePixelsPerUnit
+		public float referencePixelsPerUnit
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_referencePixelsPerUnit_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_referencePixelsPerUnit_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool overridePixelPerfect
+		public bool overridePixelPerfect
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_overridePixelPerfect_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_overridePixelPerfect_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool vertexColorAlwaysGammaSpace
+		public bool vertexColorAlwaysGammaSpace
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_vertexColorAlwaysGammaSpace_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_vertexColorAlwaysGammaSpace_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool pixelPerfect
+		public bool pixelPerfect
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_pixelPerfect_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_pixelPerfect_Injected(intPtr, value);
+			}
 		}
 
-		public extern float planeDistance
+		public float planeDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_planeDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_planeDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern int renderOrder
+		public int renderOrder
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_renderOrder_Injected(intPtr);
+			}
 		}
 
-		public extern bool overrideSorting
+		public bool overrideSorting
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_overrideSorting_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_overrideSorting_Injected(intPtr, value);
+			}
 		}
 
-		public extern int sortingOrder
+		public int sortingOrder
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_sortingOrder_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_sortingOrder_Injected(intPtr, value);
+			}
 		}
 
-		public extern int targetDisplay
+		public int targetDisplay
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_targetDisplay_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_targetDisplay_Injected(intPtr, value);
+			}
 		}
 
-		public extern int sortingLayerID
+		public int sortingLayerID
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_sortingLayerID_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_sortingLayerID_Injected(intPtr, value);
+			}
 		}
 
-		public extern int cachedSortingLayerValue
+		public int cachedSortingLayerValue
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_cachedSortingLayerValue_Injected(intPtr);
+			}
 		}
 
-		public extern AdditionalCanvasShaderChannels additionalShaderChannels
+		public AdditionalCanvasShaderChannels additionalShaderChannels
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_additionalShaderChannels_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_additionalShaderChannels_Injected(intPtr, value);
+			}
 		}
 
-		public extern string sortingLayerName
+		public unsafe string sortingLayerName
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					Canvas.get_sortingLayerName_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Canvas.set_sortingLayerName_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
-		public extern Canvas rootCanvas
+		public Canvas rootCanvas
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Canvas>(Canvas.get_rootCanvas_Injected(intPtr));
+			}
 		}
 
 		public Vector2 renderingDisplaySize
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_renderingDisplaySize_Injected(out vector);
+				Canvas.get_renderingDisplaySize_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
 
-		public extern StandaloneRenderResize updateRectTransformForStandalone
+		public StandaloneRenderResize updateRectTransformForStandalone
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_updateRectTransformForStandalone_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_updateRectTransformForStandalone_Injected(intPtr, value);
+			}
+		}
+
+		internal static Action<int> externBeginRenderOverlays
+		{
+			get; [VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 			set;
 		}
 
-		internal static Action<int> externBeginRenderOverlays { get; set; }
+		internal static Action<int, int> externRenderOverlaysBefore
+		{
+			get; [VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			set;
+		}
 
-		internal static Action<int, int> externRenderOverlaysBefore { get; set; }
+		internal static Action<int> externEndRenderOverlays
+		{
+			get; [VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+			set;
+		}
 
-		internal static Action<int> externEndRenderOverlays { get; set; }
-
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		[FreeFunction("UI::CanvasManager::SetExternalCanvasEnabled")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SetExternalCanvasEnabled(bool enabled);
 
 		[NativeProperty("Camera", false, TargetType.Function)]
-		public extern Camera worldCamera
+		public Camera worldCamera
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Camera>(Canvas.get_worldCamera_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_worldCamera_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Camera>(value));
+			}
 		}
 
 		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
-		public extern float normalizedSortingGridSize
+		public float normalizedSortingGridSize
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_normalizedSortingGridSize_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_normalizedSortingGridSize_Injected(intPtr, value);
+			}
 		}
 
+		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
 		[Obsolete("Setting normalizedSize via a int is not supported. Please use normalizedSortingGridSize", false)]
-		[NativeProperty("SortingBucketNormalizedSize", false, TargetType.Function)]
-		public extern int sortingGridNormalizedSize
+		public int sortingGridNormalizedSize
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Canvas.get_sortingGridNormalizedSize_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Canvas.set_sortingGridNormalizedSize_Injected(intPtr, value);
+			}
 		}
 
-		[Obsolete("Shared default material now used for text and general UI elements, call Canvas.GetDefaultCanvasMaterial()", false)]
 		[FreeFunction("UI::GetDefaultUIMaterial")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Material GetDefaultCanvasTextMaterial();
+		[Obsolete("Shared default material now used for text and general UI elements, call Canvas.GetDefaultCanvasMaterial()", false)]
+		public static Material GetDefaultCanvasTextMaterial()
+		{
+			return Unmarshal.UnmarshalUnityObject<Material>(Canvas.GetDefaultCanvasTextMaterial_Injected());
+		}
 
 		[FreeFunction("UI::GetDefaultUIMaterial")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Material GetDefaultCanvasMaterial();
+		public static Material GetDefaultCanvasMaterial()
+		{
+			return Unmarshal.UnmarshalUnityObject<Material>(Canvas.GetDefaultCanvasMaterial_Injected());
+		}
 
 		[FreeFunction("UI::GetETC1SupportedCanvasMaterial")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern Material GetETC1SupportedCanvasMaterial();
+		public static Material GetETC1SupportedCanvasMaterial()
+		{
+			return Unmarshal.UnmarshalUnityObject<Material>(Canvas.GetETC1SupportedCanvasMaterial_Injected());
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void UpdateCanvasRectTransform(bool alignWithCamera);
+		internal void UpdateCanvasRectTransform(bool alignWithCamera)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Canvas>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Canvas.UpdateCanvasRectTransform_Injected(intPtr, alignWithCamera);
+		}
 
 		public static void ForceUpdateCanvases()
 		{
@@ -286,10 +615,136 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_pixelRect_Injected(out Rect ret);
+		private static extern RenderMode get_renderMode_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_renderingDisplaySize_Injected(out Vector2 ret);
+		private static extern void set_renderMode_Injected(IntPtr _unity_self, RenderMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isRootCanvas_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_pixelRect_Injected(IntPtr _unity_self, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_scaleFactor_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_scaleFactor_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_referencePixelsPerUnit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_referencePixelsPerUnit_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_overridePixelPerfect_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_overridePixelPerfect_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_vertexColorAlwaysGammaSpace_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_vertexColorAlwaysGammaSpace_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_pixelPerfect_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_pixelPerfect_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_planeDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_planeDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_renderOrder_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_overrideSorting_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_overrideSorting_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sortingOrder_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingOrder_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_targetDisplay_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetDisplay_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sortingLayerID_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingLayerID_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_cachedSortingLayerValue_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AdditionalCanvasShaderChannels get_additionalShaderChannels_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_additionalShaderChannels_Injected(IntPtr _unity_self, AdditionalCanvasShaderChannels value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_sortingLayerName_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingLayerName_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_rootCanvas_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_renderingDisplaySize_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern StandaloneRenderResize get_updateRectTransformForStandalone_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_updateRectTransformForStandalone_Injected(IntPtr _unity_self, StandaloneRenderResize value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_worldCamera_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_worldCamera_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_normalizedSortingGridSize_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_normalizedSortingGridSize_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sortingGridNormalizedSize_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingGridNormalizedSize_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetDefaultCanvasTextMaterial_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetDefaultCanvasMaterial_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetETC1SupportedCanvasMaterial_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UpdateCanvasRectTransform_Injected(IntPtr _unity_self, bool alignWithCamera);
 
 		public delegate void WillRenderCanvases();
 	}

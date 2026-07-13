@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -10,19 +9,16 @@ namespace Unity.Properties.Internal
 {
 	internal static class PropertyBagStore
 	{
-		static PropertyBagStore()
-		{
-			DefaultPropertyBagInitializer.Initialize();
-		}
-
-		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		internal static event Action<Type, IPropertyBag> NewTypeRegistered;
-
-		internal static bool HasProvider
+		private static ReflectedPropertyBagProvider ReflectedPropertyBagProvider
 		{
 			get
 			{
-				return PropertyBagStore.s_PropertyBagProvider != null;
+				ReflectedPropertyBagProvider reflectedPropertyBagProvider;
+				if ((reflectedPropertyBagProvider = PropertyBagStore.s_PropertyBagProvider) == null)
+				{
+					reflectedPropertyBagProvider = (PropertyBagStore.s_PropertyBagProvider = new ReflectedPropertyBagProvider());
+				}
+				return reflectedPropertyBagProvider;
 			}
 		}
 
@@ -32,6 +28,11 @@ namespace Unity.Properties.Internal
 			{
 				return PropertyBagStore.s_RegisteredTypes;
 			}
+		}
+
+		internal static void CreatePropertyBagProvider()
+		{
+			PropertyBagStore.s_PropertyBagProvider = new ReflectedPropertyBagProvider();
 		}
 
 		internal static void AddPropertyBag<TContainer>(IPropertyBag<TContainer> propertyBag)
@@ -72,11 +73,6 @@ namespace Unity.Properties.Internal
 				PropertyBagStore.s_RegisteredTypes.Add(typeof(TContainer));
 			}
 			PropertyBagStore.s_PropertyBags[typeof(TContainer)] = propertyBag;
-			Action<Type, IPropertyBag> newTypeRegistered = PropertyBagStore.NewTypeRegistered;
-			if (newTypeRegistered != null)
-			{
-				newTypeRegistered(typeof(TContainer), propertyBag);
-			}
 		}
 
 		internal static IPropertyBag<TContainer> GetPropertyBag<TContainer>()
@@ -148,23 +144,22 @@ namespace Unity.Properties.Internal
 							}
 							else
 							{
-								bool flag6 = PropertyBagStore.s_PropertyBagProvider != null;
+								propertyBag = PropertyBagStore.ReflectedPropertyBagProvider.CreatePropertyBag(type);
+								bool flag6 = propertyBag == null;
 								if (flag6)
 								{
-									propertyBag = PropertyBagStore.s_PropertyBagProvider.CreatePropertyBag(type);
-									bool flag7 = propertyBag == null;
-									if (!flag7)
-									{
-										IPropertyBagRegister propertyBagRegister = propertyBag as IPropertyBagRegister;
-										if (propertyBagRegister != null)
-										{
-											propertyBagRegister.Register();
-										}
-										return propertyBag;
-									}
 									PropertyBagStore.s_PropertyBags.TryAdd(type, null);
+									propertyBag2 = null;
 								}
-								propertyBag2 = null;
+								else
+								{
+									IPropertyBagRegister propertyBagRegister = propertyBag as IPropertyBagRegister;
+									if (propertyBagRegister != null)
+									{
+										propertyBagRegister.Register();
+									}
+									propertyBag2 = propertyBag;
+								}
 							}
 						}
 					}
@@ -239,7 +234,7 @@ namespace Unity.Properties.Internal
 
 		private static readonly List<Type> s_RegisteredTypes = new List<Type>();
 
-		private static ReflectedPropertyBagProvider s_PropertyBagProvider = new ReflectedPropertyBagProvider();
+		private static ReflectedPropertyBagProvider s_PropertyBagProvider = null;
 
 		internal struct TypedStore<TContainer>
 		{

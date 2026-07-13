@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeConditional("ENABLE_VR")]
-	[NativeHeader("Modules/XR/XRPrefix.h")]
-	[NativeHeader("XRScriptingClasses.h")]
 	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
-	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
+	[NativeHeader("XRScriptingClasses.h")]
+	[NativeHeader("Modules/XR/XRPrefix.h")]
+	[NativeConditional("ENABLE_VR")]
 	[RequiredByNativeCode]
+	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
 	public struct Eyes : IEquatable<Eyes>
 	{
 		internal ulong deviceId
@@ -111,16 +112,16 @@ namespace UnityEngine.XR
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Eyes_TryGetEyePosition_Injected(ref Eyes eyes, EyeSide chirality, out Vector3 position);
+		private static extern bool Eyes_TryGetEyePosition_Injected([In] ref Eyes eyes, EyeSide chirality, out Vector3 position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Eyes_TryGetEyeRotation_Injected(ref Eyes eyes, EyeSide chirality, out Quaternion rotation);
+		private static extern bool Eyes_TryGetEyeRotation_Injected([In] ref Eyes eyes, EyeSide chirality, out Quaternion rotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Eyes_TryGetFixationPoint_Injected(ref Eyes eyes, out Vector3 fixationPoint);
+		private static extern bool Eyes_TryGetFixationPoint_Injected([In] ref Eyes eyes, out Vector3 fixationPoint);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Eyes_TryGetEyeOpenAmount_Injected(ref Eyes eyes, EyeSide chirality, out float openAmount);
+		private static extern bool Eyes_TryGetEyeOpenAmount_Injected([In] ref Eyes eyes, EyeSide chirality, out float openAmount);
 
 		private ulong m_DeviceId;
 

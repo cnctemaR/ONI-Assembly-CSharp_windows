@@ -27,7 +27,7 @@ namespace UnityEngine
 			MeshFilter[] array;
 			if (flag)
 			{
-				array = (MeshFilter[])Object.FindObjectsOfType(typeof(MeshFilter));
+				array = (MeshFilter[])Object.FindObjectsByType(typeof(MeshFilter), FindObjectsSortMode.None);
 			}
 			else
 			{

@@ -14,6 +14,20 @@ namespace Mono.Cecil
 			this.module = module;
 		}
 
+		private TypeReference ImportType(Type type, ImportGenericContext context, Type[] required_modifiers, Type[] optional_modifiers)
+		{
+			TypeReference typeReference = this.ImportType(type, context);
+			foreach (Type type2 in required_modifiers)
+			{
+				typeReference = new RequiredModifierType(this.ImportType(type2, context), typeReference);
+			}
+			foreach (Type type3 in optional_modifiers)
+			{
+				typeReference = new OptionalModifierType(this.ImportType(type3, context), typeReference);
+			}
+			return typeReference;
+		}
+
 		private TypeReference ImportType(Type type, ImportGenericContext context)
 		{
 			return this.ImportType(type, context, DefaultReflectionImporter.ImportGenericKind.Open);
@@ -215,7 +229,7 @@ namespace Mono.Cecil
 				{
 					Name = field.Name,
 					DeclaringType = typeReference,
-					FieldType = this.ImportType(field.FieldType, context)
+					FieldType = this.ImportType(field.FieldType, context, field.GetRequiredCustomModifiers(), field.GetOptionalCustomModifiers())
 				};
 			}
 			finally
@@ -266,12 +280,12 @@ namespace Mono.Cecil
 			try
 			{
 				MethodInfo methodInfo = method as MethodInfo;
-				methodReference.ReturnType = ((methodInfo != null) ? this.ImportType(methodInfo.ReturnType, context) : this.ImportType(typeof(void), default(ImportGenericContext)));
+				methodReference.ReturnType = ((methodInfo != null) ? this.ImportType(methodInfo.ReturnType, context, methodInfo.ReturnParameter.GetRequiredCustomModifiers(), methodInfo.ReturnParameter.GetOptionalCustomModifiers()) : this.ImportType(typeof(void), default(ImportGenericContext)));
 				ParameterInfo[] parameters = method.GetParameters();
 				Collection<ParameterDefinition> parameters2 = methodReference.Parameters;
-				for (int i = 0; i < parameters.Length; i++)
+				foreach (ParameterInfo parameterInfo in parameters)
 				{
-					parameters2.Add(new ParameterDefinition(this.ImportType(parameters[i].ParameterType, context)));
+					parameters2.Add(new ParameterDefinition(this.ImportType(parameterInfo.ParameterType, context, parameterInfo.GetRequiredCustomModifiers(), parameterInfo.GetOptionalCustomModifiers())));
 				}
 				methodReference.DeclaringType = typeReference;
 				methodReference2 = methodReference;

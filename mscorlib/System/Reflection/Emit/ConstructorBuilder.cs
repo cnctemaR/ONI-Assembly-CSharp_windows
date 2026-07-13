@@ -10,9 +10,9 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_ConstructorBuilder))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class ConstructorBuilder : ConstructorInfo, _ConstructorBuilder
 	{

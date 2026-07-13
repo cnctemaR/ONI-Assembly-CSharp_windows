@@ -11,6 +11,7 @@ namespace UnityEngine.VFX
 		Float4,
 		Int32,
 		Uint32,
+		EntityId,
 		Texture2D,
 		Texture2DArray,
 		Texture3D,

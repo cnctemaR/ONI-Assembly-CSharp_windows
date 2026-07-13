@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Mono.Cecil;
 
 namespace MonoMod.Utils
 {
-	public interface ICallSiteGenerator
+	[NullableContext(1)]
+	internal interface ICallSiteGenerator
 	{
-		CallSite ToCallSite(ModuleDefinition module);
+		Mono.Cecil.CallSite ToCallSite(ModuleDefinition module);
 	}
 }

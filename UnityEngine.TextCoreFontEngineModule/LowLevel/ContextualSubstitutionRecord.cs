@@ -32,12 +32,12 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 		}
 
-		[SerializeField]
 		[NativeName("inputGlyphSequences")]
+		[SerializeField]
 		private GlyphIDSequence[] m_InputGlyphSequences;
 
-		[SerializeField]
 		[NativeName("sequenceLookupRecords")]
+		[SerializeField]
 		private SequenceLookupRecord[] m_SequenceLookupRecords;
 	}
 }

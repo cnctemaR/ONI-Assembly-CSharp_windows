@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.UI
 {
 	[RequireComponent(typeof(CanvasRenderer))]
-	[AddComponentMenu("UI/Raw Image", 12)]
+	[AddComponentMenu("UI (Canvas)/Raw Image", 12)]
 	public class RawImage : MaskableGraphic
 	{
 		protected RawImage()
@@ -18,7 +18,7 @@ namespace UnityEngine.UI
 			{
 				if (!(this.m_Texture == null))
 				{
-					return this.m_Texture;
+					return this.m_Texture as Texture;
 				}
 				if (this.material != null && this.material.mainTexture != null)
 				{
@@ -83,13 +83,14 @@ namespace UnityEngine.UI
 			{
 				Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
 				Vector4 vector = new Vector4(pixelAdjustedRect.x, pixelAdjustedRect.y, pixelAdjustedRect.x + pixelAdjustedRect.width, pixelAdjustedRect.y + pixelAdjustedRect.height);
-				float num = (float)mainTexture.width * mainTexture.texelSize.x;
-				float num2 = (float)mainTexture.height * mainTexture.texelSize.y;
-				Color color = this.color;
-				vh.AddVert(new Vector3(vector.x, vector.y), color, new Vector2(this.m_UVRect.xMin * num, this.m_UVRect.yMin * num2));
-				vh.AddVert(new Vector3(vector.x, vector.w), color, new Vector2(this.m_UVRect.xMin * num, this.m_UVRect.yMax * num2));
-				vh.AddVert(new Vector3(vector.z, vector.w), color, new Vector2(this.m_UVRect.xMax * num, this.m_UVRect.yMax * num2));
-				vh.AddVert(new Vector3(vector.z, vector.y), color, new Vector2(this.m_UVRect.xMax * num, this.m_UVRect.yMin * num2));
+				Vector2 texelSize = mainTexture.texelSize;
+				float num = (float)mainTexture.width * texelSize.x;
+				float num2 = (float)mainTexture.height * texelSize.y;
+				Color32 color = this.color;
+				vh.AddVert(new Vector3(vector.x, vector.y), color, new Vector4(this.m_UVRect.xMin * num, this.m_UVRect.yMin * num2));
+				vh.AddVert(new Vector3(vector.x, vector.w), color, new Vector4(this.m_UVRect.xMin * num, this.m_UVRect.yMax * num2));
+				vh.AddVert(new Vector3(vector.z, vector.w), color, new Vector4(this.m_UVRect.xMax * num, this.m_UVRect.yMax * num2));
+				vh.AddVert(new Vector3(vector.z, vector.y), color, new Vector4(this.m_UVRect.xMax * num, this.m_UVRect.yMin * num2));
 				vh.AddTriangle(0, 1, 2);
 				vh.AddTriangle(2, 3, 0);
 			}

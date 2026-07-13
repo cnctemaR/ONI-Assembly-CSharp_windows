@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum DocumentLanguage
+	internal enum DocumentLanguage
 	{
 		Other,
 		C,

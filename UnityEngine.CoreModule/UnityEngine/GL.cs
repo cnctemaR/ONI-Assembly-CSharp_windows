@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/GfxDevice/GfxDevice.h")]
-	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Camera/CameraUtil.h")]
+	[NativeHeader("Runtime/Camera/Camera.h")]
 	public sealed class GL
 	{
 		[NativeName("ImmediateVertex")]
@@ -225,29 +226,34 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("ClearWithSkybox")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void ClearWithSkybox(bool clearDepth, Camera camera);
+		public static void ClearWithSkybox(bool clearDepth, Camera camera)
+		{
+			GL.ClearWithSkybox_Injected(clearDepth, Object.MarshalledUnityObject.Marshal<Camera>(camera));
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetWorldViewMatrix_Injected(out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetViewMatrix_Injected(ref Matrix4x4 m);
+		private static extern void SetViewMatrix_Injected([In] ref Matrix4x4 m);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MultMatrix_Injected(ref Matrix4x4 m);
+		private static extern void MultMatrix_Injected([In] ref Matrix4x4 m);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void LoadProjectionMatrix_Injected(ref Matrix4x4 mat);
+		private static extern void LoadProjectionMatrix_Injected([In] ref Matrix4x4 mat);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetGPUProjectionMatrix_Injected(ref Matrix4x4 proj, bool renderIntoTexture, out Matrix4x4 ret);
+		private static extern void GetGPUProjectionMatrix_Injected([In] ref Matrix4x4 proj, bool renderIntoTexture, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GLClear_Injected(bool clearDepth, bool clearColor, ref Color backgroundColor, float depth);
+		private static extern void GLClear_Injected(bool clearDepth, bool clearColor, [In] ref Color backgroundColor, float depth);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Viewport_Injected(ref Rect pixelRect);
+		private static extern void Viewport_Injected([In] ref Rect pixelRect);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearWithSkybox_Injected(bool clearDepth, IntPtr camera);
 
 		public const int TRIANGLES = 4;
 

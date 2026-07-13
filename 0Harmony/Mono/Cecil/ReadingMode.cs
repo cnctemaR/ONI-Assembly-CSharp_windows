@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum ReadingMode
+	internal enum ReadingMode
 	{
 		Immediate = 1,
 		Deferred

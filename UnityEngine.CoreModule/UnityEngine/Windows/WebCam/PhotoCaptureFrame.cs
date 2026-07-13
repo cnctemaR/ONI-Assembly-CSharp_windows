@@ -7,9 +7,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
-	[NativeHeader("PlatformDependent/Win/Webcam/PhotoCaptureFrame.h")]
 	[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
+	[NativeHeader("PlatformDependent/Win/Webcam/PhotoCaptureFrame.h")]
 	public sealed class PhotoCaptureFrame : IDisposable
 	{
 		public int dataLength { get; private set; }
@@ -19,16 +19,37 @@ namespace UnityEngine.Windows.WebCam
 		public CapturePixelFormat pixelFormat { get; private set; }
 
 		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetDataLength();
+		private int GetDataLength()
+		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return PhotoCaptureFrame.GetDataLength_Injected(intPtr);
+		}
 
 		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetHasLocationData();
+		private bool GetHasLocationData()
+		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return PhotoCaptureFrame.GetHasLocationData_Injected(intPtr);
+		}
 
 		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern CapturePixelFormat GetCapturePixelFormat();
+		private CapturePixelFormat GetCapturePixelFormat()
+		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return PhotoCaptureFrame.GetCapturePixelFormat_Injected(intPtr);
+		}
 
 		public bool TryGetCameraToWorldMatrix(out Matrix4x4 cameraToWorldMatrix)
 		{
@@ -52,8 +73,13 @@ namespace UnityEngine.Windows.WebCam
 		[NativeName("GetCameraToWorld")]
 		private Matrix4x4 GetCameraToWorldMatrix()
 		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetCameraToWorldMatrix_Injected(out matrix4x);
+			PhotoCaptureFrame.GetCameraToWorldMatrix_Injected(intPtr, out matrix4x);
 			return matrix4x;
 		}
 
@@ -111,8 +137,13 @@ namespace UnityEngine.Windows.WebCam
 		[ThreadAndSerializationSafe]
 		private Matrix4x4 GetProjection()
 		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetProjection_Injected(out matrix4x);
+			PhotoCaptureFrame.GetProjection_Injected(intPtr, out matrix4x);
 			return matrix4x;
 		}
 
@@ -131,16 +162,30 @@ namespace UnityEngine.Windows.WebCam
 			this.UploadImageDataToTexture_Internal(targetTexture);
 		}
 
-		[ThreadAndSerializationSafe]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeName("UploadImageDataToTexture")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void UploadImageDataToTexture_Internal(Texture2D targetTexture);
-
 		[ThreadAndSerializationSafe]
+		private void UploadImageDataToTexture_Internal(Texture2D targetTexture)
+		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			PhotoCaptureFrame.UploadImageDataToTexture_Internal_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture2D>(targetTexture));
+		}
+
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetUnsafePointerToBuffer();
+		[ThreadAndSerializationSafe]
+		public IntPtr GetUnsafePointerToBuffer()
+		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return PhotoCaptureFrame.GetUnsafePointerToBuffer_Injected(intPtr);
+		}
 
 		public void CopyRawImageDataIntoBuffer(List<byte> byteBuffer)
 		{
@@ -160,11 +205,38 @@ namespace UnityEngine.Windows.WebCam
 			byteBuffer.AddRange(array);
 		}
 
-		[NativeName("CopyRawImageDataIntoBuffer")]
 		[ThreadAndSerializationSafe]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void CopyRawImageDataIntoBuffer_Internal([Out] byte[] byteArray);
+		[NativeName("CopyRawImageDataIntoBuffer")]
+		internal unsafe void CopyRawImageDataIntoBuffer_Internal([Out] byte[] byteArray)
+		{
+			try
+			{
+				IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (byteArray != null)
+				{
+					fixed (byte[] array = byteArray)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				PhotoCaptureFrame.CopyRawImageDataIntoBuffer_Internal_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				byte[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<byte>(ref array);
+			}
+		}
 
 		internal PhotoCaptureFrame(IntPtr nativePtr)
 		{
@@ -186,11 +258,18 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[ThreadAndSerializationSafe]
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeName("Dispose")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Dispose_Internal();
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[ThreadAndSerializationSafe]
+		private void Dispose_Internal()
+		{
+			IntPtr intPtr = PhotoCaptureFrame.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			PhotoCaptureFrame.Dispose_Internal_Injected(intPtr);
+		}
 
 		public void Dispose()
 		{
@@ -204,11 +283,40 @@ namespace UnityEngine.Windows.WebCam
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetCameraToWorldMatrix_Injected(out Matrix4x4 ret);
+		private static extern int GetDataLength_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetProjection_Injected(out Matrix4x4 ret);
+		private static extern bool GetHasLocationData_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern CapturePixelFormat GetCapturePixelFormat_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCameraToWorldMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetProjection_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UploadImageDataToTexture_Internal_Injected(IntPtr _unity_self, IntPtr targetTexture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetUnsafePointerToBuffer_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyRawImageDataIntoBuffer_Internal_Injected(IntPtr _unity_self, out BlittableArrayWrapper byteArray);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Dispose_Internal_Injected(IntPtr _unity_self);
 
 		private IntPtr m_NativePtr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(PhotoCaptureFrame photoCaptureFrame)
+			{
+				return photoCaptureFrame.m_NativePtr;
+			}
+		}
 	}
 }

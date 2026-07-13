@@ -4,13 +4,10 @@ using UnityEngine;
 [Serializable]
 public class AnimEvent
 {
-	[SerializeField]
 	public string name { get; private set; }
 
-	[SerializeField]
 	public string file { get; private set; }
 
-	[SerializeField]
 	public int frame { get; private set; }
 
 	public AnimEvent()

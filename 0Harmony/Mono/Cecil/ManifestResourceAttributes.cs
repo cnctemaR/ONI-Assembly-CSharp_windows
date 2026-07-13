@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum ManifestResourceAttributes : uint
+	internal enum ManifestResourceAttributes : uint
 	{
 		VisibilityMask = 7U,
 		Public = 1U,

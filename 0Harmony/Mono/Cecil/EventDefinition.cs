@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class EventDefinition : EventReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider
+	internal sealed class EventDefinition : EventReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider
 	{
 		public EventAttributes Attributes
 		{

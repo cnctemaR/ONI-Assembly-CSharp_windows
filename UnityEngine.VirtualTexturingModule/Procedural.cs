@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -9,8 +10,8 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Rendering.VirtualTexturing
 {
 	[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
-	[Obsolete("Procedural Virtual Texturing is experimental, not ready for production use and Unity does not currently support it. The feature might be changed or removed in the future.", false)]
 	[StaticAccessor("VirtualTexturing::Procedural", StaticAccessorType.DoubleColon)]
+	[Obsolete("Procedural Virtual Texturing is experimental, not ready for production use and Unity does not currently support it. The feature might be changed or removed in the future.", false)]
 	public static class Procedural
 	{
 		[NativeThrows]
@@ -34,12 +35,34 @@ namespace UnityEngine.Rendering.VirtualTexturing
 		public static extern int GetCPUCacheSize();
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetGPUCacheSettings(GPUCacheSetting[] cacheSettings);
+		public unsafe static void SetGPUCacheSettings(GPUCacheSetting[] cacheSettings)
+		{
+			Span<GPUCacheSetting> span = new Span<GPUCacheSetting>(cacheSettings);
+			fixed (GPUCacheSetting* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Procedural.SetGPUCacheSettings_Injected(ref managedSpanWrapper);
+			}
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GPUCacheSetting[] GetGPUCacheSettings();
+		public static GPUCacheSetting[] GetGPUCacheSettings()
+		{
+			GPUCacheSetting[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Procedural.GetGPUCacheSettings_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				GPUCacheSetting[] array;
+				blittableArrayWrapper.Unmarshal<GPUCacheSetting>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -48,6 +71,12 @@ namespace UnityEngine.Rendering.VirtualTexturing
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern uint GetGPUCacheStagingAreaCapacity();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGPUCacheSettings_Injected(ref ManagedSpanWrapper cacheSettings);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGPUCacheSettings_Injected(out BlittableArrayWrapper ret);
 
 		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		[StaticAccessor("VirtualTexturing::Procedural", StaticAccessorType.DoubleColon)]
@@ -70,24 +99,98 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			internal static extern void GetRequestParameters(IntPtr requestHandles, IntPtr requestParameters, int length);
 
-			[NativeThrows]
 			[ThreadSafe]
+			[NativeThrows]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			internal static extern void UpdateRequestState(IntPtr requestHandles, IntPtr requestUpdates, int length);
 
 			[NativeThrows]
 			[ThreadSafe]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			internal static extern void UpdateRequestStateWithCommandBuffer(IntPtr requestHandles, IntPtr requestUpdates, int length, CommandBuffer fenceBuffer);
+			internal static void UpdateRequestStateWithCommandBuffer(IntPtr requestHandles, IntPtr requestUpdates, int length, CommandBuffer fenceBuffer)
+			{
+				Procedural.Binding.UpdateRequestStateWithCommandBuffer_Injected(requestHandles, requestUpdates, length, (fenceBuffer == null) ? ((IntPtr)0) : CommandBuffer.BindingsMarshaller.ConvertToNative(fenceBuffer));
+			}
 
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			internal static extern void BindToMaterialPropertyBlock(ulong handle, [NotNull("ArgumentNullException")] MaterialPropertyBlock material, string name);
+			internal unsafe static void BindToMaterialPropertyBlock(ulong handle, [NotNull] MaterialPropertyBlock material, string name)
+			{
+				if (material == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(material, "material");
+				}
+				try
+				{
+					IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(material);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowArgumentNullException(material, "material");
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Procedural.Binding.BindToMaterialPropertyBlock_Injected(handle, intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			internal static extern void BindToMaterial(ulong handle, [NotNull("ArgumentNullException")] Material material, string name);
+			internal unsafe static void BindToMaterial(ulong handle, [NotNull] Material material, string name)
+			{
+				if (material == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(material, "material");
+				}
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Material>(material);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowArgumentNullException(material, "material");
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Procedural.Binding.BindToMaterial_Injected(handle, intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			internal static extern void BindGlobally(ulong handle, string name);
+			internal unsafe static void BindGlobally(ulong handle, string name)
+			{
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Procedural.Binding.BindGlobally_Injected(handle, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 
 			[NativeThrows]
 			internal static void RequestRegion(ulong handle, Rect r, int mipMap, int numMips)
@@ -108,16 +211,28 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			}
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern ulong Create_Injected(ref Procedural.CreationParameters p);
+			private static extern ulong Create_Injected([In] ref Procedural.CreationParameters p);
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void RequestRegion_Injected(ulong handle, ref Rect r, int mipMap, int numMips);
+			private static extern void UpdateRequestStateWithCommandBuffer_Injected(IntPtr requestHandles, IntPtr requestUpdates, int length, IntPtr fenceBuffer);
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void InvalidateRegion_Injected(ulong handle, ref Rect r, int mipMap, int numMips);
+			private static extern void BindToMaterialPropertyBlock_Injected(ulong handle, IntPtr material, ref ManagedSpanWrapper name);
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void EvictRegion_Injected(ulong handle, ref Rect r, int mipMap, int numMips);
+			private static extern void BindToMaterial_Injected(ulong handle, IntPtr material, ref ManagedSpanWrapper name);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void BindGlobally_Injected(ulong handle, ref ManagedSpanWrapper name);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void RequestRegion_Injected(ulong handle, [In] ref Rect r, int mipMap, int numMips);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void InvalidateRegion_Injected(ulong handle, [In] ref Rect r, int mipMap, int numMips);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void EvictRegion_Injected(ulong handle, [In] ref Rect r, int mipMap, int numMips);
 		}
 
 		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
@@ -181,10 +296,10 @@ namespace UnityEngine.Rendering.VirtualTexturing
 					GraphicsFormat.A2B10G10R10_UNormPack32,
 					GraphicsFormat.R16_UNorm
 				};
-				FormatUsage formatUsage = ((this.gpuGeneration == 1) ? FormatUsage.Render : FormatUsage.Sample);
+				GraphicsFormatUsage graphicsFormatUsage = ((this.gpuGeneration == 1) ? GraphicsFormatUsage.Render : GraphicsFormatUsage.Sample);
 				for (int i = 0; i < this.layers.Length; i++)
 				{
-					bool flag5 = SystemInfo.GetCompatibleFormat(this.layers[i], formatUsage) != this.layers[i];
+					bool flag5 = SystemInfo.GetCompatibleFormat(this.layers[i], graphicsFormatUsage) != this.layers[i];
 					if (flag5)
 					{
 						throw new ArgumentException(string.Format("Requested format {0} on layer {1} is not supported on this platform", this.layers[i], i));
@@ -369,25 +484,15 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			internal Procedural.RequestHandlePayload payload;
 		}
 
-		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		[UsedByNativeCode]
+		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		public struct GPUTextureStackRequestLayerParameters
 		{
-			public int GetWidth()
-			{
-				return Procedural.GPUTextureStackRequestLayerParameters.GetWidth_Injected(ref this);
-			}
-
-			public int GetHeight()
-			{
-				return Procedural.GPUTextureStackRequestLayerParameters.GetHeight_Injected(ref this);
-			}
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			public extern int GetWidth();
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetWidth_Injected(ref Procedural.GPUTextureStackRequestLayerParameters _unity_self);
-
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetHeight_Injected(ref Procedural.GPUTextureStackRequestLayerParameters _unity_self);
+			public extern int GetHeight();
 
 			public int destX;
 
@@ -396,8 +501,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			public RenderTargetIdentifier dest;
 		}
 
-		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		[UsedByNativeCode]
+		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		public struct CPUTextureStackRequestLayerParameters
 		{
 			public NativeArray<T> GetData<T>() where T : struct
@@ -449,8 +554,8 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			internal unsafe void* mipData;
 		}
 
-		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		[UsedByNativeCode]
+		[NativeHeader("Modules/VirtualTexturing/ScriptBindings/VirtualTexturing.bindings.h")]
 		public struct GPUTextureStackRequestParameters
 		{
 			public Procedural.GPUTextureStackRequestLayerParameters GetLayer(int index)

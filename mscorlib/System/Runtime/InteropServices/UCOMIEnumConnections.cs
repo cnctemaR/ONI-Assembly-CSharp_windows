@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete("Use System.Runtime.InteropServices.ComTypes.IEnumConnections instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
 	[Guid("B196B287-BAB4-101A-B69C-00AA00341D07")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Obsolete("Use System.Runtime.InteropServices.ComTypes.IEnumConnections instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
 	[ComImport]
 	public interface UCOMIEnumConnections
 	{

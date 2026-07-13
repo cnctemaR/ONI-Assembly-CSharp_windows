@@ -11,7 +11,7 @@ namespace UnityEngine.Networking
 	public sealed class DownloadHandlerBuffer : DownloadHandler
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Create(DownloadHandlerBuffer obj);
+		private static extern IntPtr Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] DownloadHandlerBuffer obj);
 
 		private void InternalCreateBuffer()
 		{
@@ -40,5 +40,13 @@ namespace UnityEngine.Networking
 		}
 
 		private NativeArray<byte> m_NativeData;
+
+		internal new static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(DownloadHandlerBuffer handler)
+			{
+				return handler.m_Ptr;
+			}
+		}
 	}
 }

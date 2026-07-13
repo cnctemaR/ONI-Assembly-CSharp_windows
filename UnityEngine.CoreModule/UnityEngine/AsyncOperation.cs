@@ -6,9 +6,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Export/Scripting/AsyncOperation.bindings.h")]
 	[NativeHeader("Runtime/Misc/AsyncOperation.h")]
+	[NativeHeader("Runtime/Export/Scripting/AsyncOperation.bindings.h")]
+	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncOperation : YieldInstruction
 	{
@@ -17,38 +17,99 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalDestroy(IntPtr ptr);
 
-		public extern bool isDone
+		[NativeMethod(IsThreadSafe = true)]
+		[StaticAccessor("AsyncOperationBindings", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetManagedObject(IntPtr ptr, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] AsyncOperation self);
+
+		public AsyncOperation()
+		{
+		}
+
+		protected AsyncOperation(IntPtr ptr)
+		{
+			bool flag = ptr == IntPtr.Zero;
+			if (!flag)
+			{
+				AsyncOperation.InternalSetManagedObject(ptr, this);
+				this.m_Ptr = ptr;
+			}
+		}
+
+		public bool isDone
 		{
 			[NativeMethod("IsDone")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AsyncOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AsyncOperation.get_isDone_Injected(intPtr);
+			}
 		}
 
-		public extern float progress
+		public float progress
 		{
 			[NativeMethod("GetProgress")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AsyncOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AsyncOperation.get_progress_Injected(intPtr);
+			}
 		}
 
-		public extern int priority
+		public int priority
 		{
 			[NativeMethod("GetPriority")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AsyncOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AsyncOperation.get_priority_Injected(intPtr);
+			}
 			[NativeMethod("SetPriority")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = AsyncOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				AsyncOperation.set_priority_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool allowSceneActivation
+		public bool allowSceneActivation
 		{
 			[NativeMethod("GetAllowSceneActivation")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AsyncOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AsyncOperation.get_allowSceneActivation_Injected(intPtr);
+			}
 			[NativeMethod("SetAllowSceneActivation")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = AsyncOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				AsyncOperation.set_allowSceneActivation_Injected(intPtr, value);
+			}
 		}
 
 		~AsyncOperation()
@@ -87,8 +148,40 @@ namespace UnityEngine
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isDone_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_progress_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_priority_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_priority_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_allowSceneActivation_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_allowSceneActivation_Injected(IntPtr _unity_self, bool value);
+
+		[VisibleToOtherModules]
 		internal IntPtr m_Ptr;
 
 		private Action<AsyncOperation> m_completeCallback;
+
+		internal static class BindingsMarshaller
+		{
+			public static AsyncOperation ConvertToManaged(IntPtr ptr)
+			{
+				return new AsyncOperation(ptr);
+			}
+
+			public static IntPtr ConvertToNative(AsyncOperation asyncOperation)
+			{
+				return asyncOperation.m_Ptr;
+			}
+		}
 	}
 }

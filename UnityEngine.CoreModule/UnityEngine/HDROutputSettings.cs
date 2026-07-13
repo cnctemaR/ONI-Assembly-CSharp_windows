@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/GfxDevice/HDROutputSettings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/GfxDevice/HDROutputSettings.h")]
 	public class HDROutputSettings
 	{
 		[VisibleToOtherModules(new string[] { "UnityEngine.XRModule" })]

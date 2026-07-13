@@ -299,7 +299,7 @@ namespace Unity.Burst
 			}
 		}
 
-		internal bool TryGetOptions(MemberInfo member, out string flagsOut, bool isForILPostProcessing = false, bool isForCompilerClient = false)
+		internal bool TryGetOptions(MemberInfo member, out string flagsOut, bool isForILPostProcessing = false, bool isForCompilerClient = false, bool deterministicCompilation = false)
 		{
 			flagsOut = null;
 			BurstCompileAttribute burstCompileAttribute;
@@ -312,27 +312,36 @@ namespace Unity.Burst
 			{
 				BurstCompilerOptions.MergeAttributes(ref burstCompileAttribute, in burstCompileAttribute2);
 			}
-			flagsOut = this.GetOptions(burstCompileAttribute, isForILPostProcessing, isForCompilerClient);
+			flagsOut = this.GetOptions(burstCompileAttribute, isForILPostProcessing, isForCompilerClient, deterministicCompilation);
 			return true;
 		}
 
-		internal string GetOptions(BurstCompileAttribute attr = null, bool isForILPostProcessing = false, bool isForCompilerClient = false)
+		internal string GetOptions(BurstCompileAttribute attr = null, bool isForILPostProcessing = false, bool isForCompilerClient = false, bool deterministicCompilation = false)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			if (!isForCompilerClient && ((attr != null && attr.CompileSynchronously) || this.RequiresSynchronousCompilation))
 			{
 				BurstCompilerOptions.AddOption(stringBuilder, BurstCompilerOptions.GetOption("enable-synchronous-compilation", null));
 			}
+			if (!BurstCompiler.IsApiAvailable("RegisterFrameInfo"))
+			{
+				BurstCompilerOptions.AddOption(stringBuilder, BurstCompilerOptions.GetOption("force-disable-frame-info-registration", null));
+			}
 			BurstCompilerOptions.AddOption(stringBuilder, BurstCompilerOptions.GetOption("debug=", "LineOnly"));
 			if (isForILPostProcessing)
 			{
 				BurstCompilerOptions.AddOption(stringBuilder, BurstCompilerOptions.GetOption("compilation-priority=", CompilationPriority.ILPP));
 			}
+			FloatMode floatMode = FloatMode.Default;
+			if (deterministicCompilation)
+			{
+				floatMode = FloatMode.Deterministic;
+			}
 			if (attr != null)
 			{
 				if (attr.FloatMode != FloatMode.Default)
 				{
-					BurstCompilerOptions.AddOption(stringBuilder, BurstCompilerOptions.GetOption("float-mode=", attr.FloatMode));
+					floatMode = attr.FloatMode;
 				}
 				if (attr.FloatPrecision != FloatPrecision.Standard)
 				{
@@ -369,6 +378,10 @@ namespace Unity.Burst
 					BurstCompilerOptions.AddOption(stringBuilder, BurstCompilerOptions.GetOption("opt-level=", 1));
 					break;
 				}
+			}
+			if (floatMode != FloatMode.Default)
+			{
+				BurstCompilerOptions.AddOption(stringBuilder, BurstCompilerOptions.GetOption("float-mode=", floatMode));
 			}
 			if (this.ForceEnableBurstSafetyChecks)
 			{
@@ -479,6 +492,8 @@ namespace Unity.Burst
 
 		internal const string OptionPlatform = "platform=";
 
+		internal const string OptionMinimumOSVersion = "minimum-os-version=";
+
 		internal const string OptionBackend = "backend=";
 
 		internal const string OptionGlobalSafetyChecksSetting = "global-safety-checks-setting=";
@@ -531,6 +546,8 @@ namespace Unity.Burst
 
 		internal const string OptionEnableAutoLayoutFallbackCheck = "enable-autolayout-fallback-check";
 
+		internal const string OptionEnableFrameInfoRegistration = "enable-frame-info-registration";
+
 		internal const string OptionGenerateLinkXml = "generate-link-xml=";
 
 		internal const string OptionMetaDataGeneration = "meta-data-generation=";
@@ -542,6 +559,8 @@ namespace Unity.Burst
 		internal const string OptionStackProtector = "stack-protector=";
 
 		internal const string OptionStackProtectorBufferSize = "stack-protector-buffer-size=";
+
+		internal const string OptionForceDisableFrameInfoRegistration = "force-disable-frame-info-registration";
 
 		internal const string OptionCacheDirectory = "cache-directory=";
 
@@ -662,6 +681,8 @@ namespace Unity.Burst
 		internal const string CompilerCommandNotifyCompilationStarted = "$notify_compilation_started";
 
 		internal const string CompilerCommandNotifyCompilationFinished = "$notify_compilation_finished";
+
+		internal const string CompilerCommandDirtyAllAssemblies = "$dirty_all_assemblies";
 
 		internal const string CompilerCommandAotCompilation = "$aot_compilation";
 

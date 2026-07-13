@@ -86,7 +86,7 @@ public class WarpPortal : Workable
 	private int GetTargetWorldID()
 	{
 		SaveGame.Instance.GetComponent<WorldGenSpawner>().SpawnTag(WarpReceiverConfig.ID);
-		foreach (WarpReceiver warpReceiver in global::UnityEngine.Object.FindObjectsOfType<WarpReceiver>())
+		foreach (WarpReceiver warpReceiver in global::UnityEngine.Object.FindObjectsByType<WarpReceiver>(FindObjectsSortMode.None))
 		{
 			if (warpReceiver.GetMyWorldId() != this.GetMyWorldId())
 			{
@@ -104,7 +104,7 @@ public class WarpPortal : Workable
 			return;
 		}
 		WarpReceiver warpReceiver = null;
-		foreach (WarpReceiver warpReceiver2 in global::UnityEngine.Object.FindObjectsOfType<WarpReceiver>())
+		foreach (WarpReceiver warpReceiver2 in global::UnityEngine.Object.FindObjectsByType<WarpReceiver>(FindObjectsSortMode.None))
 		{
 			if (warpReceiver2.GetMyWorldId() != this.GetMyWorldId())
 			{
@@ -115,7 +115,7 @@ public class WarpPortal : Workable
 		if (warpReceiver == null)
 		{
 			SaveGame.Instance.GetComponent<WorldGenSpawner>().SpawnTag(WarpReceiverConfig.ID);
-			warpReceiver = global::UnityEngine.Object.FindObjectOfType<WarpReceiver>();
+			warpReceiver = global::UnityEngine.Object.FindFirstObjectByType<WarpReceiver>();
 		}
 		if (warpReceiver != null)
 		{

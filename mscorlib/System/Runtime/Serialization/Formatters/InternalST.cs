@@ -6,8 +6,8 @@ using System.Security;
 
 namespace System.Runtime.Serialization.Formatters
 {
-	[ComVisible(true)]
 	[SecurityCritical]
+	[ComVisible(true)]
 	public sealed class InternalST
 	{
 		private InternalST()

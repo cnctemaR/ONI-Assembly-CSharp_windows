@@ -148,46 +148,54 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 
 	public class States : GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>
 	{
+		private static bool IsLiveMinion(ChoreDriver.StatesInstance smi)
+		{
+			return smi.masterPrefabId.HasTag(GameTags.BaseMinion) && !smi.masterPrefabId.HasTag(GameTags.Dead);
+		}
+
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.nochore;
 			this.saveHistory = true;
 			this.nochore.Update(delegate(ChoreDriver.StatesInstance smi, float dt)
 			{
-				if (smi.masterPrefabId.HasTag(GameTags.BaseMinion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
+				if (!ChoreDriver.States.IsLiveMinion(smi))
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.WorkTime, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, DUPLICANTS.CHORES.THINKING.NAME), smi.master.GetProperName());
+					return;
 				}
+				ReportManager.Instance.ReportValueWithPrefabInstanceContext(ReportManager.ReportType.WorkTime, dt, smi.masterPrefabId, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, DUPLICANTS.CHORES.THINKING.NAME));
 			}, UpdateRate.SIM_200ms, false).ParamTransition<Chore>(this.nextChore, this.haschore, (ChoreDriver.StatesInstance smi, Chore next_chore) => next_chore != null);
 			this.haschore.Enter("BeginChore", delegate(ChoreDriver.StatesInstance smi)
 			{
 				smi.BeginChore();
 			}).Update(delegate(ChoreDriver.StatesInstance smi, float dt)
 			{
-				if (smi.masterPrefabId.HasTag(GameTags.BaseMinion) && !smi.masterPrefabId.HasTag(GameTags.Dead))
+				if (!ChoreDriver.States.IsLiveMinion(smi))
 				{
-					Chore chore = this.currentChore.Get(smi);
-					if (chore == null)
-					{
-						return;
-					}
-					if (smi.navigator.IsMoving())
-					{
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, GameUtil.GetChoreName(chore, null), smi.master.GetProperName());
-						return;
-					}
-					ReportManager.ReportType reportType = chore.GetReportType();
+					return;
+				}
+				Chore chore = this.currentChore.Get(smi);
+				if (chore == null)
+				{
+					return;
+				}
+				ReportManager.ReportType reportType = chore.GetReportType();
+				string text;
+				if (smi.navigator.IsMoving())
+				{
+					reportType = ReportManager.ReportType.TravelTime;
+					text = GameUtil.GetChoreName(chore, null);
+				}
+				else
+				{
 					Workable workable = smi.worker.GetWorkable();
 					if (workable != null)
 					{
-						ReportManager.ReportType reportType2 = workable.GetReportType();
-						if (reportType != reportType2)
-						{
-							reportType = reportType2;
-						}
+						reportType = workable.GetReportType();
 					}
-					ReportManager.Instance.ReportValue(reportType, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.WORK_TIME, GameUtil.GetChoreName(chore, null)), smi.master.GetProperName());
+					text = string.Format(UI.ENDOFDAYREPORT.NOTES.WORK_TIME, GameUtil.GetChoreName(chore, null));
 				}
+				ReportManager.Instance.ReportValueWithPrefabInstanceContext(reportType, dt, smi.masterPrefabId, text);
 			}, UpdateRate.SIM_200ms, false).Exit("EndChore", delegate(ChoreDriver.StatesInstance smi)
 			{
 				smi.EndChore("ChoreDriver.SignalStop");

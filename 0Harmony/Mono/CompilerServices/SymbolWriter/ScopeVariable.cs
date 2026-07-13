@@ -2,7 +2,7 @@
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public struct ScopeVariable
+	internal struct ScopeVariable
 	{
 		public ScopeVariable(int scope, int index)
 		{

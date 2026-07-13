@@ -3,7 +3,7 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Cecil.Rocks
 {
-	public interface IILVisitor
+	internal interface IILVisitor
 	{
 		void OnInlineNone(OpCode opcode);
 

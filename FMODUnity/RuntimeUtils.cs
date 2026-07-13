@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using FMOD;
 using FMOD.Studio;
 using UnityEngine;
@@ -66,7 +67,7 @@ namespace FMODUnity
 			ATTRIBUTES_3D attributes_3D = transform.To3DAttributes();
 			if (rigidbody)
 			{
-				attributes_3D.velocity = rigidbody.velocity.ToFMODVector();
+				attributes_3D.velocity = rigidbody.linearVelocity.ToFMODVector();
 			}
 			return attributes_3D;
 		}
@@ -76,7 +77,7 @@ namespace FMODUnity
 			ATTRIBUTES_3D attributes_3D = go.transform.To3DAttributes();
 			if (rigidbody)
 			{
-				attributes_3D.velocity = rigidbody.velocity.ToFMODVector();
+				attributes_3D.velocity = rigidbody.linearVelocity.ToFMODVector();
 			}
 			return attributes_3D;
 		}
@@ -87,8 +88,8 @@ namespace FMODUnity
 			if (rigidbody)
 			{
 				VECTOR vector;
-				vector.x = rigidbody.velocity.x;
-				vector.y = rigidbody.velocity.y;
+				vector.x = rigidbody.linearVelocity.x;
+				vector.y = rigidbody.linearVelocity.y;
 				vector.z = 0f;
 				attributes_3D.velocity = vector;
 			}
@@ -101,8 +102,8 @@ namespace FMODUnity
 			if (rigidbody)
 			{
 				VECTOR vector;
-				vector.x = rigidbody.velocity.x;
-				vector.y = rigidbody.velocity.y;
+				vector.x = rigidbody.linearVelocity.x;
+				vector.y = rigidbody.linearVelocity.y;
 				vector.z = 0f;
 				attributes_3D.velocity = vector;
 			}
@@ -242,6 +243,20 @@ namespace FMODUnity
 			{
 				global::UnityEngine.Debug.LogException(e);
 			}
+		}
+
+		public static string GetPluginArchitectureFolder()
+		{
+			switch (RuntimeInformation.ProcessArchitecture)
+			{
+			case Architecture.X86:
+				return "x86";
+			case Architecture.Arm:
+				throw new NotSupportedException("[FMOD] Attempted to load FMOD plugins on a 32 bit ARM platform.");
+			case Architecture.Arm64:
+				return "arm64";
+			}
+			return "x86_64";
 		}
 	}
 }

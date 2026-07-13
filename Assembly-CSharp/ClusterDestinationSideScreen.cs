@@ -119,8 +119,31 @@ public class ClusterDestinationSideScreen : SideScreenContent
 		}
 		else
 		{
-			this.destinationImage.sprite = Assets.GetSprite("hex_unknown");
-			this.destinationInfoLabel.text = GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL, new object[] { UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL_INVALID });
+			string text3;
+			if (this.targetRocketSelector != null && this.targetRocketSelector.Repeat && this.targetRocketSelector.PreviousDestination != AxialI.INVALID)
+			{
+				ClusterGridEntity visibleEntityOfLayerAtCell = ClusterGrid.Instance.GetVisibleEntityOfLayerAtCell(this.targetRocketSelector.PreviousDestination, this.targetRocketSelector.requiredEntityLayer);
+				if (visibleEntityOfLayerAtCell != null)
+				{
+					this.destinationImage.sprite = visibleEntityOfLayerAtCell.GetUISprite();
+					text3 = GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_ROUNTRIP_LABEL, new object[] { visibleEntityOfLayerAtCell.GetProperName() });
+				}
+				else
+				{
+					Sprite sprite2;
+					string text4;
+					string text5;
+					ClusterGrid.Instance.GetLocationDescription(this.targetRocketSelector.PreviousDestination, out sprite2, out text4, out text5, out entityLayer);
+					this.destinationImage.sprite = sprite2;
+					text3 = GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_ROUNTRIP_LABEL, new object[] { text4 });
+				}
+			}
+			else
+			{
+				this.destinationImage.sprite = Assets.GetSprite("hex_unknown");
+				text3 = GameUtil.SafeStringFormat(UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL, new object[] { UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.DESTINATION_LABEL_INVALID });
+			}
+			this.destinationInfoLabel.text = text3;
 			this.clearDestinationButton.isInteractable = false;
 		}
 		this.changeDestinationButtonTooltip.SetSimpleTooltip(flag ? UI.UISIDESCREENS.CLUSTERDESTINATIONSIDESCREEN.CHANGE_DESTINATION_BUTTON_SELECTING_TOOLTIP : this.targetSelector.changeTargetButtonTooltipString);
@@ -230,6 +253,7 @@ public class ClusterDestinationSideScreen : SideScreenContent
 	private void OnRepeatClicked()
 	{
 		this.targetRocketSelector.Repeat = !this.targetRocketSelector.Repeat;
+		this.Refresh(null);
 		this.RefreshRepeatButtonLabels();
 	}
 

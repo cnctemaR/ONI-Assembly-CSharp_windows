@@ -7,7 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Telescope")]
-public class Telescope : Workable, OxygenBreather.IGasProvider, IGameObjectEffectDescriptor, ISim200ms, BuildingStatusItems.ISkyVisInfo
+public class Telescope : Workable, OxygenBreather.IGasProvider, ISim200ms, BuildingStatusItems.ISkyVisInfo
 {
 	float BuildingStatusItems.ISkyVisInfo.GetPercentVisible01()
 	{

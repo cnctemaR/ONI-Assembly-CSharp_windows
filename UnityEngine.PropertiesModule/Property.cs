@@ -79,7 +79,7 @@ namespace Unity.Properties
 			}
 			foreach (Attribute attribute in attributes)
 			{
-				bool flag2 = attribute == null || attribute.GetType() == typeof(CreatePropertyAttribute);
+				bool flag2 = attribute == null;
 				if (!flag2)
 				{
 					this.m_Attributes.Add(attribute);

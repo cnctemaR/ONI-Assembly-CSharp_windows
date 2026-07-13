@@ -44,10 +44,15 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int Internal_AudioRenderer_GetSampleCountForCaptureFrame();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe static extern bool Internal_AudioRenderer_AddMixerGroupSink(AudioMixerGroup mixerGroup, void* ptr, int length, bool excludeFromMix);
+		internal unsafe static bool Internal_AudioRenderer_AddMixerGroupSink(AudioMixerGroup mixerGroup, void* ptr, int length, bool excludeFromMix)
+		{
+			return AudioRenderer.Internal_AudioRenderer_AddMixerGroupSink_Injected(Object.MarshalledUnityObject.Marshal<AudioMixerGroup>(mixerGroup), ptr, length, excludeFromMix);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal unsafe static extern bool Internal_AudioRenderer_Render(void* ptr, int length);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern bool Internal_AudioRenderer_AddMixerGroupSink_Injected(IntPtr mixerGroup, void* ptr, int length, bool excludeFromMix);
 	}
 }

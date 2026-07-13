@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public interface IAssemblyResolver : IDisposable
+	internal interface IAssemblyResolver : IDisposable
 	{
 		AssemblyDefinition Resolve(AssemblyNameReference name);
 

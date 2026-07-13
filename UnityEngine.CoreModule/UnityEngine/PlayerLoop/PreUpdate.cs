@@ -57,5 +57,10 @@ namespace UnityEngine.PlayerLoop
 		public struct NewInputUpdate
 		{
 		}
+
+		[RequiredByNativeCode]
+		public struct InputForUIUpdate
+		{
+		}
 	}
 }

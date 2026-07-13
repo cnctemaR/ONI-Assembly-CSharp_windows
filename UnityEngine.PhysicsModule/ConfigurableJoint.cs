@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[RequireComponent(typeof(Rigidbody))]
 	[NativeHeader("Modules/Physics/ConfigurableJoint.h")]
 	[NativeClass("Unity::ConfigurableJoint")]
 	public class ConfigurableJoint : Joint
@@ -12,75 +14,179 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_secondaryAxis_Injected(out vector);
+				ConfigurableJoint.get_secondaryAxis_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_secondaryAxis_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_secondaryAxis_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern ConfigurableJointMotion xMotion
+		public ConfigurableJointMotion xMotion
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_xMotion_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_xMotion_Injected(intPtr, value);
+			}
 		}
 
-		public extern ConfigurableJointMotion yMotion
+		public ConfigurableJointMotion yMotion
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_yMotion_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_yMotion_Injected(intPtr, value);
+			}
 		}
 
-		public extern ConfigurableJointMotion zMotion
+		public ConfigurableJointMotion zMotion
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_zMotion_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_zMotion_Injected(intPtr, value);
+			}
 		}
 
-		public extern ConfigurableJointMotion angularXMotion
+		public ConfigurableJointMotion angularXMotion
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_angularXMotion_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularXMotion_Injected(intPtr, value);
+			}
 		}
 
-		public extern ConfigurableJointMotion angularYMotion
+		public ConfigurableJointMotion angularYMotion
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_angularYMotion_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularYMotion_Injected(intPtr, value);
+			}
 		}
 
-		public extern ConfigurableJointMotion angularZMotion
+		public ConfigurableJointMotion angularZMotion
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_angularZMotion_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularZMotion_Injected(intPtr, value);
+			}
 		}
 
 		public SoftJointLimitSpring linearLimitSpring
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimitSpring softJointLimitSpring;
-				this.get_linearLimitSpring_Injected(out softJointLimitSpring);
+				ConfigurableJoint.get_linearLimitSpring_Injected(intPtr, out softJointLimitSpring);
 				return softJointLimitSpring;
 			}
 			set
 			{
-				this.set_linearLimitSpring_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_linearLimitSpring_Injected(intPtr, ref value);
 			}
 		}
 
@@ -88,13 +194,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimitSpring softJointLimitSpring;
-				this.get_angularXLimitSpring_Injected(out softJointLimitSpring);
+				ConfigurableJoint.get_angularXLimitSpring_Injected(intPtr, out softJointLimitSpring);
 				return softJointLimitSpring;
 			}
 			set
 			{
-				this.set_angularXLimitSpring_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularXLimitSpring_Injected(intPtr, ref value);
 			}
 		}
 
@@ -102,13 +218,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimitSpring softJointLimitSpring;
-				this.get_angularYZLimitSpring_Injected(out softJointLimitSpring);
+				ConfigurableJoint.get_angularYZLimitSpring_Injected(intPtr, out softJointLimitSpring);
 				return softJointLimitSpring;
 			}
 			set
 			{
-				this.set_angularYZLimitSpring_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularYZLimitSpring_Injected(intPtr, ref value);
 			}
 		}
 
@@ -116,13 +242,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_linearLimit_Injected(out softJointLimit);
+				ConfigurableJoint.get_linearLimit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_linearLimit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_linearLimit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -130,13 +266,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_lowAngularXLimit_Injected(out softJointLimit);
+				ConfigurableJoint.get_lowAngularXLimit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_lowAngularXLimit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_lowAngularXLimit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -144,13 +290,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_highAngularXLimit_Injected(out softJointLimit);
+				ConfigurableJoint.get_highAngularXLimit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_highAngularXLimit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_highAngularXLimit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -158,13 +314,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_angularYLimit_Injected(out softJointLimit);
+				ConfigurableJoint.get_angularYLimit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_angularYLimit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularYLimit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -172,13 +338,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				SoftJointLimit softJointLimit;
-				this.get_angularZLimit_Injected(out softJointLimit);
+				ConfigurableJoint.get_angularZLimit_Injected(intPtr, out softJointLimit);
 				return softJointLimit;
 			}
 			set
 			{
-				this.set_angularZLimit_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularZLimit_Injected(intPtr, ref value);
 			}
 		}
 
@@ -186,13 +362,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_targetPosition_Injected(out vector);
+				ConfigurableJoint.get_targetPosition_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_targetPosition_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_targetPosition_Injected(intPtr, ref value);
 			}
 		}
 
@@ -200,13 +386,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_targetVelocity_Injected(out vector);
+				ConfigurableJoint.get_targetVelocity_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_targetVelocity_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_targetVelocity_Injected(intPtr, ref value);
 			}
 		}
 
@@ -214,13 +410,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				JointDrive jointDrive;
-				this.get_xDrive_Injected(out jointDrive);
+				ConfigurableJoint.get_xDrive_Injected(intPtr, out jointDrive);
 				return jointDrive;
 			}
 			set
 			{
-				this.set_xDrive_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_xDrive_Injected(intPtr, ref value);
 			}
 		}
 
@@ -228,13 +434,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				JointDrive jointDrive;
-				this.get_yDrive_Injected(out jointDrive);
+				ConfigurableJoint.get_yDrive_Injected(intPtr, out jointDrive);
 				return jointDrive;
 			}
 			set
 			{
-				this.set_yDrive_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_yDrive_Injected(intPtr, ref value);
 			}
 		}
 
@@ -242,13 +458,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				JointDrive jointDrive;
-				this.get_zDrive_Injected(out jointDrive);
+				ConfigurableJoint.get_zDrive_Injected(intPtr, out jointDrive);
 				return jointDrive;
 			}
 			set
 			{
-				this.set_zDrive_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_zDrive_Injected(intPtr, ref value);
 			}
 		}
 
@@ -256,13 +482,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Quaternion quaternion;
-				this.get_targetRotation_Injected(out quaternion);
+				ConfigurableJoint.get_targetRotation_Injected(intPtr, out quaternion);
 				return quaternion;
 			}
 			set
 			{
-				this.set_targetRotation_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_targetRotation_Injected(intPtr, ref value);
 			}
 		}
 
@@ -270,35 +506,69 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_targetAngularVelocity_Injected(out vector);
+				ConfigurableJoint.get_targetAngularVelocity_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_targetAngularVelocity_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_targetAngularVelocity_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern RotationDriveMode rotationDriveMode
+		public RotationDriveMode rotationDriveMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_rotationDriveMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_rotationDriveMode_Injected(intPtr, value);
+			}
 		}
 
 		public JointDrive angularXDrive
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				JointDrive jointDrive;
-				this.get_angularXDrive_Injected(out jointDrive);
+				ConfigurableJoint.get_angularXDrive_Injected(intPtr, out jointDrive);
 				return jointDrive;
 			}
 			set
 			{
-				this.set_angularXDrive_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularXDrive_Injected(intPtr, ref value);
 			}
 		}
 
@@ -306,13 +576,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				JointDrive jointDrive;
-				this.get_angularYZDrive_Injected(out jointDrive);
+				ConfigurableJoint.get_angularYZDrive_Injected(intPtr, out jointDrive);
 				return jointDrive;
 			}
 			set
 			{
-				this.set_angularYZDrive_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_angularYZDrive_Injected(intPtr, ref value);
 			}
 		}
 
@@ -320,168 +600,320 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				JointDrive jointDrive;
-				this.get_slerpDrive_Injected(out jointDrive);
+				ConfigurableJoint.get_slerpDrive_Injected(intPtr, out jointDrive);
 				return jointDrive;
 			}
 			set
 			{
-				this.set_slerpDrive_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_slerpDrive_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern JointProjectionMode projectionMode
+		public JointProjectionMode projectionMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_projectionMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_projectionMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern float projectionDistance
+		public float projectionDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_projectionDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_projectionDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern float projectionAngle
+		public float projectionAngle
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_projectionAngle_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_projectionAngle_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool configuredInWorldSpace
+		public bool configuredInWorldSpace
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_configuredInWorldSpace_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_configuredInWorldSpace_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool swapBodies
+		public bool swapBodies
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ConfigurableJoint.get_swapBodies_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConfigurableJoint>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConfigurableJoint.set_swapBodies_Injected(intPtr, value);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_secondaryAxis_Injected(out Vector3 ret);
+		private static extern void get_secondaryAxis_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_secondaryAxis_Injected(ref Vector3 value);
+		private static extern void set_secondaryAxis_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_linearLimitSpring_Injected(out SoftJointLimitSpring ret);
+		private static extern ConfigurableJointMotion get_xMotion_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_linearLimitSpring_Injected(ref SoftJointLimitSpring value);
+		private static extern void set_xMotion_Injected(IntPtr _unity_self, ConfigurableJointMotion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_angularXLimitSpring_Injected(out SoftJointLimitSpring ret);
+		private static extern ConfigurableJointMotion get_yMotion_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_angularXLimitSpring_Injected(ref SoftJointLimitSpring value);
+		private static extern void set_yMotion_Injected(IntPtr _unity_self, ConfigurableJointMotion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_angularYZLimitSpring_Injected(out SoftJointLimitSpring ret);
+		private static extern ConfigurableJointMotion get_zMotion_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_angularYZLimitSpring_Injected(ref SoftJointLimitSpring value);
+		private static extern void set_zMotion_Injected(IntPtr _unity_self, ConfigurableJointMotion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_linearLimit_Injected(out SoftJointLimit ret);
+		private static extern ConfigurableJointMotion get_angularXMotion_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_linearLimit_Injected(ref SoftJointLimit value);
+		private static extern void set_angularXMotion_Injected(IntPtr _unity_self, ConfigurableJointMotion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_lowAngularXLimit_Injected(out SoftJointLimit ret);
+		private static extern ConfigurableJointMotion get_angularYMotion_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_lowAngularXLimit_Injected(ref SoftJointLimit value);
+		private static extern void set_angularYMotion_Injected(IntPtr _unity_self, ConfigurableJointMotion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_highAngularXLimit_Injected(out SoftJointLimit ret);
+		private static extern ConfigurableJointMotion get_angularZMotion_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_highAngularXLimit_Injected(ref SoftJointLimit value);
+		private static extern void set_angularZMotion_Injected(IntPtr _unity_self, ConfigurableJointMotion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_angularYLimit_Injected(out SoftJointLimit ret);
+		private static extern void get_linearLimitSpring_Injected(IntPtr _unity_self, out SoftJointLimitSpring ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_angularYLimit_Injected(ref SoftJointLimit value);
+		private static extern void set_linearLimitSpring_Injected(IntPtr _unity_self, [In] ref SoftJointLimitSpring value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_angularZLimit_Injected(out SoftJointLimit ret);
+		private static extern void get_angularXLimitSpring_Injected(IntPtr _unity_self, out SoftJointLimitSpring ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_angularZLimit_Injected(ref SoftJointLimit value);
+		private static extern void set_angularXLimitSpring_Injected(IntPtr _unity_self, [In] ref SoftJointLimitSpring value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_targetPosition_Injected(out Vector3 ret);
+		private static extern void get_angularYZLimitSpring_Injected(IntPtr _unity_self, out SoftJointLimitSpring ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_targetPosition_Injected(ref Vector3 value);
+		private static extern void set_angularYZLimitSpring_Injected(IntPtr _unity_self, [In] ref SoftJointLimitSpring value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_targetVelocity_Injected(out Vector3 ret);
+		private static extern void get_linearLimit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_targetVelocity_Injected(ref Vector3 value);
+		private static extern void set_linearLimit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_xDrive_Injected(out JointDrive ret);
+		private static extern void get_lowAngularXLimit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_xDrive_Injected(ref JointDrive value);
+		private static extern void set_lowAngularXLimit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_yDrive_Injected(out JointDrive ret);
+		private static extern void get_highAngularXLimit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_yDrive_Injected(ref JointDrive value);
+		private static extern void set_highAngularXLimit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_zDrive_Injected(out JointDrive ret);
+		private static extern void get_angularYLimit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_zDrive_Injected(ref JointDrive value);
+		private static extern void set_angularYLimit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_targetRotation_Injected(out Quaternion ret);
+		private static extern void get_angularZLimit_Injected(IntPtr _unity_self, out SoftJointLimit ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_targetRotation_Injected(ref Quaternion value);
+		private static extern void set_angularZLimit_Injected(IntPtr _unity_self, [In] ref SoftJointLimit value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_targetAngularVelocity_Injected(out Vector3 ret);
+		private static extern void get_targetPosition_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_targetAngularVelocity_Injected(ref Vector3 value);
+		private static extern void set_targetPosition_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_angularXDrive_Injected(out JointDrive ret);
+		private static extern void get_targetVelocity_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_angularXDrive_Injected(ref JointDrive value);
+		private static extern void set_targetVelocity_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_angularYZDrive_Injected(out JointDrive ret);
+		private static extern void get_xDrive_Injected(IntPtr _unity_self, out JointDrive ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_angularYZDrive_Injected(ref JointDrive value);
+		private static extern void set_xDrive_Injected(IntPtr _unity_self, [In] ref JointDrive value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_slerpDrive_Injected(out JointDrive ret);
+		private static extern void get_yDrive_Injected(IntPtr _unity_self, out JointDrive ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_slerpDrive_Injected(ref JointDrive value);
+		private static extern void set_yDrive_Injected(IntPtr _unity_self, [In] ref JointDrive value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_zDrive_Injected(IntPtr _unity_self, out JointDrive ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_zDrive_Injected(IntPtr _unity_self, [In] ref JointDrive value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_targetRotation_Injected(IntPtr _unity_self, out Quaternion ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetRotation_Injected(IntPtr _unity_self, [In] ref Quaternion value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_targetAngularVelocity_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetAngularVelocity_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RotationDriveMode get_rotationDriveMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rotationDriveMode_Injected(IntPtr _unity_self, RotationDriveMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_angularXDrive_Injected(IntPtr _unity_self, out JointDrive ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_angularXDrive_Injected(IntPtr _unity_self, [In] ref JointDrive value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_angularYZDrive_Injected(IntPtr _unity_self, out JointDrive ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_angularYZDrive_Injected(IntPtr _unity_self, [In] ref JointDrive value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_slerpDrive_Injected(IntPtr _unity_self, out JointDrive ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_slerpDrive_Injected(IntPtr _unity_self, [In] ref JointDrive value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern JointProjectionMode get_projectionMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_projectionMode_Injected(IntPtr _unity_self, JointProjectionMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_projectionDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_projectionDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_projectionAngle_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_projectionAngle_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_configuredInWorldSpace_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_configuredInWorldSpace_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_swapBodies_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_swapBodies_Injected(IntPtr _unity_self, bool value);
 	}
 }

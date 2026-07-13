@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum MethodSemanticsAttributes : ushort
+	internal enum MethodSemanticsAttributes : ushort
 	{
 		None = 0,
 		Setter = 1,

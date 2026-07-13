@@ -6,9 +6,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading;
+using MonoMod.Core.Platforms;
 using MonoMod.Utils;
 
 namespace HarmonyLib
@@ -25,19 +28,59 @@ namespace HarmonyLib
 		public static Type TypeByName(string name)
 		{
 			Type type = Type.GetType(name, false);
-			if (type == null)
+			if (type != null)
 			{
-				type = AccessTools.AllTypes().FirstOrDefault<Type>((Type t) => t.FullName == name);
+				return type;
 			}
-			if (type == null)
+			foreach (Assembly assembly in AccessTools.AllAssemblies())
 			{
-				type = AccessTools.AllTypes().FirstOrDefault<Type>((Type t) => t.Name == name);
+				Type type2 = assembly.GetType(name, false);
+				if (type2 != null)
+				{
+					return type2;
+				}
 			}
-			if (type == null)
+			Type[] array = AccessTools.AllTypes().ToArray<Type>();
+			Type type3 = array.FirstOrDefault<Type>((Type t) => t.FullName == name);
+			if (type3 != null)
 			{
-				FileLog.Debug("AccessTools.TypeByName: Could not find type named " + name);
+				return type3;
 			}
-			return type;
+			Type type4 = array.FirstOrDefault<Type>((Type t) => t.Name == name);
+			if (type4 != null)
+			{
+				return type4;
+			}
+			FileLog.Debug("AccessTools.TypeByName: Could not find type named " + name);
+			return null;
+		}
+
+		public static Type TypeSearch(Regex search, bool invalidateCache = false)
+		{
+			if (AccessTools.allTypesCached == null || invalidateCache)
+			{
+				AccessTools.allTypesCached = AccessTools.AllTypes().ToArray<Type>();
+			}
+			Type type = AccessTools.allTypesCached.FirstOrDefault<Type>((Type t) => search.IsMatch(t.FullName));
+			if (type != null)
+			{
+				return type;
+			}
+			Type type2 = AccessTools.allTypesCached.FirstOrDefault<Type>((Type t) => search.IsMatch(t.Name));
+			if (type2 != null)
+			{
+				return type2;
+			}
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(68, 1);
+			defaultInterpolatedStringHandler.AppendLiteral("AccessTools.TypeSearch: Could not find type with regular expression ");
+			defaultInterpolatedStringHandler.AppendFormatted<Regex>(search);
+			FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
+			return null;
+		}
+
+		public static void ClearTypeSearchCache()
+		{
+			AccessTools.allTypesCached = null;
 		}
 
 		public static Type[] GetTypesFromAssembly(Assembly assembly)
@@ -49,7 +92,12 @@ namespace HarmonyLib
 			}
 			catch (ReflectionTypeLoadException ex)
 			{
-				FileLog.Debug(string.Format("AccessTools.GetTypesFromAssembly: assembly {0} => {1}", assembly, ex));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(47, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.GetTypesFromAssembly: assembly ");
+				defaultInterpolatedStringHandler.AppendFormatted<Assembly>(assembly);
+				defaultInterpolatedStringHandler.AppendLiteral(" => ");
+				defaultInterpolatedStringHandler.AppendFormatted<ReflectionTypeLoadException>(ex);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 				array = ex.Types.Where<Type>((Type type) => type != null).ToArray<Type>();
 			}
 			return array;
@@ -57,7 +105,18 @@ namespace HarmonyLib
 
 		public static IEnumerable<Type> AllTypes()
 		{
-			return AccessTools.AllAssemblies().SelectMany<Assembly, Type>((Assembly a) => AccessTools.GetTypesFromAssembly(a));
+			IEnumerable<Assembly> enumerable = AccessTools.AllAssemblies();
+			Func<Assembly, IEnumerable<Type>> func;
+			if ((func = AccessTools.<>O.<0>__GetTypesFromAssembly) == null)
+			{
+				func = (AccessTools.<>O.<0>__GetTypesFromAssembly = new Func<Assembly, IEnumerable<Type>>(AccessTools.GetTypesFromAssembly));
+			}
+			return enumerable.SelectMany<Assembly, Type>(func);
+		}
+
+		public static IEnumerable<Type> InnerTypes(Type type)
+		{
+			return type.GetNestedTypes(AccessTools.all);
 		}
 
 		public static T FindIncludingBaseTypes<T>(Type type, Func<Type, T> func) where T : class
@@ -88,16 +147,20 @@ namespace HarmonyLib
 			{
 				return t;
 			}
-			Type[] nestedTypes = type.GetNestedTypes(AccessTools.all);
-			for (int i = 0; i < nestedTypes.Length; i++)
+			foreach (Type type2 in type.GetNestedTypes(AccessTools.all))
 			{
-				t = AccessTools.FindIncludingInnerTypes<T>(nestedTypes[i], func);
+				t = AccessTools.FindIncludingInnerTypes<T>(type2, func);
 				if (t != null)
 				{
 					break;
 				}
 			}
 			return t;
+		}
+
+		public static MethodInfo Identifiable(this MethodInfo method)
+		{
+			return (PlatformTriple.Current.GetIdentifiable(method) as MethodInfo) ?? method;
 		}
 
 		public static FieldInfo DeclaredField(Type type, string name)
@@ -107,15 +170,20 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.DeclaredField: type is null");
 				return null;
 			}
-			if (name == null)
+			if (string.IsNullOrEmpty(name))
 			{
-				FileLog.Debug("AccessTools.DeclaredField: name is null");
+				FileLog.Debug("AccessTools.DeclaredField: name is null/empty");
 				return null;
 			}
 			FieldInfo field = type.GetField(name, AccessTools.allDeclared);
 			if (field == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.DeclaredField: Could not find field for type {0} and name {1}", type, name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(67, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredField: Could not find field for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return field;
 		}
@@ -126,7 +194,12 @@ namespace HarmonyLib
 			FieldInfo field = typeAndName.type.GetField(typeAndName.name, AccessTools.allDeclared);
 			if (field == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.DeclaredField: Could not find field for type {0} and name {1}", typeAndName.type, typeAndName.name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(67, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredField: Could not find field for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeAndName.type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(typeAndName.name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return field;
 		}
@@ -138,15 +211,20 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.Field: type is null");
 				return null;
 			}
-			if (name == null)
+			if (string.IsNullOrEmpty(name))
 			{
-				FileLog.Debug("AccessTools.Field: name is null");
+				FileLog.Debug("AccessTools.Field: name is null/empty");
 				return null;
 			}
 			FieldInfo fieldInfo = AccessTools.FindIncludingBaseTypes<FieldInfo>(type, (Type t) => t.GetField(name, AccessTools.all));
 			if (fieldInfo == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.Field: Could not find field for type {0} and name {1}", type, name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(59, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Field: Could not find field for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return fieldInfo;
 		}
@@ -157,7 +235,12 @@ namespace HarmonyLib
 			FieldInfo fieldInfo = AccessTools.FindIncludingBaseTypes<FieldInfo>(info.type, (Type t) => t.GetField(info.name, AccessTools.all));
 			if (fieldInfo == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.Field: Could not find field for type {0} and name {1}", info.type, info.name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(59, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Field: Could not find field for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(info.type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(info.name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return fieldInfo;
 		}
@@ -172,7 +255,12 @@ namespace HarmonyLib
 			FieldInfo fieldInfo = AccessTools.GetDeclaredFields(type).ElementAtOrDefault<FieldInfo>(idx);
 			if (fieldInfo == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.DeclaredField: Could not find field for type {0} and idx {1}", type, idx));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(66, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredField: Could not find field for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and idx ");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(idx);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return fieldInfo;
 		}
@@ -184,15 +272,20 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.DeclaredProperty: type is null");
 				return null;
 			}
-			if (name == null)
+			if (string.IsNullOrEmpty(name))
 			{
-				FileLog.Debug("AccessTools.DeclaredProperty: name is null");
+				FileLog.Debug("AccessTools.DeclaredProperty: name is null/empty");
 				return null;
 			}
 			PropertyInfo property = type.GetProperty(name, AccessTools.allDeclared);
 			if (property == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.DeclaredProperty: Could not find property for type {0} and name {1}", type, name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(73, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredProperty: Could not find property for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return property;
 		}
@@ -203,9 +296,54 @@ namespace HarmonyLib
 			PropertyInfo property = typeAndName.type.GetProperty(typeAndName.name, AccessTools.allDeclared);
 			if (property == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.DeclaredProperty: Could not find property for type {0} and name {1}", typeAndName.type, typeAndName.name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(73, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredProperty: Could not find property for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeAndName.type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(typeAndName.name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return property;
+		}
+
+		public static PropertyInfo DeclaredIndexer(Type type, Type[] parameters = null)
+		{
+			if (type == null)
+			{
+				FileLog.Debug("AccessTools.DeclaredIndexer: type is null");
+				return null;
+			}
+			PropertyInfo propertyInfo3;
+			try
+			{
+				PropertyInfo propertyInfo;
+				if (parameters != null)
+				{
+					propertyInfo = type.GetProperties(AccessTools.allDeclared).FirstOrDefault<PropertyInfo>((PropertyInfo property) => (from param in property.GetIndexParameters()
+						select param.ParameterType).SequenceEqual<Type>(parameters));
+				}
+				else
+				{
+					propertyInfo = type.GetProperties(AccessTools.allDeclared).SingleOrDefault<PropertyInfo>((PropertyInfo property) => property.GetIndexParameters().Length != 0);
+				}
+				PropertyInfo propertyInfo2 = propertyInfo;
+				if (propertyInfo2 == null)
+				{
+					DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(77, 2);
+					defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredIndexer: Could not find indexer for type ");
+					defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+					defaultInterpolatedStringHandler.AppendLiteral(" and parameters ");
+					Type[] parameters2 = parameters;
+					defaultInterpolatedStringHandler.AppendFormatted((parameters2 != null) ? parameters2.Description() : null);
+					FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
+				}
+				propertyInfo3 = propertyInfo2;
+			}
+			catch (InvalidOperationException ex)
+			{
+				throw new AmbiguousMatchException("Multiple possible indexers were found.", ex);
+			}
+			return propertyInfo3;
 		}
 
 		public static MethodInfo DeclaredPropertyGetter(Type type, string name)
@@ -221,6 +359,16 @@ namespace HarmonyLib
 		public static MethodInfo DeclaredPropertyGetter(string typeColonName)
 		{
 			PropertyInfo propertyInfo = AccessTools.DeclaredProperty(typeColonName);
+			if (propertyInfo == null)
+			{
+				return null;
+			}
+			return propertyInfo.GetGetMethod(true);
+		}
+
+		public static MethodInfo DeclaredIndexerGetter(Type type, Type[] parameters = null)
+		{
+			PropertyInfo propertyInfo = AccessTools.DeclaredIndexer(type, parameters);
 			if (propertyInfo == null)
 			{
 				return null;
@@ -248,6 +396,16 @@ namespace HarmonyLib
 			return propertyInfo.GetSetMethod(true);
 		}
 
+		public static MethodInfo DeclaredIndexerSetter(Type type, Type[] parameters)
+		{
+			PropertyInfo propertyInfo = AccessTools.DeclaredIndexer(type, parameters);
+			if (propertyInfo == null)
+			{
+				return null;
+			}
+			return propertyInfo.GetSetMethod(true);
+		}
+
 		public static PropertyInfo Property(Type type, string name)
 		{
 			if (type == null)
@@ -255,15 +413,20 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.Property: type is null");
 				return null;
 			}
-			if (name == null)
+			if (string.IsNullOrEmpty(name))
 			{
-				FileLog.Debug("AccessTools.Property: name is null");
+				FileLog.Debug("AccessTools.Property: name is null/empty");
 				return null;
 			}
 			PropertyInfo propertyInfo = AccessTools.FindIncludingBaseTypes<PropertyInfo>(type, (Type t) => t.GetProperty(name, AccessTools.all));
 			if (propertyInfo == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.Property: Could not find property for type {0} and name {1}", type, name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(65, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Property: Could not find property for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return propertyInfo;
 		}
@@ -274,9 +437,65 @@ namespace HarmonyLib
 			PropertyInfo propertyInfo = AccessTools.FindIncludingBaseTypes<PropertyInfo>(info.type, (Type t) => t.GetProperty(info.name, AccessTools.all));
 			if (propertyInfo == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.Property: Could not find property for type {0} and name {1}", info.type, info.name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(65, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Property: Could not find property for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(info.type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(info.name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return propertyInfo;
+		}
+
+		public static PropertyInfo Indexer(Type type, Type[] parameters = null)
+		{
+			if (type == null)
+			{
+				FileLog.Debug("AccessTools.Indexer: type is null");
+				return null;
+			}
+			Func<Type, PropertyInfo> func;
+			if (parameters != null)
+			{
+				Func<PropertyInfo, bool> <>9__3;
+				func = delegate(Type t)
+				{
+					IEnumerable<PropertyInfo> properties = t.GetProperties(AccessTools.all);
+					Func<PropertyInfo, bool> func3;
+					if ((func3 = <>9__3) == null)
+					{
+						func3 = (<>9__3 = (PropertyInfo property) => (from param in property.GetIndexParameters()
+							select param.ParameterType).SequenceEqual<Type>(parameters));
+					}
+					return properties.FirstOrDefault<PropertyInfo>(func3);
+				};
+			}
+			else
+			{
+				func = (Type t) => t.GetProperties(AccessTools.all).SingleOrDefault<PropertyInfo>((PropertyInfo property) => property.GetIndexParameters().Length != 0);
+			}
+			Func<Type, PropertyInfo> func2 = func;
+			PropertyInfo propertyInfo2;
+			try
+			{
+				PropertyInfo propertyInfo = AccessTools.FindIncludingBaseTypes<PropertyInfo>(type, func2);
+				if (propertyInfo == null)
+				{
+					DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(69, 2);
+					defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Indexer: Could not find indexer for type ");
+					defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+					defaultInterpolatedStringHandler.AppendLiteral(" and parameters ");
+					Type[] parameters2 = parameters;
+					defaultInterpolatedStringHandler.AppendFormatted((parameters2 != null) ? parameters2.Description() : null);
+					FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
+				}
+				propertyInfo2 = propertyInfo;
+			}
+			catch (InvalidOperationException ex)
+			{
+				throw new AmbiguousMatchException("Multiple possible indexers were found.", ex);
+			}
+			return propertyInfo2;
 		}
 
 		public static MethodInfo PropertyGetter(Type type, string name)
@@ -292,6 +511,16 @@ namespace HarmonyLib
 		public static MethodInfo PropertyGetter(string typeColonName)
 		{
 			PropertyInfo propertyInfo = AccessTools.Property(typeColonName);
+			if (propertyInfo == null)
+			{
+				return null;
+			}
+			return propertyInfo.GetGetMethod(true);
+		}
+
+		public static MethodInfo IndexerGetter(Type type, Type[] parameters = null)
+		{
+			PropertyInfo propertyInfo = AccessTools.Indexer(type, parameters);
 			if (propertyInfo == null)
 			{
 				return null;
@@ -319,6 +548,178 @@ namespace HarmonyLib
 			return propertyInfo.GetSetMethod(true);
 		}
 
+		public static MethodInfo IndexerSetter(Type type, Type[] parameters = null)
+		{
+			PropertyInfo propertyInfo = AccessTools.Indexer(type, parameters);
+			if (propertyInfo == null)
+			{
+				return null;
+			}
+			return propertyInfo.GetSetMethod(true);
+		}
+
+		public static EventInfo DeclaredEvent(Type type, string name)
+		{
+			if (type == null)
+			{
+				FileLog.Debug("AccessTools.DeclaredEvent: type is null");
+				return null;
+			}
+			if (string.IsNullOrEmpty(name))
+			{
+				FileLog.Debug("AccessTools.DeclaredEvent: name is null/empty");
+				return null;
+			}
+			EventInfo @event = type.GetEvent(name, AccessTools.allDeclared);
+			if (@event == null)
+			{
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(67, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredEvent: Could not find event for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
+			}
+			return @event;
+		}
+
+		public static EventInfo DeclaredEvent(string typeColonName)
+		{
+			Tools.TypeAndName typeAndName = Tools.TypColonName(typeColonName);
+			EventInfo @event = typeAndName.type.GetEvent(typeAndName.name, AccessTools.allDeclared);
+			if (@event == null)
+			{
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(67, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredEvent: Could not find event for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeAndName.type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(typeAndName.name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
+			}
+			return @event;
+		}
+
+		public static EventInfo Event(Type type, string name)
+		{
+			if (type == null)
+			{
+				FileLog.Debug("AccessTools.Event: type is null");
+				return null;
+			}
+			if (string.IsNullOrEmpty(name))
+			{
+				FileLog.Debug("AccessTools.Event: name is null/empty");
+				return null;
+			}
+			EventInfo eventInfo = AccessTools.FindIncludingBaseTypes<EventInfo>(type, (Type t) => t.GetEvent(name, AccessTools.all));
+			if (eventInfo == null)
+			{
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(59, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Event: Could not find event for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
+			}
+			return eventInfo;
+		}
+
+		public static EventInfo Event(string typeColonName)
+		{
+			Tools.TypeAndName info = Tools.TypColonName(typeColonName);
+			EventInfo eventInfo = AccessTools.FindIncludingBaseTypes<EventInfo>(info.type, (Type t) => t.GetEvent(info.name, AccessTools.all));
+			if (eventInfo == null)
+			{
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(59, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Event: Could not find event for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(info.type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(info.name);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
+			}
+			return eventInfo;
+		}
+
+		public static MethodInfo DeclaredEventAdder(Type type, string name)
+		{
+			EventInfo eventInfo = AccessTools.DeclaredEvent(type, name);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetAddMethod(true);
+		}
+
+		public static MethodInfo DeclaredEventAdder(string typeColonName)
+		{
+			EventInfo eventInfo = AccessTools.DeclaredEvent(typeColonName);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetAddMethod(true);
+		}
+
+		public static MethodInfo EventAdder(Type type, string name)
+		{
+			EventInfo eventInfo = AccessTools.Event(type, name);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetAddMethod(true);
+		}
+
+		public static MethodInfo EventAdder(string typeColonName)
+		{
+			EventInfo eventInfo = AccessTools.Event(typeColonName);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetAddMethod(true);
+		}
+
+		public static MethodInfo DeclaredEventRemover(Type type, string name)
+		{
+			EventInfo eventInfo = AccessTools.DeclaredEvent(type, name);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetRemoveMethod(true);
+		}
+
+		public static MethodInfo DeclaredEventRemover(string typeColonName)
+		{
+			EventInfo eventInfo = AccessTools.DeclaredEvent(typeColonName);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetRemoveMethod(true);
+		}
+
+		public static MethodInfo EventRemover(Type type, string name)
+		{
+			EventInfo eventInfo = AccessTools.Event(type, name);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetRemoveMethod(true);
+		}
+
+		public static MethodInfo EventRemover(string typeColonName)
+		{
+			EventInfo eventInfo = AccessTools.Event(typeColonName);
+			if (eventInfo == null)
+			{
+				return null;
+			}
+			return eventInfo.GetRemoveMethod(true);
+		}
+
 		public static MethodInfo DeclaredMethod(Type type, string name, Type[] parameters = null, Type[] generics = null)
 		{
 			if (type == null)
@@ -326,9 +727,9 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.DeclaredMethod: type is null");
 				return null;
 			}
-			if (name == null)
+			if (string.IsNullOrEmpty(name))
 			{
-				FileLog.Debug("AccessTools.DeclaredMethod: name is null");
+				FileLog.Debug("AccessTools.DeclaredMethod: name is null/empty");
 				return null;
 			}
 			ParameterModifier[] array = new ParameterModifier[0];
@@ -343,7 +744,14 @@ namespace HarmonyLib
 			}
 			if (methodInfo == null)
 			{
-				FileLog.Debug(string.Format("AccessTools.DeclaredMethod: Could not find method for type {0} and name {1} and parameters {2}", type, name, (parameters != null) ? parameters.Description() : null));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(85, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.DeclaredMethod: Could not find method for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				defaultInterpolatedStringHandler.AppendLiteral(" and parameters ");
+				defaultInterpolatedStringHandler.AppendFormatted((parameters != null) ? parameters.Description() : null);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 				return null;
 			}
 			if (generics != null)
@@ -366,9 +774,9 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.Method: type is null");
 				return null;
 			}
-			if (name == null)
+			if (string.IsNullOrEmpty(name))
 			{
-				FileLog.Debug("AccessTools.Method: name is null");
+				FileLog.Debug("AccessTools.Method: name is null/empty");
 				return null;
 			}
 			ParameterModifier[] modifiers = new ParameterModifier[0];
@@ -378,26 +786,36 @@ namespace HarmonyLib
 				try
 				{
 					methodInfo = AccessTools.FindIncludingBaseTypes<MethodInfo>(type, (Type t) => t.GetMethod(name, AccessTools.all));
-					goto IL_00A4;
+					goto IL_00D6;
 				}
 				catch (AmbiguousMatchException ex)
 				{
-					methodInfo = AccessTools.FindIncludingBaseTypes<MethodInfo>(type, (Type t) => t.GetMethod(name, AccessTools.all, null, new Type[0], modifiers));
+					methodInfo = AccessTools.FindIncludingBaseTypes<MethodInfo>(type, (Type t) => t.GetMethod(name, AccessTools.all, null, Array.Empty<Type>(), modifiers));
 					if (methodInfo == null)
 					{
-						throw new AmbiguousMatchException(string.Format("Ambiguous match in Harmony patch for {0}:{1}", type, name), ex);
+						DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(38, 2);
+						defaultInterpolatedStringHandler.AppendLiteral("Ambiguous match in Harmony patch for ");
+						defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+						defaultInterpolatedStringHandler.AppendLiteral(":");
+						defaultInterpolatedStringHandler.AppendFormatted(name);
+						throw new AmbiguousMatchException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 					}
-					goto IL_00A4;
+					goto IL_00D6;
 				}
 			}
 			methodInfo = AccessTools.FindIncludingBaseTypes<MethodInfo>(type, (Type t) => t.GetMethod(name, AccessTools.all, null, parameters, modifiers));
-			IL_00A4:
+			IL_00D6:
 			if (methodInfo == null)
 			{
-				string text = "AccessTools.Method: Could not find method for type {0} and name {1} and parameters {2}";
-				object name2 = name;
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(77, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("AccessTools.Method: Could not find method for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				defaultInterpolatedStringHandler.AppendLiteral(" and parameters ");
 				Type[] parameters2 = parameters;
-				FileLog.Debug(string.Format(text, type, name2, (parameters2 != null) ? parameters2.Description() : null));
+				defaultInterpolatedStringHandler.AppendFormatted((parameters2 != null) ? parameters2.Description() : null);
+				FileLog.Debug(defaultInterpolatedStringHandler.ToStringAndClear());
 				return null;
 			}
 			if (generics != null)
@@ -441,6 +859,39 @@ namespace HarmonyLib
 				return null;
 			}
 			return AccessTools.Method(declaringType, "MoveNext", null, null);
+		}
+
+		public static MethodInfo AsyncMoveNext(MethodBase method)
+		{
+			if (method == null)
+			{
+				FileLog.Debug("AccessTools.AsyncMoveNext: method is null");
+				return null;
+			}
+			AsyncStateMachineAttribute customAttribute = method.GetCustomAttribute<AsyncStateMachineAttribute>();
+			if (customAttribute == null)
+			{
+				FileLog.Debug("AccessTools.AsyncMoveNext: Could not find AsyncStateMachine for " + method.FullDescription());
+				return null;
+			}
+			Type stateMachineType = customAttribute.StateMachineType;
+			MethodInfo methodInfo = AccessTools.DeclaredMethod(stateMachineType, "MoveNext", null, null);
+			if (methodInfo == null)
+			{
+				FileLog.Debug("AccessTools.AsyncMoveNext: Could not find async method body for " + method.FullDescription());
+				return null;
+			}
+			return methodInfo;
+		}
+
+		public static MethodInfo Finalizer(Type type)
+		{
+			return AccessTools.Method(type, "Finalize", null, null);
+		}
+
+		public static MethodInfo DeclaredFinalizer(Type type)
+		{
+			return AccessTools.DeclaredMethod(type, "Finalize", null, null);
 		}
 
 		public static List<string> GetMethodNames(Type type)
@@ -534,6 +985,18 @@ namespace HarmonyLib
 			throw new ArgumentException("Member must be of type EventInfo, FieldInfo, MethodInfo, or PropertyInfo");
 		}
 
+		public static MethodInfo GetMethodByModuleAndToken(string moduleGUID, int token)
+		{
+			Module module = (from a in AppDomain.CurrentDomain.GetAssemblies()
+				where !a.FullName.StartsWith("Microsoft.VisualStudio")
+				select a).SelectMany<Assembly, Module>((Assembly a) => a.GetLoadedModules()).First<Module>((Module m) => m.ModuleVersionId.ToString() == moduleGUID);
+			if (!(module == null))
+			{
+				return (MethodInfo)module.ResolveMethod(token);
+			}
+			return null;
+		}
+
 		public static bool IsDeclaredMember<T>(this T member) where T : MemberInfo
 		{
 			return member.DeclaringType == member.ReflectedType;
@@ -547,7 +1010,8 @@ namespace HarmonyLib
 			}
 			int metadataToken = member.MetadataToken;
 			Type declaringType = member.DeclaringType;
-			foreach (MemberInfo memberInfo in ((declaringType != null) ? declaringType.GetMembers(AccessTools.all) : null) ?? new MemberInfo[0])
+			MemberInfo[] array = ((declaringType != null) ? declaringType.GetMembers(AccessTools.all) : null) ?? Array.Empty<MemberInfo>();
+			foreach (MemberInfo memberInfo in array)
 			{
 				if (memberInfo.MetadataToken == metadataToken)
 				{
@@ -566,10 +1030,10 @@ namespace HarmonyLib
 			}
 			if (parameters == null)
 			{
-				parameters = new Type[0];
+				parameters = Array.Empty<Type>();
 			}
 			BindingFlags bindingFlags = (searchForStatic ? (AccessTools.allDeclared & ~BindingFlags.Instance) : (AccessTools.allDeclared & ~BindingFlags.Static));
-			return type.GetConstructor(bindingFlags, null, parameters, new ParameterModifier[0]);
+			return type.GetConstructor(bindingFlags, null, parameters, Array.Empty<ParameterModifier>());
 		}
 
 		public static ConstructorInfo Constructor(Type type, Type[] parameters = null, bool searchForStatic = false)
@@ -581,10 +1045,10 @@ namespace HarmonyLib
 			}
 			if (parameters == null)
 			{
-				parameters = new Type[0];
+				parameters = Array.Empty<Type>();
 			}
 			BindingFlags flags = (searchForStatic ? (AccessTools.all & ~BindingFlags.Instance) : (AccessTools.all & ~BindingFlags.Static));
-			return AccessTools.FindIncludingBaseTypes<ConstructorInfo>(type, (Type t) => t.GetConstructor(flags, null, parameters, new ParameterModifier[0]));
+			return AccessTools.FindIncludingBaseTypes<ConstructorInfo>(type, (Type t) => t.GetConstructor(flags, null, parameters, Array.Empty<ParameterModifier>()));
 		}
 
 		public static List<ConstructorInfo> GetDeclaredConstructors(Type type, bool? searchForStatic = null)
@@ -641,7 +1105,8 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.GetReturnedType: methodOrConstructor is null");
 				return null;
 			}
-			if (methodOrConstructor is ConstructorInfo)
+			ConstructorInfo constructorInfo = methodOrConstructor as ConstructorInfo;
+			if (constructorInfo != null)
 			{
 				return typeof(void);
 			}
@@ -655,9 +1120,9 @@ namespace HarmonyLib
 				FileLog.Debug("AccessTools.Inner: type is null");
 				return null;
 			}
-			if (name == null)
+			if (string.IsNullOrEmpty(name))
 			{
-				FileLog.Debug("AccessTools.Inner: name is null");
+				FileLog.Debug("AccessTools.Inner: name is null/empty");
 				return null;
 			}
 			return AccessTools.FindIncludingBaseTypes<Type>(type, (Type t) => t.GetNestedType(name, AccessTools.all));
@@ -727,7 +1192,7 @@ namespace HarmonyLib
 		{
 			if (parameters == null)
 			{
-				return new Type[0];
+				return Array.Empty<Type>();
 			}
 			return parameters.Select<object, Type>(delegate(object p)
 			{
@@ -779,7 +1244,15 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("FieldRefAccess<{0}, {1}> for {2} caused an exception", typeof(T), typeof(F), fieldName), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(43, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("FieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted(fieldName);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return fieldRef;
 		}
@@ -806,13 +1279,17 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("FieldRefAccess<{0}, {1}> for {2}, {3} caused an exception", new object[]
-				{
-					typeof(T),
-					typeof(F),
-					instance,
-					fieldName
-				}), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(45, 4);
+				defaultInterpolatedStringHandler.AppendLiteral("FieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<T>(instance);
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted(fieldName);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return ref ptr;
 		}
@@ -847,7 +1324,15 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("FieldRefAccess<{0}> for {1}, {2} caused an exception", typeof(F), type, fieldName), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(43, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("FieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted(fieldName);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return fieldRef;
 		}
@@ -889,7 +1374,15 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("FieldRefAccess<{0}, {1}> for {2} caused an exception", typeof(T), typeof(F), fieldInfo), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(43, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("FieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<FieldInfo>(fieldInfo);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return fieldRef;
 		}
@@ -930,13 +1423,17 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("FieldRefAccess<{0}, {1}> for {2}, {3} caused an exception", new object[]
-				{
-					typeof(T),
-					typeof(F),
-					instance,
-					fieldInfo
-				}), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(45, 4);
+				defaultInterpolatedStringHandler.AppendLiteral("FieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<T>(instance);
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<FieldInfo>(fieldInfo);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return ref ptr;
 		}
@@ -954,7 +1451,15 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("StructFieldRefAccess<{0}, {1}> for {2} caused an exception", typeof(T), typeof(F), fieldName), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(49, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("StructFieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted(fieldName);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return structFieldRef;
 		}
@@ -972,13 +1477,17 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("StructFieldRefAccess<{0}, {1}> for {2}, {3} caused an exception", new object[]
-				{
-					typeof(T),
-					typeof(F),
-					instance,
-					fieldName
-				}), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(51, 4);
+				defaultInterpolatedStringHandler.AppendLiteral("StructFieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<T>(instance);
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted(fieldName);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return ref ptr;
 		}
@@ -997,7 +1506,15 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("StructFieldRefAccess<{0}, {1}> for {2} caused an exception", typeof(T), typeof(F), fieldInfo), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(49, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("StructFieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<FieldInfo>(fieldInfo);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return structFieldRef;
 		}
@@ -1016,13 +1533,17 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("StructFieldRefAccess<{0}, {1}> for {2}, {3} caused an exception", new object[]
-				{
-					typeof(T),
-					typeof(F),
-					instance,
-					fieldInfo
-				}), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(51, 4);
+				defaultInterpolatedStringHandler.AppendLiteral("StructFieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<T>(instance);
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<FieldInfo>(fieldInfo);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return ref ptr;
 		}
@@ -1046,7 +1567,15 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("StaticFieldRefAccess<{0}> for {1}, {2} caused an exception", typeof(F), type, fieldName), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(49, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("StaticFieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted(fieldName);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return ref ptr;
 		}
@@ -1070,7 +1599,15 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("StaticFieldRefAccess<{0}, {1}> for {2} caused an exception", typeof(T), typeof(F), fieldInfo), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(49, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("StaticFieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(T));
+				defaultInterpolatedStringHandler.AppendLiteral(", ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<FieldInfo>(fieldInfo);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return ref ptr;
 		}
@@ -1088,12 +1625,25 @@ namespace HarmonyLib
 			}
 			catch (Exception ex)
 			{
-				throw new ArgumentException(string.Format("StaticFieldRefAccess<{0}> for {1} caused an exception", typeof(F), fieldInfo), ex);
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(47, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("StaticFieldRefAccess<");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(F));
+				defaultInterpolatedStringHandler.AppendLiteral("> for ");
+				defaultInterpolatedStringHandler.AppendFormatted<FieldInfo>(fieldInfo);
+				defaultInterpolatedStringHandler.AppendLiteral(" caused an exception");
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear(), ex);
 			}
 			return fieldRef;
 		}
 
-		public static DelegateType MethodDelegate<DelegateType>(MethodInfo method, object instance = null, bool virtualCall = true) where DelegateType : Delegate
+		[Obsolete("This overload only exists for runtime backwards compatibility and will be removed in Harmony 3. Use MethodDelegate(MethodInfo, object, bool, Type[]) instead")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public static DelegateType MethodDelegate<DelegateType>(MethodInfo method, object instance, bool virtualCall) where DelegateType : Delegate
+		{
+			return AccessTools.MethodDelegate<DelegateType>(method, instance, virtualCall, null);
+		}
+
+		public static DelegateType MethodDelegate<DelegateType>(MethodInfo method, object instance = null, bool virtualCall = true, Type[] delegateArgs = null) where DelegateType : Delegate
 		{
 			if (method == null)
 			{
@@ -1149,12 +1699,11 @@ namespace HarmonyLib
 				{
 					array[i + 1] = parameters2[i].ParameterType;
 				}
-				DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition("OpenInstanceDelegate_" + method.Name, method.ReturnType, array)
-				{
-					OwnerType = type
-				};
+				Type[] array2 = delegateArgs ?? typeFromHandle.GetGenericArguments();
+				Type[] array3 = ((array2.Length < array.Length) ? array : array2);
+				DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition("OpenInstanceDelegate_" + method.Name, method.ReturnType, array3);
 				ILGenerator ilgenerator = dynamicMethodDefinition.GetILGenerator();
-				if (type != null && type.IsValueType)
+				if (type != null && type.IsValueType && array2.Length != 0 && !array2[0].IsByRef)
 				{
 					ilgenerator.Emit(OpCodes.Ldarga_S, 0);
 				}
@@ -1165,6 +1714,10 @@ namespace HarmonyLib
 				for (int j = 1; j < array.Length; j++)
 				{
 					ilgenerator.Emit(OpCodes.Ldarg, j);
+					if (array[j].IsValueType && j < array2.Length && !array2[j].IsValueType)
+					{
+						ilgenerator.Emit(OpCodes.Unbox_Any, array[j]);
+					}
 				}
 				ilgenerator.Emit(OpCodes.Call, method);
 				ilgenerator.Emit(OpCodes.Ret);
@@ -1183,10 +1736,7 @@ namespace HarmonyLib
 				}
 				if (AccessTools.IsMonoRuntime)
 				{
-					DynamicMethodDefinition dynamicMethodDefinition2 = new DynamicMethodDefinition("LdftnDelegate_" + method.Name, typeFromHandle, new Type[] { typeof(object) })
-					{
-						OwnerType = typeFromHandle
-					};
+					DynamicMethodDefinition dynamicMethodDefinition2 = new DynamicMethodDefinition("LdftnDelegate_" + method.Name, typeFromHandle, new Type[] { typeof(object) });
 					ILGenerator ilgenerator2 = dynamicMethodDefinition2.GetILGenerator();
 					ilgenerator2.Emit(OpCodes.Ldarg_0);
 					ilgenerator2.Emit(OpCodes.Ldftn, method);
@@ -1206,33 +1756,46 @@ namespace HarmonyLib
 			}
 		}
 
-		public static DelegateType MethodDelegate<DelegateType>(string typeColonName, object instance = null, bool virtualCall = true) where DelegateType : Delegate
+		[Obsolete("This overload only exists for runtime backwards compatibility and will be removed in Harmony 3. Use MethodDelegate(string, object, bool, Type[]) instead")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public static DelegateType MethodDelegate<DelegateType>(string typeColonName, object instance, bool virtualCall) where DelegateType : Delegate
 		{
-			return AccessTools.MethodDelegate<DelegateType>(AccessTools.DeclaredMethod(typeColonName, null, null), instance, virtualCall);
+			return AccessTools.MethodDelegate<DelegateType>(typeColonName, instance, virtualCall, null);
+		}
+
+		public static DelegateType MethodDelegate<DelegateType>(string typeColonName, object instance = null, bool virtualCall = true, Type[] delegateArgs = null) where DelegateType : Delegate
+		{
+			return AccessTools.MethodDelegate<DelegateType>(AccessTools.DeclaredMethod(typeColonName, null, null), instance, virtualCall, delegateArgs);
 		}
 
 		public static DelegateType HarmonyDelegate<DelegateType>(object instance = null) where DelegateType : Delegate
 		{
 			HarmonyMethod mergedFromType = HarmonyMethodExtensions.GetMergedFromType(typeof(DelegateType));
-			MethodType? methodType = mergedFromType.methodType;
-			if (methodType == null)
+			HarmonyMethod harmonyMethod = mergedFromType;
+			MethodType methodType = harmonyMethod.methodType.GetValueOrDefault();
+			if (harmonyMethod.methodType == null)
 			{
-				mergedFromType.methodType = new MethodType?(MethodType.Normal);
+				methodType = MethodType.Normal;
+				harmonyMethod.methodType = new MethodType?(methodType);
 			}
 			MethodInfo methodInfo = mergedFromType.GetOriginalMethod() as MethodInfo;
 			if (methodInfo == null)
 			{
-				throw new NullReferenceException(string.Format("Delegate {0} has no defined original method", typeof(DelegateType)));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(40, 1);
+				defaultInterpolatedStringHandler.AppendLiteral("Delegate ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(typeof(DelegateType));
+				defaultInterpolatedStringHandler.AppendLiteral(" has no defined original method");
+				throw new NullReferenceException(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
-			return AccessTools.MethodDelegate<DelegateType>(methodInfo, instance, !mergedFromType.nonVirtualDelegate);
+			return AccessTools.MethodDelegate<DelegateType>(methodInfo, instance, !mergedFromType.nonVirtualDelegate, null);
 		}
 
 		public static MethodBase GetOutsideCaller()
 		{
-			StackFrame[] frames = new StackTrace(true).GetFrames();
-			for (int i = 0; i < frames.Length; i++)
+			StackTrace stackTrace = new StackTrace(true);
+			foreach (StackFrame stackFrame in stackTrace.GetFrames())
 			{
-				MethodBase method = frames[i].GetMethod();
+				MethodBase method = stackFrame.GetMethod();
 				Type declaringType = method.DeclaringType;
 				if (((declaringType != null) ? declaringType.Namespace : null) != typeof(Harmony).Namespace)
 				{
@@ -1258,14 +1821,13 @@ namespace HarmonyLib
 		{
 			string text = string.Join(",", AccessTools.GetFieldNames(type).ToArray());
 			string text2 = string.Join(",", AccessTools.GetPropertyNames(type).ToArray());
-			throw new MissingMemberException(string.Concat(new string[]
-			{
-				string.Join(",", names),
-				"; available fields: ",
-				text,
-				"; available properties: ",
-				text2
-			}));
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(44, 3);
+			defaultInterpolatedStringHandler.AppendFormatted(string.Join(",", names));
+			defaultInterpolatedStringHandler.AppendLiteral("; available fields: ");
+			defaultInterpolatedStringHandler.AppendFormatted(text);
+			defaultInterpolatedStringHandler.AppendLiteral("; available properties: ");
+			defaultInterpolatedStringHandler.AppendFormatted(text2);
+			throw new MissingMemberException(defaultInterpolatedStringHandler.ToStringAndClear());
 		}
 
 		public static object GetDefaultValue(Type type)
@@ -1292,7 +1854,7 @@ namespace HarmonyLib
 			{
 				throw new ArgumentNullException("type");
 			}
-			ConstructorInfo constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, CallingConventions.Any, new Type[0], null);
+			ConstructorInfo constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, CallingConventions.Any, Array.Empty<Type>(), null);
 			if (constructor != null)
 			{
 				return constructor.Invoke(null);
@@ -1403,7 +1965,10 @@ namespace HarmonyLib
 			{
 				string text5 = ((pathRoot.Length > 0) ? (pathRoot + "." + name) : name);
 				object obj5 = ((processor != null) ? processor(text5, src, dst) : src.GetValue());
-				dst.SetValue(AccessTools.MakeDeepCopy(obj5, dst.GetValueType(), processor, text5));
+				if (dst.IsWriteable)
+				{
+					dst.SetValue(AccessTools.MakeDeepCopy(obj5, dst.GetValueType(), processor, text5));
+				}
 			});
 			return obj4;
 		}
@@ -1495,7 +2060,10 @@ namespace HarmonyLib
 				return AccessTools.IsStatic((Type)member);
 			}
 			IL_0091:
-			throw new ArgumentException(string.Format("Unknown member type: {0}", member.MemberType));
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(21, 1);
+			defaultInterpolatedStringHandler.AppendLiteral("Unknown member type: ");
+			defaultInterpolatedStringHandler.AppendFormatted<MemberTypes>(member.MemberType);
+			throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear());
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -1557,6 +2125,8 @@ namespace HarmonyLib
 			AccessTools.addHandlerCacheLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 		}
 
+		private static Type[] allTypesCached = null;
+
 		public static readonly BindingFlags all = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.SetField | BindingFlags.GetProperty | BindingFlags.SetProperty;
 
 		public static readonly BindingFlags allDeclared = AccessTools.all | BindingFlags.DeclaredOnly;
@@ -1570,5 +2140,11 @@ namespace HarmonyLib
 		public delegate ref F StructFieldRef<T, F>(ref T instance) where T : struct;
 
 		public delegate ref F FieldRef<F>();
+
+		[CompilerGenerated]
+		private static class <>O
+		{
+			public static Func<Assembly, IEnumerable<Type>> <0>__GetTypesFromAssembly;
+		}
 	}
 }

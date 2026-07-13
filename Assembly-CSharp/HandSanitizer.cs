@@ -275,7 +275,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IG
 	}
 
 	[AddComponentMenu("KMonoBehaviour/Workable/Work")]
-	public class Work : Workable, IGameObjectEffectDescriptor
+	public class Work : Workable
 	{
 		protected override void OnPrefabInit()
 		{

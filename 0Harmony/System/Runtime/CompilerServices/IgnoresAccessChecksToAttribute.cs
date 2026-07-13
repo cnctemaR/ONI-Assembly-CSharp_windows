@@ -2,8 +2,10 @@
 
 namespace System.Runtime.CompilerServices
 {
+	[NullableContext(1)]
+	[Nullable(0)]
 	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-	internal class IgnoresAccessChecksToAttribute : Attribute
+	internal sealed class IgnoresAccessChecksToAttribute : Attribute
 	{
 		public string AssemblyName { get; }
 

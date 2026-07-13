@@ -113,6 +113,22 @@ public static class ModUtil
 		Localization.GenerateStringsTemplate(locstring_tree_root, Path.Combine(Manager.GetDirectory(), "strings_templates"));
 	}
 
+	public static Texture2D LoadTexture(string path)
+	{
+		Texture2D texture2D = null;
+		if (File.Exists(path))
+		{
+			byte[] array = File.ReadAllBytes(path);
+			texture2D = new Texture2D(2, 2);
+			texture2D.LoadImage(array);
+		}
+		else
+		{
+			global::Debug.LogWarning("ModUtil: Texture file '" + path + "' not found");
+		}
+		return texture2D;
+	}
+
 	public enum BuildingOrdering
 	{
 		Before,

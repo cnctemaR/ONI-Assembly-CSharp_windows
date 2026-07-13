@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using UnityEngine.Analytics;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromDocs]
-	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
 	[NativeHeader("Modules/UnityAnalytics/RemoteSettings/RemoteSettings.h")]
+	[NativeHeader("UnityAnalyticsScriptingClasses.h")]
+	[ExcludeFromDocs]
+	[NativeHeader("Modules/UnityAnalyticsCommon/Public/UnityAnalyticsCommon.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class RemoteConfigSettings : IDisposable
 	{
@@ -49,8 +51,28 @@ namespace UnityEngine
 			GC.SuppressFinalize(this);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern IntPtr Internal_Create(RemoteConfigSettings rcs, string configKey);
+		internal unsafe static IntPtr Internal_Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] RemoteConfigSettings rcs, string configKey)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(configKey, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = configKey.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = RemoteConfigSettings.Internal_Create_Injected(rcs, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -67,20 +89,82 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool QueueConfig(string name, object param, int ver = 1, string prefix = "");
+		public unsafe static AnalyticsResult QueueConfig(string name, object param, int ver = 1, string prefix = "")
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = prefix.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				analyticsResult = RemoteConfigSettings.QueueConfig_Injected(ref managedSpanWrapper, param, ver, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return analyticsResult;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool SendDeviceInfoInConfigRequest();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void AddSessionTag(string tag);
+		public unsafe static void AddSessionTag(string tag)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(tag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = tag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				RemoteConfigSettings.AddSessionTag_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ForceUpdate();
+		public void ForceUpdate()
+		{
+			IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RemoteConfigSettings.ForceUpdate_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool WasLastUpdatedFromServer();
+		public bool WasLastUpdatedFromServer()
+		{
+			IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RemoteConfigSettings.WasLastUpdatedFromServer_Injected(intPtr);
+		}
 
 		[ExcludeFromDocs]
 		public int GetInt(string key)
@@ -88,8 +172,33 @@ namespace UnityEngine
 			return this.GetInt(key, 0);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetInt(string key, [DefaultValue("0")] int defaultValue);
+		public unsafe int GetInt(string key, [DefaultValue("0")] int defaultValue)
+		{
+			int int_Injected;
+			try
+			{
+				IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				int_Injected = RemoteConfigSettings.GetInt_Injected(intPtr, ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return int_Injected;
+		}
 
 		[ExcludeFromDocs]
 		public long GetLong(string key)
@@ -97,8 +206,33 @@ namespace UnityEngine
 			return this.GetLong(key, 0L);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern long GetLong(string key, [DefaultValue("0")] long defaultValue);
+		public unsafe long GetLong(string key, [DefaultValue("0")] long defaultValue)
+		{
+			long long_Injected;
+			try
+			{
+				IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				long_Injected = RemoteConfigSettings.GetLong_Injected(intPtr, ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return long_Injected;
+		}
 
 		[ExcludeFromDocs]
 		public float GetFloat(string key)
@@ -106,8 +240,33 @@ namespace UnityEngine
 			return this.GetFloat(key, 0f);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetFloat(string key, [DefaultValue("0.0F")] float defaultValue);
+		public unsafe float GetFloat(string key, [DefaultValue("0.0F")] float defaultValue)
+		{
+			float float_Injected;
+			try
+			{
+				IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				float_Injected = RemoteConfigSettings.GetFloat_Injected(intPtr, ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return float_Injected;
+		}
 
 		[ExcludeFromDocs]
 		public string GetString(string key)
@@ -115,8 +274,46 @@ namespace UnityEngine
 			return this.GetString(key, "");
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string GetString(string key, [DefaultValue("\"\"")] string defaultValue);
+		public unsafe string GetString(string key, [DefaultValue("\"\"")] string defaultValue)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(defaultValue, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = defaultValue.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				RemoteConfigSettings.GetString_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2, out managedSpanWrapper3);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				ManagedSpanWrapper managedSpanWrapper3;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper3);
+			}
+			return stringAndDispose;
+		}
 
 		[ExcludeFromDocs]
 		public bool GetBool(string key)
@@ -124,17 +321,81 @@ namespace UnityEngine
 			return this.GetBool(key, false);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetBool(string key, [DefaultValue("false")] bool defaultValue);
+		public unsafe bool GetBool(string key, [DefaultValue("false")] bool defaultValue)
+		{
+			bool bool_Injected;
+			try
+			{
+				IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				bool_Injected = RemoteConfigSettings.GetBool_Injected(intPtr, ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return bool_Injected;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasKey(string key);
+		public unsafe bool HasKey(string key)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = RemoteConfigSettings.HasKey_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetCount();
+		public int GetCount()
+		{
+			IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RemoteConfigSettings.GetCount_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string[] GetKeys();
+		public string[] GetKeys()
+		{
+			IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RemoteConfigSettings.GetKeys_Injected(intPtr);
+		}
 
 		public T GetObject<T>(string key = "")
 		{
@@ -172,8 +433,33 @@ namespace UnityEngine
 			return this.GetAsScriptingObject(type, defaultValue, key);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern object GetAsScriptingObject(Type t, object defaultValue, string key);
+		internal unsafe object GetAsScriptingObject(Type t, object defaultValue, string key)
+		{
+			object asScriptingObject_Injected;
+			try
+			{
+				IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				asScriptingObject_Injected = RemoteConfigSettings.GetAsScriptingObject_Injected(intPtr, t, defaultValue, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return asScriptingObject_Injected;
+		}
 
 		public IDictionary<string, object> GetDictionary(string key = "")
 		{
@@ -183,16 +469,96 @@ namespace UnityEngine
 			return dictionary;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void UseSafeLock();
+		internal void UseSafeLock()
+		{
+			IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RemoteConfigSettings.UseSafeLock_Injected(intPtr);
+		}
+
+		internal void ReleaseSafeLock()
+		{
+			IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			RemoteConfigSettings.ReleaseSafeLock_Injected(intPtr);
+		}
+
+		internal IntPtr GetSafeTopMap()
+		{
+			IntPtr intPtr = RemoteConfigSettings.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return RemoteConfigSettings.GetSafeTopMap_Injected(intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void ReleaseSafeLock();
+		private static extern IntPtr Internal_Create_Injected(RemoteConfigSettings rcs, ref ManagedSpanWrapper configKey);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern IntPtr GetSafeTopMap();
+		private static extern AnalyticsResult QueueConfig_Injected(ref ManagedSpanWrapper name, object param, int ver, ref ManagedSpanWrapper prefix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddSessionTag_Injected(ref ManagedSpanWrapper tag);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ForceUpdate_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool WasLastUpdatedFromServer_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetInt_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, [DefaultValue("0")] int defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetLong_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, [DefaultValue("0")] long defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetFloat_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, [DefaultValue("0.0F")] float defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetString_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, [DefaultValue("\"\"")] ref ManagedSpanWrapper defaultValue, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetBool_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key, [DefaultValue("false")] bool defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasKey_Injected(IntPtr _unity_self, ref ManagedSpanWrapper key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetKeys_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern object GetAsScriptingObject_Injected(IntPtr _unity_self, Type t, object defaultValue, ref ManagedSpanWrapper key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UseSafeLock_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseSafeLock_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSafeTopMap_Injected(IntPtr _unity_self);
 
 		[NonSerialized]
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(RemoteConfigSettings remoteConfigSettings)
+			{
+				return remoteConfigSettings.m_Ptr;
+			}
+		}
 	}
 }

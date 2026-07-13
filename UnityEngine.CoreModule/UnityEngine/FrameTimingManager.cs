@@ -14,8 +14,17 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CaptureFrameTimings();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern uint GetLatestTimings(uint numFrames, [Unmarshalled] FrameTiming[] timings);
+		public unsafe static uint GetLatestTimings(uint numFrames, FrameTiming[] timings)
+		{
+			Span<FrameTiming> span = new Span<FrameTiming>(timings);
+			uint latestTimings_Injected;
+			fixed (FrameTiming* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				latestTimings_Injected = FrameTimingManager.GetLatestTimings_Injected(numFrames, ref managedSpanWrapper);
+			}
+			return latestTimings_Injected;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetVSyncsPerSecond();
@@ -25,5 +34,8 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern ulong GetCpuTimerFrequency();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetLatestTimings_Injected(uint numFrames, ref ManagedSpanWrapper timings);
 	}
 }

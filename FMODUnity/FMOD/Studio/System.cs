@@ -7,12 +7,12 @@ namespace FMOD.Studio
 	{
 		public static RESULT create(out FMOD.Studio.System system)
 		{
-			return FMOD.Studio.System.FMOD_Studio_System_Create(out system.handle, 131619U);
+			return FMOD.Studio.System.FMOD_Studio_System_Create(out system.handle, 131858U);
 		}
 
 		public RESULT setAdvancedSettings(ADVANCEDSETTINGS settings)
 		{
-			settings.cbsize = MarshalHelper.SizeOf(typeof(ADVANCEDSETTINGS));
+			settings.cbsize = Marshal.SizeOf<ADVANCEDSETTINGS>();
 			return FMOD.Studio.System.FMOD_Studio_System_SetAdvancedSettings(this.handle, ref settings);
 		}
 
@@ -32,7 +32,7 @@ namespace FMOD.Studio
 
 		public RESULT getAdvancedSettings(out ADVANCEDSETTINGS settings)
 		{
-			settings.cbsize = MarshalHelper.SizeOf(typeof(ADVANCEDSETTINGS));
+			settings.cbsize = Marshal.SizeOf<ADVANCEDSETTINGS>();
 			return FMOD.Studio.System.FMOD_Studio_System_GetAdvancedSettings(this.handle, out settings);
 		}
 
@@ -358,9 +358,14 @@ namespace FMOD.Studio
 			return result;
 		}
 
+		public RESULT loadBankMemory(IntPtr buffer, int length, LOAD_BANK_FLAGS flags, out Bank bank)
+		{
+			return FMOD.Studio.System.FMOD_Studio_System_LoadBankMemory(this.handle, buffer, length, LOAD_MEMORY_MODE.LOAD_MEMORY, flags, out bank.handle);
+		}
+
 		public RESULT loadBankCustom(BANK_INFO info, LOAD_BANK_FLAGS flags, out Bank bank)
 		{
-			info.size = MarshalHelper.SizeOf(typeof(BANK_INFO));
+			info.size = Marshal.SizeOf<BANK_INFO>();
 			return FMOD.Studio.System.FMOD_Studio_System_LoadBankCustom(this.handle, ref info, flags, out bank.handle);
 		}
 

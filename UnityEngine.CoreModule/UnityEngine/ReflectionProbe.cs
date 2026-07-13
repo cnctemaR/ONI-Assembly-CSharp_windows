@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Rendering;
@@ -14,15 +15,29 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Camera/ReflectionProbes.h")]
 	public sealed class ReflectionProbe : Behaviour
 	{
-		[NativeName("ProbeType")]
-		[Obsolete("type property has been deprecated. Starting with Unity 5.4, the only supported reflection probe type is Cube.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public extern ReflectionProbeType type
+		[Obsolete("type property has been deprecated. Starting with Unity 5.4, the only supported reflection probe type is Cube.", true)]
+		[NativeName("ProbeType")]
+		public ReflectionProbeType type
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_type_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_type_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("BoxSize")]
@@ -30,13 +45,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_size_Injected(out vector);
+				ReflectionProbe.get_size_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_size_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_size_Injected(intPtr, ref value);
 			}
 		}
 
@@ -45,41 +70,93 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_center_Injected(out vector);
+				ReflectionProbe.get_center_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_center_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_center_Injected(intPtr, ref value);
 			}
 		}
 
 		[NativeName("Near")]
-		public extern float nearClipPlane
+		public float nearClipPlane
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_nearClipPlane_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_nearClipPlane_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("Far")]
-		public extern float farClipPlane
+		public float farClipPlane
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_farClipPlane_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_farClipPlane_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("IntensityMultiplier")]
-		public extern float intensity
+		public float intensity
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_intensity_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_intensity_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("GlobalAABB")]
@@ -87,152 +164,384 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_bounds_Injected(out bounds);
+				ReflectionProbe.get_bounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 		}
 
 		[NativeName("HDR")]
-		public extern bool hdr
+		public bool hdr
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_hdr_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_hdr_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("RenderDynamicObjects")]
-		public extern bool renderDynamicObjects
+		public bool renderDynamicObjects
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_renderDynamicObjects_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_renderDynamicObjects_Injected(intPtr, value);
+			}
 		}
 
-		public extern float shadowDistance
+		public float shadowDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_shadowDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_shadowDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern int resolution
+		public int resolution
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_resolution_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_resolution_Injected(intPtr, value);
+			}
 		}
 
-		public extern int cullingMask
+		public int cullingMask
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_cullingMask_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_cullingMask_Injected(intPtr, value);
+			}
 		}
 
-		public extern ReflectionProbeClearFlags clearFlags
+		public ReflectionProbeClearFlags clearFlags
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_clearFlags_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_clearFlags_Injected(intPtr, value);
+			}
 		}
 
 		public Color backgroundColor
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_backgroundColor_Injected(out color);
+				ReflectionProbe.get_backgroundColor_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_backgroundColor_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_backgroundColor_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern float blendDistance
+		public float blendDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_blendDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_blendDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool boxProjection
+		public bool boxProjection
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_boxProjection_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_boxProjection_Injected(intPtr, value);
+			}
 		}
 
-		public extern ReflectionProbeMode mode
+		public ReflectionProbeMode mode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_mode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_mode_Injected(intPtr, value);
+			}
 		}
 
-		public extern int importance
+		public int importance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_importance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_importance_Injected(intPtr, value);
+			}
 		}
 
-		public extern ReflectionProbeRefreshMode refreshMode
+		public ReflectionProbeRefreshMode refreshMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_refreshMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_refreshMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern ReflectionProbeTimeSlicingMode timeSlicingMode
+		public ReflectionProbeTimeSlicingMode timeSlicingMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ReflectionProbe.get_timeSlicingMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_timeSlicingMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern Texture bakedTexture
+		public Texture bakedTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture>(ReflectionProbe.get_bakedTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_bakedTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(value));
+			}
 		}
 
-		public extern Texture customBakedTexture
+		public Texture customBakedTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture>(ReflectionProbe.get_customBakedTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_customBakedTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(value));
+			}
 		}
 
-		public extern RenderTexture realtimeTexture
+		public RenderTexture realtimeTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<RenderTexture>(ReflectionProbe.get_realtimeTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ReflectionProbe.set_realtimeTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(value));
+			}
 		}
 
-		public extern Texture texture
+		public Texture texture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture>(ReflectionProbe.get_texture_Injected(intPtr));
+			}
 		}
 
 		public Vector4 textureHDRDecodeValues
@@ -240,14 +549,26 @@ namespace UnityEngine
 			[NativeName("CalculateHDRDecodeValues")]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_textureHDRDecodeValues_Injected(out vector);
+				ReflectionProbe.get_textureHDRDecodeValues_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Reset();
+		public void Reset()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReflectionProbe.Reset_Injected(intPtr);
+		}
 
 		public int RenderProbe()
 		{
@@ -259,19 +580,35 @@ namespace UnityEngine
 			return this.ScheduleRender(this.timeSlicingMode, targetTexture);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsFinishedRendering(int renderId);
+		public bool IsFinishedRendering(int renderId)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return ReflectionProbe.IsFinishedRendering_Injected(intPtr, renderId);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int ScheduleRender(ReflectionProbeTimeSlicingMode timeSlicingMode, RenderTexture targetTexture);
+		private int ScheduleRender(ReflectionProbeTimeSlicingMode timeSlicingMode, RenderTexture targetTexture)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ReflectionProbe>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return ReflectionProbe.ScheduleRender_Injected(intPtr, timeSlicingMode, Object.MarshalledUnityObject.Marshal<RenderTexture>(targetTexture));
+		}
 
-		[FreeFunction("CubemapGPUBlend")]
 		[NativeHeader("Runtime/Camera/CubemapGPUUtility.h")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool BlendCubemap(Texture src, Texture dst, float blend, RenderTexture target);
+		[FreeFunction("CubemapGPUBlend")]
+		public static bool BlendCubemap(Texture src, Texture dst, float blend, RenderTexture target)
+		{
+			return ReflectionProbe.BlendCubemap_Injected(Object.MarshalledUnityObject.Marshal<Texture>(src), Object.MarshalledUnityObject.Marshal<Texture>(dst), blend, Object.MarshalledUnityObject.Marshal<RenderTexture>(target));
+		}
 
-		[StaticAccessor("GetReflectionProbes()")]
 		[NativeMethod("UpdateSampleData")]
+		[StaticAccessor("GetReflectionProbes()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UpdateCachedState();
 
@@ -301,10 +638,12 @@ namespace UnityEngine
 		}
 
 		[StaticAccessor("GetReflectionProbes()")]
-		public static extern Texture defaultTexture
+		public static Texture defaultTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Texture>(ReflectionProbe.get_defaultTexture_Injected());
+			}
 		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -380,31 +719,163 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_size_Injected(out Vector3 ret);
+		private static extern ReflectionProbeType get_type_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_size_Injected(ref Vector3 value);
+		private static extern void set_type_Injected(IntPtr _unity_self, ReflectionProbeType value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_center_Injected(out Vector3 ret);
+		private static extern void get_size_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_center_Injected(ref Vector3 value);
+		private static extern void set_size_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_bounds_Injected(out Bounds ret);
+		private static extern void get_center_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_backgroundColor_Injected(out Color ret);
+		private static extern void set_center_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_backgroundColor_Injected(ref Color value);
+		private static extern float get_nearClipPlane_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_textureHDRDecodeValues_Injected(out Vector4 ret);
+		private static extern void set_nearClipPlane_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_farClipPlane_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_farClipPlane_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_intensity_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_intensity_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_bounds_Injected(IntPtr _unity_self, out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_hdr_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_hdr_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_renderDynamicObjects_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_renderDynamicObjects_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_shadowDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_shadowDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_resolution_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_resolution_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_cullingMask_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cullingMask_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ReflectionProbeClearFlags get_clearFlags_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_clearFlags_Injected(IntPtr _unity_self, ReflectionProbeClearFlags value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_backgroundColor_Injected(IntPtr _unity_self, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_backgroundColor_Injected(IntPtr _unity_self, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_blendDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_blendDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_boxProjection_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_boxProjection_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ReflectionProbeMode get_mode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_mode_Injected(IntPtr _unity_self, ReflectionProbeMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_importance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_importance_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ReflectionProbeRefreshMode get_refreshMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_refreshMode_Injected(IntPtr _unity_self, ReflectionProbeRefreshMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ReflectionProbeTimeSlicingMode get_timeSlicingMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_timeSlicingMode_Injected(IntPtr _unity_self, ReflectionProbeTimeSlicingMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_bakedTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_bakedTexture_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_customBakedTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_customBakedTexture_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_realtimeTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_realtimeTexture_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_texture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_textureHDRDecodeValues_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Reset_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsFinishedRendering_Injected(IntPtr _unity_self, int renderId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ScheduleRender_Injected(IntPtr _unity_self, ReflectionProbeTimeSlicingMode timeSlicingMode, IntPtr targetTexture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool BlendCubemap_Injected(IntPtr src, IntPtr dst, float blend, IntPtr target);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_defaultTextureHDRDecodeValues_Injected(out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_defaultTexture_Injected();
 
 		private static Dictionary<int, Action<Texture>> registeredDefaultReflectionSetActions = new Dictionary<int, Action<Texture>>();
 

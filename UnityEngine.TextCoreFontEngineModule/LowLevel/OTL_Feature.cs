@@ -8,7 +8,7 @@ namespace UnityEngine.TextCore.LowLevel
 	[DebuggerDisplay("Feature = {tag},  Lookup Count = {lookupIndexes.Length}")]
 	internal struct OTL_Feature
 	{
-		public string tag;
+		public OTL_Tag tag;
 
 		public uint[] lookupIndexes;
 	}

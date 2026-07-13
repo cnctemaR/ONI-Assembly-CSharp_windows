@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("Modules/XR/Subsystems/Meshing/XRMeshBindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/XR/Subsystems/Meshing/XRMeshBindings.h")]
 	public enum MeshGenerationStatus
 	{
 		Success,

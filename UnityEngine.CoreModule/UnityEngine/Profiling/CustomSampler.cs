@@ -9,17 +9,17 @@ using UnityEngine.Scripting;
 namespace UnityEngine.Profiling
 {
 	[NativeHeader("Runtime/Profiler/ScriptBindings/Sampler.bindings.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Profiler/Marker.h")]
+	[UsedByNativeCode]
 	public sealed class CustomSampler : Sampler
 	{
 		internal CustomSampler()
 		{
 		}
 
-		internal CustomSampler(IntPtr ptr)
+		private CustomSampler(IntPtr ptr)
+			: base(ptr)
 		{
-			this.m_Ptr = ptr;
 		}
 
 		public static CustomSampler Create(string name, bool collectGpuData = false)
@@ -38,27 +38,35 @@ namespace UnityEngine.Profiling
 			return customSampler;
 		}
 
-		[Conditional("ENABLE_PROFILER")]
 		[IgnoredByDeepProfiler]
+		[Conditional("ENABLE_PROFILER")]
 		public void Begin()
 		{
 			ProfilerUnsafeUtility.BeginSample(this.m_Ptr);
 		}
 
-		[IgnoredByDeepProfiler]
 		[Conditional("ENABLE_PROFILER")]
+		[IgnoredByDeepProfiler]
 		public void Begin(Object targetObject)
 		{
 			ProfilerUnsafeUtility.Internal_BeginWithObject(this.m_Ptr, targetObject);
 		}
 
-		[IgnoredByDeepProfiler]
 		[Conditional("ENABLE_PROFILER")]
+		[IgnoredByDeepProfiler]
 		public void End()
 		{
 			ProfilerUnsafeUtility.EndSample(this.m_Ptr);
 		}
 
 		internal static CustomSampler s_InvalidCustomSampler = new CustomSampler();
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(CustomSampler customSampler)
+			{
+				return customSampler.m_Ptr;
+			}
+		}
 	}
 }

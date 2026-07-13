@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[Obsolete("This struct is not for public use.")]
 	[UsedByNativeCode]
+	[Obsolete("This struct is not for public use.")]
 	public struct CacheIndex
 	{
 		public string name;

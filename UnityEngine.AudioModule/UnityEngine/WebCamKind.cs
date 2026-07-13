@@ -4,7 +4,8 @@ namespace UnityEngine
 {
 	public enum WebCamKind
 	{
-		WideAngle = 1,
+		Unknown,
+		WideAngle,
 		Telephoto,
 		ColorAndDepth,
 		UltraWideAngle

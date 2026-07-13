@@ -52,18 +52,6 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("JointDriveMode is obsolete")]
-		public JointDriveMode mode
-		{
-			get
-			{
-				return JointDriveMode.None;
-			}
-			set
-			{
-			}
-		}
-
 		private float m_PositionSpring;
 
 		private float m_PositionDamper;

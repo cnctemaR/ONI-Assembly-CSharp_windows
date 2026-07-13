@@ -1,0 +1,13 @@
+﻿using System;
+
+namespace FMOD
+{
+	public enum DSP_MULTIBAND_DYNAMICS_MODE_TYPE
+	{
+		DISABLED,
+		COMPRESS_UP,
+		COMPRESS_DOWN,
+		EXPAND_UP,
+		EXPAND_DOWN
+	}
+}

@@ -8,7 +8,7 @@ namespace NodeEditorFramework
 	{
 		public static void SetupReceivers()
 		{
-			NodeEditorCallbacks.callbackReceiver = new List<NodeEditorCallbackReceiver>(global::UnityEngine.Object.FindObjectsOfType<NodeEditorCallbackReceiver>());
+			NodeEditorCallbacks.callbackReceiver = new List<NodeEditorCallbackReceiver>(global::UnityEngine.Object.FindObjectsByType<NodeEditorCallbackReceiver>(FindObjectsSortMode.InstanceID));
 			NodeEditorCallbacks.receiverCount = NodeEditorCallbacks.callbackReceiver.Count;
 		}
 

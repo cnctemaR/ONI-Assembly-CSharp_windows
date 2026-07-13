@@ -6,45 +6,77 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType(Header = "Runtime/Geometry/AABB.h")]
-	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[NativeHeader("Runtime/Geometry/Intersection.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeClass("AABB")]
 	[NativeHeader("Runtime/Geometry/Ray.h")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeHeader("Runtime/Geometry/Intersection.h")]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[NativeType(Header = "Runtime/Geometry/AABB.h")]
 	[NativeHeader("Runtime/Geometry/AABB.h")]
 	public struct Bounds : IEquatable<Bounds>, IFormattable
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Bounds(Vector3 center, Vector3 size)
 		{
-			this.m_Center = center;
-			this.m_Extents = size * 0.5f;
+			this.m_Center.x = center.x;
+			this.m_Center.y = center.y;
+			this.m_Center.z = center.z;
+			this.m_Extents.x = size.x * 0.5f;
+			this.m_Extents.y = size.y * 0.5f;
+			this.m_Extents.z = size.z * 0.5f;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override int GetHashCode()
+		public Bounds(in Vector3 center, in Vector3 size)
 		{
-			return this.center.GetHashCode() ^ (this.extents.GetHashCode() << 2);
+			this.m_Center.x = center.x;
+			this.m_Center.y = center.y;
+			this.m_Center.z = center.z;
+			this.m_Extents.x = size.x * 0.5f;
+			this.m_Extents.y = size.y * 0.5f;
+			this.m_Extents.z = size.z * 0.5f;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool Equals(object other)
+		public override readonly int GetHashCode()
 		{
-			bool flag = !(other is Bounds);
-			return !flag && this.Equals((Bounds)other);
+			return this.m_Center.GetHashCode() ^ (this.m_Extents.GetHashCode() << 2);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Equals(Bounds other)
+		public override readonly bool Equals(object other)
 		{
-			return this.center.Equals(other.center) && this.extents.Equals(other.extents);
+			Bounds bounds;
+			bool flag;
+			if (other is Bounds)
+			{
+				bounds = (Bounds)other;
+				flag = true;
+			}
+			else
+			{
+				flag = false;
+			}
+			bool flag2 = flag;
+			return flag2 && this.Equals(in bounds);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Equals(Bounds other)
+		{
+			return this.m_Center.Equals(in other.m_Center) && this.m_Extents.Equals(in other.m_Extents);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Equals(in Bounds other)
+		{
+			return this.m_Center.Equals(in other.m_Center) && this.m_Extents.Equals(in other.m_Extents);
 		}
 
 		public Vector3 center
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_Center;
 			}
@@ -58,21 +90,28 @@ namespace UnityEngine
 		public Vector3 size
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
-				return this.m_Extents * 2f;
+				return new Vector3
+				{
+					x = this.m_Extents.x * 2f,
+					y = this.m_Extents.y * 2f,
+					z = this.m_Extents.z * 2f
+				};
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				this.m_Extents = value * 0.5f;
+				this.m_Extents.x = value.x * 0.5f;
+				this.m_Extents.y = value.y * 0.5f;
+				this.m_Extents.z = value.z * 0.5f;
 			}
 		}
 
 		public Vector3 extents
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_Extents;
 			}
@@ -86,35 +125,47 @@ namespace UnityEngine
 		public Vector3 min
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
-				return this.center - this.extents;
+				return new Vector3
+				{
+					x = this.m_Center.x - this.m_Extents.x,
+					y = this.m_Center.y - this.m_Extents.y,
+					z = this.m_Center.z - this.m_Extents.z
+				};
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				this.SetMinMax(value, this.max);
+				Vector3 max = this.max;
+				this.SetMinMax(in value, in max);
 			}
 		}
 
 		public Vector3 max
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
-				return this.center + this.extents;
+				return new Vector3
+				{
+					x = this.m_Center.x + this.m_Extents.x,
+					y = this.m_Center.y + this.m_Extents.y,
+					z = this.m_Center.z + this.m_Extents.z
+				};
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
-				this.SetMinMax(this.min, value);
+				Vector3 min = this.min;
+				this.SetMinMax(in min, in value);
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Bounds lhs, Bounds rhs)
 		{
-			return lhs.center == rhs.center && lhs.extents == rhs.extents;
+			return lhs.m_Center == rhs.m_Center && lhs.m_Extents == rhs.m_Extents;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,68 +177,147 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void SetMinMax(Vector3 min, Vector3 max)
 		{
-			this.extents = (max - min) * 0.5f;
-			this.center = min + this.extents;
+			this.m_Extents.x = (max.x - min.x) * 0.5f;
+			this.m_Extents.y = (max.y - min.y) * 0.5f;
+			this.m_Extents.z = (max.z - min.z) * 0.5f;
+			this.m_Center.x = min.x + this.m_Extents.x;
+			this.m_Center.y = min.y + this.m_Extents.y;
+			this.m_Center.z = min.z + this.m_Extents.z;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void SetMinMax(in Vector3 min, in Vector3 max)
+		{
+			this.m_Extents.x = (max.x - min.x) * 0.5f;
+			this.m_Extents.y = (max.y - min.y) * 0.5f;
+			this.m_Extents.z = (max.z - min.z) * 0.5f;
+			this.m_Center.x = min.x + this.m_Extents.x;
+			this.m_Center.y = min.y + this.m_Extents.y;
+			this.m_Center.z = min.z + this.m_Extents.z;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Encapsulate(Vector3 point)
 		{
-			this.SetMinMax(Vector3.Min(this.min, point), Vector3.Max(this.max, point));
+			Vector3 vector = this.min;
+			Vector3 vector2 = Vector3.Min(in vector, in point);
+			vector = this.max;
+			Vector3 vector3 = Vector3.Max(in vector, in point);
+			this.SetMinMax(in vector2, in vector3);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Encapsulate(in Vector3 point)
+		{
+			Vector3 vector = this.min;
+			Vector3 vector2 = Vector3.Min(in vector, in point);
+			vector = this.max;
+			Vector3 vector3 = Vector3.Max(in vector, in point);
+			this.SetMinMax(in vector2, in vector3);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Encapsulate(Bounds bounds)
 		{
-			this.Encapsulate(bounds.center - bounds.extents);
-			this.Encapsulate(bounds.center + bounds.extents);
+			Vector3 min = bounds.min;
+			Vector3 max = bounds.max;
+			this.Encapsulate(in min);
+			this.Encapsulate(in max);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Encapsulate(in Bounds bounds)
+		{
+			Vector3 min = bounds.min;
+			Vector3 max = bounds.max;
+			this.Encapsulate(in min);
+			this.Encapsulate(in max);
 		}
 
 		public void Expand(float amount)
 		{
 			amount *= 0.5f;
-			this.extents += new Vector3(amount, amount, amount);
+			this.m_Extents.x = this.m_Extents.x + amount;
+			this.m_Extents.y = this.m_Extents.y + amount;
+			this.m_Extents.z = this.m_Extents.z + amount;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Expand(Vector3 amount)
 		{
-			this.extents += amount * 0.5f;
+			this.m_Extents.x = this.m_Extents.x + amount.x * 0.5f;
+			this.m_Extents.y = this.m_Extents.y + amount.y * 0.5f;
+			this.m_Extents.z = this.m_Extents.z + amount.z * 0.5f;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Intersects(Bounds bounds)
+		public void Expand(in Vector3 amount)
 		{
-			return this.min.x <= bounds.max.x && this.max.x >= bounds.min.x && this.min.y <= bounds.max.y && this.max.y >= bounds.min.y && this.min.z <= bounds.max.z && this.max.z >= bounds.min.z;
+			this.m_Extents.x = this.m_Extents.x + amount.x * 0.5f;
+			this.m_Extents.y = this.m_Extents.y + amount.y * 0.5f;
+			this.m_Extents.z = this.m_Extents.z + amount.z * 0.5f;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool IntersectRay(Ray ray)
+		public readonly bool Intersects(Bounds bounds)
+		{
+			Vector3 min = this.min;
+			Vector3 max = this.max;
+			Vector3 min2 = bounds.min;
+			Vector3 max2 = bounds.max;
+			return min.x <= max2.x && max.x >= min2.x && min.y <= max2.y && max.y >= min2.y && min.z <= max2.z && max.z >= min2.z;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Intersects(in Bounds bounds)
+		{
+			Vector3 min = this.min;
+			Vector3 max = this.max;
+			Vector3 min2 = bounds.min;
+			Vector3 max2 = bounds.max;
+			return min.x <= max2.x && max.x >= min2.x && min.y <= max2.y && max.y >= min2.y && min.z <= max2.z && max.z >= min2.z;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool IntersectRay(Ray ray)
 		{
 			float num;
-			return Bounds.IntersectRayAABB(ray, this, out num);
+			return Bounds.IntersectRayAABB(in ray, in this, out num);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool IntersectRay(Ray ray, out float distance)
+		public readonly bool IntersectRay(in Ray ray)
 		{
-			return Bounds.IntersectRayAABB(ray, this, out distance);
+			float num;
+			return Bounds.IntersectRayAABB(in ray, in this, out num);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override string ToString()
+		public readonly bool IntersectRay(Ray ray, out float distance)
+		{
+			return Bounds.IntersectRayAABB(in ray, in this, out distance);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool IntersectRay(in Ray ray, out float distance)
+		{
+			return Bounds.IntersectRayAABB(in ray, in this, out distance);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override readonly string ToString()
 		{
 			return this.ToString(null, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format)
+		public readonly string ToString(string format)
 		{
 			return this.ToString(format, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format, IFormatProvider formatProvider)
+		public readonly string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = string.IsNullOrEmpty(format);
 			if (flag)
@@ -199,50 +329,67 @@ namespace UnityEngine
 			{
 				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
-			return UnityString.Format("Center: {0}, Extents: {1}", new object[]
-			{
-				this.m_Center.ToString(format, formatProvider),
-				this.m_Extents.ToString(format, formatProvider)
-			});
+			return string.Format("Center: {0}, Extents: {1}", this.m_Center.ToString(format, formatProvider), this.m_Extents.ToString(format, formatProvider));
 		}
 
 		[NativeMethod("IsInside", IsThreadSafe = true)]
-		public bool Contains(Vector3 point)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private readonly extern bool Internal_Contains(in Vector3 point);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Contains(Vector3 point)
 		{
-			return Bounds.Contains_Injected(ref this, ref point);
+			return this.Internal_Contains(in point);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Contains(in Vector3 point)
+		{
+			return this.Internal_Contains(in point);
 		}
 
 		[FreeFunction("BoundsScripting::SqrDistance", HasExplicitThis = true, IsThreadSafe = true)]
-		public float SqrDistance(Vector3 point)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private readonly extern float Internal_SqrDistance(in Vector3 point);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly float SqrDistance(Vector3 point)
 		{
-			return Bounds.SqrDistance_Injected(ref this, ref point);
+			return this.Internal_SqrDistance(in point);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly float SqrDistance(in Vector3 point)
+		{
+			return this.Internal_SqrDistance(in point);
 		}
 
 		[FreeFunction("IntersectRayAABB", IsThreadSafe = true)]
-		private static bool IntersectRayAABB(Ray ray, Bounds bounds, out float dist)
-		{
-			return Bounds.IntersectRayAABB_Injected(ref ray, ref bounds, out dist);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IntersectRayAABB(in Ray ray, in Bounds bounds, out float dist);
 
 		[FreeFunction("BoundsScripting::ClosestPoint", HasExplicitThis = true, IsThreadSafe = true)]
-		public Vector3 ClosestPoint(Vector3 point)
+		private readonly Vector3 Internal_ClosestPoint(in Vector3 point)
 		{
 			Vector3 vector;
-			Bounds.ClosestPoint_Injected(ref this, ref point, out vector);
+			Bounds.Internal_ClosestPoint_Injected(ref this, in point, out vector);
 			return vector;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Contains_Injected(ref Bounds _unity_self, ref Vector3 point);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly Vector3 ClosestPoint(Vector3 point)
+		{
+			return this.Internal_ClosestPoint(in point);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly Vector3 ClosestPoint(in Vector3 point)
+		{
+			return this.Internal_ClosestPoint(in point);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float SqrDistance_Injected(ref Bounds _unity_self, ref Vector3 point);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IntersectRayAABB_Injected(ref Ray ray, ref Bounds bounds, out float dist);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ClosestPoint_Injected(ref Bounds _unity_self, ref Vector3 point, out Vector3 ret);
+		private static extern void Internal_ClosestPoint_Injected(ref Bounds _unity_self, in Vector3 point, out Vector3 ret);
 
 		private Vector3 m_Center;
 

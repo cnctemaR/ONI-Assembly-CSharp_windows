@@ -2,7 +2,7 @@
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public struct NamespaceEntry
+	internal struct NamespaceEntry
 	{
 		public NamespaceEntry(string name, int index, string[] using_clauses, int parent)
 		{

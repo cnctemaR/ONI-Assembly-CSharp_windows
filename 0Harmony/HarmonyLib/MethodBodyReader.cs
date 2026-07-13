@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoMod.Utils;
-using MonoMod.Utils.Cil;
 
 namespace HarmonyLib
 {
@@ -44,7 +42,7 @@ namespace HarmonyLib
 			int? num2 = num;
 			if (num2.GetValueOrDefault() == 0)
 			{
-				this.ilBytes = new ByteBuffer(new byte[0]);
+				this.ilBytes = new ByteBuffer(Array.Empty<byte>());
 				this.ilInstructions = new List<ILInstruction>();
 			}
 			else
@@ -104,11 +102,6 @@ namespace HarmonyLib
 			this.debug = debug;
 		}
 
-		internal void SetArgumentShift(bool argumentShift)
-		{
-			this.argumentShift = argumentShift;
-		}
-
 		internal void GenerateInstructions()
 		{
 			while (this.ilBytes.position < this.ilBytes.buffer.Length)
@@ -133,18 +126,36 @@ namespace HarmonyLib
 			{
 				return;
 			}
+			if (methodInfo.ReflectedType != null)
+			{
+				return;
+			}
 			DllImportAttribute dllImportAttribute = methodInfo.GetCustomAttributes(false).OfType<DllImportAttribute>().FirstOrDefault<DllImportAttribute>();
 			if (dllImportAttribute == null)
 			{
 				return;
 			}
+			string[] array = (from p in methodInfo.GetParameters()
+				select p.ParameterType.FullName ?? p.ParameterType.Name).ToArray<string>();
+			string text = string.Join("_", array);
+			string text2 = ((text.Length > 0) ? text.GetHashCode().ToString("X") : "0");
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(2, 3);
 			Type declaringType = methodInfo.DeclaringType;
-			AssemblyName assemblyName = new AssemblyName((((declaringType != null) ? declaringType.FullName : null) ?? "").Replace(".", "_") + "_" + methodInfo.Name);
-			TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run).DefineDynamicModule(assemblyName.Name).DefineType("NativeMethodHolder", TypeAttributes.Public | TypeAttributes.UnicodeClass);
+			defaultInterpolatedStringHandler.AppendFormatted((((declaringType != null) ? declaringType.FullName : null) ?? "").Replace(".", "_"));
+			defaultInterpolatedStringHandler.AppendLiteral("_");
+			defaultInterpolatedStringHandler.AppendFormatted(methodInfo.Name);
+			defaultInterpolatedStringHandler.AppendLiteral("_");
+			defaultInterpolatedStringHandler.AppendFormatted(text2);
+			string text3 = defaultInterpolatedStringHandler.ToStringAndClear();
+			AssemblyName assemblyName = new AssemblyName(text3);
+			AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+			ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
+			TypeBuilder typeBuilder = moduleBuilder.DefineType("NativeMethodHolder", TypeAttributes.Public | TypeAttributes.UnicodeClass);
 			MethodBuilder methodBuilder = typeBuilder.DefinePInvokeMethod(methodInfo.Name, dllImportAttribute.Value, MethodAttributes.FamANDAssem | MethodAttributes.Family | MethodAttributes.Static | MethodAttributes.PinvokeImpl, CallingConventions.Standard, methodInfo.ReturnType, (from x in methodInfo.GetParameters()
 				select x.ParameterType).ToArray<Type>(), dllImportAttribute.CallingConvention, dllImportAttribute.CharSet);
 			methodBuilder.SetImplementationFlags(methodBuilder.GetMethodImplementationFlags() | MethodImplAttributes.PreserveSig);
-			MethodInfo methodInfo2 = typeBuilder.CreateType().GetMethod(methodInfo.Name);
+			Type type = typeBuilder.CreateType();
+			MethodInfo methodInfo2 = type.GetMethod(methodInfo.Name);
 			int num = this.method.GetParameters().Length;
 			for (int i = 0; i < num; i++)
 			{
@@ -211,34 +222,58 @@ namespace HarmonyLib
 				int tryOffset = exceptionHandlingClause.TryOffset;
 				int handlerOffset = exceptionHandlingClause.HandlerOffset;
 				int num = exceptionHandlingClause.HandlerOffset + exceptionHandlingClause.HandlerLength - 1;
-				this.GetInstruction(tryOffset, false).blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock, null));
-				this.GetInstruction(num, true).blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock, null));
+				ILInstruction instruction = this.GetInstruction(tryOffset, false);
+				instruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock, null));
+				ILInstruction instruction2 = this.GetInstruction(num, true);
+				instruction2.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock, null));
 				switch (exceptionHandlingClause.Flags)
 				{
 				case ExceptionHandlingClauseOptions.Clause:
-					this.GetInstruction(handlerOffset, false).blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginCatchBlock, exceptionHandlingClause.CatchType));
+				{
+					ILInstruction instruction3 = this.GetInstruction(handlerOffset, false);
+					instruction3.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginCatchBlock, exceptionHandlingClause.CatchType));
 					break;
+				}
 				case ExceptionHandlingClauseOptions.Filter:
-					this.GetInstruction(exceptionHandlingClause.FilterOffset, false).blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptFilterBlock, null));
+				{
+					ILInstruction instruction4 = this.GetInstruction(exceptionHandlingClause.FilterOffset, false);
+					instruction4.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptFilterBlock, null));
 					break;
+				}
 				case ExceptionHandlingClauseOptions.Finally:
-					this.GetInstruction(handlerOffset, false).blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFinallyBlock, null));
+				{
+					ILInstruction instruction5 = this.GetInstruction(handlerOffset, false);
+					instruction5.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFinallyBlock, null));
 					break;
+				}
 				case ExceptionHandlingClauseOptions.Fault:
-					this.GetInstruction(handlerOffset, false).blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFaultBlock, null));
+				{
+					ILInstruction instruction6 = this.GetInstruction(handlerOffset, false);
+					instruction6.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFaultBlock, null));
 					break;
+				}
 				}
 			}
 		}
 
-		internal List<CodeInstruction> FinalizeILCodes(Emitter emitter, List<MethodInfo> transpilers, List<Label> endLabels, out bool hasReturnCode)
+		private bool EndsInDeadCode(List<CodeInstruction> list)
+		{
+			int count = list.Count;
+			if (count < 2 || list.Last<CodeInstruction>().opcode != OpCodes.Throw)
+			{
+				return false;
+			}
+			return list.GetRange(0, count - 1).All<CodeInstruction>((CodeInstruction code) => code.opcode != OpCodes.Ret);
+		}
+
+		internal List<CodeInstruction> FinalizeILCodes(List<MethodInfo> transpilers, bool stripLastReturn, out bool hasReturnCode, out bool methodEndsInDeadCode, List<Label> endLabels)
 		{
 			hasReturnCode = false;
+			methodEndsInDeadCode = false;
 			if (this.generator == null)
 			{
 				return null;
 			}
-			Label label;
 			foreach (ILInstruction ilinstruction in this.ilInstructions)
 			{
 				OperandType operandType = ilinstruction.opcode.OperandType;
@@ -259,7 +294,7 @@ namespace HarmonyLib
 							List<Label> list = new List<Label>();
 							foreach (ILInstruction ilinstruction2 in array)
 							{
-								label = this.generator.DefineLabel();
+								Label label = this.generator.DefineLabel();
 								ilinstruction2.labels.Add(label);
 								list.Add(label);
 							}
@@ -277,123 +312,24 @@ namespace HarmonyLib
 					ilinstruction.argument = label2;
 				}
 			}
-			CodeTranspiler codeTranspiler = new CodeTranspiler(this.ilInstructions, this.argumentShift);
-			transpilers.Do<MethodInfo>(delegate(MethodInfo transpiler)
-			{
-				codeTranspiler.Add(transpiler);
-			});
+			CodeTranspiler codeTranspiler = new CodeTranspiler(this.ilInstructions);
+			transpilers.Do<MethodInfo>(new Action<MethodInfo>(codeTranspiler.Add));
 			List<CodeInstruction> result = codeTranspiler.GetResult(this.generator, this.method);
-			if (emitter == null)
-			{
-				return result;
-			}
-			emitter.LogComment("start original");
-			if (this.debug)
-			{
-				List<string> buffer = FileLog.GetBuffer(true);
-				emitter.LogAllLocalVariables();
-				FileLog.LogBuffered(buffer);
-			}
 			hasReturnCode = result.Any<CodeInstruction>((CodeInstruction code) => code.opcode == OpCodes.Ret);
-			for (;;)
+			methodEndsInDeadCode = this.EndsInDeadCode(result);
+			while (stripLastReturn)
 			{
-				CodeInstruction codeInstruction2 = result.LastOrDefault<CodeInstruction>();
-				if (codeInstruction2 == null || codeInstruction2.opcode != OpCodes.Ret)
+				CodeInstruction codeInstruction = result.LastOrDefault<CodeInstruction>();
+				if (codeInstruction == null || codeInstruction.opcode != OpCodes.Ret)
 				{
 					break;
 				}
-				endLabels.AddRange(codeInstruction2.labels);
+				if (endLabels != null)
+				{
+					endLabels.AddRange(codeInstruction.labels);
+				}
 				result.RemoveAt(result.Count - 1);
 			}
-			Action<Label> <>9__3;
-			Action<ExceptionBlock> <>9__4;
-			Action<ExceptionBlock> <>9__5;
-			result.Do<CodeInstruction>(delegate(CodeInstruction codeInstruction)
-			{
-				IEnumerable<Label> labels = codeInstruction.labels;
-				Action<Label> action;
-				if ((action = <>9__3) == null)
-				{
-					action = (<>9__3 = delegate(Label label)
-					{
-						emitter.MarkLabel(label);
-					});
-				}
-				labels.Do<Label>(action);
-				IEnumerable<ExceptionBlock> blocks = codeInstruction.blocks;
-				Action<ExceptionBlock> action2;
-				if ((action2 = <>9__4) == null)
-				{
-					action2 = (<>9__4 = delegate(ExceptionBlock block)
-					{
-						Label? label5;
-						emitter.MarkBlockBefore(block, out label5);
-					});
-				}
-				blocks.Do<ExceptionBlock>(action2);
-				OpCode opCode = codeInstruction.opcode;
-				object obj = codeInstruction.operand;
-				if (opCode == OpCodes.Ret)
-				{
-					Label label3 = this.generator.DefineLabel();
-					opCode = OpCodes.Br;
-					obj = label3;
-					endLabels.Add(label3);
-				}
-				OpCode opCode2;
-				if (MethodBodyReader.shortJumps.TryGetValue(opCode, out opCode2))
-				{
-					opCode = opCode2;
-				}
-				OperandType operandType2 = opCode.OperandType;
-				if (operandType2 != OperandType.InlineNone)
-				{
-					if (operandType2 != OperandType.InlineSig)
-					{
-						if (obj == null)
-						{
-							throw new Exception(string.Format("Wrong null argument: {0}", codeInstruction));
-						}
-						emitter.AddInstruction(opCode, obj);
-						emitter.LogIL(opCode, obj, null);
-						this.generator.DynEmit(opCode, obj);
-					}
-					else
-					{
-						CecilILGenerator proxiedShim = this.generator.GetProxiedShim<CecilILGenerator>();
-						if (proxiedShim == null)
-						{
-							throw new NotSupportedException();
-						}
-						if (obj == null)
-						{
-							throw new Exception(string.Format("Wrong null argument: {0}", codeInstruction));
-						}
-						if (!(obj is ICallSiteGenerator))
-						{
-							throw new Exception(string.Format("Wrong Emit argument type {0} in {1}", obj.GetType(), codeInstruction));
-						}
-						emitter.AddInstruction(opCode, obj);
-						emitter.LogIL(opCode, obj, null);
-						proxiedShim.Emit(opCode, (ICallSiteGenerator)obj);
-					}
-				}
-				else
-				{
-					emitter.Emit(opCode);
-				}
-				IEnumerable<ExceptionBlock> blocks2 = codeInstruction.blocks;
-				Action<ExceptionBlock> action3;
-				if ((action3 = <>9__5) == null)
-				{
-					action3 = (<>9__5 = delegate(ExceptionBlock block)
-					{
-						emitter.MarkBlockAfter(block);
-					});
-				}
-				blocks2.Do<ExceptionBlock>(action3);
-			});
-			emitter.LogComment("end original");
 			return result;
 		}
 
@@ -510,10 +446,6 @@ namespace HarmonyLib
 				InlineSignature inlineSignature = InlineSignatureParser.ImportCallSite(this.module, array);
 				instruction.operand = inlineSignature;
 				instruction.argument = inlineSignature;
-				Debugger.Log(0, "TEST", "METHOD " + this.method.FullDescription() + "\n");
-				Debugger.Log(0, "TEST", "Signature Blob = " + array.Select<byte, string>((byte b) => string.Format("0x{0:x02}", b)).Aggregate<string>((string a, string b) => a + " " + b) + "\n");
-				Debugger.Log(0, "TEST", string.Format("Signature = {0}\n", inlineSignature));
-				Debugger.Break();
 				return;
 			}
 			case OperandType.InlineString:
@@ -577,8 +509,8 @@ namespace HarmonyLib
 			}
 			case OperandType.ShortInlineBrTarget:
 			{
-				sbyte b5 = (sbyte)this.ilBytes.ReadByte();
-				instruction.operand = (int)b5 + this.ilBytes.position;
+				sbyte b = (sbyte)this.ilBytes.ReadByte();
+				instruction.operand = (int)b + this.ilBytes.position;
 				return;
 			}
 			case OperandType.ShortInlineI:
@@ -628,15 +560,29 @@ namespace HarmonyLib
 
 		private ILInstruction GetInstruction(int offset, bool isEndOfInstruction)
 		{
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler;
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", offset, string.Format("Instruction offset {0} is less than 0", offset));
+				string text = "offset";
+				object obj = offset;
+				defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(34, 1);
+				defaultInterpolatedStringHandler.AppendLiteral("Instruction offset ");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(offset);
+				defaultInterpolatedStringHandler.AppendLiteral(" is less than 0");
+				throw new ArgumentOutOfRangeException(text, obj, defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			int num = this.ilInstructions.Count - 1;
 			ILInstruction ilinstruction = this.ilInstructions[num];
 			if (offset > ilinstruction.offset + ilinstruction.GetSize() - 1)
 			{
-				throw new ArgumentOutOfRangeException("offset", offset, string.Format("Instruction offset {0} is outside valid range 0 - {1}", offset, ilinstruction.offset + ilinstruction.GetSize() - 1));
+				string text2 = "offset";
+				object obj2 = offset;
+				defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(47, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("Instruction offset ");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(offset);
+				defaultInterpolatedStringHandler.AppendLiteral(" is outside valid range 0 - ");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(ilinstruction.offset + ilinstruction.GetSize() - 1);
+				throw new ArgumentOutOfRangeException(text2, obj2, defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			int i = 0;
 			int num2 = num;
@@ -664,7 +610,10 @@ namespace HarmonyLib
 					i = num3 + 1;
 				}
 			}
-			throw new Exception(string.Format("Cannot find instruction for {0:X4}", offset));
+			defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(28, 1);
+			defaultInterpolatedStringHandler.AppendLiteral("Cannot find instruction for ");
+			defaultInterpolatedStringHandler.AppendFormatted<int>(offset, "X4");
+			throw new Exception(defaultInterpolatedStringHandler.ToStringAndClear());
 		}
 
 		private static bool TargetsLocalVariable(OpCode opcode)
@@ -705,9 +654,9 @@ namespace HarmonyLib
 		static MethodBodyReader()
 		{
 			FieldInfo[] fields = typeof(OpCodes).GetFields(BindingFlags.Static | BindingFlags.Public);
-			for (int i = 0; i < fields.Length; i++)
+			foreach (FieldInfo fieldInfo in fields)
 			{
-				OpCode opCode = (OpCode)fields[i].GetValue(null);
+				OpCode opCode = (OpCode)fieldInfo.GetValue(null);
 				if (opCode.OpCodeType != OpCodeType.Nternal)
 				{
 					if (opCode.Size == 1)
@@ -728,8 +677,6 @@ namespace HarmonyLib
 
 		private bool debug;
 
-		private bool argumentShift;
-
 		private readonly Module module;
 
 		private readonly Type[] typeArguments;
@@ -749,66 +696,6 @@ namespace HarmonyLib
 		private readonly List<LocalVariableInfo> localVariables;
 
 		private LocalBuilder[] variables;
-
-		private static readonly Dictionary<OpCode, OpCode> shortJumps = new Dictionary<OpCode, OpCode>
-		{
-			{
-				OpCodes.Leave_S,
-				OpCodes.Leave
-			},
-			{
-				OpCodes.Brfalse_S,
-				OpCodes.Brfalse
-			},
-			{
-				OpCodes.Brtrue_S,
-				OpCodes.Brtrue
-			},
-			{
-				OpCodes.Beq_S,
-				OpCodes.Beq
-			},
-			{
-				OpCodes.Bge_S,
-				OpCodes.Bge
-			},
-			{
-				OpCodes.Bgt_S,
-				OpCodes.Bgt
-			},
-			{
-				OpCodes.Ble_S,
-				OpCodes.Ble
-			},
-			{
-				OpCodes.Blt_S,
-				OpCodes.Blt
-			},
-			{
-				OpCodes.Bne_Un_S,
-				OpCodes.Bne_Un
-			},
-			{
-				OpCodes.Bge_Un_S,
-				OpCodes.Bge_Un
-			},
-			{
-				OpCodes.Bgt_Un_S,
-				OpCodes.Bgt_Un
-			},
-			{
-				OpCodes.Ble_Un_S,
-				OpCodes.Ble_Un
-			},
-			{
-				OpCodes.Br_S,
-				OpCodes.Br
-			},
-			{
-				OpCodes.Blt_Un_S,
-				OpCodes.Blt_Un
-			}
-		};
 
 		private static readonly OpCode[] one_byte_opcodes = new OpCode[225];
 

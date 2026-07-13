@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class MethodEntry : IComparable
+	internal class MethodEntry : IComparable
 	{
 		public MethodEntry.Flags MethodFlags
 		{

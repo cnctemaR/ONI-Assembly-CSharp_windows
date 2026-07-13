@@ -9,44 +9,124 @@ namespace UnityEngine
 	public sealed class CanvasGroup : Behaviour, ICanvasRaycastFilter
 	{
 		[NativeProperty("Alpha", false, TargetType.Function)]
-		public extern float alpha
+		public float alpha
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasGroup.get_alpha_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasGroup.set_alpha_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("Interactable", false, TargetType.Function)]
-		public extern bool interactable
+		public bool interactable
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasGroup.get_interactable_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasGroup.set_interactable_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("BlocksRaycasts", false, TargetType.Function)]
-		public extern bool blocksRaycasts
+		public bool blocksRaycasts
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasGroup.get_blocksRaycasts_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasGroup.set_blocksRaycasts_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("IgnoreParentGroups", false, TargetType.Function)]
-		public extern bool ignoreParentGroups
+		public bool ignoreParentGroups
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasGroup.get_ignoreParentGroups_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasGroup>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasGroup.set_ignoreParentGroups_Injected(intPtr, value);
+			}
 		}
 
 		public bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
 		{
 			return this.blocksRaycasts;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_alpha_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_alpha_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_interactable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_interactable_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_blocksRaycasts_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_blocksRaycasts_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_ignoreParentGroups_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_ignoreParentGroups_Injected(IntPtr _unity_self, bool value);
 	}
 }

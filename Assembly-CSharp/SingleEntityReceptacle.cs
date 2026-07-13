@@ -63,7 +63,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			return false;
 		}
 		IReceptacleDirection component = candidate.GetComponent<IReceptacleDirection>();
-		bool flag = this.rotatable != null || component == null || component.Direction == this.Direction;
+		bool flag = this.Direction == SingleEntityReceptacle.ReceptacleDirection.Any || this.rotatable != null || component == null || component.Direction == this.Direction;
 		int num = 0;
 		while (flag && num < this.additionalCriteria.Count)
 		{
@@ -485,6 +485,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		Top,
 		Side,
-		Bottom
+		Bottom,
+		Any
 	}
 }

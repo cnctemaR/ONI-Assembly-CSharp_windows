@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using UnityEngine.Bindings;
 using UnityEngineInternal;
@@ -48,6 +49,7 @@ namespace UnityEngine
 			return layoutCache;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static GUILayoutUtility.LayoutCache SelectIDList(int instanceID, bool isWindow)
 		{
 			Dictionary<int, GUILayoutUtility.LayoutCache> dictionary = (isWindow ? GUILayoutUtility.s_StoredWindows : GUILayoutUtility.s_StoredLayouts);
@@ -93,6 +95,7 @@ namespace UnityEngine
 			}
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static void BeginContainer(GUILayoutUtility.LayoutCache cache)
 		{
 			bool flag = Event.current.type == EventType.Layout;
@@ -179,6 +182,7 @@ namespace UnityEngine
 			}
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static void LayoutFromContainer(float w, float h)
 		{
 			bool flag = GUILayoutUtility.current.topLevel != null;
@@ -580,7 +584,7 @@ namespace UnityEngine
 		private static extern void Internal_GetWindowRect_Injected(int windowID, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_MoveWindow_Injected(int windowID, ref Rect r);
+		private static extern void Internal_MoveWindow_Injected(int windowID, [In] ref Rect r);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetWindowsBounds_Injected(out Rect ret);
@@ -615,6 +619,7 @@ namespace UnityEngine
 		}
 
 		[DebuggerDisplay("id={id}, groups={layoutGroups.Count}")]
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal sealed class LayoutCache
 		{
 			internal int id { get; private set; }
@@ -627,7 +632,7 @@ namespace UnityEngine
 				}
 			}
 
-			internal LayoutCache(int instanceID = -1)
+			public LayoutCache(int instanceID = -1)
 			{
 				this.id = instanceID;
 				this.layoutGroups.Push(this.topLevel);
@@ -651,7 +656,7 @@ namespace UnityEngine
 				}
 			}
 
-			internal GUILayoutGroup topLevel = new GUILayoutGroup();
+			public GUILayoutGroup topLevel = new GUILayoutGroup();
 
 			internal GenericStack layoutGroups = new GenericStack();
 

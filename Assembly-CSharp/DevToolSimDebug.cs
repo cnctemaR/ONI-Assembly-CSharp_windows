@@ -130,9 +130,7 @@ public class DevToolSimDebug : DevTool
 		if (this.showMouseData)
 		{
 			ImGui.Indent();
-			string text = "WorldPos: ";
-			Vector3 vector = this.worldPos;
-			ImGui.Text(text + vector.ToString());
+			ImGui.Text("WorldPos: " + this.worldPos.ToString());
 			ImGui.Unindent();
 		}
 		if (num3 < 0 || Grid.CellCount <= num3)
@@ -332,7 +330,7 @@ public class DevToolSimDebug : DevTool
 						this.showCreatures = ImGui.CollapsingHeader("Creatures (" + room.cavity.creatures.Count.ToString() + ")");
 						if (!this.showCreatures)
 						{
-							goto IL_0DC9;
+							goto IL_0DC5;
 						}
 						using (List<KPrefabID>.Enumerator enumerator4 = room.cavity.creatures.GetEnumerator())
 						{
@@ -341,7 +339,7 @@ public class DevToolSimDebug : DevTool
 								KPrefabID kprefabID2 = enumerator4.Current;
 								ImGui.Text(kprefabID2.ToString());
 							}
-							goto IL_0DC9;
+							goto IL_0DC5;
 						}
 					}
 					ImGui.Text("Is Room: False");
@@ -350,7 +348,7 @@ public class DevToolSimDebug : DevTool
 				{
 					ImGui.Text("No Cavity Detected");
 				}
-				IL_0DC9:
+				IL_0DC5:
 				ImGui.Unindent();
 			}
 			this.showPropertyInfo = ImGui.CollapsingHeader("Property Info");

@@ -5,9 +5,9 @@ using UnityEngine.Internal;
 
 namespace UnityEngine
 {
+	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
 	[NativeHeader("Runtime/Export/TouchScreenKeyboard/TouchScreenKeyboard.bindings.h")]
 	[NativeHeader("Runtime/Input/KeyboardOnScreen.h")]
-	[NativeConditional("ENABLE_ONSCREEN_KEYBOARD")]
 	public class TouchScreenKeyboard
 	{
 		[FreeFunction("TouchScreenKeyboard_Destroy", IsThreadSafe = true)]
@@ -43,8 +43,38 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("TouchScreenKeyboard_InternalConstructorHelper")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr TouchScreenKeyboard_InternalConstructorHelper(ref TouchScreenKeyboard_InternalConstructorHelperArguments arguments, string text, string textPlaceholder);
+		private unsafe static IntPtr TouchScreenKeyboard_InternalConstructorHelper(ref TouchScreenKeyboard_InternalConstructorHelperArguments arguments, string text, string textPlaceholder)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(text, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = text.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(textPlaceholder, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = textPlaceholder.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				intPtr = TouchScreenKeyboard.TouchScreenKeyboard_InternalConstructorHelper_Injected(ref arguments, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return intPtr;
+		}
 
 		public static bool isSupported
 		{
@@ -57,33 +87,22 @@ namespace UnityEngine
 				{
 					if (runtimePlatform2 != RuntimePlatform.IPhonePlayer && runtimePlatform2 != RuntimePlatform.Android && runtimePlatform2 - RuntimePlatform.WebGLPlayer > 3)
 					{
-						goto IL_0063;
+						goto IL_0051;
 					}
 				}
-				else if (runtimePlatform2 != RuntimePlatform.PS4)
+				else if (runtimePlatform2 <= RuntimePlatform.Switch)
 				{
-					switch (runtimePlatform2)
+					if (runtimePlatform2 != RuntimePlatform.PS4 && runtimePlatform2 - RuntimePlatform.tvOS > 1)
 					{
-					case RuntimePlatform.tvOS:
-					case RuntimePlatform.Switch:
-					case RuntimePlatform.Stadia:
-					case RuntimePlatform.GameCoreXboxSeries:
-					case RuntimePlatform.GameCoreXboxOne:
-					case RuntimePlatform.PS5:
-						break;
-					case RuntimePlatform.Lumin:
-					case RuntimePlatform.CloudRendering:
-						goto IL_0063;
-					default:
-						if (runtimePlatform2 != RuntimePlatform.VisionOS)
-						{
-							goto IL_0063;
-						}
-						break;
+						goto IL_0051;
 					}
+				}
+				else if (runtimePlatform2 - RuntimePlatform.GameCoreXboxSeries > 2 && runtimePlatform2 - RuntimePlatform.VisionOS > 1)
+				{
+					goto IL_0051;
 				}
 				return true;
-				IL_0063:
+				IL_0051:
 				return false;
 			}
 		}
@@ -95,21 +114,12 @@ namespace UnityEngine
 			get
 			{
 				bool disableInPlaceEditing = TouchScreenKeyboard.disableInPlaceEditing;
-				return disableInPlaceEditing && false;
+				return !disableInPlaceEditing && TouchScreenKeyboard.IsInPlaceEditingAllowed();
 			}
 		}
 
-		internal static bool isRequiredToForceOpen
-		{
-			get
-			{
-				return TouchScreenKeyboard.IsRequiredToForceOpen();
-			}
-		}
-
-		[FreeFunction("TouchScreenKeyboard_IsRequiredToForceOpen")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsRequiredToForceOpen();
+		private static extern bool IsInPlaceEditingAllowed();
 
 		public static TouchScreenKeyboard Open(string text, [DefaultValue("TouchScreenKeyboardType.Default")] TouchScreenKeyboardType keyboardType, [DefaultValue("true")] bool autocorrection, [DefaultValue("false")] bool multiline, [DefaultValue("false")] bool secure, [DefaultValue("false")] bool alert, [DefaultValue("\"\"")] string textPlaceholder, [DefaultValue("0")] int characterLimit)
 		{
@@ -186,14 +196,55 @@ namespace UnityEngine
 			return TouchScreenKeyboard.Open(text, touchScreenKeyboardType, flag4, flag3, flag2, flag, text2, num);
 		}
 
-		public extern string text
+		public unsafe string text
 		{
 			[NativeName("GetText")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					TouchScreenKeyboard.get_text_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 			[NativeName("SetText")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				try
+				{
+					IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					TouchScreenKeyboard.set_text_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
 		public static extern bool hideInput
@@ -206,14 +257,35 @@ namespace UnityEngine
 			set;
 		}
 
-		public extern bool active
+		public static extern TouchScreenKeyboard.InputFieldAppearance inputFieldAppearance
 		{
-			[NativeName("IsActive")]
+			[NativeName("GetInputFieldAppearance")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		public bool active
+		{
+			[NativeName("IsActive")]
+			get
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TouchScreenKeyboard.get_active_Injected(intPtr);
+			}
 			[NativeName("SetActive")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TouchScreenKeyboard.set_active_Injected(intPtr, value);
+			}
 		}
 
 		[FreeFunction("TouchScreenKeyboard_GetDone")]
@@ -242,35 +314,70 @@ namespace UnityEngine
 			}
 		}
 
-		public extern TouchScreenKeyboard.Status status
+		public TouchScreenKeyboard.Status status
 		{
 			[NativeName("GetKeyboardStatus")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TouchScreenKeyboard.get_status_Injected(intPtr);
+			}
 		}
 
-		public extern int characterLimit
+		public int characterLimit
 		{
 			[NativeName("GetCharacterLimit")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TouchScreenKeyboard.get_characterLimit_Injected(intPtr);
+			}
 			[NativeName("SetCharacterLimit")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TouchScreenKeyboard.set_characterLimit_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool canGetSelection
+		public bool canGetSelection
 		{
 			[NativeName("CanGetSelection")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TouchScreenKeyboard.get_canGetSelection_Injected(intPtr);
+			}
 		}
 
-		public extern bool canSetSelection
+		public bool canSetSelection
 		{
 			[NativeName("CanSetSelection")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TouchScreenKeyboard.get_canSetSelection_Injected(intPtr);
+			}
 		}
 
 		public RangeInt selection
@@ -283,12 +390,20 @@ namespace UnityEngine
 			}
 			set
 			{
-				bool flag = value.start < 0 || value.length < 0 || value.start + value.length > this.text.Length;
+				bool flag = string.IsNullOrEmpty(this.text);
 				if (flag)
 				{
-					throw new ArgumentOutOfRangeException("selection", "Selection is out of range.");
+					TouchScreenKeyboard.SetSelection(0, 0);
 				}
-				TouchScreenKeyboard.SetSelection(value.start, value.length);
+				else
+				{
+					bool flag2 = value.start < 0 || value.length < 0 || value.start + value.length > this.text.Length;
+					if (flag2)
+					{
+						throw new ArgumentOutOfRangeException("selection", "Selection is out of range.");
+					}
+					TouchScreenKeyboard.SetSelection(value.start, value.length);
+				}
 			}
 		}
 
@@ -298,11 +413,18 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetSelection(int start, int length);
 
-		public extern TouchScreenKeyboardType type
+		public TouchScreenKeyboardType type
 		{
 			[NativeName("GetKeyboardType")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TouchScreenKeyboard.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TouchScreenKeyboard.get_type_Injected(intPtr);
+			}
 		}
 
 		public int targetDisplay
@@ -336,6 +458,39 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr TouchScreenKeyboard_InternalConstructorHelper_Injected(ref TouchScreenKeyboard_InternalConstructorHelperArguments arguments, ref ManagedSpanWrapper text, ref ManagedSpanWrapper textPlaceholder);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_text_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_text_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_active_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_active_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TouchScreenKeyboard.Status get_status_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_characterLimit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_characterLimit_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canGetSelection_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canSetSelection_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TouchScreenKeyboardType get_type_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_area_Injected(out Rect ret);
 
 		[NonSerialized]
@@ -347,6 +502,13 @@ namespace UnityEngine
 			Done,
 			Canceled,
 			LostFocus
+		}
+
+		public enum InputFieldAppearance
+		{
+			Customizable,
+			AlwaysVisible,
+			AlwaysHidden
 		}
 
 		public class Android
@@ -364,6 +526,7 @@ namespace UnityEngine
 				}
 			}
 
+			[Obsolete("consumesOutsideTouches is deprecated and will be removed in a future version where Unity will always process touch input outside of the on-screen keyboard (consumesOutsideTouches = false)")]
 			public static bool consumesOutsideTouches
 			{
 				get
@@ -376,15 +539,23 @@ namespace UnityEngine
 				}
 			}
 
-			[FreeFunction("TouchScreenKeyboard_SetAndroidKeyboardConsumesOutsideTouches")]
 			[NativeConditional("PLATFORM_ANDROID")]
+			[FreeFunction("TouchScreenKeyboard_SetAndroidKeyboardConsumesOutsideTouches")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern void TouchScreenKeyboard_SetAndroidKeyboardConsumesOutsideTouches(bool enable);
 
-			[FreeFunction("TouchScreenKeyboard_GetAndroidKeyboardConsumesOutsideTouches")]
 			[NativeConditional("PLATFORM_ANDROID")]
+			[FreeFunction("TouchScreenKeyboard_GetAndroidKeyboardConsumesOutsideTouches")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern bool TouchScreenKeyboard_GetAndroidKeyboardConsumesOutsideTouches();
+		}
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(TouchScreenKeyboard touchScreenKeyboard)
+			{
+				return touchScreenKeyboard.m_Ptr;
+			}
 		}
 	}
 }

@@ -7,7 +7,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectEffectDescriptor
+public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable
 {
 	public KPrefabID plant
 	{

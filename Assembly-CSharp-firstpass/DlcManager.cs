@@ -36,6 +36,11 @@ public class DlcManager
 		return !DlcManager.IsVanillaId(dlcId) && (dlcId == "EXPANSION1_ID" || DlcManager.DLC_PACKS.ContainsKey(dlcId));
 	}
 
+	public static bool IsUnknownDlc(string dlcId)
+	{
+		return !DlcManager.IsVanillaId(dlcId) && !DlcManager.IsDlcId(dlcId);
+	}
+
 	public static string GetDlcTitle(string dlcId)
 	{
 		StringKey dlcTitle = new StringKey(dlcId);
@@ -47,6 +52,10 @@ public class DlcManager
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
 			dlcTitle = dlcInfo.dlcTitle;
+		}
+		else if (DlcManager.IsUnknownDlc(dlcId))
+		{
+			dlcTitle = new StringKey("STRINGS.UI.UNKNOWN_DLC.NAME");
 		}
 		return string.Concat(new string[]
 		{
@@ -84,6 +93,10 @@ public class DlcManager
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
 			text = dlcInfo.smallLogo;
+		}
+		else if (dlcId != "EXPANSION1_ID")
+		{
+			return "mode_segue";
 		}
 		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.Name == "Rail")
 		{

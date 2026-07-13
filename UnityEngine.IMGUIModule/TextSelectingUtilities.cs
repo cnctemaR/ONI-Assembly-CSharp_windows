@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 using UnityEngine.TextCore.Text;
 
 namespace UnityEngine
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEditor.UIBuilderModule" })]
 	internal class TextSelectingUtilities
 	{
 		public bool hasSelection
@@ -39,7 +42,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_TextHandle.textInfo.characterCount;
+				return this.textHandle.characterCount;
 			}
 		}
 
@@ -47,7 +50,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (this.m_CharacterCount > 0 && this.m_TextHandle.textInfo.textElementInfo[this.m_CharacterCount - 1].character == '\u200b') ? (this.m_CharacterCount - 1) : this.m_CharacterCount;
+				return (!this.textHandle.useAdvancedText && this.m_CharacterCount > 0 && this.textHandle.textInfo.textElementInfo[this.m_CharacterCount - 1].character == 8203U) ? (this.m_CharacterCount - 1) : this.m_CharacterCount;
 			}
 		}
 
@@ -55,7 +58,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_TextHandle.textInfo.textElementInfo;
+				return this.textHandle.textInfo.textElementInfo;
 			}
 		}
 
@@ -63,7 +66,28 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.EnsureValidCodePointIndex(this.m_CursorIndex);
+				return this.textHandle.IsPlaceholder ? 0 : this.ClampTextIndex(this.m_CursorIndex);
+			}
+			set
+			{
+				bool flag = this.m_CursorIndex != value;
+				if (flag)
+				{
+					this.m_CursorIndex = value;
+					Action onCursorIndexChange = this.OnCursorIndexChange;
+					if (onCursorIndexChange != null)
+					{
+						onCursorIndexChange();
+					}
+				}
+			}
+		}
+
+		internal int cursorIndexNoValidation
+		{
+			get
+			{
+				return this.m_CursorIndex;
 			}
 			set
 			{
@@ -89,7 +113,28 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.EnsureValidCodePointIndex(this.m_SelectIndex);
+				return this.textHandle.IsPlaceholder ? 0 : this.ClampTextIndex(this.m_SelectIndex);
+			}
+			set
+			{
+				bool flag = this.m_SelectIndex != value;
+				if (flag)
+				{
+					this.SetSelectIndexWithoutNotify(value);
+					Action onSelectIndexChange = this.OnSelectIndexChange;
+					if (onSelectIndexChange != null)
+					{
+						onSelectIndexChange();
+					}
+				}
+			}
+		}
+
+		internal int selectIndexNoValidation
+		{
+			get
+			{
+				return this.m_SelectIndex;
 			}
 			set
 			{
@@ -126,11 +171,11 @@ namespace UnityEngine
 					bool flag2 = this.cursorIndex < this.selectIndex;
 					if (flag2)
 					{
-						text = this.m_TextHandle.Substring(this.cursorIndex, this.selectIndex - this.cursorIndex);
+						text = this.textHandle.Substring(this.cursorIndex, this.selectIndex - this.cursorIndex);
 					}
 					else
 					{
-						text = this.m_TextHandle.Substring(this.selectIndex, this.cursorIndex - this.selectIndex);
+						text = this.textHandle.Substring(this.selectIndex, this.cursorIndex - this.selectIndex);
 					}
 				}
 				return text;
@@ -139,26 +184,27 @@ namespace UnityEngine
 
 		public TextSelectingUtilities(TextHandle textHandle)
 		{
-			this.m_TextHandle = textHandle;
+			this.textHandle = textHandle;
 		}
 
 		internal bool HandleKeyEvent(Event e)
 		{
-			this.InitKeyActions();
-			EventModifiers modifiers = e.modifiers;
-			e.modifiers &= ~EventModifiers.CapsLock;
-			bool flag = TextSelectingUtilities.s_KeySelectOps.ContainsKey(e);
+			return this.HandleKeyEvent(e.keyCode, e.modifiers);
+		}
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		internal bool HandleKeyEvent(KeyCode key, EventModifiers modifiers)
+		{
+			TextSelectOp? textSelectOp = TextSelectingUtilities.TextSelectOpFromEnum(key, modifiers, SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX);
+			bool flag = textSelectOp != null;
 			bool flag2;
 			if (flag)
 			{
-				TextSelectOp textSelectOp = TextSelectingUtilities.s_KeySelectOps[e];
-				this.PerformOperation(textSelectOp);
-				e.modifiers = modifiers;
+				this.PerformOperation(textSelectOp.Value);
 				flag2 = true;
 			}
 			else
 			{
-				e.modifiers = modifiers;
 				flag2 = false;
 			}
 			return flag2;
@@ -230,54 +276,27 @@ namespace UnityEngine
 			return false;
 		}
 
-		private static void MapKey(string key, TextSelectOp action)
+		internal static TextSelectOp? TextSelectOpFromEnum(KeyCode key, EventModifiers modifiers, bool IsMacOsFamily)
 		{
-			TextSelectingUtilities.s_KeySelectOps[Event.KeyboardEvent(key)] = action;
-		}
-
-		private void InitKeyActions()
-		{
-			bool flag = TextSelectingUtilities.s_KeySelectOps != null;
-			if (!flag)
+			modifiers &= ~EventModifiers.CapsLock;
+			TextEditingUtilities.KeyEvent keyEvent = new TextEditingUtilities.KeyEvent(key, modifiers);
+			foreach (ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp> valueTuple in TextSelectingUtilities.s_GlobalKeyMappings)
 			{
-				TextSelectingUtilities.s_KeySelectOps = new Dictionary<Event, TextSelectOp>();
-				TextSelectingUtilities.MapKey("#left", TextSelectOp.SelectLeft);
-				TextSelectingUtilities.MapKey("#right", TextSelectOp.SelectRight);
-				TextSelectingUtilities.MapKey("#up", TextSelectOp.SelectUp);
-				TextSelectingUtilities.MapKey("#down", TextSelectOp.SelectDown);
-				bool flag2 = SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
-				if (flag2)
+				bool flag = valueTuple.Item1 == keyEvent;
+				if (flag)
 				{
-					TextSelectingUtilities.MapKey("#home", TextSelectOp.SelectTextStart);
-					TextSelectingUtilities.MapKey("#end", TextSelectOp.SelectTextEnd);
-					TextSelectingUtilities.MapKey("#^left", TextSelectOp.ExpandSelectGraphicalLineStart);
-					TextSelectingUtilities.MapKey("#^right", TextSelectOp.ExpandSelectGraphicalLineEnd);
-					TextSelectingUtilities.MapKey("#^up", TextSelectOp.SelectParagraphBackward);
-					TextSelectingUtilities.MapKey("#^down", TextSelectOp.SelectParagraphForward);
-					TextSelectingUtilities.MapKey("#&left", TextSelectOp.SelectWordLeft);
-					TextSelectingUtilities.MapKey("#&right", TextSelectOp.SelectWordRight);
-					TextSelectingUtilities.MapKey("#&up", TextSelectOp.SelectParagraphBackward);
-					TextSelectingUtilities.MapKey("#&down", TextSelectOp.SelectParagraphForward);
-					TextSelectingUtilities.MapKey("#%left", TextSelectOp.ExpandSelectGraphicalLineStart);
-					TextSelectingUtilities.MapKey("#%right", TextSelectOp.ExpandSelectGraphicalLineEnd);
-					TextSelectingUtilities.MapKey("#%up", TextSelectOp.SelectTextStart);
-					TextSelectingUtilities.MapKey("#%down", TextSelectOp.SelectTextEnd);
-					TextSelectingUtilities.MapKey("%a", TextSelectOp.SelectAll);
-					TextSelectingUtilities.MapKey("%c", TextSelectOp.Copy);
-				}
-				else
-				{
-					TextSelectingUtilities.MapKey("#^left", TextSelectOp.SelectToEndOfPreviousWord);
-					TextSelectingUtilities.MapKey("#^right", TextSelectOp.SelectToStartOfNextWord);
-					TextSelectingUtilities.MapKey("#^up", TextSelectOp.SelectParagraphBackward);
-					TextSelectingUtilities.MapKey("#^down", TextSelectOp.SelectParagraphForward);
-					TextSelectingUtilities.MapKey("#home", TextSelectOp.SelectGraphicalLineStart);
-					TextSelectingUtilities.MapKey("#end", TextSelectOp.SelectGraphicalLineEnd);
-					TextSelectingUtilities.MapKey("^a", TextSelectOp.SelectAll);
-					TextSelectingUtilities.MapKey("^c", TextSelectOp.Copy);
-					TextSelectingUtilities.MapKey("^insert", TextSelectOp.Copy);
+					return new TextSelectOp?(valueTuple.Item2);
 				}
 			}
+			foreach (ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp> valueTuple2 in (IsMacOsFamily ? TextSelectingUtilities.s_MacKeyMappings : TextSelectingUtilities.s_WindowsLinuxKeyMappings))
+			{
+				bool flag2 = valueTuple2.Item1 == keyEvent;
+				if (flag2)
+				{
+					return new TextSelectOp?(valueTuple2.Item2);
+				}
+			}
+			return null;
 		}
 
 		public void ClearCursorPos()
@@ -344,12 +363,12 @@ namespace UnityEngine
 
 		public void SelectUp()
 		{
-			this.cursorIndex = this.m_TextHandle.LineUpCharacterPosition(this.cursorIndex);
+			this.cursorIndex = this.textHandle.LineUpCharacterPosition(this.cursorIndex);
 		}
 
 		public void SelectDown()
 		{
-			this.cursorIndex = this.m_TextHandle.LineDownCharacterPosition(this.cursorIndex);
+			this.cursorIndex = this.textHandle.LineDownCharacterPosition(this.cursorIndex);
 		}
 
 		public void SelectTextEnd()
@@ -430,14 +449,24 @@ namespace UnityEngine
 		{
 			this.ClearCursorPos();
 			bool flag = this.cursorIndex < this.selectIndex;
-			bool flag2 = this.cursorIndex < this.characterCount;
-			if (flag2)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				this.cursorIndex = this.IndexOfEndOfLine(this.cursorIndex + 1);
-				bool flag3 = flag && this.cursorIndex > this.selectIndex;
-				if (flag3)
+				int cursorIndex = this.cursorIndex;
+				this.textHandle.SelectToNextParagraph(ref cursorIndex);
+				this.cursorIndex = cursorIndex;
+			}
+			else
+			{
+				bool flag2 = this.cursorIndex < this.characterCount;
+				if (flag2)
 				{
-					this.cursorIndex = this.selectIndex;
+					this.cursorIndex = this.IndexOfEndOfLine(this.cursorIndex + 1);
+					bool flag3 = flag && this.cursorIndex > this.selectIndex;
+					if (flag3)
+					{
+						this.cursorIndex = this.selectIndex;
+					}
 				}
 			}
 		}
@@ -446,35 +475,66 @@ namespace UnityEngine
 		{
 			this.ClearCursorPos();
 			bool flag = this.cursorIndex > this.selectIndex;
-			bool flag2 = this.cursorIndex > 1;
-			if (flag2)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				this.cursorIndex = this.m_TextHandle.LastIndexOf('\n', this.cursorIndex - 2) + 1;
-				bool flag3 = flag && this.cursorIndex < this.selectIndex;
-				if (flag3)
-				{
-					this.cursorIndex = this.selectIndex;
-				}
+				int cursorIndex = this.cursorIndex;
+				this.textHandle.SelectToPreviousParagraph(ref cursorIndex);
+				this.cursorIndex = cursorIndex;
 			}
 			else
 			{
-				this.selectIndex = (this.cursorIndex = 0);
+				bool flag2 = this.cursorIndex > 1;
+				if (flag2)
+				{
+					this.cursorIndex = this.textHandle.LastIndexOf('\n', this.cursorIndex - 2) + 1;
+					bool flag3 = flag && this.cursorIndex < this.selectIndex;
+					if (flag3)
+					{
+						this.cursorIndex = this.selectIndex;
+					}
+				}
+				else
+				{
+					this.selectIndex = (this.cursorIndex = 0);
+				}
 			}
 		}
 
 		public void SelectCurrentWord()
 		{
 			int cursorIndex = this.cursorIndex;
-			bool flag = this.cursorIndex < this.selectIndex;
-			if (flag)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				this.cursorIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Backward);
-				this.selectIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Forward);
+				int num = 0;
+				int num2 = 0;
+				this.textHandle.SelectCurrentWord(cursorIndex, ref num, ref num2);
+				bool flag = this.cursorIndex < this.selectIndex;
+				if (flag)
+				{
+					this.cursorIndex = num;
+					this.selectIndex = num2;
+				}
+				else
+				{
+					this.cursorIndex = num2;
+					this.selectIndex = num;
+				}
 			}
 			else
 			{
-				this.cursorIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Forward);
-				this.selectIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Backward);
+				bool flag2 = this.cursorIndex < this.selectIndex;
+				if (flag2)
+				{
+					this.cursorIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Backward);
+					this.selectIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Forward);
+				}
+				else
+				{
+					this.cursorIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Forward);
+					this.selectIndex = this.FindEndOfClassification(cursorIndex, TextSelectingUtilities.Direction.Backward);
+				}
 			}
 			this.ClearCursorPos();
 			this.m_bJustSelected = true;
@@ -484,15 +544,27 @@ namespace UnityEngine
 		{
 			this.ClearCursorPos();
 			int characterCount = this.characterCount;
-			bool flag = this.cursorIndex < characterCount;
-			if (flag)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				this.cursorIndex = this.IndexOfEndOfLine(this.cursorIndex);
+				int cursorIndex = this.cursorIndex;
+				int selectIndex = this.selectIndex;
+				this.textHandle.SelectCurrentParagraph(ref cursorIndex, ref selectIndex);
+				this.cursorIndex = cursorIndex;
+				this.selectIndex = selectIndex;
 			}
-			bool flag2 = this.selectIndex != 0;
-			if (flag2)
+			else
 			{
-				this.selectIndex = this.m_TextHandle.LastIndexOf('\n', this.selectIndex - 1) + 1;
+				bool flag = this.cursorIndex < characterCount;
+				if (flag)
+				{
+					this.cursorIndex = this.IndexOfEndOfLine(this.cursorIndex);
+				}
+				bool flag2 = this.selectIndex != 0;
+				if (flag2)
+				{
+					this.selectIndex = this.textHandle.LastIndexOf('\n', this.selectIndex - 1) + 1;
+				}
 			}
 		}
 
@@ -553,7 +625,7 @@ namespace UnityEngine
 			{
 				this.cursorIndex = this.selectIndex;
 			}
-			this.cursorIndex = (this.selectIndex = this.m_TextHandle.LineUpCharacterPosition(this.cursorIndex));
+			this.cursorIndex = (this.selectIndex = this.textHandle.LineUpCharacterPosition(this.cursorIndex));
 			bool flag2 = this.cursorIndex <= 0;
 			if (flag2)
 			{
@@ -572,7 +644,7 @@ namespace UnityEngine
 			{
 				this.cursorIndex = this.selectIndex;
 			}
-			this.cursorIndex = (this.selectIndex = this.m_TextHandle.LineDownCharacterPosition(this.cursorIndex));
+			this.cursorIndex = (this.selectIndex = this.textHandle.LineDownCharacterPosition(this.cursorIndex));
 			bool flag2 = this.cursorIndex == this.characterCount;
 			if (flag2)
 			{
@@ -582,36 +654,56 @@ namespace UnityEngine
 
 		public void MoveLineStart()
 		{
-			int num = ((this.selectIndex < this.cursorIndex) ? this.selectIndex : this.cursorIndex);
-			int num2 = num;
-			while (num2-- != 0)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				bool flag = this.m_TextElementInfos[num2].character == '\n';
-				if (flag)
-				{
-					this.selectIndex = (this.cursorIndex = num2 + 1);
-					return;
-				}
+				int cursorIndex = this.cursorIndex;
+				this.textHandle.SelectToPreviousParagraph(ref cursorIndex);
+				this.cursorIndex = (this.selectIndex = cursorIndex);
 			}
-			this.selectIndex = (this.cursorIndex = 0);
+			else
+			{
+				int num = ((this.selectIndex < this.cursorIndex) ? this.selectIndex : this.cursorIndex);
+				int num2 = num;
+				while (num2-- != 0)
+				{
+					bool flag = this.m_TextElementInfos[num2].character == 10U;
+					if (flag)
+					{
+						this.selectIndex = (this.cursorIndex = num2 + 1);
+						return;
+					}
+				}
+				this.selectIndex = (this.cursorIndex = 0);
+			}
 		}
 
 		public void MoveLineEnd()
 		{
-			int num = ((this.selectIndex > this.cursorIndex) ? this.selectIndex : this.cursorIndex);
-			int i = num;
-			int characterCount = this.characterCount;
-			while (i < characterCount)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				bool flag = this.m_TextElementInfos[i].character == '\n';
-				if (flag)
-				{
-					this.selectIndex = (this.cursorIndex = i);
-					return;
-				}
-				i++;
+				int cursorIndex = this.cursorIndex;
+				this.textHandle.SelectToNextParagraph(ref cursorIndex);
+				this.cursorIndex = (this.selectIndex = cursorIndex);
 			}
-			this.selectIndex = (this.cursorIndex = characterCount);
+			else
+			{
+				int num = ((this.selectIndex > this.cursorIndex) ? this.selectIndex : this.cursorIndex);
+				int i = num;
+				int characterCount = this.characterCount;
+				while (i < characterCount)
+				{
+					bool flag = this.m_TextElementInfos[i].character == 10U;
+					if (flag)
+					{
+						this.selectIndex = (this.cursorIndex = i);
+						return;
+					}
+					i++;
+				}
+				this.selectIndex = (this.cursorIndex = characterCount);
+			}
 		}
 
 		public void MoveGraphicalLineStart()
@@ -636,32 +728,60 @@ namespace UnityEngine
 
 		public void MoveParagraphForward()
 		{
-			this.cursorIndex = ((this.cursorIndex > this.selectIndex) ? this.cursorIndex : this.selectIndex);
-			bool flag = this.cursorIndex < this.characterCount;
-			if (flag)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				this.selectIndex = (this.cursorIndex = this.IndexOfEndOfLine(this.cursorIndex + 1));
+				int cursorIndex = this.cursorIndex;
+				this.textHandle.SelectToNextParagraph(ref cursorIndex);
+				this.cursorIndex = (this.selectIndex = cursorIndex);
+			}
+			else
+			{
+				this.cursorIndex = ((this.cursorIndex > this.selectIndex) ? this.cursorIndex : this.selectIndex);
+				bool flag = this.cursorIndex < this.characterCount;
+				if (flag)
+				{
+					this.selectIndex = (this.cursorIndex = this.IndexOfEndOfLine(this.cursorIndex + 1));
+				}
 			}
 		}
 
 		public void MoveParagraphBackward()
 		{
-			this.cursorIndex = ((this.cursorIndex < this.selectIndex) ? this.cursorIndex : this.selectIndex);
-			bool flag = this.cursorIndex > 1;
-			if (flag)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
 			{
-				this.selectIndex = (this.cursorIndex = this.m_TextHandle.LastIndexOf('\n', this.cursorIndex - 2) + 1);
+				int cursorIndex = this.cursorIndex;
+				this.textHandle.SelectToPreviousParagraph(ref cursorIndex);
+				this.cursorIndex = (this.selectIndex = cursorIndex);
 			}
 			else
 			{
-				this.selectIndex = (this.cursorIndex = 0);
+				this.cursorIndex = ((this.cursorIndex < this.selectIndex) ? this.cursorIndex : this.selectIndex);
+				bool flag = this.cursorIndex > 1;
+				if (flag)
+				{
+					this.selectIndex = (this.cursorIndex = this.textHandle.LastIndexOf('\n', this.cursorIndex - 2) + 1);
+				}
+				else
+				{
+					this.selectIndex = (this.cursorIndex = 0);
+				}
 			}
 		}
 
 		public void MoveWordRight()
 		{
 			this.cursorIndex = ((this.cursorIndex > this.selectIndex) ? this.cursorIndex : this.selectIndex);
-			this.cursorIndex = (this.selectIndex = this.FindNextSeperator(this.cursorIndex));
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
+			{
+				this.cursorIndex = (this.selectIndex = this.FindStartOfNextWord(this.cursorIndex));
+			}
+			else
+			{
+				this.cursorIndex = (this.selectIndex = this.FindNextSeperator(this.cursorIndex));
+			}
 			this.ClearCursorPos();
 		}
 
@@ -696,7 +816,15 @@ namespace UnityEngine
 		public void MoveWordLeft()
 		{
 			this.cursorIndex = ((this.cursorIndex < this.selectIndex) ? this.cursorIndex : this.selectIndex);
-			this.cursorIndex = this.FindPrevSeperator(this.cursorIndex);
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			if (useAdvancedText)
+			{
+				this.cursorIndex = this.FindEndOfPreviousWord(this.cursorIndex);
+			}
+			else
+			{
+				this.cursorIndex = this.FindPrevSeperator(this.cursorIndex);
+			}
 			this.selectIndex = this.cursorIndex;
 		}
 
@@ -746,12 +874,32 @@ namespace UnityEngine
 
 		protected internal void MoveCursorToPosition_Internal(Vector2 cursorPosition, bool shift)
 		{
-			this.selectIndex = this.m_TextHandle.GetCursorIndexFromPosition(cursorPosition, true);
+			this.selectIndex = this.textHandle.GetCursorIndexFromPosition(cursorPosition, true);
 			bool flag = !shift;
 			if (flag)
 			{
 				this.cursorIndex = this.selectIndex;
 			}
+		}
+
+		protected internal void MoveAltCursorToPosition(Vector2 cursorPosition)
+		{
+			bool flag = this.cursorIndex == 0 && this.selectIndex == this.characterCount;
+			if (flag)
+			{
+				this.iAltCursorPos = -1;
+			}
+			else
+			{
+				int cursorIndexFromPosition = this.textHandle.GetCursorIndexFromPosition(cursorPosition, true);
+				this.iAltCursorPos = Mathf.Min(this.characterCount, cursorIndexFromPosition);
+			}
+		}
+
+		protected internal bool IsOverSelection(Vector2 cursorPosition)
+		{
+			int cursorIndexFromPosition = this.textHandle.GetCursorIndexFromPosition(cursorPosition, true);
+			return cursorIndexFromPosition < Mathf.Max(this.cursorIndex, this.selectIndex) && cursorIndexFromPosition > Mathf.Min(this.cursorIndex, this.selectIndex);
 		}
 
 		public void SelectToPosition(Vector2 cursorPosition)
@@ -762,28 +910,45 @@ namespace UnityEngine
 				bool flag2 = !this.m_MouseDragSelectsWholeWords;
 				if (flag2)
 				{
-					this.cursorIndex = this.m_TextHandle.GetCursorIndexFromPosition(cursorPosition, true);
+					this.cursorIndex = this.textHandle.GetCursorIndexFromPosition(cursorPosition, true);
 				}
 				else
 				{
-					int num = this.m_TextHandle.GetCursorIndexFromPosition(cursorPosition, true);
-					num = this.EnsureValidCodePointIndex(num);
+					int cursorIndexFromPosition = this.textHandle.GetCursorIndexFromPosition(cursorPosition, true);
 					bool flag3 = this.dblClickSnap == TextEditor.DblClickSnapping.WORDS;
 					if (flag3)
 					{
-						bool flag4 = num <= this.m_DblClickInitPosStart;
+						bool flag4 = cursorIndexFromPosition <= this.m_DblClickInitPosStart;
 						if (flag4)
 						{
-							this.cursorIndex = this.FindEndOfClassification(num, TextSelectingUtilities.Direction.Backward);
-							this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosEnd - 1, TextSelectingUtilities.Direction.Forward);
+							bool useAdvancedText = this.textHandle.useAdvancedText;
+							if (useAdvancedText)
+							{
+								this.selectIndex = Mathf.Max(this.selectIndex, this.cursorIndex);
+								this.cursorIndex = this.textHandle.GetEndOfPreviousWord(cursorIndexFromPosition);
+							}
+							else
+							{
+								this.cursorIndex = this.FindEndOfClassification(cursorIndexFromPosition, TextSelectingUtilities.Direction.Backward);
+								this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosEnd - 1, TextSelectingUtilities.Direction.Forward);
+							}
 						}
 						else
 						{
-							bool flag5 = num >= this.m_DblClickInitPosEnd;
+							bool flag5 = cursorIndexFromPosition >= this.m_DblClickInitPosEnd;
 							if (flag5)
 							{
-								this.cursorIndex = this.FindEndOfClassification(num - 1, TextSelectingUtilities.Direction.Forward);
-								this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosStart + 1, TextSelectingUtilities.Direction.Backward);
+								bool useAdvancedText2 = this.textHandle.useAdvancedText;
+								if (useAdvancedText2)
+								{
+									this.selectIndex = Mathf.Min(this.selectIndex, this.cursorIndex);
+									this.cursorIndex = this.textHandle.GetStartOfNextWord(cursorIndexFromPosition - 1);
+								}
+								else
+								{
+									this.cursorIndex = this.FindEndOfClassification(cursorIndexFromPosition - 1, TextSelectingUtilities.Direction.Forward);
+									this.selectIndex = this.FindEndOfClassification(this.m_DblClickInitPosStart + 1, TextSelectingUtilities.Direction.Backward);
+								}
 							}
 							else
 							{
@@ -794,40 +959,69 @@ namespace UnityEngine
 					}
 					else
 					{
-						bool flag6 = num <= this.m_DblClickInitPosStart;
+						bool flag6 = (!this.textHandle.useAdvancedText && cursorIndexFromPosition <= this.m_DblClickInitPosStart) || (this.textHandle.useAdvancedText && cursorIndexFromPosition < this.m_DblClickInitPosStart);
 						if (flag6)
 						{
-							bool flag7 = num > 0;
-							if (flag7)
+							bool useAdvancedText3 = this.textHandle.useAdvancedText;
+							if (useAdvancedText3)
 							{
-								this.cursorIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Max(0, num - 1)) + 1;
+								int num = cursorIndexFromPosition;
+								this.textHandle.SelectToStartOfParagraph(ref num);
+								this.selectIndex = num;
 							}
 							else
 							{
-								this.cursorIndex = 0;
-							}
-							this.selectIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Min(this.characterCount - 1, this.m_DblClickInitPosEnd + 1));
-						}
-						else
-						{
-							bool flag8 = num >= this.m_DblClickInitPosEnd;
-							if (flag8)
-							{
-								bool flag9 = num < this.characterCount;
-								if (flag9)
+								bool flag7 = cursorIndexFromPosition > 0;
+								if (flag7)
 								{
-									this.cursorIndex = this.IndexOfEndOfLine(num);
+									this.cursorIndex = this.textHandle.LastIndexOf('\n', Mathf.Max(0, cursorIndexFromPosition - 1)) + 1;
 								}
 								else
 								{
-									this.cursorIndex = this.characterCount;
+									this.cursorIndex = 0;
 								}
-								this.selectIndex = this.m_TextHandle.LastIndexOf('\n', Mathf.Max(0, this.m_DblClickInitPosEnd - 2)) + 1;
+								this.selectIndex = this.textHandle.LastIndexOf('\n', Mathf.Min(this.characterCount - 1, this.m_DblClickInitPosEnd + 1));
+							}
+						}
+						else
+						{
+							bool flag8 = cursorIndexFromPosition >= this.m_DblClickInitPosEnd;
+							if (flag8)
+							{
+								bool useAdvancedText4 = this.textHandle.useAdvancedText;
+								if (useAdvancedText4)
+								{
+									int num2 = cursorIndexFromPosition;
+									this.textHandle.SelectToEndOfParagraph(ref num2);
+									this.cursorIndex = num2;
+								}
+								else
+								{
+									bool flag9 = cursorIndexFromPosition < this.characterCount;
+									if (flag9)
+									{
+										this.cursorIndex = this.IndexOfEndOfLine(cursorIndexFromPosition);
+									}
+									else
+									{
+										this.cursorIndex = this.characterCount;
+									}
+									this.selectIndex = this.textHandle.LastIndexOf('\n', Mathf.Max(0, this.m_DblClickInitPosEnd - 2)) + 1;
+								}
 							}
 							else
 							{
-								this.cursorIndex = this.m_DblClickInitPosStart;
-								this.selectIndex = this.m_DblClickInitPosEnd;
+								bool useAdvancedText5 = this.textHandle.useAdvancedText;
+								if (useAdvancedText5)
+								{
+									this.cursorIndex = this.m_DblClickInitPosEnd;
+									this.selectIndex = this.m_DblClickInitPosStart;
+								}
+								else
+								{
+									this.cursorIndex = this.m_DblClickInitPosStart;
+									this.selectIndex = this.m_DblClickInitPosEnd;
+								}
 							}
 						}
 					}
@@ -883,57 +1077,65 @@ namespace UnityEngine
 
 		public int FindStartOfNextWord(int p)
 		{
-			int characterCount = this.characterCount;
-			bool flag = p == characterCount;
+			bool useAdvancedText = this.textHandle.useAdvancedText;
 			int num;
-			if (flag)
+			if (useAdvancedText)
 			{
-				num = p;
+				num = this.textHandle.GetStartOfNextWord(p);
 			}
 			else
 			{
-				TextSelectingUtilities.CharacterType characterType = this.ClassifyChar(p);
-				bool flag2 = characterType != TextSelectingUtilities.CharacterType.WhiteSpace;
-				if (flag2)
-				{
-					p = this.NextCodePointIndex(p);
-					while (p < characterCount && this.ClassifyChar(p) == characterType)
-					{
-						p = this.NextCodePointIndex(p);
-					}
-				}
-				else
-				{
-					bool flag3 = this.m_TextElementInfos[p].character == '\t' || this.m_TextElementInfos[p].character == '\n';
-					if (flag3)
-					{
-						return this.NextCodePointIndex(p);
-					}
-				}
-				bool flag4 = p == characterCount;
-				if (flag4)
+				int characterCount = this.characterCount;
+				bool flag = p == characterCount;
+				if (flag)
 				{
 					num = p;
 				}
 				else
 				{
-					bool flag5 = this.m_TextElementInfos[p].character == ' ';
-					if (flag5)
+					TextSelectingUtilities.CharacterType characterType = this.ClassifyChar(p);
+					bool flag2 = characterType != TextSelectingUtilities.CharacterType.WhiteSpace;
+					if (flag2)
 					{
-						while (p < characterCount && this.ClassifyChar(p) == TextSelectingUtilities.CharacterType.WhiteSpace)
+						p = this.NextCodePointIndex(p);
+						while (p < characterCount && this.ClassifyChar(p) == characterType)
 						{
 							p = this.NextCodePointIndex(p);
 						}
 					}
 					else
 					{
-						bool flag6 = this.m_TextElementInfos[p].character == '\t' || this.m_TextElementInfos[p].character == '\n';
-						if (flag6)
+						bool flag3 = this.m_TextElementInfos[p].character == 9U || this.m_TextElementInfos[p].character == 10U;
+						if (flag3)
 						{
-							return p;
+							return this.NextCodePointIndex(p);
 						}
 					}
-					num = p;
+					bool flag4 = p == characterCount;
+					if (flag4)
+					{
+						num = p;
+					}
+					else
+					{
+						bool flag5 = this.m_TextElementInfos[p].character == 32U;
+						if (flag5)
+						{
+							while (p < characterCount && this.ClassifyChar(p) == TextSelectingUtilities.CharacterType.WhiteSpace)
+							{
+								p = this.NextCodePointIndex(p);
+							}
+						}
+						else
+						{
+							bool flag6 = this.m_TextElementInfos[p].character == 9U || this.m_TextElementInfos[p].character == 10U;
+							if (flag6)
+							{
+								return p;
+							}
+						}
+						num = p;
+					}
 				}
 			}
 			return num;
@@ -941,29 +1143,37 @@ namespace UnityEngine
 
 		public int FindEndOfPreviousWord(int p)
 		{
-			bool flag = p == 0;
+			bool useAdvancedText = this.textHandle.useAdvancedText;
 			int num;
-			if (flag)
+			if (useAdvancedText)
 			{
-				num = p;
+				num = this.textHandle.GetEndOfPreviousWord(p);
 			}
 			else
 			{
-				p = this.PreviousCodePointIndex(p);
-				while (p > 0 && this.m_TextElementInfos[p].character == ' ')
+				bool flag = p == 0;
+				if (flag)
+				{
+					num = p;
+				}
+				else
 				{
 					p = this.PreviousCodePointIndex(p);
-				}
-				TextSelectingUtilities.CharacterType characterType = this.ClassifyChar(p);
-				bool flag2 = characterType != TextSelectingUtilities.CharacterType.WhiteSpace;
-				if (flag2)
-				{
-					while (p > 0 && this.ClassifyChar(this.PreviousCodePointIndex(p)) == characterType)
+					while (p > 0 && this.m_TextElementInfos[p].character == 32U)
 					{
 						p = this.PreviousCodePointIndex(p);
 					}
+					TextSelectingUtilities.CharacterType characterType = this.ClassifyChar(p);
+					bool flag2 = characterType != TextSelectingUtilities.CharacterType.WhiteSpace;
+					if (flag2)
+					{
+						while (p > 0 && this.ClassifyChar(this.PreviousCodePointIndex(p)) == characterType)
+						{
+							p = this.PreviousCodePointIndex(p);
+						}
+					}
+					num = p;
 				}
-				num = p;
 			}
 			return num;
 		}
@@ -978,10 +1188,10 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag2 = p == this.characterCount;
+				bool flag2 = p >= this.characterCount;
 				if (flag2)
 				{
-					p = this.PreviousCodePointIndex(p);
+					p = this.characterCount - 1;
 				}
 				TextSelectingUtilities.CharacterType characterType = this.ClassifyChar(p);
 				bool flag3 = characterType == TextSelectingUtilities.CharacterType.NewLine;
@@ -1008,7 +1218,7 @@ namespace UnityEngine
 						else
 						{
 							p = this.NextCodePointIndex(p);
-							bool flag5 = p == this.characterCount;
+							bool flag5 = p >= this.characterCount;
 							if (flag5)
 							{
 								goto Block_8;
@@ -1042,81 +1252,60 @@ namespace UnityEngine
 			return Mathf.Clamp(index, 0, this.characterCount);
 		}
 
-		internal int EnsureValidCodePointIndex(int index)
-		{
-			index = this.ClampTextIndex(index);
-			bool flag = !this.IsValidCodePointIndex(index);
-			if (flag)
-			{
-				index = this.NextCodePointIndex(index);
-			}
-			return index;
-		}
-
-		private bool IsValidCodePointIndex(int index)
-		{
-			bool flag = index < 0 || index > this.characterCount;
-			bool flag2;
-			if (flag)
-			{
-				flag2 = false;
-			}
-			else
-			{
-				bool flag3 = index == 0 || index == this.characterCount;
-				flag2 = flag3 || !char.IsLowSurrogate(this.m_TextElementInfos[index].character);
-			}
-			return flag2;
-		}
-
 		private int IndexOfEndOfLine(int startIndex)
 		{
-			int num = this.m_TextHandle.IndexOf('\n', startIndex);
+			int num = this.textHandle.IndexOf('\n', startIndex);
 			return (num != -1) ? num : this.characterCount;
 		}
 
 		public int PreviousCodePointIndex(int index)
 		{
-			bool flag = index > 0;
-			if (flag)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			int num;
+			if (useAdvancedText)
 			{
-				index--;
+				num = this.textHandle.PreviousCodePointIndex(index);
 			}
-			while (index > 0 && char.IsLowSurrogate(this.m_TextElementInfos[index].character))
+			else
 			{
-				index--;
+				bool flag = index > 0;
+				if (flag)
+				{
+					index--;
+				}
+				num = index;
 			}
-			return index;
+			return num;
 		}
 
 		public int NextCodePointIndex(int index)
 		{
-			bool flag = index < this.characterCount;
-			if (flag)
+			bool useAdvancedText = this.textHandle.useAdvancedText;
+			int num;
+			if (useAdvancedText)
 			{
-				index++;
+				num = this.textHandle.NextCodePointIndex(index);
 			}
-			while (index < this.characterCount && char.IsLowSurrogate(this.m_TextElementInfos[index].character))
+			else
 			{
-				index++;
+				bool flag = index < this.characterCount;
+				if (flag)
+				{
+					index++;
+				}
+				num = index;
 			}
-			return index;
+			return num;
 		}
 
 		private int GetGraphicalLineStart(int p)
 		{
-			Vector2 cursorPositionFromStringIndexUsingLineHeight = this.m_TextHandle.GetCursorPositionFromStringIndexUsingLineHeight(p, false, true);
-			cursorPositionFromStringIndexUsingLineHeight.y -= 1f / GUIUtility.pixelsPerPoint;
-			cursorPositionFromStringIndexUsingLineHeight.x = 0f;
-			return this.m_TextHandle.GetCursorIndexFromPosition(cursorPositionFromStringIndexUsingLineHeight, true);
+			return this.textHandle.GetFirstCharacterIndexOnLine(p);
 		}
 
 		private int GetGraphicalLineEnd(int p)
 		{
-			Vector2 cursorPositionFromStringIndexUsingLineHeight = this.m_TextHandle.GetCursorPositionFromStringIndexUsingLineHeight(p, false, true);
-			cursorPositionFromStringIndexUsingLineHeight.y -= 1f / GUIUtility.pixelsPerPoint;
-			cursorPositionFromStringIndexUsingLineHeight.x += 5000f;
-			return this.m_TextHandle.GetCursorIndexFromPosition(cursorPositionFromStringIndexUsingLineHeight, true);
+			return this.textHandle.GetLastCharacterIndexOnLine(p);
 		}
 
 		public void Copy()
@@ -1130,8 +1319,8 @@ namespace UnityEngine
 
 		private TextSelectingUtilities.CharacterType ClassifyChar(int index)
 		{
-			char character = this.m_TextElementInfos[index].character;
-			bool flag = character == '\n';
+			char c = (char)this.m_TextElementInfos[index].character;
+			bool flag = c == '\n';
 			TextSelectingUtilities.CharacterType characterType;
 			if (flag)
 			{
@@ -1139,14 +1328,14 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag2 = char.IsWhiteSpace(character);
+				bool flag2 = char.IsWhiteSpace(c);
 				if (flag2)
 				{
 					characterType = TextSelectingUtilities.CharacterType.WhiteSpace;
 				}
 				else
 				{
-					bool flag3 = char.IsLetterOrDigit(character) || this.m_TextElementInfos[index].character == '\'';
+					bool flag3 = char.IsLetterOrDigit(c) || this.m_TextElementInfos[index].character == 39U;
 					if (flag3)
 					{
 						characterType = TextSelectingUtilities.CharacterType.LetterLike;
@@ -1174,7 +1363,7 @@ namespace UnityEngine
 
 		private int m_DblClickInitPosEnd = 0;
 
-		private TextHandle m_TextHandle;
+		public TextHandle textHandle;
 
 		private const int kMoveDownHeight = 5;
 
@@ -1186,12 +1375,57 @@ namespace UnityEngine
 
 		internal int m_SelectIndex = 0;
 
-		private static Dictionary<Event, TextSelectOp> s_KeySelectOps;
+		[TupleElementNames(new string[] { "keyEvent", "operation" })]
+		internal static readonly List<ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>> s_GlobalKeyMappings = new List<ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>>
+		{
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectLeft),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectRight),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectUp),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectDown)
+		};
 
+		[TupleElementNames(new string[] { "keyEvent", "operation" })]
+		internal static readonly List<ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>> s_MacKeyMappings = new List<ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>>
+		{
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.Home, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectTextStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.End, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectTextEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.ExpandSelectGraphicalLineStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.ExpandSelectGraphicalLineEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.SelectParagraphBackward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.SelectParagraphForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Shift | EventModifiers.Alt | EventModifiers.FunctionKey), TextSelectOp.SelectWordLeft),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Shift | EventModifiers.Alt | EventModifiers.FunctionKey), TextSelectOp.SelectWordRight),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Shift | EventModifiers.Alt | EventModifiers.FunctionKey), TextSelectOp.SelectParagraphBackward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Shift | EventModifiers.Alt | EventModifiers.FunctionKey), TextSelectOp.SelectParagraphForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Shift | EventModifiers.Command | EventModifiers.FunctionKey), TextSelectOp.ExpandSelectGraphicalLineStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Shift | EventModifiers.Command | EventModifiers.FunctionKey), TextSelectOp.ExpandSelectGraphicalLineEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Shift | EventModifiers.Command | EventModifiers.FunctionKey), TextSelectOp.SelectTextStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Shift | EventModifiers.Command | EventModifiers.FunctionKey), TextSelectOp.SelectTextEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.A, EventModifiers.Command), TextSelectOp.SelectAll),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.C, EventModifiers.Command), TextSelectOp.Copy)
+		};
+
+		[TupleElementNames(new string[] { "keyEvent", "operation" })]
+		internal static readonly List<ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>> s_WindowsLinuxKeyMappings = new List<ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>>
+		{
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.SelectToEndOfPreviousWord),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.SelectToStartOfNextWord),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.SelectParagraphBackward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Shift | EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.SelectParagraphForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.Home, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectGraphicalLineStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.End, EventModifiers.Shift | EventModifiers.FunctionKey), TextSelectOp.SelectGraphicalLineEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.A, EventModifiers.Control), TextSelectOp.SelectAll),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.C, EventModifiers.Control), TextSelectOp.Copy),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextSelectOp>(new TextEditingUtilities.KeyEvent(KeyCode.Insert, EventModifiers.Control | EventModifiers.FunctionKey), TextSelectOp.Copy)
+		};
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal Action OnCursorIndexChange;
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal Action OnSelectIndexChange;
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal Action OnRevealCursorChange;
 
 		private enum CharacterType

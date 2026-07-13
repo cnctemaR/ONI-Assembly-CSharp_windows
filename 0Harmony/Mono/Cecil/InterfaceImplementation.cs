@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class InterfaceImplementation : ICustomAttributeProvider, IMetadataTokenProvider
+	internal sealed class InterfaceImplementation : ICustomAttributeProvider, IMetadataTokenProvider
 	{
 		public TypeReference InterfaceType
 		{

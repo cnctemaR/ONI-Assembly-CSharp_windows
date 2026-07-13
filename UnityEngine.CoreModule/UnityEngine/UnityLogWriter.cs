@@ -20,12 +20,32 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void WriteStringToUnityLogImpl(string s);
+		private unsafe static void WriteStringToUnityLogImpl(string s)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(s, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = s.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				UnityLogWriter.WriteStringToUnityLogImpl_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		public static void Init()
 		{
-			Console.SetOut(new UnityLogWriter());
+			TextWriter textWriter = TextWriter.Synchronized(new UnityLogWriter());
+			Console.SetOut(textWriter);
+			Console.SetError(textWriter);
 		}
 
 		public override Encoding Encoding
@@ -50,5 +70,8 @@ namespace UnityEngine
 		{
 			UnityLogWriter.WriteStringToUnityLogImpl(new string(buffer, index, count));
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void WriteStringToUnityLogImpl_Injected(ref ManagedSpanWrapper s);
 	}
 }

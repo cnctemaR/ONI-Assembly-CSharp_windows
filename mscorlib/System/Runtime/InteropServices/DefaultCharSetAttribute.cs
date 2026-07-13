@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Module, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class DefaultCharSetAttribute : Attribute
 	{
 		public DefaultCharSetAttribute(CharSet charSet)

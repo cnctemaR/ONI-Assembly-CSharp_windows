@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Misc/Cache.h")]
 	[StaticAccessor("CacheWrapper", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Misc/Cache.h")]
 	public struct Cache : IEquatable<Cache>
 	{
 		internal int handle
@@ -85,8 +85,21 @@ namespace UnityEngine
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string Cache_GetPath(int handle);
+		internal static string Cache_GetPath(int handle)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				Cache.Cache_GetPath_Injected(handle, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public int index
 		{
@@ -180,6 +193,9 @@ namespace UnityEngine
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool Cache_ClearCache_Expiration(int handle, int expiration);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Cache_GetPath_Injected(int handle, out ManagedSpanWrapper ret);
 
 		private int m_Handle;
 	}

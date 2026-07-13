@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD7B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Unity.Multiplayer.Center</RootNamespace>
+    <AssemblyName>Unity.Multiplayer.Center.Common</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Common\Analytics\InteractionDataType.cs" />
+    <Compile Include="Common\Analytics\IOnboardingSectionAnalyticsProvider.cs" />
+    <Compile Include="Common\AnswerData.cs" />
+    <Compile Include="Common\AnsweredQuestion.cs" />
+    <Compile Include="Common\DisplayCondition.cs" />
+    <Compile Include="Common\InfrastructureDependency.cs" />
+    <Compile Include="Common\IOnboardingSection.cs" />
+    <Compile Include="Common\ISectionDependingOnUserChoices.cs" />
+    <Compile Include="Common\ISectionWithAnalytics.cs" />
+    <Compile Include="Common\OnboardingSectionAttribute.cs" />
+    <Compile Include="Common\OnboardingSectionCategory.cs" />
+    <Compile Include="Common\Preset.cs" />
+    <Compile Include="Common\SelectedSolutionsData.cs" />
+    <Compile Include="Onboarding\StyleConstants.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitySourceGeneratedAssemblyMonoScriptTypes_v1.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5B}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD63}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.JSONSerializeModule\UnityEngine.JSONSerializeModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD9F}</Project>
+      <Name>UnityEngine.JSONSerializeModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.UIElementsModule\UnityEngine.UIElementsModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDBD}</Project>
+      <Name>UnityEngine.UIElementsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

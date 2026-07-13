@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using Unity.Burst;
+using UnityEngine.Bindings;
 
 namespace Unity.Jobs
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.ParticleSystemModule" })]
 	internal static class JobValidationInternal
 	{
+		[VisibleToOtherModules(new string[] { "UnityEngine.ParticleSystemModule" })]
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		internal static void CheckReflectionDataCorrect<T>(IntPtr reflectionData)
 		{

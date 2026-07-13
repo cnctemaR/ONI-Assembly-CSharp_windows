@@ -21,8 +21,25 @@ namespace UnityEngine
 			}
 		}
 
+		public ResourceRequest()
+		{
+		}
+
+		protected ResourceRequest(IntPtr ptr)
+			: base(ptr)
+		{
+		}
+
 		internal string m_Path;
 
 		internal Type m_Type;
+
+		internal new static class BindingsMarshaller
+		{
+			public static ResourceRequest ConvertToManaged(IntPtr ptr)
+			{
+				return new ResourceRequest(ptr);
+			}
+		}
 	}
 }

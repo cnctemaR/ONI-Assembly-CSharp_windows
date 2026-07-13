@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class MonoSymbolFile : IDisposable
+	internal class MonoSymbolFile : IDisposable
 	{
 		public MonoSymbolFile()
 		{

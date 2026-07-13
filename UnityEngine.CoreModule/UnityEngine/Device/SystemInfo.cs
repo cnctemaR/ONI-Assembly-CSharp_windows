@@ -46,6 +46,22 @@ namespace UnityEngine.Device
 			}
 		}
 
+		public static string ProcessorModel
+		{
+			get
+			{
+				return SystemInfo.processorModel;
+			}
+		}
+
+		public static string ProcessorManufacturer
+		{
+			get
+			{
+				return SystemInfo.processorManufacturer;
+			}
+		}
+
 		public static int processorFrequency
 		{
 			get
@@ -131,6 +147,14 @@ namespace UnityEngine.Device
 			get
 			{
 				return SystemInfo.supportsAudio;
+			}
+		}
+
+		public static bool supportsRendering
+		{
+			get
+			{
+				return SystemInfo.supportsRendering;
 			}
 		}
 
@@ -235,6 +259,30 @@ namespace UnityEngine.Device
 			get
 			{
 				return SystemInfo.foveatedRenderingCaps;
+			}
+		}
+
+		public static bool supportsVariableRateShading
+		{
+			get
+			{
+				return SystemInfo.supportsVariableRateShading;
+			}
+		}
+
+		public static int maxTiledPixelStorageSize
+		{
+			get
+			{
+				return SystemInfo.maxTiledPixelStorageSize;
+			}
+		}
+
+		public static bool hasTiledGPU
+		{
+			get
+			{
+				return SystemInfo.hasTiledGPU;
 			}
 		}
 
@@ -422,6 +470,14 @@ namespace UnityEngine.Device
 			}
 		}
 
+		public static bool supportsMemorylessTextures
+		{
+			get
+			{
+				return SystemInfo.supportsMemorylessTextures;
+			}
+		}
+
 		public static int supportsMultisampledTextures
 		{
 			get
@@ -438,11 +494,27 @@ namespace UnityEngine.Device
 			}
 		}
 
+		public static bool supportsMultisampledBackBuffer
+		{
+			get
+			{
+				return SystemInfo.supportsMultisampledBackBuffer;
+			}
+		}
+
 		public static bool supportsMultisampleAutoResolve
 		{
 			get
 			{
 				return SystemInfo.supportsMultisampleAutoResolve;
+			}
+		}
+
+		public static bool supportsMultisampledShaderResolve
+		{
+			get
+			{
+				return SystemInfo.supportsMultisampledShaderResolve;
 			}
 		}
 
@@ -650,11 +722,43 @@ namespace UnityEngine.Device
 			}
 		}
 
+		public static bool supportsParallelPSOCreation
+		{
+			get
+			{
+				return SystemInfo.supportsParallelPSOCreation;
+			}
+		}
+
 		public static bool supportsRayTracing
 		{
 			get
 			{
 				return SystemInfo.supportsRayTracing;
+			}
+		}
+
+		public static bool supportsRayTracingShaders
+		{
+			get
+			{
+				return SystemInfo.supportsRayTracingShaders;
+			}
+		}
+
+		public static bool supportsInlineRayTracing
+		{
+			get
+			{
+				return SystemInfo.supportsInlineRayTracing;
+			}
+		}
+
+		public static bool supportsIndirectDispatchRays
+		{
+			get
+			{
+				return SystemInfo.supportsIndirectDispatchRays;
 			}
 		}
 
@@ -770,12 +874,42 @@ namespace UnityEngine.Device
 			}
 		}
 
+		public static bool supportsDepthFetchInRenderPass
+		{
+			get
+			{
+				return SystemInfo.supportsDepthFetchInRenderPass;
+			}
+		}
+
+		public static bool supportsDynamicResolution
+		{
+			get
+			{
+				return SystemInfo.supportsDynamicResolution;
+			}
+		}
+
+		[Obsolete("Use overload with a GraphicsFormatUsage parameter instead", false)]
 		public static bool IsFormatSupported(GraphicsFormat format, FormatUsage usage)
+		{
+			GraphicsFormatUsage graphicsFormatUsage = (GraphicsFormatUsage)(1 << (int)usage);
+			return SystemInfo.IsFormatSupported(format, graphicsFormatUsage);
+		}
+
+		public static bool IsFormatSupported(GraphicsFormat format, GraphicsFormatUsage usage)
 		{
 			return SystemInfo.IsFormatSupported(format, usage);
 		}
 
+		[Obsolete("Use overload with a GraphicsFormatUsage parameter instead", false)]
 		public static GraphicsFormat GetCompatibleFormat(GraphicsFormat format, FormatUsage usage)
+		{
+			GraphicsFormatUsage graphicsFormatUsage = (GraphicsFormatUsage)(1 << (int)usage);
+			return SystemInfo.GetCompatibleFormat(format, graphicsFormatUsage);
+		}
+
+		public static GraphicsFormat GetCompatibleFormat(GraphicsFormat format, GraphicsFormatUsage usage)
 		{
 			return SystemInfo.GetCompatibleFormat(format, usage);
 		}
@@ -793,6 +927,11 @@ namespace UnityEngine.Device
 		public static bool SupportsRandomWriteOnRenderTextureFormat(RenderTextureFormat format)
 		{
 			return SystemInfo.SupportsRandomWriteOnRenderTextureFormat(format);
+		}
+
+		public static int GetTiledRenderTargetStorageSize(GraphicsFormat format, int sampleCount)
+		{
+			return SystemInfo.GetTiledRenderTargetStorageSize(format, sampleCount);
 		}
 
 		public const string unsupportedIdentifier = "n/a";

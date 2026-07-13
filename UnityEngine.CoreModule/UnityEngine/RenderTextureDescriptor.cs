@@ -27,7 +27,6 @@ namespace UnityEngine
 			{
 				this._graphicsFormat = value;
 				this.SetOrClearRenderTextureCreationFlag(GraphicsFormatUtility.IsSRGBFormat(value), RenderTextureCreationFlags.SRGB);
-				this.depthBufferBits = this.depthBufferBits;
 			}
 		}
 
@@ -53,8 +52,10 @@ namespace UnityEngine
 			}
 			set
 			{
+				this.shadowSamplingMode = RenderTexture.GetShadowSamplingModeForFormat(value);
 				GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(value, this.sRGB);
-				this.graphicsFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, FormatUsage.Render);
+				this.graphicsFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, GraphicsFormatUsage.Render);
+				this.depthStencilFormat = RenderTexture.GetDepthStencilFormatLegacy(this.depthBufferBits, this.shadowSamplingMode);
 			}
 		}
 
@@ -66,7 +67,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.graphicsFormat = ((value && QualitySettings.activeColorSpace == ColorSpace.Linear && this.colorFormat != RenderTextureFormat.R8 && this.colorFormat != RenderTextureFormat.RG16) ? GraphicsFormatUtility.GetSRGBFormat(this.graphicsFormat) : GraphicsFormatUtility.GetLinearFormat(this.graphicsFormat));
+				this.graphicsFormat = ((value && QualitySettings.activeColorSpace == ColorSpace.Linear) ? GraphicsFormatUtility.GetSRGBFormat(this.graphicsFormat) : GraphicsFormatUtility.GetLinearFormat(this.graphicsFormat));
 			}
 		}
 
@@ -78,7 +79,7 @@ namespace UnityEngine
 			}
 			set
 			{
-				this.depthStencilFormat = RenderTexture.GetDepthStencilFormatLegacy(value, this.graphicsFormat);
+				this.depthStencilFormat = RenderTexture.GetDepthStencilFormatLegacy(value, this.shadowSamplingMode);
 			}
 		}
 
@@ -130,9 +131,9 @@ namespace UnityEngine
 
 		public RenderTextureDescriptor(int width, int height, [DefaultValue("RenderTextureFormat.Default")] RenderTextureFormat colorFormat, [DefaultValue("0")] int depthBufferBits, [DefaultValue("Texture.GenerateAllMips")] int mipCount, [DefaultValue("RenderTextureReadWrite.Linear")] RenderTextureReadWrite readWrite)
 		{
-			GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(colorFormat, readWrite);
-			GraphicsFormat compatibleFormat = SystemInfo.GetCompatibleFormat(graphicsFormat, FormatUsage.Render);
-			this = new RenderTextureDescriptor(width, height, compatibleFormat, RenderTexture.GetDepthStencilFormatLegacy(depthBufferBits, colorFormat), mipCount);
+			GraphicsFormat compatibleFormat = RenderTexture.GetCompatibleFormat(colorFormat, readWrite);
+			this = new RenderTextureDescriptor(width, height, compatibleFormat, RenderTexture.GetDepthStencilFormatLegacy(depthBufferBits, colorFormat, false), mipCount);
+			this.shadowSamplingMode = RenderTexture.GetShadowSamplingModeForFormat(colorFormat);
 		}
 
 		[ExcludeFromDocs]
@@ -258,6 +259,30 @@ namespace UnityEngine
 			set
 			{
 				this.SetOrClearRenderTextureCreationFlag(value, RenderTextureCreationFlags.DynamicallyScalable);
+			}
+		}
+
+		public bool useDynamicScaleExplicit
+		{
+			get
+			{
+				return (this._flags & RenderTextureCreationFlags.DynamicallyScalableExplicit) > (RenderTextureCreationFlags)0;
+			}
+			set
+			{
+				this.SetOrClearRenderTextureCreationFlag(value, RenderTextureCreationFlags.DynamicallyScalableExplicit);
+			}
+		}
+
+		public bool enableShadingRate
+		{
+			get
+			{
+				return (this._flags & RenderTextureCreationFlags.ShadingRate) > (RenderTextureCreationFlags)0;
+			}
+			set
+			{
+				this.SetOrClearRenderTextureCreationFlag(value, RenderTextureCreationFlags.ShadingRate);
 			}
 		}
 

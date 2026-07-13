@@ -291,24 +291,48 @@ namespace Mono.Cecil.PE
 
 		public void WriteCompressedInt32(int value)
 		{
-			if (value >= 0)
+			int num = value >> 31;
+			if ((value & -64) == (num & -64))
 			{
-				this.WriteCompressedUInt32((uint)((uint)value << 1));
+				int num2 = ((value & 63) << 1) | (num & 1);
+				this.WriteByte((byte)num2);
 				return;
 			}
-			if (value > -64)
+			if ((value & -8192) == (num & -8192))
 			{
-				value = 64 + value;
+				int num3 = ((value & 8191) << 1) | (num & 1);
+				ushort num4 = (ushort)(32768 | num3);
+				this.WriteUInt16(BitConverter.IsLittleEndian ? ByteBuffer.ReverseEndianness(num4) : num4);
+				return;
 			}
-			else if (value >= -8192)
+			if ((value & -268435456) == (num & -268435456))
 			{
-				value = 8192 + value;
+				int num5 = ((value & 268435455) << 1) | (num & 1);
+				uint num6 = (uint)(-1073741824 | num5);
+				this.WriteUInt32(BitConverter.IsLittleEndian ? ByteBuffer.ReverseEndianness(num6) : num6);
+				return;
 			}
-			else if (value >= -536870912)
-			{
-				value = 536870912 + value;
-			}
-			this.WriteCompressedUInt32((uint)((value << 1) | 1));
+			throw new ArgumentOutOfRangeException("value", "valid range is -2^28 to 2^28 -1");
+		}
+
+		private static uint ReverseEndianness(uint value)
+		{
+			return ByteBuffer.RotateRight(value & 16711935U, 8) + ByteBuffer.RotateLeft(value & 4278255360U, 8);
+		}
+
+		private static uint RotateRight(uint value, int offset)
+		{
+			return (value >> offset) | (value << 32 - offset);
+		}
+
+		private static uint RotateLeft(uint value, int offset)
+		{
+			return (value << offset) | (value >> 32 - offset);
+		}
+
+		private static ushort ReverseEndianness(ushort value)
+		{
+			return (ushort)((value >> 8) + ((int)value << 8));
 		}
 
 		public void WriteBytes(byte[] bytes)

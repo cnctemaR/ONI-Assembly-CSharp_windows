@@ -11,7 +11,6 @@ public abstract class BaseBatteryConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, width, height, anim, hitpoints, construction_time, construction_mass, construction_materials, melting_point, buildLocationRule, decor, tier, 0.2f);
 		buildingDef.ExhaustKilowattsWhenActive = exhaust_temperature_active;
 		buildingDef.SelfHeatKilowattsWhenActive = self_heat_kilowatts_active;
-		buildingDef.Entombable = false;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.RequiresPowerOutput = true;

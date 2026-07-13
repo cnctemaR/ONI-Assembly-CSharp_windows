@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/TextRendering/TextGenerator.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/TextRendering/TextGenerator.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class TextGenerator : IDisposable
 	{
@@ -230,35 +230,68 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Rect rect;
-				this.get_rectExtents_Injected(out rect);
+				TextGenerator.get_rectExtents_Injected(intPtr, out rect);
 				return rect;
 			}
 		}
 
-		public extern int vertexCount
+		public int vertexCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TextGenerator.get_vertexCount_Injected(intPtr);
+			}
 		}
 
-		public extern int characterCount
+		public int characterCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TextGenerator.get_characterCount_Injected(intPtr);
+			}
 		}
 
-		public extern int lineCount
+		public int lineCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TextGenerator.get_lineCount_Injected(intPtr);
+			}
 		}
 
 		[NativeProperty("FontSizeFoundForBestFit", false, TargetType.Function)]
-		public extern int fontSizeUsedForBestFit
+		public int fontSizeUsedForBestFit
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TextGenerator.get_fontSizeUsedForBestFit_Injected(intPtr);
+			}
 		}
 
 		[NativeMethod(IsThreadSafe = true)]
@@ -269,9 +302,32 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Destroy(IntPtr ptr);
 
-		internal bool Populate_Internal(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry, out uint error)
+		internal unsafe bool Populate_Internal(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry, out uint error)
 		{
-			return this.Populate_Internal_Injected(str, font, ref color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, verticalOverFlow, horizontalOverflow, updateBounds, anchor, extentsX, extentsY, pivotX, pivotY, generateOutOfBounds, alignByGeometry, out error);
+			bool flag;
+			try
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(str, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = str.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = TextGenerator.Populate_Internal_Injected(intPtr, ref managedSpanWrapper, Object.MarshalledUnityObject.Marshal<Font>(font), ref color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, verticalOverFlow, horizontalOverflow, updateBounds, anchor, extentsX, extentsY, pivotX, pivotY, generateOutOfBounds, alignByGeometry, out error);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
 		}
 
 		internal bool Populate_Internal(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, VerticalWrapMode verticalOverFlow, HorizontalWrapMode horizontalOverflow, bool updateBounds, TextAnchor anchor, Vector2 extents, Vector2 pivot, bool generateOutOfBounds, bool alignByGeometry, out TextGenerationError error)
@@ -293,32 +349,143 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern UIVertex[] GetVerticesArray();
+		public UIVertex[] GetVerticesArray()
+		{
+			UIVertex[] array2;
+			try
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				TextGenerator.GetVerticesArray_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				UIVertex[] array;
+				blittableArrayWrapper.Unmarshal<UIVertex>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern UICharInfo[] GetCharactersArray();
+		public UICharInfo[] GetCharactersArray()
+		{
+			UICharInfo[] array2;
+			try
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				TextGenerator.GetCharactersArray_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				UICharInfo[] array;
+				blittableArrayWrapper.Unmarshal<UICharInfo>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern UILineInfo[] GetLinesArray();
+		public UILineInfo[] GetLinesArray()
+		{
+			UILineInfo[] array2;
+			try
+			{
+				IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				TextGenerator.GetLinesArray_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				UILineInfo[] array;
+				blittableArrayWrapper.Unmarshal<UILineInfo>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVerticesInternal(object vertices);
+		private void GetVerticesInternal(object vertices)
+		{
+			IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			TextGenerator.GetVerticesInternal_Injected(intPtr, vertices);
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetCharactersInternal(object characters);
+		private void GetCharactersInternal(object characters)
+		{
+			IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			TextGenerator.GetCharactersInternal_Injected(intPtr, characters);
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetLinesInternal(object lines);
+		private void GetLinesInternal(object lines)
+		{
+			IntPtr intPtr = TextGenerator.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			TextGenerator.GetLinesInternal_Injected(intPtr, lines);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_rectExtents_Injected(out Rect ret);
+		private static extern void get_rectExtents_Injected(IntPtr _unity_self, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool Populate_Internal_Injected(string str, Font font, ref Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry, out uint error);
+		private static extern int get_vertexCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_characterCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_lineCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_fontSizeUsedForBestFit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Populate_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper str, IntPtr font, [In] ref Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry, out uint error);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVerticesArray_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCharactersArray_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLinesArray_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVerticesInternal_Injected(IntPtr _unity_self, object vertices);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCharactersInternal_Injected(IntPtr _unity_self, object characters);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLinesInternal_Injected(IntPtr _unity_self, object lines);
 
 		internal IntPtr m_Ptr;
 
@@ -341,5 +508,13 @@ namespace UnityEngine
 		private bool m_CachedCharacters;
 
 		private bool m_CachedLines;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(TextGenerator textGenerator)
+			{
+				return textGenerator.m_Ptr;
+			}
+		}
 	}
 }

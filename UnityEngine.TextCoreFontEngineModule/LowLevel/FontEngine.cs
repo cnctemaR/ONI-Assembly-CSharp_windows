@@ -60,8 +60,28 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_Internal(string filePath);
+		private unsafe static int LoadFontFace_Internal(string filePath)
+		{
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(filePath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = filePath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = FontEngine.LoadFontFace_Internal_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
 
 		public static FontEngineError LoadFontFace(string filePath, int pointSize)
 		{
@@ -69,17 +89,57 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_With_Size_Internal(string filePath, int pointSize);
-
-		public static FontEngineError LoadFontFace(string filePath, int pointSize, int faceIndex)
+		private unsafe static int LoadFontFace_With_Size_Internal(string filePath, int pointSize)
 		{
-			return (FontEngineError)FontEngine.LoadFontFace_With_Size_And_FaceIndex_Internal(filePath, pointSize, faceIndex);
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(filePath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = filePath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = FontEngine.LoadFontFace_With_Size_Internal_Injected(ref managedSpanWrapper, pointSize);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
+
+		public static FontEngineError LoadFontFace(string filePath, float pointSize, int faceIndex)
+		{
+			return (FontEngineError)FontEngine.LoadFontFace_With_Size_And_FaceIndex_Internal(filePath, (int)Math.Round((double)pointSize, MidpointRounding.AwayFromZero), faceIndex);
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_With_Size_And_FaceIndex_Internal(string filePath, int pointSize, int faceIndex);
+		private unsafe static int LoadFontFace_With_Size_And_FaceIndex_Internal(string filePath, int pointSize, int faceIndex)
+		{
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(filePath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = filePath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = FontEngine.LoadFontFace_With_Size_And_FaceIndex_Internal_Injected(ref managedSpanWrapper, pointSize, faceIndex);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
 
 		public static FontEngineError LoadFontFace(byte[] sourceFontFile)
 		{
@@ -97,8 +157,17 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_FromSourceFontFile_Internal(byte[] sourceFontFile);
+		private unsafe static int LoadFontFace_FromSourceFontFile_Internal(byte[] sourceFontFile)
+		{
+			Span<byte> span = new Span<byte>(sourceFontFile);
+			int num;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.LoadFontFace_FromSourceFontFile_Internal_Injected(ref managedSpanWrapper);
+			}
+			return num;
+		}
 
 		public static FontEngineError LoadFontFace(byte[] sourceFontFile, int pointSize)
 		{
@@ -116,10 +185,19 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_With_Size_FromSourceFontFile_Internal(byte[] sourceFontFile, int pointSize);
+		private unsafe static int LoadFontFace_With_Size_FromSourceFontFile_Internal(byte[] sourceFontFile, int pointSize)
+		{
+			Span<byte> span = new Span<byte>(sourceFontFile);
+			int num;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.LoadFontFace_With_Size_FromSourceFontFile_Internal_Injected(ref managedSpanWrapper, pointSize);
+			}
+			return num;
+		}
 
-		public static FontEngineError LoadFontFace(byte[] sourceFontFile, int pointSize, int faceIndex)
+		public static FontEngineError LoadFontFace(byte[] sourceFontFile, float pointSize, int faceIndex)
 		{
 			bool flag = sourceFontFile.Length == 0;
 			FontEngineError fontEngineError;
@@ -129,14 +207,23 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 			else
 			{
-				fontEngineError = (FontEngineError)FontEngine.LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal(sourceFontFile, pointSize, faceIndex);
+				fontEngineError = (FontEngineError)FontEngine.LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal(sourceFontFile, (int)Math.Round((double)pointSize, MidpointRounding.AwayFromZero), faceIndex);
 			}
 			return fontEngineError;
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal(byte[] sourceFontFile, int pointSize, int faceIndex);
+		private unsafe static int LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal(byte[] sourceFontFile, int pointSize, int faceIndex)
+		{
+			Span<byte> span = new Span<byte>(sourceFontFile);
+			int num;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal_Injected(ref managedSpanWrapper, pointSize, faceIndex);
+			}
+			return num;
+		}
 
 		public static FontEngineError LoadFontFace(Font font)
 		{
@@ -144,8 +231,10 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_FromFont_Internal(Font font);
+		private static int LoadFontFace_FromFont_Internal(Font font)
+		{
+			return FontEngine.LoadFontFace_FromFont_Internal_Injected(Object.MarshalledUnityObject.Marshal<Font>(font));
+		}
 
 		public static FontEngineError LoadFontFace(Font font, int pointSize)
 		{
@@ -153,17 +242,21 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_With_Size_FromFont_Internal(Font font, int pointSize);
-
-		public static FontEngineError LoadFontFace(Font font, int pointSize, int faceIndex)
+		private static int LoadFontFace_With_Size_FromFont_Internal(Font font, int pointSize)
 		{
-			return (FontEngineError)FontEngine.LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal(font, pointSize, faceIndex);
+			return FontEngine.LoadFontFace_With_Size_FromFont_Internal_Injected(Object.MarshalledUnityObject.Marshal<Font>(font), pointSize);
+		}
+
+		public static FontEngineError LoadFontFace(Font font, float pointSize, int faceIndex)
+		{
+			return (FontEngineError)FontEngine.LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal(font, (int)Math.Round((double)pointSize, MidpointRounding.AwayFromZero), faceIndex);
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal(Font font, int pointSize, int faceIndex);
+		private static int LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal(Font font, int pointSize, int faceIndex)
+		{
+			return FontEngine.LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal_Injected(Object.MarshalledUnityObject.Marshal<Font>(font), pointSize, faceIndex);
+		}
 
 		public static FontEngineError LoadFontFace(string familyName, string styleName)
 		{
@@ -171,17 +264,77 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_by_FamilyName_and_StyleName_Internal(string familyName, string styleName);
-
-		public static FontEngineError LoadFontFace(string familyName, string styleName, int pointSize)
+		private unsafe static int LoadFontFace_by_FamilyName_and_StyleName_Internal(string familyName, string styleName)
 		{
-			return (FontEngineError)FontEngine.LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal(familyName, styleName, pointSize);
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(familyName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = familyName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(styleName, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = styleName.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				num = FontEngine.LoadFontFace_by_FamilyName_and_StyleName_Internal_Injected(ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return num;
+		}
+
+		public static FontEngineError LoadFontFace(string familyName, string styleName, float pointSize)
+		{
+			return (FontEngineError)FontEngine.LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal(familyName, styleName, (int)Math.Round((double)pointSize, MidpointRounding.AwayFromZero));
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::LoadFontFace", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal(string familyName, string styleName, int pointSize);
+		private unsafe static int LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal(string familyName, string styleName, int pointSize)
+		{
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(familyName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = familyName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(styleName, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = styleName.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				num = FontEngine.LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, pointSize);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return num;
+		}
 
 		public static FontEngineError UnloadFontFace()
 		{
@@ -225,14 +378,49 @@ namespace UnityEngine.TextCore.LowLevel
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern FontReference[] GetSystemFontReferences();
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool IsColorFontFace();
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static bool TryGetSystemFontReference(string familyName, string styleName, out FontReference fontRef)
 		{
 			return FontEngine.TryGetSystemFontReference_Internal(familyName, styleName, out fontRef);
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryGetSystemFontReference", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryGetSystemFontReference_Internal(string familyName, string styleName, out FontReference fontRef);
+		private unsafe static bool TryGetSystemFontReference_Internal(string familyName, string styleName, out FontReference fontRef)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(familyName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = familyName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(styleName, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = styleName.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				flag = FontEngine.TryGetSystemFontReference_Internal_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, out fontRef);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return flag;
+		}
 
 		public static FontEngineError SetFaceSize(int pointSize)
 		{
@@ -279,16 +467,58 @@ namespace UnityEngine.TextCore.LowLevel
 		private static extern string[] GetFontFaces_Internal();
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetVariantGlyphIndex", IsThreadSafe = true, IsFreeFunction = true)]
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern uint GetVariantGlyphIndex(uint unicode, uint variantSelectorUnicode);
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetGlyphIndex", IsThreadSafe = true, IsFreeFunction = true)]
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern uint GetGlyphIndex(uint unicode);
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryGetGlyphIndex", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool TryGetGlyphIndex(uint unicode, out uint glyphIndex);
+
+		internal static Dictionary<uint, List<int>> GetCharacterMap()
+		{
+			GlyphIndexCodePointMap[] fontCharacterMap_Internal = FontEngine.GetFontCharacterMap_Internal();
+			Dictionary<uint, List<int>> dictionary = new Dictionary<uint, List<int>>();
+			for (int i = 0; i < fontCharacterMap_Internal.Length; i++)
+			{
+				uint glyphIndex = fontCharacterMap_Internal[i].glyphIndex;
+				uint unicode = fontCharacterMap_Internal[i].unicode;
+				bool flag = !dictionary.ContainsKey(glyphIndex);
+				if (flag)
+				{
+					dictionary.Add(glyphIndex, new List<int> { (int)unicode });
+				}
+				else
+				{
+					dictionary[glyphIndex].Add((int)unicode);
+				}
+			}
+			return dictionary;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetFontCharacterMap", IsThreadSafe = true, IsFreeFunction = true)]
+		internal static GlyphIndexCodePointMap[] GetFontCharacterMap_Internal()
+		{
+			GlyphIndexCodePointMap[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetFontCharacterMap_Internal_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				GlyphIndexCodePointMap[] array;
+				blittableArrayWrapper.Unmarshal<GlyphIndexCodePointMap>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		internal static FontEngineError LoadGlyph(uint unicode, GlyphLoadFlags flags)
 		{
@@ -401,8 +631,46 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryPackGlyph", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryPackGlyphInAtlas_Internal(ref GlyphMarshallingStruct glyph, int padding, GlyphPackingMode packingMode, GlyphRenderMode renderMode, int width, int height, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount);
+		private unsafe static bool TryPackGlyphInAtlas_Internal(ref GlyphMarshallingStruct glyph, int padding, GlyphPackingMode packingMode, GlyphRenderMode renderMode, int width, int height, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount)
+		{
+			bool flag;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (freeGlyphRects != null)
+				{
+					fixed (GlyphRect[] array = freeGlyphRects)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper2;
+				if (usedGlyphRects != null)
+				{
+					fixed (GlyphRect[] array2 = usedGlyphRects)
+					{
+						if (array2.Length != 0)
+						{
+							blittableArrayWrapper2 = new BlittableArrayWrapper((void*)(&array2[0]), array2.Length);
+						}
+					}
+				}
+				flag = FontEngine.TryPackGlyphInAtlas_Internal_Injected(ref glyph, padding, packingMode, renderMode, width, height, out blittableArrayWrapper, ref freeGlyphRectCount, out blittableArrayWrapper2, ref usedGlyphRectCount);
+			}
+			finally
+			{
+				GlyphRect[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<GlyphRect>(ref array);
+				GlyphRect[] array2;
+				BlittableArrayWrapper blittableArrayWrapper2;
+				blittableArrayWrapper2.Unmarshal<GlyphRect>(ref array2);
+			}
+			return flag;
+		}
 
 		internal static bool TryPackGlyphsInAtlas(List<Glyph> glyphsToAdd, List<Glyph> glyphsAdded, int padding, GlyphPackingMode packingMode, GlyphRenderMode renderMode, int width, int height, List<GlyphRect> freeGlyphRects, List<GlyphRect> usedGlyphRects)
 		{
@@ -500,8 +768,74 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryPackGlyphs", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryPackGlyphsInAtlas_Internal([Out] GlyphMarshallingStruct[] glyphsToAdd, ref int glyphsToAddCount, [Out] GlyphMarshallingStruct[] glyphsAdded, ref int glyphsAddedCount, int padding, GlyphPackingMode packingMode, GlyphRenderMode renderMode, int width, int height, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount);
+		private unsafe static bool TryPackGlyphsInAtlas_Internal([Out] GlyphMarshallingStruct[] glyphsToAdd, ref int glyphsToAddCount, [Out] GlyphMarshallingStruct[] glyphsAdded, ref int glyphsAddedCount, int padding, GlyphPackingMode packingMode, GlyphRenderMode renderMode, int width, int height, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount)
+		{
+			bool flag;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (glyphsToAdd != null)
+				{
+					fixed (GlyphMarshallingStruct[] array = glyphsToAdd)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper2;
+				if (glyphsAdded != null)
+				{
+					fixed (GlyphMarshallingStruct[] array2 = glyphsAdded)
+					{
+						if (array2.Length != 0)
+						{
+							blittableArrayWrapper2 = new BlittableArrayWrapper((void*)(&array2[0]), array2.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper3;
+				if (freeGlyphRects != null)
+				{
+					fixed (GlyphRect[] array3 = freeGlyphRects)
+					{
+						if (array3.Length != 0)
+						{
+							blittableArrayWrapper3 = new BlittableArrayWrapper((void*)(&array3[0]), array3.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper4;
+				if (usedGlyphRects != null)
+				{
+					fixed (GlyphRect[] array4 = usedGlyphRects)
+					{
+						if (array4.Length != 0)
+						{
+							blittableArrayWrapper4 = new BlittableArrayWrapper((void*)(&array4[0]), array4.Length);
+						}
+					}
+				}
+				flag = FontEngine.TryPackGlyphsInAtlas_Internal_Injected(out blittableArrayWrapper, ref glyphsToAddCount, out blittableArrayWrapper2, ref glyphsAddedCount, padding, packingMode, renderMode, width, height, out blittableArrayWrapper3, ref freeGlyphRectCount, out blittableArrayWrapper4, ref usedGlyphRectCount);
+			}
+			finally
+			{
+				GlyphMarshallingStruct[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<GlyphMarshallingStruct>(ref array);
+				GlyphMarshallingStruct[] array2;
+				BlittableArrayWrapper blittableArrayWrapper2;
+				blittableArrayWrapper2.Unmarshal<GlyphMarshallingStruct>(ref array2);
+				GlyphRect[] array3;
+				BlittableArrayWrapper blittableArrayWrapper3;
+				blittableArrayWrapper3.Unmarshal<GlyphRect>(ref array3);
+				GlyphRect[] array4;
+				BlittableArrayWrapper blittableArrayWrapper4;
+				blittableArrayWrapper4.Unmarshal<GlyphRect>(ref array4);
+			}
+			return flag;
+		}
 
 		internal static FontEngineError RenderGlyphToTexture(Glyph glyph, int padding, GlyphRenderMode renderMode, Texture2D texture)
 		{
@@ -512,7 +846,7 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeMethod(Name = "TextCore::FontEngine::RenderGlyphToTexture", IsFreeFunction = true)]
 		private static int RenderGlyphToTexture_Internal(GlyphMarshallingStruct glyphStruct, int padding, GlyphRenderMode renderMode, Texture2D texture)
 		{
-			return FontEngine.RenderGlyphToTexture_Internal_Injected(ref glyphStruct, padding, renderMode, texture);
+			return FontEngine.RenderGlyphToTexture_Internal_Injected(ref glyphStruct, padding, renderMode, Object.MarshalledUnityObject.Marshal<Texture2D>(texture));
 		}
 
 		internal static FontEngineError RenderGlyphsToTexture(List<Glyph> glyphs, int padding, GlyphRenderMode renderMode, Texture2D texture)
@@ -532,8 +866,17 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::RenderGlyphsToTexture", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int RenderGlyphsToTexture_Internal(GlyphMarshallingStruct[] glyphs, int glyphCount, int padding, GlyphRenderMode renderMode, Texture2D texture);
+		private unsafe static int RenderGlyphsToTexture_Internal(GlyphMarshallingStruct[] glyphs, int glyphCount, int padding, GlyphRenderMode renderMode, Texture2D texture)
+		{
+			Span<GlyphMarshallingStruct> span = new Span<GlyphMarshallingStruct>(glyphs);
+			int num;
+			fixed (GlyphMarshallingStruct* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.RenderGlyphsToTexture_Internal_Injected(ref managedSpanWrapper, glyphCount, padding, renderMode, Object.MarshalledUnityObject.Marshal<Texture2D>(texture));
+			}
+			return num;
+		}
 
 		internal static FontEngineError RenderGlyphsToTexture(List<Glyph> glyphs, int padding, GlyphRenderMode renderMode, byte[] texBuffer, int texWidth, int texHeight)
 		{
@@ -552,8 +895,38 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::RenderGlyphsToTextureBuffer", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int RenderGlyphsToTextureBuffer_Internal(GlyphMarshallingStruct[] glyphs, int glyphCount, int padding, GlyphRenderMode renderMode, [Out] byte[] texBuffer, int texWidth, int texHeight);
+		private unsafe static int RenderGlyphsToTextureBuffer_Internal(GlyphMarshallingStruct[] glyphs, int glyphCount, int padding, GlyphRenderMode renderMode, [Out] byte[] texBuffer, int texWidth, int texHeight)
+		{
+			int num;
+			try
+			{
+				Span<GlyphMarshallingStruct> span = new Span<GlyphMarshallingStruct>(glyphs);
+				fixed (GlyphMarshallingStruct* ptr = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (texBuffer != null)
+					{
+						fixed (byte[] array = texBuffer)
+						{
+							if (array.Length != 0)
+							{
+								blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+							}
+						}
+					}
+					num = FontEngine.RenderGlyphsToTextureBuffer_Internal_Injected(ref managedSpanWrapper, glyphCount, padding, renderMode, out blittableArrayWrapper, texWidth, texHeight);
+				}
+			}
+			finally
+			{
+				GlyphMarshallingStruct* ptr = null;
+				byte[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<byte>(ref array);
+			}
+			return num;
+		}
 
 		internal static FontEngineError RenderGlyphsToSharedTexture(List<Glyph> glyphs, int padding, GlyphRenderMode renderMode)
 		{
@@ -572,21 +945,34 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::RenderGlyphsToSharedTexture", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int RenderGlyphsToSharedTexture_Internal(GlyphMarshallingStruct[] glyphs, int glyphCount, int padding, GlyphRenderMode renderMode);
+		private unsafe static int RenderGlyphsToSharedTexture_Internal(GlyphMarshallingStruct[] glyphs, int glyphCount, int padding, GlyphRenderMode renderMode)
+		{
+			Span<GlyphMarshallingStruct> span = new Span<GlyphMarshallingStruct>(glyphs);
+			int num;
+			fixed (GlyphMarshallingStruct* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.RenderGlyphsToSharedTexture_Internal_Injected(ref managedSpanWrapper, glyphCount, padding, renderMode);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::SetSharedTextureData", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void SetSharedTexture(Texture2D texture);
+		internal static void SetSharedTexture(Texture2D texture)
+		{
+			FontEngine.SetSharedTexture_Injected(Object.MarshalledUnityObject.Marshal<Texture2D>(texture));
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::ReleaseSharedTextureData", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void ReleaseSharedTexture();
 
 		[NativeMethod(Name = "TextCore::FontEngine::SetTextureUploadMode", IsThreadSafe = true, IsFreeFunction = true)]
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SetTextureUploadMode(bool shouldUploadImmediately);
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static bool TryAddGlyphToTexture(uint glyphIndex, int padding, GlyphPackingMode packingMode, List<GlyphRect> freeGlyphRects, List<GlyphRect> usedGlyphRects, GlyphRenderMode renderMode, Texture2D texture, out Glyph glyph)
 		{
 			int count = freeGlyphRects.Count;
@@ -646,9 +1032,48 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryAddGlyphToTexture", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryAddGlyphToTexture_Internal(uint glyphIndex, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture, out GlyphMarshallingStruct glyph);
+		private unsafe static bool TryAddGlyphToTexture_Internal(uint glyphIndex, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture, out GlyphMarshallingStruct glyph)
+		{
+			bool flag;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (freeGlyphRects != null)
+				{
+					fixed (GlyphRect[] array = freeGlyphRects)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper2;
+				if (usedGlyphRects != null)
+				{
+					fixed (GlyphRect[] array2 = usedGlyphRects)
+					{
+						if (array2.Length != 0)
+						{
+							blittableArrayWrapper2 = new BlittableArrayWrapper((void*)(&array2[0]), array2.Length);
+						}
+					}
+				}
+				flag = FontEngine.TryAddGlyphToTexture_Internal_Injected(glyphIndex, padding, packingMode, out blittableArrayWrapper, ref freeGlyphRectCount, out blittableArrayWrapper2, ref usedGlyphRectCount, renderMode, Object.MarshalledUnityObject.Marshal<Texture2D>(texture), out glyph);
+			}
+			finally
+			{
+				GlyphRect[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<GlyphRect>(ref array);
+				GlyphRect[] array2;
+				BlittableArrayWrapper blittableArrayWrapper2;
+				blittableArrayWrapper2.Unmarshal<GlyphRect>(ref array2);
+			}
+			return flag;
+		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static bool TryAddGlyphsToTexture(List<Glyph> glyphsToAdd, List<Glyph> glyphsAdded, int padding, GlyphPackingMode packingMode, List<GlyphRect> freeGlyphRects, List<GlyphRect> usedGlyphRects, GlyphRenderMode renderMode, Texture2D texture)
 		{
 			int count = glyphsToAdd.Count;
@@ -761,9 +1186,76 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryAddGlyphsToTexture", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryAddGlyphsToTexture_Internal_MultiThread([Out] GlyphMarshallingStruct[] glyphsToAdd, ref int glyphsToAddCount, [Out] GlyphMarshallingStruct[] glyphsAdded, ref int glyphsAddedCount, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture);
+		private unsafe static bool TryAddGlyphsToTexture_Internal_MultiThread([Out] GlyphMarshallingStruct[] glyphsToAdd, ref int glyphsToAddCount, [Out] GlyphMarshallingStruct[] glyphsAdded, ref int glyphsAddedCount, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture)
+		{
+			bool flag;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (glyphsToAdd != null)
+				{
+					fixed (GlyphMarshallingStruct[] array = glyphsToAdd)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper2;
+				if (glyphsAdded != null)
+				{
+					fixed (GlyphMarshallingStruct[] array2 = glyphsAdded)
+					{
+						if (array2.Length != 0)
+						{
+							blittableArrayWrapper2 = new BlittableArrayWrapper((void*)(&array2[0]), array2.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper3;
+				if (freeGlyphRects != null)
+				{
+					fixed (GlyphRect[] array3 = freeGlyphRects)
+					{
+						if (array3.Length != 0)
+						{
+							blittableArrayWrapper3 = new BlittableArrayWrapper((void*)(&array3[0]), array3.Length);
+						}
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper4;
+				if (usedGlyphRects != null)
+				{
+					fixed (GlyphRect[] array4 = usedGlyphRects)
+					{
+						if (array4.Length != 0)
+						{
+							blittableArrayWrapper4 = new BlittableArrayWrapper((void*)(&array4[0]), array4.Length);
+						}
+					}
+				}
+				flag = FontEngine.TryAddGlyphsToTexture_Internal_MultiThread_Injected(out blittableArrayWrapper, ref glyphsToAddCount, out blittableArrayWrapper2, ref glyphsAddedCount, padding, packingMode, out blittableArrayWrapper3, ref freeGlyphRectCount, out blittableArrayWrapper4, ref usedGlyphRectCount, renderMode, Object.MarshalledUnityObject.Marshal<Texture2D>(texture));
+			}
+			finally
+			{
+				GlyphMarshallingStruct[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<GlyphMarshallingStruct>(ref array);
+				GlyphMarshallingStruct[] array2;
+				BlittableArrayWrapper blittableArrayWrapper2;
+				blittableArrayWrapper2.Unmarshal<GlyphMarshallingStruct>(ref array2);
+				GlyphRect[] array3;
+				BlittableArrayWrapper blittableArrayWrapper3;
+				blittableArrayWrapper3.Unmarshal<GlyphRect>(ref array3);
+				GlyphRect[] array4;
+				BlittableArrayWrapper blittableArrayWrapper4;
+				blittableArrayWrapper4.Unmarshal<GlyphRect>(ref array4);
+			}
+			return flag;
+		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static bool TryAddGlyphsToTexture(List<uint> glyphIndexes, int padding, GlyphPackingMode packingMode, List<GlyphRect> freeGlyphRects, List<GlyphRect> usedGlyphRects, GlyphRenderMode renderMode, Texture2D texture, out Glyph[] glyphs)
 		{
 			glyphs = null;
@@ -851,8 +1343,67 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::TryAddGlyphsToTexture", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryAddGlyphsToTexture_Internal(uint[] glyphIndex, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture, [Out] GlyphMarshallingStruct[] glyphs, ref int glyphCount);
+		private unsafe static bool TryAddGlyphsToTexture_Internal(uint[] glyphIndex, int padding, GlyphPackingMode packingMode, [Out] GlyphRect[] freeGlyphRects, ref int freeGlyphRectCount, [Out] GlyphRect[] usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, Texture2D texture, [Out] GlyphMarshallingStruct[] glyphs, ref int glyphCount)
+		{
+			bool flag;
+			try
+			{
+				Span<uint> span = new Span<uint>(glyphIndex);
+				fixed (uint* ptr = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (freeGlyphRects != null)
+					{
+						fixed (GlyphRect[] array = freeGlyphRects)
+						{
+							if (array.Length != 0)
+							{
+								blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+							}
+						}
+					}
+					BlittableArrayWrapper blittableArrayWrapper2;
+					if (usedGlyphRects != null)
+					{
+						fixed (GlyphRect[] array2 = usedGlyphRects)
+						{
+							if (array2.Length != 0)
+							{
+								blittableArrayWrapper2 = new BlittableArrayWrapper((void*)(&array2[0]), array2.Length);
+							}
+						}
+					}
+					IntPtr intPtr = Object.MarshalledUnityObject.Marshal<Texture2D>(texture);
+					BlittableArrayWrapper blittableArrayWrapper3;
+					if (glyphs != null)
+					{
+						fixed (GlyphMarshallingStruct[] array3 = glyphs)
+						{
+							if (array3.Length != 0)
+							{
+								blittableArrayWrapper3 = new BlittableArrayWrapper((void*)(&array3[0]), array3.Length);
+							}
+						}
+					}
+					flag = FontEngine.TryAddGlyphsToTexture_Internal_Injected(ref managedSpanWrapper, padding, packingMode, out blittableArrayWrapper, ref freeGlyphRectCount, out blittableArrayWrapper2, ref usedGlyphRectCount, renderMode, intPtr, out blittableArrayWrapper3, ref glyphCount);
+				}
+			}
+			finally
+			{
+				uint* ptr = null;
+				GlyphRect[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<GlyphRect>(ref array);
+				GlyphRect[] array2;
+				BlittableArrayWrapper blittableArrayWrapper2;
+				blittableArrayWrapper2.Unmarshal<GlyphRect>(ref array2);
+				GlyphMarshallingStruct[] array3;
+				BlittableArrayWrapper blittableArrayWrapper3;
+				blittableArrayWrapper3.Unmarshal<GlyphMarshallingStruct>(ref array3);
+			}
+			return flag;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetOpenTypeLayoutTable", IsFreeFunction = true)]
 		internal static OTL_Table GetOpenTypeLayoutTable(OTL_TableType type)
@@ -871,8 +1422,23 @@ namespace UnityEngine.TextCore.LowLevel
 		internal static extern OTL_Feature[] GetOpenTypeLayoutFeatures();
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetOpenTypeLayoutLookups", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern OTL_Lookup[] GetOpenTypeLayoutLookups();
+		internal static OTL_Lookup[] GetOpenTypeLayoutLookups()
+		{
+			OTL_Lookup[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetOpenTypeLayoutLookups_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				OTL_Lookup[] array;
+				blittableArrayWrapper.Unmarshal<OTL_Lookup>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		internal static OpenTypeFeature[] GetOpenTypeFontFeatureList()
 		{
@@ -880,8 +1446,23 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetAllSingleSubstitutionRecords", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern SingleSubstitutionRecord[] GetAllSingleSubstitutionRecords();
+		internal static SingleSubstitutionRecord[] GetAllSingleSubstitutionRecords()
+		{
+			SingleSubstitutionRecord[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetAllSingleSubstitutionRecords_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				SingleSubstitutionRecord[] array;
+				blittableArrayWrapper.Unmarshal<SingleSubstitutionRecord>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		internal static SingleSubstitutionRecord[] GetSingleSubstitutionRecords(int lookupIndex, uint glyphIndex)
 		{
@@ -908,7 +1489,7 @@ namespace UnityEngine.TextCore.LowLevel
 			else
 			{
 				FontEngine.SetMarshallingArraySize<SingleSubstitutionRecord>(ref FontEngine.s_SingleSubstitutionRecords_MarshallingArray, num);
-				FontEngine.GetSingleSubstitutionRecordsFromMarshallingArray(FontEngine.s_SingleSubstitutionRecords_MarshallingArray);
+				FontEngine.GetSingleSubstitutionRecordsFromMarshallingArray(FontEngine.s_SingleSubstitutionRecords_MarshallingArray.AsSpan<SingleSubstitutionRecord>());
 				FontEngine.s_SingleSubstitutionRecords_MarshallingArray[num] = default(SingleSubstitutionRecord);
 				array = FontEngine.s_SingleSubstitutionRecords_MarshallingArray;
 			}
@@ -916,12 +1497,30 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateSingleSubstitutionRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateSingleSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateSingleSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateSingleSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetSingleSubstitutionRecordsFromMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetSingleSubstitutionRecordsFromMarshallingArray([Out] SingleSubstitutionRecord[] singleSubstitutionRecords);
+		private unsafe static int GetSingleSubstitutionRecordsFromMarshallingArray(Span<SingleSubstitutionRecord> singleSubstitutionRecords)
+		{
+			Span<SingleSubstitutionRecord> span = singleSubstitutionRecords;
+			int singleSubstitutionRecordsFromMarshallingArray_Injected;
+			fixed (SingleSubstitutionRecord* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				singleSubstitutionRecordsFromMarshallingArray_Injected = FontEngine.GetSingleSubstitutionRecordsFromMarshallingArray_Injected(ref managedSpanWrapper);
+			}
+			return singleSubstitutionRecordsFromMarshallingArray_Injected;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetAllMultipleSubstitutionRecords", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -960,8 +1559,17 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateMultipleSubstitutionRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateMultipleSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateMultipleSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateMultipleSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetMultipleSubstitutionRecordsFromMarshallingArray", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1004,23 +1612,35 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateAlternateSubstitutionRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateAlternateSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateAlternateSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateAlternateSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetAlternateSubstitutionRecordsFromMarshallingArray", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetAlternateSubstitutionRecordsFromMarshallingArray([Out] AlternateSubstitutionRecord[] singleSubstitutionRecords);
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetAllLigatureSubstitutionRecords", IsThreadSafe = true, IsFreeFunction = true)]
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern LigatureSubstitutionRecord[] GetAllLigatureSubstitutionRecords();
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static LigatureSubstitutionRecord[] GetLigatureSubstitutionRecords(uint glyphIndex)
 		{
 			FontEngine.GlyphIndexToMarshallingArray(glyphIndex, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
 			return FontEngine.GetLigatureSubstitutionRecords(FontEngine.s_GlyphIndexes_MarshallingArray_A);
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static LigatureSubstitutionRecord[] GetLigatureSubstitutionRecords(List<uint> glyphIndexes)
 		{
 			FontEngine.GenericListToMarshallingArray<uint>(ref glyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
@@ -1080,12 +1700,30 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateLigatureSubstitutionRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateLigatureSubstitutionRecordMarshallingArray(uint[] glyphIndexes, out int recordCount);
+		private unsafe static int PopulateLigatureSubstitutionRecordMarshallingArray(uint[] glyphIndexes, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateLigatureSubstitutionRecordMarshallingArray_Injected(ref managedSpanWrapper, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateLigatureSubstitutionRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateLigatureSubstitutionRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateLigatureSubstitutionRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateLigatureSubstitutionRecordMarshallingArray_for_LookupIndex_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetLigatureSubstitutionRecordsFromMarshallingArray", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1128,8 +1766,17 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateContextualSubstitutionRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetContextualSubstitutionRecordsFromMarshallingArray", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1172,13 +1819,23 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateChainingContextualSubstitutionRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateChainingContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateChainingContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateChainingContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetChainingContextualSubstitutionRecordsFromMarshallingArray", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int GetChainingContextualSubstitutionRecordsFromMarshallingArray([Out] ChainingContextualSubstitutionRecord[] substitutionRecords);
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static GlyphPairAdjustmentRecord[] GetGlyphPairAdjustmentTable(uint[] glyphIndexes)
 		{
 			int num;
@@ -1220,8 +1877,17 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulatePairAdjustmentRecordMarshallingArrayFromKernTable", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulatePairAdjustmentRecordMarshallingArray_from_KernTable(uint[] glyphIndexes, out int recordCount);
+		private unsafe static int PopulatePairAdjustmentRecordMarshallingArray_from_KernTable(uint[] glyphIndexes, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulatePairAdjustmentRecordMarshallingArray_from_KernTable_Injected(ref managedSpanWrapper, out recordCount);
+			}
+			return num;
+		}
 
 		internal static GlyphPairAdjustmentRecord[] GetGlyphPairAdjustmentRecords(uint glyphIndex, out int recordCount)
 		{
@@ -1269,8 +1935,23 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulatePairAdjustmentRecordMarshallingArrayFromKernTable", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulatePairAdjustmentRecordMarshallingArray_for_NewlyAddedGlyphIndexes(uint[] newGlyphIndexes, uint[] allGlyphIndexes, out int recordCount);
+		private unsafe static int PopulatePairAdjustmentRecordMarshallingArray_for_NewlyAddedGlyphIndexes(uint[] newGlyphIndexes, uint[] allGlyphIndexes, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(newGlyphIndexes);
+			fixed (uint* ptr = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+				Span<uint> span2 = new Span<uint>(allGlyphIndexes);
+				int num;
+				fixed (uint* pinnableReference = span2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span2.Length);
+					num = FontEngine.PopulatePairAdjustmentRecordMarshallingArray_for_NewlyAddedGlyphIndexes_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, out recordCount);
+					ptr = null;
+				}
+				return num;
+			}
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetGlyphPairAdjustmentRecord", IsFreeFunction = true)]
 		internal static GlyphPairAdjustmentRecord GetGlyphPairAdjustmentRecord(uint firstGlyphIndex, uint secondGlyphIndex)
@@ -1311,7 +1992,7 @@ namespace UnityEngine.TextCore.LowLevel
 			else
 			{
 				FontEngine.SetMarshallingArraySize<GlyphAdjustmentRecord>(ref FontEngine.s_SingleAdjustmentRecords_MarshallingArray, num);
-				FontEngine.GetSingleAdjustmentRecordsFromMarshallingArray(FontEngine.s_SingleAdjustmentRecords_MarshallingArray);
+				FontEngine.GetSingleAdjustmentRecordsFromMarshallingArray(FontEngine.s_SingleAdjustmentRecords_MarshallingArray.AsSpan<GlyphAdjustmentRecord>());
 				FontEngine.s_SingleAdjustmentRecords_MarshallingArray[num] = default(GlyphAdjustmentRecord);
 				array = FontEngine.s_SingleAdjustmentRecords_MarshallingArray;
 			}
@@ -1319,16 +2000,50 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateSingleAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateSingleAdjustmentRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateSingleAdjustmentRecordMarshallingArray_from_GlyphIndexes(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateSingleAdjustmentRecordMarshallingArray_from_GlyphIndexes_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetSingleAdjustmentRecordsFromMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetSingleAdjustmentRecordsFromMarshallingArray([Out] GlyphAdjustmentRecord[] singleSubstitutionRecords);
+		private unsafe static int GetSingleAdjustmentRecordsFromMarshallingArray(Span<GlyphAdjustmentRecord> singleSubstitutionRecords)
+		{
+			Span<GlyphAdjustmentRecord> span = singleSubstitutionRecords;
+			int singleAdjustmentRecordsFromMarshallingArray_Injected;
+			fixed (GlyphAdjustmentRecord* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				singleAdjustmentRecordsFromMarshallingArray_Injected = FontEngine.GetSingleAdjustmentRecordsFromMarshallingArray_Injected(ref managedSpanWrapper);
+			}
+			return singleAdjustmentRecordsFromMarshallingArray_Injected;
+		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		[NativeMethod(Name = "TextCore::FontEngine::GetPairAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern GlyphPairAdjustmentRecord[] GetPairAdjustmentRecords(uint glyphIndex);
+		internal static GlyphPairAdjustmentRecord[] GetPairAdjustmentRecords(uint glyphIndex)
+		{
+			GlyphPairAdjustmentRecord[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetPairAdjustmentRecords_Injected(glyphIndex, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				GlyphPairAdjustmentRecord[] array;
+				blittableArrayWrapper.Unmarshal<GlyphPairAdjustmentRecord>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetPairAdjustmentRecord", IsThreadSafe = true, IsFreeFunction = true)]
 		internal static GlyphPairAdjustmentRecord GetPairAdjustmentRecord(uint firstGlyphIndex, uint secondGlyphIndex)
@@ -1339,9 +2054,26 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetAllPairAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern GlyphPairAdjustmentRecord[] GetAllPairAdjustmentRecords();
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
+		internal static GlyphPairAdjustmentRecord[] GetAllPairAdjustmentRecords()
+		{
+			GlyphPairAdjustmentRecord[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetAllPairAdjustmentRecords_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				GlyphPairAdjustmentRecord[] array;
+				blittableArrayWrapper.Unmarshal<GlyphPairAdjustmentRecord>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static GlyphPairAdjustmentRecord[] GetPairAdjustmentRecords(List<uint> glyphIndexes)
 		{
 			FontEngine.GenericListToMarshallingArray<uint>(ref glyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
@@ -1401,24 +2133,82 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulatePairAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulatePairAdjustmentRecordMarshallingArray(uint[] glyphIndexes, out int recordCount);
+		private unsafe static int PopulatePairAdjustmentRecordMarshallingArray(uint[] glyphIndexes, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulatePairAdjustmentRecordMarshallingArray_Injected(ref managedSpanWrapper, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulatePairAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulatePairAdjustmentRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulatePairAdjustmentRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulatePairAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetGlyphPairAdjustmentRecordsFromMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetPairAdjustmentRecordsFromMarshallingArray([Out] GlyphPairAdjustmentRecord[] glyphPairAdjustmentRecords);
+		private unsafe static int GetPairAdjustmentRecordsFromMarshallingArray(Span<GlyphPairAdjustmentRecord> glyphPairAdjustmentRecords)
+		{
+			Span<GlyphPairAdjustmentRecord> span = glyphPairAdjustmentRecords;
+			int pairAdjustmentRecordsFromMarshallingArray_Injected;
+			fixed (GlyphPairAdjustmentRecord* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				pairAdjustmentRecordsFromMarshallingArray_Injected = FontEngine.GetPairAdjustmentRecordsFromMarshallingArray_Injected(ref managedSpanWrapper);
+			}
+			return pairAdjustmentRecordsFromMarshallingArray_Injected;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetAllMarkToBaseAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern MarkToBaseAdjustmentRecord[] GetAllMarkToBaseAdjustmentRecords();
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
+		internal static MarkToBaseAdjustmentRecord[] GetAllMarkToBaseAdjustmentRecords()
+		{
+			MarkToBaseAdjustmentRecord[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetAllMarkToBaseAdjustmentRecords_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				MarkToBaseAdjustmentRecord[] array;
+				blittableArrayWrapper.Unmarshal<MarkToBaseAdjustmentRecord>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToBaseAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern MarkToBaseAdjustmentRecord[] GetMarkToBaseAdjustmentRecords(uint baseGlyphIndex);
+		internal static MarkToBaseAdjustmentRecord[] GetMarkToBaseAdjustmentRecords(uint baseGlyphIndex)
+		{
+			MarkToBaseAdjustmentRecord[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetMarkToBaseAdjustmentRecords_Injected(baseGlyphIndex, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				MarkToBaseAdjustmentRecord[] array;
+				blittableArrayWrapper.Unmarshal<MarkToBaseAdjustmentRecord>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToBaseAdjustmentRecord", IsFreeFunction = true)]
 		internal static MarkToBaseAdjustmentRecord GetMarkToBaseAdjustmentRecord(uint baseGlyphIndex, uint markGlyphIndex)
@@ -1428,6 +2218,7 @@ namespace UnityEngine.TextCore.LowLevel
 			return markToBaseAdjustmentRecord;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static MarkToBaseAdjustmentRecord[] GetMarkToBaseAdjustmentRecords(List<uint> glyphIndexes)
 		{
 			FontEngine.GenericListToMarshallingArray<uint>(ref glyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
@@ -1481,24 +2272,82 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateMarkToBaseAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateMarkToBaseAdjustmentRecordMarshallingArray(uint[] glyphIndexes, out int recordCount);
+		private unsafe static int PopulateMarkToBaseAdjustmentRecordMarshallingArray(uint[] glyphIndexes, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateMarkToBaseAdjustmentRecordMarshallingArray_Injected(ref managedSpanWrapper, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateMarkToBaseAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateMarkToBaseAdjustmentRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateMarkToBaseAdjustmentRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateMarkToBaseAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToBaseAdjustmentRecordsFromMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetMarkToBaseAdjustmentRecordsFromMarshallingArray([Out] MarkToBaseAdjustmentRecord[] adjustmentRecords);
+		private unsafe static int GetMarkToBaseAdjustmentRecordsFromMarshallingArray(Span<MarkToBaseAdjustmentRecord> adjustmentRecords)
+		{
+			Span<MarkToBaseAdjustmentRecord> span = adjustmentRecords;
+			int markToBaseAdjustmentRecordsFromMarshallingArray_Injected;
+			fixed (MarkToBaseAdjustmentRecord* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				markToBaseAdjustmentRecordsFromMarshallingArray_Injected = FontEngine.GetMarkToBaseAdjustmentRecordsFromMarshallingArray_Injected(ref managedSpanWrapper);
+			}
+			return markToBaseAdjustmentRecordsFromMarshallingArray_Injected;
+		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		[NativeMethod(Name = "TextCore::FontEngine::GetAllMarkToMarkAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern MarkToMarkAdjustmentRecord[] GetAllMarkToMarkAdjustmentRecords();
+		internal static MarkToMarkAdjustmentRecord[] GetAllMarkToMarkAdjustmentRecords()
+		{
+			MarkToMarkAdjustmentRecord[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetAllMarkToMarkAdjustmentRecords_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				MarkToMarkAdjustmentRecord[] array;
+				blittableArrayWrapper.Unmarshal<MarkToMarkAdjustmentRecord>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToMarkAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern MarkToMarkAdjustmentRecord[] GetMarkToMarkAdjustmentRecords(uint baseMarkGlyphIndex);
+		internal static MarkToMarkAdjustmentRecord[] GetMarkToMarkAdjustmentRecords(uint baseMarkGlyphIndex)
+		{
+			MarkToMarkAdjustmentRecord[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				FontEngine.GetMarkToMarkAdjustmentRecords_Injected(baseMarkGlyphIndex, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				MarkToMarkAdjustmentRecord[] array;
+				blittableArrayWrapper.Unmarshal<MarkToMarkAdjustmentRecord>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToMarkAdjustmentRecord", IsFreeFunction = true)]
 		internal static MarkToMarkAdjustmentRecord GetMarkToMarkAdjustmentRecord(uint firstGlyphIndex, uint secondGlyphIndex)
@@ -1508,6 +2357,7 @@ namespace UnityEngine.TextCore.LowLevel
 			return markToMarkAdjustmentRecord;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal static MarkToMarkAdjustmentRecord[] GetMarkToMarkAdjustmentRecords(List<uint> glyphIndexes)
 		{
 			FontEngine.GenericListToMarshallingArray<uint>(ref glyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
@@ -1561,16 +2411,141 @@ namespace UnityEngine.TextCore.LowLevel
 		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateMarkToMarkAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateMarkToMarkAdjustmentRecordMarshallingArray(uint[] glyphIndexes, out int recordCount);
+		private unsafe static int PopulateMarkToMarkAdjustmentRecordMarshallingArray(uint[] glyphIndexes, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateMarkToMarkAdjustmentRecordMarshallingArray_Injected(ref managedSpanWrapper, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::PopulateMarkToMarkAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int PopulateMarkToMarkAdjustmentRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount);
+		private unsafe static int PopulateMarkToMarkAdjustmentRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateMarkToMarkAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToMarkAdjustmentRecordsFromMarshallingArray", IsFreeFunction = true)]
+		private unsafe static int GetMarkToMarkAdjustmentRecordsFromMarshallingArray(Span<MarkToMarkAdjustmentRecord> adjustmentRecords)
+		{
+			Span<MarkToMarkAdjustmentRecord> span = adjustmentRecords;
+			int markToMarkAdjustmentRecordsFromMarshallingArray_Injected;
+			fixed (MarkToMarkAdjustmentRecord* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				markToMarkAdjustmentRecordsFromMarshallingArray_Injected = FontEngine.GetMarkToMarkAdjustmentRecordsFromMarshallingArray_Injected(ref managedSpanWrapper);
+			}
+			return markToMarkAdjustmentRecordsFromMarshallingArray_Injected;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetAllMarkToLigatureAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetMarkToMarkAdjustmentRecordsFromMarshallingArray([Out] MarkToMarkAdjustmentRecord[] adjustmentRecords);
+		internal static extern MarkToLigatureAdjustmentRecord[] GetAllMarkToLigatureAdjustmentRecords();
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToLigatureAdjustmentRecords", IsThreadSafe = true, IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern MarkToLigatureAdjustmentRecord[] GetMarkToLigatureAdjustmentRecords(uint baseMarkGlyphIndex);
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToLigatureAdjustmentRecord", IsFreeFunction = true)]
+		internal static MarkToLigatureAdjustmentRecord GetMarkToLigatureAdjustmentRecord(uint firstGlyphIndex, uint secondGlyphIndex)
+		{
+			MarkToLigatureAdjustmentRecord markToLigatureAdjustmentRecord;
+			FontEngine.GetMarkToLigatureAdjustmentRecord_Injected(firstGlyphIndex, secondGlyphIndex, out markToLigatureAdjustmentRecord);
+			return markToLigatureAdjustmentRecord;
+		}
+
+		internal static MarkToLigatureAdjustmentRecord[] GetMarkToLigatureAdjustmentRecords(List<uint> glyphIndexes)
+		{
+			FontEngine.GenericListToMarshallingArray<uint>(ref glyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
+			return FontEngine.GetMarkToLigatureAdjustmentRecords(FontEngine.s_GlyphIndexes_MarshallingArray_A);
+		}
+
+		internal static MarkToLigatureAdjustmentRecord[] GetMarkToLigatureAdjustmentRecords(int lookupIndex, List<uint> glyphIndexes)
+		{
+			FontEngine.GenericListToMarshallingArray<uint>(ref glyphIndexes, ref FontEngine.s_GlyphIndexes_MarshallingArray_A);
+			return FontEngine.GetMarkToLigatureAdjustmentRecords(lookupIndex, FontEngine.s_GlyphIndexes_MarshallingArray_A);
+		}
+
+		private static MarkToLigatureAdjustmentRecord[] GetMarkToLigatureAdjustmentRecords(uint[] glyphIndexes)
+		{
+			int num;
+			FontEngine.PopulateMarkToLigatureAdjustmentRecordMarshallingArray(FontEngine.s_GlyphIndexes_MarshallingArray_A, out num);
+			bool flag = num == 0;
+			MarkToLigatureAdjustmentRecord[] array;
+			if (flag)
+			{
+				array = null;
+			}
+			else
+			{
+				FontEngine.SetMarshallingArraySize<MarkToLigatureAdjustmentRecord>(ref FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray, num);
+				FontEngine.GetMarkToLigatureAdjustmentRecordsFromMarshallingArray(FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray);
+				FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray[num] = default(MarkToLigatureAdjustmentRecord);
+				array = FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray;
+			}
+			return array;
+		}
+
+		private static MarkToLigatureAdjustmentRecord[] GetMarkToLigatureAdjustmentRecords(int lookupIndex, uint[] glyphIndexes)
+		{
+			int num;
+			FontEngine.PopulateMarkToLigatureAdjustmentRecordMarshallingArray_for_LookupIndex(FontEngine.s_GlyphIndexes_MarshallingArray_A, lookupIndex, out num);
+			bool flag = num == 0;
+			MarkToLigatureAdjustmentRecord[] array;
+			if (flag)
+			{
+				array = null;
+			}
+			else
+			{
+				FontEngine.SetMarshallingArraySize<MarkToLigatureAdjustmentRecord>(ref FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray, num);
+				FontEngine.GetMarkToLigatureAdjustmentRecordsFromMarshallingArray(FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray);
+				FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray[num] = default(MarkToLigatureAdjustmentRecord);
+				array = FontEngine.s_MarkToLigatureAdjustmentRecords_MarshallingArray;
+			}
+			return array;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::PopulateMarkToLigatureAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
+		private unsafe static int PopulateMarkToLigatureAdjustmentRecordMarshallingArray(uint[] glyphIndexes, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateMarkToLigatureAdjustmentRecordMarshallingArray_Injected(ref managedSpanWrapper, out recordCount);
+			}
+			return num;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::PopulateMarkToLigatureAdjustmentRecordMarshallingArray", IsFreeFunction = true)]
+		private unsafe static int PopulateMarkToLigatureAdjustmentRecordMarshallingArray_for_LookupIndex(uint[] glyphIndexes, int lookupIndex, out int recordCount)
+		{
+			Span<uint> span = new Span<uint>(glyphIndexes);
+			int num;
+			fixed (uint* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = FontEngine.PopulateMarkToLigatureAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref managedSpanWrapper, lookupIndex, out recordCount);
+			}
+			return num;
+		}
+
+		[NativeMethod(Name = "TextCore::FontEngine::GetMarkToLigatureAdjustmentRecordsFromMarshallingArray", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMarkToLigatureAdjustmentRecordsFromMarshallingArray([Out] MarkToLigatureAdjustmentRecord[] adjustmentRecords);
 
 		private static void GlyphIndexToMarshallingArray(uint glyphIndex, ref uint[] dstArray)
 		{
@@ -1625,31 +2600,204 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		[NativeMethod(Name = "TextCore::FontEngine::ResetAtlasTexture", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ResetAtlasTexture(Texture2D texture);
+		internal static void ResetAtlasTexture(Texture2D texture)
+		{
+			FontEngine.ResetAtlasTexture_Injected(Object.MarshalledUnityObject.Marshal<Texture2D>(texture));
+		}
 
 		[NativeMethod(Name = "TextCore::FontEngine::RenderToTexture", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void RenderBufferToTexture(Texture2D srcTexture, int padding, GlyphRenderMode renderMode, Texture2D dstTexture);
+		internal static void RenderBufferToTexture(Texture2D srcTexture, int padding, GlyphRenderMode renderMode, Texture2D dstTexture)
+		{
+			FontEngine.RenderBufferToTexture_Injected(Object.MarshalledUnityObject.Marshal<Texture2D>(srcTexture), padding, renderMode, Object.MarshalledUnityObject.Marshal<Texture2D>(dstTexture));
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int RenderGlyphToTexture_Internal_Injected(ref GlyphMarshallingStruct glyphStruct, int padding, GlyphRenderMode renderMode, Texture2D texture);
+		private static extern int LoadFontFace_Internal_Injected(ref ManagedSpanWrapper filePath);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_Internal_Injected(ref ManagedSpanWrapper filePath, int pointSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_And_FaceIndex_Internal_Injected(ref ManagedSpanWrapper filePath, int pointSize, int faceIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_FromSourceFontFile_Internal_Injected(ref ManagedSpanWrapper sourceFontFile);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_FromSourceFontFile_Internal_Injected(ref ManagedSpanWrapper sourceFontFile, int pointSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_And_FaceIndex_FromSourceFontFile_Internal_Injected(ref ManagedSpanWrapper sourceFontFile, int pointSize, int faceIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_FromFont_Internal_Injected(IntPtr font);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_FromFont_Internal_Injected(IntPtr font, int pointSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_and_FaceIndex_FromFont_Internal_Injected(IntPtr font, int pointSize, int faceIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_by_FamilyName_and_StyleName_Internal_Injected(ref ManagedSpanWrapper familyName, ref ManagedSpanWrapper styleName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int LoadFontFace_With_Size_by_FamilyName_and_StyleName_Internal_Injected(ref ManagedSpanWrapper familyName, ref ManagedSpanWrapper styleName, int pointSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetSystemFontReference_Internal_Injected(ref ManagedSpanWrapper familyName, ref ManagedSpanWrapper styleName, out FontReference fontRef);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetFontCharacterMap_Internal_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryPackGlyphInAtlas_Internal_Injected(ref GlyphMarshallingStruct glyph, int padding, GlyphPackingMode packingMode, GlyphRenderMode renderMode, int width, int height, out BlittableArrayWrapper freeGlyphRects, ref int freeGlyphRectCount, out BlittableArrayWrapper usedGlyphRects, ref int usedGlyphRectCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryPackGlyphsInAtlas_Internal_Injected(out BlittableArrayWrapper glyphsToAdd, ref int glyphsToAddCount, out BlittableArrayWrapper glyphsAdded, ref int glyphsAddedCount, int padding, GlyphPackingMode packingMode, GlyphRenderMode renderMode, int width, int height, out BlittableArrayWrapper freeGlyphRects, ref int freeGlyphRectCount, out BlittableArrayWrapper usedGlyphRects, ref int usedGlyphRectCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int RenderGlyphToTexture_Internal_Injected([In] ref GlyphMarshallingStruct glyphStruct, int padding, GlyphRenderMode renderMode, IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int RenderGlyphsToTexture_Internal_Injected(ref ManagedSpanWrapper glyphs, int glyphCount, int padding, GlyphRenderMode renderMode, IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int RenderGlyphsToTextureBuffer_Internal_Injected(ref ManagedSpanWrapper glyphs, int glyphCount, int padding, GlyphRenderMode renderMode, out BlittableArrayWrapper texBuffer, int texWidth, int texHeight);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int RenderGlyphsToSharedTexture_Internal_Injected(ref ManagedSpanWrapper glyphs, int glyphCount, int padding, GlyphRenderMode renderMode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSharedTexture_Injected(IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryAddGlyphToTexture_Internal_Injected(uint glyphIndex, int padding, GlyphPackingMode packingMode, out BlittableArrayWrapper freeGlyphRects, ref int freeGlyphRectCount, out BlittableArrayWrapper usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, IntPtr texture, out GlyphMarshallingStruct glyph);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryAddGlyphsToTexture_Internal_MultiThread_Injected(out BlittableArrayWrapper glyphsToAdd, ref int glyphsToAddCount, out BlittableArrayWrapper glyphsAdded, ref int glyphsAddedCount, int padding, GlyphPackingMode packingMode, out BlittableArrayWrapper freeGlyphRects, ref int freeGlyphRectCount, out BlittableArrayWrapper usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryAddGlyphsToTexture_Internal_Injected(ref ManagedSpanWrapper glyphIndex, int padding, GlyphPackingMode packingMode, out BlittableArrayWrapper freeGlyphRects, ref int freeGlyphRectCount, out BlittableArrayWrapper usedGlyphRects, ref int usedGlyphRectCount, GlyphRenderMode renderMode, IntPtr texture, out BlittableArrayWrapper glyphs, ref int glyphCount);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetOpenTypeLayoutTable_Injected(OTL_TableType type, out OTL_Table ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetOpenTypeLayoutLookups_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAllSingleSubstitutionRecords_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateSingleSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetSingleSubstitutionRecordsFromMarshallingArray_Injected(ref ManagedSpanWrapper singleSubstitutionRecords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateMultipleSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateAlternateSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateLigatureSubstitutionRecordMarshallingArray_Injected(ref ManagedSpanWrapper glyphIndexes, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateLigatureSubstitutionRecordMarshallingArray_for_LookupIndex_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateChainingContextualSubstitutionRecordMarshallingArray_from_GlyphIndexes_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulatePairAdjustmentRecordMarshallingArray_from_KernTable_Injected(ref ManagedSpanWrapper glyphIndexes, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulatePairAdjustmentRecordMarshallingArray_for_NewlyAddedGlyphIndexes_Injected(ref ManagedSpanWrapper newGlyphIndexes, ref ManagedSpanWrapper allGlyphIndexes, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetGlyphPairAdjustmentRecord_Injected(uint firstGlyphIndex, uint secondGlyphIndex, out GlyphPairAdjustmentRecord ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateSingleAdjustmentRecordMarshallingArray_from_GlyphIndexes_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetSingleAdjustmentRecordsFromMarshallingArray_Injected(ref ManagedSpanWrapper singleSubstitutionRecords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPairAdjustmentRecords_Injected(uint glyphIndex, out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetPairAdjustmentRecord_Injected(uint firstGlyphIndex, uint secondGlyphIndex, out GlyphPairAdjustmentRecord ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAllPairAdjustmentRecords_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulatePairAdjustmentRecordMarshallingArray_Injected(ref ManagedSpanWrapper glyphIndexes, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulatePairAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPairAdjustmentRecordsFromMarshallingArray_Injected(ref ManagedSpanWrapper glyphPairAdjustmentRecords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAllMarkToBaseAdjustmentRecords_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMarkToBaseAdjustmentRecords_Injected(uint baseGlyphIndex, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetMarkToBaseAdjustmentRecord_Injected(uint baseGlyphIndex, uint markGlyphIndex, out MarkToBaseAdjustmentRecord ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateMarkToBaseAdjustmentRecordMarshallingArray_Injected(ref ManagedSpanWrapper glyphIndexes, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateMarkToBaseAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMarkToBaseAdjustmentRecordsFromMarshallingArray_Injected(ref ManagedSpanWrapper adjustmentRecords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAllMarkToMarkAdjustmentRecords_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMarkToMarkAdjustmentRecords_Injected(uint baseMarkGlyphIndex, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetMarkToMarkAdjustmentRecord_Injected(uint firstGlyphIndex, uint secondGlyphIndex, out MarkToMarkAdjustmentRecord ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateMarkToMarkAdjustmentRecordMarshallingArray_Injected(ref ManagedSpanWrapper glyphIndexes, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateMarkToMarkAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMarkToMarkAdjustmentRecordsFromMarshallingArray_Injected(ref ManagedSpanWrapper adjustmentRecords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMarkToLigatureAdjustmentRecord_Injected(uint firstGlyphIndex, uint secondGlyphIndex, out MarkToLigatureAdjustmentRecord ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateMarkToLigatureAdjustmentRecordMarshallingArray_Injected(ref ManagedSpanWrapper glyphIndexes, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int PopulateMarkToLigatureAdjustmentRecordMarshallingArray_for_LookupIndex_Injected(ref ManagedSpanWrapper glyphIndexes, int lookupIndex, out int recordCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetAtlasTexture_Injected(IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RenderBufferToTexture_Injected(IntPtr srcTexture, int padding, GlyphRenderMode renderMode, IntPtr dstTexture);
 
 		private static Glyph[] s_Glyphs = new Glyph[16];
 
@@ -1684,6 +2832,8 @@ namespace UnityEngine.TextCore.LowLevel
 		private static MarkToBaseAdjustmentRecord[] s_MarkToBaseAdjustmentRecords_MarshallingArray;
 
 		private static MarkToMarkAdjustmentRecord[] s_MarkToMarkAdjustmentRecords_MarshallingArray;
+
+		private static MarkToLigatureAdjustmentRecord[] s_MarkToLigatureAdjustmentRecords_MarshallingArray;
 
 		private static Dictionary<uint, Glyph> s_GlyphLookupDictionary = new Dictionary<uint, Glyph>();
 	}

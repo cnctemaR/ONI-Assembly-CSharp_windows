@@ -29,7 +29,7 @@ namespace FMODUnity
 
 		internal override string GetPluginPath(string pluginName)
 		{
-			return string.Format("{0}/X86_64/{1}.dll", this.GetPluginBasePath(), pluginName);
+			return string.Format("{0}/{1}/{2}.dll", this.GetPluginBasePath(), RuntimeUtils.GetPluginArchitectureFolder(), pluginName);
 		}
 
 		internal override List<CodecChannelCount> DefaultCodecChannels

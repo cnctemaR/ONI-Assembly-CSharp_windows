@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HarmonyLib
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Delegate, AllowMultiple = true)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Delegate, AllowMultiple = true)]
 	public class HarmonyPatch : HarmonyAttribute
 	{
 		public HarmonyPatch()

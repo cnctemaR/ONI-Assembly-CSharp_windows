@@ -3,11 +3,11 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[TypeLibImportClass(typeof(AssemblyBuilder))]
-	[Guid("BEBB2505-8B54-3443-AEAD-142A16DD9CC7")]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("BEBB2505-8B54-3443-AEAD-142A16DD9CC7")]
+	[TypeLibImportClass(typeof(AssemblyBuilder))]
 	public interface _AssemblyBuilder
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

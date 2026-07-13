@@ -15,8 +15,8 @@ using Unity;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_AssemblyBuilder))]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class AssemblyBuilder : Assembly, _AssemblyBuilder

@@ -46,28 +46,108 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("GetTagManager().GetSortingLayerIDs")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int[] GetSortingLayerIDsInternal();
+		private static int[] GetSortingLayerIDsInternal()
+		{
+			int[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				SortingLayer.GetSortingLayerIDsInternal_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				int[] array;
+				blittableArrayWrapper.Unmarshal<int>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("GetTagManager().GetSortingLayerValueFromUniqueID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetLayerValueFromID(int id);
 
 		[FreeFunction("GetTagManager().GetSortingLayerValueFromName")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetLayerValueFromName(string name);
+		public unsafe static int GetLayerValueFromName(string name)
+		{
+			int layerValueFromName_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				layerValueFromName_Injected = SortingLayer.GetLayerValueFromName_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return layerValueFromName_Injected;
+		}
 
 		[FreeFunction("GetTagManager().GetSortingLayerUniqueIDFromName")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int NameToID(string name);
+		public unsafe static int NameToID(string name)
+		{
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = SortingLayer.NameToID_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
 
 		[FreeFunction("GetTagManager().GetSortingLayerNameFromUniqueID")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string IDToName(int id);
+		public static string IDToName(int id)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				SortingLayer.IDToName_Injected(id, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("GetTagManager().IsSortingLayerUniqueIDValid")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsValid(int id);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSortingLayerIDsInternal_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetLayerValueFromName_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int NameToID_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IDToName_Injected(int id, out ManagedSpanWrapper ret);
 
 		private int m_Id;
 
@@ -75,8 +155,10 @@ namespace UnityEngine
 
 		public static SortingLayer.LayerCallback onLayerRemoved;
 
-		internal static Action onLayerChanged;
+		internal static SortingLayer.LayerChangedCallback onLayerChanged;
 
 		public delegate void LayerCallback(SortingLayer layer);
+
+		internal delegate void LayerChangedCallback();
 	}
 }

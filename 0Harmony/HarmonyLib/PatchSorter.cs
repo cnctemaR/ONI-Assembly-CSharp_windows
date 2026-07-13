@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace HarmonyLib
 {
@@ -23,28 +22,21 @@ namespace HarmonyLib
 			this.patches.Sort();
 		}
 
-		internal List<MethodInfo> Sort(MethodBase original)
+		internal Patch[] Sort()
 		{
 			if (this.sortedPatchArray != null)
 			{
-				return this.sortedPatchArray.Select<Patch, MethodInfo>((Patch x) => x.GetMethod(original)).ToList<MethodInfo>();
+				return this.sortedPatchArray;
 			}
 			this.handledPatches = new HashSet<PatchSorter.PatchSortingWrapper>();
 			this.waitingList = new List<PatchSorter.PatchSortingWrapper>();
 			this.result = new List<PatchSorter.PatchSortingWrapper>(this.patches.Count);
 			Queue<PatchSorter.PatchSortingWrapper> queue = new Queue<PatchSorter.PatchSortingWrapper>(this.patches);
-			Func<PatchSorter.PatchSortingWrapper, bool> <>9__3;
 			while (queue.Count != 0)
 			{
 				foreach (PatchSorter.PatchSortingWrapper patchSortingWrapper in queue)
 				{
-					IEnumerable<PatchSorter.PatchSortingWrapper> after = patchSortingWrapper.after;
-					Func<PatchSorter.PatchSortingWrapper, bool> func;
-					if ((func = <>9__3) == null)
-					{
-						func = (<>9__3 = (PatchSorter.PatchSortingWrapper x) => this.handledPatches.Contains(x));
-					}
-					if (after.All<PatchSorter.PatchSortingWrapper>(func))
+					if (patchSortingWrapper.after.All<PatchSorter.PatchSortingWrapper>((PatchSorter.PatchSortingWrapper x) => this.handledPatches.Contains(x)))
 					{
 						this.AddNodeToResult(patchSortingWrapper);
 						if (patchSortingWrapper.before.Count != 0)
@@ -65,14 +57,14 @@ namespace HarmonyLib
 			this.handledPatches = null;
 			this.waitingList = null;
 			this.patches = null;
-			return this.sortedPatchArray.Select<Patch, MethodInfo>((Patch x) => x.GetMethod(original)).ToList<MethodInfo>();
+			return this.sortedPatchArray;
 		}
 
 		internal bool ComparePatchLists(Patch[] patches)
 		{
 			if (this.sortedPatchArray == null)
 			{
-				this.Sort(null);
+				this.Sort();
 			}
 			return patches != null && this.sortedPatchArray.Length == patches.Length && this.sortedPatchArray.All<Patch>((Patch x) => patches.Contains(x, new PatchSorter.PatchDetailedComparer()));
 		}
@@ -119,7 +111,7 @@ namespace HarmonyLib
 			}
 		}
 
-		private void AddNodeToResult(PatchSorter.PatchSortingWrapper node)
+		internal void AddNodeToResult(PatchSorter.PatchSortingWrapper node)
 		{
 			this.result.Add(node);
 			this.handledPatches.Add(node);
@@ -133,11 +125,11 @@ namespace HarmonyLib
 
 		private List<PatchSorter.PatchSortingWrapper> waitingList;
 
-		internal Patch[] sortedPatchArray;
+		private Patch[] sortedPatchArray;
 
 		private readonly bool debug;
 
-		private class PatchSortingWrapper : IComparable
+		internal class PatchSortingWrapper : IComparable
 		{
 			internal PatchSortingWrapper(Patch patch)
 			{
@@ -187,7 +179,7 @@ namespace HarmonyLib
 				afterNode.before.Remove(this);
 			}
 
-			internal void RemoveBeforeDependency(PatchSorter.PatchSortingWrapper beforeNode)
+			private void RemoveBeforeDependency(PatchSorter.PatchSortingWrapper beforeNode)
 			{
 				this.before.Remove(beforeNode);
 				beforeNode.after.Remove(this);
@@ -200,7 +192,7 @@ namespace HarmonyLib
 			internal readonly Patch innerPatch;
 		}
 
-		internal class PatchDetailedComparer : IEqualityComparer<Patch>
+		private class PatchDetailedComparer : IEqualityComparer<Patch>
 		{
 			public bool Equals(Patch x, Patch y)
 			{

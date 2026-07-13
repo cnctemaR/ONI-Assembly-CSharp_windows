@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
@@ -12,6 +13,20 @@ namespace Unity.Collections.LowLevel.Unsafe
 				m_Length = length,
 				m_AllocatorLabel = allocator
 			};
+		}
+
+		public unsafe static NativeArray<T> ConvertExistingDataToNativeArray<[IsUnmanaged] T>(Span<T> data, Allocator allocator) where T : struct, ValueType
+		{
+			fixed (T* pinnableReference = data.GetPinnableReference())
+			{
+				T* ptr = pinnableReference;
+				return new NativeArray<T>
+				{
+					m_Buffer = (void*)ptr,
+					m_Length = data.Length,
+					m_AllocatorLabel = allocator
+				};
+			}
 		}
 
 		public unsafe static void* GetUnsafePtr<T>(this NativeArray<T> nativeArray) where T : struct

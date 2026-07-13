@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D421}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD67}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.IO</RootNamespace>
     <AssemblyName>System.IO.Compression.FileSystem</AssemblyName>
@@ -23,15 +23,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D415}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5B}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.IO.Compression\System.IO.Compression.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D420}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD66}</Project>
       <Name>System.IO.Compression</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D41D}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD63}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

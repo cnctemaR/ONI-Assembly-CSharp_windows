@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -7,8 +8,8 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Export/Random/Random.bindings.h")]
 	public static class Random
 	{
-		[NativeMethod("SetSeed")]
 		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
+		[NativeMethod("SetSeed")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void InitState(int seed);
 
@@ -105,8 +106,8 @@ namespace UnityEngine
 			}
 		}
 
-		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
 		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
+		[StaticAccessor("GetScriptingRand()", StaticAccessorType.Dot)]
 		public static extern int seed
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -161,7 +162,7 @@ namespace UnityEngine
 		private static extern void get_state_Injected(out Random.State ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_state_Injected(ref Random.State value);
+		private static extern void set_state_Injected([In] ref Random.State value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_insideUnitSphere_Injected(out Vector3 ret);

@@ -8,6 +8,7 @@ namespace UnityEngine.Rendering
 		Camera,
 		Light,
 		Picking,
-		SelectionOutline
+		SelectionOutline,
+		Filtering
 	}
 }

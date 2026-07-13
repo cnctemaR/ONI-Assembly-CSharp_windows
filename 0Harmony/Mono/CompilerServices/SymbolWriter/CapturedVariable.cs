@@ -2,7 +2,7 @@
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public struct CapturedVariable
+	internal struct CapturedVariable
 	{
 		public CapturedVariable(string name, string captured_name, CapturedVariable.CapturedKind kind)
 		{

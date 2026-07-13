@@ -7,51 +7,121 @@ namespace UnityEngine
 {
 	public sealed class ShaderVariantCollection : Object
 	{
-		public extern int shaderCount
+		public int shaderCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ShaderVariantCollection.get_shaderCount_Injected(intPtr);
+			}
 		}
 
-		public extern int variantCount
+		public int variantCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ShaderVariantCollection.get_variantCount_Injected(intPtr);
+			}
 		}
 
-		public extern int warmedUpVariantCount
+		public int warmedUpVariantCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ShaderVariantCollection.get_warmedUpVariantCount_Injected(intPtr);
+			}
 		}
 
-		public extern bool isWarmedUp
+		public bool isWarmedUp
 		{
 			[NativeName("IsWarmedUp")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return ShaderVariantCollection.get_isWarmedUp_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool AddVariant(Shader shader, PassType passType, [Unmarshalled] string[] keywords);
+		private bool AddVariant(Shader shader, PassType passType, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] string[] keywords)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return ShaderVariantCollection.AddVariant_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Shader>(shader), passType, keywords);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool RemoveVariant(Shader shader, PassType passType, [Unmarshalled] string[] keywords);
+		private bool RemoveVariant(Shader shader, PassType passType, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] string[] keywords)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return ShaderVariantCollection.RemoveVariant_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Shader>(shader), passType, keywords);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool ContainsVariant(Shader shader, PassType passType, [Unmarshalled] string[] keywords);
+		private bool ContainsVariant(Shader shader, PassType passType, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] string[] keywords)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return ShaderVariantCollection.ContainsVariant_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Shader>(shader), passType, keywords);
+		}
 
 		[NativeName("ClearVariants")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Clear();
+		public void Clear()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ShaderVariantCollection.Clear_Injected(intPtr);
+		}
 
 		[NativeName("WarmupShaders")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void WarmUp();
+		public void WarmUp()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ShaderVariantCollection.WarmUp_Injected(intPtr);
+		}
 
 		[NativeName("WarmupShadersProgressively")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool WarmUpProgressively(int variantCount);
+		public bool WarmUpProgressively(int variantCount)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ShaderVariantCollection>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return ShaderVariantCollection.WarmUpProgressively_Injected(intPtr, variantCount);
+		}
 
 		[NativeName("CreateFromScript")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -77,12 +147,55 @@ namespace UnityEngine
 			return this.ContainsVariant(variant.shader, variant.passType, variant.keywords);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_shaderCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_variantCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_warmedUpVariantCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isWarmedUp_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddVariant_Injected(IntPtr _unity_self, IntPtr shader, PassType passType, string[] keywords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RemoveVariant_Injected(IntPtr _unity_self, IntPtr shader, PassType passType, string[] keywords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ContainsVariant_Injected(IntPtr _unity_self, IntPtr shader, PassType passType, string[] keywords);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Clear_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void WarmUp_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool WarmUpProgressively_Injected(IntPtr _unity_self, int variantCount);
+
 		public struct ShaderVariant
 		{
 			[FreeFunction]
 			[NativeConditional("UNITY_EDITOR")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern string CheckShaderVariant(Shader shader, PassType passType, string[] keywords);
+			private static string CheckShaderVariant(Shader shader, PassType passType, string[] keywords)
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					ShaderVariantCollection.ShaderVariant.CheckShaderVariant_Injected(Object.MarshalledUnityObject.Marshal<Shader>(shader), passType, keywords, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 
 			public ShaderVariant(Shader shader, PassType passType, params string[] keywords)
 			{
@@ -90,6 +203,9 @@ namespace UnityEngine
 				this.passType = passType;
 				this.keywords = keywords;
 			}
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void CheckShaderVariant_Injected(IntPtr shader, PassType passType, string[] keywords, out ManagedSpanWrapper ret);
 
 			public Shader shader;
 

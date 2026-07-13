@@ -27,7 +27,7 @@ namespace HarmonyLib
 
 		internal List<PatchJobs<T>.Job> GetJobs()
 		{
-			return this.state.Values.Where<PatchJobs<T>.Job>((PatchJobs<T>.Job job) => job.prefixes.Count + job.postfixes.Count + job.transpilers.Count + job.finalizers.Count > 0).ToList<PatchJobs<T>.Job>();
+			return this.state.Values.Where<PatchJobs<T>.Job>((PatchJobs<T>.Job job) => job.prefixes.Count + job.postfixes.Count + job.transpilers.Count + job.finalizers.Count + job.innerprefixes.Count + job.innerpostfixes.Count > 0).ToList<PatchJobs<T>.Job>();
 		}
 
 		internal List<T> GetReplacements()
@@ -57,6 +57,14 @@ namespace HarmonyLib
 						return;
 					case HarmonyPatchType.Finalizer:
 						this.finalizers.Add(patch.info);
+						return;
+					case HarmonyPatchType.ReversePatch:
+						break;
+					case HarmonyPatchType.InnerPrefix:
+						this.innerprefixes.Add(patch.info);
+						return;
+					case HarmonyPatchType.InnerPostfix:
+						this.innerpostfixes.Add(patch.info);
 						break;
 					default:
 						return;
@@ -75,6 +83,10 @@ namespace HarmonyLib
 			internal List<HarmonyMethod> transpilers = new List<HarmonyMethod>();
 
 			internal List<HarmonyMethod> finalizers = new List<HarmonyMethod>();
+
+			internal List<HarmonyMethod> innerprefixes = new List<HarmonyMethod>();
+
+			internal List<HarmonyMethod> innerpostfixes = new List<HarmonyMethod>();
 		}
 	}
 }

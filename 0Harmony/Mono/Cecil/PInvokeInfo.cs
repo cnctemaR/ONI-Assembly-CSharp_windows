@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public sealed class PInvokeInfo
+	internal sealed class PInvokeInfo
 	{
 		public PInvokeAttributes Attributes
 		{

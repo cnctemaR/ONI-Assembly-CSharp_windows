@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
@@ -13,6 +14,27 @@ namespace HarmonyLib
 		private void FixStart()
 		{
 			this.Pos = Math.Max(0, this.Pos);
+		}
+
+		private T HandleException<T>(string error, T defaultValue)
+		{
+			if (this.errorHandler != null && this.errorHandler(this, error))
+			{
+				return defaultValue;
+			}
+			this.lastError = error;
+			throw new InvalidOperationException(error);
+		}
+
+		private void HandleException(string error)
+		{
+			this.lastError = error;
+			if (this.errorHandler != null)
+			{
+				this.errorHandler(this, error);
+				return;
+			}
+			throw new InvalidOperationException(error);
 		}
 
 		private void SetOutOfBounds(int direction)
@@ -99,10 +121,20 @@ namespace HarmonyLib
 			return new CodeMatcher(this.codes, this.generator)
 			{
 				Pos = this.Pos,
-				lastMatches = this.lastMatches,
+				lastMatches = new Dictionary<string, CodeInstruction>(this.lastMatches),
 				lastError = this.lastError,
-				lastMatchCall = this.lastMatchCall
+				lastMatchCall = this.lastMatchCall,
+				errorHandler = this.errorHandler
 			};
+		}
+
+		public CodeMatcher Reset(bool atFirstInstruction = true)
+		{
+			this.Pos = (atFirstInstruction ? 0 : (-1));
+			this.lastMatches.Clear();
+			this.lastError = null;
+			this.lastMatchCall = null;
+			return this;
 		}
 
 		public CodeInstruction Instruction
@@ -130,21 +162,29 @@ namespace HarmonyLib
 
 		public List<CodeInstruction> Instructions(int count)
 		{
+			if (this.Pos < 0 || this.Pos + count > this.Length)
+			{
+				return this.HandleException<List<CodeInstruction>>("Cannot retrieve instructions: range is out-of-bounds.", new List<CodeInstruction>());
+			}
 			return (from c in this.codes.GetRange(this.Pos, count)
 				select new CodeInstruction(c)).ToList<CodeInstruction>();
 		}
 
 		public List<CodeInstruction> InstructionsInRange(int start, int end)
 		{
-			List<CodeInstruction> list = this.codes;
+			List<CodeInstruction> range = this.codes;
 			if (start > end)
 			{
 				int num = start;
 				start = end;
 				end = num;
 			}
-			return (from c in list.GetRange(start, end - start + 1)
-				select new CodeInstruction(c)).ToList<CodeInstruction>();
+			if (start < 0 || end >= this.Length)
+			{
+				return this.HandleException<List<CodeInstruction>>("Cannot retrieve instructions: range is out-of-bounds.", new List<CodeInstruction>());
+			}
+			range = range.GetRange(start, end - start + 1);
+			return range.Select<CodeInstruction, CodeInstruction>((CodeInstruction c) => new CodeInstruction(c)).ToList<CodeInstruction>();
 		}
 
 		public List<CodeInstruction> InstructionsWithOffsets(int startOffset, int endOffset)
@@ -164,7 +204,11 @@ namespace HarmonyLib
 				return false;
 			}
 			string text = this.lastError ?? "Unexpected code";
-			logger(string.Format("{0} in {1}", text, method));
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(4, 2);
+			defaultInterpolatedStringHandler.AppendFormatted(text);
+			defaultInterpolatedStringHandler.AppendLiteral(" in ");
+			defaultInterpolatedStringHandler.AppendFormatted<MethodBase>(method);
+			logger(defaultInterpolatedStringHandler.ToStringAndClear());
 			return true;
 		}
 
@@ -176,7 +220,7 @@ namespace HarmonyLib
 			}
 			if (this.IsInvalid)
 			{
-				throw new InvalidOperationException(explanation + " - Current state is invalid");
+				return this.HandleException<CodeMatcher>(explanation + " - Current state is invalid", this);
 			}
 			return this;
 		}
@@ -186,7 +230,7 @@ namespace HarmonyLib
 			this.ThrowIfInvalid(explanation);
 			if (!this.MatchSequence(this.Pos, matches))
 			{
-				throw new InvalidOperationException(explanation + " - Match failed");
+				return this.HandleException<CodeMatcher>(explanation + " - Match failed", this);
 			}
 			return this;
 		}
@@ -197,9 +241,9 @@ namespace HarmonyLib
 			int pos = this.Pos;
 			try
 			{
-				if (this.Match(matches, direction, false).IsInvalid)
+				if (this.Match(matches, direction, CodeMatcher.MatchPosition.Start, false).IsInvalid)
 				{
-					throw new InvalidOperationException(explanation + " - Match failed");
+					this.HandleException(explanation + " - Match failed");
 				}
 			}
 			finally
@@ -229,13 +273,33 @@ namespace HarmonyLib
 			this.ThrowIfInvalid(explanation);
 			if (!stateCheckFunc(this))
 			{
-				throw new InvalidOperationException(explanation + " - Check function returned false");
+				return this.HandleException<CodeMatcher>(explanation + " - Check function returned false", this);
 			}
+			return this;
+		}
+
+		public CodeMatcher Do(Action<CodeMatcher> action)
+		{
+			if (action == null)
+			{
+				throw new ArgumentNullException("action");
+			}
+			action(this);
+			return this;
+		}
+
+		public CodeMatcher OnError(CodeMatcher.ErrorHandler errorHandler)
+		{
+			this.errorHandler = errorHandler;
 			return this;
 		}
 
 		public CodeMatcher SetInstruction(CodeInstruction instruction)
 		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot set instruction/opcode at invalid position.", this);
+			}
 			this.codes[this.Pos] = instruction;
 			return this;
 		}
@@ -250,6 +314,10 @@ namespace HarmonyLib
 
 		public unsafe CodeMatcher Set(OpCode opcode, object operand)
 		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot set values at invalid position.", this);
+			}
 			*this.Opcode = opcode;
 			*this.Operand = operand;
 			return this;
@@ -265,6 +333,10 @@ namespace HarmonyLib
 
 		public unsafe CodeMatcher SetOpcodeAndAdvance(OpCode opcode)
 		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot set opcode at invalid position.", this);
+			}
 			*this.Opcode = opcode;
 			int pos = this.Pos;
 			this.Pos = pos + 1;
@@ -273,14 +345,45 @@ namespace HarmonyLib
 
 		public unsafe CodeMatcher SetOperandAndAdvance(object operand)
 		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot set operand at invalid position.", this);
+			}
 			*this.Operand = operand;
 			int pos = this.Pos;
 			this.Pos = pos + 1;
 			return this;
 		}
 
+		public CodeMatcher DeclareLocal(Type variableType, out LocalBuilder localVariable)
+		{
+			if (this.generator == null)
+			{
+				localVariable = null;
+				return this.HandleException<CodeMatcher>("Generator must be provided to use this method", this);
+			}
+			localVariable = this.generator.DeclareLocal(variableType);
+			return this;
+		}
+
+		public CodeMatcher DefineLabel(out Label label)
+		{
+			if (this.generator == null)
+			{
+				label = default(Label);
+				return this.HandleException<CodeMatcher>("Generator must be provided to use this method", this);
+			}
+			label = this.generator.DefineLabel();
+			return this;
+		}
+
 		public unsafe CodeMatcher CreateLabel(out Label label)
 		{
+			if (this.generator == null)
+			{
+				label = default(Label);
+				return this.HandleException<CodeMatcher>("Generator must be provided to use this method", this);
+			}
 			label = this.generator.DefineLabel();
 			this.Labels->Add(label);
 			return this;
@@ -288,15 +391,25 @@ namespace HarmonyLib
 
 		public CodeMatcher CreateLabelAt(int position, out Label label)
 		{
+			if (this.generator == null)
+			{
+				label = default(Label);
+				return this.HandleException<CodeMatcher>("Generator must be provided to use this method", this);
+			}
 			label = this.generator.DefineLabel();
-			this.AddLabelsAt(position, new Label[] { label });
+			this.AddLabelsAt(position, new <>z__ReadOnlySingleElementList<Label>(label));
 			return this;
 		}
 
 		public CodeMatcher CreateLabelWithOffsets(int offset, out Label label)
 		{
+			if (this.generator == null)
+			{
+				label = default(Label);
+				return this.HandleException<CodeMatcher>("Generator must be provided to use this method", this);
+			}
 			label = this.generator.DefineLabel();
-			return this.AddLabelsAt(this.Pos + offset, new Label[] { label });
+			return this.AddLabelsAt(this.Pos + offset, new <>z__ReadOnlySingleElementList<Label>(label));
 		}
 
 		public unsafe CodeMatcher AddLabels(IEnumerable<Label> labels)
@@ -307,6 +420,10 @@ namespace HarmonyLib
 
 		public CodeMatcher AddLabelsAt(int position, IEnumerable<Label> labels)
 		{
+			if (position < 0 || position >= this.Length)
+			{
+				return this.HandleException<CodeMatcher>("Cannot add labels at invalid position.", this);
+			}
 			this.codes[position].labels.AddRange(labels);
 			return this;
 		}
@@ -319,18 +436,44 @@ namespace HarmonyLib
 
 		public CodeMatcher Insert(params CodeInstruction[] instructions)
 		{
-			this.codes.InsertRange(this.Pos, instructions);
-			return this;
+			if (instructions != null)
+			{
+				if (!instructions.Any<CodeInstruction>((CodeInstruction i) => i == null))
+				{
+					if (this.IsInvalid)
+					{
+						return this.HandleException<CodeMatcher>("Cannot insert instructions at invalid position.", this);
+					}
+					this.codes.InsertRange(this.Pos, instructions);
+					return this;
+				}
+			}
+			throw new ArgumentNullException("instructions");
 		}
 
 		public CodeMatcher Insert(IEnumerable<CodeInstruction> instructions)
 		{
-			this.codes.InsertRange(this.Pos, instructions);
-			return this;
+			if (instructions != null)
+			{
+				if (!instructions.Any<CodeInstruction>((CodeInstruction i) => i == null))
+				{
+					if (this.IsInvalid)
+					{
+						return this.HandleException<CodeMatcher>("Cannot insert instructions at invalid position.", this);
+					}
+					this.codes.InsertRange(this.Pos, instructions);
+					return this;
+				}
+			}
+			throw new ArgumentNullException("instructions");
 		}
 
 		public CodeMatcher InsertBranch(OpCode opcode, int destination)
 		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot insert instructions at invalid position.", this);
+			}
 			Label label;
 			this.CreateLabelAt(destination, out label);
 			this.codes.Insert(this.Pos, new CodeInstruction(opcode, label));
@@ -339,22 +482,36 @@ namespace HarmonyLib
 
 		public CodeMatcher InsertAndAdvance(params CodeInstruction[] instructions)
 		{
-			foreach (CodeInstruction codeInstruction in instructions)
+			if (instructions != null)
 			{
-				this.Insert(new CodeInstruction[] { codeInstruction });
-				int pos = this.Pos;
-				this.Pos = pos + 1;
+				if (!instructions.Any<CodeInstruction>((CodeInstruction i) => i == null))
+				{
+					foreach (CodeInstruction codeInstruction in instructions)
+					{
+						this.Insert(new CodeInstruction[] { codeInstruction });
+						int pos = this.Pos;
+						this.Pos = pos + 1;
+					}
+					return this;
+				}
 			}
-			return this;
+			throw new ArgumentNullException("instructions");
 		}
 
 		public CodeMatcher InsertAndAdvance(IEnumerable<CodeInstruction> instructions)
 		{
-			foreach (CodeInstruction codeInstruction in instructions)
+			if (instructions != null)
 			{
-				this.InsertAndAdvance(new CodeInstruction[] { codeInstruction });
+				if (!instructions.Any<CodeInstruction>((CodeInstruction i) => i == null))
+				{
+					foreach (CodeInstruction codeInstruction in instructions)
+					{
+						this.InsertAndAdvance(new CodeInstruction[] { codeInstruction });
+					}
+					return this;
+				}
 			}
-			return this;
+			throw new ArgumentNullException("instructions");
 		}
 
 		public CodeMatcher InsertBranchAndAdvance(OpCode opcode, int destination)
@@ -365,14 +522,98 @@ namespace HarmonyLib
 			return this;
 		}
 
+		public CodeMatcher InsertAfter(params CodeInstruction[] instructions)
+		{
+			if (instructions != null)
+			{
+				if (!instructions.Any<CodeInstruction>((CodeInstruction i) => i == null))
+				{
+					if (this.IsInvalid)
+					{
+						return this.HandleException<CodeMatcher>("Cannot insert instructions at invalid position.", this);
+					}
+					this.codes.InsertRange(this.Pos + 1, instructions);
+					return this;
+				}
+			}
+			throw new ArgumentNullException("instructions");
+		}
+
+		public CodeMatcher InsertAfter(IEnumerable<CodeInstruction> instructions)
+		{
+			if (instructions != null)
+			{
+				if (!instructions.Any<CodeInstruction>((CodeInstruction i) => i == null))
+				{
+					if (this.IsInvalid)
+					{
+						return this.HandleException<CodeMatcher>("Cannot insert instructions at invalid position.", this);
+					}
+					this.codes.InsertRange(this.Pos + 1, instructions);
+					return this;
+				}
+			}
+			return this.HandleException<CodeMatcher>("Cannot insert null instructions.", this);
+		}
+
+		public CodeMatcher InsertBranchAfter(OpCode opcode, int destination)
+		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot insert instructions at invalid position.", this);
+			}
+			Label label;
+			this.CreateLabelAt(destination, out label);
+			this.codes.Insert(this.Pos + 1, new CodeInstruction(opcode, label));
+			return this;
+		}
+
+		public CodeMatcher InsertAfterAndAdvance(params CodeInstruction[] instructions)
+		{
+			this.InsertAfter(instructions);
+			this.Pos += instructions.Length;
+			return this;
+		}
+
+		public CodeMatcher InsertAfterAndAdvance(IEnumerable<CodeInstruction> instructions)
+		{
+			if (instructions != null)
+			{
+				if (!instructions.Any<CodeInstruction>((CodeInstruction i) => i == null))
+				{
+					List<CodeInstruction> list = instructions.ToList<CodeInstruction>();
+					this.InsertAfter(list);
+					this.Pos += list.Count;
+					return this;
+				}
+			}
+			return this.HandleException<CodeMatcher>("Cannot insert null instructions.", this);
+		}
+
+		public CodeMatcher InsertBranchAfterAndAdvance(OpCode opcode, int destination)
+		{
+			this.InsertBranchAfter(opcode, destination);
+			int pos = this.Pos;
+			this.Pos = pos + 1;
+			return this;
+		}
+
 		public CodeMatcher RemoveInstruction()
 		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot remove instructions from an invalid position.", this);
+			}
 			this.codes.RemoveAt(this.Pos);
 			return this;
 		}
 
 		public CodeMatcher RemoveInstructions(int count)
 		{
+			if (this.IsInvalid || this.Pos + count > this.Length)
+			{
+				return this.HandleException<CodeMatcher>("Cannot remove instructions from an invalid or out-of-range position.", this);
+			}
 			this.codes.RemoveRange(this.Pos, count);
 			return this;
 		}
@@ -385,6 +626,10 @@ namespace HarmonyLib
 				start = end;
 				end = num;
 			}
+			if (start < 0 || end >= this.Length)
+			{
+				return this.HandleException<CodeMatcher>("Cannot remove instructions: range is out-of-bounds.", this);
+			}
 			this.codes.RemoveRange(start, end - start + 1);
 			return this;
 		}
@@ -394,7 +639,7 @@ namespace HarmonyLib
 			return this.RemoveInstructionsInRange(this.Pos + startOffset, this.Pos + endOffset);
 		}
 
-		public CodeMatcher Advance(int offset)
+		public CodeMatcher Advance(int offset = 1)
 		{
 			this.Pos += offset;
 			if (!this.IsValid)
@@ -433,40 +678,162 @@ namespace HarmonyLib
 			{
 				this.Pos += direction;
 			}
-			this.lastError = (this.IsInvalid ? string.Format("Cannot find {0}", predicate) : null);
+			string text;
+			if (!this.IsInvalid)
+			{
+				text = null;
+			}
+			else
+			{
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(12, 1);
+				defaultInterpolatedStringHandler.AppendLiteral("Cannot find ");
+				defaultInterpolatedStringHandler.AppendFormatted<Func<CodeInstruction, bool>>(predicate);
+				text = defaultInterpolatedStringHandler.ToStringAndClear();
+			}
+			this.lastError = text;
 			return this;
 		}
 
 		public CodeMatcher MatchStartForward(params CodeMatch[] matches)
 		{
-			return this.Match(matches, 1, false);
+			return this.Match(matches, 1, CodeMatcher.MatchPosition.Start, false);
+		}
+
+		public CodeMatcher PrepareMatchStartForward(params CodeMatch[] matches)
+		{
+			return this.Match(matches, 1, CodeMatcher.MatchPosition.Start, true);
 		}
 
 		public CodeMatcher MatchEndForward(params CodeMatch[] matches)
 		{
-			return this.Match(matches, 1, true);
+			return this.Match(matches, 1, CodeMatcher.MatchPosition.End, false);
+		}
+
+		public CodeMatcher PrepareMatchEndForward(params CodeMatch[] matches)
+		{
+			return this.Match(matches, 1, CodeMatcher.MatchPosition.End, true);
 		}
 
 		public CodeMatcher MatchStartBackwards(params CodeMatch[] matches)
 		{
-			return this.Match(matches, -1, false);
+			return this.Match(matches, -1, CodeMatcher.MatchPosition.Start, false);
+		}
+
+		public CodeMatcher PrepareMatchStartBackwards(params CodeMatch[] matches)
+		{
+			return this.Match(matches, -1, CodeMatcher.MatchPosition.Start, true);
 		}
 
 		public CodeMatcher MatchEndBackwards(params CodeMatch[] matches)
 		{
-			return this.Match(matches, -1, true);
+			return this.Match(matches, -1, CodeMatcher.MatchPosition.End, false);
 		}
 
-		private CodeMatcher Match(CodeMatch[] matches, int direction, bool useEnd)
+		public CodeMatcher PrepareMatchEndBackwards(params CodeMatch[] matches)
+		{
+			return this.Match(matches, -1, CodeMatcher.MatchPosition.End, true);
+		}
+
+		public CodeMatcher RemoveSearchForward(Func<CodeInstruction, bool> predicate)
+		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot remove instructions from an invalid position.", this);
+			}
+			int pos = this.Pos;
+			CodeMatcher codeMatcher = this.Clone().SearchForward(predicate);
+			if (codeMatcher.IsInvalid)
+			{
+				this.lastError = codeMatcher.lastError;
+				this.SetOutOfBounds(1);
+				return this;
+			}
+			int num = codeMatcher.Pos - 1;
+			if (num >= pos)
+			{
+				this.RemoveInstructionsInRange(pos, num);
+			}
+			return this;
+		}
+
+		public CodeMatcher RemoveSearchBackward(Func<CodeInstruction, bool> predicate)
+		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot remove instructions from an invalid position.", this);
+			}
+			int pos = this.Pos;
+			CodeMatcher codeMatcher = this.Clone().SearchBackwards(predicate);
+			if (codeMatcher.IsInvalid)
+			{
+				this.lastError = codeMatcher.lastError;
+				this.SetOutOfBounds(-1);
+				return this;
+			}
+			int pos2 = codeMatcher.Pos;
+			int num = pos2 + 1;
+			if (pos >= num)
+			{
+				this.RemoveInstructionsInRange(num, pos);
+			}
+			this.Pos = pos2;
+			return this;
+		}
+
+		public CodeMatcher RemoveUntilForward(params CodeMatch[] matches)
+		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot remove instructions from an invalid position.", this);
+			}
+			int pos = this.Pos;
+			CodeMatcher codeMatcher = this.Clone().MatchStartForward(matches);
+			if (codeMatcher.IsInvalid)
+			{
+				this.lastError = codeMatcher.lastError;
+				this.SetOutOfBounds(1);
+				return this;
+			}
+			int num = codeMatcher.Pos - 1;
+			if (num >= pos)
+			{
+				this.RemoveInstructionsInRange(pos, num);
+			}
+			return this;
+		}
+
+		public CodeMatcher RemoveUntilBackward(params CodeMatch[] matches)
+		{
+			if (this.IsInvalid)
+			{
+				return this.HandleException<CodeMatcher>("Cannot remove instructions from an invalid position.", this);
+			}
+			int pos = this.Pos;
+			CodeMatcher codeMatcher = this.Clone().MatchEndBackwards(matches);
+			if (codeMatcher.IsInvalid)
+			{
+				this.lastError = codeMatcher.lastError;
+				this.SetOutOfBounds(-1);
+				return this;
+			}
+			int pos2 = codeMatcher.Pos;
+			if (pos > pos2)
+			{
+				this.RemoveInstructionsInRange(pos2 + 1, pos);
+			}
+			this.Pos = pos2;
+			return this;
+		}
+
+		private CodeMatcher Match(CodeMatch[] matches, int direction, CodeMatcher.MatchPosition mode, bool prepareOnly)
 		{
 			this.lastMatchCall = delegate
 			{
-				this.FixStart();
 				while (this.IsValid)
 				{
 					if (this.MatchSequence(this.Pos, matches))
 					{
-						if (useEnd)
+						if (mode == CodeMatcher.MatchPosition.End)
 						{
 							this.Pos += matches.Length - 1;
 							break;
@@ -481,6 +848,11 @@ namespace HarmonyLib
 				this.lastError = (this.IsInvalid ? ("Cannot find " + matches.Join<CodeMatch>(null, ", ")) : null);
 				return this;
 			};
+			if (prepareOnly)
+			{
+				return this;
+			}
+			this.FixStart();
 			return this.lastMatchCall();
 		}
 
@@ -489,7 +861,7 @@ namespace HarmonyLib
 			int num = 0;
 			if (this.lastMatchCall == null)
 			{
-				throw new InvalidOperationException("No previous Match operation - cannot repeat");
+				return this.HandleException<CodeMatcher>("No previous Match operation - cannot repeat", this);
 			}
 			while (this.IsValid)
 			{
@@ -541,6 +913,16 @@ namespace HarmonyLib
 		private string lastError;
 
 		private CodeMatcher.MatchDelegate lastMatchCall;
+
+		private CodeMatcher.ErrorHandler errorHandler;
+
+		public delegate bool ErrorHandler(CodeMatcher matcher, string error);
+
+		private enum MatchPosition
+		{
+			Start,
+			End
+		}
 
 		private delegate CodeMatcher MatchDelegate();
 	}

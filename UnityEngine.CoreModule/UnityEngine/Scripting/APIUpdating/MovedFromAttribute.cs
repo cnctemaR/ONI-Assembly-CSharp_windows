@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.Scripting.APIUpdating
 {
@@ -31,6 +32,7 @@ namespace UnityEngine.Scripting.APIUpdating
 			}
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal MovedFromAttributeData data;
 	}
 }

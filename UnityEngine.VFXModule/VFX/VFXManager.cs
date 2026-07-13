@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting;
@@ -9,17 +10,19 @@ namespace UnityEngine.VFX
 {
 	[StaticAccessor("GetVFXManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/VFX/Public/ScriptBindings/VFXManagerBindings.h")]
-	[NativeHeader("Modules/VFX/Public/VFXManager.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Modules/VFX/Public/VFXManager.h")]
 	public static class VFXManager
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern VisualEffect[] GetComponents();
 
-		internal static extern ScriptableObject runtimeResources
+		internal static ScriptableObject runtimeResources
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<ScriptableObject>(VFXManager.get_runtimeResources_Injected());
+			}
 		}
 
 		public static extern float fixedTimeStep
@@ -38,6 +41,14 @@ namespace UnityEngine.VFX
 			set;
 		}
 
+		internal static extern uint maxCapacity
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		internal static extern float maxScrubTime
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -46,10 +57,23 @@ namespace UnityEngine.VFX
 			set;
 		}
 
-		internal static extern string renderPipeSettingsPath
+		internal static string renderPipeSettingsPath
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					VFXManager.get_renderPipeSettingsPath_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		internal static extern uint batchEmptyLifetime
@@ -68,21 +92,36 @@ namespace UnityEngine.VFX
 			VFXManager.CleanupEmptyBatches(true);
 		}
 
-		public static VFXBatchedEffectInfo GetBatchedEffectInfo([NotNull("NullExceptionObject")] VisualEffectAsset vfx)
+		public static VFXBatchedEffectInfo GetBatchedEffectInfo([NotNull] VisualEffectAsset vfx)
 		{
+			if (vfx == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(vfx, "vfx");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffectAsset>(vfx);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(vfx, "vfx");
+			}
 			VFXBatchedEffectInfo vfxbatchedEffectInfo;
-			VFXManager.GetBatchedEffectInfo_Injected(vfx, out vfxbatchedEffectInfo);
+			VFXManager.GetBatchedEffectInfo_Injected(intPtr, out vfxbatchedEffectInfo);
 			return vfxbatchedEffectInfo;
 		}
 
 		[FreeFunction(Name = "VFXManagerBindings::GetBatchedEffectInfos", HasExplicitThis = false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void GetBatchedEffectInfos([NotNull("NullExceptionObject")] List<VFXBatchedEffectInfo> infos);
+		public static void GetBatchedEffectInfos([NotNull] List<VFXBatchedEffectInfo> infos)
+		{
+			if (infos == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(infos, "infos");
+			}
+			VFXManager.GetBatchedEffectInfos_Injected(infos);
+		}
 
 		internal static VFXBatchInfo GetBatchInfo(VisualEffectAsset vfx, uint batchIndex)
 		{
 			VFXBatchInfo vfxbatchInfo;
-			VFXManager.GetBatchInfo_Injected(vfx, batchIndex, out vfxbatchInfo);
+			VFXManager.GetBatchInfo_Injected(Object.MarshalledUnityObject.Marshal<VisualEffectAsset>(vfx), batchIndex, out vfxbatchInfo);
 			return vfxbatchInfo;
 		}
 
@@ -90,7 +129,7 @@ namespace UnityEngine.VFX
 		public static void ProcessCamera(Camera cam)
 		{
 			VFXManager.PrepareCamera(cam, VFXManager.kDefaultCameraXRSettings);
-			VFXManager.Internal_ProcessCameraCommand(cam, null, VFXManager.kDefaultCameraXRSettings, IntPtr.Zero);
+			VFXManager.Internal_ProcessCameraCommand(cam, null, VFXManager.kDefaultCameraXRSettings, IntPtr.Zero, IntPtr.Zero);
 		}
 
 		public static void PrepareCamera(Camera cam)
@@ -98,50 +137,116 @@ namespace UnityEngine.VFX
 			VFXManager.PrepareCamera(cam, VFXManager.kDefaultCameraXRSettings);
 		}
 
-		public static void PrepareCamera([NotNull("NullExceptionObject")] Camera cam, VFXCameraXRSettings camXRSettings)
+		public static void PrepareCamera([NotNull] Camera cam, VFXCameraXRSettings camXRSettings)
 		{
-			VFXManager.PrepareCamera_Injected(cam, ref camXRSettings);
+			if (cam == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(cam);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			VFXManager.PrepareCamera_Injected(intPtr, ref camXRSettings);
 		}
 
 		[Obsolete("Use ProcessCameraCommand with CullingResults to allow culling of VFX per camera")]
 		public static void ProcessCameraCommand(Camera cam, CommandBuffer cmd)
 		{
-			VFXManager.Internal_ProcessCameraCommand(cam, cmd, VFXManager.kDefaultCameraXRSettings, IntPtr.Zero);
+			VFXManager.Internal_ProcessCameraCommand(cam, cmd, VFXManager.kDefaultCameraXRSettings, IntPtr.Zero, IntPtr.Zero);
 		}
 
 		[Obsolete("Use ProcessCameraCommand with CullingResults to allow culling of VFX per camera")]
 		public static void ProcessCameraCommand(Camera cam, CommandBuffer cmd, VFXCameraXRSettings camXRSettings)
 		{
-			VFXManager.Internal_ProcessCameraCommand(cam, cmd, camXRSettings, IntPtr.Zero);
+			VFXManager.Internal_ProcessCameraCommand(cam, cmd, camXRSettings, IntPtr.Zero, IntPtr.Zero);
 		}
 
 		public static void ProcessCameraCommand(Camera cam, CommandBuffer cmd, VFXCameraXRSettings camXRSettings, CullingResults results)
 		{
-			VFXManager.Internal_ProcessCameraCommand(cam, cmd, camXRSettings, results.ptr);
+			VFXManager.Internal_ProcessCameraCommand(cam, cmd, camXRSettings, results.ptr, IntPtr.Zero);
 		}
 
-		private static void Internal_ProcessCameraCommand([NotNull("NullExceptionObject")] Camera cam, CommandBuffer cmd, VFXCameraXRSettings camXRSettings, IntPtr cullResults)
+		public static void ProcessCameraCommand(Camera cam, CommandBuffer cmd, VFXCameraXRSettings camXRSettings, CullingResults results, CullingResults customPassResults)
 		{
-			VFXManager.Internal_ProcessCameraCommand_Injected(cam, cmd, ref camXRSettings, cullResults);
+			VFXManager.Internal_ProcessCameraCommand(cam, cmd, camXRSettings, results.ptr, customPassResults.ptr);
+		}
+
+		private static void Internal_ProcessCameraCommand([NotNull] Camera cam, CommandBuffer cmd, VFXCameraXRSettings camXRSettings, IntPtr cullResults, IntPtr customPassCullResults)
+		{
+			if (cam == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(cam);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			VFXManager.Internal_ProcessCameraCommand_Injected(intPtr, (cmd == null) ? ((IntPtr)0) : CommandBuffer.BindingsMarshaller.ConvertToNative(cmd), ref camXRSettings, cullResults, customPassCullResults);
+		}
+
+		public static VFXCameraBufferTypes IsCameraBufferNeeded([NotNull] Camera cam)
+		{
+			if (cam == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(cam);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			return VFXManager.IsCameraBufferNeeded_Injected(intPtr);
+		}
+
+		public static void SetCameraBuffer([NotNull] Camera cam, VFXCameraBufferTypes type, Texture buffer, int x, int y, int width, int height)
+		{
+			if (cam == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Camera>(cam);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(cam, "cam");
+			}
+			VFXManager.SetCameraBuffer_Injected(intPtr, type, Object.MarshalledUnityObject.Marshal<Texture>(buffer), x, y, width, height);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern VFXCameraBufferTypes IsCameraBufferNeeded([NotNull("NullExceptionObject")] Camera cam);
+		public static extern void SetRayTracingEnabled(bool enabled);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetCameraBuffer([NotNull("NullExceptionObject")] Camera cam, VFXCameraBufferTypes type, Texture buffer, int x, int y, int width, int height);
+		public static extern void RequestRtasAabbConstruction();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetBatchedEffectInfo_Injected(VisualEffectAsset vfx, out VFXBatchedEffectInfo ret);
+		private static extern IntPtr get_runtimeResources_Injected();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetBatchInfo_Injected(VisualEffectAsset vfx, uint batchIndex, out VFXBatchInfo ret);
+		private static extern void get_renderPipeSettingsPath_Injected(out ManagedSpanWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PrepareCamera_Injected(Camera cam, ref VFXCameraXRSettings camXRSettings);
+		private static extern void GetBatchedEffectInfo_Injected(IntPtr vfx, out VFXBatchedEffectInfo ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_ProcessCameraCommand_Injected(Camera cam, CommandBuffer cmd, ref VFXCameraXRSettings camXRSettings, IntPtr cullResults);
+		private static extern void GetBatchedEffectInfos_Injected(List<VFXBatchedEffectInfo> infos);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBatchInfo_Injected(IntPtr vfx, uint batchIndex, out VFXBatchInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void PrepareCamera_Injected(IntPtr cam, [In] ref VFXCameraXRSettings camXRSettings);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_ProcessCameraCommand_Injected(IntPtr cam, IntPtr cmd, [In] ref VFXCameraXRSettings camXRSettings, IntPtr cullResults, IntPtr customPassCullResults);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VFXCameraBufferTypes IsCameraBufferNeeded_Injected(IntPtr cam);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetCameraBuffer_Injected(IntPtr cam, VFXCameraBufferTypes type, IntPtr buffer, int x, int y, int width, int height);
 
 		private static readonly VFXCameraXRSettings kDefaultCameraXRSettings = new VFXCameraXRSettings
 		{

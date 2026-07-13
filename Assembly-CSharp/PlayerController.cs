@@ -36,7 +36,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	{
 		PlayerController.Instance = this;
 		InterfaceTool.InitializeConfigs(this.defaultConfigKey, this.interfaceConfigs);
-		this.vim = global::UnityEngine.Object.FindObjectOfType<VirtualInputModule>(true);
+		this.vim = global::UnityEngine.Object.FindFirstObjectByType<VirtualInputModule>(FindObjectsInactive.Include);
 		for (int i = 0; i < this.tools.Length; i++)
 		{
 			GameObject gameObject = Util.KInstantiate(this.tools[i].gameObject, base.gameObject, null);

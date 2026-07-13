@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum MetadataType : byte
+	internal enum MetadataType : byte
 	{
 		Void = 1,
 		Boolean,

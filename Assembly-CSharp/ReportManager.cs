@@ -101,6 +101,16 @@ public class ReportManager : KMonoBehaviour
 		this.TodaysReport.AddData(reportType, value, note, context);
 	}
 
+	public void ReportValueWithPrefabInstanceContext(ReportManager.ReportType reportType, float value, KPrefabID context, string note = null)
+	{
+		this.TodaysReport.AddDataWithPrefabInstanceContext(reportType, value, context, note);
+	}
+
+	public void ReportValueWithGameObjectContext(ReportManager.ReportType reportType, float value, GameObject context, string note = null)
+	{
+		this.TodaysReport.AddDataWithGameObjectContext(reportType, value, context, note);
+	}
+
 	private void OnNightTime(object data)
 	{
 		this.dailyReports.Add(this.todaysReport);
@@ -275,6 +285,12 @@ public class ReportManager : KMonoBehaviour
 			this.noteStorageId = note_storage_id;
 		}
 
+		public ReportEntry(ReportManager.ReportType reportType, int note_storage_id, string context, int contextId, bool is_child = false)
+			: this(reportType, note_storage_id, context, is_child)
+		{
+			this.contextId = contextId;
+		}
+
 		public float Positive
 		{
 			get
@@ -320,27 +336,149 @@ public class ReportManager : KMonoBehaviour
 			}
 		}
 
+		public ReportManager.ReportEntry FindEntry(string dataContext)
+		{
+			for (int i = 0; i < this.contextEntries.Count; i++)
+			{
+				ReportManager.ReportEntry reportEntry = this.contextEntries[i];
+				if (reportEntry.context == dataContext)
+				{
+					return reportEntry;
+				}
+			}
+			return null;
+		}
+
+		public ReportManager.ReportEntry FindEntryFromPrefabInstance(KPrefabID prefabId)
+		{
+			DebugUtil.DevAssert(prefabId != null, "Don't call with invalid context id", null);
+			if (prefabId == null)
+			{
+				return null;
+			}
+			if (!prefabId.HasTag(GameTags.BaseMinion))
+			{
+				return this.FindEntry(prefabId.gameObject.GetProperName());
+			}
+			ReportManager.ReportEntry reportEntry = null;
+			for (int i = 0; i < this.contextEntries.Count; i++)
+			{
+				ReportManager.ReportEntry reportEntry2 = this.contextEntries[i];
+				if (reportEntry2.contextId == prefabId.InstanceID)
+				{
+					reportEntry = reportEntry2;
+					break;
+				}
+			}
+			if (reportEntry == null)
+			{
+				string properName = prefabId.gameObject.GetProperName();
+				for (int j = 0; j < this.contextEntries.Count; j++)
+				{
+					ReportManager.ReportEntry reportEntry3 = this.contextEntries[j];
+					if (reportEntry3.contextId == 0 && !(reportEntry3.context != properName))
+					{
+						reportEntry3.contextId = prefabId.InstanceID;
+						reportEntry = reportEntry3;
+						break;
+					}
+				}
+			}
+			return reportEntry;
+		}
+
+		public ReportManager.ReportEntry FindEntryFromGameObject(GameObject contextGameObject)
+		{
+			DebugUtil.DevAssert(contextGameObject != null, "Don't call with invalid context id", null);
+			if (contextGameObject == null)
+			{
+				return null;
+			}
+			KPrefabID kprefabID;
+			if (!contextGameObject.TryGetComponent<KPrefabID>(out kprefabID))
+			{
+				return this.FindEntry(contextGameObject.GetProperName());
+			}
+			return this.FindEntryFromPrefabInstance(kprefabID);
+		}
+
+		private void AddDataToContext(ReportManager.NoteStorage note_storage, float value, string context, string note)
+		{
+			DebugUtil.DevAssert(context != null, "context must be non-null", null);
+			if (context == null)
+			{
+				return;
+			}
+			ReportManager.ReportEntry reportEntry = this.FindEntry(context);
+			if (reportEntry == null)
+			{
+				reportEntry = new ReportManager.ReportEntry(this.reportType, note_storage.GetNewNoteId(), context, true);
+				this.contextEntries.Add(reportEntry);
+			}
+			reportEntry.AddActualData(note_storage, value, note);
+		}
+
 		public void AddData(ReportManager.NoteStorage note_storage, float value, string note = null, string dataContext = null)
 		{
 			this.AddActualData(note_storage, value, note);
 			if (dataContext != null)
 			{
-				ReportManager.ReportEntry reportEntry = null;
-				for (int i = 0; i < this.contextEntries.Count; i++)
-				{
-					if (this.contextEntries[i].context == dataContext)
-					{
-						reportEntry = this.contextEntries[i];
-						break;
-					}
-				}
+				this.AddDataToContext(note_storage, value, dataContext, note);
+			}
+		}
+
+		private void AddDataToProperNameContext(ReportManager.NoteStorage note_storage, float value, GameObject context, string note)
+		{
+			DebugUtil.DevAssert(context != null, "context must be non-null", null);
+			if (context != null)
+			{
+				this.AddDataToContext(note_storage, value, context.GetProperName(), note);
+			}
+		}
+
+		private void AddDataToPrefabInstanceContext(ReportManager.NoteStorage note_storage, float value, KPrefabID context, string note)
+		{
+			DebugUtil.DevAssert(context != null, "context must be non-null", null);
+			if (context == null)
+			{
+				return;
+			}
+			if (context.HasTag(GameTags.BaseMinion))
+			{
+				ReportManager.ReportEntry reportEntry = this.FindEntryFromPrefabInstance(context);
 				if (reportEntry == null)
 				{
-					reportEntry = new ReportManager.ReportEntry(this.reportType, note_storage.GetNewNoteId(), dataContext, true);
+					reportEntry = new ReportManager.ReportEntry(this.reportType, note_storage.GetNewNoteId(), context.gameObject.GetProperName(), context.InstanceID, true);
 					this.contextEntries.Add(reportEntry);
 				}
 				reportEntry.AddActualData(note_storage, value, note);
+				return;
 			}
+			this.AddDataToProperNameContext(note_storage, value, context.gameObject, note);
+		}
+
+		public void AddDataWithPrefabInstanceContext(ReportManager.NoteStorage note_storage, float value, KPrefabID context, string note = null)
+		{
+			this.AddActualData(note_storage, value, note);
+			DebugUtil.DevAssert(context != null, "Use the other overload of AddData for null contexts", null);
+			this.AddDataToPrefabInstanceContext(note_storage, value, context, note);
+		}
+
+		public void AddDataWithGameObjectContext(ReportManager.NoteStorage note_storage, float value, GameObject context, string note = null)
+		{
+			this.AddActualData(note_storage, value, note);
+			DebugUtil.DevAssert(context != null, "Use the other overload of AddData for null contexts", null);
+			if (context == null)
+			{
+				return;
+			}
+			KPrefabID kprefabID;
+			if (context.TryGetComponent<KPrefabID>(out kprefabID))
+			{
+				this.AddDataToPrefabInstanceContext(note_storage, value, kprefabID, note);
+				return;
+			}
+			this.AddDataToProperNameContext(note_storage, value, context, note);
 		}
 
 		private void AddActualData(ReportManager.NoteStorage note_storage, float value, string note = null)
@@ -365,6 +503,8 @@ public class ReportManager : KMonoBehaviour
 			return this.contextEntries.Count > 0;
 		}
 
+		private const int INVALID_CONTEXT_ID = 0;
+
 		[Serialize]
 		public int noteStorageId;
 
@@ -376,6 +516,9 @@ public class ReportManager : KMonoBehaviour
 
 		[Serialize]
 		public string context;
+
+		[Serialize]
+		public int contextId;
 
 		[Serialize]
 		public float accumulate;
@@ -448,6 +591,16 @@ public class ReportManager : KMonoBehaviour
 		public void AddData(ReportManager.ReportType reportType, float value, string note = null, string context = null)
 		{
 			this.GetEntry(reportType).AddData(this.noteStorage, value, note, context);
+		}
+
+		public void AddDataWithPrefabInstanceContext(ReportManager.ReportType reportType, float value, KPrefabID context, string note = null)
+		{
+			this.GetEntry(reportType).AddDataWithPrefabInstanceContext(this.noteStorage, value, context, note);
+		}
+
+		public void AddDataWithGameObjectContext(ReportManager.ReportType reportType, float value, GameObject context, string note = null)
+		{
+			this.GetEntry(reportType).AddDataWithGameObjectContext(this.noteStorage, value, context, note);
 		}
 
 		[Serialize]

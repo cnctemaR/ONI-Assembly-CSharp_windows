@@ -283,7 +283,8 @@ namespace Mono.Cecil
 			}
 			for (int i = 0; i < constructorArguments.Count; i++)
 			{
-				this.WriteCustomAttributeFixedArgument(parameters[i].ParameterType, constructorArguments[i]);
+				TypeReference typeReference = GenericParameterResolver.ResolveParameterTypeIfNeeded(attribute.Constructor, parameters[i]);
+				this.WriteCustomAttributeFixedArgument(typeReference, constructorArguments[i]);
 			}
 		}
 
@@ -342,17 +343,25 @@ namespace Mono.Cecil
 			{
 				if (etype != ElementType.String)
 				{
-					this.WritePrimitiveValue(value);
+					if (etype != ElementType.GenericInst)
+					{
+						this.WritePrimitiveValue(value);
+						return;
+					}
+					this.WriteCustomAttributeEnumValue(type, value);
 					return;
 				}
-				string text = (string)value;
-				if (text == null)
+				else
 				{
-					base.WriteByte(byte.MaxValue);
+					string text = (string)value;
+					if (text == null)
+					{
+						base.WriteByte(byte.MaxValue);
+						return;
+					}
+					this.WriteUTF8String(text);
 					return;
 				}
-				this.WriteUTF8String(text);
-				return;
 			}
 			else
 			{
@@ -396,7 +405,7 @@ namespace Mono.Cecil
 			switch (Type.GetTypeCode(value.GetType()))
 			{
 			case TypeCode.Boolean:
-				base.WriteByte(((bool)value) ? 1 : 0);
+				base.WriteByte(((bool)value > false) ? 1 : 0);
 				return;
 			case TypeCode.Char:
 				base.WriteInt16((short)((char)value));
@@ -458,6 +467,12 @@ namespace Mono.Cecil
 			ElementType etype = type.etype;
 			if (etype != ElementType.None)
 			{
+				if (etype == ElementType.GenericInst)
+				{
+					this.WriteElementType(ElementType.Enum);
+					this.WriteTypeReference(type);
+					return;
+				}
 				if (etype == ElementType.Object)
 				{
 					this.WriteElementType(ElementType.Boxed);

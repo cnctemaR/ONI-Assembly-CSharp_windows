@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum DocumentHashAlgorithm
+	internal enum DocumentHashAlgorithm
 	{
 		None,
 		MD5,

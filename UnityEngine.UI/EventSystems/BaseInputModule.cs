@@ -7,7 +7,7 @@ namespace UnityEngine.EventSystems
 	[RequireComponent(typeof(EventSystem))]
 	public abstract class BaseInputModule : UIBehaviour
 	{
-		internal bool sendPointerHoverToParent
+		protected internal bool sendPointerHoverToParent
 		{
 			get
 			{
@@ -293,6 +293,16 @@ namespace UnityEngine.EventSystems
 				return PointerId.touchPointerIdBase + sourcePointerData.pointerId;
 			}
 			return PointerId.mousePointerId;
+		}
+
+		public virtual Vector2 ConvertPointerEventScrollDeltaToTicks(Vector2 scrollDelta)
+		{
+			return scrollDelta / this.input.mouseScrollDeltaPerTick;
+		}
+
+		public virtual NavigationDeviceType GetNavigationEventDeviceType(BaseEventData eventData)
+		{
+			return NavigationDeviceType.Unknown;
 		}
 
 		[NonSerialized]

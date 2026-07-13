@@ -73,11 +73,7 @@ namespace VoronoiTree
 			{
 				if (powerDiagramSite.poly == null)
 				{
-					string text = "site poly is null for [";
-					string text2 = powerDiagramSite.id.ToString();
-					string text3 = "]";
-					Vector2 position = powerDiagramSite.position;
-					throw new Exception(text + text2 + text3 + position.ToString());
+					throw new Exception("site poly is null for [" + powerDiagramSite.id.ToString() + "]" + powerDiagramSite.position.ToString());
 				}
 				powerDiagramSite.position = powerDiagramSite.poly.Centroid();
 			}
@@ -388,11 +384,7 @@ namespace VoronoiTree
 			{
 				if (powerDiagramSite.poly == null)
 				{
-					string text = "site poly is null for [";
-					string text2 = powerDiagramSite.id.ToString();
-					string text3 = "]";
-					Vector2 position = powerDiagramSite.position;
-					throw new Exception(text + text2 + text3 + position.ToString());
+					throw new Exception("site poly is null for [" + powerDiagramSite.id.ToString() + "]" + powerDiagramSite.position.ToString());
 				}
 				powerDiagramSite.position = powerDiagramSite.poly.Centroid();
 				powerDiagramSite.currentWeight = Mathf.Max(powerDiagramSite.currentWeight, 1f);

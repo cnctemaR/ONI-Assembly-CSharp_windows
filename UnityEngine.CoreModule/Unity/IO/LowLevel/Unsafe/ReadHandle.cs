@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
@@ -114,36 +115,36 @@ namespace Unity.IO.LowLevel.Unsafe
 			return ReadHandle.GetBytesReadArray(this);
 		}
 
-		[ThreadAndSerializationSafe]
 		[FreeFunction("AsyncReadManagerManaged::GetReadStatus", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
 		private static ReadStatus GetReadStatus(ReadHandle handle)
 		{
 			return ReadHandle.GetReadStatus_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::GetReadCount", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetReadCount", IsThreadSafe = true)]
 		private static long GetReadCount(ReadHandle handle)
 		{
 			return ReadHandle.GetReadCount_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::GetBytesRead", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetBytesRead", IsThreadSafe = true)]
 		private static long GetBytesRead(ReadHandle handle)
 		{
 			return ReadHandle.GetBytesRead_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::GetBytesReadForCommand", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetBytesReadForCommand", IsThreadSafe = true)]
 		private static long GetBytesReadForCommand(ReadHandle handle, uint readCommandIndex)
 		{
 			return ReadHandle.GetBytesReadForCommand_Injected(ref handle, readCommandIndex);
 		}
 
-		[ThreadAndSerializationSafe]
 		[FreeFunction("AsyncReadManagerManaged::GetBytesReadArray", IsThreadSafe = true)]
+		[ThreadAndSerializationSafe]
 		private unsafe static ulong* GetBytesReadArray(ReadHandle handle)
 		{
 			return ReadHandle.GetBytesReadArray_Injected(ref handle);
@@ -163,8 +164,8 @@ namespace Unity.IO.LowLevel.Unsafe
 			return ReadHandle.IsReadHandleValid_Injected(ref handle);
 		}
 
-		[FreeFunction("AsyncReadManagerManaged::GetJobHandle", IsThreadSafe = true)]
 		[ThreadAndSerializationSafe]
+		[FreeFunction("AsyncReadManagerManaged::GetJobHandle", IsThreadSafe = true)]
 		private static JobHandle GetJobHandle(ReadHandle handle)
 		{
 			JobHandle jobHandle;
@@ -173,31 +174,31 @@ namespace Unity.IO.LowLevel.Unsafe
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CancelInternal_Injected(ref ReadHandle handle);
+		private static extern void CancelInternal_Injected([In] ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ReadStatus GetReadStatus_Injected(ref ReadHandle handle);
+		private static extern ReadStatus GetReadStatus_Injected([In] ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetReadCount_Injected(ref ReadHandle handle);
+		private static extern long GetReadCount_Injected([In] ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetBytesRead_Injected(ref ReadHandle handle);
+		private static extern long GetBytesRead_Injected([In] ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetBytesReadForCommand_Injected(ref ReadHandle handle, uint readCommandIndex);
+		private static extern long GetBytesReadForCommand_Injected([In] ref ReadHandle handle, uint readCommandIndex);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern ulong* GetBytesReadArray_Injected(ref ReadHandle handle);
+		private unsafe static extern ulong* GetBytesReadArray_Injected([In] ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ReleaseReadHandle_Injected(ref ReadHandle handle);
+		private static extern void ReleaseReadHandle_Injected([In] ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsReadHandleValid_Injected(ref ReadHandle handle);
+		private static extern bool IsReadHandleValid_Injected([In] ref ReadHandle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetJobHandle_Injected(ref ReadHandle handle, out JobHandle ret);
+		private static extern void GetJobHandle_Injected([In] ref ReadHandle handle, out JobHandle ret);
 
 		[NativeDisableUnsafePtrRestriction]
 		internal IntPtr ptr;

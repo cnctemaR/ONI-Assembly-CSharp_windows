@@ -330,6 +330,11 @@ public class MainMenu : KScreen
 			global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true).PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
 		}
 		Global.Instance.modManager.Report(base.gameObject);
+		Global.Instance.modManager.SetModLoadingInProgress(false);
+		if (Global.Instance.modManager.safe_mode_enabled)
+		{
+			Global.Instance.modManager.ShowSafeModeDialog(base.gameObject);
+		}
 		if (GenericGameSettings.instance.devBootSmoke && !GenericGameSettings.instance.devBootModReport)
 		{
 			App.QuitCode(KCrashReporter.hasCrash ? 1 : 0);
@@ -536,7 +541,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 707956U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 37)
+				if (header.buildVersion > 719533U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 37)
 				{
 					flag = false;
 				}

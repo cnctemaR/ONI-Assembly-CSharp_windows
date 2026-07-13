@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[VisibleToOtherModules]
 	[NativeHeader("Runtime/Export/Scripting/ScriptingRuntime.h")]
+	[VisibleToOtherModules]
 	internal class ScriptingRuntime
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

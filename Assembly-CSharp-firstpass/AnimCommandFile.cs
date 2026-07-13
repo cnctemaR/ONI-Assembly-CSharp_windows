@@ -94,7 +94,8 @@ public class AnimCommandFile
 	public enum ConfigType
 	{
 		Default,
-		AnimOnly
+		AnimOnly,
+		BuildAndAnim
 	}
 
 	public enum GroupBy

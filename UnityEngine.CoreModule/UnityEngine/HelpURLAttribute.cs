@@ -21,7 +21,7 @@ namespace UnityEngine
 			this.m_Dispatcher = !string.IsNullOrEmpty(dispatchingFieldName);
 		}
 
-		public string URL
+		public virtual string URL
 		{
 			get
 			{

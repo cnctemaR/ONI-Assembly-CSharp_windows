@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("03973551-57A1-3900-A2B5-9083E3FF2943")]
 	[TypeLibImportClass(typeof(Activator))]

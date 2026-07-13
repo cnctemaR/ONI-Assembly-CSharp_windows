@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -77,7 +78,7 @@ public class CodexTemperatureTransitionPanel : CodexWidget<CodexTemperatureTrans
 		component.GetReference<Image>("Icon").sprite = sprite;
 		LocText reference = component.GetReference<LocText>("Label");
 		reference.text = text;
-		reference.enableWordWrapping = false;
+		reference.textWrappingMode = TextWrappingModes.NoWrap;
 		reference.gameObject.SetActive(text != null);
 		component.GetReference<LocText>("Label").color = color;
 		component.GetReference<ToolTip>("ToolTip").toolTip = text2;

@@ -137,8 +137,8 @@ namespace UnityEngine.TextCore
 		[NativeName("index")]
 		private uint m_Index;
 
-		[SerializeField]
 		[NativeName("metrics")]
+		[SerializeField]
 		private GlyphMetrics m_Metrics;
 
 		[SerializeField]

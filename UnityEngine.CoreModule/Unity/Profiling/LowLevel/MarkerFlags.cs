@@ -13,6 +13,10 @@ namespace Unity.Profiling.LowLevel
 		AvailabilityNonDevelopment = 8,
 		Warning = 16,
 		Counter = 128,
-		SampleGPU = 256
+		SampleGPU = 256,
+		VerbosityDebug = 1024,
+		VerbosityInternal = 2048,
+		VerbosityExternal = 3072,
+		VerbosityAdvanced = 4096
 	}
 }

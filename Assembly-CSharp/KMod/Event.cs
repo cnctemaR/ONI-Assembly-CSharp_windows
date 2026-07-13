@@ -51,6 +51,10 @@ namespace KMod
 				title = UI.FRONTEND.MOD_EVENTS.UNINSTALLED;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.UNINSTALLED;
 				return;
+			case EventType.CannotInstall:
+				title = UI.FRONTEND.MOD_EVENTS.CANNOT_INSTALL;
+				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.CANNOT_INSTALL;
+				return;
 			case EventType.VersionUpdate:
 				title = UI.FRONTEND.MOD_EVENTS.VERSION_UPDATE;
 				title_tooltip = UI.FRONTEND.MOD_EVENTS.TOOLTIPS.VERSION_UPDATE;

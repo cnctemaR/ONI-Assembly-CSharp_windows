@@ -15,19 +15,66 @@ namespace UnityEngine.Rendering
 		private static extern uint GetGlobalKeywordCount();
 
 		[FreeFunction("ShaderScripting::GetGlobalKeywordIndex")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern uint GetGlobalKeywordIndex(string keyword);
+		private unsafe static uint GetGlobalKeywordIndex(string keyword)
+		{
+			uint globalKeywordIndex_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				globalKeywordIndex_Injected = GlobalKeyword.GetGlobalKeywordIndex_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return globalKeywordIndex_Injected;
+		}
 
 		[FreeFunction("ShaderScripting::CreateGlobalKeyword")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateGlobalKeyword(string keyword);
-
-		public string name
+		private unsafe static void CreateGlobalKeyword(string keyword)
 		{
-			get
+			try
 			{
-				return this.m_Name;
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GlobalKeyword.CreateGlobalKeyword_Injected(ref managedSpanWrapper);
 			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
+
+		[FreeFunction("ShaderScripting::GetGlobalKeywordName")]
+		private static string GetGlobalKeywordName(uint keywordIndex)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				GlobalKeyword.GetGlobalKeywordName_Injected(keywordIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
 		}
 
 		public static GlobalKeyword Create(string name)
@@ -38,7 +85,6 @@ namespace UnityEngine.Rendering
 
 		public GlobalKeyword(string name)
 		{
-			this.m_Name = name;
 			this.m_Index = GlobalKeyword.GetGlobalKeywordIndex(name);
 			bool flag = this.m_Index >= GlobalKeyword.GetGlobalKeywordCount();
 			if (flag)
@@ -47,12 +93,27 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		public override string ToString()
+		public string name
 		{
-			return this.m_Name;
+			get
+			{
+				return GlobalKeyword.GetGlobalKeywordName(this.m_Index);
+			}
 		}
 
-		internal readonly string m_Name;
+		public override string ToString()
+		{
+			return this.name;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetGlobalKeywordIndex_Injected(ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CreateGlobalKeyword_Injected(ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGlobalKeywordName_Injected(uint keywordIndex, out ManagedSpanWrapper ret);
 
 		internal readonly uint m_Index;
 	}

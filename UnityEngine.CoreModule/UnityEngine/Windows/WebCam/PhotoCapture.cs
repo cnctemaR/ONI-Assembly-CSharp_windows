@@ -9,9 +9,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
+	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[NativeHeader("PlatformDependent/Win/Webcam/PhotoCapture.h")]
 	[StaticAccessor("PhotoCapture", StaticAccessorType.DoubleColon)]
-	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class PhotoCapture : IDisposable
 	{
@@ -55,10 +55,25 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[NativeName("GetSupportedResolutions")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Resolution[] GetSupportedResolutions_Internal();
+		[NativeName("GetSupportedResolutions")]
+		private static Resolution[] GetSupportedResolutions_Internal()
+		{
+			Resolution[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				PhotoCapture.GetSupportedResolutions_Internal_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Resolution[] array;
+				blittableArrayWrapper.Unmarshal<Resolution>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		public static void CreateAsync(bool showHolograms, PhotoCapture.OnCaptureResourceCreatedCallback onCreatedCallback)
 		{
@@ -123,7 +138,12 @@ namespace UnityEngine.Windows.WebCam
 		[NativeName("StartPhotoMode")]
 		private void StartPhotoMode_Internal(CameraParameters setupParams, PhotoCapture.OnPhotoModeStartedCallback onPhotoModeStartedCallback)
 		{
-			this.StartPhotoMode_Internal_Injected(ref setupParams, onPhotoModeStartedCallback);
+			IntPtr intPtr = PhotoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			PhotoCapture.StartPhotoMode_Internal_Injected(intPtr, ref setupParams, onPhotoModeStartedCallback);
 		}
 
 		[RequiredByNativeCode]
@@ -132,10 +152,17 @@ namespace UnityEngine.Windows.WebCam
 			callback(PhotoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeName("StopPhotoMode")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StopPhotoModeAsync(PhotoCapture.OnPhotoModeStoppedCallback onPhotoModeStoppedCallback);
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		public void StopPhotoModeAsync(PhotoCapture.OnPhotoModeStoppedCallback onPhotoModeStoppedCallback)
+		{
+			IntPtr intPtr = PhotoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			PhotoCapture.StopPhotoModeAsync_Injected(intPtr, onPhotoModeStoppedCallback);
+		}
 
 		[RequiredByNativeCode]
 		private static void InvokeOnPhotoModeStoppedDelegate(PhotoCapture.OnPhotoModeStoppedCallback callback, long hResult)
@@ -171,10 +198,33 @@ namespace UnityEngine.Windows.WebCam
 			this.CapturePhotoToDisk_Internal(filename, fileOutputFormat, onCapturedPhotoToDiskCallback);
 		}
 
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeName("CapturePhotoToDisk")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CapturePhotoToDisk_Internal(string filename, PhotoCaptureFileOutputFormat fileOutputFormat, PhotoCapture.OnCapturedToDiskCallback onCapturedPhotoToDiskCallback);
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		private unsafe void CapturePhotoToDisk_Internal(string filename, PhotoCaptureFileOutputFormat fileOutputFormat, PhotoCapture.OnCapturedToDiskCallback onCapturedPhotoToDiskCallback)
+		{
+			try
+			{
+				IntPtr intPtr = PhotoCapture.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(filename, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = filename.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				PhotoCapture.CapturePhotoToDisk_Internal_Injected(intPtr, ref managedSpanWrapper, fileOutputFormat, onCapturedPhotoToDiskCallback);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[RequiredByNativeCode]
 		private static void InvokeOnCapturedPhotoToDiskDelegate(PhotoCapture.OnCapturedToDiskCallback callback, long hResult)
@@ -194,8 +244,15 @@ namespace UnityEngine.Windows.WebCam
 
 		[NativeName("CapturePhotoToMemory")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CapturePhotoToMemory_Internal(PhotoCapture.OnCapturedToMemoryCallback onCapturedPhotoToMemoryCallback);
+		private void CapturePhotoToMemory_Internal(PhotoCapture.OnCapturedToMemoryCallback onCapturedPhotoToMemoryCallback)
+		{
+			IntPtr intPtr = PhotoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			PhotoCapture.CapturePhotoToMemory_Internal_Injected(intPtr, onCapturedPhotoToMemoryCallback);
+		}
 
 		[RequiredByNativeCode]
 		private static void InvokeOnCapturedPhotoToMemoryDelegate(PhotoCapture.OnCapturedToMemoryCallback callback, long hResult, IntPtr photoCaptureFramePtr)
@@ -209,11 +266,18 @@ namespace UnityEngine.Windows.WebCam
 			callback(PhotoCapture.MakeCaptureResult(hResult), photoCaptureFrame);
 		}
 
+		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[ThreadAndSerializationSafe]
 		[NativeName("GetUnsafePointerToVideoDeviceController")]
-		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetUnsafePointerToVideoDeviceController();
+		public IntPtr GetUnsafePointerToVideoDeviceController()
+		{
+			IntPtr intPtr = PhotoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return PhotoCapture.GetUnsafePointerToVideoDeviceController_Injected(intPtr);
+		}
 
 		public void Dispose()
 		{
@@ -226,10 +290,17 @@ namespace UnityEngine.Windows.WebCam
 			GC.SuppressFinalize(this);
 		}
 
-		[NativeName("Dispose")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Dispose_Internal();
+		[NativeName("Dispose")]
+		private void Dispose_Internal()
+		{
+			IntPtr intPtr = PhotoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			PhotoCapture.Dispose_Internal_Injected(intPtr);
+		}
 
 		protected override void Finalize()
 		{
@@ -248,14 +319,42 @@ namespace UnityEngine.Windows.WebCam
 			}
 		}
 
-		[NativeName("DisposeThreaded")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeName("DisposeThreaded")]
 		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DisposeThreaded_Internal();
+		private void DisposeThreaded_Internal()
+		{
+			IntPtr intPtr = PhotoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			PhotoCapture.DisposeThreaded_Internal_Injected(intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void StartPhotoMode_Internal_Injected(ref CameraParameters setupParams, PhotoCapture.OnPhotoModeStartedCallback onPhotoModeStartedCallback);
+		private static extern void GetSupportedResolutions_Internal_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StartPhotoMode_Internal_Injected(IntPtr _unity_self, [In] ref CameraParameters setupParams, PhotoCapture.OnPhotoModeStartedCallback onPhotoModeStartedCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StopPhotoModeAsync_Injected(IntPtr _unity_self, PhotoCapture.OnPhotoModeStoppedCallback onPhotoModeStoppedCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CapturePhotoToDisk_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper filename, PhotoCaptureFileOutputFormat fileOutputFormat, PhotoCapture.OnCapturedToDiskCallback onCapturedPhotoToDiskCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CapturePhotoToMemory_Internal_Injected(IntPtr _unity_self, PhotoCapture.OnCapturedToMemoryCallback onCapturedPhotoToMemoryCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetUnsafePointerToVideoDeviceController_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Dispose_Internal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisposeThreaded_Internal_Injected(IntPtr _unity_self);
 
 		internal IntPtr m_NativePtr;
 
@@ -293,5 +392,13 @@ namespace UnityEngine.Windows.WebCam
 		public delegate void OnCapturedToDiskCallback(PhotoCapture.PhotoCaptureResult result);
 
 		public delegate void OnCapturedToMemoryCallback(PhotoCapture.PhotoCaptureResult result, PhotoCaptureFrame photoCaptureFrame);
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(PhotoCapture photoCapture)
+			{
+				return photoCapture.m_NativePtr;
+			}
+		}
 	}
 }

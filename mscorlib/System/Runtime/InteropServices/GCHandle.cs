@@ -28,24 +28,54 @@ namespace System.Runtime.InteropServices
 
 		public bool IsAllocated
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				return this.handle != IntPtr.Zero;
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal unsafe static object GetRef(IntPtr handle)
+		{
+			return *Unsafe.As<IntPtr, object>(ref *(IntPtr*)(void*)handle);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal unsafe static void SetRef(IntPtr handle, object value)
+		{
+			*Unsafe.As<IntPtr, object>(ref *(IntPtr*)(void*)handle) = value;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static bool CanDereferenceHandle(IntPtr handle)
+		{
+			return (handle & (IntPtr)1) == (IntPtr)0;
+		}
+
 		public object Target
 		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
 				if (!this.IsAllocated)
 				{
 					throw new InvalidOperationException("Handle is not allocated");
 				}
+				if (GCHandle.CanDereferenceHandle(this.handle))
+				{
+					return GCHandle.GetRef(this.handle);
+				}
 				return GCHandle.GetTarget(this.handle);
 			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
+				if (GCHandle.CanDereferenceHandle(this.handle))
+				{
+					GCHandle.SetRef(this.handle, value);
+					return;
+				}
 				this.handle = GCHandle.GetTargetHandle(value, this.handle, (GCHandleType)(-1));
 			}
 		}

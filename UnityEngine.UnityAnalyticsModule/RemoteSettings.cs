@@ -74,8 +74,28 @@ namespace UnityEngine
 			return RemoteSettings.GetInt(key, 0);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetInt(string key, [DefaultValue("0")] int defaultValue);
+		public unsafe static int GetInt(string key, [DefaultValue("0")] int defaultValue)
+		{
+			int int_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				int_Injected = RemoteSettings.GetInt_Injected(ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return int_Injected;
+		}
 
 		[ExcludeFromDocs]
 		public static long GetLong(string key)
@@ -83,8 +103,28 @@ namespace UnityEngine
 			return RemoteSettings.GetLong(key, 0L);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern long GetLong(string key, [DefaultValue("0")] long defaultValue);
+		public unsafe static long GetLong(string key, [DefaultValue("0")] long defaultValue)
+		{
+			long long_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				long_Injected = RemoteSettings.GetLong_Injected(ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return long_Injected;
+		}
 
 		[ExcludeFromDocs]
 		public static float GetFloat(string key)
@@ -92,8 +132,28 @@ namespace UnityEngine
 			return RemoteSettings.GetFloat(key, 0f);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern float GetFloat(string key, [DefaultValue("0.0F")] float defaultValue);
+		public unsafe static float GetFloat(string key, [DefaultValue("0.0F")] float defaultValue)
+		{
+			float float_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				float_Injected = RemoteSettings.GetFloat_Injected(ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return float_Injected;
+		}
 
 		[ExcludeFromDocs]
 		public static string GetString(string key)
@@ -101,8 +161,41 @@ namespace UnityEngine
 			return RemoteSettings.GetString(key, "");
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetString(string key, [DefaultValue("\"\"")] string defaultValue);
+		public unsafe static string GetString(string key, [DefaultValue("\"\"")] string defaultValue)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(defaultValue, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = defaultValue.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				RemoteSettings.GetString_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, out managedSpanWrapper3);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				ManagedSpanWrapper managedSpanWrapper3;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper3);
+			}
+			return stringAndDispose;
+		}
 
 		[ExcludeFromDocs]
 		public static bool GetBool(string key)
@@ -110,11 +203,51 @@ namespace UnityEngine
 			return RemoteSettings.GetBool(key, false);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool GetBool(string key, [DefaultValue("false")] bool defaultValue);
+		public unsafe static bool GetBool(string key, [DefaultValue("false")] bool defaultValue)
+		{
+			bool bool_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				bool_Injected = RemoteSettings.GetBool_Injected(ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return bool_Injected;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool HasKey(string key);
+		public unsafe static bool HasKey(string key)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = RemoteSettings.HasKey_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetCount();
@@ -158,8 +291,28 @@ namespace UnityEngine
 			return RemoteSettings.GetAsScriptingObject(type, defaultValue, key);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern object GetAsScriptingObject(Type t, object defaultValue, string key);
+		internal unsafe static object GetAsScriptingObject(Type t, object defaultValue, string key)
+		{
+			object asScriptingObject_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				asScriptingObject_Injected = RemoteSettings.GetAsScriptingObject_Injected(t, defaultValue, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return asScriptingObject_Injected;
+		}
 
 		public static IDictionary<string, object> GetDictionary(string key = "")
 		{
@@ -177,6 +330,27 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern IntPtr GetSafeTopMap();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetInt_Injected(ref ManagedSpanWrapper key, [DefaultValue("0")] int defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetLong_Injected(ref ManagedSpanWrapper key, [DefaultValue("0")] long defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetFloat_Injected(ref ManagedSpanWrapper key, [DefaultValue("0.0F")] float defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetString_Injected(ref ManagedSpanWrapper key, [DefaultValue("\"\"")] ref ManagedSpanWrapper defaultValue, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetBool_Injected(ref ManagedSpanWrapper key, [DefaultValue("false")] bool defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasKey_Injected(ref ManagedSpanWrapper key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern object GetAsScriptingObject_Injected(Type t, object defaultValue, ref ManagedSpanWrapper key);
 
 		public delegate void UpdatedEventHandler();
 	}

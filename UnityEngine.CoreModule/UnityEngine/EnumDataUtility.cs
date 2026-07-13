@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEditor.UIBuilderModule" })]
 	internal static class EnumDataUtility
 	{
 		public static EnumData GetCachedEnumData(Type enumType, EnumDataUtility.CachedType cachedType = EnumDataUtility.CachedType.IncludeObsoleteExceptErrors, Func<string, string> nicifyName = null)
@@ -130,7 +132,7 @@ namespace UnityEngine
 			return enumData2;
 		}
 
-		internal static int EnumFlagsToInt(EnumData enumData, Enum enumValue)
+		public static int EnumFlagsToInt(EnumData enumData, Enum enumValue)
 		{
 			bool unsigned = enumData.unsigned;
 			int num;
@@ -163,7 +165,7 @@ namespace UnityEngine
 			return num;
 		}
 
-		internal static Enum IntToEnumFlags(Type enumType, int value)
+		public static Enum IntToEnumFlags(Type enumType, int value)
 		{
 			EnumData cachedEnumData = EnumDataUtility.GetCachedEnumData(enumType, EnumDataUtility.CachedType.IncludeObsoleteExceptErrors, null);
 			bool unsigned = cachedEnumData.unsigned;
@@ -196,7 +198,7 @@ namespace UnityEngine
 			return @enum;
 		}
 
-		internal static void HandleInspectorOrderAttribute(Type enumType, ref EnumData enumData)
+		public static void HandleInspectorOrderAttribute(Type enumType, ref EnumData enumData)
 		{
 			InspectorOrderAttribute inspectorOrderAttribute = Attribute.GetCustomAttribute(enumType, typeof(InspectorOrderAttribute)) as InspectorOrderAttribute;
 			bool flag = inspectorOrderAttribute == null;

@@ -6,12 +6,28 @@ namespace UnityEngine.Windows
 {
 	public static class CrashReporting
 	{
-		public static extern string crashReportFolder
+		public static string crashReportFolder
 		{
-			[ThreadSafe]
 			[NativeHeader("PlatformDependent/WinPlayer/Bindings/CrashReportingBindings.h")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			[ThreadSafe]
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					CrashReporting.get_crashReportFolder_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_crashReportFolder_Injected(out ManagedSpanWrapper ret);
 	}
 }

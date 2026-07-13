@@ -8,8 +8,10 @@ namespace UnityEngine.NVIDIA
 
 		public uint NGXVersion;
 
-		public unsafe DLSSDebugFeatureInfos* dlssInfos;
+		public IntPtr outDlssInfoBuffer;
 
-		public uint dlssInfosCount;
+		public uint outDlssInfoBufferCapacity;
+
+		public uint dlssInfoCount;
 	}
 }

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Scrollbar", 36)]
+	[AddComponentMenu("UI (Canvas)/Scrollbar", 36)]
 	[ExecuteAlways]
 	[RequireComponent(typeof(RectTransform))]
 	public class Scrollbar : Selectable, IBeginDragHandler, IEventSystemHandler, IDragHandler, IInitializePotentialDragHandler, ICanvasElement
@@ -252,8 +252,13 @@ namespace UnityEngine.UI
 			{
 				return;
 			}
+			this.UpdateDrag(this.m_ContainerRect, zero, eventData.pressEventCamera);
+		}
+
+		private void UpdateDrag(RectTransform containerRect, Vector2 position, Camera camera)
+		{
 			Vector2 vector;
-			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_ContainerRect, zero, eventData.pressEventCamera, out vector))
+			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(containerRect, position, camera, out vector))
 			{
 				return;
 			}
@@ -343,13 +348,9 @@ namespace UnityEngine.UI
 		{
 			while (this.isPointerDownAndNotDragging)
 			{
-				Vector2 vector;
-				if (!RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, screenPosition, camera) && RectTransformUtility.ScreenPointToLocalPointInRectangle(this.m_HandleRect, screenPosition, camera, out vector))
+				if (!RectTransformUtility.RectangleContainsScreenPoint(this.m_HandleRect, screenPosition, camera))
 				{
-					float num = ((((this.axis == Scrollbar.Axis.Horizontal) ? vector.x : vector.y) < 0f) ? this.size : (-this.size));
-					this.value += (this.reverseValue ? num : (-num));
-					this.value = Mathf.Clamp01(this.value);
-					this.value = Mathf.Round(this.value * 10000f) / 10000f;
+					this.UpdateDrag(this.m_ContainerRect, screenPosition, camera);
 				}
 				yield return new WaitForEndOfFrame();
 			}

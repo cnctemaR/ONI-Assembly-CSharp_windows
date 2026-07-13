@@ -5,18 +5,22 @@ using UnityEngine.Bindings;
 
 namespace Unity.Baselib.LowLevel
 {
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ErrorState.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_NetworkAddress.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ErrorCode.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Thread.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_DynamicLibrary.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_RegisteredNetwork.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Memory.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Timer.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_FileIO.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_SourceLocation.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_Socket.gen.binding.h")]
-	[NativeHeader("External/baselib/builds/CSharp/BindingsUnity/Baselib_ThreadLocalStorage.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_ErrorState.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_WakeupFallbackStrategy.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_NetworkAddress.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_HostnameLookup.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_SourceLocation.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_ThreadLocalStorage.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_RegisteredNetwork.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_Thread.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_FileIO.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_SystemFutex.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_Memory.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_DynamicLibrary.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_Socket.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_ErrorCode.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_SystemSemaphore.gen.binding.h")]
+	[NativeHeader("baselib/CSharp/BindingsUnity/Baselib_Timer.gen.binding.h")]
 	internal static class Binding
 	{
 		[FreeFunction(IsThreadSafe = true)]
@@ -167,6 +171,19 @@ namespace Unity.Baselib.LowLevel
 
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern Binding.Baselib_NetworkAddress_HostnameLookupHandle* Baselib_NetworkAddress_HostnameLookup(byte* hostName, Binding.Baselib_NetworkAddress* dstAddress, Binding.Baselib_ErrorState* errorState);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		public unsafe static extern bool Baselib_NetworkAddress_HostnameLookupCheckStatus(Binding.Baselib_NetworkAddress_HostnameLookupHandle* task, Binding.Baselib_NetworkAddress* dstAddress, Binding.Baselib_ErrorState* errorState);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void Baselib_NetworkAddress_HostnameLookupCancel(Binding.Baselib_NetworkAddress_HostnameLookupHandle* task);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void Baselib_Memory_GetPageSizeInfo(Binding.Baselib_Memory_PageSizeInfo* outPagesSizeInfo);
 
 		[FreeFunction(IsThreadSafe = true)]
@@ -202,6 +219,14 @@ namespace Unity.Baselib.LowLevel
 		}
 
 		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static Binding.Baselib_Memory_PageAllocation Baselib_Memory_AllocatePagesEx(ulong pageSize, ulong pageCount, ulong alignmentInMultipleOfPageSize, Binding.Baselib_Memory_PageState pageState, uint extPageState, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Memory_PageAllocation baselib_Memory_PageAllocation;
+			Binding.Baselib_Memory_AllocatePagesEx_Injected(pageSize, pageCount, alignmentInMultipleOfPageSize, pageState, extPageState, errorState, out baselib_Memory_PageAllocation);
+			return baselib_Memory_PageAllocation;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
 		public unsafe static void Baselib_Memory_ReleasePages(Binding.Baselib_Memory_PageAllocation pageAllocation, Binding.Baselib_ErrorState* errorState)
 		{
 			Binding.Baselib_Memory_ReleasePages_Injected(ref pageAllocation, errorState);
@@ -213,11 +238,20 @@ namespace Unity.Baselib.LowLevel
 
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		public unsafe static extern void Baselib_Memory_SetPageStateEx(IntPtr addressOfFirstPage, ulong pageSize, ulong pageCount, Binding.Baselib_Memory_PageState pageState, uint extPageState, Binding.Baselib_ErrorState* errorState);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void Baselib_NetworkAddress_Encode(Binding.Baselib_NetworkAddress* dstAddress, Binding.Baselib_NetworkAddress_Family family, byte* ip, ushort port, Binding.Baselib_ErrorState* errorState);
 
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void Baselib_NetworkAddress_Decode(Binding.Baselib_NetworkAddress* srcAddress, Binding.Baselib_NetworkAddress_Family* family, byte* ipAddressBuffer, uint ipAddressBufferLen, ushort* port, Binding.Baselib_ErrorState* errorState);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		public static extern bool Baselib_RegisteredNetwork_IsEmulated();
 
 		[FreeFunction(IsThreadSafe = true)]
 		public unsafe static Binding.Baselib_RegisteredNetwork_Buffer Baselib_RegisteredNetwork_Buffer_Register(Binding.Baselib_Memory_PageAllocation pageAllocation, Binding.Baselib_ErrorState* errorState)
@@ -340,6 +374,19 @@ namespace Unity.Baselib.LowLevel
 		}
 
 		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_RegisteredNetwork_Socket_UDP_SetIPv4DontFragHeader(Binding.Baselib_RegisteredNetwork_Socket_UDP socket, [MarshalAs(UnmanagedType.U1)] bool set, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_RegisteredNetwork_Socket_UDP_SetIPv4DontFragHeader_Injected(ref socket, set, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		public unsafe static bool Baselib_RegisteredNetwork_Socket_UDP_GetIPv4DontFragHeader(Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_RegisteredNetwork_Socket_UDP_GetIPv4DontFragHeader_Injected(ref socket, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
 		public unsafe static Binding.Baselib_Socket_Handle Baselib_Socket_Create(Binding.Baselib_NetworkAddress_Family family, Binding.Baselib_Socket_Protocol protocol, Binding.Baselib_ErrorState* errorState)
 		{
 			Binding.Baselib_Socket_Handle baselib_Socket_Handle;
@@ -414,6 +461,86 @@ namespace Unity.Baselib.LowLevel
 		}
 
 		[FreeFunction(IsThreadSafe = true)]
+		public unsafe static void Baselib_Socket_SetIPv4DontFragHeader(Binding.Baselib_Socket_Handle socket, [MarshalAs(UnmanagedType.U1)] bool set, Binding.Baselib_ErrorState* errorState)
+		{
+			Binding.Baselib_Socket_SetIPv4DontFragHeader_Injected(ref socket, set, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		public unsafe static bool Baselib_Socket_GetIPv4DontFragHeader(Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState)
+		{
+			return Binding.Baselib_Socket_GetIPv4DontFragHeader_Injected(ref socket, errorState);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		public static extern bool Baselib_SystemFutex_NativeSupport();
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Baselib_SystemFutex_Wait(IntPtr address, int expected, uint timeoutInMilliseconds);
+
+		[FreeFunction(IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Baselib_SystemFutex_Notify(IntPtr address, uint count, Binding.Baselib_WakeupFallbackStrategy wakeupFallbackStrategy);
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static Binding.Baselib_SystemSemaphore_Handle Baselib_SystemSemaphore_Create()
+		{
+			Binding.Baselib_SystemSemaphore_Handle baselib_SystemSemaphore_Handle;
+			Binding.Baselib_SystemSemaphore_Create_Injected(out baselib_SystemSemaphore_Handle);
+			return baselib_SystemSemaphore_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static Binding.Baselib_SystemSemaphore_Handle Baselib_SystemSemaphore_CreateInplace(IntPtr semaphoreData)
+		{
+			Binding.Baselib_SystemSemaphore_Handle baselib_SystemSemaphore_Handle;
+			Binding.Baselib_SystemSemaphore_CreateInplace_Injected(semaphoreData, out baselib_SystemSemaphore_Handle);
+			return baselib_SystemSemaphore_Handle;
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_SystemSemaphore_Acquire(Binding.Baselib_SystemSemaphore_Handle semaphore)
+		{
+			Binding.Baselib_SystemSemaphore_Acquire_Injected(ref semaphore);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		public static bool Baselib_SystemSemaphore_TryAcquire(Binding.Baselib_SystemSemaphore_Handle semaphore)
+		{
+			return Binding.Baselib_SystemSemaphore_TryAcquire_Injected(ref semaphore);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		[return: MarshalAs(UnmanagedType.U1)]
+		public static bool Baselib_SystemSemaphore_TryTimedAcquire(Binding.Baselib_SystemSemaphore_Handle semaphore, uint timeoutInMilliseconds)
+		{
+			return Binding.Baselib_SystemSemaphore_TryTimedAcquire_Injected(ref semaphore, timeoutInMilliseconds);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_SystemSemaphore_Release(Binding.Baselib_SystemSemaphore_Handle semaphore, uint count)
+		{
+			Binding.Baselib_SystemSemaphore_Release_Injected(ref semaphore, count);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_SystemSemaphore_Free(Binding.Baselib_SystemSemaphore_Handle semaphore)
+		{
+			Binding.Baselib_SystemSemaphore_Free_Injected(ref semaphore);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
+		public static void Baselib_SystemSemaphore_FreeInplace(Binding.Baselib_SystemSemaphore_Handle semaphore)
+		{
+			Binding.Baselib_SystemSemaphore_FreeInplace_Injected(ref semaphore);
+		}
+
+		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Baselib_Thread_YieldExecution();
 
@@ -470,31 +597,31 @@ namespace Unity.Baselib.LowLevel
 		private unsafe static extern void Baselib_DynamicLibrary_FromNativeHandle_Injected(ulong handle, uint type, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_DynamicLibrary_Handle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern IntPtr Baselib_DynamicLibrary_GetFunction_Injected(ref Binding.Baselib_DynamicLibrary_Handle handle, byte* functionName, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern IntPtr Baselib_DynamicLibrary_GetFunction_Injected([In] ref Binding.Baselib_DynamicLibrary_Handle handle, byte* functionName, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_DynamicLibrary_Close_Injected(ref Binding.Baselib_DynamicLibrary_Handle handle);
+		private static extern void Baselib_DynamicLibrary_Close_Injected([In] ref Binding.Baselib_DynamicLibrary_Handle handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Baselib_FileIO_EventQueue_Create_Injected(out Binding.Baselib_FileIO_EventQueue ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_FileIO_EventQueue_Free_Injected(ref Binding.Baselib_FileIO_EventQueue eq);
+		private static extern void Baselib_FileIO_EventQueue_Free_Injected([In] ref Binding.Baselib_FileIO_EventQueue eq);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern ulong Baselib_FileIO_EventQueue_Dequeue_Injected(ref Binding.Baselib_FileIO_EventQueue eq, Binding.Baselib_FileIO_EventQueue_Result* results, ulong count, uint timeoutInMilliseconds);
+		private unsafe static extern ulong Baselib_FileIO_EventQueue_Dequeue_Injected([In] ref Binding.Baselib_FileIO_EventQueue eq, Binding.Baselib_FileIO_EventQueue_Result* results, ulong count, uint timeoutInMilliseconds);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_FileIO_EventQueue_Shutdown_Injected(ref Binding.Baselib_FileIO_EventQueue eq, uint threadCount);
+		private static extern void Baselib_FileIO_EventQueue_Shutdown_Injected([In] ref Binding.Baselib_FileIO_EventQueue eq, uint threadCount);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_FileIO_AsyncOpen_Injected(ref Binding.Baselib_FileIO_EventQueue eq, byte* pathname, ulong userdata, Binding.Baselib_FileIO_Priority priority, out Binding.Baselib_FileIO_AsyncFile ret);
+		private unsafe static extern void Baselib_FileIO_AsyncOpen_Injected([In] ref Binding.Baselib_FileIO_EventQueue eq, byte* pathname, ulong userdata, Binding.Baselib_FileIO_Priority priority, out Binding.Baselib_FileIO_AsyncFile ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_FileIO_AsyncRead_Injected(ref Binding.Baselib_FileIO_AsyncFile file, Binding.Baselib_FileIO_ReadRequest* requests, ulong count, ulong userdata, Binding.Baselib_FileIO_Priority priority);
+		private unsafe static extern void Baselib_FileIO_AsyncRead_Injected([In] ref Binding.Baselib_FileIO_AsyncFile file, Binding.Baselib_FileIO_ReadRequest* requests, ulong count, ulong userdata, Binding.Baselib_FileIO_Priority priority);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_FileIO_AsyncClose_Injected(ref Binding.Baselib_FileIO_AsyncFile file);
+		private static extern void Baselib_FileIO_AsyncClose_Injected([In] ref Binding.Baselib_FileIO_AsyncFile file);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void Baselib_FileIO_SyncOpen_Injected(byte* pathname, Binding.Baselib_FileIO_OpenFlags openFlags, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_FileIO_SyncFile ret);
@@ -503,115 +630,154 @@ namespace Unity.Baselib.LowLevel
 		private static extern void Baselib_FileIO_SyncFileFromNativeHandle_Injected(ulong handle, uint type, out Binding.Baselib_FileIO_SyncFile ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern ulong Baselib_FileIO_SyncRead_Injected(ref Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern ulong Baselib_FileIO_SyncRead_Injected([In] ref Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern ulong Baselib_FileIO_SyncWrite_Injected(ref Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern ulong Baselib_FileIO_SyncWrite_Injected([In] ref Binding.Baselib_FileIO_SyncFile file, ulong offset, IntPtr buffer, ulong size, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_FileIO_SyncFlush_Injected(ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_FileIO_SyncFlush_Injected([In] ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_FileIO_SyncSetFileSize_Injected(ref Binding.Baselib_FileIO_SyncFile file, ulong size, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_FileIO_SyncSetFileSize_Injected([In] ref Binding.Baselib_FileIO_SyncFile file, ulong size, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern ulong Baselib_FileIO_SyncGetFileSize_Injected(ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern ulong Baselib_FileIO_SyncGetFileSize_Injected([In] ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_FileIO_SyncClose_Injected(ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_FileIO_SyncClose_Injected([In] ref Binding.Baselib_FileIO_SyncFile file, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void Baselib_Memory_AllocatePages_Injected(ulong pageSize, ulong pageCount, ulong alignmentInMultipleOfPageSize, Binding.Baselib_Memory_PageState pageState, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Memory_PageAllocation ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_Memory_ReleasePages_Injected(ref Binding.Baselib_Memory_PageAllocation pageAllocation, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_Memory_AllocatePagesEx_Injected(ulong pageSize, ulong pageCount, ulong alignmentInMultipleOfPageSize, Binding.Baselib_Memory_PageState pageState, uint extPageState, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Memory_PageAllocation ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_RegisteredNetwork_Buffer_Register_Injected(ref Binding.Baselib_Memory_PageAllocation pageAllocation, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_RegisteredNetwork_Buffer ret);
+		private unsafe static extern void Baselib_Memory_ReleasePages_Injected([In] ref Binding.Baselib_Memory_PageAllocation pageAllocation, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_RegisteredNetwork_Buffer_Deregister_Injected(ref Binding.Baselib_RegisteredNetwork_Buffer buffer);
+		private unsafe static extern void Baselib_RegisteredNetwork_Buffer_Register_Injected([In] ref Binding.Baselib_Memory_PageAllocation pageAllocation, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_RegisteredNetwork_Buffer ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_RegisteredNetwork_BufferSlice_Create_Injected(ref Binding.Baselib_RegisteredNetwork_Buffer buffer, uint offset, uint size, out Binding.Baselib_RegisteredNetwork_BufferSlice ret);
+		private static extern void Baselib_RegisteredNetwork_Buffer_Deregister_Injected([In] ref Binding.Baselib_RegisteredNetwork_Buffer buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_RegisteredNetwork_BufferSlice_Create_Injected([In] ref Binding.Baselib_RegisteredNetwork_Buffer buffer, uint offset, uint size, out Binding.Baselib_RegisteredNetwork_BufferSlice ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Baselib_RegisteredNetwork_BufferSlice_Empty_Injected(out Binding.Baselib_RegisteredNetwork_BufferSlice ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_RegisteredNetwork_Endpoint_Create_Injected(Binding.Baselib_NetworkAddress* srcAddress, ref Binding.Baselib_RegisteredNetwork_BufferSlice dstSlice, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_RegisteredNetwork_Endpoint ret);
+		private unsafe static extern void Baselib_RegisteredNetwork_Endpoint_Create_Injected(Binding.Baselib_NetworkAddress* srcAddress, [In] ref Binding.Baselib_RegisteredNetwork_BufferSlice dstSlice, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_RegisteredNetwork_Endpoint ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Baselib_RegisteredNetwork_Endpoint_Empty_Injected(out Binding.Baselib_RegisteredNetwork_Endpoint ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_RegisteredNetwork_Endpoint_GetNetworkAddress_Injected(ref Binding.Baselib_RegisteredNetwork_Endpoint endpoint, Binding.Baselib_NetworkAddress* dstAddress, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_RegisteredNetwork_Endpoint_GetNetworkAddress_Injected([In] ref Binding.Baselib_RegisteredNetwork_Endpoint endpoint, Binding.Baselib_NetworkAddress* dstAddress, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void Baselib_RegisteredNetwork_Socket_UDP_Create_Injected(Binding.Baselib_NetworkAddress* bindAddress, Binding.Baselib_NetworkAddress_AddressReuse endpointReuse, uint sendQueueSize, uint recvQueueSize, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_RegisteredNetwork_Socket_UDP ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_ScheduleRecv_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_Request* requests, uint requestsCount, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_ScheduleRecv_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_Request* requests, uint requestsCount, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_ScheduleSend_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_Request* requests, uint requestsCount, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_ScheduleSend_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_Request* requests, uint requestsCount, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern Binding.Baselib_RegisteredNetwork_ProcessStatus Baselib_RegisteredNetwork_Socket_UDP_ProcessRecv_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern Binding.Baselib_RegisteredNetwork_ProcessStatus Baselib_RegisteredNetwork_Socket_UDP_ProcessRecv_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern Binding.Baselib_RegisteredNetwork_ProcessStatus Baselib_RegisteredNetwork_Socket_UDP_ProcessSend_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern Binding.Baselib_RegisteredNetwork_ProcessStatus Baselib_RegisteredNetwork_Socket_UDP_ProcessSend_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern Binding.Baselib_RegisteredNetwork_CompletionQueueStatus Baselib_RegisteredNetwork_Socket_UDP_WaitForCompletedRecv_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, uint timeoutInMilliseconds, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern Binding.Baselib_RegisteredNetwork_CompletionQueueStatus Baselib_RegisteredNetwork_Socket_UDP_WaitForCompletedRecv_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, uint timeoutInMilliseconds, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern Binding.Baselib_RegisteredNetwork_CompletionQueueStatus Baselib_RegisteredNetwork_Socket_UDP_WaitForCompletedSend_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, uint timeoutInMilliseconds, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern Binding.Baselib_RegisteredNetwork_CompletionQueueStatus Baselib_RegisteredNetwork_Socket_UDP_WaitForCompletedSend_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, uint timeoutInMilliseconds, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_DequeueRecv_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_CompletionResult* results, uint resultsCount, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_DequeueRecv_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_CompletionResult* results, uint resultsCount, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_DequeueSend_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_CompletionResult* results, uint resultsCount, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_RegisteredNetwork_Socket_UDP_DequeueSend_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_RegisteredNetwork_CompletionResult* results, uint resultsCount, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_RegisteredNetwork_Socket_UDP_GetNetworkAddress_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_NetworkAddress* dstAddress, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_RegisteredNetwork_Socket_UDP_GetNetworkAddress_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_NetworkAddress* dstAddress, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_RegisteredNetwork_Socket_UDP_Close_Injected(ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket);
+		private static extern void Baselib_RegisteredNetwork_Socket_UDP_Close_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_RegisteredNetwork_Socket_UDP_SetIPv4DontFragHeader_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, bool set, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern bool Baselib_RegisteredNetwork_Socket_UDP_GetIPv4DontFragHeader_Injected([In] ref Binding.Baselib_RegisteredNetwork_Socket_UDP socket, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void Baselib_Socket_Create_Injected(Binding.Baselib_NetworkAddress_Family family, Binding.Baselib_Socket_Protocol protocol, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Socket_Handle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_Socket_Bind_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_Socket_Bind_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_Socket_TCP_Connect_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_Socket_TCP_Connect_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_NetworkAddress_AddressReuse addressReuse, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_Socket_GetAddress_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_Socket_GetAddress_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_NetworkAddress* address, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_Socket_TCP_Listen_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern void Baselib_Socket_TCP_Listen_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Baselib_Socket_TCP_Accept_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Socket_Handle ret);
+		private unsafe static extern void Baselib_Socket_TCP_Accept_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState, out Binding.Baselib_Socket_Handle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_Socket_UDP_Send_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_Socket_UDP_Send_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_Socket_TCP_Send_Injected(ref Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_Socket_TCP_Send_Injected([In] ref Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_Socket_UDP_Recv_Injected(ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_Socket_UDP_Recv_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_Socket_Message* messages, uint messagesCount, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern uint Baselib_Socket_TCP_Recv_Injected(ref Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState);
+		private unsafe static extern uint Baselib_Socket_TCP_Recv_Injected([In] ref Binding.Baselib_Socket_Handle socket, IntPtr data, uint dataLen, Binding.Baselib_ErrorState* errorState);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Baselib_Socket_Close_Injected(ref Binding.Baselib_Socket_Handle socket);
+		private static extern void Baselib_Socket_Close_Injected([In] ref Binding.Baselib_Socket_Handle socket);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void Baselib_Socket_SetIPv4DontFragHeader_Injected([In] ref Binding.Baselib_Socket_Handle socket, bool set, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern bool Baselib_Socket_GetIPv4DontFragHeader_Injected([In] ref Binding.Baselib_Socket_Handle socket, Binding.Baselib_ErrorState* errorState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_SystemSemaphore_Create_Injected(out Binding.Baselib_SystemSemaphore_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_SystemSemaphore_CreateInplace_Injected(IntPtr semaphoreData, out Binding.Baselib_SystemSemaphore_Handle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_SystemSemaphore_Acquire_Injected([In] ref Binding.Baselib_SystemSemaphore_Handle semaphore);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Baselib_SystemSemaphore_TryAcquire_Injected([In] ref Binding.Baselib_SystemSemaphore_Handle semaphore);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Baselib_SystemSemaphore_TryTimedAcquire_Injected([In] ref Binding.Baselib_SystemSemaphore_Handle semaphore, uint timeoutInMilliseconds);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_SystemSemaphore_Release_Injected([In] ref Binding.Baselib_SystemSemaphore_Handle semaphore, uint count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_SystemSemaphore_Free_Injected([In] ref Binding.Baselib_SystemSemaphore_Handle semaphore);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Baselib_SystemSemaphore_FreeInplace_Injected([In] ref Binding.Baselib_SystemSemaphore_Handle semaphore);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Baselib_Timer_GetTicksToNanosecondsConversionRatio_Injected(out Binding.Baselib_Timer_TickToNanosecondConversionRatio ret);
@@ -625,6 +791,8 @@ namespace Unity.Baselib.LowLevel
 		public static readonly IntPtr Baselib_RegisteredNetwork_Buffer_Id_Invalid = IntPtr.Zero;
 
 		public const uint Baselib_RegisteredNetwork_Endpoint_MaxSize = 28U;
+
+		public const int Baselib_SystemSemaphore_MaxCount = 2147483647;
 
 		public static readonly IntPtr Baselib_Thread_InvalidId = IntPtr.Zero;
 
@@ -713,11 +881,15 @@ namespace Unity.Baselib.LowLevel
 			AddressUnreachable,
 			AddressFamilyNotSupported,
 			Disconnected,
+			InvalidSocketType,
+			InvalidAddressFamily,
 			InvalidPathname = 83886080,
 			RequestedAccessIsNotAllowed,
 			IOError,
 			FailedToOpenDynamicLibrary = 100663296,
 			FunctionNotFound,
+			NoSupportedAddressFound = 117440512,
+			TryAgain,
 			UnexpectedError = -1
 		}
 
@@ -841,6 +1013,11 @@ namespace Unity.Baselib.LowLevel
 			[Ignore(DoesNotContributeToSize = true)]
 			[FieldOffset(64)]
 			public Binding.Baselib_FileIO_EventQueue_Result_ReadFile readFile;
+		}
+
+		public struct Baselib_NetworkAddress_HostnameLookupHandle
+		{
+			public byte _placeholder;
 		}
 
 		public struct Baselib_Memory_PageSizeInfo
@@ -1153,11 +1330,22 @@ namespace Unity.Baselib.LowLevel
 			public uint lineNumber;
 		}
 
+		public struct Baselib_SystemSemaphore_Handle
+		{
+			public IntPtr handle;
+		}
+
 		public struct Baselib_Timer_TickToNanosecondConversionRatio
 		{
 			public ulong ticksToNanosecondsNumerator;
 
 			public ulong ticksToNanosecondsDenominator;
+		}
+
+		public enum Baselib_WakeupFallbackStrategy
+		{
+			OneByOne,
+			All
 		}
 	}
 }

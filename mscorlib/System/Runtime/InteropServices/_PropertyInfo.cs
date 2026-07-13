@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[CLSCompliant(false)]
-	[Guid("F59ED4E4-E68F-3218-BD77-061AA82824BF")]
 	[TypeLibImportClass(typeof(PropertyInfo))]
+	[Guid("F59ED4E4-E68F-3218-BD77-061AA82824BF")]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	public interface _PropertyInfo
 	{
 		bool Equals(object other);

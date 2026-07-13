@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("ILocalUser is deprecated and will be removed in a future release.", false)]
 	public interface ILocalUser : IUserProfile
 	{
 		void Authenticate(Action<bool> callback);

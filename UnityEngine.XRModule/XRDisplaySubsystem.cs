@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeConditional("ENABLE_XR")]
+	[NativeType(Header = "Modules/XR/Subsystems/Display/XRDisplaySubsystem.h")]
 	[NativeHeader("Modules/XR/XRPrefix.h")]
 	[UsedByNativeCode]
-	[NativeType(Header = "Modules/XR/Subsystems/Display/XRDisplaySubsystem.h")]
+	[NativeConditional("ENABLE_XR")]
 	public class XRDisplaySubsystem : IntegratedSubsystem<XRDisplaySubsystemDescriptor>
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -50,127 +51,381 @@ namespace UnityEngine.XR
 			}
 		}
 
-		public extern bool displayOpaque
+		public bool displayOpaque
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_displayOpaque_Injected(intPtr);
+			}
 		}
 
-		public extern bool contentProtectionEnabled
+		public bool contentProtectionEnabled
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_contentProtectionEnabled_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_contentProtectionEnabled_Injected(intPtr, value);
+			}
 		}
 
-		public extern float scaleOfAllViewports
+		public float appliedViewportScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_appliedViewportScale_Injected(intPtr);
+			}
 		}
 
-		public extern float scaleOfAllRenderTargets
+		public float scaleOfAllViewports
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_scaleOfAllViewports_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_scaleOfAllViewports_Injected(intPtr, value);
+			}
 		}
 
-		public extern float zNear
+		public float scaleOfAllRenderTargets
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_scaleOfAllRenderTargets_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_scaleOfAllRenderTargets_Injected(intPtr, value);
+			}
 		}
 
-		public extern float zFar
+		public float globalDynamicScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_globalDynamicScale_Injected(intPtr);
+			}
 		}
 
-		public extern bool sRGB
+		public float zNear
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_zNear_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_zNear_Injected(intPtr, value);
+			}
 		}
 
-		public extern float occlusionMaskScale
+		public float zFar
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_zFar_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_zFar_Injected(intPtr, value);
+			}
 		}
 
-		public extern float foveatedRenderingLevel
+		public bool sRGB
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_sRGB_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_sRGB_Injected(intPtr, value);
+			}
 		}
 
-		public extern XRDisplaySubsystem.FoveatedRenderingFlags foveatedRenderingFlags
+		public float occlusionMaskScale
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_occlusionMaskScale_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_occlusionMaskScale_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void MarkTransformLateLatched(Transform transform, XRDisplaySubsystem.LateLatchNode nodeType);
-
-		public extern XRDisplaySubsystem.TextureLayout textureLayout
+		public float foveatedRenderingLevel
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_foveatedRenderingLevel_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_foveatedRenderingLevel_Injected(intPtr, value);
+			}
 		}
 
-		public extern XRDisplaySubsystem.TextureLayout supportedTextureLayouts
+		public XRDisplaySubsystem.FoveatedRenderingFlags foveatedRenderingFlags
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_foveatedRenderingFlags_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_foveatedRenderingFlags_Injected(intPtr, value);
+			}
 		}
 
-		public extern XRDisplaySubsystem.ReprojectionMode reprojectionMode
+		public void MarkTransformLateLatched(Transform transform, XRDisplaySubsystem.LateLatchNode nodeType)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			XRDisplaySubsystem.MarkTransformLateLatched_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Transform>(transform), nodeType);
+		}
+
+		public XRDisplaySubsystem.TextureLayout textureLayout
+		{
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_textureLayout_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_textureLayout_Injected(intPtr, value);
+			}
+		}
+
+		public XRDisplaySubsystem.TextureLayout supportedTextureLayouts
+		{
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_supportedTextureLayouts_Injected(intPtr);
+			}
+		}
+
+		public int ScaledTextureWidth(RenderTexture renderTexture)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.ScaledTextureWidth_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(renderTexture));
+		}
+
+		public int ScaledTextureHeight(RenderTexture renderTexture)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.ScaledTextureHeight_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(renderTexture));
+		}
+
+		public XRDisplaySubsystem.ReprojectionMode reprojectionMode
+		{
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_reprojectionMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_reprojectionMode_Injected(intPtr, value);
+			}
 		}
 
 		public void SetFocusPlane(Vector3 point, Vector3 normal, Vector3 velocity)
 		{
-			this.SetFocusPlane_Injected(ref point, ref normal, ref velocity);
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			XRDisplaySubsystem.SetFocusPlane_Injected(intPtr, ref point, ref normal, ref velocity);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetMSAALevel(int level);
-
-		public extern bool disableLegacyRenderer
+		public void SetMSAALevel(int level)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			XRDisplaySubsystem.SetMSAALevel_Injected(intPtr, level);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetRenderPassCount();
+		public bool disableLegacyRenderer
+		{
+			get
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return XRDisplaySubsystem.get_disableLegacyRenderer_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				XRDisplaySubsystem.set_disableLegacyRenderer_Injected(intPtr, value);
+			}
+		}
+
+		public int GetRenderPassCount()
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.GetRenderPassCount_Injected(intPtr);
+		}
 
 		public void GetRenderPass(int renderPassIndex, out XRDisplaySubsystem.XRRenderPass renderPass)
 		{
@@ -182,8 +437,15 @@ namespace UnityEngine.XR
 		}
 
 		[NativeMethod("TryGetRenderPass")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool Internal_TryGetRenderPass(int renderPassIndex, out XRDisplaySubsystem.XRRenderPass renderPass);
+		private bool Internal_TryGetRenderPass(int renderPassIndex, out XRDisplaySubsystem.XRRenderPass renderPass)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.Internal_TryGetRenderPass_Injected(intPtr, renderPassIndex, out renderPass);
+		}
 
 		public void EndRecordingIfLateLatched(Camera camera)
 		{
@@ -199,8 +461,15 @@ namespace UnityEngine.XR
 		}
 
 		[NativeMethod("TryEndRecordingIfLateLatched")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool Internal_TryEndRecordingIfLateLatched(Camera camera);
+		private bool Internal_TryEndRecordingIfLateLatched(Camera camera)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.Internal_TryEndRecordingIfLateLatched_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Camera>(camera));
+		}
 
 		public void BeginRecordingIfLateLatched(Camera camera)
 		{
@@ -216,8 +485,15 @@ namespace UnityEngine.XR
 		}
 
 		[NativeMethod("TryBeginRecordingIfLateLatched")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool Internal_TryBeginRecordingIfLateLatched(Camera camera);
+		private bool Internal_TryBeginRecordingIfLateLatched(Camera camera)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.Internal_TryBeginRecordingIfLateLatched_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Camera>(camera));
+		}
 
 		public void GetCullingParameters(Camera camera, int cullingPassIndex, out ScriptableCullingParameters scriptableCullingParameters)
 		{
@@ -234,59 +510,143 @@ namespace UnityEngine.XR
 			throw new IndexOutOfRangeException("cullingPassIndex");
 		}
 
-		[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
 		[NativeMethod("TryGetCullingParams")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool Internal_TryGetCullingParams(Camera camera, int cullingPassIndex, out ScriptableCullingParameters scriptableCullingParameters);
+		[NativeHeader("Runtime/Graphics/ScriptableRenderLoop/ScriptableCulling.h")]
+		private bool Internal_TryGetCullingParams(Camera camera, int cullingPassIndex, out ScriptableCullingParameters scriptableCullingParameters)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.Internal_TryGetCullingParams_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Camera>(camera), cullingPassIndex, out scriptableCullingParameters);
+		}
 
 		[NativeMethod("TryGetAppGPUTimeLastFrame")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TryGetAppGPUTimeLastFrame(out float gpuTimeLastFrame);
+		public bool TryGetAppGPUTimeLastFrame(out float gpuTimeLastFrame)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.TryGetAppGPUTimeLastFrame_Injected(intPtr, out gpuTimeLastFrame);
+		}
 
 		[NativeMethod("TryGetCompositorGPUTimeLastFrame")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TryGetCompositorGPUTimeLastFrame(out float gpuTimeLastFrameCompositor);
+		public bool TryGetCompositorGPUTimeLastFrame(out float gpuTimeLastFrameCompositor)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.TryGetCompositorGPUTimeLastFrame_Injected(intPtr, out gpuTimeLastFrameCompositor);
+		}
 
 		[NativeMethod("TryGetDroppedFrameCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TryGetDroppedFrameCount(out int droppedFrameCount);
+		public bool TryGetDroppedFrameCount(out int droppedFrameCount)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.TryGetDroppedFrameCount_Injected(intPtr, out droppedFrameCount);
+		}
 
 		[NativeMethod("TryGetFramePresentCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TryGetFramePresentCount(out int framePresentCount);
+		public bool TryGetFramePresentCount(out int framePresentCount)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.TryGetFramePresentCount_Injected(intPtr, out framePresentCount);
+		}
 
 		[NativeMethod("TryGetDisplayRefreshRate")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TryGetDisplayRefreshRate(out float displayRefreshRate);
+		public bool TryGetDisplayRefreshRate(out float displayRefreshRate)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.TryGetDisplayRefreshRate_Injected(intPtr, out displayRefreshRate);
+		}
 
 		[NativeMethod("TryGetMotionToPhoton")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool TryGetMotionToPhoton(out float motionToPhoton);
+		public bool TryGetMotionToPhoton(out float motionToPhoton)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.TryGetMotionToPhoton_Injected(intPtr, out motionToPhoton);
+		}
 
 		[NativeConditional("ENABLE_XR")]
 		[NativeMethod(Name = "UnityXRRenderTextureIdToRenderTexture", IsThreadSafe = false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern RenderTexture GetRenderTexture(uint unityXrRenderTextureId);
+		public RenderTexture GetRenderTexture(uint unityXrRenderTextureId)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<RenderTexture>(XRDisplaySubsystem.GetRenderTexture_Injected(intPtr, unityXrRenderTextureId));
+		}
 
 		[NativeConditional("ENABLE_XR")]
 		[NativeMethod(Name = "GetTextureForRenderPass", IsThreadSafe = false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern RenderTexture GetRenderTextureForRenderPass(int renderPass);
+		public RenderTexture GetRenderTextureForRenderPass(int renderPass)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<RenderTexture>(XRDisplaySubsystem.GetRenderTextureForRenderPass_Injected(intPtr, renderPass));
+		}
 
-		[NativeConditional("ENABLE_XR")]
 		[NativeMethod(Name = "GetSharedDepthTextureForRenderPass", IsThreadSafe = false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern RenderTexture GetSharedDepthTextureForRenderPass(int renderPass);
+		[NativeConditional("ENABLE_XR")]
+		public RenderTexture GetSharedDepthTextureForRenderPass(int renderPass)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<RenderTexture>(XRDisplaySubsystem.GetSharedDepthTextureForRenderPass_Injected(intPtr, renderPass));
+		}
 
 		[NativeMethod(Name = "GetPreferredMirrorViewBlitMode", IsThreadSafe = false)]
 		[NativeConditional("ENABLE_XR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetPreferredMirrorBlitMode();
+		public int GetPreferredMirrorBlitMode()
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.GetPreferredMirrorBlitMode_Injected(intPtr);
+		}
 
-		[NativeMethod(Name = "SetPreferredMirrorViewBlitMode", IsThreadSafe = false)]
 		[NativeConditional("ENABLE_XR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPreferredMirrorBlitMode(int blitMode);
+		[NativeMethod(Name = "SetPreferredMirrorViewBlitMode", IsThreadSafe = false)]
+		public void SetPreferredMirrorBlitMode(int blitMode)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			XRDisplaySubsystem.SetPreferredMirrorBlitMode_Injected(intPtr, blitMode);
+		}
 
 		[Obsolete("GetMirrorViewBlitDesc(RenderTexture, out XRMirrorViewBlitDesc) is deprecated. Use GetMirrorViewBlitDesc(RenderTexture, out XRMirrorViewBlitDesc, int) instead.", false)]
 		public bool GetMirrorViewBlitDesc(RenderTexture mirrorRt, out XRDisplaySubsystem.XRMirrorViewBlitDesc outDesc)
@@ -294,10 +654,17 @@ namespace UnityEngine.XR
 			return this.GetMirrorViewBlitDesc(mirrorRt, out outDesc, -1);
 		}
 
-		[NativeMethod(Name = "QueryMirrorViewBlitDesc", IsThreadSafe = false)]
 		[NativeConditional("ENABLE_XR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetMirrorViewBlitDesc(RenderTexture mirrorRt, out XRDisplaySubsystem.XRMirrorViewBlitDesc outDesc, int mode);
+		[NativeMethod(Name = "QueryMirrorViewBlitDesc", IsThreadSafe = false)]
+		public bool GetMirrorViewBlitDesc(RenderTexture mirrorRt, out XRDisplaySubsystem.XRMirrorViewBlitDesc outDesc, int mode)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.GetMirrorViewBlitDesc_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(mirrorRt), out outDesc, mode);
+		}
 
 		[Obsolete("AddGraphicsThreadMirrorViewBlit(CommandBuffer, bool) is deprecated. Use AddGraphicsThreadMirrorViewBlit(CommandBuffer, bool, int) instead.", false)]
 		public bool AddGraphicsThreadMirrorViewBlit(CommandBuffer cmd, bool allowGraphicsStateInvalidate)
@@ -305,11 +672,18 @@ namespace UnityEngine.XR
 			return this.AddGraphicsThreadMirrorViewBlit(cmd, allowGraphicsStateInvalidate, -1);
 		}
 
-		[NativeConditional("ENABLE_XR")]
-		[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 		[NativeMethod(Name = "AddGraphicsThreadMirrorViewBlit", IsThreadSafe = false)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool AddGraphicsThreadMirrorViewBlit(CommandBuffer cmd, bool allowGraphicsStateInvalidate, int mode);
+		[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+		[NativeConditional("ENABLE_XR")]
+		public bool AddGraphicsThreadMirrorViewBlit(CommandBuffer cmd, bool allowGraphicsStateInvalidate, int mode)
+		{
+			IntPtr intPtr = XRDisplaySubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return XRDisplaySubsystem.AddGraphicsThreadMirrorViewBlit_Injected(intPtr, (cmd == null) ? ((IntPtr)0) : CommandBuffer.BindingsMarshaller.ConvertToNative(cmd), allowGraphicsStateInvalidate, mode);
+		}
 
 		public HDROutputSettings hdrOutputSettings
 		{
@@ -325,7 +699,157 @@ namespace UnityEngine.XR
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFocusPlane_Injected(ref Vector3 point, ref Vector3 normal, ref Vector3 velocity);
+		private static extern bool get_displayOpaque_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_contentProtectionEnabled_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_contentProtectionEnabled_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_appliedViewportScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_scaleOfAllViewports_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_scaleOfAllViewports_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_scaleOfAllRenderTargets_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_scaleOfAllRenderTargets_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_globalDynamicScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_zNear_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_zNear_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_zFar_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_zFar_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_sRGB_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sRGB_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_occlusionMaskScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_occlusionMaskScale_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_foveatedRenderingLevel_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_foveatedRenderingLevel_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern XRDisplaySubsystem.FoveatedRenderingFlags get_foveatedRenderingFlags_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_foveatedRenderingFlags_Injected(IntPtr _unity_self, XRDisplaySubsystem.FoveatedRenderingFlags value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MarkTransformLateLatched_Injected(IntPtr _unity_self, IntPtr transform, XRDisplaySubsystem.LateLatchNode nodeType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern XRDisplaySubsystem.TextureLayout get_textureLayout_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_textureLayout_Injected(IntPtr _unity_self, XRDisplaySubsystem.TextureLayout value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern XRDisplaySubsystem.TextureLayout get_supportedTextureLayouts_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ScaledTextureWidth_Injected(IntPtr _unity_self, IntPtr renderTexture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ScaledTextureHeight_Injected(IntPtr _unity_self, IntPtr renderTexture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern XRDisplaySubsystem.ReprojectionMode get_reprojectionMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_reprojectionMode_Injected(IntPtr _unity_self, XRDisplaySubsystem.ReprojectionMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetFocusPlane_Injected(IntPtr _unity_self, [In] ref Vector3 point, [In] ref Vector3 normal, [In] ref Vector3 velocity);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMSAALevel_Injected(IntPtr _unity_self, int level);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_disableLegacyRenderer_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_disableLegacyRenderer_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetRenderPassCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Internal_TryGetRenderPass_Injected(IntPtr _unity_self, int renderPassIndex, out XRDisplaySubsystem.XRRenderPass renderPass);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Internal_TryEndRecordingIfLateLatched_Injected(IntPtr _unity_self, IntPtr camera);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Internal_TryBeginRecordingIfLateLatched_Injected(IntPtr _unity_self, IntPtr camera);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Internal_TryGetCullingParams_Injected(IntPtr _unity_self, IntPtr camera, int cullingPassIndex, out ScriptableCullingParameters scriptableCullingParameters);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetAppGPUTimeLastFrame_Injected(IntPtr _unity_self, out float gpuTimeLastFrame);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetCompositorGPUTimeLastFrame_Injected(IntPtr _unity_self, out float gpuTimeLastFrameCompositor);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetDroppedFrameCount_Injected(IntPtr _unity_self, out int droppedFrameCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetFramePresentCount_Injected(IntPtr _unity_self, out int framePresentCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetDisplayRefreshRate_Injected(IntPtr _unity_self, out float displayRefreshRate);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool TryGetMotionToPhoton_Injected(IntPtr _unity_self, out float motionToPhoton);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetRenderTexture_Injected(IntPtr _unity_self, uint unityXrRenderTextureId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetRenderTextureForRenderPass_Injected(IntPtr _unity_self, int renderPass);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSharedDepthTextureForRenderPass_Injected(IntPtr _unity_self, int renderPass);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPreferredMirrorBlitMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPreferredMirrorBlitMode_Injected(IntPtr _unity_self, int blitMode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetMirrorViewBlitDesc_Injected(IntPtr _unity_self, IntPtr mirrorRt, out XRDisplaySubsystem.XRMirrorViewBlitDesc outDesc, int mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddGraphicsThreadMirrorViewBlit_Injected(IntPtr _unity_self, IntPtr cmd, bool allowGraphicsStateInvalidate, int mode);
 
 		private HDROutputSettings m_HDROutputSettings;
 
@@ -370,6 +894,8 @@ namespace UnityEngine.XR
 
 			public Mesh occlusionMesh;
 
+			public Mesh visibleMesh;
+
 			public int textureArraySlice;
 
 			public Matrix4x4 previousView;
@@ -378,29 +904,24 @@ namespace UnityEngine.XR
 		}
 
 		[NativeHeader("Modules/XR/Subsystems/Display/XRDisplaySubsystem.bindings.h")]
-		[NativeHeader("Runtime/Graphics/RenderTextureDesc.h")]
 		[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+		[NativeHeader("Runtime/Graphics/RenderTextureDesc.h")]
 		public struct XRRenderPass
 		{
-			[NativeConditional("ENABLE_XR")]
 			[NativeMethod(Name = "XRRenderPassScriptApi::GetRenderParameter", IsFreeFunction = true, HasExplicitThis = true, ThrowsException = true)]
+			[NativeConditional("ENABLE_XR")]
 			public void GetRenderParameter(Camera camera, int renderParameterIndex, out XRDisplaySubsystem.XRRenderParameter renderParameter)
 			{
-				XRDisplaySubsystem.XRRenderPass.GetRenderParameter_Injected(ref this, camera, renderParameterIndex, out renderParameter);
+				XRDisplaySubsystem.XRRenderPass.GetRenderParameter_Injected(ref this, Object.MarshalledUnityObject.Marshal<Camera>(camera), renderParameterIndex, out renderParameter);
 			}
 
-			[NativeConditional("ENABLE_XR")]
 			[NativeMethod(Name = "XRRenderPassScriptApi::GetRenderParameterCount", IsFreeFunction = true, HasExplicitThis = true)]
-			public int GetRenderParameterCount()
-			{
-				return XRDisplaySubsystem.XRRenderPass.GetRenderParameterCount_Injected(ref this);
-			}
+			[NativeConditional("ENABLE_XR")]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			public extern int GetRenderParameterCount();
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetRenderParameter_Injected(ref XRDisplaySubsystem.XRRenderPass _unity_self, Camera camera, int renderParameterIndex, out XRDisplaySubsystem.XRRenderParameter renderParameter);
-
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetRenderParameterCount_Injected(ref XRDisplaySubsystem.XRRenderPass _unity_self);
+			private static extern void GetRenderParameter_Injected(ref XRDisplaySubsystem.XRRenderPass _unity_self, IntPtr camera, int renderParameterIndex, out XRDisplaySubsystem.XRRenderParameter renderParameter);
 
 			private IntPtr displaySubsystemInstance;
 
@@ -410,6 +931,10 @@ namespace UnityEngine.XR
 
 			public RenderTextureDescriptor renderTargetDesc;
 
+			public int renderTargetScaledWidth;
+
+			public int renderTargetScaledHeight;
+
 			public bool hasMotionVectorPass;
 
 			public RenderTargetIdentifier motionVectorRenderTarget;
@@ -417,6 +942,8 @@ namespace UnityEngine.XR
 			public RenderTextureDescriptor motionVectorRenderTargetDesc;
 
 			public bool shouldFillOutDepth;
+
+			public bool spaceWarpRightHandedNDC;
 
 			public int cullingPassIndex;
 
@@ -447,15 +974,10 @@ namespace UnityEngine.XR
 		[NativeHeader("Modules/XR/Subsystems/Display/XRDisplaySubsystem.bindings.h")]
 		public struct XRMirrorViewBlitDesc
 		{
-			[NativeMethod(Name = "XRMirrorViewBlitDescScriptApi::GetBlitParameter", IsFreeFunction = true, HasExplicitThis = true)]
 			[NativeConditional("ENABLE_XR")]
-			public void GetBlitParameter(int blitParameterIndex, out XRDisplaySubsystem.XRBlitParams blitParameter)
-			{
-				XRDisplaySubsystem.XRMirrorViewBlitDesc.GetBlitParameter_Injected(ref this, blitParameterIndex, out blitParameter);
-			}
-
+			[NativeMethod(Name = "XRMirrorViewBlitDescScriptApi::GetBlitParameter", IsFreeFunction = true, HasExplicitThis = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void GetBlitParameter_Injected(ref XRDisplaySubsystem.XRMirrorViewBlitDesc _unity_self, int blitParameterIndex, out XRDisplaySubsystem.XRBlitParams blitParameter);
+			public extern void GetBlitParameter(int blitParameterIndex, out XRDisplaySubsystem.XRBlitParams blitParameter);
 
 			private IntPtr displaySubsystemInstance;
 
@@ -464,6 +986,14 @@ namespace UnityEngine.XR
 			public bool nativeBlitInvalidStates;
 
 			public int blitParamsCount;
+		}
+
+		internal new static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(XRDisplaySubsystem xrDisplaySubsystem)
+			{
+				return xrDisplaySubsystem.m_Ptr;
+			}
 		}
 	}
 }

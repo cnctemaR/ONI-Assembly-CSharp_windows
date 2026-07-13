@@ -33,8 +33,8 @@ namespace FMODUnity
 					RuntimeUtils.DebugLog("[FMOD] Cannot find integration settings, creating default settings");
 					Settings.instance = ScriptableObject.CreateInstance<Settings>();
 					Settings.instance.name = "FMOD Studio Integration Settings";
-					Settings.instance.CurrentVersion = 131619;
-					Settings.instance.LastEventReferenceScanVersion = 131619;
+					Settings.instance.CurrentVersion = 131858;
+					Settings.instance.LastEventReferenceScanVersion = 131858;
 				}
 				Settings.isInitializing = false;
 			}
@@ -349,6 +349,9 @@ namespace FMODUnity
 
 		[SerializeField]
 		public EventLinkage EventLinkage;
+
+		[SerializeField]
+		public bool SerializeGUIDsOnly;
 
 		[SerializeField]
 		public DEBUG_FLAGS LoggingLevel = DEBUG_FLAGS.WARNING;

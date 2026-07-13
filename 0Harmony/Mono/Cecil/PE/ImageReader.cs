@@ -237,86 +237,88 @@ namespace Mono.Cecil.PE
 			uint num2 = this.ReadUInt32();
 			byte[] array = this.ReadHeapData(num, num2);
 			string text = this.ReadAlignedString(16);
-			uint num3 = <b7604b43-2580-4348-9381-6759dd49fb8c><PrivateImplementationDetails>.ComputeStringHash(text);
-			if (num3 <= 617129517U)
+			if (text != null)
 			{
-				if (num3 != 368124450U)
+				switch (text.Length)
 				{
-					if (num3 != 491825896U)
+				case 2:
+				{
+					char c = text[1];
+					if (c != '-')
 					{
-						if (num3 != 617129517U)
+						if (c != '~')
 						{
 							return;
 						}
-						if (!(text == "#-"))
+						if (!(text == "#~"))
 						{
 							return;
 						}
 					}
-					else
+					else if (!(text == "#-"))
 					{
-						if (!(text == "#Strings"))
-						{
-							return;
-						}
-						this.image.StringHeap = new StringHeap(array);
 						return;
 					}
+					this.image.TableHeap = new TableHeap(array);
+					this.table_heap_offset = num;
+					return;
 				}
-				else
-				{
+				case 3:
 					if (!(text == "#US"))
 					{
 						return;
 					}
 					this.image.UserStringHeap = new UserStringHeap(array);
 					return;
-				}
-			}
-			else if (num3 <= 1422005491U)
-			{
-				if (num3 != 1372122372U)
-				{
-					if (num3 != 1422005491U)
+				case 4:
+					if (!(text == "#Pdb"))
 					{
 						return;
 					}
-					if (!(text == "#GUID"))
+					this.image.PdbHeap = new PdbHeap(array);
+					this.pdb_heap_offset = num;
+					break;
+				case 5:
+				{
+					char c = text[1];
+					if (c != 'B')
+					{
+						if (c != 'G')
+						{
+							return;
+						}
+						if (!(text == "#GUID"))
+						{
+							return;
+						}
+						this.image.GuidHeap = new GuidHeap(array);
+						return;
+					}
+					else
+					{
+						if (!(text == "#Blob"))
+						{
+							return;
+						}
+						this.image.BlobHeap = new BlobHeap(array);
+						return;
+					}
+					break;
+				}
+				case 6:
+				case 7:
+					break;
+				case 8:
+					if (!(text == "#Strings"))
 					{
 						return;
 					}
-					this.image.GuidHeap = new GuidHeap(array);
+					this.image.StringHeap = new StringHeap(array);
 					return;
-				}
-				else if (!(text == "#~"))
-				{
+				default:
 					return;
 				}
 			}
-			else if (num3 != 1638201209U)
-			{
-				if (num3 != 2979271308U)
-				{
-					return;
-				}
-				if (!(text == "#Pdb"))
-				{
-					return;
-				}
-				this.image.PdbHeap = new PdbHeap(array);
-				return;
-			}
-			else
-			{
-				if (!(text == "#Blob"))
-				{
-					return;
-				}
-				this.image.BlobHeap = new BlobHeap(array);
-				return;
-			}
-			this.image.TableHeap = new TableHeap(array);
-			this.table_heap_offset = num;
 		}
 
 		private byte[] ReadHeapData(uint offset, uint size)
@@ -606,7 +608,7 @@ namespace Mono.Cecil.PE
 			return image;
 		}
 
-		public static Image ReadPortablePdb(Disposable<Stream> stream, string file_name)
+		public static Image ReadPortablePdb(Disposable<Stream> stream, string file_name, out uint pdb_heap_offset)
 		{
 			Image image;
 			try
@@ -625,6 +627,7 @@ namespace Mono.Cecil.PE
 				};
 				imageReader.metadata = new DataDirectory(0U, num);
 				imageReader.ReadMetadata();
+				pdb_heap_offset = imageReader.pdb_heap_offset;
 				image = imageReader.image;
 			}
 			catch (EndOfStreamException ex)
@@ -641,5 +644,7 @@ namespace Mono.Cecil.PE
 		private DataDirectory metadata;
 
 		private uint table_heap_offset;
+
+		private uint pdb_heap_offset;
 	}
 }

@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class ImportDebugInformation : DebugInformation
+	internal sealed class ImportDebugInformation : DebugInformation
 	{
 		public bool HasTargets
 		{

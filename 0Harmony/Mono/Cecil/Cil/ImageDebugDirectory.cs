@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public struct ImageDebugDirectory
+	internal struct ImageDebugDirectory
 	{
 		public const int Size = 28;
 

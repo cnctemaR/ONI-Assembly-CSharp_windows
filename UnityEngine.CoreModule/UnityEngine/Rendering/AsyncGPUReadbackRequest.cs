@@ -7,21 +7,17 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	[UsedByNativeCode]
 	public struct AsyncGPUReadbackRequest
 	{
-		public void Update()
-		{
-			AsyncGPUReadbackRequest.Update_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Update();
 
-		public void WaitForCompletion()
-		{
-			AsyncGPUReadbackRequest.WaitForCompletion_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void WaitForCompletion();
 
 		public unsafe NativeArray<T> GetData<T>(int layer = 0) where T : struct
 		{
@@ -107,99 +103,44 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		private bool IsDone()
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool IsDone();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool HasError();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetLayerCount();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetLayerDataSize();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetWidth();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetHeight();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int GetDepth();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool GetForcePlayerLoopUpdate();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetForcePlayerLoopUpdate(bool b);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetScriptingCallback(Action<AsyncGPUReadbackRequest> callback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern IntPtr GetDataRaw(int layer);
+
+		[RequiredByNativeCode]
+		private static void InvokeCallback(Action<AsyncGPUReadbackRequest> callback, AsyncGPUReadbackRequest obj)
 		{
-			return AsyncGPUReadbackRequest.IsDone_Injected(ref this);
+			callback(obj);
 		}
-
-		private bool HasError()
-		{
-			return AsyncGPUReadbackRequest.HasError_Injected(ref this);
-		}
-
-		private int GetLayerCount()
-		{
-			return AsyncGPUReadbackRequest.GetLayerCount_Injected(ref this);
-		}
-
-		private int GetLayerDataSize()
-		{
-			return AsyncGPUReadbackRequest.GetLayerDataSize_Injected(ref this);
-		}
-
-		private int GetWidth()
-		{
-			return AsyncGPUReadbackRequest.GetWidth_Injected(ref this);
-		}
-
-		private int GetHeight()
-		{
-			return AsyncGPUReadbackRequest.GetHeight_Injected(ref this);
-		}
-
-		private int GetDepth()
-		{
-			return AsyncGPUReadbackRequest.GetDepth_Injected(ref this);
-		}
-
-		private bool GetForcePlayerLoopUpdate()
-		{
-			return AsyncGPUReadbackRequest.GetForcePlayerLoopUpdate_Injected(ref this);
-		}
-
-		private void SetForcePlayerLoopUpdate(bool b)
-		{
-			AsyncGPUReadbackRequest.SetForcePlayerLoopUpdate_Injected(ref this, b);
-		}
-
-		internal void SetScriptingCallback(Action<AsyncGPUReadbackRequest> callback)
-		{
-			AsyncGPUReadbackRequest.SetScriptingCallback_Injected(ref this, callback);
-		}
-
-		private IntPtr GetDataRaw(int layer)
-		{
-			return AsyncGPUReadbackRequest.GetDataRaw_Injected(ref this, layer);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Update_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void WaitForCompletion_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsDone_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool HasError_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetLayerCount_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetLayerDataSize_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetWidth_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetHeight_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetDepth_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetForcePlayerLoopUpdate_Injected(ref AsyncGPUReadbackRequest _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetForcePlayerLoopUpdate_Injected(ref AsyncGPUReadbackRequest _unity_self, bool b);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetScriptingCallback_Injected(ref AsyncGPUReadbackRequest _unity_self, Action<AsyncGPUReadbackRequest> callback);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetDataRaw_Injected(ref AsyncGPUReadbackRequest _unity_self, int layer);
 
 		internal IntPtr m_Ptr;
 

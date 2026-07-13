@@ -4,22 +4,26 @@ namespace UnityEngine.Rendering
 {
 	public struct BatchDrawCommand
 	{
-		public uint visibleOffset;
-
-		public uint visibleCount;
+		public BatchDrawCommandFlags flags;
 
 		public BatchID batchID;
 
 		public BatchMaterialID materialID;
 
+		public ushort splitVisibilityMask;
+
+		public ushort lightmapIndex;
+
+		public int sortingPosition;
+
+		public uint visibleOffset;
+
+		public uint visibleCount;
+
 		public BatchMeshID meshID;
 
 		public ushort submeshIndex;
 
-		public ushort splitVisibilityMask;
-
-		public BatchDrawCommandFlags flags;
-
-		public int sortingPosition;
+		public ushort activeMeshLod;
 	}
 }

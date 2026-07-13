@@ -15,29 +15,43 @@ namespace UnityEngine.Rendering
 			this.SetZero();
 		}
 
-		private void SetZero()
-		{
-			SphericalHarmonicsL2.SetZero_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetZero();
 
+		[FreeFunction]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_AddAmbientLight(ref SphericalHarmonicsL2 sh, in Color color);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void AddAmbientLight(Color color)
 		{
-			SphericalHarmonicsL2.AddAmbientLight_Injected(ref this, ref color);
+			SphericalHarmonicsL2.Internal_AddAmbientLight(ref this, in color);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void AddAmbientLight(in Color color)
+		{
+			SphericalHarmonicsL2.Internal_AddAmbientLight(ref this, in color);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void AddDirectionalLight(Vector3 direction, Color color, float intensity)
 		{
 			Color color2 = color * (2f * intensity);
-			SphericalHarmonicsL2.AddDirectionalLightInternal(ref this, direction, color2);
+			SphericalHarmonicsL2.AddDirectionalLightInternal(ref this, in direction, in color2);
+		}
+
+		public void AddDirectionalLight(in Vector3 direction, in Color color, float intensity)
+		{
+			Color color2 = color * (2f * intensity);
+			SphericalHarmonicsL2.AddDirectionalLightInternal(ref this, in direction, in color2);
 		}
 
 		[FreeFunction]
-		private static void AddDirectionalLightInternal(ref SphericalHarmonicsL2 sh, Vector3 direction, Color color)
-		{
-			SphericalHarmonicsL2.AddDirectionalLightInternal_Injected(ref sh, ref direction, ref color);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddDirectionalLightInternal(ref SphericalHarmonicsL2 sh, in Vector3 direction, in Color color);
 
-		public void Evaluate(Vector3[] directions, Color[] results)
+		public readonly void Evaluate(Vector3[] directions, Color[] results)
 		{
 			bool flag = directions == null;
 			if (flag)
@@ -57,17 +71,45 @@ namespace UnityEngine.Rendering
 				{
 					throw new ArgumentException("Length of the directions array and the results array must match.");
 				}
-				SphericalHarmonicsL2.EvaluateInternal(ref this, directions, results);
+				SphericalHarmonicsL2.EvaluateInternal(in this, directions, results);
 			}
 		}
 
 		[FreeFunction]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void EvaluateInternal(ref SphericalHarmonicsL2 sh, Vector3[] directions, [Out] Color[] results);
+		private unsafe static void EvaluateInternal(in SphericalHarmonicsL2 sh, Vector3[] directions, [Out] Color[] results)
+		{
+			try
+			{
+				Span<Vector3> span = new Span<Vector3>(directions);
+				fixed (Vector3* ptr = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (results != null)
+					{
+						fixed (Color[] array = results)
+						{
+							if (array.Length != 0)
+							{
+								blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+							}
+						}
+					}
+					SphericalHarmonicsL2.EvaluateInternal_Injected(in sh, ref managedSpanWrapper, out blittableArrayWrapper);
+				}
+			}
+			finally
+			{
+				Vector3* ptr = null;
+				Color[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Color>(ref array);
+			}
+		}
 
 		public float this[int rgb, int coefficient]
 		{
-			get
+			readonly get
 			{
 				float num;
 				switch (rgb * 9 + coefficient)
@@ -249,7 +291,7 @@ namespace UnityEngine.Rendering
 			}
 		}
 
-		public override int GetHashCode()
+		public override readonly int GetHashCode()
 		{
 			int num = 17;
 			num = num * 23 + this.shr0.GetHashCode();
@@ -281,12 +323,30 @@ namespace UnityEngine.Rendering
 			return num * 23 + this.shb8.GetHashCode();
 		}
 
-		public override bool Equals(object other)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override readonly bool Equals(object other)
 		{
-			return other is SphericalHarmonicsL2 && this.Equals((SphericalHarmonicsL2)other);
+			bool flag;
+			if (other is SphericalHarmonicsL2)
+			{
+				SphericalHarmonicsL2 sphericalHarmonicsL = (SphericalHarmonicsL2)other;
+				flag = this.Equals(in sphericalHarmonicsL);
+			}
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
-		public bool Equals(SphericalHarmonicsL2 other)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Equals(SphericalHarmonicsL2 other)
+		{
+			return this == other;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public readonly bool Equals(in SphericalHarmonicsL2 other)
 		{
 			return this == other;
 		}
@@ -393,24 +453,20 @@ namespace UnityEngine.Rendering
 			};
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(SphericalHarmonicsL2 lhs, SphericalHarmonicsL2 rhs)
 		{
 			return lhs.shr0 == rhs.shr0 && lhs.shr1 == rhs.shr1 && lhs.shr2 == rhs.shr2 && lhs.shr3 == rhs.shr3 && lhs.shr4 == rhs.shr4 && lhs.shr5 == rhs.shr5 && lhs.shr6 == rhs.shr6 && lhs.shr7 == rhs.shr7 && lhs.shr8 == rhs.shr8 && lhs.shg0 == rhs.shg0 && lhs.shg1 == rhs.shg1 && lhs.shg2 == rhs.shg2 && lhs.shg3 == rhs.shg3 && lhs.shg4 == rhs.shg4 && lhs.shg5 == rhs.shg5 && lhs.shg6 == rhs.shg6 && lhs.shg7 == rhs.shg7 && lhs.shg8 == rhs.shg8 && lhs.shb0 == rhs.shb0 && lhs.shb1 == rhs.shb1 && lhs.shb2 == rhs.shb2 && lhs.shb3 == rhs.shb3 && lhs.shb4 == rhs.shb4 && lhs.shb5 == rhs.shb5 && lhs.shb6 == rhs.shb6 && lhs.shb7 == rhs.shb7 && lhs.shb8 == rhs.shb8;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(SphericalHarmonicsL2 lhs, SphericalHarmonicsL2 rhs)
 		{
 			return !(lhs == rhs);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetZero_Injected(ref SphericalHarmonicsL2 _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddAmbientLight_Injected(ref SphericalHarmonicsL2 _unity_self, ref Color color);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddDirectionalLightInternal_Injected(ref SphericalHarmonicsL2 sh, ref Vector3 direction, ref Color color);
+		private static extern void EvaluateInternal_Injected(in SphericalHarmonicsL2 sh, ref ManagedSpanWrapper directions, out BlittableArrayWrapper results);
 
 		private float shr0;
 

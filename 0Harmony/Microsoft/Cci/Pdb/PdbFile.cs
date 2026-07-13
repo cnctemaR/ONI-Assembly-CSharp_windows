@@ -47,11 +47,7 @@ namespace Microsoft.Cci.Pdb
 			int num6;
 			bits.ReadInt32(out num6);
 			BitSet bitSet = new BitSet(bits);
-			BitSet bitSet2 = new BitSet(bits);
-			if (!bitSet2.IsEmpty)
-			{
-				throw new PdbDebugException("Unsupported PDB deleted bitset is not empty.", new object[0]);
-			}
+			new BitSet(bits);
 			int num7 = 0;
 			for (int i = 0; i < num6; i++)
 			{

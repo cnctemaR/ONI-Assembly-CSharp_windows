@@ -16,10 +16,11 @@ namespace UnityEngine
 		{
 			[FreeFunction]
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 			get;
 			[FreeFunction(ThrowsException = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			[param: Unmarshalled]
+			[param: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 			set;
 		}
 
@@ -32,14 +33,18 @@ namespace UnityEngine
 			set;
 		}
 
-		public static extern LightProbes lightProbes
+		public static LightProbes lightProbes
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[NativeName("SetLightProbes")]
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<LightProbes>(LightmapSettings.get_lightProbes_Injected());
+			}
 			[FreeFunction]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			[NativeName("SetLightProbes")]
+			set
+			{
+				LightmapSettings.set_lightProbes_Injected(Object.MarshalledUnityObject.Marshal<LightProbes>(value));
+			}
 		}
 
 		[NativeName("ResetAndAwakeFromLoad")]
@@ -69,5 +74,11 @@ namespace UnityEngine
 			{
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_lightProbes_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_lightProbes_Injected(IntPtr value);
 	}
 }

@@ -30,41 +30,41 @@ namespace UnityEngine
 		TouchEnter,
 		TouchLeave,
 		TouchStationary,
-		[Obsolete("Use MouseDown instead (UnityUpgradable) -> MouseDown", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use MouseDown instead (UnityUpgradable) -> MouseDown", true)]
 		mouseDown = 0,
 		[Obsolete("Use MouseUp instead (UnityUpgradable) -> MouseUp", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		mouseUp,
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use MouseMove instead (UnityUpgradable) -> MouseMove", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		mouseMove,
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use MouseDrag instead (UnityUpgradable) -> MouseDrag", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		mouseDrag,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use KeyDown instead (UnityUpgradable) -> KeyDown", true)]
-		keyDown,
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		keyDown,
 		[Obsolete("Use KeyUp instead (UnityUpgradable) -> KeyUp", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		keyUp,
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use ScrollWheel instead (UnityUpgradable) -> ScrollWheel", true)]
 		scrollWheel,
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use Repaint instead (UnityUpgradable) -> Repaint", true)]
-		repaint,
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		repaint,
 		[Obsolete("Use Layout instead (UnityUpgradable) -> Layout", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		layout,
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use DragUpdated instead (UnityUpgradable) -> DragUpdated", true)]
 		dragUpdated,
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use DragPerform instead (UnityUpgradable) -> DragPerform", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		dragPerform,
-		[Obsolete("Use Ignore instead (UnityUpgradable) -> Ignore", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Use Ignore instead (UnityUpgradable) -> Ignore", true)]
 		ignore,
 		[Obsolete("Use Used instead (UnityUpgradable) -> Used", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]

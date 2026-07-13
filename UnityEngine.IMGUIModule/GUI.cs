@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/IMGUI/GUISkin.bindings.h")]
 	[NativeHeader("Modules/IMGUI/GUI.bindings.h")]
+	[NativeHeader("Modules/IMGUI/GUISkin.bindings.h")]
 	public class GUI
 	{
 		public static Color color
@@ -90,32 +91,40 @@ namespace UnityEngine
 			set;
 		}
 
-		internal static extern Material blendMaterial
+		internal static Material blendMaterial
 		{
 			[FreeFunction("GetGUIBlendMaterial")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Material>(GUI.get_blendMaterial_Injected());
+			}
 		}
 
-		internal static extern Material blitMaterial
+		internal static Material blitMaterial
 		{
 			[FreeFunction("GetGUIBlitMaterial")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Material>(GUI.get_blitMaterial_Injected());
+			}
 		}
 
-		internal static extern Material roundedRectMaterial
+		internal static Material roundedRectMaterial
 		{
 			[FreeFunction("GetGUIRoundedRectMaterial")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Material>(GUI.get_roundedRectMaterial_Injected());
+			}
 		}
 
-		internal static extern Material roundedRectWithColorPerBorderMaterial
+		internal static Material roundedRectWithColorPerBorderMaterial
 		{
 			[FreeFunction("GetGUIRoundedRectWithColorPerBorderMaterial")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Material>(GUI.get_roundedRectWithColorPerBorderMaterial_Injected());
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -128,37 +137,130 @@ namespace UnityEngine
 		internal static extern void ReleaseMouseControl();
 
 		[FreeFunction("GetGUIState().SetNameOfNextControl")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetNextControlName(string name);
+		public unsafe static void SetNextControlName(string name)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GUI.SetNextControlName_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("GetGUIState().GetNameOfFocusedControl")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetNameOfFocusedControl();
+		public static string GetNameOfFocusedControl()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				GUI.GetNameOfFocusedControl_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction("GetGUIState().FocusKeyboardControl")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void FocusControl(string name);
+		public unsafe static void FocusControl(string name)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GUI.FocusControl_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void InternalRepaintEditorWindow();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string Internal_GetTooltip();
+		private static string Internal_GetTooltip()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				GUI.Internal_GetTooltip_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_SetTooltip(string value);
+		private unsafe static void Internal_SetTooltip(string value)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GUI.Internal_SetTooltip_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string Internal_GetMouseTooltip();
+		private static string Internal_GetMouseTooltip()
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				GUI.Internal_GetMouseTooltip_Injected(out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		private static Rect Internal_DoModalWindow(int id, int instanceID, Rect clientRect, GUI.WindowFunction func, GUIContent content, GUIStyle style, object skin)
+		private static Rect Internal_DoModalWindow(int id, int instanceID, Rect clientRect, GUI.WindowFunction func, GUIContent content, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] GUIStyle style, object skin)
 		{
 			Rect rect;
 			GUI.Internal_DoModalWindow_Injected(id, instanceID, ref clientRect, func, content, style, skin, out rect);
 			return rect;
 		}
 
-		private static Rect Internal_DoWindow(int id, int instanceID, Rect clientRect, GUI.WindowFunction func, GUIContent title, GUIStyle style, object skin, bool forceRectOnLayout)
+		private static Rect Internal_DoWindow(int id, int instanceID, Rect clientRect, GUI.WindowFunction func, GUIContent title, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] GUIStyle style, object skin, bool forceRectOnLayout)
 		{
 			Rect rect;
 			GUI.Internal_DoWindow_Injected(id, instanceID, ref clientRect, func, title, style, skin, forceRectOnLayout, out rect);
@@ -188,8 +290,21 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_EndWindows();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string Internal_Concatenate(GUIContent first, GUIContent second);
+		internal static string Internal_Concatenate(GUIContent first, GUIContent second)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				GUI.Internal_Concatenate_Injected(first, second, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		internal static int scrollTroughSide { get; set; }
 
@@ -245,18 +360,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				string text = GUI.Internal_GetTooltip();
-				bool flag = text != null;
-				string text2;
-				if (flag)
-				{
-					text2 = text;
-				}
-				else
-				{
-					text2 = "";
-				}
-				return text2;
+				return GUI.Internal_GetTooltip();
 			}
 			set
 			{
@@ -784,25 +888,17 @@ namespace UnityEngine
 			textEditor.SaveBackup();
 			textEditor.position = position;
 			textEditor.style = style;
-			textEditor.multiline = multiline;
+			textEditor.isMultiline = multiline;
 			textEditor.controlID = id;
 			textEditor.DetectFocusChange();
-			bool isRequiredToForceOpen = TouchScreenKeyboard.isRequiredToForceOpen;
-			if (isRequiredToForceOpen)
+			bool flag2 = TouchScreenKeyboard.isSupported && !TouchScreenKeyboard.isInPlaceEditingAllowed;
+			if (flag2)
 			{
-				GUI.HandleTextFieldEventForDesktopWithForcedKeyboard(position, id, content, multiline, maxLength, style, secureText, textEditor);
+				GUI.HandleTextFieldEventForTouchscreen(position, id, content, multiline, maxLength, style, secureText, maskChar, textEditor);
 			}
 			else
 			{
-				bool flag2 = TouchScreenKeyboard.isSupported && !TouchScreenKeyboard.isInPlaceEditingAllowed;
-				if (flag2)
-				{
-					GUI.HandleTextFieldEventForTouchscreen(position, id, content, multiline, maxLength, style, secureText, maskChar, textEditor);
-				}
-				else
-				{
-					GUI.HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, textEditor);
-				}
+				GUI.HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, textEditor);
 			}
 			textEditor.UpdateScrollOffsetIfNeeded(Event.current);
 		}
@@ -986,6 +1082,7 @@ namespace UnityEngine
 			}
 			case EventType.Repaint:
 			{
+				editor.UpdateTextHandle();
 				bool flag15 = GUIUtility.keyboardControl != id;
 				if (flag15)
 				{
@@ -1015,54 +1112,6 @@ namespace UnityEngine
 				}
 				current.Use();
 			}
-		}
-
-		private static void HandleTextFieldEventForDesktopWithForcedKeyboard(Rect position, int id, GUIContent content, bool multiline, int maxLength, GUIStyle style, string secureText, TextEditor editor)
-		{
-			bool flag = false;
-			bool flag2 = Event.current.type == EventType.Repaint;
-			if (flag2)
-			{
-				bool flag3 = GUI.s_HotTextField != -1 && GUI.s_HotTextField != id;
-				if (flag3)
-				{
-					TextEditor textEditor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUI.s_HotTextField);
-					textEditor.keyboardOnScreen.active = false;
-					textEditor.keyboardOnScreen = null;
-				}
-				bool flag4 = editor.keyboardOnScreen != null;
-				if (flag4)
-				{
-					bool flag5 = GUIUtility.keyboardControl != id || !Application.isFocused;
-					if (flag5)
-					{
-						editor.keyboardOnScreen.active = false;
-						editor.keyboardOnScreen = null;
-					}
-					else
-					{
-						bool flag6 = !editor.keyboardOnScreen.active;
-						if (flag6)
-						{
-							flag = true;
-						}
-					}
-				}
-				else
-				{
-					bool flag7 = GUIUtility.keyboardControl == id && Application.isFocused;
-					if (flag7)
-					{
-						flag = true;
-					}
-				}
-			}
-			bool flag8 = flag;
-			if (flag8)
-			{
-				editor.keyboardOnScreen = TouchScreenKeyboard.Open(secureText ?? content.text, TouchScreenKeyboardType.Default, true, multiline, secureText != null);
-			}
-			GUI.HandleTextFieldEventForDesktop(position, id, content, multiline, maxLength, style, editor);
 		}
 
 		public static bool Toggle(Rect position, bool value, string text)
@@ -1139,12 +1188,17 @@ namespace UnityEngine
 
 		internal static int Toolbar(Rect position, int selected, GUIContent[] contents, string[] controlNames, GUIStyle style, GUI.ToolbarButtonSize buttonSize, bool[] contentsEnabled = null)
 		{
-			GUIUtility.CheckOnGUI();
 			GUIStyle guistyle;
 			GUIStyle guistyle2;
 			GUIStyle guistyle3;
 			GUI.FindStyles(ref style, out guistyle, out guistyle2, out guistyle3, "left", "mid", "right");
-			return GUI.DoButtonGrid(position, selected, contents, controlNames, contents.Length, style, guistyle, guistyle2, guistyle3, buttonSize, contentsEnabled);
+			return GUI.Toolbar(position, selected, contents, controlNames, style, guistyle, guistyle2, guistyle3, buttonSize, contentsEnabled);
+		}
+
+		internal static int Toolbar(Rect position, int selected, GUIContent[] contents, string[] controlNames, GUIStyle style, GUIStyle firstStyle, GUIStyle midStyle, GUIStyle lastStyle, GUI.ToolbarButtonSize buttonSize, bool[] contentsEnabled = null)
+		{
+			GUIUtility.CheckOnGUI();
+			return GUI.DoButtonGrid(position, selected, contents, controlNames, contents.Length, style, firstStyle, midStyle, lastStyle, buttonSize, contentsEnabled);
 		}
 
 		public static int SelectionGrid(Rect position, int selected, string[] texts, int xCount)
@@ -1527,18 +1581,22 @@ namespace UnityEngine
 								bool flag12 = !flag11;
 								if (flag12)
 								{
-									guistyle2.Draw(rect, guicontent, GUI.enabled && flag9 && (flag10 || GUIUtility.hotControl == 0), GUI.enabled && flag10, false, false);
+									bool flag13 = rect.Overlaps(GUIClip.visibleRect);
+									if (flag13)
+									{
+										guistyle2.Draw(rect, guicontent, GUI.enabled && flag9 && (flag10 || GUIUtility.hotControl == 0), GUI.enabled && flag10, false, false);
+									}
 								}
 								else
 								{
 									guistyle = guistyle2;
 								}
-								bool flag13 = flag9;
-								if (flag13)
+								bool flag14 = flag9;
+								if (flag14)
 								{
 									GUIUtility.mouseUsed = true;
-									bool flag14 = !string.IsNullOrEmpty(guicontent.tooltip);
-									if (flag14)
+									bool flag15 = !string.IsNullOrEmpty(guicontent.tooltip);
+									if (flag15)
 									{
 										GUIStyle.SetMouseTooltip(guicontent.tooltip, rect);
 									}
@@ -1548,16 +1606,20 @@ namespace UnityEngine
 						}
 						GUI.enabled = enabled;
 					}
-					bool flag15 = guistyle != null;
-					if (flag15)
+					bool flag16 = guistyle != null;
+					if (flag16)
 					{
 						Rect rect2 = array[selected];
 						GUIContent guicontent2 = contents[selected];
-						bool flag16 = rect2.Contains(Event.current.mousePosition);
-						bool flag17 = GUIUtility.hotControl == num6;
+						bool flag17 = rect2.Contains(Event.current.mousePosition);
+						bool flag18 = GUIUtility.hotControl == num6;
 						bool enabled2 = GUI.enabled;
 						GUI.enabled &= contentsEnabled == null || contentsEnabled[selected];
-						guistyle.Draw(rect2, guicontent2, GUI.enabled && flag16 && (flag17 || GUIUtility.hotControl == 0), GUI.enabled && flag17, true, false);
+						bool flag19 = rect2.Overlaps(GUIClip.visibleRect);
+						if (flag19)
+						{
+							guistyle.Draw(rect2, guicontent2, GUI.enabled && flag17 && (flag18 || GUIUtility.hotControl == 0), GUI.enabled && flag18, true, false);
+						}
 						GUI.enabled = enabled2;
 					}
 					num2 = selected;
@@ -2264,28 +2326,61 @@ namespace UnityEngine
 		private static extern void get_color_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_color_Injected(ref Color value);
+		private static extern void set_color_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_backgroundColor_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_backgroundColor_Injected(ref Color value);
+		private static extern void set_backgroundColor_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_contentColor_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_contentColor_Injected(ref Color value);
+		private static extern void set_contentColor_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_DoModalWindow_Injected(int id, int instanceID, ref Rect clientRect, GUI.WindowFunction func, GUIContent content, GUIStyle style, object skin, out Rect ret);
+		private static extern IntPtr get_blendMaterial_Injected();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_DoWindow_Injected(int id, int instanceID, ref Rect clientRect, GUI.WindowFunction func, GUIContent title, GUIStyle style, object skin, bool forceRectOnLayout, out Rect ret);
+		private static extern IntPtr get_blitMaterial_Injected();
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DragWindow_Injected(ref Rect position);
+		private static extern IntPtr get_roundedRectMaterial_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_roundedRectWithColorPerBorderMaterial_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetNextControlName_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetNameOfFocusedControl_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FocusControl_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetTooltip_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetTooltip_Injected(ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetMouseTooltip_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DoModalWindow_Injected(int id, int instanceID, [In] ref Rect clientRect, GUI.WindowFunction func, GUIContent content, GUIStyle style, object skin, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DoWindow_Injected(int id, int instanceID, [In] ref Rect clientRect, GUI.WindowFunction func, GUIContent title, GUIStyle style, object skin, bool forceRectOnLayout, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DragWindow_Injected([In] ref Rect position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_Concatenate_Injected(GUIContent first, GUIContent second, out ManagedSpanWrapper ret);
 
 		private const float s_ScrollStepSize = 10f;
 

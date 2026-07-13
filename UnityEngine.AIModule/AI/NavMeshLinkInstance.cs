@@ -4,21 +4,24 @@ namespace UnityEngine.AI
 {
 	public struct NavMeshLinkInstance
 	{
+		internal int id { readonly get; set; }
+
+		[Obsolete("valid has been deprecated. Use NavMesh.IsLinkValid() instead.")]
 		public bool valid
 		{
 			get
 			{
-				return this.id != 0 && NavMesh.IsValidLinkHandle(this.id);
+				return NavMesh.IsValidLinkHandle(this.id);
 			}
 		}
 
-		internal int id { readonly get; set; }
-
+		[Obsolete("Remove() has been deprecated. Use NavMesh.RemoveLink() instead.")]
 		public void Remove()
 		{
 			NavMesh.RemoveLinkInternal(this.id);
 		}
 
+		[Obsolete("owner has been deprecated. Use NavMesh.GetLinkOwner() and NavMesh.SetLinkOwner() instead.")]
 		public Object owner
 		{
 			get

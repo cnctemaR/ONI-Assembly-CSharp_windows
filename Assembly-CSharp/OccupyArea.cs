@@ -187,6 +187,11 @@ public class OccupyArea : KMonoBehaviour
 		}
 	}
 
+	public int[] GetOccupiedGridCells()
+	{
+		return this.occupiedGridCells;
+	}
+
 	public int GetWidthInCells()
 	{
 		int num = int.MaxValue;

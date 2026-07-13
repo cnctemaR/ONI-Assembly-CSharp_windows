@@ -6,345 +6,907 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Video
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Video/Public/VideoPlayer.h")]
+	[RequireComponent(typeof(Transform))]
 	[RequiredByNativeCode]
 	public sealed class VideoPlayer : Behaviour
 	{
-		public extern VideoSource source
+		public VideoSource source
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_source_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_source_Injected(intPtr, value);
+			}
 		}
 
-		public extern VideoTimeUpdateMode timeUpdateMode
+		public VideoTimeUpdateMode timeUpdateMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_timeUpdateMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_timeUpdateMode_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("VideoUrl")]
-		public extern string url
+		public unsafe string url
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					VideoPlayer.get_url_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					VideoPlayer.set_url_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
 		[NativeName("VideoClip")]
-		public extern VideoClip clip
+		public VideoClip clip
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<VideoClip>(VideoPlayer.get_clip_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_clip_Injected(intPtr, Object.MarshalledUnityObject.Marshal<VideoClip>(value));
+			}
 		}
 
-		public extern VideoRenderMode renderMode
+		public VideoRenderMode renderMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_renderMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_renderMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool canSetTimeUpdateMode
+		public bool canSetTimeUpdateMode
 		{
 			[NativeName("CanSetTimeUpdateMode")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_canSetTimeUpdateMode_Injected(intPtr);
+			}
 		}
 
 		[NativeHeader("Runtime/Camera/Camera.h")]
-		public extern Camera targetCamera
+		public Camera targetCamera
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Camera>(VideoPlayer.get_targetCamera_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_targetCamera_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Camera>(value));
+			}
 		}
 
 		[NativeHeader("Runtime/Graphics/RenderTexture.h")]
-		public extern RenderTexture targetTexture
+		public RenderTexture targetTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<RenderTexture>(VideoPlayer.get_targetTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_targetTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(value));
+			}
 		}
 
 		[NativeHeader("Runtime/Graphics/Renderer.h")]
-		public extern Renderer targetMaterialRenderer
+		public Renderer targetMaterialRenderer
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Renderer>(VideoPlayer.get_targetMaterialRenderer_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_targetMaterialRenderer_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Renderer>(value));
+			}
 		}
 
-		public extern string targetMaterialProperty
+		public unsafe string targetMaterialProperty
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					VideoPlayer.get_targetMaterialProperty_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					VideoPlayer.set_targetMaterialProperty_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
-		public extern VideoAspectRatio aspectRatio
+		public VideoAspectRatio aspectRatio
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_aspectRatio_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_aspectRatio_Injected(intPtr, value);
+			}
 		}
 
-		public extern float targetCameraAlpha
+		public float targetCameraAlpha
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_targetCameraAlpha_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_targetCameraAlpha_Injected(intPtr, value);
+			}
 		}
 
-		public extern Video3DLayout targetCamera3DLayout
+		public Video3DLayout targetCamera3DLayout
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_targetCamera3DLayout_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_targetCamera3DLayout_Injected(intPtr, value);
+			}
 		}
 
 		[NativeHeader("Runtime/Graphics/Texture.h")]
-		public extern Texture texture
+		public Texture texture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture>(VideoPlayer.get_texture_Injected(intPtr));
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Prepare();
+		public void Prepare()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.Prepare_Injected(intPtr);
+		}
 
-		public extern bool isPrepared
+		public bool isPrepared
 		{
 			[NativeName("IsPrepared")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_isPrepared_Injected(intPtr);
+			}
 		}
 
-		public extern bool waitForFirstFrame
+		public bool waitForFirstFrame
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_waitForFirstFrame_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_waitForFirstFrame_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool playOnAwake
+		public bool playOnAwake
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_playOnAwake_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_playOnAwake_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Play();
+		public void Play()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.Play_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Pause();
+		public void Pause()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.Pause_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Stop();
+		public void Stop()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.Stop_Injected(intPtr);
+		}
 
-		public extern bool isPlaying
+		public bool isPlaying
 		{
 			[NativeName("IsPlaying")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_isPlaying_Injected(intPtr);
+			}
 		}
 
-		public extern bool isPaused
+		public bool isPaused
 		{
 			[NativeName("IsPaused")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_isPaused_Injected(intPtr);
+			}
 		}
 
-		public extern bool canSetTime
+		public bool canSetTime
 		{
 			[NativeName("CanSetTime")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_canSetTime_Injected(intPtr);
+			}
 		}
 
 		[NativeName("SecPosition")]
-		public extern double time
+		public double time
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_time_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_time_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("FramePosition")]
-		public extern long frame
+		public long frame
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_frame_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_frame_Injected(intPtr, value);
+			}
 		}
 
-		public extern double clockTime
+		public double clockTime
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_clockTime_Injected(intPtr);
+			}
 		}
 
-		public extern bool canStep
+		public bool canStep
 		{
 			[NativeName("CanStep")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_canStep_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StepForward();
+		public void StepForward()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.StepForward_Injected(intPtr);
+		}
 
-		public extern bool canSetPlaybackSpeed
+		public bool canSetPlaybackSpeed
 		{
 			[NativeName("CanSetPlaybackSpeed")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_canSetPlaybackSpeed_Injected(intPtr);
+			}
 		}
 
-		public extern float playbackSpeed
+		public float playbackSpeed
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_playbackSpeed_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_playbackSpeed_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("Loop")]
-		public extern bool isLooping
+		public bool isLooping
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_isLooping_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_isLooping_Injected(intPtr, value);
+			}
 		}
 
 		[Obsolete("VideoPlayer.canSetTimeSource is deprecated. Use canSetTimeUpdateMode instead. (UnityUpgradable) -> canSetTimeUpdateMode")]
-		public extern bool canSetTimeSource
+		public bool canSetTimeSource
 		{
 			[NativeName("CanSetTimeSource")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_canSetTimeSource_Injected(intPtr);
+			}
 		}
 
 		[Obsolete("VideoPlayer.timeSource is deprecated. Use timeUpdateMode instead. (UnityUpgradable) -> timeUpdateMode")]
-		public extern VideoTimeSource timeSource
+		public VideoTimeSource timeSource
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_timeSource_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_timeSource_Injected(intPtr, value);
+			}
 		}
 
-		public extern VideoTimeReference timeReference
+		public VideoTimeReference timeReference
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_timeReference_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_timeReference_Injected(intPtr, value);
+			}
 		}
 
-		public extern double externalReferenceTime
+		public double externalReferenceTime
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_externalReferenceTime_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_externalReferenceTime_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool canSetSkipOnDrop
+		public bool canSetSkipOnDrop
 		{
 			[NativeName("CanSetSkipOnDrop")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_canSetSkipOnDrop_Injected(intPtr);
+			}
 		}
 
-		public extern bool skipOnDrop
+		public bool skipOnDrop
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_skipOnDrop_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_skipOnDrop_Injected(intPtr, value);
+			}
 		}
 
-		public extern ulong frameCount
+		public ulong frameCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_frameCount_Injected(intPtr);
+			}
 		}
 
-		public extern float frameRate
+		public float frameRate
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_frameRate_Injected(intPtr);
+			}
 		}
 
 		[NativeName("Duration")]
-		public extern double length
+		public double length
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_length_Injected(intPtr);
+			}
 		}
 
-		public extern uint width
+		public uint width
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_width_Injected(intPtr);
+			}
 		}
 
-		public extern uint height
+		public uint height
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_height_Injected(intPtr);
+			}
 		}
 
-		public extern uint pixelAspectRatioNumerator
+		public uint pixelAspectRatioNumerator
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_pixelAspectRatioNumerator_Injected(intPtr);
+			}
 		}
 
-		public extern uint pixelAspectRatioDenominator
+		public uint pixelAspectRatioDenominator
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_pixelAspectRatioDenominator_Injected(intPtr);
+			}
 		}
 
-		public extern ushort audioTrackCount
+		public ushort audioTrackCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_audioTrackCount_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string GetAudioLanguageCode(ushort trackIndex);
+		public string GetAudioLanguageCode(ushort trackIndex)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				VideoPlayer.GetAudioLanguageCode_Injected(intPtr, trackIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern ushort GetAudioChannelCount(ushort trackIndex);
+		public ushort GetAudioChannelCount(ushort trackIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VideoPlayer.GetAudioChannelCount_Injected(intPtr, trackIndex);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern uint GetAudioSampleRate(ushort trackIndex);
+		public uint GetAudioSampleRate(ushort trackIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VideoPlayer.GetAudioSampleRate_Injected(intPtr, trackIndex);
+		}
 
 		public static extern ushort controlledAudioTrackMaxCount
 		{
@@ -370,51 +932,142 @@ namespace UnityEngine.Video
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern ushort GetControlledAudioTrackCount();
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetControlledAudioTrackCount(ushort value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EnableAudioTrack(ushort trackIndex, bool enabled);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsAudioTrackEnabled(ushort trackIndex);
-
-		public extern VideoAudioOutputMode audioOutputMode
+		private ushort GetControlledAudioTrackCount()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VideoPlayer.GetControlledAudioTrackCount_Injected(intPtr);
 		}
 
-		public extern bool canSetDirectAudioVolume
+		private void SetControlledAudioTrackCount(ushort value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.SetControlledAudioTrackCount_Injected(intPtr, value);
+		}
+
+		public void EnableAudioTrack(ushort trackIndex, bool enabled)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.EnableAudioTrack_Injected(intPtr, trackIndex, enabled);
+		}
+
+		public bool IsAudioTrackEnabled(ushort trackIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VideoPlayer.IsAudioTrackEnabled_Injected(intPtr, trackIndex);
+		}
+
+		public VideoAudioOutputMode audioOutputMode
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_audioOutputMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_audioOutputMode_Injected(intPtr, value);
+			}
+		}
+
+		public bool canSetDirectAudioVolume
 		{
 			[NativeName("CanSetDirectAudioVolume")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_canSetDirectAudioVolume_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetDirectAudioVolume(ushort trackIndex);
+		public float GetDirectAudioVolume(ushort trackIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VideoPlayer.GetDirectAudioVolume_Injected(intPtr, trackIndex);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetDirectAudioVolume(ushort trackIndex, float volume);
+		public void SetDirectAudioVolume(ushort trackIndex, float volume)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.SetDirectAudioVolume_Injected(intPtr, trackIndex, volume);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetDirectAudioMute(ushort trackIndex);
+		public bool GetDirectAudioMute(ushort trackIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VideoPlayer.GetDirectAudioMute_Injected(intPtr, trackIndex);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetDirectAudioMute(ushort trackIndex, bool mute);
+		public void SetDirectAudioMute(ushort trackIndex, bool mute)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.SetDirectAudioMute_Injected(intPtr, trackIndex, mute);
+		}
 
 		[NativeHeader("Modules/Audio/Public/AudioSource.h")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern AudioSource GetTargetAudioSource(ushort trackIndex);
+		public AudioSource GetTargetAudioSource(ushort trackIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<AudioSource>(VideoPlayer.GetTargetAudioSource_Injected(intPtr, trackIndex));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetTargetAudioSource(ushort trackIndex, AudioSource source);
+		public void SetTargetAudioSource(ushort trackIndex, AudioSource source)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoPlayer.SetTargetAudioSource_Injected(intPtr, trackIndex, Object.MarshalledUnityObject.Marshal<AudioSource>(source));
+		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event VideoPlayer.EventHandler prepareCompleted;
@@ -437,14 +1090,28 @@ namespace UnityEngine.Video
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event VideoPlayer.TimeEventHandler clockResyncOccurred;
 
-		public extern bool sendFrameReadyEvents
+		public bool sendFrameReadyEvents
 		{
 			[NativeName("AreFrameReadyEventsEnabled")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoPlayer.get_sendFrameReadyEvents_Injected(intPtr);
+			}
 			[NativeName("EnableFrameReadyEvents")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VideoPlayer.set_sendFrameReadyEvents_Injected(intPtr, value);
+			}
 		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -529,6 +1196,264 @@ namespace UnityEngine.Video
 				source.clockResyncOccurred(source, seconds);
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VideoSource get_source_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_source_Injected(IntPtr _unity_self, VideoSource value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VideoTimeUpdateMode get_timeUpdateMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_timeUpdateMode_Injected(IntPtr _unity_self, VideoTimeUpdateMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_url_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_url_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_clip_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_clip_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VideoRenderMode get_renderMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_renderMode_Injected(IntPtr _unity_self, VideoRenderMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canSetTimeUpdateMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_targetCamera_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetCamera_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_targetTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetTexture_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_targetMaterialRenderer_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetMaterialRenderer_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_targetMaterialProperty_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetMaterialProperty_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VideoAspectRatio get_aspectRatio_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_aspectRatio_Injected(IntPtr _unity_self, VideoAspectRatio value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_targetCameraAlpha_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetCameraAlpha_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Video3DLayout get_targetCamera3DLayout_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetCamera3DLayout_Injected(IntPtr _unity_self, Video3DLayout value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_texture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Prepare_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isPrepared_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_waitForFirstFrame_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_waitForFirstFrame_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_playOnAwake_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_playOnAwake_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Play_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Pause_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Stop_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isPlaying_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isPaused_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canSetTime_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern double get_time_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_time_Injected(IntPtr _unity_self, double value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long get_frame_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_frame_Injected(IntPtr _unity_self, long value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern double get_clockTime_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canStep_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StepForward_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canSetPlaybackSpeed_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_playbackSpeed_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_playbackSpeed_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isLooping_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_isLooping_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canSetTimeSource_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VideoTimeSource get_timeSource_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_timeSource_Injected(IntPtr _unity_self, VideoTimeSource value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VideoTimeReference get_timeReference_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_timeReference_Injected(IntPtr _unity_self, VideoTimeReference value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern double get_externalReferenceTime_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_externalReferenceTime_Injected(IntPtr _unity_self, double value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canSetSkipOnDrop_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_skipOnDrop_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_skipOnDrop_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong get_frameCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_frameRate_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern double get_length_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_width_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_height_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_pixelAspectRatioNumerator_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_pixelAspectRatioDenominator_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ushort get_audioTrackCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAudioLanguageCode_Injected(IntPtr _unity_self, ushort trackIndex, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ushort GetAudioChannelCount_Injected(IntPtr _unity_self, ushort trackIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetAudioSampleRate_Injected(IntPtr _unity_self, ushort trackIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ushort GetControlledAudioTrackCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetControlledAudioTrackCount_Injected(IntPtr _unity_self, ushort value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableAudioTrack_Injected(IntPtr _unity_self, ushort trackIndex, bool enabled);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsAudioTrackEnabled_Injected(IntPtr _unity_self, ushort trackIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VideoAudioOutputMode get_audioOutputMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_audioOutputMode_Injected(IntPtr _unity_self, VideoAudioOutputMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canSetDirectAudioVolume_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetDirectAudioVolume_Injected(IntPtr _unity_self, ushort trackIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetDirectAudioVolume_Injected(IntPtr _unity_self, ushort trackIndex, float volume);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetDirectAudioMute_Injected(IntPtr _unity_self, ushort trackIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetDirectAudioMute_Injected(IntPtr _unity_self, ushort trackIndex, bool mute);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetTargetAudioSource_Injected(IntPtr _unity_self, ushort trackIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTargetAudioSource_Injected(IntPtr _unity_self, ushort trackIndex, IntPtr source);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_sendFrameReadyEvents_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sendFrameReadyEvents_Injected(IntPtr _unity_self, bool value);
 
 		public delegate void EventHandler(VideoPlayer source);
 

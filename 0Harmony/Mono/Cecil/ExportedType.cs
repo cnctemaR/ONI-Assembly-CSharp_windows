@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public sealed class ExportedType : IMetadataTokenProvider
+	internal sealed class ExportedType : IMetadataTokenProvider
 	{
 		public string Namespace
 		{

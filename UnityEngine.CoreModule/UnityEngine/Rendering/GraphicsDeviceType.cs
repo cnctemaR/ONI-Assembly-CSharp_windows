@@ -16,6 +16,7 @@ namespace UnityEngine.Rendering
 		Null,
 		[Obsolete("Xbox360 is no longer supported in Unity 5.5+")]
 		Xbox360 = 6,
+		[Obsolete("OpenGL ES 2.0 is no longer supported in Unity 2023.1")]
 		OpenGLES2 = 8,
 		OpenGLES3 = 11,
 		[Obsolete("PVita is no longer supported as of Unity 2018")]
@@ -37,6 +38,8 @@ namespace UnityEngine.Rendering
 		GameCoreScarlett = -1,
 		GameCoreXboxSeries = 25,
 		PlayStation5,
-		PlayStation5NGGC
+		PlayStation5NGGC,
+		WebGPU,
+		Switch2
 	}
 }

@@ -9,9 +9,9 @@ using System.Security.Permissions;
 
 namespace System.Reflection
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_Module))]
 	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	internal class RuntimeModule : Module

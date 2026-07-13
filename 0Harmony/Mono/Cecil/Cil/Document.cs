@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class Document : DebugInformation
+	internal sealed class Document : DebugInformation
 	{
 		public string Url
 		{

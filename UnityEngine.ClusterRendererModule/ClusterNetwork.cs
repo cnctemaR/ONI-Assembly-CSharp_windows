@@ -4,6 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[Obsolete("This type is deprecated and will be removed in a future release.", false)]
 	[NativeHeader("Modules/ClusterRenderer/ClusterNetwork.h")]
 	public class ClusterNetwork
 	{

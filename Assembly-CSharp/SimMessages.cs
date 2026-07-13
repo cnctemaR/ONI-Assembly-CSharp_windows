@@ -830,6 +830,27 @@ public static class SimMessages
 			ptr->mass = mass;
 			ptr->elementIdx = elementIndex;
 			ptr->radius = radius;
+			ptr->height = 0;
+			Sim.SIM_HandleMessage(1727657959, sizeof(SimMessages.MassConsumptionMessage), (byte*)ptr);
+		}
+	}
+
+	public unsafe static void ConsumeMass(int gameCell, SimHashes element, float mass, byte width, byte height, int callbackIdx = -1)
+	{
+		if (!Grid.IsValidCell(gameCell) || height == 0)
+		{
+			return;
+		}
+		ushort elementIndex = ElementLoader.GetElementIndex(element);
+		checked
+		{
+			SimMessages.MassConsumptionMessage* ptr = stackalloc SimMessages.MassConsumptionMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.MassConsumptionMessage)];
+			ptr->cellIdx = gameCell;
+			ptr->callbackIdx = callbackIdx;
+			ptr->mass = mass;
+			ptr->elementIdx = elementIndex;
+			ptr->radius = width;
+			ptr->height = height;
 			Sim.SIM_HandleMessage(1727657959, sizeof(SimMessages.MassConsumptionMessage), (byte*)ptr);
 		}
 	}
@@ -1527,6 +1548,8 @@ public static class SimMessages
 		public ushort elementIdx;
 
 		public byte radius;
+
+		public byte height;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

@@ -2,6 +2,7 @@
 
 namespace UnityEngine.Experimental.AI
 {
+	[Obsolete("The experimental NavMeshLocation struct has been deprecated without replacement.")]
 	public struct NavMeshLocation
 	{
 		public readonly PolygonId polygon { get; }

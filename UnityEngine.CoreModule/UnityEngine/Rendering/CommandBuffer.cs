@@ -15,11 +15,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Export/Graphics/RenderingCommandBuffer.bindings.h")]
-	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Shaders/RayTracing/RayTracingShader.h")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Shaders/RayTracingShader.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Export/Graphics/RenderingCommandBuffer.bindings.h")]
 	public class CommandBuffer : IDisposable
 	{
 		public void ConvertTexture(RenderTargetIdentifier src, RenderTargetIdentifier dst)
@@ -35,8 +35,15 @@ namespace UnityEngine.Rendering
 		}
 
 		[NativeMethod("AddWaitAllAsyncReadbackRequests")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void WaitAllAsyncReadbackRequests();
+		public void WaitAllAsyncReadbackRequests()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.WaitAllAsyncReadbackRequests_Injected(intPtr);
+		}
 
 		public void RequestAsyncReadback(ComputeBuffer src, Action<AsyncGPUReadbackRequest> callback)
 		{
@@ -259,277 +266,1420 @@ namespace UnityEngine.Rendering
 		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_1([NotNull("ArgumentNullException")] ComputeBuffer src, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_1([NotNull] ComputeBuffer src, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = ComputeBuffer.BindingsMarshaller.ConvertToNative(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_1_Injected(intPtr, intPtr2, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_2([NotNull("ArgumentNullException")] ComputeBuffer src, int size, int offset, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_2([NotNull] ComputeBuffer src, int size, int offset, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = ComputeBuffer.BindingsMarshaller.ConvertToNative(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_2_Injected(intPtr, intPtr2, size, offset, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_3([NotNull("ArgumentNullException")] Texture src, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_3([NotNull] Texture src, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Texture>(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_3_Injected(intPtr, intPtr2, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_4([NotNull("ArgumentNullException")] Texture src, int mipIndex, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_4([NotNull] Texture src, int mipIndex, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Texture>(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_4_Injected(intPtr, intPtr2, mipIndex, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_5([NotNull("ArgumentNullException")] Texture src, int mipIndex, GraphicsFormat dstFormat, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_5([NotNull] Texture src, int mipIndex, GraphicsFormat dstFormat, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Texture>(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_5_Injected(intPtr, intPtr2, mipIndex, dstFormat, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_6([NotNull("ArgumentNullException")] Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_6([NotNull] Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Texture>(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_6_Injected(intPtr, intPtr2, mipIndex, x, width, y, height, z, depth, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_7([NotNull("ArgumentNullException")] Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, GraphicsFormat dstFormat, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_7([NotNull] Texture src, int mipIndex, int x, int width, int y, int height, int z, int depth, GraphicsFormat dstFormat, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Texture>(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_7_Injected(intPtr, intPtr2, mipIndex, x, width, y, height, z, depth, dstFormat, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_8([NotNull("ArgumentNullException")] GraphicsBuffer src, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_8([NotNull] GraphicsBuffer src, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_8_Injected(intPtr, intPtr2, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddRequestAsyncReadback")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe extern void Internal_RequestAsyncReadback_9([NotNull("ArgumentNullException")] GraphicsBuffer src, int size, int offset, [NotNull("ArgumentNullException")] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null);
+		private unsafe void Internal_RequestAsyncReadback_9([NotNull] GraphicsBuffer src, int size, int offset, [NotNull] Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData = null)
+		{
+			if (src == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			if (callback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(callback, "callback");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(src);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(src, "src");
+			}
+			CommandBuffer.Internal_RequestAsyncReadback_9_Injected(intPtr, intPtr2, size, offset, callback, nativeArrayData);
+		}
 
 		[NativeMethod("AddSetInvertCulling")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetInvertCulling(bool invertCulling);
+		public void SetInvertCulling(bool invertCulling)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetInvertCulling_Injected(intPtr, invertCulling);
+		}
 
 		private void ConvertTexture_Internal(RenderTargetIdentifier src, int srcElement, RenderTargetIdentifier dst, int dstElement)
 		{
-			this.ConvertTexture_Internal_Injected(ref src, srcElement, ref dst, dstElement);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.ConvertTexture_Internal_Injected(intPtr, ref src, srcElement, ref dst, dstElement);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetSinglePassStereo", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetSinglePassStereo(SinglePassStereoMode mode);
+		private void Internal_SetSinglePassStereo(SinglePassStereoMode mode)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_SetSinglePassStereo_Injected(intPtr, mode);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::InitBuffer")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr InitBuffer();
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::CreateGPUFence_Internal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr CreateGPUFence_Internal(GraphicsFenceType fenceType, SynchronisationStageFlags stage);
+		private IntPtr CreateGPUFence_Internal(GraphicsFenceType fenceType, SynchronisationStageFlags stage)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CommandBuffer.CreateGPUFence_Internal_Injected(intPtr, fenceType, stage);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::WaitOnGPUFence_Internal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void WaitOnGPUFence_Internal(IntPtr fencePtr, SynchronisationStageFlags stage);
+		private void WaitOnGPUFence_Internal(IntPtr fencePtr, SynchronisationStageFlags stage)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.WaitOnGPUFence_Internal_Injected(intPtr, fencePtr, stage);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::ReleaseBuffer", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ReleaseBuffer();
+		private void ReleaseBuffer()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.ReleaseBuffer_Injected(intPtr);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeFloatParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetComputeFloatParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, float val);
+		public void SetComputeFloatParam([NotNull] ComputeShader computeShader, int nameID, float val)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.SetComputeFloatParam_Injected(intPtr, intPtr2, nameID, val);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeIntParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetComputeIntParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, int val);
+		public void SetComputeIntParam([NotNull] ComputeShader computeShader, int nameID, int val)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.SetComputeIntParam_Injected(intPtr, intPtr2, nameID, val);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeVectorParam", HasExplicitThis = true)]
-		public void SetComputeVectorParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, Vector4 val)
+		public void SetComputeVectorParam([NotNull] ComputeShader computeShader, int nameID, Vector4 val)
 		{
-			this.SetComputeVectorParam_Injected(computeShader, nameID, ref val);
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.SetComputeVectorParam_Injected(intPtr, intPtr2, nameID, ref val);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeVectorArrayParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetComputeVectorArrayParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] Vector4[] values);
+		public unsafe void SetComputeVectorArrayParam([NotNull] ComputeShader computeShader, int nameID, Vector4[] values)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			Span<Vector4> span = new Span<Vector4>(values);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.SetComputeVectorArrayParam_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeMatrixParam", HasExplicitThis = true)]
-		public void SetComputeMatrixParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, Matrix4x4 val)
+		public void SetComputeMatrixParam([NotNull] ComputeShader computeShader, int nameID, Matrix4x4 val)
 		{
-			this.SetComputeMatrixParam_Injected(computeShader, nameID, ref val);
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.SetComputeMatrixParam_Injected(intPtr, intPtr2, nameID, ref val);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeMatrixArrayParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetComputeMatrixArrayParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] Matrix4x4[] values);
+		public unsafe void SetComputeMatrixArrayParam([NotNull] ComputeShader computeShader, int nameID, Matrix4x4[] values)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			Span<Matrix4x4> span = new Span<Matrix4x4>(values);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.SetComputeMatrixArrayParam_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetComputeFloats", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeFloats([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] float[] values);
+		private unsafe void Internal_SetComputeFloats([NotNull] ComputeShader computeShader, int nameID, float[] values)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			Span<float> span = new Span<float>(values);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.Internal_SetComputeFloats_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetComputeInts", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeInts([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, [Unmarshalled] int[] values);
+		private unsafe void Internal_SetComputeInts([NotNull] ComputeShader computeShader, int nameID, int[] values)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			Span<int> span = new Span<int>(values);
+			fixed (int* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.Internal_SetComputeInts_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetComputeTextureParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeTextureParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int nameID, ref RenderTargetIdentifier rt, int mipLevel, RenderTextureSubElement element);
-
-		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeBufferParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeBufferParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int nameID, ComputeBuffer buffer);
-
-		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeBufferParam", HasExplicitThis = true)]
-		private void Internal_SetComputeGraphicsBufferHandleParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBufferHandle bufferHandle)
+		private void Internal_SetComputeTextureParam([NotNull] ComputeShader computeShader, int kernelIndex, int nameID, ref RenderTargetIdentifier rt, int mipLevel, RenderTextureSubElement element)
 		{
-			this.Internal_SetComputeGraphicsBufferHandleParam_Injected(computeShader, kernelIndex, nameID, ref bufferHandle);
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_SetComputeTextureParam_Injected(intPtr, intPtr2, kernelIndex, nameID, ref rt, mipLevel, element);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeBufferParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeGraphicsBufferParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBuffer buffer);
+		private void Internal_SetComputeBufferParam([NotNull] ComputeShader computeShader, int kernelIndex, int nameID, ComputeBuffer buffer)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_SetComputeBufferParam_Injected(intPtr, intPtr2, kernelIndex, nameID, (buffer == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer));
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeBufferParam", HasExplicitThis = true)]
+		private void Internal_SetComputeGraphicsBufferHandleParam([NotNull] ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBufferHandle bufferHandle)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_SetComputeGraphicsBufferHandleParam_Injected(intPtr, intPtr2, kernelIndex, nameID, ref bufferHandle);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeBufferParam", HasExplicitThis = true)]
+		private void Internal_SetComputeGraphicsBufferParam([NotNull] ComputeShader computeShader, int kernelIndex, int nameID, GraphicsBuffer buffer)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_SetComputeGraphicsBufferParam_Injected(intPtr, intPtr2, kernelIndex, nameID, (buffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer));
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeConstantBufferParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeConstantComputeBufferParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, ComputeBuffer buffer, int offset, int size);
+		private void Internal_SetComputeConstantComputeBufferParam([NotNull] ComputeShader computeShader, int nameID, ComputeBuffer buffer, int offset, int size)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_SetComputeConstantComputeBufferParam_Injected(intPtr, intPtr2, nameID, (buffer == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer), offset, size);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeConstantBufferParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeConstantGraphicsBufferParam([NotNull("ArgumentNullException")] ComputeShader computeShader, int nameID, GraphicsBuffer buffer, int offset, int size);
+		private void Internal_SetComputeConstantGraphicsBufferParam([NotNull] ComputeShader computeShader, int nameID, GraphicsBuffer buffer, int offset, int size)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_SetComputeConstantGraphicsBufferParam_Injected(intPtr, intPtr2, nameID, (buffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer), offset, size);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeParamsFromMaterial", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeParamsFromMaterial([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, Material material);
+		private void Internal_SetComputeParamsFromMaterial([NotNull] ComputeShader computeShader, int kernelIndex, Material material)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_SetComputeParamsFromMaterial_Injected(intPtr, intPtr2, kernelIndex, Object.MarshalledUnityObject.Marshal<Material>(material));
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DispatchCompute", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DispatchCompute([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, int threadGroupsX, int threadGroupsY, int threadGroupsZ);
+		private void Internal_DispatchCompute([NotNull] ComputeShader computeShader, int kernelIndex, int threadGroupsX, int threadGroupsY, int threadGroupsZ)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_DispatchCompute_Injected(intPtr, intPtr2, kernelIndex, threadGroupsX, threadGroupsY, threadGroupsZ);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DispatchComputeIndirect", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DispatchComputeIndirect([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, ComputeBuffer indirectBuffer, uint argsOffset);
+		private void Internal_DispatchComputeIndirect([NotNull] ComputeShader computeShader, int kernelIndex, ComputeBuffer indirectBuffer, uint argsOffset)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_DispatchComputeIndirect_Injected(intPtr, intPtr2, kernelIndex, (indirectBuffer == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(indirectBuffer), argsOffset);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DispatchComputeIndirect", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DispatchComputeIndirectGraphicsBuffer([NotNull("ArgumentNullException")] ComputeShader computeShader, int kernelIndex, GraphicsBuffer indirectBuffer, uint argsOffset);
+		private void Internal_DispatchComputeIndirectGraphicsBuffer([NotNull] ComputeShader computeShader, int kernelIndex, GraphicsBuffer indirectBuffer, uint argsOffset)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			CommandBuffer.Internal_DispatchComputeIndirectGraphicsBuffer_Injected(intPtr, intPtr2, kernelIndex, (indirectBuffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(indirectBuffer), argsOffset);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingBufferParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingBufferParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, ComputeBuffer buffer);
+		private void Internal_SetRayTracingComputeBufferParam([NotNull] RayTracingShader rayTracingShader, int nameID, ComputeBuffer buffer)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingComputeBufferParam_Injected(intPtr, intPtr2, nameID, (buffer == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer));
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingBufferParam", HasExplicitThis = true)]
+		private void Internal_SetRayTracingGraphicsBufferParam([NotNull] RayTracingShader rayTracingShader, int nameID, GraphicsBuffer buffer)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingGraphicsBufferParam_Injected(intPtr, intPtr2, nameID, (buffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer));
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingBufferParam", HasExplicitThis = true)]
+		private void Internal_SetRayTracingGraphicsBufferHandleParam([NotNull] RayTracingShader rayTracingShader, int nameID, GraphicsBufferHandle bufferHandle)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingGraphicsBufferHandleParam_Injected(intPtr, intPtr2, nameID, ref bufferHandle);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingConstantBufferParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingConstantComputeBufferParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, ComputeBuffer buffer, int offset, int size);
+		private void Internal_SetRayTracingConstantComputeBufferParam([NotNull] RayTracingShader rayTracingShader, int nameID, ComputeBuffer buffer, int offset, int size)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingConstantComputeBufferParam_Injected(intPtr, intPtr2, nameID, (buffer == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer), offset, size);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingConstantBufferParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingConstantGraphicsBufferParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, GraphicsBuffer buffer, int offset, int size);
+		private void Internal_SetRayTracingConstantGraphicsBufferParam([NotNull] RayTracingShader rayTracingShader, int nameID, GraphicsBuffer buffer, int offset, int size)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingConstantGraphicsBufferParam_Injected(intPtr, intPtr2, nameID, (buffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer), offset, size);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingTextureParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingTextureParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, ref RenderTargetIdentifier rt);
+		private void Internal_SetRayTracingTextureParam([NotNull] RayTracingShader rayTracingShader, int nameID, ref RenderTargetIdentifier rt)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingTextureParam_Injected(intPtr, intPtr2, nameID, ref rt);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingFloatParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingFloatParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, float val);
+		private void Internal_SetRayTracingFloatParam([NotNull] RayTracingShader rayTracingShader, int nameID, float val)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingFloatParam_Injected(intPtr, intPtr2, nameID, val);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingIntParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingIntParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, int val);
+		private void Internal_SetRayTracingIntParam([NotNull] RayTracingShader rayTracingShader, int nameID, int val)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingIntParam_Injected(intPtr, intPtr2, nameID, val);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingVectorParam", HasExplicitThis = true)]
-		private void Internal_SetRayTracingVectorParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, Vector4 val)
+		private void Internal_SetRayTracingVectorParam([NotNull] RayTracingShader rayTracingShader, int nameID, Vector4 val)
 		{
-			this.Internal_SetRayTracingVectorParam_Injected(rayTracingShader, nameID, ref val);
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingVectorParam_Injected(intPtr, intPtr2, nameID, ref val);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingVectorArrayParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingVectorArrayParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] Vector4[] values);
+		private unsafe void Internal_SetRayTracingVectorArrayParam([NotNull] RayTracingShader rayTracingShader, int nameID, Vector4[] values)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			Span<Vector4> span = new Span<Vector4>(values);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.Internal_SetRayTracingVectorArrayParam_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingMatrixParam", HasExplicitThis = true)]
-		private void Internal_SetRayTracingMatrixParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, Matrix4x4 val)
+		private void Internal_SetRayTracingMatrixParam([NotNull] RayTracingShader rayTracingShader, int nameID, Matrix4x4 val)
 		{
-			this.Internal_SetRayTracingMatrixParam_Injected(rayTracingShader, nameID, ref val);
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			CommandBuffer.Internal_SetRayTracingMatrixParam_Injected(intPtr, intPtr2, nameID, ref val);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingMatrixArrayParam", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingMatrixArrayParam([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] Matrix4x4[] values);
+		private unsafe void Internal_SetRayTracingMatrixArrayParam([NotNull] RayTracingShader rayTracingShader, int nameID, Matrix4x4[] values)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			Span<Matrix4x4> span = new Span<Matrix4x4>(values);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.Internal_SetRayTracingMatrixArrayParam_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingFloats", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingFloats([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] float[] values);
+		private unsafe void Internal_SetRayTracingFloats([NotNull] RayTracingShader rayTracingShader, int nameID, float[] values)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			Span<float> span = new Span<float>(values);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.Internal_SetRayTracingFloats_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingInts", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingInts([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, [Unmarshalled] int[] values);
+		private unsafe void Internal_SetRayTracingInts([NotNull] RayTracingShader rayTracingShader, int nameID, int[] values)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			Span<int> span = new Span<int>(values);
+			fixed (int* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.Internal_SetRayTracingInts_Injected(intPtr, intPtr2, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_BuildRayTracingAccelerationStructure", HasExplicitThis = true)]
-		private void Internal_BuildRayTracingAccelerationStructure([NotNull("ArgumentNullException")] RayTracingAccelerationStructure accelerationStructure, Vector3 relativeOrigin)
+		private void Internal_BuildRayTracingAccelerationStructure([NotNull] RayTracingAccelerationStructure accelerationStructure, RayTracingAccelerationStructure.BuildSettings buildSettings)
 		{
-			this.Internal_BuildRayTracingAccelerationStructure_Injected(accelerationStructure, ref relativeOrigin);
+			if (accelerationStructure == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(accelerationStructure, "accelerationStructure");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = RayTracingAccelerationStructure.BindingsMarshaller.ConvertToNative(accelerationStructure);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(accelerationStructure, "accelerationStructure");
+			}
+			CommandBuffer.Internal_BuildRayTracingAccelerationStructure_Injected(intPtr, intPtr2, ref buildSettings);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetRayTracingAccelerationStructure", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingAccelerationStructure([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, int nameID, RayTracingAccelerationStructure accelerationStructure);
+		private void Internal_SetRayTracingAccelerationStructure([NotNull] RayTracingShader rayTracingShader, int nameID, [NotNull] RayTracingAccelerationStructure accelerationStructure)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			if (accelerationStructure == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(accelerationStructure, "accelerationStructure");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			IntPtr intPtr3 = RayTracingAccelerationStructure.BindingsMarshaller.ConvertToNative(accelerationStructure);
+			if (intPtr3 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(accelerationStructure, "accelerationStructure");
+			}
+			CommandBuffer.Internal_SetRayTracingAccelerationStructure_Injected(intPtr, intPtr2, nameID, intPtr3);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetComputeRayTracingAccelerationStructure", HasExplicitThis = true)]
+		private void Internal_SetComputeRayTracingAccelerationStructure([NotNull] ComputeShader computeShader, int kernelIndex, int nameID, [NotNull] RayTracingAccelerationStructure accelerationStructure)
+		{
+			if (computeShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			if (accelerationStructure == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(accelerationStructure, "accelerationStructure");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ComputeShader>(computeShader);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(computeShader, "computeShader");
+			}
+			IntPtr intPtr3 = RayTracingAccelerationStructure.BindingsMarshaller.ConvertToNative(accelerationStructure);
+			if (intPtr3 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(accelerationStructure, "accelerationStructure");
+			}
+			CommandBuffer.Internal_SetComputeRayTracingAccelerationStructure_Injected(intPtr, intPtr2, kernelIndex, nameID, intPtr3);
+		}
 
 		[NativeMethod("AddSetRayTracingShaderPass")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetRayTracingShaderPass([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, string passName);
+		public unsafe void SetRayTracingShaderPass([NotNull] RayTracingShader rayTracingShader, string passName)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			try
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+				if (intPtr2 == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(passName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = passName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				CommandBuffer.SetRayTracingShaderPass_Injected(intPtr, intPtr2, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DispatchRays", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DispatchRays([NotNull("ArgumentNullException")] RayTracingShader rayTracingShader, string rayGenShaderName, uint width, uint height, uint depth, Camera camera = null);
+		private unsafe void Internal_DispatchRays([NotNull] RayTracingShader rayTracingShader, string rayGenShaderName, uint width, uint height, uint depth, Camera camera = null)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			try
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+				if (intPtr2 == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(rayGenShaderName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = rayGenShaderName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				CommandBuffer.Internal_DispatchRays_Injected(intPtr, intPtr2, ref managedSpanWrapper, width, height, depth, Object.MarshalledUnityObject.Marshal<Camera>(camera));
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DispatchRaysIndirect", HasExplicitThis = true, ThrowsException = true)]
+		private unsafe void Internal_DispatchRaysIndirect([NotNull] RayTracingShader rayTracingShader, string rayGenShaderName, [NotNull] GraphicsBuffer argsBuffer, uint argsOffset = 0U, Camera camera = null)
+		{
+			if (rayTracingShader == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+			}
+			if (argsBuffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(argsBuffer, "argsBuffer");
+			}
+			try
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RayTracingShader>(rayTracingShader);
+				if (intPtr2 == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(rayTracingShader, "rayTracingShader");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(rayGenShaderName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = rayGenShaderName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr3 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(argsBuffer);
+				if (intPtr3 == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(argsBuffer, "argsBuffer");
+				}
+				CommandBuffer.Internal_DispatchRaysIndirect_Injected(intPtr, intPtr2, ref managedSpanWrapper, intPtr3, argsOffset, Object.MarshalledUnityObject.Marshal<Camera>(camera));
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_BuildMachineLearningOperator", HasExplicitThis = true)]
+		private void Internal_BuildMachineLearningOperator(IntPtr machineLearningOperator)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_BuildMachineLearningOperator_Injected(intPtr, machineLearningOperator);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_SetMachineLearningOperatorTensors", HasExplicitThis = true)]
+		private unsafe void Internal_SetMachineLearningOperatorTensors(IntPtr machineLearningOperator, ReadOnlySpan<IntPtr> inputs, ReadOnlySpan<IntPtr> outputs)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<IntPtr> readOnlySpan = inputs;
+			fixed (IntPtr* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				ReadOnlySpan<IntPtr> readOnlySpan2 = outputs;
+				fixed (IntPtr* pinnableReference = readOnlySpan2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, readOnlySpan2.Length);
+					CommandBuffer.Internal_SetMachineLearningOperatorTensors_Injected(intPtr, machineLearningOperator, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DispatchMachineLearningOperator", HasExplicitThis = true)]
+		private void Internal_DispatchMachineLearningOperator(IntPtr machineLearningOperator)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DispatchMachineLearningOperator_Injected(intPtr, machineLearningOperator);
+		}
 
 		[NativeMethod("AddGenerateMips")]
 		private void Internal_GenerateMips(RenderTargetIdentifier rt)
 		{
-			this.Internal_GenerateMips_Injected(ref rt);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_GenerateMips_Injected(intPtr, ref rt);
 		}
 
 		[NativeMethod("AddResolveAntiAliasedSurface")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_ResolveAntiAliasedSurface(RenderTexture rt, RenderTexture target);
-
-		[NativeMethod("AddCopyCounterValue")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopyCounterValueCC(ComputeBuffer src, ComputeBuffer dst, uint dstOffsetBytes);
-
-		[NativeMethod("AddCopyCounterValue")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopyCounterValueGC(GraphicsBuffer src, ComputeBuffer dst, uint dstOffsetBytes);
-
-		[NativeMethod("AddCopyCounterValue")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopyCounterValueCG(ComputeBuffer src, GraphicsBuffer dst, uint dstOffsetBytes);
-
-		[NativeMethod("AddCopyCounterValue")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopyCounterValueGG(GraphicsBuffer src, GraphicsBuffer dst, uint dstOffsetBytes);
-
-		public extern string name
+		private void Internal_ResolveAntiAliasedSurface(RenderTexture rt, RenderTexture target)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_ResolveAntiAliasedSurface_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RenderTexture>(rt), Object.MarshalledUnityObject.Marshal<RenderTexture>(target));
 		}
 
-		public extern int sizeInBytes
+		[NativeMethod("AddCopyCounterValue")]
+		private void CopyCounterValueCC(ComputeBuffer src, ComputeBuffer dst, uint dstOffsetBytes)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.CopyCounterValueCC_Injected(intPtr, (src == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
+
+		[NativeMethod("AddCopyCounterValue")]
+		private void CopyCounterValueGC(GraphicsBuffer src, ComputeBuffer dst, uint dstOffsetBytes)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.CopyCounterValueGC_Injected(intPtr, (src == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
+
+		[NativeMethod("AddCopyCounterValue")]
+		private void CopyCounterValueCG(ComputeBuffer src, GraphicsBuffer dst, uint dstOffsetBytes)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.CopyCounterValueCG_Injected(intPtr, (src == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
+
+		[NativeMethod("AddCopyCounterValue")]
+		private void CopyCounterValueGG(GraphicsBuffer src, GraphicsBuffer dst, uint dstOffsetBytes)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.CopyCounterValueGG_Injected(intPtr, (src == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(src), (dst == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(dst), dstOffsetBytes);
+		}
+
+		public unsafe string name
+		{
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					CommandBuffer.get_name_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					CommandBuffer.set_name_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
+		}
+
+		public int sizeInBytes
 		{
 			[NativeMethod("GetBufferSize")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CommandBuffer.get_sizeInBytes_Injected(intPtr);
+			}
 		}
 
 		[NativeMethod("ClearCommands")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Clear();
+		public void Clear()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Clear_Injected(intPtr);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawMesh", HasExplicitThis = true)]
-		private void Internal_DrawMesh([NotNull("ArgumentNullException")] Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass, MaterialPropertyBlock properties)
+		private void Internal_DrawMesh([NotNull] Mesh mesh, Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass, MaterialPropertyBlock properties)
 		{
-			this.Internal_DrawMesh_Injected(mesh, ref matrix, material, submeshIndex, shaderPass, properties);
+			if (mesh == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(mesh);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+			}
+			CommandBuffer.Internal_DrawMesh_Injected(intPtr, intPtr2, ref matrix, Object.MarshalledUnityObject.Marshal<Material>(material), submeshIndex, shaderPass, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+		}
+
+		[NativeMethod("AddDrawMultipleMeshes")]
+		private unsafe void Internal_DrawMultipleMeshes(Matrix4x4[] matrices, Mesh[] meshes, int[] subsetIndices, int count, Material material, int shaderPass, MaterialPropertyBlock properties)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Matrix4x4> span = new Span<Matrix4x4>(matrices);
+			fixed (Matrix4x4* ptr = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+				Span<int> span2 = new Span<int>(subsetIndices);
+				fixed (int* pinnableReference = span2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span2.Length);
+					CommandBuffer.Internal_DrawMultipleMeshes_Injected(intPtr, ref managedSpanWrapper, meshes, ref managedSpanWrapper2, count, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+					ptr = null;
+				}
+			}
 		}
 
 		[NativeMethod("AddDrawRenderer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawRenderer([NotNull("ArgumentNullException")] Renderer renderer, Material material, int submeshIndex, int shaderPass);
+		private void Internal_DrawRenderer([NotNull] Renderer renderer, Material material, int submeshIndex, int shaderPass)
+		{
+			if (renderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(renderer, "renderer");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(renderer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(renderer, "renderer");
+			}
+			CommandBuffer.Internal_DrawRenderer_Injected(intPtr, intPtr2, Object.MarshalledUnityObject.Marshal<Material>(material), submeshIndex, shaderPass);
+		}
 
 		[NativeMethod("AddDrawRendererList")]
 		private void Internal_DrawRendererList(RendererList rendererList)
 		{
-			this.Internal_DrawRendererList_Injected(ref rendererList);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawRendererList_Injected(intPtr, ref rendererList);
 		}
 
 		private void Internal_DrawRenderer(Renderer renderer, Material material, int submeshIndex)
@@ -547,112 +1697,257 @@ namespace UnityEngine.Rendering
 		[NativeMethod("AddDrawProcedural")]
 		private void Internal_DrawProcedural(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int vertexCount, int instanceCount, MaterialPropertyBlock properties)
 		{
-			this.Internal_DrawProcedural_Injected(ref matrix, material, shaderPass, topology, vertexCount, instanceCount, properties);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawProcedural_Injected(intPtr, ref matrix, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, topology, vertexCount, instanceCount, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
 		}
 
 		[NativeMethod("AddDrawProceduralIndexed")]
 		private void Internal_DrawProceduralIndexed(GraphicsBuffer indexBuffer, Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int indexCount, int instanceCount, MaterialPropertyBlock properties)
 		{
-			this.Internal_DrawProceduralIndexed_Injected(indexBuffer, ref matrix, material, shaderPass, topology, indexCount, instanceCount, properties);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawProceduralIndexed_Injected(intPtr, (indexBuffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(indexBuffer), ref matrix, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, topology, indexCount, instanceCount, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawProceduralIndirect", HasExplicitThis = true)]
 		private void Internal_DrawProceduralIndirect(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			this.Internal_DrawProceduralIndirect_Injected(ref matrix, material, shaderPass, topology, bufferWithArgs, argsOffset, properties);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawProceduralIndirect_Injected(intPtr, ref matrix, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, topology, (bufferWithArgs == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(bufferWithArgs), argsOffset, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawProceduralIndexedIndirect", HasExplicitThis = true)]
 		private void Internal_DrawProceduralIndexedIndirect(GraphicsBuffer indexBuffer, Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			this.Internal_DrawProceduralIndexedIndirect_Injected(indexBuffer, ref matrix, material, shaderPass, topology, bufferWithArgs, argsOffset, properties);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawProceduralIndexedIndirect_Injected(intPtr, (indexBuffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(indexBuffer), ref matrix, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, topology, (bufferWithArgs == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(bufferWithArgs), argsOffset, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawProceduralIndirect", HasExplicitThis = true)]
 		private void Internal_DrawProceduralIndirectGraphicsBuffer(Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			this.Internal_DrawProceduralIndirectGraphicsBuffer_Injected(ref matrix, material, shaderPass, topology, bufferWithArgs, argsOffset, properties);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawProceduralIndirectGraphicsBuffer_Injected(intPtr, ref matrix, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, topology, (bufferWithArgs == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(bufferWithArgs), argsOffset, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawProceduralIndexedIndirect", HasExplicitThis = true)]
 		private void Internal_DrawProceduralIndexedIndirectGraphicsBuffer(GraphicsBuffer indexBuffer, Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
 		{
-			this.Internal_DrawProceduralIndexedIndirectGraphicsBuffer_Injected(indexBuffer, ref matrix, material, shaderPass, topology, bufferWithArgs, argsOffset, properties);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawProceduralIndexedIndirectGraphicsBuffer_Injected(intPtr, (indexBuffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(indexBuffer), ref matrix, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, topology, (bufferWithArgs == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(bufferWithArgs), argsOffset, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawMeshInstanced", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawMeshInstanced(Mesh mesh, int submeshIndex, Material material, int shaderPass, [Unmarshalled] Matrix4x4[] matrices, int count, MaterialPropertyBlock properties);
+		private unsafe void Internal_DrawMeshInstanced(Mesh mesh, int submeshIndex, Material material, int shaderPass, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.Marshal<Mesh>(mesh);
+			IntPtr intPtr3 = Object.MarshalledUnityObject.Marshal<Material>(material);
+			Span<Matrix4x4> span = new Span<Matrix4x4>(matrices);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.Internal_DrawMeshInstanced_Injected(intPtr, intPtr2, submeshIndex, intPtr3, shaderPass, ref managedSpanWrapper, count, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawMeshInstancedProcedural", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawMeshInstancedProcedural(Mesh mesh, int submeshIndex, Material material, int shaderPass, int count, MaterialPropertyBlock properties);
+		private void Internal_DrawMeshInstancedProcedural(Mesh mesh, int submeshIndex, Material material, int shaderPass, int count, MaterialPropertyBlock properties)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawMeshInstancedProcedural_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Mesh>(mesh), submeshIndex, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, count, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawMeshInstancedIndirect", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, int shaderPass, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties);
+		private void Internal_DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, int shaderPass, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawMeshInstancedIndirect_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Mesh>(mesh), submeshIndex, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, (bufferWithArgs == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(bufferWithArgs), argsOffset, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawMeshInstancedIndirect", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawMeshInstancedIndirectGraphicsBuffer(Mesh mesh, int submeshIndex, Material material, int shaderPass, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties);
+		private void Internal_DrawMeshInstancedIndirectGraphicsBuffer(Mesh mesh, int submeshIndex, Material material, int shaderPass, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawMeshInstancedIndirectGraphicsBuffer_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Mesh>(mesh), submeshIndex, Object.MarshalledUnityObject.Marshal<Material>(material), shaderPass, (bufferWithArgs == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(bufferWithArgs), argsOffset, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Internal_DrawOcclusionMesh", HasExplicitThis = true)]
 		private void Internal_DrawOcclusionMesh(RectInt normalizedCamViewport)
 		{
-			this.Internal_DrawOcclusionMesh_Injected(ref normalizedCamViewport);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_DrawOcclusionMesh_Injected(intPtr, ref normalizedCamViewport);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetRandomWriteTarget_Texture", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRandomWriteTarget_Texture(int index, ref RenderTargetIdentifier rt);
+		private void SetRandomWriteTarget_Texture(int index, ref RenderTargetIdentifier rt)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetRandomWriteTarget_Texture_Injected(intPtr, index, ref rt);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetRandomWriteTarget_Buffer", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRandomWriteTarget_Buffer(int index, ComputeBuffer uav, bool preserveCounterValue);
+		private void SetRandomWriteTarget_Buffer(int index, ComputeBuffer uav, bool preserveCounterValue)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetRandomWriteTarget_Buffer_Injected(intPtr, index, (uav == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(uav), preserveCounterValue);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetRandomWriteTarget_Buffer", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRandomWriteTarget_GraphicsBuffer(int index, GraphicsBuffer uav, bool preserveCounterValue);
+		private void SetRandomWriteTarget_GraphicsBuffer(int index, GraphicsBuffer uav, bool preserveCounterValue)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetRandomWriteTarget_GraphicsBuffer_Injected(intPtr, index, (uav == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(uav), preserveCounterValue);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::ClearRandomWriteTargets", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ClearRandomWriteTargets();
+		public void ClearRandomWriteTargets()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.ClearRandomWriteTargets_Injected(intPtr);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetViewport", HasExplicitThis = true, ThrowsException = true)]
 		public void SetViewport(Rect pixelRect)
 		{
-			this.SetViewport_Injected(ref pixelRect);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetViewport_Injected(intPtr, ref pixelRect);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EnableScissorRect", HasExplicitThis = true, ThrowsException = true)]
 		public void EnableScissorRect(Rect scissor)
 		{
-			this.EnableScissorRect_Injected(ref scissor);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.EnableScissorRect_Injected(intPtr, ref scissor);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::DisableScissorRect", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void DisableScissorRect();
+		public void DisableScissorRect()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.DisableScissorRect_Injected(intPtr);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::CopyTexture_Internal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopyTexture_Internal(ref RenderTargetIdentifier src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, ref RenderTargetIdentifier dst, int dstElement, int dstMip, int dstX, int dstY, int mode);
+		private void CopyTexture_Internal(ref RenderTargetIdentifier src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, ref RenderTargetIdentifier dst, int dstElement, int dstMip, int dstX, int dstY, int mode)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.CopyTexture_Internal_Injected(intPtr, ref src, srcElement, srcMip, srcX, srcY, srcWidth, srcHeight, ref dst, dstElement, dstMip, dstX, dstY, mode);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Blit_Texture", HasExplicitThis = true)]
 		private void Blit_Texture(Texture source, ref RenderTargetIdentifier dest, Material mat, int pass, Vector2 scale, Vector2 offset, int sourceDepthSlice, int destDepthSlice)
 		{
-			this.Blit_Texture_Injected(source, ref dest, mat, pass, ref scale, ref offset, sourceDepthSlice, destDepthSlice);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Blit_Texture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(source), ref dest, Object.MarshalledUnityObject.Marshal<Material>(mat), pass, ref scale, ref offset, sourceDepthSlice, destDepthSlice);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::Blit_Identifier", HasExplicitThis = true)]
 		private void Blit_Identifier(ref RenderTargetIdentifier source, ref RenderTargetIdentifier dest, Material mat, int pass, Vector2 scale, Vector2 offset, int sourceDepthSlice, int destDepthSlice)
 		{
-			this.Blit_Identifier_Injected(ref source, ref dest, mat, pass, ref scale, ref offset, sourceDepthSlice, destDepthSlice);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Blit_Identifier_Injected(intPtr, ref source, ref dest, Object.MarshalledUnityObject.Marshal<Material>(mat), pass, ref scale, ref offset, sourceDepthSlice, destDepthSlice);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::GetTemporaryRT", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetTemporaryRT(int nameID, int width, int height, int depthBuffer, FilterMode filter, GraphicsFormat format, int antiAliasing, bool enableRandomWrite, RenderTextureMemoryless memorylessMode, bool useDynamicScale);
+		private void GetTemporaryRT(int nameID, int width, int height, FilterMode filter, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat, int antiAliasing, bool enableRandomWrite, RenderTextureMemoryless memorylessMode, bool useDynamicScale, ShadowSamplingMode shadowSamplingMode)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.GetTemporaryRT_Injected(intPtr, nameID, width, height, filter, colorFormat, depthStencilFormat, antiAliasing, enableRandomWrite, memorylessMode, useDynamicScale, shadowSamplingMode);
+		}
+
+		public void GetTemporaryRT(int nameID, int width, int height, int depthBuffer, FilterMode filter, GraphicsFormat format, int antiAliasing, bool enableRandomWrite, RenderTextureMemoryless memorylessMode, bool useDynamicScale)
+		{
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format);
+			this.GetTemporaryRT(nameID, width, height, filter, format, depthStencilFormatLegacy, antiAliasing, enableRandomWrite, memorylessMode, useDynamicScale, ShadowSamplingMode.None);
+		}
 
 		public void GetTemporaryRT(int nameID, int width, int height, int depthBuffer, FilterMode filter, GraphicsFormat format, int antiAliasing, bool enableRandomWrite, RenderTextureMemoryless memorylessMode)
 		{
@@ -676,7 +1971,10 @@ namespace UnityEngine.Rendering
 
 		public void GetTemporaryRT(int nameID, int width, int height, int depthBuffer, FilterMode filter, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing, bool enableRandomWrite, RenderTextureMemoryless memorylessMode, bool useDynamicScale)
 		{
-			this.GetTemporaryRT(nameID, width, height, depthBuffer, filter, GraphicsFormatUtility.GetGraphicsFormat(format, readWrite), antiAliasing, enableRandomWrite, memorylessMode, useDynamicScale);
+			ShadowSamplingMode shadowSamplingModeForFormat = RenderTexture.GetShadowSamplingModeForFormat(format);
+			GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(format, readWrite);
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format, false);
+			this.GetTemporaryRT(nameID, width, height, filter, graphicsFormat, depthStencilFormatLegacy, antiAliasing, enableRandomWrite, memorylessMode, useDynamicScale, shadowSamplingModeForFormat);
 		}
 
 		public void GetTemporaryRT(int nameID, int width, int height, int depthBuffer, FilterMode filter, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing, bool enableRandomWrite, RenderTextureMemoryless memorylessMode)
@@ -701,12 +1999,12 @@ namespace UnityEngine.Rendering
 
 		public void GetTemporaryRT(int nameID, int width, int height, int depthBuffer, FilterMode filter, RenderTextureFormat format)
 		{
-			this.GetTemporaryRT(nameID, width, height, depthBuffer, filter, GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Default));
+			this.GetTemporaryRT(nameID, width, height, depthBuffer, filter, format, RenderTextureReadWrite.Default);
 		}
 
 		public void GetTemporaryRT(int nameID, int width, int height, int depthBuffer, FilterMode filter)
 		{
-			this.GetTemporaryRT(nameID, width, height, depthBuffer, filter, SystemInfo.GetGraphicsFormat(DefaultFormat.LDR));
+			this.GetTemporaryRT(nameID, width, height, depthBuffer, filter, RenderTextureFormat.Default);
 		}
 
 		public void GetTemporaryRT(int nameID, int width, int height, int depthBuffer)
@@ -722,7 +2020,12 @@ namespace UnityEngine.Rendering
 		[FreeFunction("RenderingCommandBuffer_Bindings::GetTemporaryRTWithDescriptor", HasExplicitThis = true)]
 		private void GetTemporaryRTWithDescriptor(int nameID, RenderTextureDescriptor desc, FilterMode filter)
 		{
-			this.GetTemporaryRTWithDescriptor_Injected(nameID, ref desc, filter);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.GetTemporaryRTWithDescriptor_Injected(intPtr, nameID, ref desc, filter);
 		}
 
 		public void GetTemporaryRT(int nameID, RenderTextureDescriptor desc, FilterMode filter)
@@ -736,8 +2039,21 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::GetTemporaryRTArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter, GraphicsFormat format, int antiAliasing, bool enableRandomWrite, bool useDynamicScale);
+		private void GetTemporaryRTArray(int nameID, int width, int height, int slices, FilterMode filter, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat, int antiAliasing, bool enableRandomWrite, bool useDynamicScale, ShadowSamplingMode shadowSamplingMode)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.GetTemporaryRTArray_Injected(intPtr, nameID, width, height, slices, filter, colorFormat, depthStencilFormat, antiAliasing, enableRandomWrite, useDynamicScale, shadowSamplingMode);
+		}
+
+		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter, GraphicsFormat format, int antiAliasing, bool enableRandomWrite, bool useDynamicScale)
+		{
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format);
+			this.GetTemporaryRTArray(nameID, width, height, slices, filter, format, depthStencilFormatLegacy, antiAliasing, enableRandomWrite, useDynamicScale, ShadowSamplingMode.None);
+		}
 
 		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter, GraphicsFormat format, int antiAliasing, bool enableRandomWrite)
 		{
@@ -756,27 +2072,30 @@ namespace UnityEngine.Rendering
 
 		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing, bool enableRandomWrite)
 		{
-			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, GraphicsFormatUtility.GetGraphicsFormat(format, readWrite), antiAliasing, enableRandomWrite, false);
+			ShadowSamplingMode shadowSamplingModeForFormat = RenderTexture.GetShadowSamplingModeForFormat(format);
+			GraphicsFormat graphicsFormat = GraphicsFormatUtility.GetGraphicsFormat(format, readWrite);
+			GraphicsFormat depthStencilFormatLegacy = RenderTexture.GetDepthStencilFormatLegacy(depthBuffer, format, false);
+			this.GetTemporaryRTArray(nameID, width, height, slices, filter, graphicsFormat, depthStencilFormatLegacy, antiAliasing, enableRandomWrite, false, shadowSamplingModeForFormat);
 		}
 
 		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing)
 		{
-			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, GraphicsFormatUtility.GetGraphicsFormat(format, readWrite), antiAliasing, false);
+			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, format, readWrite, antiAliasing, false);
 		}
 
 		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter, RenderTextureFormat format, RenderTextureReadWrite readWrite)
 		{
-			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, GraphicsFormatUtility.GetGraphicsFormat(format, readWrite), 1, false);
+			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, format, readWrite, 1);
 		}
 
 		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter, RenderTextureFormat format)
 		{
-			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, GraphicsFormatUtility.GetGraphicsFormat(format, RenderTextureReadWrite.Default), 1, false);
+			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, format, RenderTextureReadWrite.Default);
 		}
 
 		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer, FilterMode filter)
 		{
-			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, SystemInfo.GetGraphicsFormat(DefaultFormat.LDR), 1, false);
+			this.GetTemporaryRTArray(nameID, width, height, slices, depthBuffer, filter, RenderTextureFormat.Default);
 		}
 
 		public void GetTemporaryRTArray(int nameID, int width, int height, int slices, int depthBuffer)
@@ -790,77 +2109,189 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::ReleaseTemporaryRT", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ReleaseTemporaryRT(int nameID);
-
-		[FreeFunction("RenderingCommandBuffer_Bindings::ClearRenderTarget", HasExplicitThis = true)]
-		public void ClearRenderTarget(RTClearFlags clearFlags, Color backgroundColor, float depth, uint stencil)
+		public void ReleaseTemporaryRT(int nameID)
 		{
-			this.ClearRenderTarget_Injected(clearFlags, ref backgroundColor, depth, stencil);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.ReleaseTemporaryRT_Injected(intPtr, nameID);
 		}
 
 		public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor)
 		{
-			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
-			this.ClearRenderTarget((clearColor ? RTClearFlags.Color : RTClearFlags.None) | (clearDepth ? RTClearFlags.DepthStencil : RTClearFlags.None), backgroundColor, 1f, 0U);
+			this.ClearRenderTarget(clearDepth, clearColor, backgroundColor, 1f, 0U);
 		}
 
 		public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor, float depth)
 		{
+			this.ClearRenderTarget(clearDepth, clearColor, backgroundColor, depth, 0U);
+		}
+
+		public void ClearRenderTarget(bool clearDepth, bool clearColor, Color backgroundColor, float depth = 1f, uint stencil = 0U)
+		{
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
-			this.ClearRenderTarget((clearColor ? RTClearFlags.Color : RTClearFlags.None) | (clearDepth ? RTClearFlags.DepthStencil : RTClearFlags.None), backgroundColor, depth, 0U);
+			this.ClearRenderTargetSingle_Internal((clearColor ? RTClearFlags.Color : RTClearFlags.None) | (clearDepth ? RTClearFlags.DepthStencil : RTClearFlags.None), backgroundColor, depth, stencil);
+		}
+
+		public void ClearRenderTarget(RTClearFlags clearFlags, Color backgroundColor, float depth = 1f, uint stencil = 0U)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.ClearRenderTargetSingle_Internal(clearFlags, backgroundColor, depth, stencil);
+		}
+
+		public void ClearRenderTarget(RTClearFlags clearFlags, Color[] backgroundColors, float depth = 1f, uint stencil = 0U)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			bool flag = backgroundColors.Length < 1;
+			if (flag)
+			{
+				throw new ArgumentException(string.Format("The number of clear colors must be at least 1, but is {0}", backgroundColors.Length));
+			}
+			bool flag2 = backgroundColors.Length > SystemInfo.supportedRenderTargetCount;
+			if (flag2)
+			{
+				throw new ArgumentException(string.Format("The number of clear colors ({0}) exceeds the maximum supported number of render targets ({1})", backgroundColors.Length, SystemInfo.supportedRenderTargetCount));
+			}
+			this.ClearRenderTargetMulti_Internal(clearFlags, backgroundColors, depth, stencil);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalFloat", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalFloat(int nameID, float value);
+		public void SetGlobalFloat(int nameID, float value)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalFloat_Injected(intPtr, nameID, value);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalInt", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalInt(int nameID, int value);
+		public void SetGlobalInt(int nameID, int value)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalInt_Injected(intPtr, nameID, value);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalInteger", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalInteger(int nameID, int value);
+		public void SetGlobalInteger(int nameID, int value)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalInteger_Injected(intPtr, nameID, value);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalVector", HasExplicitThis = true)]
 		public void SetGlobalVector(int nameID, Vector4 value)
 		{
-			this.SetGlobalVector_Injected(nameID, ref value);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalVector_Injected(intPtr, nameID, ref value);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalColor", HasExplicitThis = true)]
 		public void SetGlobalColor(int nameID, Color value)
 		{
-			this.SetGlobalColor_Injected(nameID, ref value);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalColor_Injected(intPtr, nameID, ref value);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalMatrix", HasExplicitThis = true)]
 		public void SetGlobalMatrix(int nameID, Matrix4x4 value)
 		{
-			this.SetGlobalMatrix_Injected(nameID, ref value);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalMatrix_Injected(intPtr, nameID, ref value);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EnableShaderKeyword", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EnableShaderKeyword(string keyword);
+		public unsafe void EnableShaderKeyword(string keyword)
+		{
+			try
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				CommandBuffer.EnableShaderKeyword_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EnableShaderKeyword", HasExplicitThis = true)]
 		private void EnableGlobalKeyword(GlobalKeyword keyword)
 		{
-			this.EnableGlobalKeyword_Injected(ref keyword);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.EnableGlobalKeyword_Injected(intPtr, ref keyword);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EnableMaterialKeyword", HasExplicitThis = true)]
 		private void EnableMaterialKeyword(Material material, LocalKeyword keyword)
 		{
-			this.EnableMaterialKeyword_Injected(material, ref keyword);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.EnableMaterialKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material), ref keyword);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EnableComputeKeyword", HasExplicitThis = true)]
 		private void EnableComputeKeyword(ComputeShader computeShader, LocalKeyword keyword)
 		{
-			this.EnableComputeKeyword_Injected(computeShader, ref keyword);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.EnableComputeKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<ComputeShader>(computeShader), ref keyword);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::EnableRayTracingKeyword", HasExplicitThis = true)]
+		private void EnableRayTracingKeyword(RayTracingShader rayTracingShader, LocalKeyword keyword)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.EnableRayTracingKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RayTracingShader>(rayTracingShader), ref keyword);
 		}
 
 		public void EnableKeyword(in GlobalKeyword keyword)
@@ -878,26 +2309,80 @@ namespace UnityEngine.Rendering
 			this.EnableComputeKeyword(computeShader, keyword);
 		}
 
+		public void EnableKeyword(RayTracingShader rayTracingShader, in LocalKeyword keyword)
+		{
+			this.EnableRayTracingKeyword(rayTracingShader, keyword);
+		}
+
 		[FreeFunction("RenderingCommandBuffer_Bindings::DisableShaderKeyword", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void DisableShaderKeyword(string keyword);
+		public unsafe void DisableShaderKeyword(string keyword)
+		{
+			try
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(keyword, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = keyword.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				CommandBuffer.DisableShaderKeyword_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::DisableShaderKeyword", HasExplicitThis = true)]
 		private void DisableGlobalKeyword(GlobalKeyword keyword)
 		{
-			this.DisableGlobalKeyword_Injected(ref keyword);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.DisableGlobalKeyword_Injected(intPtr, ref keyword);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::DisableMaterialKeyword", HasExplicitThis = true)]
 		private void DisableMaterialKeyword(Material material, LocalKeyword keyword)
 		{
-			this.DisableMaterialKeyword_Injected(material, ref keyword);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.DisableMaterialKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material), ref keyword);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::DisableComputeKeyword", HasExplicitThis = true)]
 		private void DisableComputeKeyword(ComputeShader computeShader, LocalKeyword keyword)
 		{
-			this.DisableComputeKeyword_Injected(computeShader, ref keyword);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.DisableComputeKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<ComputeShader>(computeShader), ref keyword);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::DisableRayTracingKeyword", HasExplicitThis = true)]
+		private void DisableRayTracingKeyword(RayTracingShader rayTracingShader, LocalKeyword keyword)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.DisableRayTracingKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RayTracingShader>(rayTracingShader), ref keyword);
 		}
 
 		public void DisableKeyword(in GlobalKeyword keyword)
@@ -915,22 +2400,53 @@ namespace UnityEngine.Rendering
 			this.DisableComputeKeyword(computeShader, keyword);
 		}
 
+		public void DisableKeyword(RayTracingShader rayTracingShader, in LocalKeyword keyword)
+		{
+			this.DisableRayTracingKeyword(rayTracingShader, keyword);
+		}
+
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetShaderKeyword", HasExplicitThis = true)]
 		private void SetGlobalKeyword(GlobalKeyword keyword, bool value)
 		{
-			this.SetGlobalKeyword_Injected(ref keyword, value);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalKeyword_Injected(intPtr, ref keyword, value);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetMaterialKeyword", HasExplicitThis = true)]
 		private void SetMaterialKeyword(Material material, LocalKeyword keyword, bool value)
 		{
-			this.SetMaterialKeyword_Injected(material, ref keyword, value);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetMaterialKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material), ref keyword, value);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetComputeKeyword", HasExplicitThis = true)]
 		private void SetComputeKeyword(ComputeShader computeShader, LocalKeyword keyword, bool value)
 		{
-			this.SetComputeKeyword_Injected(computeShader, ref keyword, value);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetComputeKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<ComputeShader>(computeShader), ref keyword, value);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetRayTracingKeyword", HasExplicitThis = true)]
+		private void SetRayTracingKeyword(RayTracingShader rayTracingShader, LocalKeyword keyword, bool value)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetRayTracingKeyword_Injected(intPtr, Object.MarshalledUnityObject.Marshal<RayTracingShader>(rayTracingShader), ref keyword, value);
 		}
 
 		public void SetKeyword(in GlobalKeyword keyword, bool value)
@@ -948,99 +2464,331 @@ namespace UnityEngine.Rendering
 			this.SetComputeKeyword(computeShader, keyword, value);
 		}
 
+		public void SetKeyword(RayTracingShader rayTracingShader, in LocalKeyword keyword, bool value)
+		{
+			this.SetRayTracingKeyword(rayTracingShader, keyword, value);
+		}
+
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetViewMatrix", HasExplicitThis = true, ThrowsException = true)]
 		public void SetViewMatrix(Matrix4x4 view)
 		{
-			this.SetViewMatrix_Injected(ref view);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetViewMatrix_Injected(intPtr, ref view);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetProjectionMatrix", HasExplicitThis = true, ThrowsException = true)]
 		public void SetProjectionMatrix(Matrix4x4 proj)
 		{
-			this.SetProjectionMatrix_Injected(ref proj);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetProjectionMatrix_Injected(intPtr, ref proj);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetViewProjectionMatrices", HasExplicitThis = true, ThrowsException = true)]
 		public void SetViewProjectionMatrices(Matrix4x4 view, Matrix4x4 proj)
 		{
-			this.SetViewProjectionMatrices_Injected(ref view, ref proj);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetViewProjectionMatrices_Injected(intPtr, ref view, ref proj);
 		}
 
 		[NativeMethod("AddSetGlobalDepthBias")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalDepthBias(float bias, float slopeBias);
+		public void SetGlobalDepthBias(float bias, float slopeBias)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalDepthBias_Injected(intPtr, bias, slopeBias);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetExecutionFlags", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetExecutionFlags(CommandBufferExecutionFlags flags);
+		public void SetExecutionFlags(CommandBufferExecutionFlags flags)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetExecutionFlags_Injected(intPtr, flags);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::ValidateAgainstExecutionFlags", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool ValidateAgainstExecutionFlags(CommandBufferExecutionFlags requiredFlags, CommandBufferExecutionFlags invalidFlags);
+		private bool ValidateAgainstExecutionFlags(CommandBufferExecutionFlags requiredFlags, CommandBufferExecutionFlags invalidFlags)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CommandBuffer.ValidateAgainstExecutionFlags_Injected(intPtr, requiredFlags, invalidFlags);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalFloatArrayListImpl", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalFloatArrayListImpl(int nameID, object values);
+		private void SetGlobalFloatArrayListImpl(int nameID, object values)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalFloatArrayListImpl_Injected(intPtr, nameID, values);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalVectorArrayListImpl", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalVectorArrayListImpl(int nameID, object values);
+		private void SetGlobalVectorArrayListImpl(int nameID, object values)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalVectorArrayListImpl_Injected(intPtr, nameID, values);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalMatrixArrayListImpl", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalMatrixArrayListImpl(int nameID, object values);
+		private void SetGlobalMatrixArrayListImpl(int nameID, object values)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalMatrixArrayListImpl_Injected(intPtr, nameID, values);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalFloatArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalFloatArray(int nameID, [Unmarshalled] float[] values);
+		public unsafe void SetGlobalFloatArray(int nameID, [NotNull] float[] values)
+		{
+			if (values == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(values, "values");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<float> span = new Span<float>(values);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.SetGlobalFloatArray_Injected(intPtr, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalVectorArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalVectorArray(int nameID, [Unmarshalled] Vector4[] values);
+		public unsafe void SetGlobalVectorArray(int nameID, [NotNull] Vector4[] values)
+		{
+			if (values == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(values, "values");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector4> span = new Span<Vector4>(values);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.SetGlobalVectorArray_Injected(intPtr, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalMatrixArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGlobalMatrixArray(int nameID, [Unmarshalled] Matrix4x4[] values);
+		public unsafe void SetGlobalMatrixArray(int nameID, [NotNull] Matrix4x4[] values)
+		{
+			if (values == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(values, "values");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Matrix4x4> span = new Span<Matrix4x4>(values);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.SetGlobalMatrixArray_Injected(intPtr, nameID, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetLateLatchProjectionMatrices", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetLateLatchProjectionMatrices([Unmarshalled] Matrix4x4[] projectionMat);
+		public unsafe void SetLateLatchProjectionMatrices([NotNull] Matrix4x4[] projectionMat)
+		{
+			if (projectionMat == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(projectionMat, "projectionMat");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Matrix4x4> span = new Span<Matrix4x4>(projectionMat);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.SetLateLatchProjectionMatrices_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::MarkLateLatchMatrixShaderPropertyID", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void MarkLateLatchMatrixShaderPropertyID(CameraLateLatchMatrixType matrixPropertyType, int shaderPropertyID);
+		public void MarkLateLatchMatrixShaderPropertyID(CameraLateLatchMatrixType matrixPropertyType, int shaderPropertyID)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.MarkLateLatchMatrixShaderPropertyID_Injected(intPtr, matrixPropertyType, shaderPropertyID);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::UnmarkLateLatchMatrix", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void UnmarkLateLatchMatrix(CameraLateLatchMatrixType matrixPropertyType);
+		public void UnmarkLateLatchMatrix(CameraLateLatchMatrixType matrixPropertyType)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.UnmarkLateLatchMatrix_Injected(intPtr, matrixPropertyType);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalTexture_Impl", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalTexture_Impl(int nameID, ref RenderTargetIdentifier rt, RenderTextureSubElement element);
+		private void SetGlobalTexture_Impl(int nameID, ref RenderTargetIdentifier rt, RenderTextureSubElement element)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalTexture_Impl_Injected(intPtr, nameID, ref rt, element);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalBuffer", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalBufferInternal(int nameID, ComputeBuffer value);
+		private void SetGlobalBufferInternal(int nameID, ComputeBuffer value)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalBufferInternal_Injected(intPtr, nameID, (value == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalBuffer", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalGraphicsBufferInternal(int nameID, GraphicsBuffer value);
+		private void SetGlobalGraphicsBufferInternal(int nameID, GraphicsBuffer value)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalGraphicsBufferInternal_Injected(intPtr, nameID, (value == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalRayTracingAccelerationStructure", HasExplicitThis = true)]
+		private void SetGlobalRayTracingAccelerationStructureInternal(RayTracingAccelerationStructure accelerationStructure, int nameID)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalRayTracingAccelerationStructureInternal_Injected(intPtr, (accelerationStructure == null) ? ((IntPtr)0) : RayTracingAccelerationStructure.BindingsMarshaller.ConvertToNative(accelerationStructure), nameID);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetShadowSamplingMode_Impl", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetShadowSamplingMode_Impl(ref RenderTargetIdentifier shadowmap, ShadowSamplingMode mode);
+		private void SetShadowSamplingMode_Impl(ref RenderTargetIdentifier shadowmap, ShadowSamplingMode mode)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetShadowSamplingMode_Impl_Injected(intPtr, ref shadowmap, mode);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginEventInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void IssuePluginEventInternal(IntPtr callback, int eventID);
+		private void IssuePluginEventInternal(IntPtr callback, int eventID)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.IssuePluginEventInternal_Injected(intPtr, callback, eventID);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::BeginSample", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void BeginSample(string name);
+		public unsafe void BeginSample(string name)
+		{
+			try
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				CommandBuffer.BeginSample_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EndSample", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EndSample(string name);
+		public unsafe void EndSample(string name)
+		{
+			try
+			{
+				IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				CommandBuffer.EndSample_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		public void BeginSample(CustomSampler sampler)
 		{
@@ -1053,12 +2801,44 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::BeginSample_CustomSampler", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void BeginSample_CustomSampler([NotNull("ArgumentNullException")] CustomSampler sampler);
+		private void BeginSample_CustomSampler([NotNull] CustomSampler sampler)
+		{
+			if (sampler == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sampler, "sampler");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = CustomSampler.BindingsMarshaller.ConvertToNative(sampler);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sampler, "sampler");
+			}
+			CommandBuffer.BeginSample_CustomSampler_Injected(intPtr, intPtr2);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EndSample_CustomSampler", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EndSample_CustomSampler([NotNull("ArgumentNullException")] CustomSampler sampler);
+		private void EndSample_CustomSampler([NotNull] CustomSampler sampler)
+		{
+			if (sampler == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sampler, "sampler");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = CustomSampler.BindingsMarshaller.ConvertToNative(sampler);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sampler, "sampler");
+			}
+			CommandBuffer.EndSample_CustomSampler_Injected(intPtr, intPtr2);
+		}
 
 		[Conditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1075,67 +2855,167 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::BeginSample_ProfilerMarker", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void BeginSample_ProfilerMarker(IntPtr markerHandle);
+		private void BeginSample_ProfilerMarker(IntPtr markerHandle)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.BeginSample_ProfilerMarker_Injected(intPtr, markerHandle);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::EndSample_ProfilerMarker", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EndSample_ProfilerMarker(IntPtr markerHandle);
+		private void EndSample_ProfilerMarker(IntPtr markerHandle)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.EndSample_ProfilerMarker_Injected(intPtr, markerHandle);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginEventAndDataInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void IssuePluginEventAndDataInternal(IntPtr callback, int eventID, IntPtr data);
+		private void IssuePluginEventAndDataInternal(IntPtr callback, int eventID, IntPtr data)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.IssuePluginEventAndDataInternal_Injected(intPtr, callback, eventID, data);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginEventAndDataWithFlagsInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void IssuePluginEventAndDataInternalWithFlags(IntPtr callback, int eventID, CustomMarkerCallbackFlags flags, IntPtr data);
+		private void IssuePluginEventAndDataInternalWithFlags(IntPtr callback, int eventID, CustomMarkerCallbackFlags flags, IntPtr data)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.IssuePluginEventAndDataInternalWithFlags_Injected(intPtr, callback, eventID, flags, data);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginCustomBlitInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void IssuePluginCustomBlitInternal(IntPtr callback, uint command, ref RenderTargetIdentifier source, ref RenderTargetIdentifier dest, uint commandParam, uint commandFlags);
+		private void IssuePluginCustomBlitInternal(IntPtr callback, uint command, ref RenderTargetIdentifier source, ref RenderTargetIdentifier dest, uint commandParam, uint commandFlags)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.IssuePluginCustomBlitInternal_Injected(intPtr, callback, command, ref source, ref dest, commandParam, commandFlags);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::IssuePluginCustomTextureUpdateInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void IssuePluginCustomTextureUpdateInternal(IntPtr callback, Texture targetTexture, uint userData, bool useNewUnityRenderingExtTextureUpdateParamsV2);
+		private void IssuePluginCustomTextureUpdateInternal(IntPtr callback, Texture targetTexture, uint userData, bool useNewUnityRenderingExtTextureUpdateParamsV2)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.IssuePluginCustomTextureUpdateInternal_Injected(intPtr, callback, Object.MarshalledUnityObject.Marshal<Texture>(targetTexture), userData, useNewUnityRenderingExtTextureUpdateParamsV2);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalConstantBuffer", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalConstantBufferInternal(ComputeBuffer buffer, int nameID, int offset, int size);
+		private void SetGlobalConstantBufferInternal(ComputeBuffer buffer, int nameID, int offset, int size)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalConstantBufferInternal_Injected(intPtr, (buffer == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer), nameID, offset, size);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetGlobalConstantBuffer", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalConstantGraphicsBufferInternal(GraphicsBuffer buffer, int nameID, int offset, int size);
+		private void SetGlobalConstantGraphicsBufferInternal(GraphicsBuffer buffer, int nameID, int offset, int size)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetGlobalConstantGraphicsBufferInternal_Injected(intPtr, (buffer == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer), nameID, offset, size);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::IncrementUpdateCount", HasExplicitThis = true)]
 		public void IncrementUpdateCount(RenderTargetIdentifier dest)
 		{
-			this.IncrementUpdateCount_Injected(ref dest);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.IncrementUpdateCount_Injected(intPtr, ref dest);
 		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetInstanceMultiplier", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetInstanceMultiplier(uint multiplier);
+		public void SetInstanceMultiplier(uint multiplier)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetInstanceMultiplier_Injected(intPtr, multiplier);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetFoveatedRenderingMode", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetFoveatedRenderingMode(FoveatedRenderingMode foveatedRenderingMode);
+		public void SetFoveatedRenderingMode(FoveatedRenderingMode foveatedRenderingMode)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetFoveatedRenderingMode_Injected(intPtr, foveatedRenderingMode);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::SetWireframe", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetWireframe(bool enable);
+		public void SetWireframe(bool enable)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetWireframe_Injected(intPtr, enable);
+		}
 
 		[FreeFunction("RenderingCommandBuffer_Bindings::ConfigureFoveatedRendering", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ConfigureFoveatedRendering(IntPtr platformData);
+		public void ConfigureFoveatedRendering(IntPtr platformData)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.ConfigureFoveatedRendering_Injected(intPtr, platformData);
+		}
+
+		private static void CheckThrowOnSetRenderTarget()
+		{
+			bool throwOnSetRenderTarget = CommandBuffer.ThrowOnSetRenderTarget;
+			if (throwOnSetRenderTarget)
+			{
+				throw new Exception("Setrendertarget is not allowed in this context");
+			}
+		}
 
 		public void SetRenderTarget(RenderTargetIdentifier rt)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			this.SetRenderTargetSingle_Internal(rt, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
 		}
 
 		public void SetRenderTarget(RenderTargetIdentifier rt, RenderBufferLoadAction loadAction, RenderBufferStoreAction storeAction)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = loadAction == RenderBufferLoadAction.Clear;
 			if (flag)
@@ -1147,6 +3027,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier rt, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = colorLoadAction == RenderBufferLoadAction.Clear || depthLoadAction == RenderBufferLoadAction.Clear;
 			if (flag)
@@ -1169,6 +3050,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier rt, int mipLevel, CubemapFace cubemapFace)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = mipLevel < 0;
 			if (flag)
@@ -1180,6 +3062,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier rt, int mipLevel, CubemapFace cubemapFace, int depthSlice)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = depthSlice < -1;
 			if (flag)
@@ -1196,12 +3079,14 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier color, RenderTargetIdentifier depth)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			this.SetRenderTargetColorDepth_Internal(color, depth, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store, RenderTargetFlags.None);
 		}
 
 		public void SetRenderTarget(RenderTargetIdentifier color, RenderTargetIdentifier depth, int mipLevel)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = mipLevel < 0;
 			if (flag)
@@ -1213,6 +3098,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier color, RenderTargetIdentifier depth, int mipLevel, CubemapFace cubemapFace)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = mipLevel < 0;
 			if (flag)
@@ -1224,6 +3110,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier color, RenderTargetIdentifier depth, int mipLevel, CubemapFace cubemapFace, int depthSlice)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = depthSlice < -1;
 			if (flag)
@@ -1240,6 +3127,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier color, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderTargetIdentifier depth, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = colorLoadAction == RenderBufferLoadAction.Clear || depthLoadAction == RenderBufferLoadAction.Clear;
 			if (flag)
@@ -1251,6 +3139,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier[] colors, RenderTargetIdentifier depth)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = colors.Length < 1;
 			if (flag)
@@ -1267,6 +3156,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetIdentifier[] colors, RenderTargetIdentifier depth, int mipLevel, CubemapFace cubemapFace, int depthSlice)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = colors.Length < 1;
 			if (flag)
@@ -1283,6 +3173,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetBinding binding, int mipLevel, CubemapFace cubemapFace, int depthSlice)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = binding.colorRenderTargets.Length < 1;
 			if (flag)
@@ -1322,6 +3213,7 @@ namespace UnityEngine.Rendering
 
 		public void SetRenderTarget(RenderTargetBinding binding)
 		{
+			CommandBuffer.CheckThrowOnSetRenderTarget();
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
 			bool flag = binding.colorRenderTargets.Length < 1;
 			if (flag)
@@ -1359,35 +3251,124 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		private void ClearRenderTargetSingle_Internal(RTClearFlags clearFlags, Color color, float depth, uint stencil)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.ClearRenderTargetSingle_Internal_Injected(intPtr, clearFlags, ref color, depth, stencil);
+		}
+
+		private unsafe void ClearRenderTargetMulti_Internal(RTClearFlags clearFlags, Color[] colors, float depth, uint stencil)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color> span = new Span<Color>(colors);
+			fixed (Color* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CommandBuffer.ClearRenderTargetMulti_Internal_Injected(intPtr, clearFlags, ref managedSpanWrapper, depth, stencil);
+			}
+		}
+
 		private void SetRenderTargetSingle_Internal(RenderTargetIdentifier rt, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction)
 		{
-			this.SetRenderTargetSingle_Internal_Injected(ref rt, colorLoadAction, colorStoreAction, depthLoadAction, depthStoreAction);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetRenderTargetSingle_Internal_Injected(intPtr, ref rt, colorLoadAction, colorStoreAction, depthLoadAction, depthStoreAction);
 		}
 
 		private void SetRenderTargetColorDepth_Internal(RenderTargetIdentifier color, RenderTargetIdentifier depth, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, RenderTargetFlags flags)
 		{
-			this.SetRenderTargetColorDepth_Internal_Injected(ref color, ref depth, colorLoadAction, colorStoreAction, depthLoadAction, depthStoreAction, flags);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetRenderTargetColorDepth_Internal_Injected(intPtr, ref color, ref depth, colorLoadAction, colorStoreAction, depthLoadAction, depthStoreAction, flags);
 		}
 
-		private void SetRenderTargetMulti_Internal(RenderTargetIdentifier[] colors, RenderTargetIdentifier depth, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, RenderTargetFlags flags)
+		private unsafe void SetRenderTargetMulti_Internal(RenderTargetIdentifier[] colors, RenderTargetIdentifier depth, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, RenderTargetFlags flags)
 		{
-			this.SetRenderTargetMulti_Internal_Injected(colors, ref depth, colorLoadActions, colorStoreActions, depthLoadAction, depthStoreAction, flags);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<RenderTargetIdentifier> span = new Span<RenderTargetIdentifier>(colors);
+			fixed (RenderTargetIdentifier* ptr = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+				Span<RenderBufferLoadAction> span2 = new Span<RenderBufferLoadAction>(colorLoadActions);
+				fixed (RenderBufferLoadAction* ptr2 = span2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, span2.Length);
+					Span<RenderBufferStoreAction> span3 = new Span<RenderBufferStoreAction>(colorStoreActions);
+					fixed (RenderBufferStoreAction* pinnableReference = span3.GetPinnableReference())
+					{
+						ManagedSpanWrapper managedSpanWrapper3 = new ManagedSpanWrapper((void*)pinnableReference, span3.Length);
+						CommandBuffer.SetRenderTargetMulti_Internal_Injected(intPtr, ref managedSpanWrapper, ref depth, ref managedSpanWrapper2, ref managedSpanWrapper3, depthLoadAction, depthStoreAction, flags);
+						ptr = null;
+						ptr2 = null;
+					}
+				}
+			}
 		}
 
 		private void SetRenderTargetColorDepthSubtarget(RenderTargetIdentifier color, RenderTargetIdentifier depth, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, int mipLevel, CubemapFace cubemapFace, int depthSlice)
 		{
-			this.SetRenderTargetColorDepthSubtarget_Injected(ref color, ref depth, colorLoadAction, colorStoreAction, depthLoadAction, depthStoreAction, mipLevel, cubemapFace, depthSlice);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetRenderTargetColorDepthSubtarget_Injected(intPtr, ref color, ref depth, colorLoadAction, colorStoreAction, depthLoadAction, depthStoreAction, mipLevel, cubemapFace, depthSlice);
 		}
 
-		private void SetRenderTargetMultiSubtarget(RenderTargetIdentifier[] colors, RenderTargetIdentifier depth, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, int mipLevel, CubemapFace cubemapFace, int depthSlice)
+		private unsafe void SetRenderTargetMultiSubtarget(RenderTargetIdentifier[] colors, RenderTargetIdentifier depth, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, int mipLevel, CubemapFace cubemapFace, int depthSlice)
 		{
-			this.SetRenderTargetMultiSubtarget_Injected(colors, ref depth, colorLoadActions, colorStoreActions, depthLoadAction, depthStoreAction, mipLevel, cubemapFace, depthSlice);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<RenderTargetIdentifier> span = new Span<RenderTargetIdentifier>(colors);
+			fixed (RenderTargetIdentifier* ptr = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+				Span<RenderBufferLoadAction> span2 = new Span<RenderBufferLoadAction>(colorLoadActions);
+				fixed (RenderBufferLoadAction* ptr2 = span2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, span2.Length);
+					Span<RenderBufferStoreAction> span3 = new Span<RenderBufferStoreAction>(colorStoreActions);
+					fixed (RenderBufferStoreAction* pinnableReference = span3.GetPinnableReference())
+					{
+						ManagedSpanWrapper managedSpanWrapper3 = new ManagedSpanWrapper((void*)pinnableReference, span3.Length);
+						CommandBuffer.SetRenderTargetMultiSubtarget_Injected(intPtr, ref managedSpanWrapper, ref depth, ref managedSpanWrapper2, ref managedSpanWrapper3, depthLoadAction, depthStoreAction, mipLevel, cubemapFace, depthSlice);
+						ptr = null;
+						ptr2 = null;
+					}
+				}
+			}
 		}
 
 		[NativeMethod("ProcessVTFeedback")]
 		private void Internal_ProcessVTFeedback(RenderTargetIdentifier rt, IntPtr resolver, int slice, int x, int width, int y, int height, int mip)
 		{
-			this.Internal_ProcessVTFeedback_Injected(ref rt, resolver, slice, x, width, y, height, mip);
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.Internal_ProcessVTFeedback_Injected(intPtr, ref rt, resolver, slice, x, width, y, height, mip);
 		}
 
 		[SecuritySafeCritical]
@@ -1419,7 +3400,7 @@ namespace UnityEngine.Rendering
 			{
 				throw new ArgumentException(string.Format("List<{0}> passed to RenderingCommandBuffer.SetBufferData(List<>) must be blittable.\n{1}", typeof(T), UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
 			}
-			this.InternalSetComputeBufferData(buffer, NoAllocHelpers.ExtractArrayFromList(data), 0, 0, NoAllocHelpers.SafeLength<T>(data), Marshal.SizeOf(typeof(T)));
+			this.InternalSetComputeBufferData(buffer, NoAllocHelpers.ExtractArrayFromList<T>(data), 0, 0, NoAllocHelpers.SafeLength<T>(data), Marshal.SizeOf(typeof(T)));
 		}
 
 		[SecuritySafeCritical]
@@ -1467,7 +3448,7 @@ namespace UnityEngine.Rendering
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (managedBufferStartIndex:{0} graphicsBufferStartIndex:{1} count:{2})", managedBufferStartIndex, graphicsBufferStartIndex, count));
 			}
-			this.InternalSetComputeBufferData(buffer, NoAllocHelpers.ExtractArrayFromList(data), managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(typeof(T)));
+			this.InternalSetComputeBufferData(buffer, NoAllocHelpers.ExtractArrayFromList<T>(data), managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(typeof(T)));
 		}
 
 		[SecuritySafeCritical]
@@ -1487,16 +3468,64 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferNativeData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetComputeBufferNativeData([NotNull("ArgumentNullException")] ComputeBuffer buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+		private void InternalSetComputeBufferNativeData([NotNull] ComputeBuffer buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			CommandBuffer.InternalSetComputeBufferNativeData_Injected(intPtr, intPtr2, data, nativeBufferStartIndex, graphicsBufferStartIndex, count, elemSize);
+		}
 
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetComputeBufferData([NotNull("ArgumentNullException")] ComputeBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+		private void InternalSetComputeBufferData([NotNull] ComputeBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			CommandBuffer.InternalSetComputeBufferData_Injected(intPtr, intPtr2, data, managedBufferStartIndex, graphicsBufferStartIndex, count, elemSize);
+		}
 
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferCounterValue", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetComputeBufferCounterValue([NotNull("ArgumentNullException")] ComputeBuffer buffer, uint counterValue);
+		private void InternalSetComputeBufferCounterValue([NotNull] ComputeBuffer buffer, uint counterValue)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = ComputeBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			CommandBuffer.InternalSetComputeBufferCounterValue_Injected(intPtr, intPtr2, counterValue);
+		}
 
 		[SecuritySafeCritical]
 		public void SetBufferData(GraphicsBuffer buffer, Array data)
@@ -1527,7 +3556,7 @@ namespace UnityEngine.Rendering
 			{
 				throw new ArgumentException(string.Format("List<{0}> passed to RenderingCommandBuffer.SetBufferData(List<>) must be blittable.\n{1}", typeof(T), UnsafeUtility.GetReasonForGenericListNonBlittable<T>()));
 			}
-			this.InternalSetGraphicsBufferData(buffer, NoAllocHelpers.ExtractArrayFromList(data), 0, 0, NoAllocHelpers.SafeLength<T>(data), Marshal.SizeOf(typeof(T)));
+			this.InternalSetGraphicsBufferData(buffer, NoAllocHelpers.ExtractArrayFromList<T>(data), 0, 0, NoAllocHelpers.SafeLength<T>(data), Marshal.SizeOf(typeof(T)));
 		}
 
 		[SecuritySafeCritical]
@@ -1575,7 +3604,7 @@ namespace UnityEngine.Rendering
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad indices/count arguments (managedBufferStartIndex:{0} graphicsBufferStartIndex:{1} count:{2})", managedBufferStartIndex, graphicsBufferStartIndex, count));
 			}
-			this.InternalSetGraphicsBufferData(buffer, NoAllocHelpers.ExtractArrayFromList(data), managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(typeof(T)));
+			this.InternalSetGraphicsBufferData(buffer, NoAllocHelpers.ExtractArrayFromList<T>(data), managedBufferStartIndex, graphicsBufferStartIndex, count, Marshal.SizeOf(typeof(T)));
 		}
 
 		[SecuritySafeCritical]
@@ -1595,21 +3624,316 @@ namespace UnityEngine.Rendering
 		}
 
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferNativeData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetGraphicsBufferNativeData([NotNull("ArgumentNullException")] GraphicsBuffer buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+		private void InternalSetGraphicsBufferNativeData([NotNull] GraphicsBuffer buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			CommandBuffer.InternalSetGraphicsBufferNativeData_Injected(intPtr, intPtr2, data, nativeBufferStartIndex, graphicsBufferStartIndex, count, elemSize);
+		}
 
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferData", HasExplicitThis = true, ThrowsException = true)]
 		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetGraphicsBufferData([NotNull("ArgumentNullException")] GraphicsBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+		private void InternalSetGraphicsBufferData([NotNull] GraphicsBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			CommandBuffer.InternalSetGraphicsBufferData_Injected(intPtr, intPtr2, data, managedBufferStartIndex, graphicsBufferStartIndex, count, elemSize);
+		}
 
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::InternalSetGraphicsBufferCounterValue", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetGraphicsBufferCounterValue([NotNull("ArgumentNullException")] GraphicsBuffer buffer, uint counterValue);
+		private void InternalSetGraphicsBufferCounterValue([NotNull] GraphicsBuffer buffer, uint counterValue)
+		{
+			if (buffer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(buffer);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(buffer, "buffer");
+			}
+			CommandBuffer.InternalSetGraphicsBufferCounterValue_Injected(intPtr, intPtr2, counterValue);
+		}
 
 		[FreeFunction(Name = "RenderingCommandBuffer_Bindings::CopyBuffer", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopyBufferImpl([NotNull("ArgumentNullException")] GraphicsBuffer source, [NotNull("ArgumentNullException")] GraphicsBuffer dest);
+		private void CopyBufferImpl([NotNull] GraphicsBuffer source, [NotNull] GraphicsBuffer dest)
+		{
+			if (source == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			if (dest == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(dest, "dest");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(source);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(source, "source");
+			}
+			IntPtr intPtr3 = GraphicsBuffer.BindingsMarshaller.ConvertToNative(dest);
+			if (intPtr3 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(dest, "dest");
+			}
+			CommandBuffer.CopyBufferImpl_Injected(intPtr, intPtr2, intPtr3);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::BeginRenderPass", HasExplicitThis = true)]
+		private unsafe void BeginRenderPass_Internal(int width, int height, int volumeDepth, int samples, ReadOnlySpan<AttachmentDescriptor> attachments, int depthAttachmentIndex, int shadingRateImageAttachmentIndex, ReadOnlySpan<SubPassDescriptor> subPasses, ReadOnlySpan<byte> debugNameUtf8)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<AttachmentDescriptor> readOnlySpan = attachments;
+			fixed (AttachmentDescriptor* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				ReadOnlySpan<SubPassDescriptor> readOnlySpan2 = subPasses;
+				fixed (SubPassDescriptor* ptr2 = readOnlySpan2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					ReadOnlySpan<byte> readOnlySpan3 = debugNameUtf8;
+					fixed (byte* pinnableReference = readOnlySpan3.GetPinnableReference())
+					{
+						ManagedSpanWrapper managedSpanWrapper3 = new ManagedSpanWrapper((void*)pinnableReference, readOnlySpan3.Length);
+						CommandBuffer.BeginRenderPass_Internal_Injected(intPtr, width, height, volumeDepth, samples, ref managedSpanWrapper, depthAttachmentIndex, shadingRateImageAttachmentIndex, ref managedSpanWrapper2, ref managedSpanWrapper3);
+						ptr = null;
+						ptr2 = null;
+					}
+				}
+			}
+		}
+
+		public void BeginRenderPass(int width, int height, int volumeDepth, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, NativeArray<SubPassDescriptor> subPasses, ReadOnlySpan<byte> debugNameUtf8)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, volumeDepth, samples, in attachments, depthAttachmentIndex, -1, in subPasses, debugNameUtf8);
+		}
+
+		public void BeginRenderPass(int width, int height, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, NativeArray<SubPassDescriptor> subPasses, ReadOnlySpan<byte> debugNameUtf8)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, 1, samples, in attachments, depthAttachmentIndex, -1, in subPasses, debugNameUtf8);
+		}
+
+		public void BeginRenderPass(int width, int height, int volumeDepth, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, NativeArray<SubPassDescriptor> subPasses)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, volumeDepth, samples, in attachments, depthAttachmentIndex, -1, in subPasses, default(ReadOnlySpan<byte>));
+		}
+
+		public void BeginRenderPass(int width, int height, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, NativeArray<SubPassDescriptor> subPasses)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, 1, samples, in attachments, depthAttachmentIndex, -1, in subPasses, default(ReadOnlySpan<byte>));
+		}
+
+		public void BeginRenderPass(int width, int height, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, int shadingRateImageAttachmentIndex, NativeArray<SubPassDescriptor> subPasses)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, 1, samples, in attachments, depthAttachmentIndex, shadingRateImageAttachmentIndex, in subPasses, default(ReadOnlySpan<byte>));
+		}
+
+		public void BeginRenderPass(int width, int height, int volumeDepth, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, int shadingRateImageAttachmentIndex, NativeArray<SubPassDescriptor> subPasses)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, volumeDepth, samples, in attachments, depthAttachmentIndex, shadingRateImageAttachmentIndex, in subPasses, default(ReadOnlySpan<byte>));
+		}
+
+		public void BeginRenderPass(int width, int height, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, int shadingRateImageAttachmentIndex, NativeArray<SubPassDescriptor> subPasses, ReadOnlySpan<byte> debugNameUtf8)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, 1, samples, in attachments, depthAttachmentIndex, shadingRateImageAttachmentIndex, in subPasses, debugNameUtf8);
+		}
+
+		public void BeginRenderPass(int width, int height, int volumeDepth, int samples, NativeArray<AttachmentDescriptor> attachments, int depthAttachmentIndex, int shadingRateImageAttachmentIndex, NativeArray<SubPassDescriptor> subPasses, ReadOnlySpan<byte> debugNameUtf8)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.BeginRenderPass_Internal(width, height, volumeDepth, samples, in attachments, depthAttachmentIndex, shadingRateImageAttachmentIndex, in subPasses, debugNameUtf8);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::NextSubPass", HasExplicitThis = true)]
+		private void NextSubPass_Internal()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.NextSubPass_Internal_Injected(intPtr);
+		}
+
+		public void NextSubPass()
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.NextSubPass_Internal();
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::EndRenderPass", HasExplicitThis = true)]
+		private void EndRenderPass_Internal()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.EndRenderPass_Internal_Injected(intPtr);
+		}
+
+		public void EndRenderPass()
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.EndRenderPass_Internal();
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetupCameraProperties", HasExplicitThis = true)]
+		private void SetupCameraProperties_Internal([NotNull] Camera camera)
+		{
+			if (camera == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Camera>(camera);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(camera, "camera");
+			}
+			CommandBuffer.SetupCameraProperties_Internal_Injected(intPtr, intPtr2);
+		}
+
+		public void SetupCameraProperties(Camera camera)
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.SetupCameraProperties_Internal(camera);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::InvokeOnRenderObjectCallbacks", HasExplicitThis = true)]
+		private void InvokeOnRenderObjectCallbacks_Internal()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.InvokeOnRenderObjectCallbacks_Internal_Injected(intPtr);
+		}
+
+		public void InvokeOnRenderObjectCallbacks()
+		{
+			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
+			this.InvokeOnRenderObjectCallbacks_Internal();
+		}
+
+		public void SetShadingRateFragmentSize(ShadingRateFragmentSize shadingRateFragmentSize)
+		{
+			this.SetShadingRateFragmentSize_Impl(shadingRateFragmentSize);
+		}
+
+		public void SetShadingRateCombiner(ShadingRateCombinerStage stage, ShadingRateCombiner combiner)
+		{
+			this.SetShadingRateCombiner_Impl(stage, combiner);
+		}
+
+		public void SetShadingRateImage(in RenderTargetIdentifier shadingRateImage)
+		{
+			this.SetShadingRateImage_Impl(in shadingRateImage);
+		}
+
+		public void ResetShadingRate()
+		{
+			this.ResetShadingRate_Impl();
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetShadingRateFragmentSize_Impl", HasExplicitThis = true)]
+		private void SetShadingRateFragmentSize_Impl(ShadingRateFragmentSize shadingRateFragmentSize)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetShadingRateFragmentSize_Impl_Injected(intPtr, shadingRateFragmentSize);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetShadingRateCombiner_Impl", HasExplicitThis = true)]
+		private void SetShadingRateCombiner_Impl(ShadingRateCombinerStage stage, ShadingRateCombiner combiner)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetShadingRateCombiner_Impl_Injected(intPtr, stage, combiner);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::SetShadingRateImage_Impl", HasExplicitThis = true)]
+		private void SetShadingRateImage_Impl(in RenderTargetIdentifier shadingRateImage)
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.SetShadingRateImage_Impl_Injected(intPtr, in shadingRateImage);
+		}
+
+		[FreeFunction("RenderingCommandBuffer_Bindings::ResetShadingRate_Impl", HasExplicitThis = true)]
+		private void ResetShadingRate_Impl()
+		{
+			IntPtr intPtr = CommandBuffer.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CommandBuffer.ResetShadingRate_Impl_Injected(intPtr);
+		}
+
+		private CommandBuffer(IntPtr ptr)
+		{
+			this.m_Ptr = ptr;
+		}
 
 		~CommandBuffer()
 		{
@@ -1845,13 +4169,27 @@ namespace UnityEngine.Rendering
 
 		public void BuildRayTracingAccelerationStructure(RayTracingAccelerationStructure accelerationStructure)
 		{
-			Vector3 vector = new Vector3(0f, 0f, 0f);
-			this.Internal_BuildRayTracingAccelerationStructure(accelerationStructure, vector);
+			RayTracingAccelerationStructure.BuildSettings buildSettings = new RayTracingAccelerationStructure.BuildSettings
+			{
+				buildFlags = RayTracingAccelerationStructureBuildFlags.PreferFastTrace,
+				relativeOrigin = Vector3.zero
+			};
+			this.Internal_BuildRayTracingAccelerationStructure(accelerationStructure, buildSettings);
 		}
 
 		public void BuildRayTracingAccelerationStructure(RayTracingAccelerationStructure accelerationStructure, Vector3 relativeOrigin)
 		{
-			this.Internal_BuildRayTracingAccelerationStructure(accelerationStructure, relativeOrigin);
+			RayTracingAccelerationStructure.BuildSettings buildSettings = new RayTracingAccelerationStructure.BuildSettings
+			{
+				buildFlags = RayTracingAccelerationStructureBuildFlags.PreferFastTrace,
+				relativeOrigin = relativeOrigin
+			};
+			this.Internal_BuildRayTracingAccelerationStructure(accelerationStructure, buildSettings);
+		}
+
+		public void BuildRayTracingAccelerationStructure(RayTracingAccelerationStructure accelerationStructure, RayTracingAccelerationStructure.BuildSettings buildSettings)
+		{
+			this.Internal_BuildRayTracingAccelerationStructure(accelerationStructure, buildSettings);
 		}
 
 		public void SetRayTracingAccelerationStructure(RayTracingShader rayTracingShader, string name, RayTracingAccelerationStructure rayTracingAccelerationStructure)
@@ -1864,14 +4202,44 @@ namespace UnityEngine.Rendering
 			this.Internal_SetRayTracingAccelerationStructure(rayTracingShader, nameID, rayTracingAccelerationStructure);
 		}
 
+		public void SetRayTracingAccelerationStructure(ComputeShader computeShader, int kernelIndex, string name, RayTracingAccelerationStructure rayTracingAccelerationStructure)
+		{
+			this.Internal_SetComputeRayTracingAccelerationStructure(computeShader, kernelIndex, Shader.PropertyToID(name), rayTracingAccelerationStructure);
+		}
+
+		public void SetRayTracingAccelerationStructure(ComputeShader computeShader, int kernelIndex, int nameID, RayTracingAccelerationStructure rayTracingAccelerationStructure)
+		{
+			this.Internal_SetComputeRayTracingAccelerationStructure(computeShader, kernelIndex, nameID, rayTracingAccelerationStructure);
+		}
+
 		public void SetRayTracingBufferParam(RayTracingShader rayTracingShader, string name, ComputeBuffer buffer)
 		{
-			this.Internal_SetRayTracingBufferParam(rayTracingShader, Shader.PropertyToID(name), buffer);
+			this.Internal_SetRayTracingComputeBufferParam(rayTracingShader, Shader.PropertyToID(name), buffer);
 		}
 
 		public void SetRayTracingBufferParam(RayTracingShader rayTracingShader, int nameID, ComputeBuffer buffer)
 		{
-			this.Internal_SetRayTracingBufferParam(rayTracingShader, nameID, buffer);
+			this.Internal_SetRayTracingComputeBufferParam(rayTracingShader, nameID, buffer);
+		}
+
+		public void SetRayTracingBufferParam(RayTracingShader rayTracingShader, string name, GraphicsBuffer buffer)
+		{
+			this.Internal_SetRayTracingGraphicsBufferParam(rayTracingShader, Shader.PropertyToID(name), buffer);
+		}
+
+		public void SetRayTracingBufferParam(RayTracingShader rayTracingShader, int nameID, GraphicsBuffer buffer)
+		{
+			this.Internal_SetRayTracingGraphicsBufferParam(rayTracingShader, nameID, buffer);
+		}
+
+		public void SetRayTracingBufferParam(RayTracingShader rayTracingShader, string name, GraphicsBufferHandle bufferHandle)
+		{
+			this.Internal_SetRayTracingGraphicsBufferHandleParam(rayTracingShader, Shader.PropertyToID(name), bufferHandle);
+		}
+
+		public void SetRayTracingBufferParam(RayTracingShader rayTracingShader, int nameID, GraphicsBufferHandle bufferHandle)
+		{
+			this.Internal_SetRayTracingGraphicsBufferHandleParam(rayTracingShader, nameID, bufferHandle);
 		}
 
 		public void SetRayTracingConstantBufferParam(RayTracingShader rayTracingShader, int nameID, ComputeBuffer buffer, int offset, int size)
@@ -1989,6 +4357,21 @@ namespace UnityEngine.Rendering
 			this.Internal_DispatchRays(rayTracingShader, rayGenName, width, height, depth, camera);
 		}
 
+		public void DispatchRays(RayTracingShader rayTracingShader, string rayGenName, GraphicsBuffer argsBuffer, uint argsOffset, Camera camera = null)
+		{
+			this.Internal_DispatchRaysIndirect(rayTracingShader, rayGenName, argsBuffer, argsOffset, camera);
+		}
+
+		internal void SetMachineLearningOperatorTensors(MachineLearningOperator op, ReadOnlySpan<IntPtr> inputs, ReadOnlySpan<IntPtr> outputs)
+		{
+			this.Internal_SetMachineLearningOperatorTensors(op.m_Ptr, inputs, outputs);
+		}
+
+		internal void DispatchMachineLearningOperator(MachineLearningOperator op)
+		{
+			this.Internal_DispatchMachineLearningOperator(op.m_Ptr);
+		}
+
 		public void GenerateMips(RenderTargetIdentifier rt)
 		{
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
@@ -2053,6 +4436,22 @@ namespace UnityEngine.Rendering
 		public void DrawMesh(Mesh mesh, Matrix4x4 matrix, Material material)
 		{
 			this.DrawMesh(mesh, matrix, material, 0);
+		}
+
+		[ExcludeFromDocs]
+		public void DrawMultipleMeshes(Matrix4x4[] matrices, Mesh[] meshes, int[] subsetIndices, int count, Material material, int shaderPass, [DefaultValue("null")] MaterialPropertyBlock properties)
+		{
+			bool flag = matrices.Length != meshes.Length || matrices.Length != subsetIndices.Length;
+			if (flag)
+			{
+				throw new InvalidOperationException("matrices, meshes, subsetIndices must be of same length and must be valid");
+			}
+			bool flag2 = count < 1;
+			if (flag2)
+			{
+				throw new InvalidOperationException("count must be atleast 1");
+			}
+			this.Internal_DrawMultipleMeshes(matrices, meshes, subsetIndices, count, material, shaderPass, properties);
 		}
 
 		public void DrawRenderer(Renderer renderer, Material material, [DefaultValue("0")] int submeshIndex, [DefaultValue("-1")] int shaderPass)
@@ -2296,19 +4695,24 @@ namespace UnityEngine.Rendering
 			{
 				throw new ArgumentNullException("material");
 			}
-			bool flag5 = matrices == null;
+			bool flag5 = !material.enableInstancing;
 			if (flag5)
+			{
+				throw new InvalidOperationException("Material needs to enable instancing for use with DrawMeshInstanced.");
+			}
+			bool flag6 = matrices == null;
+			if (flag6)
 			{
 				throw new ArgumentNullException("matrices");
 			}
-			bool flag6 = count < 0 || count > Mathf.Min(Graphics.kMaxDrawMeshInstanceCount, matrices.Length);
-			if (flag6)
+			bool flag7 = count < 0 || count > Mathf.Min(Graphics.kMaxDrawMeshInstanceCount, matrices.Length);
+			if (flag7)
 			{
 				throw new ArgumentOutOfRangeException("count", string.Format("Count must be in the range of 0 to {0}.", Mathf.Min(Graphics.kMaxDrawMeshInstanceCount, matrices.Length)));
 			}
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
-			bool flag7 = count > 0;
-			if (flag7)
+			bool flag8 = count > 0;
+			if (flag8)
 			{
 				this.Internal_DrawMeshInstanced(mesh, submeshIndex, material, shaderPass, matrices, count, properties);
 			}
@@ -2753,6 +5157,16 @@ namespace UnityEngine.Rendering
 			this.SetGlobalConstantGraphicsBufferInternal(buffer, Shader.PropertyToID(name), offset, size);
 		}
 
+		public void SetGlobalRayTracingAccelerationStructure(string name, RayTracingAccelerationStructure accelerationStructure)
+		{
+			this.SetGlobalRayTracingAccelerationStructureInternal(accelerationStructure, Shader.PropertyToID(name));
+		}
+
+		public void SetGlobalRayTracingAccelerationStructure(int nameID, RayTracingAccelerationStructure accelerationStructure)
+		{
+			this.SetGlobalRayTracingAccelerationStructureInternal(accelerationStructure, nameID);
+		}
+
 		public void SetShadowSamplingMode(RenderTargetIdentifier shadowmap, ShadowSamplingMode mode)
 		{
 			this.ValidateAgainstExecutionFlags(CommandBufferExecutionFlags.None, CommandBufferExecutionFlags.AsyncCompute);
@@ -2854,183 +5268,590 @@ namespace UnityEngine.Rendering
 		{
 		}
 
-		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData(*)", false)]
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData(*)", true)]
 		public void SetComputeBufferData(ComputeBuffer buffer, Array data)
 		{
-			this.SetBufferData(buffer, data);
 		}
 
-		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", true)]
 		public void SetComputeBufferData<T>(ComputeBuffer buffer, List<T> data) where T : struct
 		{
-			this.SetBufferData<T>(buffer, data);
 		}
 
-		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", true)]
 		public void SetComputeBufferData<T>(ComputeBuffer buffer, NativeArray<T> data) where T : struct
 		{
-			this.SetBufferData<T>(buffer, data);
 		}
 
-		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData(*)", false)]
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData(*)", true)]
 		public void SetComputeBufferData(ComputeBuffer buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count)
 		{
-			this.SetBufferData(buffer, data, managedBufferStartIndex, graphicsBufferStartIndex, count);
 		}
 
-		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", true)]
 		public void SetComputeBufferData<T>(ComputeBuffer buffer, List<T> data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
 		{
-			this.SetBufferData<T>(buffer, data, managedBufferStartIndex, graphicsBufferStartIndex, count);
 		}
 
-		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", false)]
+		[Obsolete("CommandBuffer.SetComputeBufferData has been deprecated. Use SetBufferData instead (UnityUpgradable) -> SetBufferData<T>(*)", true)]
 		public void SetComputeBufferData<T>(ComputeBuffer buffer, NativeArray<T> data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count) where T : struct
 		{
-			this.SetBufferData<T>(buffer, data, nativeBufferStartIndex, graphicsBufferStartIndex, count);
 		}
 
-		[Obsolete("CommandBuffer.SetComputeBufferCounterValue has been deprecated. Use SetBufferCounterValue instead (UnityUpgradable) -> SetBufferCounterValue(*)", false)]
+		[Obsolete("CommandBuffer.SetComputeBufferCounterValue has been deprecated. Use SetBufferCounterValue instead (UnityUpgradable) -> SetBufferCounterValue(*)", true)]
 		public void SetComputeBufferCounterValue(ComputeBuffer buffer, uint counterValue)
 		{
-			this.SetBufferCounterValue(buffer, counterValue);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ConvertTexture_Internal_Injected(ref RenderTargetIdentifier src, int srcElement, ref RenderTargetIdentifier dst, int dstElement);
+		private static extern void WaitAllAsyncReadbackRequests_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetComputeVectorParam_Injected(ComputeShader computeShader, int nameID, ref Vector4 val);
+		private unsafe static extern void Internal_RequestAsyncReadback_1_Injected(IntPtr _unity_self, IntPtr src, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetComputeMatrixParam_Injected(ComputeShader computeShader, int nameID, ref Matrix4x4 val);
+		private unsafe static extern void Internal_RequestAsyncReadback_2_Injected(IntPtr _unity_self, IntPtr src, int size, int offset, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetComputeGraphicsBufferHandleParam_Injected(ComputeShader computeShader, int kernelIndex, int nameID, ref GraphicsBufferHandle bufferHandle);
+		private unsafe static extern void Internal_RequestAsyncReadback_3_Injected(IntPtr _unity_self, IntPtr src, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingVectorParam_Injected(RayTracingShader rayTracingShader, int nameID, ref Vector4 val);
+		private unsafe static extern void Internal_RequestAsyncReadback_4_Injected(IntPtr _unity_self, IntPtr src, int mipIndex, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_SetRayTracingMatrixParam_Injected(RayTracingShader rayTracingShader, int nameID, ref Matrix4x4 val);
+		private unsafe static extern void Internal_RequestAsyncReadback_5_Injected(IntPtr _unity_self, IntPtr src, int mipIndex, GraphicsFormat dstFormat, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_BuildRayTracingAccelerationStructure_Injected(RayTracingAccelerationStructure accelerationStructure, ref Vector3 relativeOrigin);
+		private unsafe static extern void Internal_RequestAsyncReadback_6_Injected(IntPtr _unity_self, IntPtr src, int mipIndex, int x, int width, int y, int height, int z, int depth, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_GenerateMips_Injected(ref RenderTargetIdentifier rt);
+		private unsafe static extern void Internal_RequestAsyncReadback_7_Injected(IntPtr _unity_self, IntPtr src, int mipIndex, int x, int width, int y, int height, int z, int depth, GraphicsFormat dstFormat, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawMesh_Injected(Mesh mesh, ref Matrix4x4 matrix, Material material, int submeshIndex, int shaderPass, MaterialPropertyBlock properties);
+		private unsafe static extern void Internal_RequestAsyncReadback_8_Injected(IntPtr _unity_self, IntPtr src, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawRendererList_Injected(ref RendererList rendererList);
+		private unsafe static extern void Internal_RequestAsyncReadback_9_Injected(IntPtr _unity_self, IntPtr src, int size, int offset, Action<AsyncGPUReadbackRequest> callback, AsyncRequestNativeArrayData* nativeArrayData);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawProcedural_Injected(ref Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int vertexCount, int instanceCount, MaterialPropertyBlock properties);
+		private static extern void SetInvertCulling_Injected(IntPtr _unity_self, bool invertCulling);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawProceduralIndexed_Injected(GraphicsBuffer indexBuffer, ref Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, int indexCount, int instanceCount, MaterialPropertyBlock properties);
+		private static extern void ConvertTexture_Internal_Injected(IntPtr _unity_self, [In] ref RenderTargetIdentifier src, int srcElement, [In] ref RenderTargetIdentifier dst, int dstElement);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawProceduralIndirect_Injected(ref Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties);
+		private static extern void Internal_SetSinglePassStereo_Injected(IntPtr _unity_self, SinglePassStereoMode mode);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawProceduralIndexedIndirect_Injected(GraphicsBuffer indexBuffer, ref Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties);
+		private static extern IntPtr CreateGPUFence_Internal_Injected(IntPtr _unity_self, GraphicsFenceType fenceType, SynchronisationStageFlags stage);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawProceduralIndirectGraphicsBuffer_Injected(ref Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties);
+		private static extern void WaitOnGPUFence_Internal_Injected(IntPtr _unity_self, IntPtr fencePtr, SynchronisationStageFlags stage);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawProceduralIndexedIndirectGraphicsBuffer_Injected(GraphicsBuffer indexBuffer, ref Matrix4x4 matrix, Material material, int shaderPass, MeshTopology topology, GraphicsBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties);
+		private static extern void ReleaseBuffer_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_DrawOcclusionMesh_Injected(ref RectInt normalizedCamViewport);
+		private static extern void SetComputeFloatParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, float val);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetViewport_Injected(ref Rect pixelRect);
+		private static extern void SetComputeIntParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, int val);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EnableScissorRect_Injected(ref Rect scissor);
+		private static extern void SetComputeVectorParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, [In] ref Vector4 val);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Blit_Texture_Injected(Texture source, ref RenderTargetIdentifier dest, Material mat, int pass, ref Vector2 scale, ref Vector2 offset, int sourceDepthSlice, int destDepthSlice);
+		private static extern void SetComputeVectorArrayParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, ref ManagedSpanWrapper values);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Blit_Identifier_Injected(ref RenderTargetIdentifier source, ref RenderTargetIdentifier dest, Material mat, int pass, ref Vector2 scale, ref Vector2 offset, int sourceDepthSlice, int destDepthSlice);
+		private static extern void SetComputeMatrixParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, [In] ref Matrix4x4 val);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTemporaryRTWithDescriptor_Injected(int nameID, ref RenderTextureDescriptor desc, FilterMode filter);
+		private static extern void SetComputeMatrixArrayParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, ref ManagedSpanWrapper values);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ClearRenderTarget_Injected(RTClearFlags clearFlags, ref Color backgroundColor, float depth, uint stencil);
+		private static extern void Internal_SetComputeFloats_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, ref ManagedSpanWrapper values);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalVector_Injected(int nameID, ref Vector4 value);
+		private static extern void Internal_SetComputeInts_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, ref ManagedSpanWrapper values);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalColor_Injected(int nameID, ref Color value);
+		private static extern void Internal_SetComputeTextureParam_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, int nameID, ref RenderTargetIdentifier rt, int mipLevel, RenderTextureSubElement element);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalMatrix_Injected(int nameID, ref Matrix4x4 value);
+		private static extern void Internal_SetComputeBufferParam_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, int nameID, IntPtr buffer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EnableGlobalKeyword_Injected(ref GlobalKeyword keyword);
+		private static extern void Internal_SetComputeGraphicsBufferHandleParam_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, int nameID, [In] ref GraphicsBufferHandle bufferHandle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EnableMaterialKeyword_Injected(Material material, ref LocalKeyword keyword);
+		private static extern void Internal_SetComputeGraphicsBufferParam_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, int nameID, IntPtr buffer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EnableComputeKeyword_Injected(ComputeShader computeShader, ref LocalKeyword keyword);
+		private static extern void Internal_SetComputeConstantComputeBufferParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, IntPtr buffer, int offset, int size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DisableGlobalKeyword_Injected(ref GlobalKeyword keyword);
+		private static extern void Internal_SetComputeConstantGraphicsBufferParam_Injected(IntPtr _unity_self, IntPtr computeShader, int nameID, IntPtr buffer, int offset, int size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DisableMaterialKeyword_Injected(Material material, ref LocalKeyword keyword);
+		private static extern void Internal_SetComputeParamsFromMaterial_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, IntPtr material);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DisableComputeKeyword_Injected(ComputeShader computeShader, ref LocalKeyword keyword);
+		private static extern void Internal_DispatchCompute_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, int threadGroupsX, int threadGroupsY, int threadGroupsZ);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGlobalKeyword_Injected(ref GlobalKeyword keyword, bool value);
+		private static extern void Internal_DispatchComputeIndirect_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, IntPtr indirectBuffer, uint argsOffset);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMaterialKeyword_Injected(Material material, ref LocalKeyword keyword, bool value);
+		private static extern void Internal_DispatchComputeIndirectGraphicsBuffer_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, IntPtr indirectBuffer, uint argsOffset);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetComputeKeyword_Injected(ComputeShader computeShader, ref LocalKeyword keyword, bool value);
+		private static extern void Internal_SetRayTracingComputeBufferParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, IntPtr buffer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetViewMatrix_Injected(ref Matrix4x4 view);
+		private static extern void Internal_SetRayTracingGraphicsBufferParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, IntPtr buffer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetProjectionMatrix_Injected(ref Matrix4x4 proj);
+		private static extern void Internal_SetRayTracingGraphicsBufferHandleParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, [In] ref GraphicsBufferHandle bufferHandle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetViewProjectionMatrices_Injected(ref Matrix4x4 view, ref Matrix4x4 proj);
+		private static extern void Internal_SetRayTracingConstantComputeBufferParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, IntPtr buffer, int offset, int size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void IncrementUpdateCount_Injected(ref RenderTargetIdentifier dest);
+		private static extern void Internal_SetRayTracingConstantGraphicsBufferParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, IntPtr buffer, int offset, int size);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTargetSingle_Internal_Injected(ref RenderTargetIdentifier rt, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction);
+		private static extern void Internal_SetRayTracingTextureParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, ref RenderTargetIdentifier rt);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTargetColorDepth_Internal_Injected(ref RenderTargetIdentifier color, ref RenderTargetIdentifier depth, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, RenderTargetFlags flags);
+		private static extern void Internal_SetRayTracingFloatParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, float val);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTargetMulti_Internal_Injected(RenderTargetIdentifier[] colors, ref RenderTargetIdentifier depth, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, RenderTargetFlags flags);
+		private static extern void Internal_SetRayTracingIntParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, int val);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTargetColorDepthSubtarget_Injected(ref RenderTargetIdentifier color, ref RenderTargetIdentifier depth, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, int mipLevel, CubemapFace cubemapFace, int depthSlice);
+		private static extern void Internal_SetRayTracingVectorParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, [In] ref Vector4 val);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTargetMultiSubtarget_Injected(RenderTargetIdentifier[] colors, ref RenderTargetIdentifier depth, RenderBufferLoadAction[] colorLoadActions, RenderBufferStoreAction[] colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, int mipLevel, CubemapFace cubemapFace, int depthSlice);
+		private static extern void Internal_SetRayTracingVectorArrayParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, ref ManagedSpanWrapper values);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_ProcessVTFeedback_Injected(ref RenderTargetIdentifier rt, IntPtr resolver, int slice, int x, int width, int y, int height, int mip);
+		private static extern void Internal_SetRayTracingMatrixParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, [In] ref Matrix4x4 val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetRayTracingMatrixArrayParam_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, ref ManagedSpanWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetRayTracingFloats_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, ref ManagedSpanWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetRayTracingInts_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, ref ManagedSpanWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_BuildRayTracingAccelerationStructure_Injected(IntPtr _unity_self, IntPtr accelerationStructure, [In] ref RayTracingAccelerationStructure.BuildSettings buildSettings);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetRayTracingAccelerationStructure_Injected(IntPtr _unity_self, IntPtr rayTracingShader, int nameID, IntPtr accelerationStructure);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetComputeRayTracingAccelerationStructure_Injected(IntPtr _unity_self, IntPtr computeShader, int kernelIndex, int nameID, IntPtr accelerationStructure);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRayTracingShaderPass_Injected(IntPtr _unity_self, IntPtr rayTracingShader, ref ManagedSpanWrapper passName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DispatchRays_Injected(IntPtr _unity_self, IntPtr rayTracingShader, ref ManagedSpanWrapper rayGenShaderName, uint width, uint height, uint depth, IntPtr camera);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DispatchRaysIndirect_Injected(IntPtr _unity_self, IntPtr rayTracingShader, ref ManagedSpanWrapper rayGenShaderName, IntPtr argsBuffer, uint argsOffset, IntPtr camera);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_BuildMachineLearningOperator_Injected(IntPtr _unity_self, IntPtr machineLearningOperator);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetMachineLearningOperatorTensors_Injected(IntPtr _unity_self, IntPtr machineLearningOperator, ref ManagedSpanWrapper inputs, ref ManagedSpanWrapper outputs);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DispatchMachineLearningOperator_Injected(IntPtr _unity_self, IntPtr machineLearningOperator);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GenerateMips_Injected(IntPtr _unity_self, [In] ref RenderTargetIdentifier rt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_ResolveAntiAliasedSurface_Injected(IntPtr _unity_self, IntPtr rt, IntPtr target);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCounterValueCC_Injected(IntPtr _unity_self, IntPtr src, IntPtr dst, uint dstOffsetBytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCounterValueGC_Injected(IntPtr _unity_self, IntPtr src, IntPtr dst, uint dstOffsetBytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCounterValueCG_Injected(IntPtr _unity_self, IntPtr src, IntPtr dst, uint dstOffsetBytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyCounterValueGG_Injected(IntPtr _unity_self, IntPtr src, IntPtr dst, uint dstOffsetBytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_name_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_name_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sizeInBytes_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Clear_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawMesh_Injected(IntPtr _unity_self, IntPtr mesh, [In] ref Matrix4x4 matrix, IntPtr material, int submeshIndex, int shaderPass, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawMultipleMeshes_Injected(IntPtr _unity_self, ref ManagedSpanWrapper matrices, Mesh[] meshes, ref ManagedSpanWrapper subsetIndices, int count, IntPtr material, int shaderPass, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawRenderer_Injected(IntPtr _unity_self, IntPtr renderer, IntPtr material, int submeshIndex, int shaderPass);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawRendererList_Injected(IntPtr _unity_self, [In] ref RendererList rendererList);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProcedural_Injected(IntPtr _unity_self, [In] ref Matrix4x4 matrix, IntPtr material, int shaderPass, MeshTopology topology, int vertexCount, int instanceCount, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndexed_Injected(IntPtr _unity_self, IntPtr indexBuffer, [In] ref Matrix4x4 matrix, IntPtr material, int shaderPass, MeshTopology topology, int indexCount, int instanceCount, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndirect_Injected(IntPtr _unity_self, [In] ref Matrix4x4 matrix, IntPtr material, int shaderPass, MeshTopology topology, IntPtr bufferWithArgs, int argsOffset, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndexedIndirect_Injected(IntPtr _unity_self, IntPtr indexBuffer, [In] ref Matrix4x4 matrix, IntPtr material, int shaderPass, MeshTopology topology, IntPtr bufferWithArgs, int argsOffset, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndirectGraphicsBuffer_Injected(IntPtr _unity_self, [In] ref Matrix4x4 matrix, IntPtr material, int shaderPass, MeshTopology topology, IntPtr bufferWithArgs, int argsOffset, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawProceduralIndexedIndirectGraphicsBuffer_Injected(IntPtr _unity_self, IntPtr indexBuffer, [In] ref Matrix4x4 matrix, IntPtr material, int shaderPass, MeshTopology topology, IntPtr bufferWithArgs, int argsOffset, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawMeshInstanced_Injected(IntPtr _unity_self, IntPtr mesh, int submeshIndex, IntPtr material, int shaderPass, ref ManagedSpanWrapper matrices, int count, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawMeshInstancedProcedural_Injected(IntPtr _unity_self, IntPtr mesh, int submeshIndex, IntPtr material, int shaderPass, int count, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawMeshInstancedIndirect_Injected(IntPtr _unity_self, IntPtr mesh, int submeshIndex, IntPtr material, int shaderPass, IntPtr bufferWithArgs, int argsOffset, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawMeshInstancedIndirectGraphicsBuffer_Injected(IntPtr _unity_self, IntPtr mesh, int submeshIndex, IntPtr material, int shaderPass, IntPtr bufferWithArgs, int argsOffset, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_DrawOcclusionMesh_Injected(IntPtr _unity_self, [In] ref RectInt normalizedCamViewport);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRandomWriteTarget_Texture_Injected(IntPtr _unity_self, int index, ref RenderTargetIdentifier rt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRandomWriteTarget_Buffer_Injected(IntPtr _unity_self, int index, IntPtr uav, bool preserveCounterValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRandomWriteTarget_GraphicsBuffer_Injected(IntPtr _unity_self, int index, IntPtr uav, bool preserveCounterValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearRandomWriteTargets_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetViewport_Injected(IntPtr _unity_self, [In] ref Rect pixelRect);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableScissorRect_Injected(IntPtr _unity_self, [In] ref Rect scissor);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableScissorRect_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyTexture_Internal_Injected(IntPtr _unity_self, ref RenderTargetIdentifier src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, ref RenderTargetIdentifier dst, int dstElement, int dstMip, int dstX, int dstY, int mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Blit_Texture_Injected(IntPtr _unity_self, IntPtr source, ref RenderTargetIdentifier dest, IntPtr mat, int pass, [In] ref Vector2 scale, [In] ref Vector2 offset, int sourceDepthSlice, int destDepthSlice);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Blit_Identifier_Injected(IntPtr _unity_self, ref RenderTargetIdentifier source, ref RenderTargetIdentifier dest, IntPtr mat, int pass, [In] ref Vector2 scale, [In] ref Vector2 offset, int sourceDepthSlice, int destDepthSlice);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTemporaryRT_Injected(IntPtr _unity_self, int nameID, int width, int height, FilterMode filter, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat, int antiAliasing, bool enableRandomWrite, RenderTextureMemoryless memorylessMode, bool useDynamicScale, ShadowSamplingMode shadowSamplingMode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTemporaryRTWithDescriptor_Injected(IntPtr _unity_self, int nameID, [In] ref RenderTextureDescriptor desc, FilterMode filter);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTemporaryRTArray_Injected(IntPtr _unity_self, int nameID, int width, int height, int slices, FilterMode filter, GraphicsFormat colorFormat, GraphicsFormat depthStencilFormat, int antiAliasing, bool enableRandomWrite, bool useDynamicScale, ShadowSamplingMode shadowSamplingMode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseTemporaryRT_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalFloat_Injected(IntPtr _unity_self, int nameID, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalInt_Injected(IntPtr _unity_self, int nameID, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalInteger_Injected(IntPtr _unity_self, int nameID, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalVector_Injected(IntPtr _unity_self, int nameID, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalColor_Injected(IntPtr _unity_self, int nameID, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalMatrix_Injected(IntPtr _unity_self, int nameID, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableShaderKeyword_Injected(IntPtr _unity_self, ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableGlobalKeyword_Injected(IntPtr _unity_self, [In] ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableMaterialKeyword_Injected(IntPtr _unity_self, IntPtr material, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableComputeKeyword_Injected(IntPtr _unity_self, IntPtr computeShader, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableRayTracingKeyword_Injected(IntPtr _unity_self, IntPtr rayTracingShader, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableShaderKeyword_Injected(IntPtr _unity_self, ref ManagedSpanWrapper keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableGlobalKeyword_Injected(IntPtr _unity_self, [In] ref GlobalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableMaterialKeyword_Injected(IntPtr _unity_self, IntPtr material, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableComputeKeyword_Injected(IntPtr _unity_self, IntPtr computeShader, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableRayTracingKeyword_Injected(IntPtr _unity_self, IntPtr rayTracingShader, [In] ref LocalKeyword keyword);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalKeyword_Injected(IntPtr _unity_self, [In] ref GlobalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMaterialKeyword_Injected(IntPtr _unity_self, IntPtr material, [In] ref LocalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetComputeKeyword_Injected(IntPtr _unity_self, IntPtr computeShader, [In] ref LocalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRayTracingKeyword_Injected(IntPtr _unity_self, IntPtr rayTracingShader, [In] ref LocalKeyword keyword, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetViewMatrix_Injected(IntPtr _unity_self, [In] ref Matrix4x4 view);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetProjectionMatrix_Injected(IntPtr _unity_self, [In] ref Matrix4x4 proj);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetViewProjectionMatrices_Injected(IntPtr _unity_self, [In] ref Matrix4x4 view, [In] ref Matrix4x4 proj);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalDepthBias_Injected(IntPtr _unity_self, float bias, float slopeBias);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetExecutionFlags_Injected(IntPtr _unity_self, CommandBufferExecutionFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ValidateAgainstExecutionFlags_Injected(IntPtr _unity_self, CommandBufferExecutionFlags requiredFlags, CommandBufferExecutionFlags invalidFlags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalFloatArrayListImpl_Injected(IntPtr _unity_self, int nameID, object values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalVectorArrayListImpl_Injected(IntPtr _unity_self, int nameID, object values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalMatrixArrayListImpl_Injected(IntPtr _unity_self, int nameID, object values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalFloatArray_Injected(IntPtr _unity_self, int nameID, ref ManagedSpanWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalVectorArray_Injected(IntPtr _unity_self, int nameID, ref ManagedSpanWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalMatrixArray_Injected(IntPtr _unity_self, int nameID, ref ManagedSpanWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLateLatchProjectionMatrices_Injected(IntPtr _unity_self, ref ManagedSpanWrapper projectionMat);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MarkLateLatchMatrixShaderPropertyID_Injected(IntPtr _unity_self, CameraLateLatchMatrixType matrixPropertyType, int shaderPropertyID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UnmarkLateLatchMatrix_Injected(IntPtr _unity_self, CameraLateLatchMatrixType matrixPropertyType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalTexture_Impl_Injected(IntPtr _unity_self, int nameID, ref RenderTargetIdentifier rt, RenderTextureSubElement element);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalBufferInternal_Injected(IntPtr _unity_self, int nameID, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalGraphicsBufferInternal_Injected(IntPtr _unity_self, int nameID, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalRayTracingAccelerationStructureInternal_Injected(IntPtr _unity_self, IntPtr accelerationStructure, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetShadowSamplingMode_Impl_Injected(IntPtr _unity_self, ref RenderTargetIdentifier shadowmap, ShadowSamplingMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IssuePluginEventInternal_Injected(IntPtr _unity_self, IntPtr callback, int eventID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginSample_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EndSample_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginSample_CustomSampler_Injected(IntPtr _unity_self, IntPtr sampler);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EndSample_CustomSampler_Injected(IntPtr _unity_self, IntPtr sampler);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginSample_ProfilerMarker_Injected(IntPtr _unity_self, IntPtr markerHandle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EndSample_ProfilerMarker_Injected(IntPtr _unity_self, IntPtr markerHandle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IssuePluginEventAndDataInternal_Injected(IntPtr _unity_self, IntPtr callback, int eventID, IntPtr data);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IssuePluginEventAndDataInternalWithFlags_Injected(IntPtr _unity_self, IntPtr callback, int eventID, CustomMarkerCallbackFlags flags, IntPtr data);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IssuePluginCustomBlitInternal_Injected(IntPtr _unity_self, IntPtr callback, uint command, ref RenderTargetIdentifier source, ref RenderTargetIdentifier dest, uint commandParam, uint commandFlags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IssuePluginCustomTextureUpdateInternal_Injected(IntPtr _unity_self, IntPtr callback, IntPtr targetTexture, uint userData, bool useNewUnityRenderingExtTextureUpdateParamsV2);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalConstantBufferInternal_Injected(IntPtr _unity_self, IntPtr buffer, int nameID, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGlobalConstantGraphicsBufferInternal_Injected(IntPtr _unity_self, IntPtr buffer, int nameID, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IncrementUpdateCount_Injected(IntPtr _unity_self, [In] ref RenderTargetIdentifier dest);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetInstanceMultiplier_Injected(IntPtr _unity_self, uint multiplier);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetFoveatedRenderingMode_Injected(IntPtr _unity_self, FoveatedRenderingMode foveatedRenderingMode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetWireframe_Injected(IntPtr _unity_self, bool enable);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ConfigureFoveatedRendering_Injected(IntPtr _unity_self, IntPtr platformData);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearRenderTargetSingle_Internal_Injected(IntPtr _unity_self, RTClearFlags clearFlags, [In] ref Color color, float depth, uint stencil);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearRenderTargetMulti_Internal_Injected(IntPtr _unity_self, RTClearFlags clearFlags, ref ManagedSpanWrapper colors, float depth, uint stencil);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTargetSingle_Internal_Injected(IntPtr _unity_self, [In] ref RenderTargetIdentifier rt, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTargetColorDepth_Internal_Injected(IntPtr _unity_self, [In] ref RenderTargetIdentifier color, [In] ref RenderTargetIdentifier depth, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, RenderTargetFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTargetMulti_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, [In] ref RenderTargetIdentifier depth, ref ManagedSpanWrapper colorLoadActions, ref ManagedSpanWrapper colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, RenderTargetFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTargetColorDepthSubtarget_Injected(IntPtr _unity_self, [In] ref RenderTargetIdentifier color, [In] ref RenderTargetIdentifier depth, RenderBufferLoadAction colorLoadAction, RenderBufferStoreAction colorStoreAction, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, int mipLevel, CubemapFace cubemapFace, int depthSlice);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTargetMultiSubtarget_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, [In] ref RenderTargetIdentifier depth, ref ManagedSpanWrapper colorLoadActions, ref ManagedSpanWrapper colorStoreActions, RenderBufferLoadAction depthLoadAction, RenderBufferStoreAction depthStoreAction, int mipLevel, CubemapFace cubemapFace, int depthSlice);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_ProcessVTFeedback_Injected(IntPtr _unity_self, [In] ref RenderTargetIdentifier rt, IntPtr resolver, int slice, int x, int width, int y, int height, int mip);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetComputeBufferNativeData_Injected(IntPtr _unity_self, IntPtr buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetComputeBufferData_Injected(IntPtr _unity_self, IntPtr buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetComputeBufferCounterValue_Injected(IntPtr _unity_self, IntPtr buffer, uint counterValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetGraphicsBufferNativeData_Injected(IntPtr _unity_self, IntPtr buffer, IntPtr data, int nativeBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetGraphicsBufferData_Injected(IntPtr _unity_self, IntPtr buffer, Array data, int managedBufferStartIndex, int graphicsBufferStartIndex, int count, int elemSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetGraphicsBufferCounterValue_Injected(IntPtr _unity_self, IntPtr buffer, uint counterValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyBufferImpl_Injected(IntPtr _unity_self, IntPtr source, IntPtr dest);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginRenderPass_Internal_Injected(IntPtr _unity_self, int width, int height, int volumeDepth, int samples, ref ManagedSpanWrapper attachments, int depthAttachmentIndex, int shadingRateImageAttachmentIndex, ref ManagedSpanWrapper subPasses, ref ManagedSpanWrapper debugNameUtf8);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void NextSubPass_Internal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EndRenderPass_Internal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetupCameraProperties_Internal_Injected(IntPtr _unity_self, IntPtr camera);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InvokeOnRenderObjectCallbacks_Internal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetShadingRateFragmentSize_Impl_Injected(IntPtr _unity_self, ShadingRateFragmentSize shadingRateFragmentSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetShadingRateCombiner_Impl_Injected(IntPtr _unity_self, ShadingRateCombinerStage stage, ShadingRateCombiner combiner);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetShadingRateImage_Impl_Injected(IntPtr _unity_self, in RenderTargetIdentifier shadingRateImage);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetShadingRate_Impl_Injected(IntPtr _unity_self);
+
+		public static bool ThrowOnSetRenderTarget;
 
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static CommandBuffer ConvertToManaged(IntPtr ptr)
+			{
+				return new CommandBuffer(ptr);
+			}
+
+			public static IntPtr ConvertToNative(CommandBuffer commandBuffer)
+			{
+				return commandBuffer.m_Ptr;
+			}
+		}
 	}
 }

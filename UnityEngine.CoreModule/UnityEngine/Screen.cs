@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
@@ -163,11 +164,26 @@ namespace UnityEngine
 			}
 		}
 
-		public static extern Rect[] cutouts
+		public static Rect[] cutouts
 		{
 			[FreeFunction("ScreenScripting::GetCutouts")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				Rect[] array2;
+				try
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					Screen.get_cutouts_Injected(out blittableArrayWrapper);
+				}
+				finally
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					Rect[] array;
+					blittableArrayWrapper.Unmarshal<Rect>(ref array);
+					array2 = array;
+				}
+				return array2;
+			}
 		}
 
 		[NativeName("RequestResolution")]
@@ -176,8 +192,8 @@ namespace UnityEngine
 			Screen.SetResolution_Injected(width, height, fullscreenMode, ref preferredRefreshRate);
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("SetResolution(int, int, FullScreenMode, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void SetResolution(int width, int height, FullScreenMode fullscreenMode, [DefaultValue("0")] int preferredRefreshRate)
 		{
 			bool flag = preferredRefreshRate < 0;
@@ -220,6 +236,22 @@ namespace UnityEngine
 		public static void SetResolution(int width, int height, bool fullscreen)
 		{
 			Screen.SetResolution(width, height, fullscreen, 0);
+		}
+
+		[NativeName("SetRequestedMSAASamples")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetMSAASamples(int numSamples);
+
+		[NativeName("GetRequestedMSAASamples")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMSAASamples();
+
+		public static int msaaSamples
+		{
+			get
+			{
+				return Screen.GetMSAASamples();
+			}
 		}
 
 		public static Vector2Int mainWindowPosition
@@ -276,14 +308,30 @@ namespace UnityEngine
 		[FreeFunction("MoveMainWindow")]
 		private static AsyncOperation MoveMainWindowImpl(in DisplayInfo display, Vector2Int position)
 		{
-			return Screen.MoveMainWindowImpl_Injected(in display, ref position);
+			IntPtr intPtr = Screen.MoveMainWindowImpl_Injected(in display, ref position);
+			return (intPtr == 0) ? null : AsyncOperation.BindingsMarshaller.ConvertToManaged(intPtr);
 		}
 
-		public static extern Resolution[] resolutions
+		public static Resolution[] resolutions
 		{
 			[FreeFunction("ScreenScripting::GetResolutions")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				Resolution[] array2;
+				try
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					Screen.get_resolutions_Injected(out blittableArrayWrapper);
+				}
+				finally
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					Resolution[] array;
+					blittableArrayWrapper.Unmarshal<Resolution>(ref array);
+					array2 = array;
+				}
+				return array2;
+			}
 		}
 
 		public static extern float brightness
@@ -324,7 +372,10 @@ namespace UnityEngine
 		private static extern void get_safeArea_Injected(out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetResolution_Injected(int width, int height, FullScreenMode fullscreenMode, ref RefreshRate preferredRefreshRate);
+		private static extern void get_cutouts_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetResolution_Injected(int width, int height, FullScreenMode fullscreenMode, [In] ref RefreshRate preferredRefreshRate);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetMainWindowPosition_Injected(out Vector2Int ret);
@@ -333,6 +384,9 @@ namespace UnityEngine
 		private static extern void GetMainWindowDisplayInfo_Injected(out DisplayInfo ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation MoveMainWindowImpl_Injected(in DisplayInfo display, ref Vector2Int position);
+		private static extern IntPtr MoveMainWindowImpl_Injected(in DisplayInfo display, [In] ref Vector2Int position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_resolutions_Injected(out BlittableArrayWrapper ret);
 	}
 }

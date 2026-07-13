@@ -11,39 +11,144 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class AssetBundleRecompressOperation : AsyncOperation
 	{
-		public extern string humanReadableResult
+		public string humanReadableResult
 		{
 			[NativeMethod("GetResultStr")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = AssetBundleRecompressOperation.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					AssetBundleRecompressOperation.get_humanReadableResult_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public extern string inputPath
+		public string inputPath
 		{
 			[NativeMethod("GetInputPath")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = AssetBundleRecompressOperation.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					AssetBundleRecompressOperation.get_inputPath_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public extern string outputPath
+		public string outputPath
 		{
 			[NativeMethod("GetOutputPath")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = AssetBundleRecompressOperation.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					AssetBundleRecompressOperation.get_outputPath_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
-		public extern AssetBundleLoadResult result
+		public AssetBundleLoadResult result
 		{
 			[NativeMethod("GetResult")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AssetBundleRecompressOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AssetBundleRecompressOperation.get_result_Injected(intPtr);
+			}
 		}
 
-		public extern bool success
+		public bool success
 		{
 			[NativeMethod("GetSuccess")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AssetBundleRecompressOperation.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AssetBundleRecompressOperation.get_success_Injected(intPtr);
+			}
+		}
+
+		public AssetBundleRecompressOperation()
+		{
+		}
+
+		private AssetBundleRecompressOperation(IntPtr ptr)
+			: base(ptr)
+		{
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_humanReadableResult_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_inputPath_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_outputPath_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AssetBundleLoadResult get_result_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_success_Injected(IntPtr _unity_self);
+
+		internal new static class BindingsMarshaller
+		{
+			public static AssetBundleRecompressOperation ConvertToManaged(IntPtr ptr)
+			{
+				return new AssetBundleRecompressOperation(ptr);
+			}
+
+			public static IntPtr ConvertToNative(AssetBundleRecompressOperation op)
+			{
+				return op.m_Ptr;
+			}
 		}
 	}
 }

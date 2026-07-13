@@ -4,10 +4,10 @@ using System.Reflection.Emit;
 namespace System.Runtime.InteropServices
 {
 	[CLSCompliant(false)]
-	[ComVisible(true)]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("ED3E4384-D7E2-3FA7-8FFD-8940D330519A")]
 	[TypeLibImportClass(typeof(ConstructorBuilder))]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[ComVisible(true)]
 	public interface _ConstructorBuilder
 	{
 		void GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId);

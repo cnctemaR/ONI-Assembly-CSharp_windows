@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using UnityEngineInternal;
 
 namespace UnityEngine.UI
 {
@@ -117,7 +118,7 @@ namespace UnityEngine.UI
 			{
 				float num2 = (float)Screen.width;
 				float num3 = (float)Screen.height;
-				if (num > 0 && num < Display.displays.Length)
+				if (DisplayInternal.IsASecondaryDisplayIndex(num))
 				{
 					num2 = (float)Display.displays[num].systemWidth;
 					num3 = (float)Display.displays[num].systemHeight;
@@ -194,7 +195,7 @@ namespace UnityEngine.UI
 						num6 = Vector3.Dot(forward, transform.position - ray.origin) / Vector3.Dot(forward, ray.direction);
 						if (num6 < 0f)
 						{
-							goto IL_0464;
+							goto IL_045E;
 						}
 					}
 					if (num6 < num4)
@@ -216,7 +217,7 @@ namespace UnityEngine.UI
 						resultAppendList.Add(raycastResult);
 					}
 				}
-				IL_0464:;
+				IL_045E:;
 			}
 		}
 

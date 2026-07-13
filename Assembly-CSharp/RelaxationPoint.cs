@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/RelaxationPoint")]
-public class RelaxationPoint : Workable, IGameObjectEffectDescriptor
+public class RelaxationPoint : Workable
 {
 	public RelaxationPoint()
 	{

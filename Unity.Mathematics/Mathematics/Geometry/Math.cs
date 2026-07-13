@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Unity.Mathematics.Geometry
 {
-	internal static class Math
+	public static class Math
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static MinMaxAABB Transform(RigidTransform transform, MinMaxAABB aabb)

@@ -1,26 +1,37 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Modules/Physics/Rigidbody.h")]
+	[RequireComponent(typeof(Transform))]
 	public class Rigidbody : Component
 	{
-		public Vector3 velocity
+		public Vector3 linearVelocity
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_velocity_Injected(out vector);
+				Rigidbody.get_linearVelocity_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_velocity_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_linearVelocity_Injected(intPtr, ref value);
 			}
 		}
 
@@ -28,110 +39,264 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_angularVelocity_Injected(out vector);
+				Rigidbody.get_angularVelocity_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_angularVelocity_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_angularVelocity_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern float drag
+		public float linearDamping
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_linearDamping_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_linearDamping_Injected(intPtr, value);
+			}
 		}
 
-		public extern float angularDrag
+		public float angularDamping
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_angularDamping_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_angularDamping_Injected(intPtr, value);
+			}
 		}
 
-		public extern float mass
+		public float mass
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_mass_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_mass_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetDensity(float density);
-
-		public extern bool useGravity
+		public bool useGravity
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_useGravity_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_useGravity_Injected(intPtr, value);
+			}
 		}
 
-		public extern float maxDepenetrationVelocity
+		public float maxDepenetrationVelocity
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_maxDepenetrationVelocity_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_maxDepenetrationVelocity_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool isKinematic
+		public bool isKinematic
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_isKinematic_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_isKinematic_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool freezeRotation
+		public bool freezeRotation
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return this.constraints.HasFlag(RigidbodyConstraints.FreezeRotation);
+			}
+			set
+			{
+				if (value)
+				{
+					this.constraints |= RigidbodyConstraints.FreezeRotation;
+				}
+				else
+				{
+					this.constraints &= RigidbodyConstraints.FreezePosition;
+				}
+			}
 		}
 
-		public extern RigidbodyConstraints constraints
+		public RigidbodyConstraints constraints
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_constraints_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_constraints_Injected(intPtr, value);
+			}
 		}
 
-		public extern CollisionDetectionMode collisionDetectionMode
+		public CollisionDetectionMode collisionDetectionMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_collisionDetectionMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_collisionDetectionMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool automaticCenterOfMass
+		public bool automaticCenterOfMass
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_automaticCenterOfMass_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_automaticCenterOfMass_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 centerOfMass
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_centerOfMass_Injected(out vector);
+				Rigidbody.get_centerOfMass_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_centerOfMass_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_centerOfMass_Injected(intPtr, ref value);
 			}
 		}
 
@@ -139,31 +304,60 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_worldCenterOfMass_Injected(out vector);
+				Rigidbody.get_worldCenterOfMass_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
 
-		public extern bool automaticInertiaTensor
+		public bool automaticInertiaTensor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_automaticInertiaTensor_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_automaticInertiaTensor_Injected(intPtr, value);
+			}
 		}
 
 		public Quaternion inertiaTensorRotation
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Quaternion quaternion;
-				this.get_inertiaTensorRotation_Injected(out quaternion);
+				Rigidbody.get_inertiaTensorRotation_Injected(intPtr, out quaternion);
 				return quaternion;
 			}
 			set
 			{
-				this.set_inertiaTensorRotation_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_inertiaTensorRotation_Injected(intPtr, ref value);
 			}
 		}
 
@@ -171,35 +365,84 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_inertiaTensor_Injected(out vector);
+				Rigidbody.get_inertiaTensor_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_inertiaTensor_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_inertiaTensor_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern bool detectCollisions
+		internal Matrix4x4 worldInertiaTensorMatrix
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Matrix4x4 matrix4x;
+				Rigidbody.get_worldInertiaTensorMatrix_Injected(intPtr, out matrix4x);
+				return matrix4x;
+			}
+		}
+
+		public bool detectCollisions
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_detectCollisions_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_detectCollisions_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 position
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_position_Injected(out vector);
+				Rigidbody.get_position_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_position_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_position_Injected(intPtr, ref value);
 			}
 		}
 
@@ -207,119 +450,293 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Quaternion quaternion;
-				this.get_rotation_Injected(out quaternion);
+				Rigidbody.get_rotation_Injected(intPtr, out quaternion);
 				return quaternion;
 			}
 			set
 			{
-				this.set_rotation_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_rotation_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern RigidbodyInterpolation interpolation
+		public RigidbodyInterpolation interpolation
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_interpolation_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_interpolation_Injected(intPtr, value);
+			}
 		}
 
-		public extern int solverIterations
+		public int solverIterations
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_solverIterations_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_solverIterations_Injected(intPtr, value);
+			}
 		}
 
-		public extern float sleepThreshold
+		public float sleepThreshold
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_sleepThreshold_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_sleepThreshold_Injected(intPtr, value);
+			}
 		}
 
-		public extern float maxAngularVelocity
+		public float maxAngularVelocity
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_maxAngularVelocity_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_maxAngularVelocity_Injected(intPtr, value);
+			}
 		}
 
-		public extern float maxLinearVelocity
+		public float maxLinearVelocity
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_maxLinearVelocity_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_maxLinearVelocity_Injected(intPtr, value);
+			}
 		}
 
 		public void MovePosition(Vector3 position)
 		{
-			this.MovePosition_Injected(ref position);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.MovePosition_Injected(intPtr, ref position);
 		}
 
-		public void MoveRotation(Quaternion rot)
+		public void MoveRotation(Quaternion rotation)
 		{
-			this.MoveRotation_Injected(ref rot);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.MoveRotation_Injected(intPtr, ref rotation);
 		}
 
 		public void Move(Vector3 position, Quaternion rotation)
 		{
-			this.Move_Injected(ref position, ref rotation);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.Move_Injected(intPtr, ref position, ref rotation);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Sleep();
+		public void Sleep()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.Sleep_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsSleeping();
+		public bool IsSleeping()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Rigidbody.IsSleeping_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void WakeUp();
+		public void WakeUp()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.WakeUp_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetCenterOfMass();
+		public void ResetCenterOfMass()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.ResetCenterOfMass_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetInertiaTensor();
+		public void ResetInertiaTensor()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.ResetInertiaTensor_Injected(intPtr);
+		}
 
 		public Vector3 GetRelativePointVelocity(Vector3 relativePoint)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetRelativePointVelocity_Injected(ref relativePoint, out vector);
+			Rigidbody.GetRelativePointVelocity_Injected(intPtr, ref relativePoint, out vector);
 			return vector;
 		}
 
 		public Vector3 GetPointVelocity(Vector3 worldPoint)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetPointVelocity_Injected(ref worldPoint, out vector);
+			Rigidbody.GetPointVelocity_Injected(intPtr, ref worldPoint, out vector);
 			return vector;
 		}
 
-		public extern int solverVelocityIterations
+		public int solverVelocityIterations
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Rigidbody.get_solverVelocityIterations_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_solverVelocityIterations_Injected(intPtr, value);
+			}
+		}
+
+		public void PublishTransform()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.PublishTransform_Injected(intPtr);
 		}
 
 		public LayerMask excludeLayers
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				LayerMask layerMask;
-				this.get_excludeLayers_Injected(out layerMask);
+				Rigidbody.get_excludeLayers_Injected(intPtr, out layerMask);
 				return layerMask;
 			}
 			set
 			{
-				this.set_excludeLayers_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_excludeLayers_Injected(intPtr, ref value);
 			}
 		}
 
@@ -327,20 +744,35 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				LayerMask layerMask;
-				this.get_includeLayers_Injected(out layerMask);
+				Rigidbody.get_includeLayers_Injected(intPtr, out layerMask);
 				return layerMask;
 			}
 			set
 			{
-				this.set_includeLayers_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Rigidbody.set_includeLayers_Injected(intPtr, ref value);
 			}
 		}
 
 		public Vector3 GetAccumulatedForce([DefaultValue("Time.fixedDeltaTime")] float step)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetAccumulatedForce_Injected(step, out vector);
+			Rigidbody.GetAccumulatedForce_Injected(intPtr, step, out vector);
 			return vector;
 		}
 
@@ -352,8 +784,13 @@ namespace UnityEngine
 
 		public Vector3 GetAccumulatedTorque([DefaultValue("Time.fixedDeltaTime")] float step)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetAccumulatedTorque_Injected(step, out vector);
+			Rigidbody.GetAccumulatedTorque_Injected(intPtr, step, out vector);
 			return vector;
 		}
 
@@ -365,7 +802,12 @@ namespace UnityEngine
 
 		public void AddForce(Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
-			this.AddForce_Injected(ref force, mode);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.AddForce_Injected(intPtr, ref force, mode);
 		}
 
 		[ExcludeFromDocs]
@@ -387,7 +829,12 @@ namespace UnityEngine
 
 		public void AddRelativeForce(Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
-			this.AddRelativeForce_Injected(ref force, mode);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.AddRelativeForce_Injected(intPtr, ref force, mode);
 		}
 
 		[ExcludeFromDocs]
@@ -409,7 +856,12 @@ namespace UnityEngine
 
 		public void AddTorque(Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
-			this.AddTorque_Injected(ref torque, mode);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.AddTorque_Injected(intPtr, ref torque, mode);
 		}
 
 		[ExcludeFromDocs]
@@ -431,7 +883,12 @@ namespace UnityEngine
 
 		public void AddRelativeTorque(Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
-			this.AddRelativeTorque_Injected(ref torque, mode);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.AddRelativeTorque_Injected(intPtr, ref torque, mode);
 		}
 
 		[ExcludeFromDocs]
@@ -453,7 +910,12 @@ namespace UnityEngine
 
 		public void AddForceAtPosition(Vector3 force, Vector3 position, [DefaultValue("ForceMode.Force")] ForceMode mode)
 		{
-			this.AddForceAtPosition_Injected(ref force, ref position, mode);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.AddForceAtPosition_Injected(intPtr, ref force, ref position, mode);
 		}
 
 		[ExcludeFromDocs]
@@ -464,7 +926,12 @@ namespace UnityEngine
 
 		public void AddExplosionForce(float explosionForce, Vector3 explosionPosition, float explosionRadius, [DefaultValue("0.0f")] float upwardsModifier, [DefaultValue("ForceMode.Force)")] ForceMode mode)
 		{
-			this.AddExplosionForce_Injected(explosionForce, ref explosionPosition, explosionRadius, upwardsModifier, mode);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.AddExplosionForce_Injected(intPtr, explosionForce, ref explosionPosition, explosionRadius, upwardsModifier, mode);
 		}
 
 		[ExcludeFromDocs]
@@ -482,7 +949,12 @@ namespace UnityEngine
 		[NativeName("ClosestPointOnBounds")]
 		private void Internal_ClosestPointOnBounds(Vector3 point, ref Vector3 outPos, ref float distance)
 		{
-			this.Internal_ClosestPointOnBounds_Injected(ref point, ref outPos, ref distance);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Rigidbody.Internal_ClosestPointOnBounds_Injected(intPtr, ref point, ref outPos, ref distance);
 		}
 
 		public Vector3 ClosestPointOnBounds(Vector3 position)
@@ -495,8 +967,13 @@ namespace UnityEngine
 
 		private RaycastHit SweepTest(Vector3 direction, float maxDistance, QueryTriggerInteraction queryTriggerInteraction, ref bool hasHit)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			RaycastHit raycastHit;
-			this.SweepTest_Injected(ref direction, maxDistance, queryTriggerInteraction, ref hasHit, out raycastHit);
+			Rigidbody.SweepTest_Injected(intPtr, ref direction, maxDistance, queryTriggerInteraction, ref hasHit, out raycastHit);
 			return raycastHit;
 		}
 
@@ -535,7 +1012,25 @@ namespace UnityEngine
 		[NativeName("SweepTestAll")]
 		private RaycastHit[] Internal_SweepTestAll(Vector3 direction, float maxDistance, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return this.Internal_SweepTestAll_Injected(ref direction, maxDistance, queryTriggerInteraction);
+			RaycastHit[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Rigidbody>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Rigidbody.Internal_SweepTestAll_Injected(intPtr, ref direction, maxDistance, queryTriggerInteraction, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				RaycastHit[] array;
+				blittableArrayWrapper.Unmarshal<RaycastHit>(ref array);
+				array2 = array;
+			}
+			return array2;
 		}
 
 		public RaycastHit[] SweepTestAll(Vector3 direction, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
@@ -567,183 +1062,280 @@ namespace UnityEngine
 			return this.SweepTestAll(direction, float.PositiveInfinity, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[Obsolete("The sleepVelocity is no longer supported. Use sleepThreshold. Note that sleepThreshold is energy but not velocity.", true)]
+		[Obsolete("Please use Rigidbody.linearDamping instead. (UnityUpgradable) -> linearDamping")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public float sleepVelocity
+		public float drag
 		{
 			get
 			{
-				return 0f;
+				return this.linearDamping;
 			}
 			set
 			{
+				this.linearDamping = value;
 			}
 		}
 
+		[Obsolete("Please use Rigidbody.angularDamping instead. (UnityUpgradable) -> angularDamping")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("The sleepAngularVelocity is no longer supported. Use sleepThreshold to specify energy.", true)]
-		public float sleepAngularVelocity
+		public float angularDrag
 		{
 			get
 			{
-				return 0f;
+				return this.angularDamping;
 			}
 			set
 			{
+				this.angularDamping = value;
 			}
 		}
 
-		[Obsolete("Use Rigidbody.maxAngularVelocity instead.")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public void SetMaxAngularVelocity(float a)
-		{
-			this.maxAngularVelocity = a;
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Cone friction is no longer supported.", true)]
-		public bool useConeFriction
+		[Obsolete("Please use Rigidbody.linearVelocity instead. (UnityUpgradable) -> linearVelocity")]
+		public Vector3 velocity
 		{
 			get
 			{
-				return false;
+				return this.linearVelocity;
 			}
 			set
 			{
+				this.linearVelocity = value;
 			}
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Please use Rigidbody.solverIterations instead. (UnityUpgradable) -> solverIterations")]
-		public int solverIterationCount
+		[Obsolete("Please use Rigidbody.mass instead. Setting density on a Rigidbody no longer has any effect.", false)]
+		public void SetDensity(float density)
 		{
-			get
-			{
-				return this.solverIterations;
-			}
-			set
-			{
-				this.solverIterations = value;
-			}
-		}
-
-		[Obsolete("Please use Rigidbody.solverVelocityIterations instead. (UnityUpgradable) -> solverVelocityIterations")]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public int solverVelocityIterationCount
-		{
-			get
-			{
-				return this.solverVelocityIterations;
-			}
-			set
-			{
-				this.solverVelocityIterations = value;
-			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_velocity_Injected(out Vector3 ret);
+		private static extern void get_linearVelocity_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_velocity_Injected(ref Vector3 value);
+		private static extern void set_linearVelocity_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_angularVelocity_Injected(out Vector3 ret);
+		private static extern void get_angularVelocity_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_angularVelocity_Injected(ref Vector3 value);
+		private static extern void set_angularVelocity_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_centerOfMass_Injected(out Vector3 ret);
+		private static extern float get_linearDamping_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_centerOfMass_Injected(ref Vector3 value);
+		private static extern void set_linearDamping_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_worldCenterOfMass_Injected(out Vector3 ret);
+		private static extern float get_angularDamping_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_inertiaTensorRotation_Injected(out Quaternion ret);
+		private static extern void set_angularDamping_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_inertiaTensorRotation_Injected(ref Quaternion value);
+		private static extern float get_mass_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_inertiaTensor_Injected(out Vector3 ret);
+		private static extern void set_mass_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_inertiaTensor_Injected(ref Vector3 value);
+		private static extern bool get_useGravity_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_position_Injected(out Vector3 ret);
+		private static extern void set_useGravity_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_position_Injected(ref Vector3 value);
+		private static extern float get_maxDepenetrationVelocity_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_rotation_Injected(out Quaternion ret);
+		private static extern void set_maxDepenetrationVelocity_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_rotation_Injected(ref Quaternion value);
+		private static extern bool get_isKinematic_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void MovePosition_Injected(ref Vector3 position);
+		private static extern void set_isKinematic_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void MoveRotation_Injected(ref Quaternion rot);
+		private static extern RigidbodyConstraints get_constraints_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Move_Injected(ref Vector3 position, ref Quaternion rotation);
+		private static extern void set_constraints_Injected(IntPtr _unity_self, RigidbodyConstraints value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetRelativePointVelocity_Injected(ref Vector3 relativePoint, out Vector3 ret);
+		private static extern CollisionDetectionMode get_collisionDetectionMode_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPointVelocity_Injected(ref Vector3 worldPoint, out Vector3 ret);
+		private static extern void set_collisionDetectionMode_Injected(IntPtr _unity_self, CollisionDetectionMode value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_excludeLayers_Injected(out LayerMask ret);
+		private static extern bool get_automaticCenterOfMass_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_excludeLayers_Injected(ref LayerMask value);
+		private static extern void set_automaticCenterOfMass_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_includeLayers_Injected(out LayerMask ret);
+		private static extern void get_centerOfMass_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_includeLayers_Injected(ref LayerMask value);
+		private static extern void set_centerOfMass_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetAccumulatedForce_Injected([DefaultValue("Time.fixedDeltaTime")] float step, out Vector3 ret);
+		private static extern void get_worldCenterOfMass_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetAccumulatedTorque_Injected([DefaultValue("Time.fixedDeltaTime")] float step, out Vector3 ret);
+		private static extern bool get_automaticInertiaTensor_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddForce_Injected(ref Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode);
+		private static extern void set_automaticInertiaTensor_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddRelativeForce_Injected(ref Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode);
+		private static extern void get_inertiaTensorRotation_Injected(IntPtr _unity_self, out Quaternion ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddTorque_Injected(ref Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode);
+		private static extern void set_inertiaTensorRotation_Injected(IntPtr _unity_self, [In] ref Quaternion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddRelativeTorque_Injected(ref Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode);
+		private static extern void get_inertiaTensor_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddForceAtPosition_Injected(ref Vector3 force, ref Vector3 position, [DefaultValue("ForceMode.Force")] ForceMode mode);
+		private static extern void set_inertiaTensor_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddExplosionForce_Injected(float explosionForce, ref Vector3 explosionPosition, float explosionRadius, [DefaultValue("0.0f")] float upwardsModifier, [DefaultValue("ForceMode.Force)")] ForceMode mode);
+		private static extern void get_worldInertiaTensorMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_ClosestPointOnBounds_Injected(ref Vector3 point, ref Vector3 outPos, ref float distance);
+		private static extern bool get_detectCollisions_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SweepTest_Injected(ref Vector3 direction, float maxDistance, QueryTriggerInteraction queryTriggerInteraction, ref bool hasHit, out RaycastHit ret);
+		private static extern void set_detectCollisions_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern RaycastHit[] Internal_SweepTestAll_Injected(ref Vector3 direction, float maxDistance, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern void get_position_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_position_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_rotation_Injected(IntPtr _unity_self, out Quaternion ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rotation_Injected(IntPtr _unity_self, [In] ref Quaternion value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RigidbodyInterpolation get_interpolation_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_interpolation_Injected(IntPtr _unity_self, RigidbodyInterpolation value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_solverIterations_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_solverIterations_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_sleepThreshold_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sleepThreshold_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_maxAngularVelocity_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maxAngularVelocity_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_maxLinearVelocity_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_maxLinearVelocity_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MovePosition_Injected(IntPtr _unity_self, [In] ref Vector3 position);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MoveRotation_Injected(IntPtr _unity_self, [In] ref Quaternion rotation);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Move_Injected(IntPtr _unity_self, [In] ref Vector3 position, [In] ref Quaternion rotation);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Sleep_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsSleeping_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void WakeUp_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetCenterOfMass_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetInertiaTensor_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetRelativePointVelocity_Injected(IntPtr _unity_self, [In] ref Vector3 relativePoint, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPointVelocity_Injected(IntPtr _unity_self, [In] ref Vector3 worldPoint, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_solverVelocityIterations_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_solverVelocityIterations_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void PublishTransform_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_excludeLayers_Injected(IntPtr _unity_self, out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_excludeLayers_Injected(IntPtr _unity_self, [In] ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_includeLayers_Injected(IntPtr _unity_self, out LayerMask ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_includeLayers_Injected(IntPtr _unity_self, [In] ref LayerMask value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAccumulatedForce_Injected(IntPtr _unity_self, [DefaultValue("Time.fixedDeltaTime")] float step, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetAccumulatedTorque_Injected(IntPtr _unity_self, [DefaultValue("Time.fixedDeltaTime")] float step, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddForce_Injected(IntPtr _unity_self, [In] ref Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddRelativeForce_Injected(IntPtr _unity_self, [In] ref Vector3 force, [DefaultValue("ForceMode.Force")] ForceMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddTorque_Injected(IntPtr _unity_self, [In] ref Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddRelativeTorque_Injected(IntPtr _unity_self, [In] ref Vector3 torque, [DefaultValue("ForceMode.Force")] ForceMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddForceAtPosition_Injected(IntPtr _unity_self, [In] ref Vector3 force, [In] ref Vector3 position, [DefaultValue("ForceMode.Force")] ForceMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddExplosionForce_Injected(IntPtr _unity_self, float explosionForce, [In] ref Vector3 explosionPosition, float explosionRadius, [DefaultValue("0.0f")] float upwardsModifier, [DefaultValue("ForceMode.Force)")] ForceMode mode);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_ClosestPointOnBounds_Injected(IntPtr _unity_self, [In] ref Vector3 point, ref Vector3 outPos, ref float distance);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SweepTest_Injected(IntPtr _unity_self, [In] ref Vector3 direction, float maxDistance, QueryTriggerInteraction queryTriggerInteraction, ref bool hasHit, out RaycastHit ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SweepTestAll_Injected(IntPtr _unity_self, [In] ref Vector3 direction, float maxDistance, QueryTriggerInteraction queryTriggerInteraction, out BlittableArrayWrapper ret);
 	}
 }

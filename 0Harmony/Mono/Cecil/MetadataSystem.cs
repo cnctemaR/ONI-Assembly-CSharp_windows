@@ -305,11 +305,6 @@ namespace Mono.Cecil
 			this.NestedTypes[type_rid] = mapping;
 		}
 
-		public void RemoveNestedTypeMapping(TypeDefinition type)
-		{
-			this.NestedTypes.Remove(type.token.RID);
-		}
-
 		public bool TryGetReverseNestedTypeMapping(TypeDefinition type, out uint declaring)
 		{
 			return this.ReverseNestedTypes.TryGetValue(type.token.RID, out declaring);
@@ -318,11 +313,6 @@ namespace Mono.Cecil
 		public void SetReverseNestedTypeMapping(uint nested, uint declaring)
 		{
 			this.ReverseNestedTypes[nested] = declaring;
-		}
-
-		public void RemoveReverseNestedTypeMapping(TypeDefinition type)
-		{
-			this.ReverseNestedTypes.Remove(type.token.RID);
 		}
 
 		public bool TryGetInterfaceMapping(TypeDefinition type, out Collection<Row<uint, MetadataToken>> mapping)
@@ -335,11 +325,6 @@ namespace Mono.Cecil
 			this.Interfaces[type_rid] = mapping;
 		}
 
-		public void RemoveInterfaceMapping(TypeDefinition type)
-		{
-			this.Interfaces.Remove(type.token.RID);
-		}
-
 		public void AddPropertiesRange(uint type_rid, Range range)
 		{
 			this.Properties.Add(type_rid, range);
@@ -348,11 +333,6 @@ namespace Mono.Cecil
 		public bool TryGetPropertiesRange(TypeDefinition type, out Range range)
 		{
 			return this.Properties.TryGetValue(type.token.RID, out range);
-		}
-
-		public void RemovePropertiesRange(TypeDefinition type)
-		{
-			this.Properties.Remove(type.token.RID);
 		}
 
 		public void AddEventsRange(uint type_rid, Range range)
@@ -365,19 +345,9 @@ namespace Mono.Cecil
 			return this.Events.TryGetValue(type.token.RID, out range);
 		}
 
-		public void RemoveEventsRange(TypeDefinition type)
-		{
-			this.Events.Remove(type.token.RID);
-		}
-
 		public bool TryGetGenericParameterRanges(IGenericParameterProvider owner, out Range[] ranges)
 		{
 			return this.GenericParameters.TryGetValue(owner.MetadataToken, out ranges);
-		}
-
-		public void RemoveGenericParameterRange(IGenericParameterProvider owner)
-		{
-			this.GenericParameters.Remove(owner.MetadataToken);
 		}
 
 		public bool TryGetCustomAttributeRanges(ICustomAttributeProvider owner, out Range[] ranges)
@@ -385,19 +355,9 @@ namespace Mono.Cecil
 			return this.CustomAttributes.TryGetValue(owner.MetadataToken, out ranges);
 		}
 
-		public void RemoveCustomAttributeRange(ICustomAttributeProvider owner)
-		{
-			this.CustomAttributes.Remove(owner.MetadataToken);
-		}
-
 		public bool TryGetSecurityDeclarationRanges(ISecurityDeclarationProvider owner, out Range[] ranges)
 		{
 			return this.SecurityDeclarations.TryGetValue(owner.MetadataToken, out ranges);
-		}
-
-		public void RemoveSecurityDeclarationRange(ISecurityDeclarationProvider owner)
-		{
-			this.SecurityDeclarations.Remove(owner.MetadataToken);
 		}
 
 		public bool TryGetGenericConstraintMapping(GenericParameter generic_parameter, out Collection<Row<uint, MetadataToken>> mapping)
@@ -410,11 +370,6 @@ namespace Mono.Cecil
 			this.GenericConstraints[gp_rid] = mapping;
 		}
 
-		public void RemoveGenericConstraintMapping(GenericParameter generic_parameter)
-		{
-			this.GenericConstraints.Remove(generic_parameter.token.RID);
-		}
-
 		public bool TryGetOverrideMapping(MethodDefinition method, out Collection<MetadataToken> mapping)
 		{
 			return this.Overrides.TryGetValue(method.token.RID, out mapping);
@@ -423,11 +378,6 @@ namespace Mono.Cecil
 		public void SetOverrideMapping(uint rid, Collection<MetadataToken> mapping)
 		{
 			this.Overrides[rid] = mapping;
-		}
-
-		public void RemoveOverrideMapping(MethodDefinition method)
-		{
-			this.Overrides.Remove(method.token.RID);
 		}
 
 		public Document GetDocument(uint rid)

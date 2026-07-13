@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using LibNoiseDotNet.Graphics.Tools.Noise.Modifier;
-using UnityEngine;
 
 namespace ProcGen.Noise
 {
@@ -13,7 +12,6 @@ namespace ProcGen.Noise
 			return typeof(ControlPointList);
 		}
 
-		[SerializeField]
 		public List<ControlPointList.Control> points { get; set; }
 
 		public ControlPointList()

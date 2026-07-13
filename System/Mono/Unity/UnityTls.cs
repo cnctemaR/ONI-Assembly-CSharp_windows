@@ -49,12 +49,31 @@ namespace Mono.Unity
 			UNITYTLS_NOT_SUPPORTED,
 			UNITYTLS_ENTROPY_SOURCE_FAILED,
 			UNITYTLS_STREAM_CLOSED,
+			UNITYTLS_DER_PARSE_ERROR,
+			UNITYTLS_KEY_PARSE_ERROR,
+			UNITYTLS_SSL_ERROR,
 			UNITYTLS_USER_CUSTOM_ERROR_START = 1048576U,
 			UNITYTLS_USER_WOULD_BLOCK,
+			UNITYTLS_USER_WOULD_BLOCK_READ,
+			UNITYTLS_USER_WOULD_BLOCK_WRITE,
 			UNITYTLS_USER_READ_FAILED,
 			UNITYTLS_USER_WRITE_FAILED,
 			UNITYTLS_USER_UNKNOWN_ERROR,
+			UNITYTLS_SSL_NEEDS_VERIFY,
+			UNITYTLS_HANDSHAKE_STEP,
 			UNITYTLS_USER_CUSTOM_ERROR_END = 2097152U
+		}
+
+		public enum unitytls_log_level : uint
+		{
+			UNITYTLS_LOGLEVEL_MIN,
+			UNITYTLS_LOGLEVEL_FATAL = 0U,
+			UNITYTLS_LOGLEVEL_ERROR,
+			UNITYTLS_LOGLEVEL_WARN,
+			UNITYTLS_LOGLEVEL_INFO,
+			UNITYTLS_LOGLEVEL_DEBUG,
+			UNITYTLS_LOGLEVEL_TRACE,
+			UNITYTLS_LOGLEVEL_MAX = 5U
 		}
 
 		public struct unitytls_errorstate
@@ -103,6 +122,22 @@ namespace Mono.Unity
 			UNITYTLS_X509VERIFY_FLAG_REVOKED = 2U,
 			UNITYTLS_X509VERIFY_FLAG_CN_MISMATCH = 4U,
 			UNITYTLS_X509VERIFY_FLAG_NOT_TRUSTED = 8U,
+			UNITYTLS_X509VERIFY_FLAG_BADCRL_NOT_TRUSTED = 16U,
+			UNITYTLS_X509VERIFY_FLAG_BADCRL_EXPIRED = 32U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_MISSING = 64U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_SKIP_VERIFY = 128U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_OTHER = 256U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_FUTURE = 512U,
+			UNITYTLS_X509VERIFY_FLAG_BADCRL_FUTURE = 1024U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_KEY_USAGE = 2048U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_EXT_KEY_USAGE = 4096U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_NS_CERT_TYPE = 8192U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_BAD_MD = 16384U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_BAD_PK = 32768U,
+			UNITYTLS_X509VERIFY_FLAG_BADCERT_BAD_KEY = 65536U,
+			UNITYTLS_X509VERIFY_FLAG_BADCRL_BAD_MD = 131072U,
+			UNITYTLS_X509VERIFY_FLAG_BADCRL_BAD_PK = 262144U,
+			UNITYTLS_X509VERIFY_FLAG_BADCRL_BAD_KEY = 524288U,
 			UNITYTLS_X509VERIFY_FLAG_USER_ERROR1 = 65536U,
 			UNITYTLS_X509VERIFY_FLAG_USER_ERROR2 = 131072U,
 			UNITYTLS_X509VERIFY_FLAG_USER_ERROR3 = 262144U,
@@ -243,6 +278,10 @@ namespace Mono.Unity
 
 			public UnityTls.unitytls_interface_struct.unitytls_random_generate_bytes_t unitytls_random_generate_bytes;
 
+			public UnityTls.unitytls_interface_struct.unitytls_x509verify_result_to_string_t unitytls_x509verify_result_to_string;
+
+			public UnityTls.unitytls_interface_struct.unitytls_tlsctx_set_trace_level_t unitytls_tlsctx_set_trace_level;
+
 			[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 			public delegate UnityTls.unitytls_errorstate unitytls_errorstate_create_t();
 
@@ -335,6 +374,12 @@ namespace Mono.Unity
 
 			[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 			public unsafe delegate void unitytls_random_generate_bytes_t(byte* buffer, IntPtr bufferLen, UnityTls.unitytls_errorstate* errorState);
+
+			[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+			public unsafe delegate char* unitytls_x509verify_result_to_string_t(UnityTls.unitytls_x509verify_result v);
+
+			[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+			public unsafe delegate void unitytls_tlsctx_set_trace_level_t(UnityTls.unitytls_tlsctx* ctx, UnityTls.unitytls_log_level level);
 		}
 	}
 }

@@ -57,13 +57,17 @@ namespace Mono.Cecil
 				{
 					metadataBuilder.SetSymbolWriter(symbolWriter);
 					ModuleWriter.BuildMetadata(module, metadataBuilder);
-					if (parameters.DeterministicMvid)
+					if (symbolWriter != null)
 					{
-						metadataBuilder.ComputeDeterministicMvid();
+						symbolWriter.Write();
 					}
 					ImageWriter imageWriter = ImageWriter.CreateWriter(module, metadataBuilder, stream);
 					stream.value.SetLength(0L);
 					imageWriter.WriteImage();
+					if (parameters.DeterministicMvid)
+					{
+						ModuleWriter.ComputeDeterministicMvid(imageWriter, module);
+					}
 					if (parameters.HasStrongNameKey)
 					{
 						CryptoService.StrongName(stream.value, imageWriter, parameters);
@@ -101,6 +105,18 @@ namespace Mono.Cecil
 				return symbol_writer_provider.GetSymbolWriter(module, parameters.SymbolStream);
 			}
 			return symbol_writer_provider.GetSymbolWriter(module, fq_name);
+		}
+
+		private static void ComputeDeterministicMvid(ImageWriter writer, ModuleDefinition module)
+		{
+			long position = writer.BaseStream.Position;
+			writer.BaseStream.Seek(0L, SeekOrigin.Begin);
+			Guid guid = CryptoService.ComputeGuid(CryptoService.ComputeHash(writer.BaseStream));
+			writer.MoveToRVA(TextSegment.GuidHeap);
+			writer.WriteBytes(guid.ToByteArray());
+			writer.Flush();
+			module.Mvid = guid;
+			writer.BaseStream.Seek(position, SeekOrigin.Begin);
 		}
 	}
 }

@@ -7,9 +7,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeAsStruct]
 	[NativeHeader("TerrainScriptingClasses.h")]
-	[NativeHeader("Modules/Terrain/Public/TerrainDataScriptingInterface.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Terrain/Public/TerrainDataScriptingInterface.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class DetailPrototype
 	{
@@ -326,27 +327,44 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("TerrainDataScriptingInterface::ValidateDetailPrototype")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool ValidateDetailPrototype([NotNull("ArgumentNullException")] DetailPrototype prototype, out string errorMessage);
+		internal static bool ValidateDetailPrototype([NotNull] DetailPrototype prototype, out string errorMessage)
+		{
+			if (prototype == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(prototype, "prototype");
+			}
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				flag = DetailPrototype.ValidateDetailPrototype_Injected(prototype, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				errorMessage = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return flag;
+		}
 
 		internal static bool IsModeSupportedByRenderPipeline(DetailRenderMode renderMode, bool useInstancing, out string errorMessage)
 		{
 			bool flag = GraphicsSettings.currentRenderPipeline != null;
 			if (flag)
 			{
-				bool flag2 = renderMode == DetailRenderMode.GrassBillboard && GraphicsSettings.currentRenderPipeline.terrainDetailGrassBillboardShader == null;
+				bool flag2 = renderMode == DetailRenderMode.GrassBillboard && GraphicsSettings.GetDefaultShader(DefaultShaderType.TerrainDetailGrassBillboard) == null;
 				if (flag2)
 				{
 					errorMessage = "The current render pipeline does not support Billboard details. Details will not be rendered.";
 					return false;
 				}
-				bool flag3 = renderMode == DetailRenderMode.VertexLit && !useInstancing && GraphicsSettings.currentRenderPipeline.terrainDetailLitShader == null;
+				bool flag3 = renderMode == DetailRenderMode.VertexLit && !useInstancing && GraphicsSettings.GetDefaultShader(DefaultShaderType.TerrainDetailLit) == null;
 				if (flag3)
 				{
 					errorMessage = "The current render pipeline does not support VertexLit details. Details will be rendered using the default shader.";
 					return false;
 				}
-				bool flag4 = renderMode == DetailRenderMode.Grass && GraphicsSettings.currentRenderPipeline.terrainDetailGrassShader == null;
+				bool flag4 = renderMode == DetailRenderMode.Grass && GraphicsSettings.GetDefaultShader(DefaultShaderType.TerrainDetailGrass) == null;
 				if (flag4)
 				{
 					errorMessage = "The current render pipeline does not support Grass details. Details will be rendered using the default shader without alpha test and animation.";
@@ -357,46 +375,68 @@ namespace UnityEngine
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ValidateDetailPrototype_Injected(DetailPrototype prototype, out ManagedSpanWrapper errorMessage);
+
 		internal static readonly Color DefaultHealthColor = new Color(0.2627451f, 0.9764706f, 0.16470589f, 1f);
 
 		internal static readonly Color DefaultDryColor = new Color(0.8039216f, 0.7372549f, 0.101960786f, 1f);
 
+		[NativeName("prototype")]
 		internal GameObject m_Prototype = null;
 
+		[NativeName("prototypeTexture")]
 		internal Texture2D m_PrototypeTexture = null;
 
+		[NativeName("healthyColor")]
 		internal Color m_HealthyColor = DetailPrototype.DefaultHealthColor;
 
+		[NativeName("dryColor")]
 		internal Color m_DryColor = DetailPrototype.DefaultDryColor;
 
+		[NativeName("minWidth")]
 		internal float m_MinWidth = 1f;
 
+		[NativeName("maxWidth")]
 		internal float m_MaxWidth = 2f;
 
+		[NativeName("minHeight")]
 		internal float m_MinHeight = 1f;
 
+		[NativeName("maxHeight")]
 		internal float m_MaxHeight = 2f;
 
+		[NativeName("noiseSeed")]
 		internal int m_NoiseSeed = 0;
 
+		[NativeName("noiseSpread")]
 		internal float m_NoiseSpread = 0.1f;
 
+		[NativeName("density")]
 		internal float m_Density = 1f;
 
+		[NativeName("holeTestRadius")]
 		internal float m_HoleEdgePadding = 0f;
 
+		[NativeName("renderMode")]
 		internal int m_RenderMode = 2;
 
+		[NativeName("usePrototypeMesh")]
 		internal int m_UsePrototypeMesh = 0;
 
+		[NativeName("useInstancing")]
 		internal int m_UseInstancing = 0;
 
+		[NativeName("useDensityScaling")]
 		internal int m_UseDensityScaling = 0;
 
+		[NativeName("alignToGround")]
 		internal float m_AlignToGround = 0f;
 
+		[NativeName("positionJitter")]
 		internal float m_PositionJitter = 0f;
 
+		[NativeName("targetCoverage")]
 		internal float m_TargetCoverage = 1f;
 	}
 }

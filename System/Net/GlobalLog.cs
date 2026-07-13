@@ -33,8 +33,8 @@ namespace System.Net
 		{
 		}
 
-		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		[Conditional("DEBUG")]
+		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		internal static void ThreadContract(ThreadKinds kind, ThreadKinds allowedSources, string errorMsg)
 		{
 			if ((kind & ThreadKinds.SourceMask) != ThreadKinds.Unknown || (allowedSources & ThreadKinds.SourceMask) != allowedSources)
@@ -54,8 +54,8 @@ namespace System.Net
 		{
 		}
 
-		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		[Conditional("TRAVE")]
+		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		public static void Print(string msg)
 		{
 		}
@@ -75,8 +75,8 @@ namespace System.Net
 		{
 		}
 
-		[Conditional("DEBUG")]
 		[Conditional("_FORCE_ASSERTS")]
+		[Conditional("DEBUG")]
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		public static void Assert(bool condition, string messageFormat, params object[] data)
 		{
@@ -91,16 +91,16 @@ namespace System.Net
 			}
 		}
 
-		[Conditional("DEBUG")]
-		[Conditional("_FORCE_ASSERTS")]
 		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
+		[Conditional("_FORCE_ASSERTS")]
+		[Conditional("DEBUG")]
 		public static void Assert(string message)
 		{
 		}
 
 		[Conditional("DEBUG")]
-		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		[Conditional("_FORCE_ASSERTS")]
+		[ReliabilityContract(Consistency.MayCorruptAppDomain, Cer.None)]
 		public static void Assert(string message, string detailMessage)
 		{
 			try

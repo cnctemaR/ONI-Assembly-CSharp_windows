@@ -11,7 +11,7 @@ namespace UnityEngine.Android
 			get
 			{
 				Dictionary<string, AndroidAssetPackInfo> assetPackInfos = this.m_AssetPackInfos;
-				bool flag4;
+				bool flag3;
 				lock (assetPackInfos)
 				{
 					foreach (AndroidAssetPackInfo androidAssetPackInfo in this.m_AssetPackInfos.Values)
@@ -21,15 +21,15 @@ namespace UnityEngine.Android
 						{
 							return true;
 						}
-						bool flag3 = androidAssetPackInfo.status != AndroidAssetPackStatus.Canceled && androidAssetPackInfo.status != AndroidAssetPackStatus.Completed && androidAssetPackInfo.status != AndroidAssetPackStatus.Failed && androidAssetPackInfo.status > AndroidAssetPackStatus.Unknown;
-						if (flag3)
+						bool downloadInProgress = androidAssetPackInfo.downloadInProgress;
+						if (downloadInProgress)
 						{
 							return true;
 						}
 					}
-					flag4 = false;
+					flag3 = false;
 				}
-				return flag4;
+				return flag3;
 			}
 		}
 
@@ -56,7 +56,7 @@ namespace UnityEngine.Android
 						bool flag2 = androidAssetPackInfo == null;
 						if (!flag2)
 						{
-							bool flag3 = androidAssetPackInfo.status == AndroidAssetPackStatus.Canceled || androidAssetPackInfo.status == AndroidAssetPackStatus.Completed || androidAssetPackInfo.status == AndroidAssetPackStatus.Failed || androidAssetPackInfo.status == AndroidAssetPackStatus.Unknown;
+							bool flag3 = !androidAssetPackInfo.downloadInProgress;
 							if (flag3)
 							{
 								num += 1f;

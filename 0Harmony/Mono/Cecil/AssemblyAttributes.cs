@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum AssemblyAttributes : uint
+	internal enum AssemblyAttributes : uint
 	{
 		PublicKey = 1U,
 		SideBySideCompatible = 0U,

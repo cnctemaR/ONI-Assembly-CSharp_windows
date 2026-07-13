@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[InstallerType(typeof(EventLogInstaller))]
-	[MonitoringDescription("Represents an event log")]
 	[DefaultEvent("EntryWritten")]
+	[MonitoringDescription("Represents an event log")]
+	[InstallerType(typeof(EventLogInstaller))]
 	public class EventLog : Component, ISupportInitialize
 	{
 		public EventLog()
@@ -69,8 +69,8 @@ namespace System.Diagnostics
 		}
 
 		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The entries in the log.")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public EventLogEntryCollection Entries
 		{
 			get
@@ -81,9 +81,9 @@ namespace System.Diagnostics
 
 		[ReadOnly(true)]
 		[DefaultValue("")]
-		[RecommendedAsConfigurable(true)]
 		[TypeConverter("System.Diagnostics.Design.LogConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[MonitoringDescription("Name of the log that is read and written.")]
+		[RecommendedAsConfigurable(true)]
 		public string Log
 		{
 			get
@@ -117,8 +117,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[RecommendedAsConfigurable(true)]
 		[DefaultValue(".")]
+		[RecommendedAsConfigurable(true)]
 		[ReadOnly(true)]
 		[MonitoringDescription("Name of the machine that this log get written to.")]
 		public string MachineName
@@ -141,10 +141,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ReadOnly(true)]
-		[DefaultValue("")]
 		[MonitoringDescription("The application name that writes the log.")]
+		[DefaultValue("")]
 		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[ReadOnly(true)]
 		[RecommendedAsConfigurable(true)]
 		public string Source
 		{
@@ -172,8 +172,8 @@ namespace System.Diagnostics
 		}
 
 		[MonitoringDescription("An object that synchronizes event handler calls.")]
-		[Browsable(false)]
 		[DefaultValue(null)]
+		[Browsable(false)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get
@@ -186,9 +186,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[Browsable(false)]
 		[ComVisible(false)]
+		[MonoTODO]
 		public OverflowAction OverflowAction
 		{
 			get
@@ -198,8 +198,8 @@ namespace System.Diagnostics
 		}
 
 		[ComVisible(false)]
-		[MonoTODO]
 		[Browsable(false)]
+		[MonoTODO]
 		public int MinimumRetentionDays
 		{
 			get
@@ -208,10 +208,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
-		[ComVisible(false)]
 		[Browsable(false)]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[ComVisible(false)]
+		[MonoTODO]
 		public long MaximumKilobytes
 		{
 			get
@@ -224,8 +224,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[ComVisible(false)]
+		[MonoTODO]
 		public void ModifyOverflowPolicy(OverflowAction action, int retentionDays)
 		{
 			this.Impl.ModifyOverflowPolicy(action, retentionDays);

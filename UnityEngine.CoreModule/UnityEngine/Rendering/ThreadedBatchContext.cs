@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -50,13 +51,13 @@ namespace UnityEngine.Rendering
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddDrawCommandBatch_Injected(IntPtr brg, IntPtr values, int count, ref GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize, out BatchID ret);
+		private static extern void AddDrawCommandBatch_Injected(IntPtr brg, IntPtr values, int count, [In] ref GraphicsBufferHandle buffer, uint bufferOffset, uint windowSize, out BatchID ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetDrawCommandBatchBuffer_Injected(IntPtr brg, ref BatchID batchID, ref GraphicsBufferHandle buffer);
+		private static extern void SetDrawCommandBatchBuffer_Injected(IntPtr brg, [In] ref BatchID batchID, [In] ref GraphicsBufferHandle buffer);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void RemoveDrawCommandBatch_Injected(IntPtr brg, ref BatchID batchID);
+		private static extern void RemoveDrawCommandBatch_Injected(IntPtr brg, [In] ref BatchID batchID);
 
 		public IntPtr batchRendererGroup;
 	}

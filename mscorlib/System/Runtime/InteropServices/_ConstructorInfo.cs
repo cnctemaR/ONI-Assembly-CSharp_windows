@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
-	[CLSCompliant(false)]
-	[Guid("E9A19478-9646-3679-9B10-8411AE1FD57D")]
-	[TypeLibImportClass(typeof(ConstructorInfo))]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComVisible(true)]
+	[TypeLibImportClass(typeof(ConstructorInfo))]
+	[Guid("E9A19478-9646-3679-9B10-8411AE1FD57D")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[CLSCompliant(false)]
 	public interface _ConstructorInfo
 	{
 		bool Equals(object other);

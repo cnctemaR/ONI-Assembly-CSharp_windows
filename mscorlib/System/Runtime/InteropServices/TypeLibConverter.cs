@@ -6,9 +6,9 @@ using System.Security.Permissions;
 
 namespace System.Runtime.InteropServices
 {
-	[Guid("f1c3bf79-c3e4-11d3-88e7-00902754c43a")]
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
+	[Guid("f1c3bf79-c3e4-11d3-88e7-00902754c43a")]
 	public sealed class TypeLibConverter : ITypeLibConverter
 	{
 		[SecuritySafeCritical]

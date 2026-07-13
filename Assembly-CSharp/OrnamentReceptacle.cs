@@ -29,6 +29,7 @@ public class OrnamentReceptacle : SingleEntityReceptacle
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		base.SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection.Any);
 		base.AddAdditionalCriteria((GameObject obj) => obj.HasTag(GameTags.PedestalDisplayable));
 		if (base.occupyingObject == null && this.storage.MassStored() > 0f)
 		{

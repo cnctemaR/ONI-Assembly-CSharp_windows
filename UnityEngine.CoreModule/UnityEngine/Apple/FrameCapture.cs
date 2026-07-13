@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Apple
 {
-	[NativeHeader("Runtime/Export/Apple/FrameCaptureMetalScriptBindings.h")]
 	[NativeConditional("PLATFORM_APPLE")]
+	[NativeHeader("Runtime/Export/Apple/FrameCaptureMetalScriptBindings.h")]
 	public class FrameCapture
 	{
 		private FrameCapture()
@@ -18,16 +18,52 @@ namespace UnityEngine.Apple
 		private static extern bool IsDestinationSupportedImpl(FrameCaptureDestination dest);
 
 		[FreeFunction("FrameCaptureMetalScripting::BeginCapture")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void BeginCaptureImpl(FrameCaptureDestination dest, string path);
+		private unsafe static void BeginCaptureImpl(FrameCaptureDestination dest, string path)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = path.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				FrameCapture.BeginCaptureImpl_Injected(dest, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction("FrameCaptureMetalScripting::EndCapture")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void EndCaptureImpl();
 
 		[FreeFunction("FrameCaptureMetalScripting::CaptureNextFrame")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CaptureNextFrameImpl(FrameCaptureDestination dest, string path);
+		private unsafe static void CaptureNextFrameImpl(FrameCaptureDestination dest, string path)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = path.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				FrameCapture.CaptureNextFrameImpl_Injected(dest, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		public static bool IsDestinationSupported(FrameCaptureDestination dest)
 		{
@@ -103,5 +139,11 @@ namespace UnityEngine.Apple
 			}
 			FrameCapture.CaptureNextFrameImpl(FrameCaptureDestination.GPUTraceDocument, new Uri(path).AbsoluteUri);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginCaptureImpl_Injected(FrameCaptureDestination dest, ref ManagedSpanWrapper path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CaptureNextFrameImpl_Injected(FrameCaptureDestination dest, ref ManagedSpanWrapper path);
 	}
 }

@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeType("Runtime/Graphics/SpriteFrame.h")]
-	[ExcludeFromPreset]
-	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
+	[ExcludeFromPreset]
+	[NativeType("Runtime/Graphics/SpriteFrame.h")]
+	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]
@@ -18,68 +19,119 @@ namespace UnityEngine
 		{
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetPackingMode();
+		internal int GetPackingMode()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetPackingMode_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetPackingRotation();
+		internal int GetPackingRotation()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetPackingRotation_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetPacked();
+		internal int GetPacked()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetPacked_Injected(intPtr);
+		}
 
 		internal Rect GetTextureRect()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Rect rect;
-			this.GetTextureRect_Injected(out rect);
+			Sprite.GetTextureRect_Injected(intPtr, out rect);
 			return rect;
 		}
 
 		internal Vector2 GetTextureRectOffset()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector2 vector;
-			this.GetTextureRectOffset_Injected(out vector);
+			Sprite.GetTextureRectOffset_Injected(intPtr, out vector);
 			return vector;
 		}
 
 		internal Vector4 GetInnerUVs()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetInnerUVs_Injected(out vector);
+			Sprite.GetInnerUVs_Injected(intPtr, out vector);
 			return vector;
 		}
 
 		internal Vector4 GetOuterUVs()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetOuterUVs_Injected(out vector);
+			Sprite.GetOuterUVs_Injected(intPtr, out vector);
 			return vector;
 		}
 
 		internal Vector4 GetPadding()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetPadding_Injected(out vector);
+			Sprite.GetPadding_Injected(intPtr, out vector);
 			return vector;
 		}
 
 		[FreeFunction("SpritesBindings::CreateSpriteWithoutTextureScripting")]
 		internal static Sprite CreateSpriteWithoutTextureScripting(Rect rect, Vector2 pivot, float pixelsToUnits, Texture2D texture)
 		{
-			return Sprite.CreateSpriteWithoutTextureScripting_Injected(ref rect, ref pivot, pixelsToUnits, texture);
+			return Unmarshal.UnmarshalUnityObject<Sprite>(Sprite.CreateSpriteWithoutTextureScripting_Injected(ref rect, ref pivot, pixelsToUnits, Object.MarshalledUnityObject.Marshal<Texture2D>(texture)));
 		}
 
 		[FreeFunction("SpritesBindings::CreateSprite", ThrowsException = true)]
-		internal static Sprite CreateSprite(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape, [Unmarshalled] SecondarySpriteTexture[] secondaryTexture)
+		internal static Sprite CreateSprite(Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, Vector4 border, bool generateFallbackPhysicsShape, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] SecondarySpriteTexture[] secondaryTexture)
 		{
-			return Sprite.CreateSprite_Injected(texture, ref rect, ref pivot, pixelsPerUnit, extrude, meshType, ref border, generateFallbackPhysicsShape, secondaryTexture);
+			return Unmarshal.UnmarshalUnityObject<Sprite>(Sprite.CreateSprite_Injected(Object.MarshalledUnityObject.Marshal<Texture2D>(texture), ref rect, ref pivot, pixelsPerUnit, extrude, meshType, ref border, generateFallbackPhysicsShape, secondaryTexture));
 		}
 
 		public Bounds bounds
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_bounds_Injected(out bounds);
+				Sprite.get_bounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 		}
@@ -88,8 +140,13 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Rect rect;
-				this.get_rect_Injected(out rect);
+				Sprite.get_rect_Injected(intPtr, out rect);
 				return rect;
 			}
 		}
@@ -98,47 +155,118 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_border_Injected(out vector);
+				Sprite.get_border_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
 
-		public extern Texture2D texture
+		public Texture2D texture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(Sprite.get_texture_Injected(intPtr));
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Texture2D GetSecondaryTexture(int index);
+		internal uint extrude
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Sprite.get_extrude_Injected(intPtr);
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetSecondaryTextureCount();
+		internal Texture2D GetSecondaryTexture(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture2D>(Sprite.GetSecondaryTexture_Injected(intPtr, index));
+		}
+
+		public int GetSecondaryTextureCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetSecondaryTextureCount_Injected(intPtr);
+		}
 
 		[FreeFunction("SpritesBindings::GetSecondaryTextures", ThrowsException = true, HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetSecondaryTextures([Unmarshalled] [NotNull("ArgumentNullException")] SecondarySpriteTexture[] secondaryTexture);
+		public int GetSecondaryTextures([UnityMarshalAs(NativeType.ScriptingObjectPtr)] [NotNull] SecondarySpriteTexture[] secondaryTexture)
+		{
+			if (secondaryTexture == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(secondaryTexture, "secondaryTexture");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetSecondaryTextures_Injected(intPtr, secondaryTexture);
+		}
 
-		public extern float pixelsPerUnit
+		public float pixelsPerUnit
 		{
 			[NativeMethod("GetPixelsToUnits")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Sprite.get_pixelsPerUnit_Injected(intPtr);
+			}
 		}
 
-		public extern float spriteAtlasTextureScale
+		public float spriteAtlasTextureScale
 		{
 			[NativeMethod("GetSpriteAtlasTextureScale")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Sprite.get_spriteAtlasTextureScale_Injected(intPtr);
+			}
 		}
 
-		public extern Texture2D associatedAlphaSplitTexture
+		public Texture2D associatedAlphaSplitTexture
 		{
 			[NativeMethod("GetAlphaTexture")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(Sprite.get_associatedAlphaSplitTexture_Injected(intPtr));
+			}
 		}
 
 		public Vector2 pivot
@@ -146,8 +274,13 @@ namespace UnityEngine
 			[NativeMethod("GetPivotInPixels")]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_pivot_Injected(out vector);
+				Sprite.get_pivot_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
@@ -192,29 +325,133 @@ namespace UnityEngine
 			}
 		}
 
-		public extern Vector2[] vertices
+		public Vector2[] vertices
 		{
 			[FreeFunction("SpriteAccessLegacy::GetSpriteVertices", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Sprite.get_vertices_Injected(intPtr);
+			}
 		}
 
-		public extern ushort[] triangles
+		public ushort[] triangles
 		{
 			[FreeFunction("SpriteAccessLegacy::GetSpriteIndices", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Sprite.get_triangles_Injected(intPtr);
+			}
 		}
 
-		public extern Vector2[] uv
+		public Vector2[] uv
 		{
 			[FreeFunction("SpriteAccessLegacy::GetSpriteUVs", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Sprite.get_uv_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetPhysicsShapeCount();
+		public int GetPhysicsShapeCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetPhysicsShapeCount_Injected(intPtr);
+		}
+
+		public uint GetScriptableObjectsCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetScriptableObjectsCount_Injected(intPtr);
+		}
+
+		[FreeFunction("SpritesBindings::GetScriptableObjects", ThrowsException = true, HasExplicitThis = true)]
+		public uint GetScriptableObjects([NotNull] [UnityMarshalAs(NativeType.ScriptingObjectPtr)] ScriptableObject[] scriptableObjects)
+		{
+			if (scriptableObjects == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(scriptableObjects, "scriptableObjects");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.GetScriptableObjects_Injected(intPtr, scriptableObjects);
+		}
+
+		public bool AddScriptableObject([NotNull] ScriptableObject obj)
+		{
+			if (obj == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ScriptableObject>(obj);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			return Sprite.AddScriptableObject_Injected(intPtr, intPtr2);
+		}
+
+		public bool RemoveScriptableObjectAt(uint i)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.RemoveScriptableObjectAt_Injected(intPtr, i);
+		}
+
+		public bool SetScriptableObjectAt([NotNull] ScriptableObject obj, uint i)
+		{
+			if (obj == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<ScriptableObject>(obj);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			return Sprite.SetScriptableObjectAt_Injected(intPtr, intPtr2, i);
+		}
 
 		public int GetPhysicsShapePointCount(int shapeIdx)
 		{
@@ -228,8 +465,15 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("GetPhysicsShapePointCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int Internal_GetPhysicsShapePointCount(int shapeIdx);
+		private int Internal_GetPhysicsShapePointCount(int shapeIdx)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Sprite.Internal_GetPhysicsShapePointCount_Injected(intPtr, shapeIdx);
+		}
 
 		public int GetPhysicsShape(int shapeIdx, List<Vector2> physicsShape)
 		{
@@ -243,9 +487,52 @@ namespace UnityEngine
 			return physicsShape.Count;
 		}
 
+		public ReadOnlySpan<Vector2> GetPhysicsShape(int shapeIdx)
+		{
+			int physicsShapeCount = this.GetPhysicsShapeCount();
+			bool flag = shapeIdx < 0 || shapeIdx >= physicsShapeCount;
+			if (flag)
+			{
+				throw new IndexOutOfRangeException(string.Format("Index({0}) is out of bounds(0 - {1})", shapeIdx, physicsShapeCount - 1));
+			}
+			return Sprite.GetPhysicsShapeSpanImpl(this, shapeIdx);
+		}
+
 		[FreeFunction("SpritesBindings::GetPhysicsShape", ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetPhysicsShapeImpl(Sprite sprite, int shapeIdx, [NotNull("ArgumentNullException")] List<Vector2> physicsShape);
+		private unsafe static void GetPhysicsShapeImpl(Sprite sprite, int shapeIdx, [NotNull] List<Vector2> physicsShape)
+		{
+			if (physicsShape == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(physicsShape, "physicsShape");
+			}
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.Marshal<Sprite>(sprite);
+				fixed (Vector2[] array = NoAllocHelpers.ExtractArrayFromList<Vector2>(physicsShape))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, physicsShape.Count);
+					Sprite.GetPhysicsShapeImpl_Injected(intPtr, shapeIdx, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<Vector2>(physicsShape);
+			}
+		}
+
+		[FreeFunction("SpritesBindings::GetPhysicsShape", ThrowsException = true)]
+		private static ReadOnlySpan<Vector2> GetPhysicsShapeSpanImpl(Sprite sprite, int shapeIdx)
+		{
+			ManagedSpanWrapper managedSpanWrapper;
+			Sprite.GetPhysicsShapeSpanImpl_Injected(Object.MarshalledUnityObject.Marshal<Sprite>(sprite), shapeIdx, out managedSpanWrapper);
+			return ManagedSpanWrapper.ToReadOnlySpan<Vector2>(managedSpanWrapper);
+		}
 
 		public void OverridePhysicsShape(IList<Vector2[]> physicsShapes)
 		{
@@ -276,17 +563,58 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("SpritesBindings::OverridePhysicsShapeCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void OverridePhysicsShapeCount(Sprite sprite, int physicsShapeCount);
+		private static void OverridePhysicsShapeCount(Sprite sprite, int physicsShapeCount)
+		{
+			Sprite.OverridePhysicsShapeCount_Injected(Object.MarshalledUnityObject.Marshal<Sprite>(sprite), physicsShapeCount);
+		}
 
 		[FreeFunction("SpritesBindings::OverridePhysicsShape", ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void OverridePhysicsShape(Sprite sprite, [Unmarshalled] Vector2[] physicsShape, int idx);
+		private unsafe static void OverridePhysicsShape(Sprite sprite, [NotNull] Vector2[] physicsShape, int idx)
+		{
+			if (physicsShape == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(physicsShape, "physicsShape");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.Marshal<Sprite>(sprite);
+			Span<Vector2> span = new Span<Vector2>(physicsShape);
+			fixed (Vector2* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Sprite.OverridePhysicsShape_Injected(intPtr, ref managedSpanWrapper, idx);
+			}
+		}
 
 		[FreeFunction("SpritesBindings::OverrideGeometry", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void OverrideGeometry([NotNull("ArgumentNullException")] [Unmarshalled] Vector2[] vertices, [NotNull("ArgumentNullException")] [Unmarshalled] ushort[] triangles);
+		public unsafe void OverrideGeometry([NotNull] Vector2[] vertices, [NotNull] ushort[] triangles)
+		{
+			if (vertices == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(vertices, "vertices");
+			}
+			if (triangles == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(triangles, "triangles");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector2> span = new Span<Vector2>(vertices);
+			fixed (Vector2* ptr = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+				Span<ushort> span2 = new Span<ushort>(triangles);
+				fixed (ushort* pinnableReference = span2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span2.Length);
+					Sprite.OverrideGeometry_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
 
+		[VisibleToOtherModules]
 		internal static Sprite Create(Rect rect, Vector2 pivot, float pixelsToUnits, Texture2D texture)
 		{
 			return Sprite.CreateSpriteWithoutTextureScripting(rect, pivot, pixelsToUnits, texture);
@@ -365,36 +693,114 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTextureRect_Injected(out Rect ret);
+		private static extern int GetPackingMode_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTextureRectOffset_Injected(out Vector2 ret);
+		private static extern int GetPackingRotation_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetInnerUVs_Injected(out Vector4 ret);
+		private static extern int GetPacked_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetOuterUVs_Injected(out Vector4 ret);
+		private static extern void GetTextureRect_Injected(IntPtr _unity_self, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPadding_Injected(out Vector4 ret);
+		private static extern void GetTextureRectOffset_Injected(IntPtr _unity_self, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Sprite CreateSpriteWithoutTextureScripting_Injected(ref Rect rect, ref Vector2 pivot, float pixelsToUnits, Texture2D texture);
+		private static extern void GetInnerUVs_Injected(IntPtr _unity_self, out Vector4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Sprite CreateSprite_Injected(Texture2D texture, ref Rect rect, ref Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, ref Vector4 border, bool generateFallbackPhysicsShape, SecondarySpriteTexture[] secondaryTexture);
+		private static extern void GetOuterUVs_Injected(IntPtr _unity_self, out Vector4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_bounds_Injected(out Bounds ret);
+		private static extern void GetPadding_Injected(IntPtr _unity_self, out Vector4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_rect_Injected(out Rect ret);
+		private static extern IntPtr CreateSpriteWithoutTextureScripting_Injected([In] ref Rect rect, [In] ref Vector2 pivot, float pixelsToUnits, IntPtr texture);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_border_Injected(out Vector4 ret);
+		private static extern IntPtr CreateSprite_Injected(IntPtr texture, [In] ref Rect rect, [In] ref Vector2 pivot, float pixelsPerUnit, uint extrude, SpriteMeshType meshType, [In] ref Vector4 border, bool generateFallbackPhysicsShape, SecondarySpriteTexture[] secondaryTexture);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_pivot_Injected(out Vector2 ret);
+		private static extern void get_bounds_Injected(IntPtr _unity_self, out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_rect_Injected(IntPtr _unity_self, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_border_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_texture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_extrude_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSecondaryTexture_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetSecondaryTextureCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetSecondaryTextures_Injected(IntPtr _unity_self, SecondarySpriteTexture[] secondaryTexture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_pixelsPerUnit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_spriteAtlasTextureScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_associatedAlphaSplitTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_pivot_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Vector2[] get_vertices_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ushort[] get_triangles_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Vector2[] get_uv_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPhysicsShapeCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetScriptableObjectsCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetScriptableObjects_Injected(IntPtr _unity_self, ScriptableObject[] scriptableObjects);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool AddScriptableObject_Injected(IntPtr _unity_self, IntPtr obj);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RemoveScriptableObjectAt_Injected(IntPtr _unity_self, uint i);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetScriptableObjectAt_Injected(IntPtr _unity_self, IntPtr obj, uint i);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_GetPhysicsShapePointCount_Injected(IntPtr _unity_self, int shapeIdx);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPhysicsShapeImpl_Injected(IntPtr sprite, int shapeIdx, ref BlittableListWrapper physicsShape);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPhysicsShapeSpanImpl_Injected(IntPtr sprite, int shapeIdx, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OverridePhysicsShapeCount_Injected(IntPtr sprite, int physicsShapeCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OverridePhysicsShape_Injected(IntPtr sprite, ref ManagedSpanWrapper physicsShape, int idx);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OverrideGeometry_Injected(IntPtr _unity_self, ref ManagedSpanWrapper vertices, ref ManagedSpanWrapper triangles);
 	}
 }

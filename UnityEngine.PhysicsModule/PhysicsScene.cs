@@ -1,31 +1,34 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 
 namespace UnityEngine
 {
 	[NativeHeader("Modules/Physics/Public/PhysicsSceneHandle.h")]
+	[NativeHeader("Modules/Physics/PhysicsQuery.h")]
 	public struct PhysicsScene : IEquatable<PhysicsScene>
 	{
 		public override string ToString()
 		{
-			return UnityString.Format("({0})", new object[] { this.m_Handle });
+			return string.Format("PhysicsScene(Index: {0}, Version: {1})", this.m_index, this.m_version);
 		}
 
 		public static bool operator ==(PhysicsScene lhs, PhysicsScene rhs)
 		{
-			return lhs.m_Handle == rhs.m_Handle;
+			return lhs.m_index == rhs.m_index && lhs.m_version == rhs.m_version;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(PhysicsScene lhs, PhysicsScene rhs)
 		{
-			return lhs.m_Handle != rhs.m_Handle;
+			return !(lhs == rhs);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.m_Handle;
+			return HashCode.Combine<int, int>(this.m_index, this.m_version);
 		}
 
 		public override bool Equals(object other)
@@ -39,14 +42,14 @@ namespace UnityEngine
 			else
 			{
 				PhysicsScene physicsScene = (PhysicsScene)other;
-				flag2 = this.m_Handle == physicsScene.m_Handle;
+				flag2 = this == physicsScene;
 			}
 			return flag2;
 		}
 
 		public bool Equals(PhysicsScene other)
 		{
-			return this.m_Handle == other.m_Handle;
+			return this == other;
 		}
 
 		public bool IsValid()
@@ -61,6 +64,16 @@ namespace UnityEngine
 			return PhysicsScene.IsValid_Internal_Injected(ref physicsScene);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static PhysicsScene GetDefaultScene()
+		{
+			return new PhysicsScene
+			{
+				m_index = 0,
+				m_version = 0
+			};
+		}
+
 		public bool IsEmpty()
 		{
 			bool flag = this.IsValid();
@@ -71,8 +84,8 @@ namespace UnityEngine
 			throw new InvalidOperationException("Cannot check if physics scene is empty as it is invalid.");
 		}
 
-		[NativeMethod("IsPhysicsWorldEmpty")]
 		[StaticAccessor("GetPhysicsManager()", StaticAccessorType.Dot)]
+		[NativeMethod("IsPhysicsWorldEmpty")]
 		private static bool IsEmpty_Internal(PhysicsScene physicsScene)
 		{
 			return PhysicsScene.IsEmpty_Internal_Injected(ref physicsScene);
@@ -83,18 +96,48 @@ namespace UnityEngine
 			bool flag = this.IsValid();
 			if (flag)
 			{
-				bool flag2 = this == Physics.defaultPhysicsScene && Physics.simulationMode != SimulationMode.Script;
+				bool flag2 = this == PhysicsScene.GetDefaultScene() && Physics.simulationMode != SimulationMode.Script;
 				if (flag2)
 				{
 					Debug.LogWarning("PhysicsScene.Simulate(...) was called but simulation mode is not set to Script. You should set simulation mode to Script first before calling this function therefore the simulation was not run.");
 				}
 				else
 				{
-					Physics.Simulate_Internal(this, step);
+					Physics.Simulate_Internal(this, step, SimulationStage.All, SimulationOption.All);
 				}
 				return;
 			}
 			throw new InvalidOperationException("Cannot simulate the physics scene as it is invalid.");
+		}
+
+		public void RunSimulationStages(float step, SimulationStage stages, [DefaultValue("SimulationOption.All")] SimulationOption options = SimulationOption.All)
+		{
+			bool flag = !this.IsValid();
+			if (flag)
+			{
+				throw new InvalidOperationException("Cannot simulate the physics scene as it is invalid.");
+			}
+			bool flag2 = this == PhysicsScene.GetDefaultScene() && Physics.simulationMode != SimulationMode.Script;
+			if (flag2)
+			{
+				Debug.LogWarning("PhysicsScene.Simulate(...) was called but simulation mode is not set to Script. You should set simulation mode to Script first before calling this function therefore the simulation was not run.");
+			}
+			else
+			{
+				Physics.Simulate_Internal(this, step, stages, options);
+			}
+		}
+
+		[NativeMethod("ReleasePhysicsSceneSimulationBuffers")]
+		[StaticAccessor("GetPhysicsManager()", StaticAccessorType.Dot)]
+		private static void ReleasePhysicsSceneSimulationBuffers_Internal(PhysicsScene handle)
+		{
+			PhysicsScene.ReleasePhysicsSceneSimulationBuffers_Internal_Injected(ref handle);
+		}
+
+		public void ReleaseLastSimulationStepBuffers()
+		{
+			PhysicsScene.ReleasePhysicsSceneSimulationBuffers_Internal(this);
 		}
 
 		public void InterpolateBodies()
@@ -151,8 +194,7 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
-		[NativeName("RaycastTest")]
+		[FreeFunction("Physics::RaycastTest")]
 		private static bool Internal_RaycastTest(PhysicsScene physicsScene, Ray ray, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Internal_RaycastTest_Injected(ref physicsScene, ref ray, maxDistance, layerMask, queryTriggerInteraction);
@@ -177,8 +219,7 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
-		[NativeName("Raycast")]
+		[FreeFunction("Physics::Raycast")]
 		private static bool Internal_Raycast(PhysicsScene physicsScene, Ray ray, float maxDistance, ref RaycastHit hit, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Internal_Raycast_Injected(ref physicsScene, ref ray, maxDistance, ref hit, layerMask, queryTriggerInteraction);
@@ -201,15 +242,20 @@ namespace UnityEngine
 			return num;
 		}
 
-		[NativeName("RaycastNonAlloc")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		private static int Internal_RaycastNonAlloc(PhysicsScene physicsScene, Ray ray, [Unmarshalled] RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
+		[FreeFunction("Physics::RaycastNonAlloc")]
+		private unsafe static int Internal_RaycastNonAlloc(PhysicsScene physicsScene, Ray ray, RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return PhysicsScene.Internal_RaycastNonAlloc_Injected(ref physicsScene, ref ray, raycastHits, maxDistance, mask, queryTriggerInteraction);
+			Span<RaycastHit> span = new Span<RaycastHit>(raycastHits);
+			int num;
+			fixed (RaycastHit* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = PhysicsScene.Internal_RaycastNonAlloc_Injected(ref physicsScene, ref ray, ref managedSpanWrapper, maxDistance, mask, queryTriggerInteraction);
+			}
+			return num;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
-		[NativeName("CapsuleCast")]
+		[FreeFunction("Physics::CapsuleCast")]
 		private static bool Query_CapsuleCast(PhysicsScene physicsScene, Vector3 point1, Vector3 point2, float radius, Vector3 direction, float maxDistance, ref RaycastHit hitInfo, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Query_CapsuleCast_Injected(ref physicsScene, ref point1, ref point2, radius, ref direction, maxDistance, ref hitInfo, layerMask, queryTriggerInteraction);
@@ -238,11 +284,17 @@ namespace UnityEngine
 			return PhysicsScene.Internal_CapsuleCast(this, point1, point2, radius, direction, out hitInfo, maxDistance, layerMask, queryTriggerInteraction);
 		}
 
-		[NativeName("CapsuleCastNonAlloc")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		private static int Internal_CapsuleCastNonAlloc(PhysicsScene physicsScene, Vector3 p0, Vector3 p1, float radius, Vector3 direction, [Unmarshalled] RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
+		[FreeFunction("Physics::CapsuleCastNonAlloc")]
+		private unsafe static int Internal_CapsuleCastNonAlloc(PhysicsScene physicsScene, Vector3 p0, Vector3 p1, float radius, Vector3 direction, RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return PhysicsScene.Internal_CapsuleCastNonAlloc_Injected(ref physicsScene, ref p0, ref p1, radius, ref direction, raycastHits, maxDistance, mask, queryTriggerInteraction);
+			Span<RaycastHit> span = new Span<RaycastHit>(raycastHits);
+			int num;
+			fixed (RaycastHit* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = PhysicsScene.Internal_CapsuleCastNonAlloc_Injected(ref physicsScene, ref p0, ref p1, radius, ref direction, ref managedSpanWrapper, maxDistance, mask, queryTriggerInteraction);
+			}
+			return num;
 		}
 
 		public int CapsuleCast(Vector3 point1, Vector3 point2, float radius, Vector3 direction, RaycastHit[] results, [DefaultValue("Mathf.Infinity")] float maxDistance = float.PositiveInfinity, [DefaultValue("DefaultRaycastLayers")] int layerMask = -5, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.UseGlobal)
@@ -261,9 +313,8 @@ namespace UnityEngine
 			return num;
 		}
 
-		[NativeName("OverlapCapsuleNonAlloc")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		private static int OverlapCapsuleNonAlloc_Internal(PhysicsScene physicsScene, Vector3 point0, Vector3 point1, float radius, [Unmarshalled] Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
+		[FreeFunction("Physics::OverlapCapsuleNonAlloc")]
+		private static int OverlapCapsuleNonAlloc_Internal(PhysicsScene physicsScene, Vector3 point0, Vector3 point1, float radius, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.OverlapCapsuleNonAlloc_Internal_Injected(ref physicsScene, ref point0, ref point1, radius, results, layerMask, queryTriggerInteraction);
 		}
@@ -273,8 +324,7 @@ namespace UnityEngine
 			return PhysicsScene.OverlapCapsuleNonAlloc_Internal(this, point0, point1, radius, results, layerMask, queryTriggerInteraction);
 		}
 
-		[NativeName("SphereCast")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
+		[FreeFunction("Physics::SphereCast")]
 		private static bool Query_SphereCast(PhysicsScene physicsScene, Vector3 origin, float radius, Vector3 direction, float maxDistance, ref RaycastHit hitInfo, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Query_SphereCast_Injected(ref physicsScene, ref origin, radius, ref direction, maxDistance, ref hitInfo, layerMask, queryTriggerInteraction);
@@ -303,11 +353,17 @@ namespace UnityEngine
 			return PhysicsScene.Internal_SphereCast(this, origin, radius, direction, out hitInfo, maxDistance, layerMask, queryTriggerInteraction);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		[NativeName("SphereCastNonAlloc")]
-		private static int Internal_SphereCastNonAlloc(PhysicsScene physicsScene, Vector3 origin, float radius, Vector3 direction, [Unmarshalled] RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
+		[FreeFunction("Physics::SphereCastNonAlloc")]
+		private unsafe static int Internal_SphereCastNonAlloc(PhysicsScene physicsScene, Vector3 origin, float radius, Vector3 direction, RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return PhysicsScene.Internal_SphereCastNonAlloc_Injected(ref physicsScene, ref origin, radius, ref direction, raycastHits, maxDistance, mask, queryTriggerInteraction);
+			Span<RaycastHit> span = new Span<RaycastHit>(raycastHits);
+			int num;
+			fixed (RaycastHit* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = PhysicsScene.Internal_SphereCastNonAlloc_Injected(ref physicsScene, ref origin, radius, ref direction, ref managedSpanWrapper, maxDistance, mask, queryTriggerInteraction);
+			}
+			return num;
 		}
 
 		public int SphereCast(Vector3 origin, float radius, Vector3 direction, RaycastHit[] results, [DefaultValue("Mathf.Infinity")] float maxDistance = float.PositiveInfinity, [DefaultValue("DefaultRaycastLayers")] int layerMask = -5, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.UseGlobal)
@@ -326,9 +382,8 @@ namespace UnityEngine
 			return num;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		[NativeName("OverlapSphereNonAlloc")]
-		private static int OverlapSphereNonAlloc_Internal(PhysicsScene physicsScene, Vector3 position, float radius, [Unmarshalled] Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
+		[FreeFunction("Physics::OverlapSphereNonAlloc")]
+		private static int OverlapSphereNonAlloc_Internal(PhysicsScene physicsScene, Vector3 position, float radius, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.OverlapSphereNonAlloc_Internal_Injected(ref physicsScene, ref position, radius, results, layerMask, queryTriggerInteraction);
 		}
@@ -338,8 +393,7 @@ namespace UnityEngine
 			return PhysicsScene.OverlapSphereNonAlloc_Internal(this, position, radius, results, layerMask, queryTriggerInteraction);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
-		[NativeName("BoxCast")]
+		[FreeFunction("Physics::BoxCast")]
 		private static bool Query_BoxCast(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Vector3 direction, Quaternion orientation, float maxDistance, ref RaycastHit outHit, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.Query_BoxCast_Injected(ref physicsScene, ref center, ref halfExtents, ref direction, ref orientation, maxDistance, ref outHit, layerMask, queryTriggerInteraction);
@@ -374,9 +428,8 @@ namespace UnityEngine
 			return PhysicsScene.Internal_BoxCast(this, center, halfExtents, Quaternion.identity, direction, out hitInfo, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		[NativeName("OverlapBoxNonAlloc")]
-		private static int OverlapBoxNonAlloc_Internal(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, [Unmarshalled] Collider[] results, Quaternion orientation, int mask, QueryTriggerInteraction queryTriggerInteraction)
+		[FreeFunction("Physics::OverlapBoxNonAlloc")]
+		private static int OverlapBoxNonAlloc_Internal(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, [UnityMarshalAs(NativeType.ScriptingObjectPtr)] Collider[] results, Quaternion orientation, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return PhysicsScene.OverlapBoxNonAlloc_Internal_Injected(ref physicsScene, ref center, ref halfExtents, results, ref orientation, mask, queryTriggerInteraction);
 		}
@@ -392,11 +445,17 @@ namespace UnityEngine
 			return PhysicsScene.OverlapBoxNonAlloc_Internal(this, center, halfExtents, results, Quaternion.identity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		[NativeName("BoxCastNonAlloc")]
-		private static int Internal_BoxCastNonAlloc(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Vector3 direction, [Unmarshalled] RaycastHit[] raycastHits, Quaternion orientation, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
+		[FreeFunction("Physics::BoxCastNonAlloc")]
+		private unsafe static int Internal_BoxCastNonAlloc(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Vector3 direction, RaycastHit[] raycastHits, Quaternion orientation, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return PhysicsScene.Internal_BoxCastNonAlloc_Injected(ref physicsScene, ref center, ref halfExtents, ref direction, raycastHits, ref orientation, maxDistance, mask, queryTriggerInteraction);
+			Span<RaycastHit> span = new Span<RaycastHit>(raycastHits);
+			int num;
+			fixed (RaycastHit* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = PhysicsScene.Internal_BoxCastNonAlloc_Injected(ref physicsScene, ref center, ref halfExtents, ref direction, ref managedSpanWrapper, ref orientation, maxDistance, mask, queryTriggerInteraction);
+			}
+			return num;
 		}
 
 		public int BoxCast(Vector3 center, Vector3 halfExtents, Vector3 direction, RaycastHit[] results, [DefaultValue("Quaternion.identity")] Quaternion orientation, [DefaultValue("Mathf.Infinity")] float maxDistance = float.PositiveInfinity, [DefaultValue("DefaultRaycastLayers")] int layerMask = -5, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction = QueryTriggerInteraction.UseGlobal)
@@ -422,47 +481,52 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsValid_Internal_Injected(ref PhysicsScene physicsScene);
+		private static extern bool IsValid_Internal_Injected([In] ref PhysicsScene physicsScene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsEmpty_Internal_Injected(ref PhysicsScene physicsScene);
+		private static extern bool IsEmpty_Internal_Injected([In] ref PhysicsScene physicsScene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_RaycastTest_Injected(ref PhysicsScene physicsScene, ref Ray ray, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern void ReleasePhysicsSceneSimulationBuffers_Internal_Injected([In] ref PhysicsScene handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_Raycast_Injected(ref PhysicsScene physicsScene, ref Ray ray, float maxDistance, ref RaycastHit hit, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool Internal_RaycastTest_Injected([In] ref PhysicsScene physicsScene, [In] ref Ray ray, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int Internal_RaycastNonAlloc_Injected(ref PhysicsScene physicsScene, ref Ray ray, RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool Internal_Raycast_Injected([In] ref PhysicsScene physicsScene, [In] ref Ray ray, float maxDistance, ref RaycastHit hit, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Query_CapsuleCast_Injected(ref PhysicsScene physicsScene, ref Vector3 point1, ref Vector3 point2, float radius, ref Vector3 direction, float maxDistance, ref RaycastHit hitInfo, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern int Internal_RaycastNonAlloc_Injected([In] ref PhysicsScene physicsScene, [In] ref Ray ray, ref ManagedSpanWrapper raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int Internal_CapsuleCastNonAlloc_Injected(ref PhysicsScene physicsScene, ref Vector3 p0, ref Vector3 p1, float radius, ref Vector3 direction, RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool Query_CapsuleCast_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 point1, [In] ref Vector3 point2, float radius, [In] ref Vector3 direction, float maxDistance, ref RaycastHit hitInfo, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int OverlapCapsuleNonAlloc_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 point0, ref Vector3 point1, float radius, Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern int Internal_CapsuleCastNonAlloc_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 p0, [In] ref Vector3 p1, float radius, [In] ref Vector3 direction, ref ManagedSpanWrapper raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Query_SphereCast_Injected(ref PhysicsScene physicsScene, ref Vector3 origin, float radius, ref Vector3 direction, float maxDistance, ref RaycastHit hitInfo, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern int OverlapCapsuleNonAlloc_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 point0, [In] ref Vector3 point1, float radius, Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int Internal_SphereCastNonAlloc_Injected(ref PhysicsScene physicsScene, ref Vector3 origin, float radius, ref Vector3 direction, RaycastHit[] raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool Query_SphereCast_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 origin, float radius, [In] ref Vector3 direction, float maxDistance, ref RaycastHit hitInfo, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int OverlapSphereNonAlloc_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 position, float radius, Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern int Internal_SphereCastNonAlloc_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 origin, float radius, [In] ref Vector3 direction, ref ManagedSpanWrapper raycastHits, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Query_BoxCast_Injected(ref PhysicsScene physicsScene, ref Vector3 center, ref Vector3 halfExtents, ref Vector3 direction, ref Quaternion orientation, float maxDistance, ref RaycastHit outHit, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern int OverlapSphereNonAlloc_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 position, float radius, Collider[] results, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int OverlapBoxNonAlloc_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 center, ref Vector3 halfExtents, Collider[] results, ref Quaternion orientation, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool Query_BoxCast_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 center, [In] ref Vector3 halfExtents, [In] ref Vector3 direction, [In] ref Quaternion orientation, float maxDistance, ref RaycastHit outHit, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int Internal_BoxCastNonAlloc_Injected(ref PhysicsScene physicsScene, ref Vector3 center, ref Vector3 halfExtents, ref Vector3 direction, RaycastHit[] raycastHits, ref Quaternion orientation, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern int OverlapBoxNonAlloc_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 center, [In] ref Vector3 halfExtents, Collider[] results, [In] ref Quaternion orientation, int mask, QueryTriggerInteraction queryTriggerInteraction);
 
-		private int m_Handle;
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_BoxCastNonAlloc_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 center, [In] ref Vector3 halfExtents, [In] ref Vector3 direction, ref ManagedSpanWrapper raycastHits, [In] ref Quaternion orientation, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+
+		private int m_index;
+
+		private int m_version;
 	}
 }

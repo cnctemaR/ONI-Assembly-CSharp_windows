@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using UnityEngine;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -49,16 +50,58 @@ namespace Unity.Profiling.LowLevel.Unsafe
 			return ProfilerRecorderHandle.GetDescriptionInternal(handle);
 		}
 
-		[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void GetAvailable(List<ProfilerRecorderHandle> outRecorderHandleList);
+		[NativeMethod(IsThreadSafe = true)]
+		public unsafe static void GetAvailable([NotNull] List<ProfilerRecorderHandle> outRecorderHandleList)
+		{
+			if (outRecorderHandleList == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(outRecorderHandleList, "outRecorderHandleList");
+			}
+			try
+			{
+				fixed (ProfilerRecorderHandle[] array = NoAllocHelpers.ExtractArrayFromList<ProfilerRecorderHandle>(outRecorderHandleList))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, outRecorderHandleList.Count);
+					ProfilerRecorderHandle.GetAvailable_Injected(ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ProfilerRecorderHandle>(outRecorderHandleList);
+			}
+		}
 
 		[NativeMethod(IsThreadSafe = true)]
-		internal static ProfilerRecorderHandle GetByName(ProfilerCategory category, string name)
+		internal unsafe static ProfilerRecorderHandle GetByName(ProfilerCategory category, string name)
 		{
-			ProfilerRecorderHandle profilerRecorderHandle;
-			ProfilerRecorderHandle.GetByName_Injected(ref category, name, out profilerRecorderHandle);
-			return profilerRecorderHandle;
+			ProfilerRecorderHandle profilerRecorderHandle2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ProfilerRecorderHandle profilerRecorderHandle;
+				ProfilerRecorderHandle.GetByName_Injected(ref category, ref managedSpanWrapper, out profilerRecorderHandle);
+			}
+			finally
+			{
+				char* ptr = null;
+				ProfilerRecorderHandle profilerRecorderHandle;
+				profilerRecorderHandle2 = profilerRecorderHandle;
+			}
+			return profilerRecorderHandle2;
 		}
 
 		[RequiredMember]
@@ -93,16 +136,19 @@ namespace Unity.Profiling.LowLevel.Unsafe
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetByName_Injected(ref ProfilerCategory category, string name, out ProfilerRecorderHandle ret);
+		private static extern void GetAvailable_Injected(ref BlittableListWrapper outRecorderHandleList);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void GetByName__Unmanaged_Injected(ref ProfilerCategory category, byte* name, int nameLen, out ProfilerRecorderHandle ret);
+		private static extern void GetByName_Injected([In] ref ProfilerCategory category, ref ManagedSpanWrapper name, out ProfilerRecorderHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void GetByName_Unsafe_Injected(ref ProfilerCategory category, char* name, int nameLen, out ProfilerRecorderHandle ret);
+		private unsafe static extern void GetByName__Unmanaged_Injected([In] ref ProfilerCategory category, byte* name, int nameLen, out ProfilerRecorderHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetDescriptionInternal_Injected(ref ProfilerRecorderHandle handle, out ProfilerRecorderDescription ret);
+		private unsafe static extern void GetByName_Unsafe_Injected([In] ref ProfilerCategory category, char* name, int nameLen, out ProfilerRecorderHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetDescriptionInternal_Injected([In] ref ProfilerRecorderHandle handle, out ProfilerRecorderDescription ret);
 
 		private const ulong k_InvalidHandle = 18446744073709551615UL;
 

@@ -270,7 +270,7 @@ namespace Mono.Cecil
 				{
 					typeDefinitionTreatment = TypeDefinitionTreatment.PrefixWindowsRuntimeName;
 				}
-				if ((typeDefinitionTreatment == TypeDefinitionTreatment.PrefixWindowsRuntimeName || typeDefinitionTreatment == TypeDefinitionTreatment.NormalType) && !type.IsInterface && WindowsRuntimeProjections.HasAttribute(type, "Windows.UI.Xaml", "TreatAsAbstractComposableClassAttribute"))
+				if ((typeDefinitionTreatment == TypeDefinitionTreatment.PrefixWindowsRuntimeName || typeDefinitionTreatment == TypeDefinitionTreatment.NormalType) && !type.IsInterface && WindowsRuntimeProjections.HasAttribute(type.CustomAttributes, "Windows.UI.Xaml", "TreatAsAbstractComposableClassAttribute"))
 				{
 					typeDefinitionTreatment |= TypeDefinitionTreatment.Abstract;
 				}
@@ -911,7 +911,7 @@ namespace Mono.Cecil
 			throw new Exception();
 		}
 
-		public static void Project(ICustomAttributeProvider owner, CustomAttribute attribute)
+		public static void Project(ICustomAttributeProvider owner, Collection<CustomAttribute> owner_attributes, CustomAttribute attribute)
 		{
 			if (!WindowsRuntimeProjections.IsWindowsAttributeUsageAttribute(owner, attribute))
 			{
@@ -932,7 +932,7 @@ namespace Mono.Cecil
 			}
 			if (customAttributeValueTreatment == CustomAttributeValueTreatment.None)
 			{
-				customAttributeValueTreatment = (WindowsRuntimeProjections.HasAttribute(typeDefinition, "Windows.Foundation.Metadata", "AllowMultipleAttribute") ? CustomAttributeValueTreatment.AllowMultiple : CustomAttributeValueTreatment.AllowSingle);
+				customAttributeValueTreatment = (WindowsRuntimeProjections.HasAttribute(owner_attributes, "Windows.Foundation.Metadata", "AllowMultipleAttribute") ? CustomAttributeValueTreatment.AllowMultiple : CustomAttributeValueTreatment.AllowSingle);
 			}
 			if (customAttributeValueTreatment != CustomAttributeValueTreatment.None)
 			{
@@ -956,9 +956,9 @@ namespace Mono.Cecil
 			return declaringType.MetadataToken.TokenType == TokenType.TypeRef && declaringType.Name == "AttributeUsageAttribute" && declaringType.Namespace == "System";
 		}
 
-		private static bool HasAttribute(TypeDefinition type, string @namespace, string name)
+		private static bool HasAttribute(Collection<CustomAttribute> attributes, string @namespace, string name)
 		{
-			foreach (CustomAttribute customAttribute in type.CustomAttributes)
+			foreach (CustomAttribute customAttribute in attributes)
 			{
 				TypeReference attributeType = customAttribute.AttributeType;
 				if (attributeType.Name == name && attributeType.Namespace == @namespace)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace ProcGen.Noise
 {
@@ -12,7 +11,6 @@ namespace ProcGen.Noise
 			return typeof(FloatList);
 		}
 
-		[SerializeField]
 		public List<float> points { get; set; }
 
 		public FloatList()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -10,116 +11,298 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[UsedByNativeCode]
-	[StaticAccessor("GetITerrainManager()", StaticAccessorType.Arrow)]
-	[NativeHeader("TerrainScriptingClasses.h")]
 	[NativeHeader("Runtime/Interfaces/ITerrainManager.h")]
+	[NativeHeader("TerrainScriptingClasses.h")]
+	[StaticAccessor("GetITerrainManager()", StaticAccessorType.Arrow)]
 	[NativeHeader("Modules/Terrain/Public/Terrain.h")]
 	public sealed class Terrain : Behaviour
 	{
-		public extern TerrainData terrainData
+		public TerrainData terrainData
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<TerrainData>(Terrain.get_terrainData_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_terrainData_Injected(intPtr, Object.MarshalledUnityObject.Marshal<TerrainData>(value));
+			}
 		}
 
-		public extern float treeDistance
+		public float treeDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_treeDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_treeDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern float treeBillboardDistance
+		public float treeBillboardDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_treeBillboardDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_treeBillboardDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern float treeCrossFadeLength
+		public float treeCrossFadeLength
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_treeCrossFadeLength_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_treeCrossFadeLength_Injected(intPtr, value);
+			}
 		}
 
-		public extern int treeMaximumFullLODCount
+		public int treeMaximumFullLODCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_treeMaximumFullLODCount_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_treeMaximumFullLODCount_Injected(intPtr, value);
+			}
 		}
 
-		public extern float detailObjectDistance
+		public float detailObjectDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_detailObjectDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_detailObjectDistance_Injected(intPtr, value);
+			}
 		}
 
-		public extern float detailObjectDensity
+		public float detailObjectDensity
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_detailObjectDensity_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_detailObjectDensity_Injected(intPtr, value);
+			}
 		}
 
-		public extern float heightmapPixelError
+		public float heightmapPixelError
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_heightmapPixelError_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_heightmapPixelError_Injected(intPtr, value);
+			}
 		}
 
-		public extern int heightmapMaximumLOD
+		public int heightmapMaximumLOD
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_heightmapMaximumLOD_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_heightmapMaximumLOD_Injected(intPtr, value);
+			}
 		}
 
-		public extern int heightmapMinimumLODSimplification
+		public int heightmapMinimumLODSimplification
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_heightmapMinimumLODSimplification_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_heightmapMinimumLODSimplification_Injected(intPtr, value);
+			}
 		}
 
-		public extern float basemapDistance
+		public float basemapDistance
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_basemapDistance_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_basemapDistance_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("StaticLightmapIndexInt")]
-		public extern int lightmapIndex
+		public int lightmapIndex
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_lightmapIndex_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_lightmapIndex_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("DynamicLightmapIndexInt")]
-		public extern int realtimeLightmapIndex
+		public int realtimeLightmapIndex
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_realtimeLightmapIndex_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_realtimeLightmapIndex_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("StaticLightmapST")]
@@ -127,13 +310,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_lightmapScaleOffset_Injected(out vector);
+				Terrain.get_lightmapScaleOffset_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_lightmapScaleOffset_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_lightmapScaleOffset_Injected(intPtr, ref value);
 			}
 		}
 
@@ -142,200 +335,511 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector4 vector;
-				this.get_realtimeLightmapScaleOffset_Injected(out vector);
+				Terrain.get_realtimeLightmapScaleOffset_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_realtimeLightmapScaleOffset_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_realtimeLightmapScaleOffset_Injected(intPtr, ref value);
 			}
 		}
 
 		[NativeProperty("FreeUnusedRenderingResourcesObsolete")]
 		[Obsolete("Terrain.freeUnusedRenderingResources is obsolete; use keepUnusedRenderingResources instead.")]
-		public extern bool freeUnusedRenderingResources
+		public bool freeUnusedRenderingResources
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_freeUnusedRenderingResources_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_freeUnusedRenderingResources_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("KeepUnusedRenderingResources")]
-		public extern bool keepUnusedRenderingResources
+		public bool keepUnusedRenderingResources
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_keepUnusedRenderingResources_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_keepUnusedRenderingResources_Injected(intPtr, value);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetKeepUnusedCameraRenderingResources(int cameraInstanceID);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetKeepUnusedCameraRenderingResources(int cameraInstanceID, bool keepUnused);
-
-		public extern ShadowCastingMode shadowCastingMode
+		public bool GetKeepUnusedCameraRenderingResources(EntityId cameraEntityId)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Terrain.GetKeepUnusedCameraRenderingResources_Injected(intPtr, ref cameraEntityId);
 		}
 
-		public extern ReflectionProbeUsage reflectionProbeUsage
+		public void SetKeepUnusedCameraRenderingResources(EntityId cameraEntityId, bool keepUnused)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.SetKeepUnusedCameraRenderingResources_Injected(intPtr, ref cameraEntityId, keepUnused);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetClosestReflectionProbes(List<ReflectionProbeBlendInfo> result);
-
-		public extern Material materialTemplate
+		[Obsolete("GetKeepUnusedCameraRenderingResources(int) is obsolete. Use GetKeepUnusedCameraRenderingResources(EntityId) instead.")]
+		public bool GetKeepUnusedCameraRenderingResources(int cameraInstanceID)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			return this.GetKeepUnusedCameraRenderingResources(cameraInstanceID);
 		}
 
-		public extern bool drawHeightmap
+		[Obsolete("SetKeepUnusedCameraRenderingResources(int, bool) is obsolete. Use SetKeepUnusedCameraRenderingResources(EntityId, bool) instead.")]
+		public void SetKeepUnusedCameraRenderingResources(int cameraInstanceID, bool keepUnused)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			this.SetKeepUnusedCameraRenderingResources(cameraInstanceID, keepUnused);
 		}
 
-		public extern bool allowAutoConnect
+		public ShadowCastingMode shadowCastingMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_shadowCastingMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_shadowCastingMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern int groupingID
+		public ReflectionProbeUsage reflectionProbeUsage
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_reflectionProbeUsage_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_reflectionProbeUsage_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool drawInstanced
+		public void GetClosestReflectionProbes(List<ReflectionProbeBlendInfo> result)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.GetClosestReflectionProbes_Injected(intPtr, result);
 		}
 
-		public extern bool enableHeightmapRayTracing
+		public Material materialTemplate
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Material>(Terrain.get_materialTemplate_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_materialTemplate_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(value));
+			}
 		}
 
-		public extern RenderTexture normalmapTexture
+		public bool drawHeightmap
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_drawHeightmap_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_drawHeightmap_Injected(intPtr, value);
+			}
+		}
+
+		public bool allowAutoConnect
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_allowAutoConnect_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_allowAutoConnect_Injected(intPtr, value);
+			}
+		}
+
+		public int groupingID
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_groupingID_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_groupingID_Injected(intPtr, value);
+			}
+		}
+
+		public bool drawInstanced
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_drawInstanced_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_drawInstanced_Injected(intPtr, value);
+			}
+		}
+
+		public bool enableHeightmapRayTracing
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_enableHeightmapRayTracing_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_enableHeightmapRayTracing_Injected(intPtr, value);
+			}
+		}
+
+		public RenderTexture normalmapTexture
 		{
 			[NativeMethod("TryGetNormalMapTexture")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<RenderTexture>(Terrain.get_normalmapTexture_Injected(intPtr));
+			}
 		}
 
-		public extern bool drawTreesAndFoliage
+		public bool drawTreesAndFoliage
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_drawTreesAndFoliage_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_drawTreesAndFoliage_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 patchBoundsMultiplier
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_patchBoundsMultiplier_Injected(out vector);
+				Terrain.get_patchBoundsMultiplier_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_patchBoundsMultiplier_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_patchBoundsMultiplier_Injected(intPtr, ref value);
 			}
 		}
 
 		public float SampleHeight(Vector3 worldPosition)
 		{
-			return this.SampleHeight_Injected(ref worldPosition);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Terrain.SampleHeight_Injected(intPtr, ref worldPosition);
 		}
 
 		public void AddTreeInstance(TreeInstance instance)
 		{
-			this.AddTreeInstance_Injected(ref instance);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.AddTreeInstance_Injected(intPtr, ref instance);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetNeighbors(Terrain left, Terrain top, Terrain right, Terrain bottom);
-
-		public extern float treeLODBiasMultiplier
+		public void SetNeighbors(Terrain left, Terrain top, Terrain right, Terrain bottom)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.SetNeighbors_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Terrain>(left), Object.MarshalledUnityObject.Marshal<Terrain>(top), Object.MarshalledUnityObject.Marshal<Terrain>(right), Object.MarshalledUnityObject.Marshal<Terrain>(bottom));
 		}
 
-		public extern bool collectDetailPatches
+		public float treeLODBiasMultiplier
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_treeLODBiasMultiplier_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_treeLODBiasMultiplier_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool ignoreQualitySettings
+		public bool collectDetailPatches
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_collectDetailPatches_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_collectDetailPatches_Injected(intPtr, value);
+			}
 		}
 
-		public extern TerrainRenderFlags editorRenderFlags
+		public bool ignoreQualitySettings
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_ignoreQualitySettings_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_ignoreQualitySettings_Injected(intPtr, value);
+			}
+		}
+
+		public TerrainRenderFlags editorRenderFlags
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_editorRenderFlags_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_editorRenderFlags_Injected(intPtr, value);
+			}
 		}
 
 		public Vector3 GetPosition()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetPosition_Injected(out vector);
+			Terrain.GetPosition_Injected(intPtr, out vector);
 			return vector;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Flush();
+		public void Flush()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.Flush_Injected(intPtr);
+		}
 
 		internal void RemoveTrees(Vector2 position, float radius, int prototypeIndex)
 		{
-			this.RemoveTrees_Injected(ref position, radius, prototypeIndex);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.RemoveTrees_Injected(intPtr, ref position, radius, prototypeIndex);
 		}
 
 		[NativeMethod("CopySplatMaterialCustomProps")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetSplatMaterialPropertyBlock(MaterialPropertyBlock properties);
+		public void SetSplatMaterialPropertyBlock(MaterialPropertyBlock properties)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.SetSplatMaterialPropertyBlock_Injected(intPtr, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+		}
 
 		public void GetSplatMaterialPropertyBlock(MaterialPropertyBlock dest)
 		{
@@ -348,23 +852,58 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("GetSplatMaterialCustomProps")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_GetSplatMaterialPropertyBlock(MaterialPropertyBlock dest);
-
-		public extern TreeMotionVectorModeOverride treeMotionVectorModeOverride
+		private void Internal_GetSplatMaterialPropertyBlock(MaterialPropertyBlock dest)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Terrain.Internal_GetSplatMaterialPropertyBlock_Injected(intPtr, (dest == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(dest));
 		}
 
-		public extern bool preserveTreePrototypeLayers
+		public TreeMotionVectorModeOverride treeMotionVectorModeOverride
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_treeMotionVectorModeOverride_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_treeMotionVectorModeOverride_Injected(intPtr, value);
+			}
+		}
+
+		public bool preserveTreePrototypeLayers
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_preserveTreePrototypeLayers_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_preserveTreePrototypeLayers_Injected(intPtr, value);
+			}
 		}
 
 		[StaticAccessor("Terrain", StaticAccessorType.DoubleColon)]
@@ -443,10 +982,12 @@ namespace UnityEngine
 			}
 		}
 
-		public static extern Terrain activeTerrain
+		public static Terrain activeTerrain
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Terrain>(Terrain.get_activeTerrain_Injected());
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -456,6 +997,7 @@ namespace UnityEngine
 		public static extern Terrain[] activeTerrains
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
+			[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 			get;
 		}
 
@@ -464,43 +1006,93 @@ namespace UnityEngine
 			Terrain.Internal_FillActiveTerrainList(terrainList);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_FillActiveTerrainList([NotNull("ArgumentNullException")] object terrainList);
+		private static void Internal_FillActiveTerrainList([NotNull] object terrainList)
+		{
+			if (terrainList == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(terrainList, "terrainList");
+			}
+			Terrain.Internal_FillActiveTerrainList_Injected(terrainList);
+		}
 
 		[UsedByNativeCode]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject CreateTerrainGameObject(TerrainData assignTerrain);
-
-		public extern Terrain leftNeighbor
+		public static GameObject CreateTerrainGameObject(TerrainData assignTerrain)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			return Unmarshal.UnmarshalUnityObject<GameObject>(Terrain.CreateTerrainGameObject_Injected(Object.MarshalledUnityObject.Marshal<TerrainData>(assignTerrain)));
 		}
 
-		public extern Terrain rightNeighbor
+		public Terrain leftNeighbor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Terrain>(Terrain.get_leftNeighbor_Injected(intPtr));
+			}
 		}
 
-		public extern Terrain topNeighbor
+		public Terrain rightNeighbor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Terrain>(Terrain.get_rightNeighbor_Injected(intPtr));
+			}
 		}
 
-		public extern Terrain bottomNeighbor
+		public Terrain topNeighbor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Terrain>(Terrain.get_topNeighbor_Injected(intPtr));
+			}
 		}
 
-		public extern uint renderingLayerMask
+		public Terrain bottomNeighbor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Terrain>(Terrain.get_bottomNeighbor_Injected(intPtr));
+			}
+		}
+
+		public uint renderingLayerMask
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Terrain.get_renderingLayerMask_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Terrain>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Terrain.set_renderingLayerMask_Injected(intPtr, value);
+			}
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -577,34 +1169,265 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_lightmapScaleOffset_Injected(out Vector4 ret);
+		private static extern IntPtr get_terrainData_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_lightmapScaleOffset_Injected(ref Vector4 value);
+		private static extern void set_terrainData_Injected(IntPtr _unity_self, IntPtr value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_realtimeLightmapScaleOffset_Injected(out Vector4 ret);
+		private static extern float get_treeDistance_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_realtimeLightmapScaleOffset_Injected(ref Vector4 value);
+		private static extern void set_treeDistance_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_patchBoundsMultiplier_Injected(out Vector3 ret);
+		private static extern float get_treeBillboardDistance_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_patchBoundsMultiplier_Injected(ref Vector3 value);
+		private static extern void set_treeBillboardDistance_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float SampleHeight_Injected(ref Vector3 worldPosition);
+		private static extern float get_treeCrossFadeLength_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void AddTreeInstance_Injected(ref TreeInstance instance);
+		private static extern void set_treeCrossFadeLength_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetPosition_Injected(out Vector3 ret);
+		private static extern int get_treeMaximumFullLODCount_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RemoveTrees_Injected(ref Vector2 position, float radius, int prototypeIndex);
+		private static extern void set_treeMaximumFullLODCount_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_detailObjectDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_detailObjectDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_detailObjectDensity_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_detailObjectDensity_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_heightmapPixelError_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_heightmapPixelError_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_heightmapMaximumLOD_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_heightmapMaximumLOD_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_heightmapMinimumLODSimplification_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_heightmapMinimumLODSimplification_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_basemapDistance_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_basemapDistance_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_lightmapIndex_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_lightmapIndex_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_realtimeLightmapIndex_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_realtimeLightmapIndex_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_lightmapScaleOffset_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_lightmapScaleOffset_Injected(IntPtr _unity_self, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_realtimeLightmapScaleOffset_Injected(IntPtr _unity_self, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_realtimeLightmapScaleOffset_Injected(IntPtr _unity_self, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_freeUnusedRenderingResources_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_freeUnusedRenderingResources_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_keepUnusedRenderingResources_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_keepUnusedRenderingResources_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetKeepUnusedCameraRenderingResources_Injected(IntPtr _unity_self, [In] ref EntityId cameraEntityId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetKeepUnusedCameraRenderingResources_Injected(IntPtr _unity_self, [In] ref EntityId cameraEntityId, bool keepUnused);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShadowCastingMode get_shadowCastingMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_shadowCastingMode_Injected(IntPtr _unity_self, ShadowCastingMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ReflectionProbeUsage get_reflectionProbeUsage_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_reflectionProbeUsage_Injected(IntPtr _unity_self, ReflectionProbeUsage value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetClosestReflectionProbes_Injected(IntPtr _unity_self, List<ReflectionProbeBlendInfo> result);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_materialTemplate_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_materialTemplate_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_drawHeightmap_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_drawHeightmap_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_allowAutoConnect_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_allowAutoConnect_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_groupingID_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_groupingID_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_drawInstanced_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_drawInstanced_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enableHeightmapRayTracing_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enableHeightmapRayTracing_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_normalmapTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_drawTreesAndFoliage_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_drawTreesAndFoliage_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_patchBoundsMultiplier_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_patchBoundsMultiplier_Injected(IntPtr _unity_self, [In] ref Vector3 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float SampleHeight_Injected(IntPtr _unity_self, [In] ref Vector3 worldPosition);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddTreeInstance_Injected(IntPtr _unity_self, [In] ref TreeInstance instance);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetNeighbors_Injected(IntPtr _unity_self, IntPtr left, IntPtr top, IntPtr right, IntPtr bottom);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_treeLODBiasMultiplier_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_treeLODBiasMultiplier_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_collectDetailPatches_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_collectDetailPatches_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_ignoreQualitySettings_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_ignoreQualitySettings_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TerrainRenderFlags get_editorRenderFlags_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_editorRenderFlags_Injected(IntPtr _unity_self, TerrainRenderFlags value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetPosition_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Flush_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RemoveTrees_Injected(IntPtr _unity_self, [In] ref Vector2 position, float radius, int prototypeIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSplatMaterialPropertyBlock_Injected(IntPtr _unity_self, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetSplatMaterialPropertyBlock_Injected(IntPtr _unity_self, IntPtr dest);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TreeMotionVectorModeOverride get_treeMotionVectorModeOverride_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_treeMotionVectorModeOverride_Injected(IntPtr _unity_self, TreeMotionVectorModeOverride value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_preserveTreePrototypeLayers_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_preserveTreePrototypeLayers_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_activeTerrain_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_FillActiveTerrainList_Injected(object terrainList);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr CreateTerrainGameObject_Injected(IntPtr assignTerrain);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_leftNeighbor_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_rightNeighbor_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_topNeighbor_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_bottomNeighbor_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_renderingLayerMask_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_renderingLayerMask_Injected(IntPtr _unity_self, uint value);
 
 		[Obsolete("Enum type MaterialType is not used any more.", false)]
 		public enum MaterialType

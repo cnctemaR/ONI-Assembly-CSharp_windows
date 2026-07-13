@@ -8,7 +8,7 @@ namespace Unity.Mathematics.Geometry
 	[DebuggerDisplay("{Normal}, {Distance}")]
 	[Il2CppEagerStaticClassConstruction]
 	[Serializable]
-	internal struct Plane
+	public struct Plane
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Plane(float coefficientA, float coefficientB, float coefficientC, float coefficientD)

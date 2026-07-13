@@ -7,9 +7,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/Texture.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Streaming/TextureStreamingManager.h")]
-	[NativeHeader("Runtime/Graphics/Texture.h")]
 	public class Texture : Object
 	{
 		protected Texture()
@@ -36,11 +36,18 @@ namespace UnityEngine
 			set;
 		}
 
-		public extern int mipmapCount
+		public int mipmapCount
 		{
 			[NativeName("GetMipmapCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_mipmapCount_Injected(intPtr);
+			}
 		}
 
 		[NativeProperty("AnisoLimit")]
@@ -64,14 +71,38 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetDataWidth();
+		[ThreadSafe]
+		private int GetDataWidth()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.GetDataWidth_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetDataHeight();
+		[ThreadSafe]
+		private int GetDataHeight()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.GetDataHeight_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern TextureDimension GetDimension();
+		[ThreadSafe]
+		private TextureDimension GetDimension()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.GetDimension_Injected(intPtr);
+		}
 
 		public virtual int width
 		{
@@ -109,74 +140,186 @@ namespace UnityEngine
 			}
 		}
 
-		internal extern bool isNativeTexture
+		internal bool isNativeTexture
 		{
 			[NativeName("IsNativeTexture")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_isNativeTexture_Injected(intPtr);
+			}
 		}
 
-		public virtual extern bool isReadable
+		public virtual bool isReadable
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_isReadable_Injected(intPtr);
+			}
 		}
 
-		public extern TextureWrapMode wrapMode
+		public TextureWrapMode wrapMode
 		{
 			[NativeName("GetWrapModeU")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_wrapMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Texture.set_wrapMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern TextureWrapMode wrapModeU
+		public TextureWrapMode wrapModeU
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_wrapModeU_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Texture.set_wrapModeU_Injected(intPtr, value);
+			}
 		}
 
-		public extern TextureWrapMode wrapModeV
+		public TextureWrapMode wrapModeV
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_wrapModeV_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Texture.set_wrapModeV_Injected(intPtr, value);
+			}
 		}
 
-		public extern TextureWrapMode wrapModeW
+		public TextureWrapMode wrapModeW
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_wrapModeW_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Texture.set_wrapModeW_Injected(intPtr, value);
+			}
 		}
 
-		public extern FilterMode filterMode
+		public FilterMode filterMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_filterMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Texture.set_filterMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern int anisoLevel
+		public int anisoLevel
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_anisoLevel_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Texture.set_anisoLevel_Injected(intPtr, value);
+			}
 		}
 
-		public extern float mipMapBias
+		public float mipMapBias
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_mipMapBias_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Texture.set_mipMapBias_Injected(intPtr, value);
+			}
 		}
 
 		public Vector2 texelSize
@@ -184,14 +327,26 @@ namespace UnityEngine
 			[NativeName("GetTexelSize")]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_texelSize_Injected(out vector);
+				Texture.get_texelSize_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetNativeTexturePtr();
+		public IntPtr GetNativeTexturePtr()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.GetNativeTexturePtr_Injected(intPtr);
+		}
 
 		[Obsolete("Use GetNativeTexturePtr instead.", false)]
 		public int GetNativeTextureID()
@@ -199,18 +354,39 @@ namespace UnityEngine
 			return (int)this.GetNativeTexturePtr();
 		}
 
-		public extern uint updateCount
+		public uint updateCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture.get_updateCount_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void IncrementUpdateCount();
+		public void IncrementUpdateCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture.IncrementUpdateCount_Injected(intPtr);
+		}
 
 		[NativeMethod("GetActiveTextureColorSpace")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int Internal_GetActiveTextureColorSpace();
+		private int Internal_GetActiveTextureColorSpace()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.Internal_GetActiveTextureColorSpace_Injected(intPtr);
+		}
 
 		internal ColorSpace activeTextureColorSpace
 		{
@@ -222,8 +398,15 @@ namespace UnityEngine
 		}
 
 		[NativeMethod("GetStoredColorSpace")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern TextureColorSpace Internal_GetStoredColorSpace();
+		private TextureColorSpace Internal_GetStoredColorSpace()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.Internal_GetStoredColorSpace_Injected(intPtr);
+		}
 
 		public bool isDataSRGB
 		{
@@ -314,6 +497,15 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStreamingTextureMaterialDebugProperties();
 
+		[FreeFunction("GetTextureStreamingManager().SetStreamingTextureMaterialDebugPropertiesWithSlot")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStreamingTextureMaterialDebugPropertiesWithSlot(int materialTextureSlot);
+
+		public static void SetStreamingTextureMaterialDebugProperties(int materialTextureSlot)
+		{
+			Texture.SetStreamingTextureMaterialDebugPropertiesWithSlot(materialTextureSlot);
+		}
+
 		public static extern bool streamingTextureForceLoadAll
 		{
 			[FreeFunction(Name = "GetTextureStreamingManager().GetForceLoadAll")]
@@ -344,11 +536,40 @@ namespace UnityEngine
 			set;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern ulong GetPixelDataSize(int mipLevel, int element = 0);
+		internal ulong GetPixelDataSize(int mipLevel, int element = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.GetPixelDataSize_Injected(intPtr, mipLevel, element);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern ulong GetPixelDataOffset(int mipLevel, int element = 0);
+		internal ulong GetPixelDataOffset(int mipLevel, int element = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture.GetPixelDataOffset_Injected(intPtr, mipLevel, element);
+		}
+
+		public GraphicsTexture graphicsTexture
+		{
+			[FreeFunction(Name = "Texture2DScripting::GetCurrentGraphicsTexture", HasExplicitThis = true)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				IntPtr intPtr2 = Texture.get_graphicsTexture_Injected(intPtr);
+				return (intPtr2 == 0) ? null : GraphicsTexture.BindingsMarshaller.ConvertToManaged(intPtr2);
+			}
+		}
 
 		internal TextureColorSpace GetTextureColorSpace(bool linear)
 		{
@@ -401,27 +622,18 @@ namespace UnityEngine
 			return flag2;
 		}
 
-		internal bool ValidateFormat(GraphicsFormat format, FormatUsage usage)
+		internal bool ValidateFormat(GraphicsFormat format, GraphicsFormatUsage usage)
 		{
-			bool flag = usage != FormatUsage.Render && (format == GraphicsFormat.ShadowAuto || format == GraphicsFormat.DepthAuto);
+			bool flag = SystemInfo.IsFormatSupported(format, usage);
 			bool flag2;
 			if (flag)
 			{
-				Debug.LogWarning(string.Format("'{0}' is not allowed because it is an auto format and not an exact format. Use GraphicsFormatUtility.GetDepthStencilFormat to get an exact depth/stencil format.", format.ToString()), this);
-				flag2 = false;
+				flag2 = true;
 			}
 			else
 			{
-				bool flag3 = SystemInfo.IsFormatSupported(format, usage);
-				if (flag3)
-				{
-					flag2 = true;
-				}
-				else
-				{
-					Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported for {1} usage on this platform. Use 'SystemInfo.IsFormatSupported' C# API to check format support.", format.ToString(), usage.ToString()), this);
-					flag2 = false;
-				}
+				Debug.LogError(string.Format("Texture creation failed. '{0}' is not supported for {1} usage on this platform. Use 'SystemInfo.IsFormatSupported' C# API to check format support.", format.ToString(), usage.ToString()), this);
+				flag2 = false;
 			}
 			return flag2;
 		}
@@ -431,13 +643,102 @@ namespace UnityEngine
 			return new UnityException(string.Format("Texture '{0}' is not readable, the texture memory can not be accessed from scripts. You can make the texture readable in the Texture Import Settings.", t.name));
 		}
 
+		internal UnityException IgnoreMipmapLimitCannotBeToggledException(Texture t)
+		{
+			return new UnityException(string.Format("Failed to toggle ignoreMipmapLimit, Texture '{0}' is not readable. You can make the texture readable in the Texture Import Settings.", t.name));
+		}
+
 		internal UnityException CreateNativeArrayLengthOverflowException()
 		{
 			return new UnityException("Failed to create NativeArray, length exceeds the allowed maximum of Int32.MaxValue. Use a larger type as template argument to reduce the array length.");
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_texelSize_Injected(out Vector2 ret);
+		private static extern int get_mipmapCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetDataWidth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetDataHeight_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureDimension GetDimension_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isNativeTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isReadable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureWrapMode get_wrapMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_wrapMode_Injected(IntPtr _unity_self, TextureWrapMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureWrapMode get_wrapModeU_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_wrapModeU_Injected(IntPtr _unity_self, TextureWrapMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureWrapMode get_wrapModeV_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_wrapModeV_Injected(IntPtr _unity_self, TextureWrapMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureWrapMode get_wrapModeW_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_wrapModeW_Injected(IntPtr _unity_self, TextureWrapMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern FilterMode get_filterMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_filterMode_Injected(IntPtr _unity_self, FilterMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_anisoLevel_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_anisoLevel_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_mipMapBias_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_mipMapBias_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_texelSize_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetNativeTexturePtr_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_updateCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void IncrementUpdateCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_GetActiveTextureColorSpace_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureColorSpace Internal_GetStoredColorSpace_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong GetPixelDataSize_Injected(IntPtr _unity_self, int mipLevel, int element);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong GetPixelDataOffset_Injected(IntPtr _unity_self, int mipLevel, int element);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_graphicsTexture_Injected(IntPtr _unity_self);
 
 		public static readonly int GenerateAllMips = -1;
 	}

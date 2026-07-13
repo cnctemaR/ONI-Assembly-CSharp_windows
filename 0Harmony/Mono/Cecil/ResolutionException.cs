@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Mono.Cecil
 {
 	[Serializable]
-	public sealed class ResolutionException : Exception
+	internal sealed class ResolutionException : Exception
 	{
 		public MemberReference Member
 		{

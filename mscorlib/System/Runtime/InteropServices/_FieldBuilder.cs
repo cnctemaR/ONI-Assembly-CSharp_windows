@@ -5,8 +5,8 @@ namespace System.Runtime.InteropServices
 {
 	[TypeLibImportClass(typeof(FieldBuilder))]
 	[Guid("CE1A3BF5-975E-30CC-97C9-1EF70F8F3993")]
-	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[CLSCompliant(false)]
 	[ComVisible(true)]
 	public interface _FieldBuilder
 	{

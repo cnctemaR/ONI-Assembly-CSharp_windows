@@ -8,6 +8,7 @@ public class PowerTransformer : Generator
 	{
 		base.OnSpawn();
 		this.battery = base.GetComponent<Battery>();
+		base.TryGetComponent<RequireInputs>(out this.requireInputs);
 		base.Subscribe<PowerTransformer>(-592767678, PowerTransformer.OnOperationalChangedDelegate);
 		this.UpdateJoulesLostPerSecond();
 	}
@@ -27,6 +28,15 @@ public class PowerTransformer : Generator
 	private void OnOperationalChanged(object _)
 	{
 		this.UpdateJoulesLostPerSecond();
+		if (this.requireInputs != null)
+		{
+			if (this.operational.IsOperational)
+			{
+				this.requireInputs.visualizeRequirements |= RequireInputs.Requirements.NoWire;
+				return;
+			}
+			this.requireInputs.visualizeRequirements &= ~RequireInputs.Requirements.NoWire;
+		}
 	}
 
 	private void UpdateJoulesLostPerSecond()
@@ -55,6 +65,8 @@ public class PowerTransformer : Generator
 	}
 
 	private Battery battery;
+
+	private RequireInputs requireInputs;
 
 	private bool mLoopDetected;
 

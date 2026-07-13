@@ -639,47 +639,80 @@ namespace UnityEngine
 				bool flag11 = elementType == typeof(string);
 				if (flag11)
 				{
-					string[] array2 = (string[])array;
-					int length = array.GetLength(0);
-					IntPtr intPtr2 = AndroidJNISafe.FindClass("java/lang/String");
-					IntPtr intPtr3 = AndroidJNI.NewObjectArray(length, intPtr2, IntPtr.Zero);
-					for (int i = 0; i < length; i++)
+					IntPtr intPtr2 = IntPtr.Zero;
+					bool flag12 = false;
+					try
 					{
-						IntPtr intPtr4 = AndroidJNISafe.NewString(array2[i]);
-						AndroidJNI.SetObjectArrayElement(intPtr3, i, intPtr4);
-						AndroidJNISafe.DeleteLocalRef(intPtr4);
+						string[] array2 = (string[])array;
+						int length = array.GetLength(0);
+						int num = length;
+						bool flag13 = num > _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS;
+						if (flag13)
+						{
+							num = _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS;
+						}
+						IntPtr intPtr3 = AndroidJNISafe.FindClass("java/lang/String");
+						IntPtr intPtr4 = AndroidJNI.NewObjectArray(length, intPtr3, IntPtr.Zero);
+						AndroidJNISafe.DeleteLocalRef(intPtr3);
+						bool flag14 = num > 0;
+						if (flag14)
+						{
+							AndroidJNISafe.PushLocalFrame(num);
+							flag12 = true;
+						}
+						for (int i = 0; i < length; i++)
+						{
+							bool flag15 = i % _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS == 0;
+							if (flag15)
+							{
+								AndroidJNI.PopLocalFrame(IntPtr.Zero);
+								flag12 = false;
+								AndroidJNISafe.PushLocalFrame(num);
+								flag12 = true;
+							}
+							IntPtr intPtr5 = AndroidJNISafe.NewString(array2[i]);
+							AndroidJNI.SetObjectArrayElement(intPtr4, i, intPtr5);
+						}
+						intPtr2 = intPtr4;
 					}
-					AndroidJNISafe.DeleteLocalRef(intPtr2);
-					intPtr = intPtr3;
+					finally
+					{
+						bool flag16 = flag12;
+						if (flag16)
+						{
+							AndroidJNI.PopLocalFrame(IntPtr.Zero);
+						}
+					}
+					intPtr = intPtr2;
 				}
 				else
 				{
-					bool flag12 = elementType == typeof(AndroidJavaObject);
-					if (flag12)
+					bool flag17 = elementType == typeof(AndroidJavaObject);
+					if (flag17)
 					{
 						AndroidJavaObject[] array3 = (AndroidJavaObject[])array;
 						int length2 = array.GetLength(0);
 						IntPtr[] array4 = new IntPtr[length2];
-						IntPtr intPtr5 = AndroidJNISafe.FindClass("java/lang/Object");
-						IntPtr intPtr6 = IntPtr.Zero;
+						IntPtr intPtr6 = AndroidJNISafe.FindClass("java/lang/Object");
+						IntPtr intPtr7 = IntPtr.Zero;
 						for (int j = 0; j < length2; j++)
 						{
-							bool flag13 = array3[j] != null;
-							if (flag13)
+							bool flag18 = array3[j] != null;
+							if (flag18)
 							{
 								array4[j] = array3[j].GetRawObject();
 								IntPtr rawClass = array3[j].GetRawClass();
-								bool flag14 = intPtr6 == IntPtr.Zero;
-								if (flag14)
+								bool flag19 = intPtr7 == IntPtr.Zero;
+								if (flag19)
 								{
-									intPtr6 = rawClass;
+									intPtr7 = rawClass;
 								}
 								else
 								{
-									bool flag15 = intPtr6 != intPtr5 && !AndroidJNI.IsSameObject(intPtr6, rawClass);
-									if (flag15)
+									bool flag20 = intPtr7 != intPtr6 && !AndroidJNI.IsSameObject(intPtr7, rawClass);
+									if (flag20)
 									{
-										intPtr6 = intPtr5;
+										intPtr7 = intPtr6;
 									}
 								}
 							}
@@ -688,14 +721,14 @@ namespace UnityEngine
 								array4[j] = IntPtr.Zero;
 							}
 						}
-						IntPtr intPtr7 = AndroidJNISafe.ToObjectArray(array4, intPtr6);
-						AndroidJNISafe.DeleteLocalRef(intPtr5);
-						intPtr = intPtr7;
+						IntPtr intPtr8 = AndroidJNISafe.ToObjectArray(array4, intPtr7);
+						AndroidJNISafe.DeleteLocalRef(intPtr6);
+						intPtr = intPtr8;
 					}
 					else
 					{
-						bool flag16 = AndroidReflection.IsAssignableFrom(typeof(AndroidJavaProxy), elementType);
-						if (!flag16)
+						bool flag21 = AndroidReflection.IsAssignableFrom(typeof(AndroidJavaProxy), elementType);
+						if (!flag21)
 						{
 							string text = "JNI; Unknown array type '";
 							Type type = elementType;
@@ -704,26 +737,26 @@ namespace UnityEngine
 						AndroidJavaProxy[] array5 = (AndroidJavaProxy[])array;
 						int length3 = array.GetLength(0);
 						IntPtr[] array6 = new IntPtr[length3];
-						IntPtr intPtr8 = AndroidJNISafe.FindClass("java/lang/Object");
-						IntPtr intPtr9 = IntPtr.Zero;
+						IntPtr intPtr9 = AndroidJNISafe.FindClass("java/lang/Object");
+						IntPtr intPtr10 = IntPtr.Zero;
 						for (int k = 0; k < length3; k++)
 						{
-							bool flag17 = array5[k] != null;
-							if (flag17)
+							bool flag22 = array5[k] != null;
+							if (flag22)
 							{
 								array6[k] = array5[k].GetRawProxy();
 								IntPtr rawClass2 = array5[k].javaInterface.GetRawClass();
-								bool flag18 = intPtr9 == IntPtr.Zero;
-								if (flag18)
+								bool flag23 = intPtr10 == IntPtr.Zero;
+								if (flag23)
 								{
-									intPtr9 = rawClass2;
+									intPtr10 = rawClass2;
 								}
 								else
 								{
-									bool flag19 = intPtr9 != intPtr8 && !AndroidJNI.IsSameObject(intPtr9, rawClass2);
-									if (flag19)
+									bool flag24 = intPtr10 != intPtr9 && !AndroidJNI.IsSameObject(intPtr10, rawClass2);
+									if (flag24)
 									{
-										intPtr9 = intPtr8;
+										intPtr10 = intPtr9;
 									}
 								}
 							}
@@ -732,9 +765,9 @@ namespace UnityEngine
 								array6[k] = IntPtr.Zero;
 							}
 						}
-						IntPtr intPtr10 = AndroidJNISafe.ToObjectArray(array6, intPtr9);
-						AndroidJNISafe.DeleteLocalRef(intPtr8);
-						intPtr = intPtr10;
+						IntPtr intPtr11 = AndroidJNISafe.ToObjectArray(array6, intPtr10);
+						AndroidJNISafe.DeleteLocalRef(intPtr9);
+						intPtr = intPtr11;
 					}
 				}
 			}
@@ -830,18 +863,47 @@ namespace UnityEngine
 				{
 					int arrayLength = AndroidJNISafe.GetArrayLength(array);
 					string[] array2 = new string[arrayLength];
-					for (int i = 0; i < arrayLength; i++)
+					bool flag12 = arrayLength == 0;
+					if (flag12)
 					{
-						IntPtr objectArrayElement = AndroidJNI.GetObjectArrayElement(array, i);
-						array2[i] = AndroidJNISafe.GetStringChars(objectArrayElement);
-						AndroidJNISafe.DeleteLocalRef(objectArrayElement);
+						arrayType = (ArrayType)((object)array2);
 					}
-					arrayType = (ArrayType)((object)array2);
+					else
+					{
+						int num = ((arrayLength > _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS) ? _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS : arrayLength);
+						AndroidJNISafe.PushLocalFrame(num);
+						bool flag13 = true;
+						try
+						{
+							for (int i = 0; i < arrayLength; i++)
+							{
+								bool flag14 = i % _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS == 0;
+								if (flag14)
+								{
+									AndroidJNI.PopLocalFrame(IntPtr.Zero);
+									flag13 = false;
+									AndroidJNISafe.PushLocalFrame(num);
+									flag13 = true;
+								}
+								IntPtr objectArrayElement = AndroidJNI.GetObjectArrayElement(array, i);
+								array2[i] = AndroidJNISafe.GetStringChars(objectArrayElement);
+							}
+						}
+						finally
+						{
+							bool flag15 = flag13;
+							if (flag15)
+							{
+								AndroidJNI.PopLocalFrame(IntPtr.Zero);
+							}
+						}
+						arrayType = (ArrayType)((object)array2);
+					}
 				}
 				else
 				{
-					bool flag12 = elementType == typeof(AndroidJavaObject);
-					if (!flag12)
+					bool flag16 = elementType == typeof(AndroidJavaObject);
+					if (!flag16)
 					{
 						string text = "JNI: Unknown generic array type '";
 						Type type = elementType;
@@ -849,13 +911,42 @@ namespace UnityEngine
 					}
 					int arrayLength2 = AndroidJNISafe.GetArrayLength(array);
 					AndroidJavaObject[] array3 = new AndroidJavaObject[arrayLength2];
-					for (int j = 0; j < arrayLength2; j++)
+					bool flag17 = arrayLength2 == 0;
+					if (flag17)
 					{
-						IntPtr objectArrayElement2 = AndroidJNI.GetObjectArrayElement(array, j);
-						array3[j] = new AndroidJavaObject(objectArrayElement2);
-						AndroidJNISafe.DeleteLocalRef(objectArrayElement2);
+						arrayType = (ArrayType)((object)array3);
 					}
-					arrayType = (ArrayType)((object)array3);
+					else
+					{
+						int num2 = ((arrayLength2 > _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS) ? _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS : arrayLength2);
+						AndroidJNISafe.PushLocalFrame(num2);
+						bool flag18 = true;
+						try
+						{
+							for (int j = 0; j < arrayLength2; j++)
+							{
+								bool flag19 = j % _AndroidJNIHelper.FRAME_SIZE_FOR_ARRAYS == 0;
+								if (flag19)
+								{
+									AndroidJNI.PopLocalFrame(IntPtr.Zero);
+									flag18 = false;
+									AndroidJNISafe.PushLocalFrame(num2);
+									flag18 = true;
+								}
+								IntPtr objectArrayElement2 = AndroidJNI.GetObjectArrayElement(array, j);
+								array3[j] = new AndroidJavaObject(objectArrayElement2);
+							}
+						}
+						finally
+						{
+							bool flag20 = flag18;
+							if (flag20)
+							{
+								AndroidJNI.PopLocalFrame(IntPtr.Zero);
+							}
+						}
+						arrayType = (ArrayType)((object)array3);
+					}
 				}
 			}
 			return arrayType;
@@ -1110,50 +1201,53 @@ namespace UnityEngine
 							}
 							else
 							{
-								bool flag16 = type.Equals(typeof(AndroidJavaClass));
+								bool flag16 = obj is AndroidJavaClass || (obj == type && AndroidReflection.IsAssignableFrom(typeof(AndroidJavaClass), type));
 								if (flag16)
 								{
 									text = "Ljava/lang/Class;";
 								}
 								else
 								{
-									bool flag17 = type.Equals(typeof(AndroidJavaObject));
+									bool flag17 = obj is AndroidJavaObject;
 									if (flag17)
 									{
-										bool flag18 = obj == type;
-										if (flag18)
-										{
-											return "Ljava/lang/Object;";
-										}
 										AndroidJavaObject androidJavaObject2 = (AndroidJavaObject)obj;
 										using (AndroidJavaObject androidJavaObject3 = androidJavaObject2.Call<AndroidJavaObject>("getClass", Array.Empty<object>()))
 										{
 											return "L" + androidJavaObject3.Call<string>("getName", Array.Empty<object>()) + ";";
 										}
 									}
-									bool flag19 = AndroidReflection.IsAssignableFrom(typeof(Array), type);
-									if (!flag19)
+									bool flag18 = obj == type && AndroidReflection.IsAssignableFrom(typeof(AndroidJavaObject), type);
+									if (flag18)
 									{
-										string[] array = new string[6];
-										array[0] = "JNI: Unknown signature for type '";
-										int num = 1;
-										Type type2 = type;
-										array[num] = ((type2 != null) ? type2.ToString() : null);
-										array[2] = "' (obj = ";
-										array[3] = ((obj != null) ? obj.ToString() : null);
-										array[4] = ") ";
-										array[5] = ((type == obj) ? "equal" : "instance");
-										throw new Exception(string.Concat(array));
+										text = "Ljava/lang/Object;";
 									}
-									bool flag20 = type.GetArrayRank() != 1;
-									if (flag20)
+									else
 									{
-										throw new Exception("JNI: System.Array in n dimensions is not allowed");
+										bool flag19 = AndroidReflection.IsAssignableFrom(typeof(Array), type);
+										if (!flag19)
+										{
+											string[] array = new string[6];
+											array[0] = "JNI: Unknown signature for type '";
+											int num = 1;
+											Type type2 = type;
+											array[num] = ((type2 != null) ? type2.ToString() : null);
+											array[2] = "' (obj = ";
+											array[3] = ((obj != null) ? obj.ToString() : null);
+											array[4] = ") ";
+											array[5] = ((type == obj) ? "equal" : "instance");
+											throw new Exception(string.Concat(array));
+										}
+										bool flag20 = type.GetArrayRank() != 1;
+										if (flag20)
+										{
+											throw new Exception("JNI: System.Array in n dimensions is not allowed");
+										}
+										StringBuilder stringBuilder = new StringBuilder();
+										stringBuilder.Append('[');
+										stringBuilder.Append(_AndroidJNIHelper.GetSignature(type.GetElementType()));
+										text = ((stringBuilder.Length > 1) ? stringBuilder.ToString() : "");
 									}
-									StringBuilder stringBuilder = new StringBuilder();
-									stringBuilder.Append('[');
-									stringBuilder.Append(_AndroidJNIHelper.GetSignature(type.GetElementType()));
-									text = ((stringBuilder.Length > 1) ? stringBuilder.ToString() : "");
 								}
 							}
 						}
@@ -1207,5 +1301,7 @@ namespace UnityEngine
 			}
 			return text;
 		}
+
+		private static int FRAME_SIZE_FOR_ARRAYS = 100;
 	}
 }

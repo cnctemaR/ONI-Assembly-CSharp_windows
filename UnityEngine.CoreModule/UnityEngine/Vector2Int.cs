@@ -7,15 +7,15 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[Il2CppEagerStaticClassConstruction]
-	[NativeType("Runtime/Math/Vector2Int.h")]
 	[UsedByNativeCode]
+	[NativeType("Runtime/Math/Vector2Int.h")]
+	[Il2CppEagerStaticClassConstruction]
 	public struct Vector2Int : IEquatable<Vector2Int>, IFormattable
 	{
 		public int x
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_X;
 			}
@@ -29,7 +29,7 @@ namespace UnityEngine
 		public int y
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				return this.m_Y;
 			}
@@ -57,7 +57,7 @@ namespace UnityEngine
 		public int this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get
+			readonly get
 			{
 				int num;
 				if (index != 0)
@@ -66,11 +66,11 @@ namespace UnityEngine
 					{
 						throw new IndexOutOfRangeException(string.Format("Invalid Vector2Int index addressed: {0}!", index));
 					}
-					num = this.y;
+					num = this.m_Y;
 				}
 				else
 				{
-					num = this.x;
+					num = this.m_X;
 				}
 				return num;
 			}
@@ -83,89 +83,137 @@ namespace UnityEngine
 					{
 						throw new IndexOutOfRangeException(string.Format("Invalid Vector2Int index addressed: {0}!", index));
 					}
-					this.y = value;
+					this.m_Y = value;
 				}
 				else
 				{
-					this.x = value;
+					this.m_X = value;
 				}
 			}
 		}
 
-		public float magnitude
+		public readonly float magnitude
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return Mathf.Sqrt((float)(this.x * this.x + this.y * this.y));
+				return Mathf.Sqrt((float)(this.m_X * this.m_X + this.m_Y * this.m_Y));
 			}
 		}
 
-		public int sqrMagnitude
+		public readonly int sqrMagnitude
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get
 			{
-				return this.x * this.x + this.y * this.y;
+				return this.m_X * this.m_X + this.m_Y * this.m_Y;
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Distance(Vector2Int a, Vector2Int b)
 		{
-			float num = (float)(a.x - b.x);
-			float num2 = (float)(a.y - b.y);
+			float num = (float)(a.m_X - b.m_X);
+			float num2 = (float)(a.m_Y - b.m_Y);
+			return (float)Math.Sqrt((double)(num * num + num2 * num2));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float Distance(in Vector2Int a, in Vector2Int b)
+		{
+			float num = (float)(a.m_X - b.m_X);
+			float num2 = (float)(a.m_Y - b.m_Y);
 			return (float)Math.Sqrt((double)(num * num + num2 * num2));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int Min(Vector2Int lhs, Vector2Int rhs)
 		{
-			return new Vector2Int(Mathf.Min(lhs.x, rhs.x), Mathf.Min(lhs.y, rhs.y));
+			return new Vector2Int(Mathf.Min(lhs.m_X, rhs.m_X), Mathf.Min(lhs.m_Y, rhs.m_Y));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector2Int Min(in Vector2Int lhs, in Vector2Int rhs)
+		{
+			return new Vector2Int(Mathf.Min(lhs.m_X, rhs.m_X), Mathf.Min(lhs.m_Y, rhs.m_Y));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int Max(Vector2Int lhs, Vector2Int rhs)
 		{
-			return new Vector2Int(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y));
+			return new Vector2Int(Mathf.Max(lhs.m_X, rhs.m_X), Mathf.Max(lhs.m_Y, rhs.m_Y));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector2Int Max(in Vector2Int lhs, in Vector2Int rhs)
+		{
+			return new Vector2Int(Mathf.Max(lhs.m_X, rhs.m_X), Mathf.Max(lhs.m_Y, rhs.m_Y));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int Scale(Vector2Int a, Vector2Int b)
 		{
-			return new Vector2Int(a.x * b.x, a.y * b.y);
+			return new Vector2Int(a.m_X * b.m_X, a.m_Y * b.m_Y);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector2Int Scale(in Vector2Int a, in Vector2Int b)
+		{
+			return new Vector2Int(a.m_X * b.m_X, a.m_Y * b.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Scale(Vector2Int scale)
 		{
-			this.x *= scale.x;
-			this.y *= scale.y;
+			this.m_X *= scale.m_X;
+			this.m_Y *= scale.m_Y;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Scale(in Vector2Int scale)
+		{
+			this.m_X *= scale.m_X;
+			this.m_Y *= scale.m_Y;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Clamp(Vector2Int min, Vector2Int max)
 		{
-			this.x = Math.Max(min.x, this.x);
-			this.x = Math.Min(max.x, this.x);
-			this.y = Math.Max(min.y, this.y);
-			this.y = Math.Min(max.y, this.y);
+			this.m_X = Mathf.Clamp(this.m_X, min.m_X, max.m_X);
+			this.m_Y = Mathf.Clamp(this.m_Y, min.m_Y, max.m_Y);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Clamp(in Vector2Int min, in Vector2Int max)
+		{
+			this.m_X = Mathf.Clamp(this.m_X, min.m_X, max.m_X);
+			this.m_Y = Mathf.Clamp(this.m_Y, min.m_Y, max.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static implicit operator Vector2(Vector2Int v)
 		{
-			return new Vector2((float)v.x, (float)v.y);
+			return new Vector2
+			{
+				x = (float)v.m_X,
+				y = (float)v.m_Y
+			};
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static explicit operator Vector3Int(Vector2Int v)
 		{
-			return new Vector3Int(v.x, v.y, 0);
+			return new Vector3Int(v.m_X, v.m_Y, 0);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int FloorToInt(Vector2 v)
+		{
+			return new Vector2Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector2Int FloorToInt(in Vector2 v)
 		{
 			return new Vector2Int(Mathf.FloorToInt(v.x), Mathf.FloorToInt(v.y));
 		}
@@ -177,7 +225,19 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector2Int CeilToInt(in Vector2 v)
+		{
+			return new Vector2Int(Mathf.CeilToInt(v.x), Mathf.CeilToInt(v.y));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int RoundToInt(Vector2 v)
+		{
+			return new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vector2Int RoundToInt(in Vector2 v)
 		{
 			return new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
 		}
@@ -185,49 +245,49 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int operator -(Vector2Int v)
 		{
-			return new Vector2Int(-v.x, -v.y);
+			return new Vector2Int(-v.m_X, -v.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int operator +(Vector2Int a, Vector2Int b)
 		{
-			return new Vector2Int(a.x + b.x, a.y + b.y);
+			return new Vector2Int(a.m_X + b.m_X, a.m_Y + b.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int operator -(Vector2Int a, Vector2Int b)
 		{
-			return new Vector2Int(a.x - b.x, a.y - b.y);
+			return new Vector2Int(a.m_X - b.m_X, a.m_Y - b.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int operator *(Vector2Int a, Vector2Int b)
 		{
-			return new Vector2Int(a.x * b.x, a.y * b.y);
+			return new Vector2Int(a.m_X * b.m_X, a.m_Y * b.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int operator *(int a, Vector2Int b)
 		{
-			return new Vector2Int(a * b.x, a * b.y);
+			return new Vector2Int(a * b.m_X, a * b.m_Y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int operator *(Vector2Int a, int b)
 		{
-			return new Vector2Int(a.x * b, a.y * b);
+			return new Vector2Int(a.m_X * b, a.m_Y * b);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int operator /(Vector2Int a, int b)
 		{
-			return new Vector2Int(a.x / b, a.y / b);
+			return new Vector2Int(a.m_X / b, a.m_Y / b);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(Vector2Int lhs, Vector2Int rhs)
 		{
-			return lhs.x == rhs.x && lhs.y == rhs.y;
+			return lhs.m_X == rhs.m_X && lhs.m_Y == rhs.m_Y;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -237,49 +297,62 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool Equals(object other)
+		public override readonly bool Equals(object other)
 		{
-			bool flag = !(other is Vector2Int);
-			return !flag && this.Equals((Vector2Int)other);
+			Vector2Int vector2Int;
+			bool flag;
+			if (other is Vector2Int)
+			{
+				vector2Int = (Vector2Int)other;
+				flag = true;
+			}
+			else
+			{
+				flag = false;
+			}
+			bool flag2 = flag;
+			return flag2 && this.Equals(in vector2Int);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Equals(Vector2Int other)
+		public readonly bool Equals(Vector2Int other)
 		{
-			return this.x == other.x && this.y == other.y;
+			return this.m_X == other.m_X && this.m_Y == other.m_Y;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override int GetHashCode()
+		public readonly bool Equals(in Vector2Int other)
 		{
-			return this.x.GetHashCode() ^ (this.y.GetHashCode() << 2);
+			return this.m_X == other.m_X && this.m_Y == other.m_Y;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override string ToString()
+		public override readonly int GetHashCode()
+		{
+			return (this.m_X * 73856093) ^ (this.m_Y * 83492791);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override readonly string ToString()
 		{
 			return this.ToString(null, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format)
+		public readonly string ToString(string format)
 		{
 			return this.ToString(format, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format, IFormatProvider formatProvider)
+		public readonly string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = formatProvider == null;
 			if (flag)
 			{
 				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
-			return UnityString.Format("({0}, {1})", new object[]
-			{
-				this.x.ToString(format, formatProvider),
-				this.y.ToString(format, formatProvider)
-			});
+			return string.Format("({0}, {1})", this.m_X.ToString(format, formatProvider), this.m_Y.ToString(format, formatProvider));
 		}
 
 		public static Vector2Int zero

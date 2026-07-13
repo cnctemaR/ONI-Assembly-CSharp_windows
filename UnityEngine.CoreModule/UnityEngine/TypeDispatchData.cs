@@ -14,8 +14,8 @@ namespace UnityEngine
 
 		public Object[] changed;
 
-		public NativeArray<int> changedID;
+		public NativeArray<EntityId> changedID;
 
-		public NativeArray<int> destroyedID;
+		public NativeArray<EntityId> destroyedID;
 	}
 }

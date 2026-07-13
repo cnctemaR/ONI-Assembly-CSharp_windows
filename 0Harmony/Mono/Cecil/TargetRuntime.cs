@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum TargetRuntime
+	internal enum TargetRuntime
 	{
 		Net_1_0,
 		Net_1_1,

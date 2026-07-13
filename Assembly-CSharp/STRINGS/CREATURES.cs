@@ -3686,22 +3686,6 @@ namespace STRINGS
 				public static LocString LINE_ITEM = "\n            • {Resource}: {Amount}";
 			}
 
-			public class WRONGFERTILIZER
-			{
-				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This farm is storing materials that are not suitable for this plant\n\nEmpty this building's ",
-					UI.PRE_KEYWORD,
-					"Storage",
-					UI.PST_KEYWORD,
-					" to remove the unusable materials"
-				});
-
-				public static LocString LINE_ITEM = "            • {0}: {1}\n";
-			}
-
 			public class WRONGIRRIGATION
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
@@ -3709,22 +3693,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant\n\nEmpty this building's storage to remove the unusable materials";
 
 				public static LocString LINE_ITEM = "            • {0}: {1}\n";
-			}
-
-			public class WRONGFERTILIZERMAJOR
-			{
-				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
-
-				public static LocString TOOLTIP = string.Concat(new string[]
-				{
-					"This farm is storing materials that are not suitable for this plant\n\n",
-					UI.PRE_KEYWORD,
-					"Empty Storage",
-					UI.PST_KEYWORD,
-					" on this building to remove the unusable materials"
-				});
-
-				public static LocString LINE_ITEM = "        " + CREATURES.STATUSITEMS.WRONGFERTILIZER.LINE_ITEM;
 			}
 
 			public class WRONGIRRIGATIONMAJOR
@@ -4652,8 +4620,6 @@ namespace STRINGS
 			public class FERTILIZATION
 			{
 				public static LocString NAME = "Fertilization";
-
-				public static LocString CONSUME_MODIFIER = "Consuming";
 
 				public static LocString ABSORBING_MODIFIER = "Absorbing";
 			}

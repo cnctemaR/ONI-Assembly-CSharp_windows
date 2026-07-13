@@ -3,7 +3,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public abstract class PropertyReference : MemberReference
+	internal abstract class PropertyReference : MemberReference
 	{
 		public TypeReference PropertyType
 		{

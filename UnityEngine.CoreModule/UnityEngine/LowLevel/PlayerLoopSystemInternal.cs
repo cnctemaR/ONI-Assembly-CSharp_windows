@@ -5,9 +5,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.LowLevel
 {
-	[NativeType(Header = "Runtime/Misc/PlayerLoop.h")]
-	[RequiredByNativeCode]
 	[MovedFrom("UnityEngine.Experimental.LowLevel")]
+	[RequiredByNativeCode]
+	[NativeType(Header = "Runtime/Misc/PlayerLoop.h")]
 	internal struct PlayerLoopSystemInternal
 	{
 		public Type type;

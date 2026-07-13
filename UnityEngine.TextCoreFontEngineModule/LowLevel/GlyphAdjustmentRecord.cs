@@ -69,12 +69,12 @@ namespace UnityEngine.TextCore.LowLevel
 			return !(lhs == rhs);
 		}
 
-		[SerializeField]
 		[NativeName("glyphIndex")]
+		[SerializeField]
 		private uint m_GlyphIndex;
 
-		[SerializeField]
 		[NativeName("glyphValueRecord")]
+		[SerializeField]
 		private GlyphValueRecord m_GlyphValueRecord;
 	}
 }

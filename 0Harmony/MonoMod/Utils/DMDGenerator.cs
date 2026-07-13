@@ -1,43 +1,42 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace MonoMod.Utils
 {
-	public abstract class DMDGenerator<TSelf> : _IDMDGenerator where TSelf : DMDGenerator<TSelf>, new()
+	[NullableContext(1)]
+	[Nullable(0)]
+	internal abstract class DMDGenerator<[Nullable(0)] TSelf> : IDMDGenerator where TSelf : DMDGenerator<TSelf>, new()
 	{
-		protected abstract MethodInfo _Generate(DynamicMethodDefinition dmd, object context);
+		protected abstract MethodInfo GenerateCore(DynamicMethodDefinition dmd, [Nullable(2)] object context);
 
-		MethodInfo _IDMDGenerator.Generate(DynamicMethodDefinition dmd, object context)
+		MethodInfo IDMDGenerator.Generate(DynamicMethodDefinition dmd, [Nullable(2)] object context)
 		{
-			return DMDGenerator<TSelf>._Postbuild(this._Generate(dmd, context));
+			return DMDGenerator<TSelf>.Postbuild(this.GenerateCore(dmd, context));
 		}
 
-		public static MethodInfo Generate(DynamicMethodDefinition dmd, object context = null)
+		public static MethodInfo Generate(DynamicMethodDefinition dmd, [Nullable(2)] object context = null)
 		{
 			TSelf tself;
-			if ((tself = DMDGenerator<TSelf>._Instance) == null)
+			if ((tself = DMDGenerator<TSelf>.Instance) == null)
 			{
-				tself = (DMDGenerator<TSelf>._Instance = new TSelf());
+				tself = (DMDGenerator<TSelf>.Instance = new TSelf());
 			}
-			return DMDGenerator<TSelf>._Postbuild(tself._Generate(dmd, context));
+			return DMDGenerator<TSelf>.Postbuild(tself.GenerateCore(dmd, context));
 		}
 
-		internal static MethodInfo _Postbuild(MethodInfo mi)
+		internal static MethodInfo Postbuild(MethodInfo mi)
 		{
-			if (mi == null)
+			if (PlatformDetection.Runtime == RuntimeKind.Mono && !(mi is DynamicMethod) && mi.DeclaringType != null)
 			{
-				return null;
-			}
-			if (ReflectionHelper.IsMono && !(mi is DynamicMethod) && mi.DeclaringType != null)
-			{
-				Module module = ((mi != null) ? mi.Module : null);
+				Module module = mi.Module;
 				if (module == null)
 				{
 					return mi;
 				}
 				Assembly assembly = module.Assembly;
-				if (((assembly != null) ? assembly.GetType() : null) == null)
+				if (assembly.GetType() == null)
 				{
 					return mi;
 				}
@@ -46,6 +45,7 @@ namespace MonoMod.Utils
 			return mi;
 		}
 
-		private static TSelf _Instance;
+		[Nullable(2)]
+		private static TSelf Instance;
 	}
 }

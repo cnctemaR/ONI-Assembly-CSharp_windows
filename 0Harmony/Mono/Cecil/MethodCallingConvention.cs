@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum MethodCallingConvention : byte
+	internal enum MethodCallingConvention : byte
 	{
 		Default,
 		C,
@@ -10,6 +10,7 @@ namespace Mono.Cecil
 		ThisCall,
 		FastCall,
 		VarArg,
+		Unmanaged = 9,
 		Generic = 16
 	}
 }

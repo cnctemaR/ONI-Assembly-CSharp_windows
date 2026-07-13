@@ -15,12 +15,38 @@ namespace UnityEngine.Networking
 	{
 		[NativeMethod(IsThreadSafe = true)]
 		[NativeConditional("ENABLE_UNITYWEBREQUEST")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetWebErrorString(UnityWebRequest.UnityWebRequestError err);
+		private static string GetWebErrorString(UnityWebRequest.UnityWebRequestError err)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				UnityWebRequest.GetWebErrorString_Injected(err, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[VisibleToOtherModules]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetHTTPStatusString(long responseCode);
+		internal static string GetHTTPStatusString(long responseCode)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				UnityWebRequest.GetHTTPStatusString_Injected(responseCode, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public bool disposeCertificateHandlerOnDispose { get; set; }
 
@@ -53,16 +79,51 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ClearCookieCache(string domain, string path);
+		private unsafe static void ClearCookieCache(string domain, string path)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(domain, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = domain.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = path.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				UnityWebRequest.ClearCookieCache_Injected(ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern IntPtr Create();
 
 		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Release();
+		private void Release()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			UnityWebRequest.Release_Injected(intPtr);
+		}
 
 		internal void InternalDestroy()
 		{
@@ -186,8 +247,16 @@ namespace UnityEngine.Networking
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern UnityWebRequestAsyncOperation BeginWebRequest();
+		internal UnityWebRequestAsyncOperation BeginWebRequest()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = UnityWebRequest.BeginWebRequest_Injected(intPtr);
+			return (intPtr2 == 0) ? null : UnityWebRequestAsyncOperation.BindingsMarshaller.ConvertToManaged(intPtr2);
+		}
 
 		[Obsolete("Use SendWebRequest.  It returns a UnityWebRequestAsyncOperation which contains a reference to the WebRequest object.", false)]
 		public AsyncOperation Send()
@@ -207,11 +276,25 @@ namespace UnityEngine.Networking
 		}
 
 		[NativeMethod(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Abort();
+		public void Abort()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			UnityWebRequest.Abort_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetMethod(UnityWebRequest.UnityWebRequestMethod methodType);
+		private UnityWebRequest.UnityWebRequestError SetMethod(UnityWebRequest.UnityWebRequestMethod methodType)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.SetMethod_Injected(intPtr, methodType);
+		}
 
 		internal void InternalSetMethod(UnityWebRequest.UnityWebRequestMethod methodType)
 		{
@@ -228,8 +311,33 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetCustomMethod(string customMethodName);
+		private unsafe UnityWebRequest.UnityWebRequestError SetCustomMethod(string customMethodName)
+		{
+			UnityWebRequest.UnityWebRequestError unityWebRequestError;
+			try
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(customMethodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = customMethodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				unityWebRequestError = UnityWebRequest.SetCustomMethod_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return unityWebRequestError;
+		}
 
 		internal void InternalSetCustomMethod(string customMethodName)
 		{
@@ -246,11 +354,36 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern UnityWebRequest.UnityWebRequestMethod GetMethod();
+		internal UnityWebRequest.UnityWebRequestMethod GetMethod()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetMethod_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern string GetCustomMethod();
+		internal string GetCustomMethod()
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				UnityWebRequest.GetCustomMethod_Injected(intPtr, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public string method
 		{
@@ -318,8 +451,15 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError GetError();
+		private UnityWebRequest.UnityWebRequestError GetError()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetError_Injected(intPtr);
+		}
 
 		public string error
 		{
@@ -347,12 +487,26 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		private extern bool use100Continue
+		private bool use100Continue
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return UnityWebRequest.get_use100Continue_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				UnityWebRequest.set_use100Continue_Injected(intPtr, value);
+			}
 		}
 
 		public bool useHttpContinue
@@ -403,11 +557,54 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern string GetUrl();
+		private string GetUrl()
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				UnityWebRequest.GetUrl_Injected(intPtr, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetUrl(string url);
+		private unsafe UnityWebRequest.UnityWebRequestError SetUrl(string url)
+		{
+			UnityWebRequest.UnityWebRequestError unityWebRequestError;
+			try
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(url, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = url.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				unityWebRequestError = UnityWebRequest.SetUrl_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return unityWebRequestError;
+		}
 
 		private void InternalSetUrl(string url)
 		{
@@ -424,17 +621,38 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		public extern long responseCode
+		public long responseCode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return UnityWebRequest.get_responseCode_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float GetUploadProgress();
+		private float GetUploadProgress()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetUploadProgress_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsExecuting();
+		private bool IsExecuting()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.IsExecuting_Injected(intPtr);
+		}
 
 		public float uploadProgress
 		{
@@ -454,11 +672,18 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		public extern bool isModifiable
+		public bool isModifiable
 		{
 			[NativeMethod("IsModifiable")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return UnityWebRequest.get_isModifiable_Injected(intPtr);
+			}
 		}
 
 		public bool isDone
@@ -487,15 +712,29 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		public extern UnityWebRequest.Result result
+		public UnityWebRequest.Result result
 		{
 			[NativeMethod("GetResult")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return UnityWebRequest.get_result_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float GetDownloadProgress();
+		private float GetDownloadProgress()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetDownloadProgress_Injected(intPtr);
+		}
 
 		public float downloadProgress
 		{
@@ -515,24 +754,52 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		public extern ulong uploadedBytes
+		public ulong uploadedBytes
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return UnityWebRequest.get_uploadedBytes_Injected(intPtr);
+			}
 		}
 
-		public extern ulong downloadedBytes
+		public ulong downloadedBytes
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return UnityWebRequest.get_downloadedBytes_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetRedirectLimit();
+		private int GetRedirectLimit()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetRedirectLimit_Injected(intPtr);
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRedirectLimitFromScripting(int limit);
+		private void SetRedirectLimitFromScripting(int limit)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			UnityWebRequest.SetRedirectLimitFromScripting_Injected(intPtr, limit);
+		}
 
 		public int redirectLimit
 		{
@@ -546,11 +813,25 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetChunked();
+		private bool GetChunked()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetChunked_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetChunked(bool chunked);
+		private UnityWebRequest.UnityWebRequestError SetChunked(bool chunked)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.SetChunked_Injected(intPtr, chunked);
+		}
 
 		[Obsolete("HTTP/2 and many HTTP/1.1 servers don't support this; we recommend leaving it set to false (default).", false)]
 		public bool chunkedTransfer
@@ -575,12 +856,75 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string GetRequestHeader(string name);
+		public unsafe string GetRequestHeader(string name)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				UnityWebRequest.GetRequestHeader_Injected(intPtr, ref managedSpanWrapper, out managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				ManagedSpanWrapper managedSpanWrapper2;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper2);
+			}
+			return stringAndDispose;
+		}
 
 		[NativeMethod("SetRequestHeader")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern UnityWebRequest.UnityWebRequestError InternalSetRequestHeader(string name, string value);
+		internal unsafe UnityWebRequest.UnityWebRequestError InternalSetRequestHeader(string name, string value)
+		{
+			UnityWebRequest.UnityWebRequestError unityWebRequestError;
+			try
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = value.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				unityWebRequestError = UnityWebRequest.InternalSetRequestHeader_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return unityWebRequestError;
+		}
 
 		public void SetRequestHeader(string name, string value)
 		{
@@ -607,11 +951,46 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string GetResponseHeader(string name);
+		public unsafe string GetResponseHeader(string name)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				UnityWebRequest.GetResponseHeader_Injected(intPtr, ref managedSpanWrapper, out managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				ManagedSpanWrapper managedSpanWrapper2;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper2);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern string[] GetResponseHeaderKeys();
+		internal string[] GetResponseHeaderKeys()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetResponseHeaderKeys_Injected(intPtr);
+		}
 
 		public Dictionary<string, string> GetResponseHeaders()
 		{
@@ -635,8 +1014,15 @@ namespace UnityEngine.Networking
 			return dictionary;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetUploadHandler(UploadHandler uh);
+		private UnityWebRequest.UnityWebRequestError SetUploadHandler(UploadHandler uh)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.SetUploadHandler_Injected(intPtr, (uh == null) ? ((IntPtr)0) : UploadHandler.BindingsMarshaller.ConvertToNative(uh));
+		}
 
 		public UploadHandler uploadHandler
 		{
@@ -661,8 +1047,15 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetDownloadHandler(DownloadHandler dh);
+		private UnityWebRequest.UnityWebRequestError SetDownloadHandler(DownloadHandler dh)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.SetDownloadHandler_Injected(intPtr, (dh == null) ? ((IntPtr)0) : DownloadHandler.BindingsMarshaller.ConvertToNative(dh));
+		}
 
 		public DownloadHandler downloadHandler
 		{
@@ -687,8 +1080,15 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetCertificateHandler(CertificateHandler ch);
+		private UnityWebRequest.UnityWebRequestError SetCertificateHandler(CertificateHandler ch)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.SetCertificateHandler_Injected(intPtr, (ch == null) ? ((IntPtr)0) : CertificateHandler.BindingsMarshaller.ConvertToNative(ch));
+		}
 
 		public CertificateHandler certificateHandler
 		{
@@ -713,11 +1113,25 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetTimeoutMsec();
+		private int GetTimeoutMsec()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetTimeoutMsec_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetTimeoutMsec(int timeout);
+		private UnityWebRequest.UnityWebRequestError SetTimeoutMsec(int timeout)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.SetTimeoutMsec_Injected(intPtr, timeout);
+		}
 
 		public int timeout
 		{
@@ -742,11 +1156,25 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetSuppressErrorsToConsole();
+		private bool GetSuppressErrorsToConsole()
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.GetSuppressErrorsToConsole_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern UnityWebRequest.UnityWebRequestError SetSuppressErrorsToConsole(bool suppress);
+		private UnityWebRequest.UnityWebRequestError SetSuppressErrorsToConsole(bool suppress)
+		{
+			IntPtr intPtr = UnityWebRequest.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return UnityWebRequest.SetSuppressErrorsToConsole_Injected(intPtr, suppress);
+		}
 
 		internal bool suppressErrorsToConsole
 		{
@@ -814,15 +1242,15 @@ namespace UnityEngine.Networking
 			throw new NotSupportedException("UnityWebRequest.GetTexture is obsolete. Use UnityWebRequestTexture.GetTexture instead.");
 		}
 
-		[Obsolete("UnityWebRequest.GetAudioClip is obsolete. Use UnityWebRequestMultimedia.GetAudioClip instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestMultimedia.GetAudioClip(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("UnityWebRequest.GetAudioClip is obsolete. Use UnityWebRequestMultimedia.GetAudioClip instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestMultimedia.GetAudioClip(*)", true)]
 		public static UnityWebRequest GetAudioClip(string uri, AudioType audioType)
 		{
 			return null;
 		}
 
-		[Obsolete("UnityWebRequest.GetAssetBundle is obsolete. Use UnityWebRequestAssetBundle.GetAssetBundle instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestAssetBundle.GetAssetBundle(*)", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("UnityWebRequest.GetAssetBundle is obsolete. Use UnityWebRequestAssetBundle.GetAssetBundle instead (UnityUpgradable) -> [UnityEngine] UnityWebRequestAssetBundle.GetAssetBundle(*)", true)]
 		public static UnityWebRequest GetAssetBundle(string uri)
 		{
 			return null;
@@ -876,8 +1304,8 @@ namespace UnityEngine.Networking
 			return new UnityWebRequest(uri, "PUT", new DownloadHandlerBuffer(), new UploadHandlerRaw(Encoding.UTF8.GetBytes(bodyData)));
 		}
 
-		[Obsolete("UnityWebRequest.Post with only a string data is obsolete. Use UnityWebRequest.Post with content type argument or UnityWebRequest.PostWwwForm instead (UnityUpgradable) -> [UnityEngine] UnityWebRequest.PostWwwForm(*)", false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("UnityWebRequest.Post with only a string data is obsolete. Use UnityWebRequest.Post with content type argument or UnityWebRequest.PostWwwForm instead (UnityUpgradable) -> [UnityEngine] UnityWebRequest.PostWwwForm(*)", false)]
 		public static UnityWebRequest Post(string uri, string postData)
 		{
 			return UnityWebRequest.PostWwwForm(uri, postData);
@@ -1227,6 +1655,120 @@ namespace UnityEngine.Networking
 			return Encoding.UTF8.GetBytes(text);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetWebErrorString_Injected(UnityWebRequest.UnityWebRequestError err, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetHTTPStatusString_Injected(long responseCode, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearCookieCache_Injected(ref ManagedSpanWrapper domain, ref ManagedSpanWrapper path);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Release_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr BeginWebRequest_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Abort_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetMethod_Injected(IntPtr _unity_self, UnityWebRequest.UnityWebRequestMethod methodType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetCustomMethod_Injected(IntPtr _unity_self, ref ManagedSpanWrapper customMethodName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestMethod GetMethod_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCustomMethod_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError GetError_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_use100Continue_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_use100Continue_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetUrl_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetUrl_Injected(IntPtr _unity_self, ref ManagedSpanWrapper url);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long get_responseCode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetUploadProgress_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsExecuting_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isModifiable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.Result get_result_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetDownloadProgress_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong get_uploadedBytes_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong get_downloadedBytes_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetRedirectLimit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRedirectLimitFromScripting_Injected(IntPtr _unity_self, int limit);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetChunked_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetChunked_Injected(IntPtr _unity_self, bool chunked);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetRequestHeader_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError InternalSetRequestHeader_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetResponseHeader_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetResponseHeaderKeys_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetUploadHandler_Injected(IntPtr _unity_self, IntPtr uh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetDownloadHandler_Injected(IntPtr _unity_self, IntPtr dh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetCertificateHandler_Injected(IntPtr _unity_self, IntPtr ch);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetTimeoutMsec_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetTimeoutMsec_Injected(IntPtr _unity_self, int timeout);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetSuppressErrorsToConsole_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern UnityWebRequest.UnityWebRequestError SetSuppressErrorsToConsole_Injected(IntPtr _unity_self, bool suppress);
+
 		[NonSerialized]
 		internal IntPtr m_Ptr;
 
@@ -1315,6 +1857,14 @@ namespace UnityEngine.Networking
 			ConnectionError,
 			ProtocolError,
 			DataProcessingError
+		}
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(UnityWebRequest unityWebRequest)
+			{
+				return unityWebRequest.m_Ptr;
+			}
 		}
 	}
 }

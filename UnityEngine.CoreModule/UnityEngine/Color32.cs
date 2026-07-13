@@ -9,7 +9,7 @@ namespace UnityEngine
 {
 	[UsedByNativeCode]
 	[StructLayout(LayoutKind.Explicit)]
-	public struct Color32 : IFormattable
+	public struct Color32 : IEquatable<Color32>, IFormattable
 	{
 		public Color32(byte r, byte g, byte b, byte a)
 		{
@@ -22,28 +22,75 @@ namespace UnityEngine
 
 		public static implicit operator Color32(Color c)
 		{
-			return new Color32((byte)Mathf.Round(Mathf.Clamp01(c.r) * 255f), (byte)Mathf.Round(Mathf.Clamp01(c.g) * 255f), (byte)Mathf.Round(Mathf.Clamp01(c.b) * 255f), (byte)Mathf.Round(Mathf.Clamp01(c.a) * 255f));
+			return new Color32
+			{
+				r = (byte)Mathf.Round(Mathf.Clamp01(c.r) * 255f),
+				g = (byte)Mathf.Round(Mathf.Clamp01(c.g) * 255f),
+				b = (byte)Mathf.Round(Mathf.Clamp01(c.b) * 255f),
+				a = (byte)Mathf.Round(Mathf.Clamp01(c.a) * 255f)
+			};
 		}
 
 		public static implicit operator Color(Color32 c)
 		{
-			return new Color((float)c.r / 255f, (float)c.g / 255f, (float)c.b / 255f, (float)c.a / 255f);
+			return new Color
+			{
+				r = (float)c.r / 255f,
+				g = (float)c.g / 255f,
+				b = (float)c.b / 255f,
+				a = (float)c.a / 255f
+			};
 		}
 
 		public static Color32 Lerp(Color32 a, Color32 b, float t)
 		{
 			t = Mathf.Clamp01(t);
-			return new Color32((byte)((float)a.r + (float)(b.r - a.r) * t), (byte)((float)a.g + (float)(b.g - a.g) * t), (byte)((float)a.b + (float)(b.b - a.b) * t), (byte)((float)a.a + (float)(b.a - a.a) * t));
+			return new Color32
+			{
+				r = (byte)((float)a.r + (float)(b.r - a.r) * t),
+				g = (byte)((float)a.g + (float)(b.g - a.g) * t),
+				b = (byte)((float)a.b + (float)(b.b - a.b) * t),
+				a = (byte)((float)a.a + (float)(b.a - a.a) * t)
+			};
+		}
+
+		public static Color32 Lerp(in Color32 a, in Color32 b, float t)
+		{
+			t = Mathf.Clamp01(t);
+			return new Color32
+			{
+				r = (byte)((float)a.r + (float)(b.r - a.r) * t),
+				g = (byte)((float)a.g + (float)(b.g - a.g) * t),
+				b = (byte)((float)a.b + (float)(b.b - a.b) * t),
+				a = (byte)((float)a.a + (float)(b.a - a.a) * t)
+			};
 		}
 
 		public static Color32 LerpUnclamped(Color32 a, Color32 b, float t)
 		{
-			return new Color32((byte)((float)a.r + (float)(b.r - a.r) * t), (byte)((float)a.g + (float)(b.g - a.g) * t), (byte)((float)a.b + (float)(b.b - a.b) * t), (byte)((float)a.a + (float)(b.a - a.a) * t));
+			return new Color32
+			{
+				r = (byte)((float)a.r + (float)(b.r - a.r) * t),
+				g = (byte)((float)a.g + (float)(b.g - a.g) * t),
+				b = (byte)((float)a.b + (float)(b.b - a.b) * t),
+				a = (byte)((float)a.a + (float)(b.a - a.a) * t)
+			};
+		}
+
+		public static Color32 LerpUnclamped(in Color32 a, in Color32 b, float t)
+		{
+			return new Color32
+			{
+				r = (byte)((float)a.r + (float)(b.r - a.r) * t),
+				g = (byte)((float)a.g + (float)(b.g - a.g) * t),
+				b = (byte)((float)a.b + (float)(b.b - a.b) * t),
+				a = (byte)((float)a.a + (float)(b.a - a.a) * t)
+			};
 		}
 
 		public byte this[int index]
 		{
-			get
+			readonly get
 			{
 				byte b;
 				switch (index)
@@ -87,33 +134,59 @@ namespace UnityEngine
 			}
 		}
 
-		[VisibleToOtherModules]
-		internal bool InternalEquals(Color32 other)
+		public override readonly int GetHashCode()
+		{
+			return this.rgba.GetHashCode();
+		}
+
+		public override readonly bool Equals(object other)
+		{
+			Color32 color;
+			bool flag;
+			if (other is Color32)
+			{
+				color = (Color32)other;
+				flag = true;
+			}
+			else
+			{
+				flag = false;
+			}
+			bool flag2 = flag;
+			return flag2 && this.Equals(in color);
+		}
+
+		public readonly bool Equals(Color32 other)
+		{
+			return this.rgba == other.rgba;
+		}
+
+		public readonly bool Equals(in Color32 other)
 		{
 			return this.rgba == other.rgba;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override string ToString()
+		public override readonly string ToString()
 		{
 			return this.ToString(null, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format)
+		public readonly string ToString(string format)
 		{
 			return this.ToString(format, null);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public string ToString(string format, IFormatProvider formatProvider)
+		public readonly string ToString(string format, IFormatProvider formatProvider)
 		{
 			bool flag = formatProvider == null;
 			if (flag)
 			{
 				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
-			return UnityString.Format("RGBA({0}, {1}, {2}, {3})", new object[]
+			return string.Format("RGBA({0}, {1}, {2}, {3})", new object[]
 			{
 				this.r.ToString(format, formatProvider),
 				this.g.ToString(format, formatProvider),

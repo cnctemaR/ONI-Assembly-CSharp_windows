@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
+	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
 	[NativeHeader("Runtime/Export/Director/MaterialEffectPlayable.bindings.h")]
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
 	public struct MaterialEffectPlayable : IPlayable, IEquatable<MaterialEffectPlayable>
 	{
 		public static MaterialEffectPlayable Create(PlayableGraph graph, Material material, int pass = -1)
@@ -90,12 +90,16 @@ namespace UnityEngine.Experimental.Playables
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Material GetMaterialInternal(ref PlayableHandle hdl);
+		private static Material GetMaterialInternal(ref PlayableHandle hdl)
+		{
+			return Unmarshal.UnmarshalUnityObject<Material>(MaterialEffectPlayable.GetMaterialInternal_Injected(ref hdl));
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetMaterialInternal(ref PlayableHandle hdl, Material material);
+		private static void SetMaterialInternal(ref PlayableHandle hdl, Material material)
+		{
+			MaterialEffectPlayable.SetMaterialInternal_Injected(ref hdl, Object.MarshalledUnityObject.Marshal<Material>(material));
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -106,12 +110,23 @@ namespace UnityEngine.Experimental.Playables
 		private static extern void SetPassInternal(ref PlayableHandle hdl, int pass);
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool InternalCreateMaterialEffectPlayable(ref PlayableGraph graph, Material material, int pass, ref PlayableHandle handle);
+		private static bool InternalCreateMaterialEffectPlayable(ref PlayableGraph graph, Material material, int pass, ref PlayableHandle handle)
+		{
+			return MaterialEffectPlayable.InternalCreateMaterialEffectPlayable_Injected(ref graph, Object.MarshalledUnityObject.Marshal<Material>(material), pass, ref handle);
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ValidateType(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetMaterialInternal_Injected(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMaterialInternal_Injected(ref PlayableHandle hdl, IntPtr material);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool InternalCreateMaterialEffectPlayable_Injected(ref PlayableGraph graph, IntPtr material, int pass, ref PlayableHandle handle);
 
 		private PlayableHandle m_Handle;
 	}

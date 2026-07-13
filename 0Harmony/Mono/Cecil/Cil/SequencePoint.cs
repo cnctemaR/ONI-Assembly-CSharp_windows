@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class SequencePoint
+	internal sealed class SequencePoint
 	{
 		public int Offset
 		{

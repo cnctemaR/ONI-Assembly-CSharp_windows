@@ -456,7 +456,6 @@ namespace Mono.Cecil
 					memberDefinitionCollection.Add(typeDefinition);
 				}
 			}
-			this.metadata.RemoveNestedTypeMapping(type);
 			return memberDefinitionCollection;
 		}
 
@@ -529,7 +528,6 @@ namespace Mono.Cecil
 			{
 				return null;
 			}
-			this.metadata.RemoveReverseNestedTypeMapping(type);
 			return this.GetTypeDefinition(num);
 		}
 
@@ -802,7 +800,6 @@ namespace Mono.Cecil
 			{
 				interfaceImplementationCollection.Add(new InterfaceImplementation(this.GetTypeDefOrRef(collection[i].Col2), new MetadataToken(TokenType.InterfaceImpl, collection[i].Col1)));
 			}
-			this.metadata.RemoveInterfaceMapping(type);
 			return interfaceImplementationCollection;
 		}
 
@@ -1015,7 +1012,6 @@ namespace Mono.Cecil
 				return new MemberDefinitionCollection<EventDefinition>(type);
 			}
 			MemberDefinitionCollection<EventDefinition> memberDefinitionCollection = new MemberDefinitionCollection<EventDefinition>(type, (int)range.Length);
-			this.metadata.RemoveEventsRange(type);
 			if (range.Length == 0U)
 			{
 				return memberDefinitionCollection;
@@ -1086,7 +1082,6 @@ namespace Mono.Cecil
 			{
 				return new MemberDefinitionCollection<PropertyDefinition>(type);
 			}
-			this.metadata.RemovePropertiesRange(type);
 			MemberDefinitionCollection<PropertyDefinition> memberDefinitionCollection = new MemberDefinitionCollection<PropertyDefinition>(type, (int)range.Length);
 			if (range.Length == 0U)
 			{
@@ -1480,7 +1475,6 @@ namespace Mono.Cecil
 			{
 				return new GenericParameterCollection(provider);
 			}
-			this.metadata.RemoveGenericParameterRange(provider);
 			GenericParameterCollection genericParameterCollection = new GenericParameterCollection(provider, MetadataReader.RangesSize(array));
 			for (int i = 0; i < array.Length; i++)
 			{
@@ -1594,7 +1588,6 @@ namespace Mono.Cecil
 			{
 				genericParameterConstraintCollection.Add(new GenericParameterConstraint(this.GetTypeDefOrRef(collection[i].Col2), new MetadataToken(TokenType.GenericParamConstraint, collection[i].Col1)));
 			}
-			this.metadata.RemoveGenericConstraintMapping(generic_parameter);
 			return genericParameterConstraintCollection;
 		}
 
@@ -1640,7 +1633,6 @@ namespace Mono.Cecil
 			{
 				collection2.Add((MethodReference)this.LookupToken(collection[i]));
 			}
-			this.metadata.RemoveOverrideMapping(method);
 			return collection2;
 		}
 
@@ -2094,12 +2086,11 @@ namespace Mono.Cecil
 			{
 				this.ReadCustomAttributeRange(array[i], collection);
 			}
-			this.metadata.RemoveCustomAttributeRange(owner);
 			if (this.module.IsWindowsMetadata())
 			{
 				foreach (CustomAttribute customAttribute in collection)
 				{
-					WindowsRuntimeProjections.Project(owner, customAttribute);
+					WindowsRuntimeProjections.Project(owner, collection, customAttribute);
 				}
 			}
 			return collection;
@@ -2247,7 +2238,6 @@ namespace Mono.Cecil
 			{
 				this.ReadSecurityDeclarationRange(array[i], collection);
 			}
-			this.metadata.RemoveSecurityDeclarationRange(owner);
 			return collection;
 		}
 
@@ -2589,7 +2579,11 @@ namespace Mono.Cecil
 			object obj;
 			if (typeReference.etype == ElementType.String)
 			{
-				if (signatureReader.CanReadMore() && signatureReader.buffer[signatureReader.position] != 255)
+				if (!signatureReader.CanReadMore())
+				{
+					obj = "";
+				}
+				else if (signatureReader.buffer[signatureReader.position] != 255)
 				{
 					byte[] array = signatureReader.ReadBytes((int)((ulong)signatureReader.sig_length - (ulong)((long)signatureReader.position - (long)((ulong)signatureReader.start))));
 					obj = Encoding.Unicode.GetString(array, 0, array.Length);
@@ -2775,6 +2769,13 @@ namespace Mono.Cecil
 				this.metadata.CustomDebugInformations[metadataToken] = array.Add(row);
 				num2 += 1U;
 			}
+		}
+
+		public bool HasCustomDebugInformation(ICustomDebugInformationProvider provider)
+		{
+			this.InitializeCustomDebugInformations();
+			Row<Guid, uint, uint>[] array;
+			return this.metadata.CustomDebugInformations.TryGetValue(provider.MetadataToken, out array) && array.Length != 0;
 		}
 
 		public Collection<CustomDebugInformation> GetCustomDebugInformation(ICustomDebugInformationProvider provider)

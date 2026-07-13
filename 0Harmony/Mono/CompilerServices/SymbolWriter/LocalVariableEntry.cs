@@ -2,7 +2,7 @@
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public struct LocalVariableEntry
+	internal struct LocalVariableEntry
 	{
 		public LocalVariableEntry(int index, string name, int block)
 		{

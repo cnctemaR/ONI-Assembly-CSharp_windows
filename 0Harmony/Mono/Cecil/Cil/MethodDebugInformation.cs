@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class MethodDebugInformation : DebugInformation
+	internal sealed class MethodDebugInformation : DebugInformation
 	{
 		public MethodDefinition Method
 		{

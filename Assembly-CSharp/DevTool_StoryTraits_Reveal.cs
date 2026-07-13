@@ -69,7 +69,7 @@ public class DevTool_StoryTraits_Reveal : DevTool
 
 	private IReadOnlyList<WorldGenSpawner.Spawnable> GetAllSpawnables()
 	{
-		WorldGenSpawner worldGenSpawner = global::UnityEngine.Object.FindObjectOfType<WorldGenSpawner>(true);
+		WorldGenSpawner worldGenSpawner = global::UnityEngine.Object.FindFirstObjectByType<WorldGenSpawner>(FindObjectsInactive.Include);
 		if (worldGenSpawner == null)
 		{
 			return null;

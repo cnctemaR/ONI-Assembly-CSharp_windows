@@ -13,7 +13,7 @@ public class InSpaceMonitor : GameStateMachine<InSpaceMonitor, InSpaceMonitor.In
 				smi.GoTo(this.inSpace);
 			}
 		});
-		this.idle.EventTransition(GameHashes.MinionMigration, (InSpaceMonitor.Instance smi) => Game.Instance, this.inSpace, (InSpaceMonitor.Instance smi) => smi.IsInSpace()).Enter(delegate(InSpaceMonitor.Instance smi)
+		this.idle.Transition(this.inSpace, (InSpaceMonitor.Instance smi) => smi.IsInSpace(), UpdateRate.SIM_1000ms).Enter(delegate(InSpaceMonitor.Instance smi)
 		{
 			Effects component = smi.master.gameObject.GetComponent<Effects>();
 			if (component != null && component.HasEffect("SpaceBuzz"))
@@ -21,7 +21,7 @@ public class InSpaceMonitor : GameStateMachine<InSpaceMonitor, InSpaceMonitor.In
 				component.Remove("SpaceBuzz");
 			}
 		});
-		this.inSpace.EventTransition(GameHashes.MinionMigration, (InSpaceMonitor.Instance smi) => Game.Instance, this.idle, (InSpaceMonitor.Instance smi) => !smi.IsInSpace()).ToggleEffect("SpaceBuzz");
+		this.inSpace.Transition(this.idle, (InSpaceMonitor.Instance smi) => !smi.IsInSpace(), UpdateRate.SIM_1000ms).ToggleEffect("SpaceBuzz");
 	}
 
 	private const string SPACE_EFFECT_NAME = "SpaceBuzz";

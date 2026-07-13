@@ -118,15 +118,65 @@ namespace UnityEngine
 
 		[FreeFunction(Name = "CrashReport_Bindings::GetReports", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		private static extern string[] GetReports();
 
 		[FreeFunction(Name = "CrashReport_Bindings::GetReportData", IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetReportData(string id, out double secondsSinceUnixEpoch);
+		private unsafe static string GetReportData(string id, out double secondsSinceUnixEpoch)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(id, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = id.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				CrashReport.GetReportData_Injected(ref managedSpanWrapper, out secondsSinceUnixEpoch, out managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				ManagedSpanWrapper managedSpanWrapper2;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper2);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction(Name = "CrashReport_Bindings::RemoveReport", IsThreadSafe = true)]
+		private unsafe static bool RemoveReport(string id)
+		{
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(id, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = id.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = CrashReport.RemoveReport_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool RemoveReport(string id);
+		private static extern void GetReportData_Injected(ref ManagedSpanWrapper id, out double secondsSinceUnixEpoch, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool RemoveReport_Injected(ref ManagedSpanWrapper id);
 
 		private static List<CrashReport> internalReports;
 

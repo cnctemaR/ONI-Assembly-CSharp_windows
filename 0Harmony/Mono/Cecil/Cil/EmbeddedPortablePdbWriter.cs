@@ -18,9 +18,19 @@ namespace Mono.Cecil.Cil
 			return new EmbeddedPortablePdbReaderProvider();
 		}
 
+		public void Write(MethodDebugInformation info)
+		{
+			this.writer.Write(info);
+		}
+
+		public void Write(ICustomDebugInformationProvider provider)
+		{
+			this.writer.Write(provider);
+		}
+
 		public ImageDebugHeader GetDebugHeader()
 		{
-			this.writer.Dispose();
+			ImageDebugHeader debugHeader = this.writer.GetDebugHeader();
 			ImageDebugDirectory imageDebugDirectory = new ImageDebugDirectory
 			{
 				Type = ImageDebugType.EmbeddedPortablePdb,
@@ -40,20 +50,23 @@ namespace Mono.Cecil.Cil
 				this.stream.CopyTo(deflateStream);
 			}
 			imageDebugDirectory.SizeOfData = (int)memoryStream.Length;
-			return new ImageDebugHeader(new ImageDebugHeaderEntry[]
+			ImageDebugHeaderEntry[] array = new ImageDebugHeaderEntry[debugHeader.Entries.Length + 1];
+			for (int i = 0; i < debugHeader.Entries.Length; i++)
 			{
-				this.writer.GetDebugHeader().Entries[0],
-				new ImageDebugHeaderEntry(imageDebugDirectory, memoryStream.ToArray())
-			});
+				array[i] = debugHeader.Entries[i];
+			}
+			array[array.Length - 1] = new ImageDebugHeaderEntry(imageDebugDirectory, memoryStream.ToArray());
+			return new ImageDebugHeader(array);
 		}
 
-		public void Write(MethodDebugInformation info)
+		public void Write()
 		{
-			this.writer.Write(info);
+			this.writer.Write();
 		}
 
 		public void Dispose()
 		{
+			this.writer.Dispose();
 		}
 
 		private readonly Stream stream;

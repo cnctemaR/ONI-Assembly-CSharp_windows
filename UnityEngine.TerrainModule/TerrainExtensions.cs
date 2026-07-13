@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -30,12 +31,12 @@ namespace UnityEngine
 
 		[FreeFunction]
 		[NativeConditional("INCLUDE_DYNAMIC_GI && ENABLE_RUNTIME_GI")]
-		internal static void UpdateGIMaterialsForTerrain(int terrainInstanceID, Rect uvBounds)
+		internal static void UpdateGIMaterialsForTerrain(EntityId terrainInstanceID, Rect uvBounds)
 		{
-			TerrainExtensions.UpdateGIMaterialsForTerrain_Injected(terrainInstanceID, ref uvBounds);
+			TerrainExtensions.UpdateGIMaterialsForTerrain_Injected(ref terrainInstanceID, ref uvBounds);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void UpdateGIMaterialsForTerrain_Injected(int terrainInstanceID, ref Rect uvBounds);
+		private static extern void UpdateGIMaterialsForTerrain_Injected([In] ref EntityId terrainInstanceID, [In] ref Rect uvBounds);
 	}
 }

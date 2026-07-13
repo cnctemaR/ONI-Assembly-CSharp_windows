@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
-	[UsedByNativeCode]
 	[Flags]
+	[UsedByNativeCode]
 	public enum GlyphLoadFlags
 	{
 		LOAD_DEFAULT = 0,

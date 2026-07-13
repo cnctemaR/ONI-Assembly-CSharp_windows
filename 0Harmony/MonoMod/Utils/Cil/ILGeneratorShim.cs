@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using Mono.Cecil;
@@ -9,7 +10,9 @@ using Mono.Cecil.Cil;
 
 namespace MonoMod.Utils.Cil
 {
-	public abstract class ILGeneratorShim
+	[NullableContext(1)]
+	[Nullable(0)]
+	internal abstract class ILGeneratorShim
 	{
 		public abstract int ILOffset { get; }
 
@@ -65,11 +68,13 @@ namespace MonoMod.Utils.Cil
 
 		public abstract void Emit(global::System.Reflection.Emit.OpCode opcode, Type cls);
 
-		public abstract void EmitCall(global::System.Reflection.Emit.OpCode opcode, MethodInfo methodInfo, Type[] optionalParameterTypes);
+		public abstract void EmitCall(global::System.Reflection.Emit.OpCode opcode, MethodInfo methodInfo, [Nullable(new byte[] { 2, 1 })] Type[] optionalParameterTypes);
 
-		public abstract void EmitCalli(global::System.Reflection.Emit.OpCode opcode, CallingConventions callingConvention, Type returnType, Type[] parameterTypes, Type[] optionalParameterTypes);
+		[NullableContext(2)]
+		public abstract void EmitCalli(global::System.Reflection.Emit.OpCode opcode, CallingConventions callingConvention, Type returnType, [Nullable(new byte[] { 2, 1 })] Type[] parameterTypes, [Nullable(new byte[] { 2, 1 })] Type[] optionalParameterTypes);
 
-		public abstract void EmitCalli(global::System.Reflection.Emit.OpCode opcode, CallingConvention unmanagedCallConv, Type returnType, Type[] parameterTypes);
+		[NullableContext(2)]
+		public abstract void EmitCalli(global::System.Reflection.Emit.OpCode opcode, CallingConvention unmanagedCallConv, Type returnType, [Nullable(new byte[] { 2, 1 })] Type[] parameterTypes);
 
 		public abstract void EmitWriteLine(LocalBuilder localBuilder);
 
@@ -92,17 +97,17 @@ namespace MonoMod.Utils.Cil
 			return (ILGenerator)ILGeneratorShim.ILGeneratorBuilder.GenerateProxy().MakeGenericType(new Type[] { base.GetType() }).GetConstructors()[0].Invoke(new object[] { this });
 		}
 
-		public static Type GetProxyType<TShim>() where TShim : ILGeneratorShim
+		public static Type GetProxyType<[Nullable(0)] TShim>() where TShim : ILGeneratorShim
 		{
 			return ILGeneratorShim.GetProxyType(typeof(TShim));
 		}
 
 		public static Type GetProxyType(Type tShim)
 		{
-			return ILGeneratorShim.ProxyType.MakeGenericType(new Type[] { tShim });
+			return ILGeneratorShim.GenericProxyType.MakeGenericType(new Type[] { tShim });
 		}
 
-		public static Type ProxyType
+		public static Type GenericProxyType
 		{
 			get
 			{
@@ -110,6 +115,7 @@ namespace MonoMod.Utils.Cil
 			}
 		}
 
+		[Nullable(0)]
 		internal static class ILGeneratorBuilder
 		{
 			public static Type GenerateProxy()
@@ -123,7 +129,8 @@ namespace MonoMod.Utils.Cil
 				Assembly assembly;
 				using (ModuleDefinition moduleDefinition = ModuleDefinition.CreateModule("MonoMod.Utils.Cil.ILGeneratorProxy", new ModuleParameters
 				{
-					Kind = ModuleKind.Dll
+					Kind = ModuleKind.Dll,
+					ReflectionImporterProvider = MMReflectionImporter.Provider
 				}))
 				{
 					CustomAttribute customAttribute = new CustomAttribute(moduleDefinition.ImportReference(DynamicMethodDefinition.c_IgnoresAccessChecksToAttribute));
@@ -226,17 +233,17 @@ namespace MonoMod.Utils.Cil
 					{
 						stringBuilder.AppendLine(((type != null) ? type.FullName : null) ?? "<NULL>");
 					}
-					if (((array2 != null) ? array2.Length : 0) > 0)
+					if (array2 != null && array2.Length != 0)
 					{
 						stringBuilder.AppendLine("Listing all exceptions:");
 						for (int l = 0; l < array2.Length; l++)
 						{
-							StringBuilder stringBuilder2 = stringBuilder.Append("#").Append(l).Append(": ");
+							StringBuilder stringBuilder2 = stringBuilder.Append('#').Append(l).Append(": ");
 							Exception ex2 = array2[l];
 							stringBuilder2.AppendLine(((ex2 != null) ? ex2.ToString() : null) ?? "NULL");
 						}
 					}
-					throw new Exception(stringBuilder.ToString());
+					throw new InvalidOperationException(stringBuilder.ToString());
 				}
 				return ILGeneratorShim.ILGeneratorBuilder.ProxyType;
 			}
@@ -249,6 +256,7 @@ namespace MonoMod.Utils.Cil
 
 			public const string TargetName = "Target";
 
+			[Nullable(2)]
 			private static Type ProxyType;
 		}
 	}

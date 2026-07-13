@@ -58,6 +58,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		base.OnPrefabInit();
 		this.overrideAnims = Door.OVERRIDE_ANIMS;
 		this.synchronizeAnims = false;
+		this.requestedState = Door.ControlState.NumStates;
 		base.SetWorkTime(3f);
 		if (!string.IsNullOrEmpty(this.doorClosingSoundEventName))
 		{
@@ -107,8 +108,17 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		base.Subscribe<Door>(-592767678, Door.OnOperationalChangedDelegate);
 		base.Subscribe<Door>(824508782, Door.OnOperationalChangedDelegate);
 		base.Subscribe<Door>(-801688580, Door.OnLogicValueChangedDelegate);
-		this.requestedState = this.CurrentState;
-		this.ApplyRequestedControlState(true);
+		this.ApplyControlState(true);
+		if (this.requestedState != Door.ControlState.NumStates && this.requestedState != this.controlState)
+		{
+			Door.ControlState controlState = this.requestedState;
+			this.requestedState = this.controlState;
+			this.QueueStateChange(controlState);
+		}
+		else
+		{
+			this.requestedState = this.controlState;
+		}
 		int num = ((this.rotatable.GetOrientation() == Orientation.Neutral) ? (this.building.Def.WidthInCells * (this.building.Def.HeightInCells - 1)) : 0);
 		int num2 = ((this.rotatable.GetOrientation() == Orientation.Neutral) ? this.building.Def.WidthInCells : this.building.Def.HeightInCells);
 		for (int num3 = 0; num3 != num2; num3++)
@@ -117,20 +127,9 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			Grid.FakeFloor.Add(num4);
 			Pathfinding.Instance.AddDirtyNavGridCell(num4);
 		}
-		List<int> list = new List<int>();
 		foreach (int num5 in this.building.PlacementCells)
 		{
 			Grid.HasDoor[num5] = true;
-			if (this.rotatable.IsRotated)
-			{
-				list.Add(Grid.CellAbove(num5));
-				list.Add(Grid.CellBelow(num5));
-			}
-			else
-			{
-				list.Add(Grid.CellLeft(num5));
-				list.Add(Grid.CellRight(num5));
-			}
 			SimMessages.SetCellProperties(num5, 8);
 			if (Door.DisplacesGas(this.doorType))
 			{
@@ -142,7 +141,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 	protected override void OnCleanUp()
 	{
 		this.UpdateDoorState(true);
-		List<int> list = new List<int>();
 		foreach (int num in this.building.PlacementCells)
 		{
 			if (this.insulationModifier != 1f)
@@ -157,16 +155,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, -1);
 			}
 			Pathfinding.Instance.AddDirtyNavGridCell(num);
-			if (this.rotatable.IsRotated)
-			{
-				list.Add(Grid.CellAbove(num));
-				list.Add(Grid.CellBelow(num));
-			}
-			else
-			{
-				list.Add(Grid.CellLeft(num));
-				list.Add(Grid.CellRight(num));
-			}
 		}
 		foreach (int num2 in this.building.PlacementCells)
 		{
@@ -204,7 +192,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			break;
 		}
 		base.BoxingTrigger<Door.ControlState>(279163026, this.controlState);
-		this.SetWorldState();
+		this.SetWorldState(false);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CurrentDoorControlState, this);
 	}
 
@@ -269,12 +257,15 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		}
 	}
 
-	private void SetWorldState()
+	private void SetWorldState(bool updateSim)
 	{
 		int[] placementCells = this.building.PlacementCells;
 		bool flag = this.IsOpen();
 		this.SetPassableState(flag, placementCells);
-		this.SetSimState(flag, placementCells);
+		if (updateSim)
+		{
+			this.SetSimState(flag, placementCells);
+		}
 	}
 
 	private void SetPassableState(bool is_door_open, IList<int> cells)
@@ -515,13 +506,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		return this.controller.IsInsideState(this.controller.sm.open) || this.controller.IsInsideState(this.controller.sm.closedelay) || this.controller.IsInsideState(this.controller.sm.closeblocked);
 	}
 
-	private void ApplyRequestedControlState(bool force = false)
+	private void ApplyControlState(bool force = false)
 	{
-		if (this.requestedState == this.controlState && !force)
-		{
-			return;
-		}
-		this.controlState = this.requestedState;
 		this.RefreshControlState();
 		this.OnOperationalChanged(null);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
@@ -531,6 +517,16 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			this.Open();
 			this.Close();
 		}
+	}
+
+	private void ApplyRequestedControlState(bool force = false)
+	{
+		if (this.requestedState == this.controlState && !force)
+		{
+			return;
+		}
+		this.controlState = this.requestedState;
+		this.ApplyControlState(force);
 	}
 
 	public void OnLogicValueChanged(object data)
@@ -659,7 +655,10 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 
 	private int openCount;
 
-	private Door.ControlState requestedState;
+	private const Door.ControlState INVALID_CONTROL_STATE = Door.ControlState.NumStates;
+
+	[Serialize]
+	private Door.ControlState requestedState = Door.ControlState.NumStates;
 
 	private Chore changeStateChore;
 
@@ -747,16 +746,16 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				.OnAnimQueueComplete(this.closed);
 			this.open.PlayAnim("open").ParamTransition<bool>(this.isOpen, this.closeblocked, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsFalse).Enter("SetWorldStateOpen", delegate(Door.Controller.Instance smi)
 			{
-				smi.master.SetWorldState();
+				smi.master.SetWorldState(true);
 			});
 			this.closed.PlayAnim("closed").ParamTransition<bool>(this.isOpen, this.opening, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue).ParamTransition<bool>(this.isLocked, this.locking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue)
 				.Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 				{
-					smi.master.SetWorldState();
+					smi.master.SetWorldState(true);
 				});
 			this.locking.PlayAnim("locked_pre").OnAnimQueueComplete(this.locked).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 			{
-				smi.master.SetWorldState();
+				smi.master.SetWorldState(true);
 			});
 			this.locked.PlayAnim("locked").ParamTransition<bool>(this.isLocked, this.unlocking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsFalse);
 			this.unlocking.PlayAnim("locked_pst").OnAnimQueueComplete(this.closed);
@@ -797,7 +796,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				}
 			}).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 			{
-				smi.master.SetWorldState();
+				smi.master.SetWorldState(true);
 			}).Exit(delegate(Door.Controller.Instance smi)
 			{
 				smi.sm.isLocked.Set(false, smi, false);

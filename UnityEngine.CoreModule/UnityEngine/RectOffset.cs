@@ -70,7 +70,7 @@ namespace UnityEngine
 			{
 				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
-			return UnityString.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[]
+			return string.Format("RectOffset (l:{0} r:{1} t:{2} b:{3})", new object[]
 			{
 				this.left.ToString(format, formatProvider),
 				this.right.ToString(format, formatProvider),
@@ -98,77 +98,195 @@ namespace UnityEngine
 		private static extern void InternalDestroy(IntPtr ptr);
 
 		[NativeProperty("left", false, TargetType.Field)]
-		public extern int left
+		public int left
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectOffset.get_left_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectOffset.set_left_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("right", false, TargetType.Field)]
-		public extern int right
+		public int right
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectOffset.get_right_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectOffset.set_right_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("top", false, TargetType.Field)]
-		public extern int top
+		public int top
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectOffset.get_top_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectOffset.set_top_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("bottom", false, TargetType.Field)]
-		public extern int bottom
+		public int bottom
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectOffset.get_bottom_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				RectOffset.set_bottom_Injected(intPtr, value);
+			}
 		}
 
-		public extern int horizontal
+		public int horizontal
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectOffset.get_horizontal_Injected(intPtr);
+			}
 		}
 
-		public extern int vertical
+		public int vertical
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return RectOffset.get_vertical_Injected(intPtr);
+			}
 		}
 
 		public Rect Add(Rect rect)
 		{
+			IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Rect rect2;
-			this.Add_Injected(ref rect, out rect2);
+			RectOffset.Add_Injected(intPtr, ref rect, out rect2);
 			return rect2;
 		}
 
 		public Rect Remove(Rect rect)
 		{
+			IntPtr intPtr = RectOffset.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Rect rect2;
-			this.Remove_Injected(ref rect, out rect2);
+			RectOffset.Remove_Injected(intPtr, ref rect, out rect2);
 			return rect2;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Add_Injected(ref Rect rect, out Rect ret);
+		private static extern int get_left_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Remove_Injected(ref Rect rect, out Rect ret);
+		private static extern void set_left_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_right_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_right_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_top_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_top_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_bottom_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_bottom_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_horizontal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_vertical_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Add_Injected(IntPtr _unity_self, [In] ref Rect rect, out Rect ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Remove_Injected(IntPtr _unity_self, [In] ref Rect rect, out Rect ret);
 
 		[VisibleToOtherModules(new string[] { "UnityEngine.IMGUIModule" })]
 		[NonSerialized]
 		internal IntPtr m_Ptr;
 
 		private readonly object m_SourceStyle;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(RectOffset rectOffset)
+			{
+				return rectOffset.m_Ptr;
+			}
+		}
 	}
 }

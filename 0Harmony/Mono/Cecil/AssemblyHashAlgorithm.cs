@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum AssemblyHashAlgorithm : uint
+	internal enum AssemblyHashAlgorithm : uint
 	{
 		None,
 		MD5 = 32771U,

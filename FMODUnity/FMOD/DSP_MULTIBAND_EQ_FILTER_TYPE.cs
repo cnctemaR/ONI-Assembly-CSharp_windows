@@ -16,6 +16,8 @@ namespace FMOD
 		PEAKING,
 		BANDPASS,
 		NOTCH,
-		ALLPASS
+		ALLPASS,
+		LOWPASS_6DB,
+		HIGHPASS_6DB
 	}
 }

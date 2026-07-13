@@ -44,6 +44,11 @@ namespace Mono.Cecil.Pdb
 
 		public void Close()
 		{
+			if (this.closed)
+			{
+				return;
+			}
+			this.closed = true;
 			this.writer.Close();
 			Marshal.ReleaseComObject(this.writer);
 			foreach (ISymUnmanagedDocumentWriter symUnmanagedDocumentWriter in this.documents)
@@ -126,5 +131,7 @@ namespace Mono.Cecil.Pdb
 		private readonly ISymUnmanagedWriter2 writer;
 
 		private readonly Collection<ISymUnmanagedDocumentWriter> documents;
+
+		private bool closed;
 	}
 }

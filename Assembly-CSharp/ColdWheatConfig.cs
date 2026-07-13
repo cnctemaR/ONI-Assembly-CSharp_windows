@@ -44,15 +44,14 @@ public class ColdWheatConfig : IEntityConfig
 		string text5 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.NAME;
 		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.COLDWHEAT.DESC;
 		KAnimFile anim = Assets.GetAnim("seed_coldwheat_kanim");
+		EdiblesManager.FoodInfo cold_WHEAT_SEED = FOOD.FOOD_TYPES.COLD_WHEAT_SEED;
 		string text7 = "object";
 		int num2 = 1;
 		List<Tag> list = new List<Tag>();
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text8 = global::STRINGS.CREATURES.SPECIES.COLDWHEAT.DOMESTICATEDDESC;
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, text4, text5, text6, anim, text7, num2, list, receptacleDirection, default(Tag), 3, text8, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", true);
-		EntityTemplates.ExtendEntityToFood(gameObject3, FOOD.FOOD_TYPES.COLD_WHEAT_SEED);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "ColdWheat_preview", Assets.GetAnim("coldwheat_kanim"), "place", 1, 1);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlantAsFood(gameObject2, hasDlcRestrictions, productionType, text4, text5, text6, anim, cold_WHEAT_SEED, text7, num2, list, receptacleDirection, default(Tag), 3, text8, EntityTemplates.CollisionShape.CIRCLE, 0.2f, 0.2f, null, "", true), "ColdWheat_preview", Assets.GetAnim("coldwheat_kanim"), "place", 1, 1);
 		SoundEventVolumeCache.instance.AddVolume("coldwheat_kanim", "ColdWheat_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("coldwheat_kanim", "ColdWheat_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

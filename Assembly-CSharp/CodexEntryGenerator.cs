@@ -304,6 +304,7 @@ public static class CodexEntryGenerator
 		CodexEntryGenerator.GenerateFabricatorContainers(def.BuildingComplete, list);
 		CodexEntryGenerator.GenerateReceptacleContainers(def.BuildingComplete, list);
 		CodexEntryGenerator.GenerateConfigurableConsumerContainers(def.BuildingComplete, list);
+		CodexEntryGenerator.GenerateManualConversionEntries(def.BuildingComplete.PrefabID(), list);
 		CodexEntry codexEntry = new CodexEntry(categoryEntryID, list, Strings.Get("STRINGS.BUILDINGS.PREFABS." + def.PrefabID.ToUpper() + ".NAME"));
 		codexEntry.icon = def.GetUISprite("ui", false);
 		codexEntry.parentId = categoryEntryID;
@@ -1712,6 +1713,11 @@ public static class CodexEntryGenerator
 	private static ICodexWidget GetIconWidget(object entity)
 	{
 		return new CodexImage(32, 32, Def.GetUISprite(entity, "ui", false));
+	}
+
+	public static void GenerateManualConversionEntries(Tag tag, List<ContentContainer> containers)
+	{
+		CodexEntryGenerator_Elements.GenerateMadeAndUsedContainers(tag, containers);
 	}
 
 	private static void GenerateDiseaseDescriptionContainers(Disease disease, List<ContentContainer> containers)

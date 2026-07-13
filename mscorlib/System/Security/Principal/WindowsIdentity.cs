@@ -222,8 +222,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[MonoTODO("not implemented")]
 		[ComVisible(false)]
+		[MonoTODO("not implemented")]
 		public TokenImpersonationLevel ImpersonationLevel
 		{
 			get
@@ -232,8 +232,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("not implemented")]
+		[ComVisible(false)]
 		public SecurityIdentifier Owner
 		{
 			get
@@ -242,8 +242,8 @@ namespace System.Security.Principal
 			}
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("not implemented")]
+		[ComVisible(false)]
 		public SecurityIdentifier User
 		{
 			get

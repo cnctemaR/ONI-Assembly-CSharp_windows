@@ -105,7 +105,7 @@ public class TopLeftControlScreen : KScreen
 			return;
 		}
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
-		global::UnityEngine.Object.FindObjectOfType<KleiItemDropScreen>(true).Show(true);
+		global::UnityEngine.Object.FindFirstObjectByType<KleiItemDropScreen>(FindObjectsInactive.Include).Show(true);
 	}
 
 	private bool CheckSandboxModeLocked()

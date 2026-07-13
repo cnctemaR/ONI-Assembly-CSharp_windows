@@ -10,6 +10,11 @@ namespace FMOD.Studio
 			return EventInstance.FMOD_Studio_EventInstance_GetDescription(this.handle, out description.handle);
 		}
 
+		public RESULT getSystem(out FMOD.Studio.System system)
+		{
+			return EventInstance.FMOD_Studio_EventInstance_GetSystem(this.handle, out system.handle);
+		}
+
 		public RESULT getVolume(out float volume)
 		{
 			return EventInstance.FMOD_Studio_EventInstance_GetVolume(this.handle, out volume, IntPtr.Zero);
@@ -240,6 +245,9 @@ namespace FMOD.Studio
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_GetDescription(IntPtr _event, out IntPtr description);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_GetSystem(IntPtr _event, out IntPtr system);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_GetVolume(IntPtr _event, out float volume, IntPtr zero);

@@ -5,6 +5,7 @@ using UnityEngine.Bindings;
 namespace UnityEngine
 {
 	[NativeHeader("Modules/IMGUI/GUIState.h")]
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal class ObjectGUIState : IDisposable
 	{
 		public ObjectGUIState()
@@ -41,5 +42,13 @@ namespace UnityEngine
 		private static extern void Internal_Destroy(IntPtr ptr);
 
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(ObjectGUIState objectGUIState)
+			{
+				return objectGUIState.m_Ptr;
+			}
+		}
 	}
 }

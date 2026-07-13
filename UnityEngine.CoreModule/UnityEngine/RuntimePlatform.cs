@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace UnityEngine
 {
@@ -56,25 +57,38 @@ namespace UnityEngine
 		Switch,
 		[Obsolete("Lumin is no longer supported in Unity 2022.2")]
 		Lumin,
+		[Obsolete("Stadia is no longer supported in Unity 2023.1")]
 		Stadia,
-		[Obsolete("Use LinuxPlayer instead")]
-		CloudRendering,
+		[Obsolete("CloudRendering is deprecated, please use LinuxHeadlessSimulation (UnityUpgradable) -> LinuxHeadlessSimulation", false)]
+		CloudRendering = -1,
+		LinuxHeadlessSimulation = 35,
 		[Obsolete("GameCoreScarlett is deprecated, please use GameCoreXboxSeries (UnityUpgradable) -> GameCoreXboxSeries", false)]
 		GameCoreScarlett = -1,
 		GameCoreXboxSeries = 36,
 		GameCoreXboxOne,
 		PS5,
 		EmbeddedLinuxArm64,
+		[Obsolete("32-bit embedded platforms are no longer supported")]
 		EmbeddedLinuxArm32,
 		EmbeddedLinuxX64,
+		[Obsolete("32-bit embedded platforms are no longer supported")]
 		EmbeddedLinuxX86,
 		LinuxServer,
 		WindowsServer,
 		OSXServer,
+		[Obsolete("32-bit embedded platforms are no longer supported")]
 		QNXArm32,
 		QNXArm64,
 		QNXX64,
+		[Obsolete("32-bit embedded platforms are no longer supported")]
 		QNXX86,
-		VisionOS
+		VisionOS,
+		Switch2,
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete]
+		KeplerArm64,
+		[Obsolete]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		KeplerX64
 	}
 }

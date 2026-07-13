@@ -27,6 +27,7 @@ namespace UnityEngine.Rendering
 				}
 			}
 			this.m_UseSrpBatcher = 0;
+			this.m_LodCrossFadeStencilMask = 0;
 		}
 
 		public SortingSettings sortingSettings
@@ -163,6 +164,18 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		public int lodCrossFadeStencilMask
+		{
+			get
+			{
+				return this.m_LodCrossFadeStencilMask;
+			}
+			set
+			{
+				this.m_LodCrossFadeStencilMask = value;
+			}
+		}
+
 		public unsafe ShaderTagId GetShaderPassName(int index)
 		{
 			bool flag = index >= DrawingSettings.maxShaderPasses || index < 0;
@@ -204,7 +217,7 @@ namespace UnityEngine.Rendering
 					return false;
 				}
 			}
-			return this.m_SortingSettings.Equals(other.m_SortingSettings) && this.m_PerObjectData == other.m_PerObjectData && this.m_Flags == other.m_Flags && this.m_OverrideMaterialInstanceId == other.m_OverrideMaterialInstanceId && this.m_OverrideMaterialPassIndex == other.m_OverrideMaterialPassIndex && this.m_fallbackMaterialInstanceId == other.m_fallbackMaterialInstanceId && this.m_UseSrpBatcher == other.m_UseSrpBatcher;
+			return this.m_SortingSettings.Equals(other.m_SortingSettings) && this.m_PerObjectData == other.m_PerObjectData && this.m_Flags == other.m_Flags && this.m_OverrideMaterialInstanceId == other.m_OverrideMaterialInstanceId && this.m_OverrideMaterialPassIndex == other.m_OverrideMaterialPassIndex && this.m_fallbackMaterialInstanceId == other.m_fallbackMaterialInstanceId && this.m_UseSrpBatcher == other.m_UseSrpBatcher && this.m_LodCrossFadeStencilMask == other.m_LodCrossFadeStencilMask;
 		}
 
 		public override bool Equals(object obj)
@@ -221,7 +234,8 @@ namespace UnityEngine.Rendering
 			num = (num * 397) ^ this.m_OverrideMaterialInstanceId;
 			num = (num * 397) ^ this.m_OverrideMaterialPassIndex;
 			num = (num * 397) ^ this.m_fallbackMaterialInstanceId;
-			return (num * 397) ^ this.m_UseSrpBatcher;
+			num = (num * 397) ^ this.m_UseSrpBatcher;
+			return (num * 397) ^ this.m_LodCrossFadeStencilMask;
 		}
 
 		public static bool operator ==(DrawingSettings left, DrawingSettings right)
@@ -261,8 +275,10 @@ namespace UnityEngine.Rendering
 
 		private int m_UseSrpBatcher;
 
-		[UnsafeValueType]
+		private int m_LodCrossFadeStencilMask;
+
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 64)]
 		public struct <shaderPassNames>e__FixedBuffer
 		{

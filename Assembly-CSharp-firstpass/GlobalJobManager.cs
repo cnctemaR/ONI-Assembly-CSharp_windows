@@ -7,6 +7,11 @@ public static class GlobalJobManager
 		GlobalJobManager.jobManager.Run(work_items);
 	}
 
+	public static void DebugRunSingleThreaded(IWorkItemCollection work_items)
+	{
+		GlobalJobManager.jobManager.DebugRunSingleThreaded(work_items);
+	}
+
 	public static int ThreadCount
 	{
 		get

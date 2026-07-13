@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
@@ -47,9 +48,10 @@ namespace HarmonyLib
 		{
 			this.CheckCanRead(8);
 			uint num = (uint)((int)this.buffer[this.position] | ((int)this.buffer[this.position + 1] << 8) | ((int)this.buffer[this.position + 2] << 16) | ((int)this.buffer[this.position + 3] << 24));
-			long num2 = (long)(((ulong)((int)this.buffer[this.position + 4] | ((int)this.buffer[this.position + 5] << 8) | ((int)this.buffer[this.position + 6] << 16) | ((int)this.buffer[this.position + 7] << 24)) << 32) | (ulong)num);
+			uint num2 = (uint)((int)this.buffer[this.position + 4] | ((int)this.buffer[this.position + 5] << 8) | ((int)this.buffer[this.position + 6] << 16) | ((int)this.buffer[this.position + 7] << 24));
+			long num3 = (long)(((ulong)num2 << 32) | (ulong)num);
 			this.position += 8;
-			return num2;
+			return num3;
 		}
 
 		internal float ReadSingle()
@@ -84,7 +86,16 @@ namespace HarmonyLib
 		{
 			if (this.position + count > this.buffer.Length)
 			{
-				throw new ArgumentOutOfRangeException("count", string.Format("position({0}) + count({1}) > buffer.Length({2})", this.position, count, this.buffer.Length));
+				string text = "count";
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(38, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("position(");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(this.position);
+				defaultInterpolatedStringHandler.AppendLiteral(") + count(");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(count);
+				defaultInterpolatedStringHandler.AppendLiteral(") > buffer.Length(");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(this.buffer.Length);
+				defaultInterpolatedStringHandler.AppendLiteral(")");
+				throw new ArgumentOutOfRangeException(text, defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 		}
 

@@ -94,6 +94,14 @@ public class JobManager
 		}
 	}
 
+	public void DebugRunSingleThreaded(IWorkItemCollection work_items)
+	{
+		for (int i = 0; i < work_items.Count; i++)
+		{
+			work_items.InternalDoWorkItem(i, 0);
+		}
+	}
+
 	public void DecrementActiveWorkerThreadCount()
 	{
 		if (Interlocked.Decrement(ref this.workerThreadCount) == 0)

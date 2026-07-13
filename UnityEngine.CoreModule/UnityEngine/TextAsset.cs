@@ -11,23 +11,81 @@ namespace UnityEngine
 	[NativeHeader("Runtime/Scripting/TextAsset.h")]
 	public class TextAsset : Object
 	{
-		public extern byte[] bytes
+		public byte[] bytes
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TextAsset>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return TextAsset.get_bytes_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern byte[] GetPreviewBytes(int maxByteCount);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		private byte[] GetPreviewBytes(int maxByteCount)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TextAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return TextAsset.GetPreviewBytes_Injected(intPtr, maxByteCount);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_CreateInstance([Writable] TextAsset self, string text);
+		private unsafe static void Internal_CreateInstance([Writable] TextAsset self, string text)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(text, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = text.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				TextAsset.Internal_CreateInstance_Injected(self, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetDataPtr();
+		private unsafe static void Internal_CreateInstanceFromBytes([Writable] TextAsset self, ReadOnlySpan<byte> bytes)
+		{
+			ReadOnlySpan<byte> readOnlySpan = bytes;
+			fixed (byte* pinnableReference = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, readOnlySpan.Length);
+				TextAsset.Internal_CreateInstanceFromBytes_Injected(self, ref managedSpanWrapper);
+			}
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern long GetDataSize();
+		private IntPtr GetDataPtr()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TextAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return TextAsset.GetDataPtr_Injected(intPtr);
+		}
+
+		private long GetDataSize()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<TextAsset>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return TextAsset.GetDataSize_Injected(intPtr);
+		}
 
 		public string text
 		{
@@ -61,12 +119,26 @@ namespace UnityEngine
 		{
 		}
 
+		public TextAsset(ReadOnlySpan<byte> bytes)
+			: this(TextAsset.CreateOptions.CreateNativeObject, bytes)
+		{
+		}
+
 		internal TextAsset(TextAsset.CreateOptions options, string text)
 		{
 			bool flag = options == TextAsset.CreateOptions.CreateNativeObject;
 			if (flag)
 			{
 				TextAsset.Internal_CreateInstance(this, text);
+			}
+		}
+
+		internal TextAsset(TextAsset.CreateOptions options, ReadOnlySpan<byte> bytes)
+		{
+			bool flag = options == TextAsset.CreateOptions.CreateNativeObject;
+			if (flag)
+			{
+				TextAsset.Internal_CreateInstanceFromBytes(this, bytes);
 			}
 		}
 
@@ -130,6 +202,24 @@ namespace UnityEngine
 			Encoding targetEncoding = TextAsset.EncodingUtility.targetEncoding;
 			return targetEncoding.GetString(bytes, num2, bytes.Length - num2);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern byte[] get_bytes_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern byte[] GetPreviewBytes_Injected(IntPtr _unity_self, int maxByteCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_CreateInstance_Injected([Writable] TextAsset self, ref ManagedSpanWrapper text);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_CreateInstanceFromBytes_Injected([Writable] TextAsset self, ref ManagedSpanWrapper bytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetDataPtr_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetDataSize_Injected(IntPtr _unity_self);
 
 		internal enum CreateOptions
 		{

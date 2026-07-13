@@ -12,6 +12,14 @@ public class ManagementMenu : KIconToggleMenu
 		ManagementMenu.Instance = null;
 	}
 
+	public bool HasActiveResearch
+	{
+		get
+		{
+			return this.researchScreen.HasActiveResearch;
+		}
+	}
+
 	public override float GetSortKey()
 	{
 		return 21f;
@@ -318,13 +326,18 @@ public class ManagementMenu : KIconToggleMenu
 		this.CheckStarmap(null);
 	}
 
+	public bool CheckHasResearchCenter()
+	{
+		return Components.ResearchCenters.Count > 0 || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
+	}
+
 	public void CheckResearch(object o)
 	{
 		if (this.researchInfo.toggle == null)
 		{
 			return;
 		}
-		bool flag = Components.ResearchCenters.Count <= 0 && !DebugHandler.InstantBuildMode && !Game.Instance.SandboxModeActive;
+		bool flag = !this.CheckHasResearchCenter();
 		bool flag2 = !flag && this.activeScreen != null && this.activeScreen.toggleInfo == this.researchInfo;
 		this.ConfigureToggle(this.researchInfo.toggle, flag, flag2);
 	}

@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class GenericParameterConstraint : ICustomAttributeProvider, IMetadataTokenProvider
+	internal sealed class GenericParameterConstraint : ICustomAttributeProvider, IMetadataTokenProvider
 	{
 		public TypeReference ConstraintType
 		{

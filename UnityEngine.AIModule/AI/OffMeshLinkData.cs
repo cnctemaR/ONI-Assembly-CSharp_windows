@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	[NativeHeader("Modules/AI/Components/OffMeshLink.bindings.h")]
 	[MovedFrom("UnityEngine")]
+	[NativeHeader("Modules/AI/Components/OffMeshLink.bindings.h")]
 	public struct OffMeshLinkData
 	{
 		public bool valid
@@ -49,6 +50,21 @@ namespace UnityEngine.AI
 			}
 		}
 
+		public Object owner
+		{
+			get
+			{
+				return OffMeshLinkData.GetLinkOwnerInternal(this.m_InstanceID);
+			}
+		}
+
+		[FreeFunction("OffMeshLinkScriptBindings::GetLinkOwnerInternal")]
+		private static Object GetLinkOwnerInternal(EntityId instanceID)
+		{
+			return Unmarshal.UnmarshalUnityObject<Object>(OffMeshLinkData.GetLinkOwnerInternal_Injected(ref instanceID));
+		}
+
+		[Obsolete("offMeshLink has been deprecated. Use 'owner' instead.")]
 		public OffMeshLink offMeshLink
 		{
 			get
@@ -58,14 +74,22 @@ namespace UnityEngine.AI
 		}
 
 		[FreeFunction("OffMeshLinkScriptBindings::GetOffMeshLinkInternal")]
+		private static OffMeshLink GetOffMeshLinkInternal(EntityId instanceID)
+		{
+			return Unmarshal.UnmarshalUnityObject<OffMeshLink>(OffMeshLinkData.GetOffMeshLinkInternal_Injected(ref instanceID));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern OffMeshLink GetOffMeshLinkInternal(int instanceID);
+		private static extern IntPtr GetLinkOwnerInternal_Injected([In] ref EntityId instanceID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetOffMeshLinkInternal_Injected([In] ref EntityId instanceID);
 
 		internal int m_Valid;
 
 		internal int m_Activated;
 
-		internal int m_InstanceID;
+		internal EntityId m_InstanceID;
 
 		internal OffMeshLinkType m_LinkType;
 

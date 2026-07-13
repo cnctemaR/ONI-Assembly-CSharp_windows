@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum MetadataKind
+	internal enum MetadataKind
 	{
 		Ecma335,
 		WindowsMetadata,

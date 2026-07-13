@@ -7,6 +7,7 @@ namespace UnityEngine.Experimental.Rendering
 		Off,
 		Static,
 		DynamicTransform,
-		DynamicGeometry
+		DynamicGeometry,
+		DynamicGeometryManualUpdate
 	}
 }

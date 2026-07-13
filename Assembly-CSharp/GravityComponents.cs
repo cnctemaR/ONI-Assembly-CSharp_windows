@@ -52,7 +52,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 				Vector2 vector3 = vector + vector2 * dt;
 				Vector2 vector4 = vector3;
 				vector4.y = vector3.y - groundOffset;
-				bool flag2 = Grid.IsVisiblyInLiquid(vector3 + new Vector2(0f, groundOffset));
+				bool flag2 = Grid.IsVisiblyInLiquid(vector4);
 				if (!flag && flag2)
 				{
 					Game.Instance.SpawnFX(SpawnFXHashes.SplashStep, new Vector3(vector3.x, vector3.y, Grid.GetLayerZ(Grid.SceneLayer.Front)) + new Vector3(-0.38f, 0.75f, -0.1f), 0f);

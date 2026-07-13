@@ -8,10 +8,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[ExtensionOfNativeClass]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
+	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
 	public class MonoBehaviour : Behaviour
 	{
 		public CancellationToken destroyCancellationToken
@@ -63,7 +63,7 @@ namespace UnityEngine
 			bool flag = repeatRate <= 1E-05f && repeatRate != 0f;
 			if (flag)
 			{
-				throw new UnityException("Invoke repeat rate has to be larger than 0.00001F)");
+				throw new UnityException("Invoke repeat rate has to be larger than 0.00001F");
 			}
 			MonoBehaviour.InvokeDelayed(this, methodName, time, repeatRate);
 		}
@@ -151,18 +151,88 @@ namespace UnityEngine
 			this.StopCoroutineManaged(routine);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StopCoroutine(string methodName);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StopAllCoroutines();
-
-		public extern bool useGUILayout
+		public unsafe void StopCoroutine(string methodName)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				MonoBehaviour.StopCoroutine_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
+
+		public void StopAllCoroutines()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MonoBehaviour.StopAllCoroutines_Injected(intPtr);
+		}
+
+		public bool useGUILayout
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return MonoBehaviour.get_useGUILayout_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				MonoBehaviour.set_useGUILayout_Injected(intPtr, value);
+			}
+		}
+
+		public bool didStart
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return MonoBehaviour.get_didStart_Injected(intPtr);
+			}
+		}
+
+		public bool didAwake
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return MonoBehaviour.get_didAwake_Injected(intPtr);
+			}
 		}
 
 		public static void print(object message)
@@ -171,46 +241,289 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("CancelInvoke")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_CancelInvokeAll([NotNull("NullExceptionObject")] MonoBehaviour self);
+		private static void Internal_CancelInvokeAll([NotNull] MonoBehaviour self)
+		{
+			if (self == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(self, "self");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(self);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(self, "self");
+			}
+			MonoBehaviour.Internal_CancelInvokeAll_Injected(intPtr);
+		}
 
 		[FreeFunction("IsInvoking")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_IsInvokingAll([NotNull("NullExceptionObject")] MonoBehaviour self);
+		private static bool Internal_IsInvokingAll([NotNull] MonoBehaviour self)
+		{
+			if (self == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(self, "self");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(self);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(self, "self");
+			}
+			return MonoBehaviour.Internal_IsInvokingAll_Injected(intPtr);
+		}
 
 		[FreeFunction]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InvokeDelayed([NotNull("NullExceptionObject")] MonoBehaviour self, string methodName, float time, float repeatRate);
+		private unsafe static void InvokeDelayed([NotNull] MonoBehaviour self, string methodName, float time, float repeatRate)
+		{
+			if (self == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(self, "self");
+			}
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(self);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(self, "self");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				MonoBehaviour.InvokeDelayed_Injected(intPtr, ref managedSpanWrapper, time, repeatRate);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CancelInvoke([NotNull("NullExceptionObject")] MonoBehaviour self, string methodName);
+		private unsafe static void CancelInvoke([NotNull] MonoBehaviour self, string methodName)
+		{
+			if (self == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(self, "self");
+			}
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(self);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(self, "self");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				MonoBehaviour.CancelInvoke_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsInvoking([NotNull("NullExceptionObject")] MonoBehaviour self, string methodName);
+		private unsafe static bool IsInvoking([NotNull] MonoBehaviour self, string methodName)
+		{
+			if (self == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(self, "self");
+			}
+			bool flag;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(self);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(self, "self");
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = MonoBehaviour.IsInvoking_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
 		[FreeFunction]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsObjectMonoBehaviour([NotNull("NullExceptionObject")] Object obj);
+		private static bool IsObjectMonoBehaviour([NotNull] Object obj)
+		{
+			if (obj == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Object>(obj);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(obj, "obj");
+			}
+			return MonoBehaviour.IsObjectMonoBehaviour_Injected(intPtr);
+		}
+
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		private unsafe Coroutine StartCoroutineManaged(string methodName, object value)
+		{
+			Coroutine coroutine;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				coroutine = MonoBehaviour.StartCoroutineManaged_Injected(intPtr, ref managedSpanWrapper, value);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return coroutine;
+		}
+
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		private Coroutine StartCoroutineManaged2(IEnumerator enumerator)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MonoBehaviour.StartCoroutineManaged2_Injected(intPtr, enumerator);
+		}
+
+		private void StopCoroutineManaged(Coroutine routine)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MonoBehaviour.StopCoroutineManaged_Injected(intPtr, (routine == null) ? ((IntPtr)0) : Coroutine.BindingsMarshaller.ConvertToNative(routine));
+		}
+
+		private void StopCoroutineFromEnumeratorManaged(IEnumerator routine)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MonoBehaviour.StopCoroutineFromEnumeratorManaged_Injected(intPtr, routine);
+		}
+
+		internal string GetScriptClassName()
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				MonoBehaviour.GetScriptClassName_Injected(intPtr, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		private void OnCancellationTokenCreated()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<MonoBehaviour>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MonoBehaviour.OnCancellationTokenCreated_Injected(intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Coroutine StartCoroutineManaged(string methodName, object value);
+		private static extern void StopCoroutine_Injected(IntPtr _unity_self, ref ManagedSpanWrapper methodName);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Coroutine StartCoroutineManaged2(IEnumerator enumerator);
+		private static extern void StopAllCoroutines_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void StopCoroutineManaged(Coroutine routine);
+		private static extern bool get_useGUILayout_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void StopCoroutineFromEnumeratorManaged(IEnumerator routine);
+		private static extern void set_useGUILayout_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern string GetScriptClassName();
+		private static extern bool get_didStart_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void OnCancellationTokenCreated();
+		private static extern bool get_didAwake_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_CancelInvokeAll_Injected(IntPtr self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Internal_IsInvokingAll_Injected(IntPtr self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InvokeDelayed_Injected(IntPtr self, ref ManagedSpanWrapper methodName, float time, float repeatRate);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CancelInvoke_Injected(IntPtr self, ref ManagedSpanWrapper methodName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsInvoking_Injected(IntPtr self, ref ManagedSpanWrapper methodName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsObjectMonoBehaviour_Injected(IntPtr obj);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Coroutine StartCoroutineManaged_Injected(IntPtr _unity_self, ref ManagedSpanWrapper methodName, object value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Coroutine StartCoroutineManaged2_Injected(IntPtr _unity_self, IEnumerator enumerator);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StopCoroutineManaged_Injected(IntPtr _unity_self, IntPtr routine);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StopCoroutineFromEnumeratorManaged_Injected(IntPtr _unity_self, IEnumerator routine);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetScriptClassName_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OnCancellationTokenCreated_Injected(IntPtr _unity_self);
 
 		private CancellationTokenSource m_CancellationTokenSource;
 	}

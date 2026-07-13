@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.U2D
 {
-	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[NativeHeader("Runtime/Graphics/Mesh/SpriteRenderer.h")]
+	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	public static class SpriteRendererDataAccessExtensions
 	{
 		internal static void SetDeformableBuffer(this SpriteRenderer spriteRenderer, NativeArray<byte> src)
@@ -51,29 +52,153 @@ namespace UnityEngine.U2D
 			SpriteRendererDataAccessExtensions.SetBatchDeformableBufferAndLocalAABBArray(spriteRenderers, buffers.GetUnsafeReadOnlyPtr<IntPtr>(), bufferSizes.GetUnsafeReadOnlyPtr<int>(), bounds.GetUnsafeReadOnlyPtr<Bounds>(), num);
 		}
 
+		internal static void SetBoneTransformsArray(SpriteRenderer[] spriteRenderers, NativeArray<IntPtr> buffers, NativeArray<int> bufferSizes, NativeArray<Bounds> bounds)
+		{
+			int num = spriteRenderers.Length;
+			bool flag = num != buffers.Length || num != bufferSizes.Length || num != bounds.Length;
+			if (flag)
+			{
+				throw new ArgumentException("Input array sizes are not the same.");
+			}
+			SpriteRendererDataAccessExtensions.SetBoneTransformsArray(spriteRenderers, buffers.GetUnsafeReadOnlyPtr<IntPtr>(), bufferSizes.GetUnsafeReadOnlyPtr<int>(), bounds.GetUnsafeReadOnlyPtr<Bounds>(), num);
+		}
+
 		internal unsafe static bool IsUsingDeformableBuffer(this SpriteRenderer spriteRenderer, IntPtr buffer)
 		{
 			return SpriteRendererDataAccessExtensions.IsUsingDeformableBuffer(spriteRenderer, (void*)buffer);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DeactivateDeformableBuffer([NotNull("ArgumentNullException")] this SpriteRenderer renderer);
-
-		internal static void SetLocalAABB([NotNull("ArgumentNullException")] this SpriteRenderer renderer, Bounds aabb)
+		internal static void SetBoneTransforms(this SpriteRenderer spriteRenderer, NativeArray<Matrix4x4> src)
 		{
-			SpriteRendererDataAccessExtensions.SetLocalAABB_Injected(renderer, ref aabb);
+			SpriteRendererDataAccessExtensions.SetBoneTransforms(spriteRenderer, src.GetUnsafeReadOnlyPtr<Matrix4x4>(), src.Length);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetDeformableBuffer([NotNull("ArgumentNullException")] SpriteRenderer spriteRenderer, void* src, int count);
+		public static void DeactivateDeformableBuffer([NotNull] this SpriteRenderer renderer)
+		{
+			if (renderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(renderer, "renderer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(renderer);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(renderer, "renderer");
+			}
+			SpriteRendererDataAccessExtensions.DeactivateDeformableBuffer_Injected(intPtr);
+		}
+
+		internal static void SetLocalAABB([NotNull] this SpriteRenderer renderer, Bounds aabb)
+		{
+			if (renderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(renderer, "renderer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(renderer);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(renderer, "renderer");
+			}
+			SpriteRendererDataAccessExtensions.SetLocalAABB_Injected(intPtr, ref aabb);
+		}
+
+		private unsafe static void SetDeformableBuffer([NotNull] SpriteRenderer spriteRenderer, void* src, int count)
+		{
+			if (spriteRenderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(spriteRenderer);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			SpriteRendererDataAccessExtensions.SetDeformableBuffer_Injected(intPtr, src, count);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void SetBatchDeformableBufferAndLocalAABBArray(SpriteRenderer[] spriteRenderers, void* buffers, void* bufferSizes, void* bounds, int count);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern bool IsUsingDeformableBuffer([NotNull("ArgumentNullException")] SpriteRenderer spriteRenderer, void* buffer);
+		private unsafe static bool IsUsingDeformableBuffer([NotNull] SpriteRenderer spriteRenderer, void* buffer)
+		{
+			if (spriteRenderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(spriteRenderer);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			return SpriteRendererDataAccessExtensions.IsUsingDeformableBuffer_Injected(intPtr, buffer);
+		}
+
+		private unsafe static void SetBoneTransforms([NotNull] SpriteRenderer spriteRenderer, void* src, int count)
+		{
+			if (spriteRenderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(spriteRenderer);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			SpriteRendererDataAccessExtensions.SetBoneTransforms_Injected(intPtr, src, count);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetLocalAABB_Injected(SpriteRenderer renderer, ref Bounds aabb);
+		private unsafe static extern void SetBoneTransformsArray(SpriteRenderer[] spriteRenderers, void* buffers, void* bufferSizes, void* bounds, int count);
+
+		internal static void SetupMaterialProperties([NotNull] SpriteRenderer spriteRenderer)
+		{
+			if (spriteRenderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(spriteRenderer);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			SpriteRendererDataAccessExtensions.SetupMaterialProperties_Injected(intPtr);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool IsGPUSkinningEnabled();
+
+		internal static bool IsSRPBatchingEnabled([NotNull] this SpriteRenderer spriteRenderer)
+		{
+			if (spriteRenderer == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<SpriteRenderer>(spriteRenderer);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(spriteRenderer, "spriteRenderer");
+			}
+			return SpriteRendererDataAccessExtensions.IsSRPBatchingEnabled_Injected(intPtr);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DeactivateDeformableBuffer_Injected(IntPtr renderer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLocalAABB_Injected(IntPtr renderer, [In] ref Bounds aabb);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void SetDeformableBuffer_Injected(IntPtr spriteRenderer, void* src, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern bool IsUsingDeformableBuffer_Injected(IntPtr spriteRenderer, void* buffer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void SetBoneTransforms_Injected(IntPtr spriteRenderer, void* src, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetupMaterialProperties_Injected(IntPtr spriteRenderer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsSRPBatchingEnabled_Injected(IntPtr spriteRenderer);
 	}
 }

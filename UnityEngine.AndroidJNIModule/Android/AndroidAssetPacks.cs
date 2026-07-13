@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Android
 {
-	[NativeHeader("Modules/AndroidJNI/Public/AndroidAssetPacksBindingsHelpers.h")]
 	[StaticAccessor("AndroidAssetPacksBindingsHelpers", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/AndroidJNI/Public/AndroidAssetPacksBindingsHelpers.h")]
 	public static class AndroidAssetPacks
 	{
 		public static bool coreUnityAssetPacksDownloaded
@@ -13,6 +13,14 @@ namespace UnityEngine.Android
 			get
 			{
 				return AndroidAssetPacks.CoreUnityAssetPacksDownloaded();
+			}
+		}
+
+		internal static string textureCompressionsPackName
+		{
+			get
+			{
+				return AndroidAssetPacks.GetTextureCompressionsPackName();
 			}
 		}
 
@@ -79,6 +87,11 @@ namespace UnityEngine.Android
 
 		public static void RemoveAssetPack(string assetPackName)
 		{
+		}
+
+		private static string GetTextureCompressionsPackName()
+		{
+			return "UnityTextureCompressionsAssetPack";
 		}
 
 		private static string GetDataPackName()

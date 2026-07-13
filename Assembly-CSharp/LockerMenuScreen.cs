@@ -129,7 +129,7 @@ public class LockerMenuScreen : KModalScreen
 			{
 				return;
 			}
-			global::UnityEngine.Object.FindObjectOfType<KleiItemDropScreen>(true).Show(true);
+			global::UnityEngine.Object.FindFirstObjectByType<KleiItemDropScreen>(FindObjectsInactive.Include).Show(true);
 			this.Show(false);
 		}));
 		this.ConfigureHoverForButton(this.buttonClaimItems, hasClaimable ? UI.LOCKER_MENU.BUTTON_CLAIM_DESCRIPTION : UI.LOCKER_MENU.BUTTON_CLAIM_NONE_DESCRIPTION, hasClaimable);

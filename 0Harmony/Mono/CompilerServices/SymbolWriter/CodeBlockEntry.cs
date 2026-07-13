@@ -2,7 +2,7 @@
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class CodeBlockEntry
+	internal class CodeBlockEntry
 	{
 		public CodeBlockEntry(int index, int parent, CodeBlockEntry.Type type, int start_offset)
 		{

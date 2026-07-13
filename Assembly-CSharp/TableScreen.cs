@@ -658,7 +658,7 @@ public class TableScreen : ShowOptimizedKScreen
 				{
 					locText.text = "";
 				}
-				locText.enableWordWrapping = false;
+				locText.textWrappingMode = TextWrappingModes.Normal;
 				return;
 			}
 		}

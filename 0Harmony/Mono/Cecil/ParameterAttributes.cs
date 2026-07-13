@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum ParameterAttributes : ushort
+	internal enum ParameterAttributes : ushort
 	{
 		None = 0,
 		In = 1,

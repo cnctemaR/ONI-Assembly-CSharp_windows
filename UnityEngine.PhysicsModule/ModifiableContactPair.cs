@@ -1,14 +1,46 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[NativeHeader("Modules/Physics/PhysXContactModification.h")]
+	[NativeHeader("Modules/Physics/PhysicsCollisionGeometry.h")]
 	public struct ModifiableContactPair
 	{
+		[FreeFunction("Physics::PhysXGeometryExtension::TranslateTriangleIndex", true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern uint TranslateTriangleIndex(IntPtr shapePtr, uint rawIndex);
+
+		[FreeFunction("Physics::PhysXContactModificationExtension::ResolveShapeToInstanceID", true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int ResolveShapeToInstanceID(IntPtr shapePtr);
+
+		[FreeFunction("Physics::PhysXContactModificationExtension::ResolveActorToInstanceID", true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern int ResolveActorToInstanceID(IntPtr actorPtr);
+
+		[FreeFunction("Physics::PhysXContactModificationExtension::GetActorLinearVelocity", true)]
+		internal static Vector3 GetActorLinearVelocity(IntPtr actorPtr)
+		{
+			Vector3 vector;
+			ModifiableContactPair.GetActorLinearVelocity_Injected(actorPtr, out vector);
+			return vector;
+		}
+
+		[FreeFunction("Physics::PhysXContactModificationExtension::GetActorAngularVelocity", true)]
+		internal static Vector3 GetActorAngularVelocity(IntPtr actorPtr)
+		{
+			Vector3 vector;
+			ModifiableContactPair.GetActorAngularVelocity_Injected(actorPtr, out vector);
+			return vector;
+		}
+
 		public int colliderInstanceID
 		{
 			get
 			{
-				return Physics.ResolveShapeToInstanceID(this.shape);
+				return ModifiableContactPair.ResolveShapeToInstanceID(this.shape);
 			}
 		}
 
@@ -16,7 +48,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.ResolveShapeToInstanceID(this.otherShape);
+				return ModifiableContactPair.ResolveShapeToInstanceID(this.otherShape);
 			}
 		}
 
@@ -24,7 +56,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.ResolveActorToInstanceID(this.actor);
+				return ModifiableContactPair.ResolveActorToInstanceID(this.actor);
 			}
 		}
 
@@ -32,7 +64,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.ResolveActorToInstanceID(this.otherActor);
+				return ModifiableContactPair.ResolveActorToInstanceID(this.otherActor);
 			}
 		}
 
@@ -40,7 +72,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.GetActorLinearVelocity(this.actor);
+				return ModifiableContactPair.GetActorLinearVelocity(this.actor);
 			}
 		}
 
@@ -48,7 +80,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.GetActorAngularVelocity(this.actor);
+				return ModifiableContactPair.GetActorAngularVelocity(this.actor);
 			}
 		}
 
@@ -56,7 +88,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.GetActorLinearVelocity(this.otherActor);
+				return ModifiableContactPair.GetActorLinearVelocity(this.otherActor);
 			}
 		}
 
@@ -64,7 +96,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.GetActorAngularVelocity(this.otherActor);
+				return ModifiableContactPair.GetActorAngularVelocity(this.otherActor);
 			}
 		}
 
@@ -196,7 +228,7 @@ namespace UnityEngine
 			{
 				IntPtr intPtr = new IntPtr(this.contacts.ToInt64() + (long)(this.numContacts * sizeof(ModifiableContact)) + (long)((this.numContacts + i) * 4));
 				uint num = *(uint*)(void*)intPtr;
-				num2 = Physics.TranslateTriangleIndex(this.otherShape, num);
+				num2 = ModifiableContactPair.TranslateTriangleIndex(this.otherShape, num);
 			}
 			else
 			{
@@ -216,6 +248,12 @@ namespace UnityEngine
 			IntPtr intPtr = new IntPtr(this.contacts.ToInt64() - (long)(this.numContacts * sizeof(ModifiableContactPatch)));
 			return (ModifiableContactPatch*)(void*)intPtr;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetActorLinearVelocity_Injected(IntPtr actorPtr, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetActorAngularVelocity_Injected(IntPtr actorPtr, out Vector3 ret);
 
 		private IntPtr actor;
 

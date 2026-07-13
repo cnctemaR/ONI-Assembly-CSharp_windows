@@ -96,61 +96,205 @@ namespace UnityEngine.U2D
 		}
 
 		[NativeName("HasChannel")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool HasVertexAttribute([NotNull("ArgumentNullException")] this Sprite sprite, VertexAttribute channel);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetVertexCount([NotNull("ArgumentNullException")] this Sprite sprite, int count);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetVertexCount([NotNull("ArgumentNullException")] this Sprite sprite);
-
-		private static SpriteChannelInfo GetBindPoseInfo([NotNull("ArgumentNullException")] Sprite sprite)
+		public static bool HasVertexAttribute([NotNull] this Sprite sprite, VertexAttribute channel)
 		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			return SpriteDataAccessExtensions.HasVertexAttribute_Injected(intPtr, channel);
+		}
+
+		public static void SetVertexCount([NotNull] this Sprite sprite, int count)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			SpriteDataAccessExtensions.SetVertexCount_Injected(intPtr, count);
+		}
+
+		public static int GetVertexCount([NotNull] this Sprite sprite)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			return SpriteDataAccessExtensions.GetVertexCount_Injected(intPtr);
+		}
+
+		private static SpriteChannelInfo GetBindPoseInfo([NotNull] Sprite sprite)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
 			SpriteChannelInfo spriteChannelInfo;
-			SpriteDataAccessExtensions.GetBindPoseInfo_Injected(sprite, out spriteChannelInfo);
+			SpriteDataAccessExtensions.GetBindPoseInfo_Injected(intPtr, out spriteChannelInfo);
 			return spriteChannelInfo;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetBindPoseData([NotNull("ArgumentNullException")] Sprite sprite, void* src, int count);
-
-		private static SpriteChannelInfo GetIndicesInfo([NotNull("ArgumentNullException")] Sprite sprite)
+		private unsafe static void SetBindPoseData([NotNull] Sprite sprite, void* src, int count)
 		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			SpriteDataAccessExtensions.SetBindPoseData_Injected(intPtr, src, count);
+		}
+
+		private static SpriteChannelInfo GetIndicesInfo([NotNull] Sprite sprite)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
 			SpriteChannelInfo spriteChannelInfo;
-			SpriteDataAccessExtensions.GetIndicesInfo_Injected(sprite, out spriteChannelInfo);
+			SpriteDataAccessExtensions.GetIndicesInfo_Injected(intPtr, out spriteChannelInfo);
 			return spriteChannelInfo;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetIndicesData([NotNull("ArgumentNullException")] Sprite sprite, void* src, int count);
-
-		private static SpriteChannelInfo GetChannelInfo([NotNull("ArgumentNullException")] Sprite sprite, VertexAttribute channel)
+		private unsafe static void SetIndicesData([NotNull] Sprite sprite, void* src, int count)
 		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			SpriteDataAccessExtensions.SetIndicesData_Injected(intPtr, src, count);
+		}
+
+		private static SpriteChannelInfo GetChannelInfo([NotNull] Sprite sprite, VertexAttribute channel)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
 			SpriteChannelInfo spriteChannelInfo;
-			SpriteDataAccessExtensions.GetChannelInfo_Injected(sprite, channel, out spriteChannelInfo);
+			SpriteDataAccessExtensions.GetChannelInfo_Injected(intPtr, channel, out spriteChannelInfo);
 			return spriteChannelInfo;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void SetChannelData([NotNull("ArgumentNullException")] Sprite sprite, VertexAttribute channel, void* src);
+		private unsafe static void SetChannelData([NotNull] Sprite sprite, VertexAttribute channel, void* src)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			SpriteDataAccessExtensions.SetChannelData_Injected(intPtr, channel, src);
+		}
+
+		private static SpriteBone[] GetBoneInfo([NotNull] Sprite sprite)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			return SpriteDataAccessExtensions.GetBoneInfo_Injected(intPtr);
+		}
+
+		private static void SetBoneData([NotNull] Sprite sprite, SpriteBone[] src)
+		{
+			if (sprite == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Sprite>(sprite);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(sprite, "sprite");
+			}
+			SpriteDataAccessExtensions.SetBoneData_Injected(intPtr, src);
+		}
+
+		internal static int GetPrimaryVertexStreamSize(Sprite sprite)
+		{
+			return SpriteDataAccessExtensions.GetPrimaryVertexStreamSize_Injected(Object.MarshalledUnityObject.Marshal<Sprite>(sprite));
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern SpriteBone[] GetBoneInfo([NotNull("ArgumentNullException")] Sprite sprite);
+		private static extern bool HasVertexAttribute_Injected(IntPtr sprite, VertexAttribute channel);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetBoneData([NotNull("ArgumentNullException")] Sprite sprite, SpriteBone[] src);
+		private static extern void SetVertexCount_Injected(IntPtr sprite, int count);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetPrimaryVertexStreamSize(Sprite sprite);
+		private static extern int GetVertexCount_Injected(IntPtr sprite);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetBindPoseInfo_Injected(Sprite sprite, out SpriteChannelInfo ret);
+		private static extern void GetBindPoseInfo_Injected(IntPtr sprite, out SpriteChannelInfo ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetIndicesInfo_Injected(Sprite sprite, out SpriteChannelInfo ret);
+		private unsafe static extern void SetBindPoseData_Injected(IntPtr sprite, void* src, int count);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetChannelInfo_Injected(Sprite sprite, VertexAttribute channel, out SpriteChannelInfo ret);
+		private static extern void GetIndicesInfo_Injected(IntPtr sprite, out SpriteChannelInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void SetIndicesData_Injected(IntPtr sprite, void* src, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetChannelInfo_Injected(IntPtr sprite, VertexAttribute channel, out SpriteChannelInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void SetChannelData_Injected(IntPtr sprite, VertexAttribute channel, void* src);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteBone[] GetBoneInfo_Injected(IntPtr sprite);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBoneData_Injected(IntPtr sprite, SpriteBone[] src);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPrimaryVertexStreamSize_Injected(IntPtr sprite);
 	}
 }

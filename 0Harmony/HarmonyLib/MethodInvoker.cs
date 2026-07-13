@@ -89,7 +89,7 @@ namespace HarmonyLib
 				MethodInvoker.EmitBoxIfNeeded(ilgenerator, methodInfo.ReturnType);
 			}
 			MethodInvoker.Emit(ilgenerator, OpCodes.Ret);
-			return (FastInvokeHandler)dynamicMethodDefinition.Generate().CreateDelegate(typeof(FastInvokeHandler));
+			return dynamicMethodDefinition.Generate().CreateDelegate<FastInvokeHandler>();
 		}
 
 		internal static void Emit(ILGenerator il, OpCode opcode)

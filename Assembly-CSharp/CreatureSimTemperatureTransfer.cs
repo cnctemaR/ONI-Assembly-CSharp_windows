@@ -12,7 +12,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 	{
 		this.primaryElement = base.GetComponent<PrimaryElement>();
 		this.average_kilowatts_exchanged = new RunningWeightedAverage(-10f, 10f, 20, true);
-		this.averageTemperatureTransferPerSecond = new AttributeModifier(this.temperatureAttributeName + "Delta", 0f, DUPLICANTS.MODIFIERS.TEMPEXCHANGE.NAME, false, true, false);
+		this.averageTemperatureTransferPerSecond = new AttributeModifier(this.temperatureAttributeName + "Delta", 0f, CreatureSimTemperatureTransfer.RESULT_MODIFIER_NAME, false, true, false);
 		this.GetAttributes().Add(this.averageTemperatureTransferPerSecond);
 		base.OnPrefabInit();
 	}
@@ -88,6 +88,8 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 	{
 		return SimUtil.CalculateEnergyFlowCreatures(cell, transfererPrimaryElement.Temperature, transfererPrimaryElement.Element.specificHeatCapacity, transfererPrimaryElement.Element.thermalConductivity, temperatureTransferer.SurfaceArea, temperatureTransferer.Thickness);
 	}
+
+	public static string RESULT_MODIFIER_NAME = DUPLICANTS.MODIFIERS.TEMPEXCHANGE.NAME;
 
 	public string temperatureAttributeName = "Temperature";
 

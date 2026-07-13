@@ -18,7 +18,7 @@ public class GravitasPosterSeedConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Granite, true);
 		component.Temperature = 294.15f;
-		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntryThenNext("story_trait_hijackheadquarters_initial", UI.USERMENUACTIONS.READLORE.SEARCH_MIRROR_SUCCESS.SEARCH1, new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextEmail), true));
+		LoreBearerUtil.AddLoreTo(gameObject, new LoreBearerAction(LoreBearerUtil.UnlockNextJournalEntry));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

@@ -35,7 +35,7 @@ public class WarpConduitSender : StateMachineComponent<WarpConduitSender.StatesI
 	private void FindPartner()
 	{
 		SaveGame.Instance.GetComponent<WorldGenSpawner>().SpawnTag("WarpConduitReceiver");
-		foreach (WarpConduitReceiver warpConduitReceiver in global::UnityEngine.Object.FindObjectsOfType<WarpConduitReceiver>())
+		foreach (WarpConduitReceiver warpConduitReceiver in global::UnityEngine.Object.FindObjectsByType<WarpConduitReceiver>(FindObjectsSortMode.None))
 		{
 			if (warpConduitReceiver.GetMyWorldId() != this.GetMyWorldId())
 			{

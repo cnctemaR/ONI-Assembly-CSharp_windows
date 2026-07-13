@@ -1,22 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Bindings;
 
 namespace Unity.Properties
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal readonly struct ConversionRegistry : IEqualityComparer<ConversionRegistry>
 	{
 		private ConversionRegistry(Dictionary<ConversionRegistry.ConverterKey, Delegate> storage)
 		{
 			this.m_Converters = storage;
-		}
-
-		public int ConverterCount
-		{
-			get
-			{
-				Dictionary<ConversionRegistry.ConverterKey, Delegate> converters = this.m_Converters;
-				return (converters != null) ? converters.Count : 0;
-			}
 		}
 
 		public static ConversionRegistry Create()
@@ -35,11 +28,6 @@ namespace Unity.Properties
 			converters[converterKey] = converter;
 		}
 
-		public void Unregister(Type source, Type destination)
-		{
-			this.m_Converters.Remove(new ConversionRegistry.ConverterKey(source, destination));
-		}
-
 		public Delegate GetConverter(Type source, Type destination)
 		{
 			ConversionRegistry.ConverterKey converterKey = new ConversionRegistry.ConverterKey(source, destination);
@@ -51,18 +39,6 @@ namespace Unity.Properties
 		{
 			converter = this.GetConverter(source, destination);
 			return converter != null;
-		}
-
-		public void GetAllTypesConvertingToType(Type type, List<Type> result)
-		{
-			foreach (ConversionRegistry.ConverterKey converterKey in this.m_Converters.Keys)
-			{
-				bool flag = converterKey.DestinationType == type;
-				if (flag)
-				{
-					result.Add(converterKey.SourceType);
-				}
-			}
 		}
 
 		public bool Equals(ConversionRegistry x, ConversionRegistry y)

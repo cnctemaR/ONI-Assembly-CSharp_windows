@@ -4,7 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.Rendering
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("PlatformDependent/Win/Profiler/PixBindings.h")]
+	[NativeConditional("PLATFORM_WIN && ENABLE_PROFILER")]
 	public class PIX
 	{
 		[FreeFunction("PIX::BeginGPUCapture")]

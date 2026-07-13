@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public struct InstructionOffset
+	internal struct InstructionOffset
 	{
 		public int Offset
 		{

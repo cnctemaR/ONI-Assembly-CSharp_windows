@@ -7,10 +7,10 @@ using System.Security.Policy;
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsDual)]
 	[Guid("17156360-2F1A-384A-BC52-FDE93C215C5B")]
+	[ComVisible(true)]
 	[TypeLibImportClass(typeof(Assembly))]
 	public interface _Assembly
 	{

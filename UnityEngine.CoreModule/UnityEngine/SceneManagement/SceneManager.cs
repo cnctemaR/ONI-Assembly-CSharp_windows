@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -10,14 +11,14 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.SceneManagement
 {
-	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Export/SceneManager/SceneManager.bindings.h")]
 	public class SceneManager
 	{
 		public static extern int sceneCount
 		{
-			[NativeMethod("GetSceneCount")]
 			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
+			[NativeMethod("GetSceneCount")]
 			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -25,8 +26,8 @@ namespace UnityEngine.SceneManagement
 
 		public static extern int loadedSceneCount
 		{
-			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
 			[NativeMethod("GetLoadedSceneCount")]
+			[StaticAccessor("GetSceneManager()", StaticAccessorType.Dot)]
 			[NativeHeader("Runtime/SceneManager/SceneManager.h")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
@@ -62,19 +63,57 @@ namespace UnityEngine.SceneManagement
 		}
 
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
-		public static Scene GetSceneByPath(string scenePath)
+		public unsafe static Scene GetSceneByPath(string scenePath)
 		{
-			Scene scene;
-			SceneManager.GetSceneByPath_Injected(scenePath, out scene);
-			return scene;
+			Scene scene2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(scenePath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = scenePath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Scene scene;
+				SceneManager.GetSceneByPath_Injected(ref managedSpanWrapper, out scene);
+			}
+			finally
+			{
+				char* ptr = null;
+				Scene scene;
+				scene2 = scene;
+			}
+			return scene2;
 		}
 
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
-		public static Scene GetSceneByName(string name)
+		public unsafe static Scene GetSceneByName(string name)
 		{
-			Scene scene;
-			SceneManager.GetSceneByName_Injected(name, out scene);
-			return scene;
+			Scene scene2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Scene scene;
+				SceneManager.GetSceneByName_Injected(ref managedSpanWrapper, out scene);
+			}
+			finally
+			{
+				char* ptr = null;
+				Scene scene;
+				scene2 = scene;
+			}
+			return scene2;
 		}
 
 		public static Scene GetSceneByBuildIndex(int buildIndex)
@@ -82,8 +121,8 @@ namespace UnityEngine.SceneManagement
 			return SceneManagerAPI.ActiveAPI.GetSceneByBuildIndex(buildIndex);
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static Scene GetSceneAt(int index)
 		{
 			Scene scene;
@@ -91,13 +130,36 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
-		public static Scene CreateScene([NotNull("ArgumentNullException")] string sceneName, CreateSceneParameters parameters)
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		public unsafe static Scene CreateScene([NotNull] string sceneName, CreateSceneParameters parameters)
 		{
-			Scene scene;
-			SceneManager.CreateScene_Injected(sceneName, ref parameters, out scene);
-			return scene;
+			if (sceneName == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(sceneName, "sceneName");
+			}
+			Scene scene2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(sceneName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = sceneName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Scene scene;
+				SceneManager.CreateScene_Injected(ref managedSpanWrapper, ref parameters, out scene);
+			}
+			finally
+			{
+				char* ptr = null;
+				Scene scene;
+				scene2 = scene;
+			}
+			return scene2;
 		}
 
 		[NativeThrows]
@@ -107,11 +169,12 @@ namespace UnityEngine.SceneManagement
 			return SceneManager.UnloadSceneInternal_Injected(ref scene, options);
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		private static AsyncOperation UnloadSceneAsyncInternal(Scene scene, UnloadSceneOptions options)
 		{
-			return SceneManager.UnloadSceneAsyncInternal_Injected(ref scene, options);
+			IntPtr intPtr = SceneManager.UnloadSceneAsyncInternal_Injected(ref scene, options);
+			return (intPtr == 0) ? null : AsyncOperation.BindingsMarshaller.ConvertToManaged(intPtr);
 		}
 
 		private static AsyncOperation LoadSceneAsyncNameIndexInternal(string sceneName, int sceneBuildIndex, LoadSceneParameters parameters, bool mustCompleteNextFrame)
@@ -145,18 +208,27 @@ namespace UnityEngine.SceneManagement
 			return asyncOperation;
 		}
 
-		[NativeThrows]
 		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
 		public static void MergeScenes(Scene sourceScene, Scene destinationScene)
 		{
 			SceneManager.MergeScenes_Injected(ref sourceScene, ref destinationScene);
 		}
 
-		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
-		public static void MoveGameObjectToScene([NotNull("ArgumentNullException")] GameObject go, Scene scene)
+		[StaticAccessor("SceneManagerBindings", StaticAccessorType.DoubleColon)]
+		public static void MoveGameObjectToScene([NotNull] GameObject go, Scene scene)
 		{
-			SceneManager.MoveGameObjectToScene_Injected(go, ref scene);
+			if (go == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(go, "go");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(go);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(go, "go");
+			}
+			SceneManager.MoveGameObjectToScene_Injected(intPtr, ref scene);
 		}
 
 		[NativeThrows]
@@ -166,7 +238,8 @@ namespace UnityEngine.SceneManagement
 			SceneManager.MoveGameObjectsToSceneByInstanceId_Injected(instanceIds, instanceCount, ref scene);
 		}
 
-		public static void MoveGameObjectsToScene(NativeArray<int> instanceIDs, Scene scene)
+		[Obsolete("Please use MoveGameObjectsToScene(NativeArray<EntityId>, Scene scene) with the EntityId parameter type instead.", false)]
+		public unsafe static void MoveGameObjectsToScene(NativeArray<int> instanceIDs, Scene scene)
 		{
 			bool flag = !instanceIDs.IsCreated;
 			if (flag)
@@ -176,7 +249,22 @@ namespace UnityEngine.SceneManagement
 			bool flag2 = instanceIDs.Length == 0;
 			if (!flag2)
 			{
+				Debug.Assert(sizeof(EntityId) == 4, "EntityId size mismatch. This method should be removed, as it relies on this size.");
 				SceneManager.MoveGameObjectsToSceneByInstanceId((IntPtr)instanceIDs.GetUnsafeReadOnlyPtr<int>(), instanceIDs.Length, scene);
+			}
+		}
+
+		public static void MoveGameObjectsToScene(NativeArray<EntityId> entityIds, Scene scene)
+		{
+			bool flag = !entityIds.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "entityIds");
+			}
+			bool flag2 = entityIds.Length == 0;
+			if (!flag2)
+			{
+				SceneManager.MoveGameObjectsToSceneByInstanceId((IntPtr)entityIds.GetUnsafeReadOnlyPtr<EntityId>(), entityIds.Length, scene);
 			}
 		}
 
@@ -373,40 +461,40 @@ namespace UnityEngine.SceneManagement
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CanSetAsActiveScene_Injected(ref Scene scene);
+		private static extern bool CanSetAsActiveScene_Injected([In] ref Scene scene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetActiveScene_Injected(out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SetActiveScene_Injected(ref Scene scene);
+		private static extern bool SetActiveScene_Injected([In] ref Scene scene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetSceneByPath_Injected(string scenePath, out Scene ret);
+		private static extern void GetSceneByPath_Injected(ref ManagedSpanWrapper scenePath, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetSceneByName_Injected(string name, out Scene ret);
+		private static extern void GetSceneByName_Injected(ref ManagedSpanWrapper name, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetSceneAt_Injected(int index, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CreateScene_Injected(string sceneName, ref CreateSceneParameters parameters, out Scene ret);
+		private static extern void CreateScene_Injected(ref ManagedSpanWrapper sceneName, [In] ref CreateSceneParameters parameters, out Scene ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool UnloadSceneInternal_Injected(ref Scene scene, UnloadSceneOptions options);
+		private static extern bool UnloadSceneInternal_Injected([In] ref Scene scene, UnloadSceneOptions options);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation UnloadSceneAsyncInternal_Injected(ref Scene scene, UnloadSceneOptions options);
+		private static extern IntPtr UnloadSceneAsyncInternal_Injected([In] ref Scene scene, UnloadSceneOptions options);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MergeScenes_Injected(ref Scene sourceScene, ref Scene destinationScene);
+		private static extern void MergeScenes_Injected([In] ref Scene sourceScene, [In] ref Scene destinationScene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MoveGameObjectToScene_Injected(GameObject go, ref Scene scene);
+		private static extern void MoveGameObjectToScene_Injected(IntPtr go, [In] ref Scene scene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MoveGameObjectsToSceneByInstanceId_Injected(IntPtr instanceIds, int instanceCount, ref Scene scene);
+		private static extern void MoveGameObjectsToSceneByInstanceId_Injected(IntPtr instanceIds, int instanceCount, [In] ref Scene scene);
 
 		internal static bool s_AllowLoadScene = true;
 	}

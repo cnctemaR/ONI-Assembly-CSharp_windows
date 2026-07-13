@@ -4,8 +4,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.PlayerLoop
 {
-	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	[RequiredByNativeCode]
+	[MovedFrom("UnityEngine.Experimental.PlayerLoop")]
 	public struct PostLateUpdate
 	{
 		[RequiredByNativeCode]
@@ -25,6 +25,16 @@ namespace UnityEngine.PlayerLoop
 
 		[RequiredByNativeCode]
 		public struct PlayerUpdateCanvases
+		{
+		}
+
+		[RequiredByNativeCode]
+		public struct AccessibilityLateUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
+		internal struct UIElementsRepaintPanels
 		{
 		}
 
@@ -104,6 +114,11 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		public struct RenderAs2DUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct SortingGroupsUpdate
 		{
 		}
@@ -124,7 +139,7 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
-		internal struct PlayerRenderUIEBatchModeOffscreen
+		internal struct UIElementsRenderBatchModeOffscreen
 		{
 		}
 

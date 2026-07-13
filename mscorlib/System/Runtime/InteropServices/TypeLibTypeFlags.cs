@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Flags]
 	[ComVisible(true)]
+	[Flags]
 	[Serializable]
 	public enum TypeLibTypeFlags
 	{

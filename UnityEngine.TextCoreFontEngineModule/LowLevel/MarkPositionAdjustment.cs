@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 	[UsedByNativeCode]
 	[Serializable]
 	internal struct MarkPositionAdjustment
@@ -42,8 +43,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[SerializeField]
 		private float m_XPositionAdjustment;
 
-		[SerializeField]
 		[NativeName("yCoordinate")]
+		[SerializeField]
 		private float m_YPositionAdjustment;
 	}
 }

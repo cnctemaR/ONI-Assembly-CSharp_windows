@@ -14,6 +14,8 @@ namespace UnityEngine
 		AllowVerticalFlip = 128,
 		NoResolvedColorSurface = 256,
 		DynamicallyScalable = 1024,
-		BindMS = 2048
+		BindMS = 2048,
+		ShadingRate = 16384,
+		DynamicallyScalableExplicit = 131072
 	}
 }

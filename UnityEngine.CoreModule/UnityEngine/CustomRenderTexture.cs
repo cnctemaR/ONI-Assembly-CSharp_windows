@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Internal;
@@ -17,8 +18,15 @@ namespace UnityEngine
 		private static extern void Internal_CreateCustomRenderTexture([Writable] CustomRenderTexture rt);
 
 		[NativeName("TriggerUpdate")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void TriggerUpdate(int count);
+		private void TriggerUpdate(int count)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CustomRenderTexture.TriggerUpdate_Injected(intPtr, count);
+		}
 
 		public void Update(int count)
 		{
@@ -32,8 +40,15 @@ namespace UnityEngine
 		}
 
 		[NativeName("TriggerInitialization")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void TriggerInitialization();
+		private void TriggerInitialization()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CustomRenderTexture.TriggerInitialization_Injected(intPtr);
+		}
 
 		public void Initialize()
 		{
@@ -41,36 +56,96 @@ namespace UnityEngine
 			CustomRenderTextureManager.InvokeTriggerInitialize(this);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ClearUpdateZones();
-
-		public extern Material material
+		public void ClearUpdateZones()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CustomRenderTexture.ClearUpdateZones_Injected(intPtr);
 		}
 
-		public extern Material initializationMaterial
+		public Material material
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Material>(CustomRenderTexture.get_material_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_material_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(value));
+			}
 		}
 
-		public extern Texture initializationTexture
+		public Material initializationMaterial
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Material>(CustomRenderTexture.get_initializationMaterial_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_initializationMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(value));
+			}
+		}
+
+		public Texture initializationTexture
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Texture>(CustomRenderTexture.get_initializationTexture_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_initializationTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(value));
+			}
 		}
 
 		[FreeFunction(Name = "CustomRenderTextureScripting::GetUpdateZonesInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetUpdateZonesInternal([NotNull("ArgumentNullException")] object updateZones);
+		internal void GetUpdateZonesInternal([NotNull] object updateZones)
+		{
+			if (updateZones == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(updateZones, "updateZones");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CustomRenderTexture.GetUpdateZonesInternal_Injected(intPtr, updateZones);
+		}
 
 		public void GetUpdateZones(List<CustomRenderTextureUpdateZone> updateZones)
 		{
@@ -78,15 +153,41 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "CustomRenderTextureScripting::SetUpdateZonesInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetUpdateZonesInternal([Unmarshalled] CustomRenderTextureUpdateZone[] updateZones);
+		private unsafe void SetUpdateZonesInternal(CustomRenderTextureUpdateZone[] updateZones)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<CustomRenderTextureUpdateZone> span = new Span<CustomRenderTextureUpdateZone>(updateZones);
+			fixed (CustomRenderTextureUpdateZone* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CustomRenderTexture.SetUpdateZonesInternal_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction(Name = "CustomRenderTextureScripting::GetDoubleBufferRenderTexture", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern RenderTexture GetDoubleBufferRenderTexture();
+		public RenderTexture GetDoubleBufferRenderTexture()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<RenderTexture>(CustomRenderTexture.GetDoubleBufferRenderTexture_Injected(intPtr));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EnsureDoubleBufferConsistency();
+		public void EnsureDoubleBufferConsistency()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CustomRenderTexture.EnsureDoubleBufferConsistency_Injected(intPtr);
+		}
 
 		public void SetUpdateZones(CustomRenderTextureUpdateZone[] updateZones)
 		{
@@ -98,95 +199,236 @@ namespace UnityEngine
 			this.SetUpdateZonesInternal(updateZones);
 		}
 
-		public extern CustomRenderTextureInitializationSource initializationSource
+		public CustomRenderTextureInitializationSource initializationSource
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_initializationSource_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_initializationSource_Injected(intPtr, value);
+			}
 		}
 
 		public Color initializationColor
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Color color;
-				this.get_initializationColor_Injected(out color);
+				CustomRenderTexture.get_initializationColor_Injected(intPtr, out color);
 				return color;
 			}
 			set
 			{
-				this.set_initializationColor_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_initializationColor_Injected(intPtr, ref value);
 			}
 		}
 
-		public extern CustomRenderTextureUpdateMode updateMode
+		public CustomRenderTextureUpdateMode updateMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_updateMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_updateMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern CustomRenderTextureUpdateMode initializationMode
+		public CustomRenderTextureUpdateMode initializationMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_initializationMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_initializationMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern CustomRenderTextureUpdateZoneSpace updateZoneSpace
+		public CustomRenderTextureUpdateZoneSpace updateZoneSpace
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_updateZoneSpace_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_updateZoneSpace_Injected(intPtr, value);
+			}
 		}
 
-		public extern int shaderPass
+		public int shaderPass
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_shaderPass_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_shaderPass_Injected(intPtr, value);
+			}
 		}
 
-		public extern uint cubemapFaceMask
+		public uint cubemapFaceMask
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_cubemapFaceMask_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_cubemapFaceMask_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool doubleBuffered
+		public bool doubleBuffered
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_doubleBuffered_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_doubleBuffered_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool wrapUpdateZones
+		public bool wrapUpdateZones
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_wrapUpdateZones_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_wrapUpdateZones_Injected(intPtr, value);
+			}
 		}
 
-		public extern float updatePeriod
+		public float updatePeriod
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CustomRenderTexture.get_updatePeriod_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CustomRenderTexture>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CustomRenderTexture.set_updatePeriod_Injected(intPtr, value);
+			}
 		}
 
 		public CustomRenderTexture(int width, int height, RenderTextureFormat format, [DefaultValue("RenderTextureReadWrite.Default")] RenderTextureReadWrite readWrite)
 			: this(width, height, RenderTexture.GetCompatibleFormat(format, readWrite))
 		{
+			bool flag = this != null;
+			if (flag)
+			{
+				base.SetShadowSamplingMode(RenderTexture.GetShadowSamplingModeForFormat(format));
+			}
 		}
 
 		[ExcludeFromDocs]
@@ -209,13 +451,14 @@ namespace UnityEngine
 			if (flag)
 			{
 				base.depthStencilFormat = SystemInfo.GetGraphicsFormat(defaultFormat);
+				base.SetShadowSamplingMode(RenderTexture.GetShadowSamplingModeForFormat(defaultFormat));
 			}
 		}
 
 		[ExcludeFromDocs]
 		public CustomRenderTexture(int width, int height, GraphicsFormat format)
 		{
-			bool flag = format != GraphicsFormat.None && !base.ValidateFormat(format, FormatUsage.Render);
+			bool flag = format != GraphicsFormat.None && !base.ValidateFormat(format, GraphicsFormatUsage.Render);
 			if (!flag)
 			{
 				CustomRenderTexture.Internal_CreateCustomRenderTexture(this);
@@ -227,9 +470,102 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_initializationColor_Injected(out Color ret);
+		private static extern void TriggerUpdate_Injected(IntPtr _unity_self, int count);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_initializationColor_Injected(ref Color value);
+		private static extern void TriggerInitialization_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearUpdateZones_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_material_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_material_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_initializationMaterial_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_initializationMaterial_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_initializationTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_initializationTexture_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetUpdateZonesInternal_Injected(IntPtr _unity_self, object updateZones);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetUpdateZonesInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper updateZones);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetDoubleBufferRenderTexture_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnsureDoubleBufferConsistency_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern CustomRenderTextureInitializationSource get_initializationSource_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_initializationSource_Injected(IntPtr _unity_self, CustomRenderTextureInitializationSource value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_initializationColor_Injected(IntPtr _unity_self, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_initializationColor_Injected(IntPtr _unity_self, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern CustomRenderTextureUpdateMode get_updateMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_updateMode_Injected(IntPtr _unity_self, CustomRenderTextureUpdateMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern CustomRenderTextureUpdateMode get_initializationMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_initializationMode_Injected(IntPtr _unity_self, CustomRenderTextureUpdateMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern CustomRenderTextureUpdateZoneSpace get_updateZoneSpace_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_updateZoneSpace_Injected(IntPtr _unity_self, CustomRenderTextureUpdateZoneSpace value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_shaderPass_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_shaderPass_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_cubemapFaceMask_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cubemapFaceMask_Injected(IntPtr _unity_self, uint value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_doubleBuffered_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_doubleBuffered_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_wrapUpdateZones_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_wrapUpdateZones_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_updatePeriod_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_updatePeriod_Injected(IntPtr _unity_self, float value);
 	}
 }

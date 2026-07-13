@@ -11,14 +11,14 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/Renderer.h")]
-	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[UsedByNativeCode]
 	public class Renderer : Component
 	{
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Use shadowCastingMode instead.", false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool castShadows
 		{
 			get
@@ -62,14 +62,24 @@ namespace UnityEngine
 			[FreeFunction(Name = "RendererScripting::GetWorldBounds", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_bounds_Injected(out bounds);
+				Renderer.get_bounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 			[NativeName("SetWorldAABB")]
 			set
 			{
-				this.set_bounds_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_bounds_Injected(intPtr, ref value);
 			}
 		}
 
@@ -78,58 +88,162 @@ namespace UnityEngine
 			[FreeFunction(Name = "RendererScripting::GetLocalBounds", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_localBounds_Injected(out bounds);
+				Renderer.get_localBounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 			[NativeName("SetLocalAABB")]
 			set
 			{
-				this.set_localBounds_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_localBounds_Injected(intPtr, ref value);
 			}
 		}
 
 		[NativeName("ResetWorldAABB")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetBounds();
+		public void ResetBounds()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.ResetBounds_Injected(intPtr);
+		}
 
 		[NativeName("ResetLocalAABB")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetLocalBounds();
+		public void ResetLocalBounds()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.ResetLocalBounds_Injected(intPtr);
+		}
+
+		[NativeName("HasCustomWorldAABB")]
+		internal bool Internal_HasCustomBounds()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.Internal_HasCustomBounds_Injected(intPtr);
+		}
+
+		[NativeName("HasCustomLocalAABB")]
+		internal bool Internal_HasCustomLocalBounds()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.Internal_HasCustomLocalBounds_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "RendererScripting::SetStaticLightmapST", HasExplicitThis = true)]
 		private void SetStaticLightmapST(Vector4 st)
 		{
-			this.SetStaticLightmapST_Injected(ref st);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.SetStaticLightmapST_Injected(intPtr, ref st);
 		}
 
 		[FreeFunction(Name = "RendererScripting::GetMaterial", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Material GetMaterial();
+		private Material GetMaterial()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Material>(Renderer.GetMaterial_Injected(intPtr));
+		}
 
 		[FreeFunction(Name = "RendererScripting::GetSharedMaterial", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Material GetSharedMaterial();
+		private Material GetSharedMaterial()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Material>(Renderer.GetSharedMaterial_Injected(intPtr));
+		}
 
 		[FreeFunction(Name = "RendererScripting::SetMaterial", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMaterial(Material m);
+		private void SetMaterial(Material m)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.SetMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(m));
+		}
 
 		[FreeFunction(Name = "RendererScripting::GetMaterialArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Material[] GetMaterialArray();
+		private Material[] GetMaterialArray()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.GetMaterialArray_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "RendererScripting::GetMaterialArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopyMaterialArray([Out] Material[] m);
+		private void CopyMaterialArray([Out] Material[] m)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.CopyMaterialArray_Injected(intPtr, m);
+		}
 
 		[FreeFunction(Name = "RendererScripting::GetSharedMaterialArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CopySharedMaterialArray([Out] Material[] m);
+		private void CopySharedMaterialArray([Out] Material[] m)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.CopySharedMaterialArray_Injected(intPtr, m);
+		}
 
 		[FreeFunction(Name = "RendererScripting::SetMaterialArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMaterialArray([NotNull("ArgumentNullException")] Material[] m, int length);
+		private void SetMaterialArray([NotNull] Material[] m, int length)
+		{
+			if (m == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(m, "m");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.SetMaterialArray_Injected(intPtr, m, length);
+		}
 
 		private void SetMaterialArray(Material[] m)
 		{
@@ -137,24 +251,77 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "RendererScripting::SetPropertyBlock", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_SetPropertyBlock(MaterialPropertyBlock properties);
+		internal void Internal_SetPropertyBlock(MaterialPropertyBlock properties)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.Internal_SetPropertyBlock_Injected(intPtr, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+		}
 
 		[FreeFunction(Name = "RendererScripting::GetPropertyBlock", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_GetPropertyBlock([NotNull("ArgumentNullException")] MaterialPropertyBlock dest);
+		internal void Internal_GetPropertyBlock([NotNull] MaterialPropertyBlock dest)
+		{
+			if (dest == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(dest, "dest");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(dest);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(dest, "dest");
+			}
+			Renderer.Internal_GetPropertyBlock_Injected(intPtr, intPtr2);
+		}
 
 		[FreeFunction(Name = "RendererScripting::SetPropertyBlockMaterialIndex", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_SetPropertyBlockMaterialIndex(MaterialPropertyBlock properties, int materialIndex);
+		internal void Internal_SetPropertyBlockMaterialIndex(MaterialPropertyBlock properties, int materialIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.Internal_SetPropertyBlockMaterialIndex_Injected(intPtr, (properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties), materialIndex);
+		}
 
 		[FreeFunction(Name = "RendererScripting::GetPropertyBlockMaterialIndex", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_GetPropertyBlockMaterialIndex([NotNull("ArgumentNullException")] MaterialPropertyBlock dest, int materialIndex);
+		internal void Internal_GetPropertyBlockMaterialIndex([NotNull] MaterialPropertyBlock dest, int materialIndex)
+		{
+			if (dest == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(dest, "dest");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(dest);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(dest, "dest");
+			}
+			Renderer.Internal_GetPropertyBlockMaterialIndex_Injected(intPtr, intPtr2, materialIndex);
+		}
 
 		[FreeFunction(Name = "RendererScripting::HasPropertyBlock", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasPropertyBlock();
+		public bool HasPropertyBlock()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.HasPropertyBlock_Injected(intPtr);
+		}
 
 		public void SetPropertyBlock(MaterialPropertyBlock properties)
 		{
@@ -177,55 +344,205 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "RendererScripting::GetClosestReflectionProbes", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetClosestReflectionProbesInternal(object result);
-
-		public extern bool enabled
+		private void GetClosestReflectionProbesInternal(object result)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.GetClosestReflectionProbesInternal_Injected(intPtr, result);
 		}
 
-		public extern bool isVisible
+		[NativeName("Renderer::GetMaskInteraction")]
+		internal SpriteMaskInteraction Internal_GetSpriteMaskInteraction()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.Internal_GetSpriteMaskInteraction_Injected(intPtr);
+		}
+
+		[NativeName("Renderer::SetMaskInteraction")]
+		internal void Internal_SetSpriteMaskInteraction(SpriteMaskInteraction maskInteraction)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.Internal_SetSpriteMaskInteraction_Injected(intPtr, maskInteraction);
+		}
+
+		public bool enabled
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_enabled_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_enabled_Injected(intPtr, value);
+			}
+		}
+
+		public bool isVisible
 		{
 			[NativeName("IsVisibleInScene")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_isVisible_Injected(intPtr);
+			}
 		}
 
-		public extern ShadowCastingMode shadowCastingMode
+		public ShadowCastingMode shadowCastingMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_shadowCastingMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_shadowCastingMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool receiveShadows
+		public bool receiveShadows
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_receiveShadows_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_receiveShadows_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool forceRenderingOff
+		public bool forceRenderingOff
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_forceRenderingOff_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_forceRenderingOff_Injected(intPtr, value);
+			}
+		}
+
+		internal bool allowGPUDrivenRendering
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_allowGPUDrivenRendering_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_allowGPUDrivenRendering_Injected(intPtr, value);
+			}
+		}
+
+		internal bool smallMeshCulling
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_smallMeshCulling_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_smallMeshCulling_Injected(intPtr, value);
+			}
 		}
 
 		[NativeName("GetIsStaticShadowCaster")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetIsStaticShadowCaster();
+		private bool GetIsStaticShadowCaster()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.GetIsStaticShadowCaster_Injected(intPtr);
+		}
 
 		[NativeName("SetIsStaticShadowCaster")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetIsStaticShadowCaster(bool value);
+		private void SetIsStaticShadowCaster(bool value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.SetIsStaticShadowCaster_Injected(intPtr, value);
+		}
 
 		public bool staticShadowCaster
 		{
@@ -239,146 +556,499 @@ namespace UnityEngine
 			}
 		}
 
-		public extern MotionVectorGenerationMode motionVectorGenerationMode
+		public MotionVectorGenerationMode motionVectorGenerationMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_motionVectorGenerationMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_motionVectorGenerationMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern LightProbeUsage lightProbeUsage
+		public LightProbeUsage lightProbeUsage
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_lightProbeUsage_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_lightProbeUsage_Injected(intPtr, value);
+			}
 		}
 
-		public extern ReflectionProbeUsage reflectionProbeUsage
+		public ReflectionProbeUsage reflectionProbeUsage
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_reflectionProbeUsage_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_reflectionProbeUsage_Injected(intPtr, value);
+			}
 		}
 
-		public extern uint renderingLayerMask
+		public uint renderingLayerMask
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_renderingLayerMask_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_renderingLayerMask_Injected(intPtr, value);
+			}
 		}
 
-		public extern int rendererPriority
+		public int rendererPriority
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_rendererPriority_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_rendererPriority_Injected(intPtr, value);
+			}
 		}
 
-		public extern RayTracingMode rayTracingMode
+		public RayTracingMode rayTracingMode
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_rayTracingMode_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_rayTracingMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern string sortingLayerName
+		public RayTracingAccelerationStructureBuildFlags rayTracingAccelerationStructureBuildFlags
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_rayTracingAccelerationStructureBuildFlags_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_rayTracingAccelerationStructureBuildFlags_Injected(intPtr, value);
+			}
 		}
 
-		public extern int sortingLayerID
+		public bool rayTracingAccelerationStructureBuildFlagsOverride
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_rayTracingAccelerationStructureBuildFlagsOverride_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_rayTracingAccelerationStructureBuildFlagsOverride_Injected(intPtr, value);
+			}
 		}
 
-		public extern int sortingOrder
+		public unsafe string sortingLayerName
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					Renderer.get_sortingLayerName_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Renderer.set_sortingLayerName_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
-		internal extern uint sortingKey
+		public int sortingLayerID
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_sortingLayerID_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_sortingLayerID_Injected(intPtr, value);
+			}
 		}
 
-		internal extern int sortingGroupID
+		public int sortingOrder
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_sortingOrder_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_sortingOrder_Injected(intPtr, value);
+			}
 		}
 
-		internal extern int sortingGroupOrder
+		internal uint sortingKey
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_sortingKey_Injected(intPtr);
+			}
 		}
 
-		internal extern uint sortingGroupKey
+		internal int sortingGroupID
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_sortingGroupID_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_sortingGroupID_Injected(intPtr, value);
+			}
+		}
+
+		internal int sortingGroupOrder
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_sortingGroupOrder_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_sortingGroupOrder_Injected(intPtr, value);
+			}
+		}
+
+		internal uint sortingGroupKey
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_sortingGroupKey_Injected(intPtr);
+			}
+		}
+
+		public bool isLOD0
+		{
+			[NativeName("IsLOD0")]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_isLOD0_Injected(intPtr);
+			}
 		}
 
 		[NativeProperty("IsDynamicOccludee")]
-		public extern bool allowOcclusionWhenDynamic
+		public bool allowOcclusionWhenDynamic
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_allowOcclusionWhenDynamic_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_allowOcclusionWhenDynamic_Injected(intPtr, value);
+			}
+		}
+
+		[NativeProperty("ForceMeshLod")]
+		public short forceMeshLod
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_forceMeshLod_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_forceMeshLod_Injected(intPtr, value);
+			}
+		}
+
+		[NativeProperty("MeshLodSelectionBias")]
+		public float meshLodSelectionBias
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_meshLodSelectionBias_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_meshLodSelectionBias_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("StaticBatchRoot")]
-		internal extern Transform staticBatchRootTransform
+		internal Transform staticBatchRootTransform
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Transform>(Renderer.get_staticBatchRootTransform_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_staticBatchRootTransform_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Transform>(value));
+			}
 		}
 
-		internal extern int staticBatchIndex
+		internal int staticBatchIndex
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_staticBatchIndex_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetStaticBatchInfo(int firstSubMesh, int subMeshCount);
+		internal void SetStaticBatchInfo(int firstSubMesh, int subMeshCount)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.SetStaticBatchInfo_Injected(intPtr, firstSubMesh, subMeshCount);
+		}
 
-		public extern bool isPartOfStaticBatch
+		public bool isPartOfStaticBatch
 		{
 			[NativeName("IsPartOfStaticBatch")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Renderer.get_isPartOfStaticBatch_Injected(intPtr);
+			}
 		}
 
 		public Matrix4x4 worldToLocalMatrix
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_worldToLocalMatrix_Injected(out matrix4x);
+				Renderer.get_worldToLocalMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 		}
@@ -387,48 +1057,105 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_localToWorldMatrix_Injected(out matrix4x);
+				Renderer.get_localToWorldMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 		}
 
-		public extern GameObject lightProbeProxyVolumeOverride
+		public GameObject lightProbeProxyVolumeOverride
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<GameObject>(Renderer.get_lightProbeProxyVolumeOverride_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_lightProbeProxyVolumeOverride_Injected(intPtr, Object.MarshalledUnityObject.Marshal<GameObject>(value));
+			}
 		}
 
-		public extern Transform probeAnchor
+		public Transform probeAnchor
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Transform>(Renderer.get_probeAnchor_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Renderer.set_probeAnchor_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Transform>(value));
+			}
 		}
 
 		[NativeName("GetLightmapIndexInt")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetLightmapIndex(LightmapType lt);
+		private int GetLightmapIndex(LightmapType lt)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.GetLightmapIndex_Injected(intPtr, lt);
+		}
 
 		[NativeName("SetLightmapIndexInt")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLightmapIndex(int index, LightmapType lt);
+		private void SetLightmapIndex(int index, LightmapType lt)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.SetLightmapIndex_Injected(intPtr, index, lt);
+		}
 
 		[NativeName("GetLightmapST")]
 		private Vector4 GetLightmapST(LightmapType lt)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetLightmapST_Injected(lt, out vector);
+			Renderer.GetLightmapST_Injected(intPtr, lt, out vector);
 			return vector;
 		}
 
 		[NativeName("SetLightmapST")]
 		private void SetLightmapST(Vector4 st, LightmapType lt)
 		{
-			this.SetLightmapST_Injected(ref st, lt);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Renderer.SetLightmapST_Injected(intPtr, ref st, lt);
 		}
 
 		public int lightmapIndex
@@ -479,12 +1206,26 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetMaterialCount();
+		private int GetMaterialCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.GetMaterialCount_Injected(intPtr);
+		}
 
 		[NativeName("GetMaterialArray")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Material[] GetSharedMaterialArray();
+		private Material[] GetSharedMaterialArray()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Renderer.GetSharedMaterialArray_Injected(intPtr);
+		}
 
 		public Material[] materials
 		{
@@ -542,7 +1283,7 @@ namespace UnityEngine
 				throw new ArgumentNullException("The result material list cannot be null.", "m");
 			}
 			NoAllocHelpers.EnsureListElemCount<Material>(m, this.GetMaterialCount());
-			this.CopyMaterialArray(NoAllocHelpers.ExtractArrayFromListT<Material>(m));
+			this.CopyMaterialArray(NoAllocHelpers.ExtractArrayFromList<Material>(m));
 		}
 
 		public void SetSharedMaterials(List<Material> materials)
@@ -552,7 +1293,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("The material list to set cannot be null.", "materials");
 			}
-			this.SetMaterialArray(NoAllocHelpers.ExtractArrayFromListT<Material>(materials), materials.Count);
+			this.SetMaterialArray(NoAllocHelpers.ExtractArrayFromList<Material>(materials), materials.Count);
 		}
 
 		public void SetMaterials(List<Material> materials)
@@ -562,7 +1303,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("The material list to set cannot be null.", "materials");
 			}
-			this.SetMaterialArray(NoAllocHelpers.ExtractArrayFromListT<Material>(materials), materials.Count);
+			this.SetMaterialArray(NoAllocHelpers.ExtractArrayFromList<Material>(materials), materials.Count);
 		}
 
 		public void GetSharedMaterials(List<Material> m)
@@ -573,7 +1314,7 @@ namespace UnityEngine
 				throw new ArgumentNullException("The result material list cannot be null.", "m");
 			}
 			NoAllocHelpers.EnsureListElemCount<Material>(m, this.GetMaterialCount());
-			this.CopySharedMaterialArray(NoAllocHelpers.ExtractArrayFromListT<Material>(m));
+			this.CopySharedMaterialArray(NoAllocHelpers.ExtractArrayFromList<Material>(m));
 		}
 
 		public void GetClosestReflectionProbes(List<ReflectionProbeBlendInfo> result)
@@ -581,31 +1322,293 @@ namespace UnityEngine
 			this.GetClosestReflectionProbesInternal(result);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_bounds_Injected(out Bounds ret);
+		public LODGroup LODGroup
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Renderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<LODGroup>(Renderer.get_LODGroup_Injected(intPtr));
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_bounds_Injected(ref Bounds value);
+		private static extern void get_bounds_Injected(IntPtr _unity_self, out Bounds ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localBounds_Injected(out Bounds ret);
+		private static extern void set_bounds_Injected(IntPtr _unity_self, [In] ref Bounds value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_localBounds_Injected(ref Bounds value);
+		private static extern void get_localBounds_Injected(IntPtr _unity_self, out Bounds ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetStaticLightmapST_Injected(ref Vector4 st);
+		private static extern void set_localBounds_Injected(IntPtr _unity_self, [In] ref Bounds value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_worldToLocalMatrix_Injected(out Matrix4x4 ret);
+		private static extern void ResetBounds_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localToWorldMatrix_Injected(out Matrix4x4 ret);
+		private static extern void ResetLocalBounds_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetLightmapST_Injected(LightmapType lt, out Vector4 ret);
+		private static extern bool Internal_HasCustomBounds_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLightmapST_Injected(ref Vector4 st, LightmapType lt);
+		private static extern bool Internal_HasCustomLocalBounds_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStaticLightmapST_Injected(IntPtr _unity_self, [In] ref Vector4 st);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetMaterial_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSharedMaterial_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMaterial_Injected(IntPtr _unity_self, IntPtr m);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Material[] GetMaterialArray_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyMaterialArray_Injected(IntPtr _unity_self, [Out] Material[] m);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopySharedMaterialArray_Injected(IntPtr _unity_self, [Out] Material[] m);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMaterialArray_Injected(IntPtr _unity_self, Material[] m, int length);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetPropertyBlock_Injected(IntPtr _unity_self, IntPtr properties);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetPropertyBlock_Injected(IntPtr _unity_self, IntPtr dest);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetPropertyBlockMaterialIndex_Injected(IntPtr _unity_self, IntPtr properties, int materialIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetPropertyBlockMaterialIndex_Injected(IntPtr _unity_self, IntPtr dest, int materialIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasPropertyBlock_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetClosestReflectionProbesInternal_Injected(IntPtr _unity_self, object result);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern SpriteMaskInteraction Internal_GetSpriteMaskInteraction_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetSpriteMaskInteraction_Injected(IntPtr _unity_self, SpriteMaskInteraction maskInteraction);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enabled_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enabled_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isVisible_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ShadowCastingMode get_shadowCastingMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_shadowCastingMode_Injected(IntPtr _unity_self, ShadowCastingMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_receiveShadows_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_receiveShadows_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_forceRenderingOff_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_forceRenderingOff_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_allowGPUDrivenRendering_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_allowGPUDrivenRendering_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_smallMeshCulling_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_smallMeshCulling_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetIsStaticShadowCaster_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIsStaticShadowCaster_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern MotionVectorGenerationMode get_motionVectorGenerationMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_motionVectorGenerationMode_Injected(IntPtr _unity_self, MotionVectorGenerationMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern LightProbeUsage get_lightProbeUsage_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_lightProbeUsage_Injected(IntPtr _unity_self, LightProbeUsage value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ReflectionProbeUsage get_reflectionProbeUsage_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_reflectionProbeUsage_Injected(IntPtr _unity_self, ReflectionProbeUsage value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_renderingLayerMask_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_renderingLayerMask_Injected(IntPtr _unity_self, uint value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_rendererPriority_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rendererPriority_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RayTracingMode get_rayTracingMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rayTracingMode_Injected(IntPtr _unity_self, RayTracingMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern RayTracingAccelerationStructureBuildFlags get_rayTracingAccelerationStructureBuildFlags_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rayTracingAccelerationStructureBuildFlags_Injected(IntPtr _unity_self, RayTracingAccelerationStructureBuildFlags value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_rayTracingAccelerationStructureBuildFlagsOverride_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_rayTracingAccelerationStructureBuildFlagsOverride_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_sortingLayerName_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingLayerName_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sortingLayerID_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingLayerID_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sortingOrder_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingOrder_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_sortingKey_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sortingGroupID_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingGroupID_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_sortingGroupOrder_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sortingGroupOrder_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint get_sortingGroupKey_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isLOD0_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_allowOcclusionWhenDynamic_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_allowOcclusionWhenDynamic_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern short get_forceMeshLod_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_forceMeshLod_Injected(IntPtr _unity_self, short value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_meshLodSelectionBias_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_meshLodSelectionBias_Injected(IntPtr _unity_self, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_staticBatchRootTransform_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_staticBatchRootTransform_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_staticBatchIndex_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStaticBatchInfo_Injected(IntPtr _unity_self, int firstSubMesh, int subMeshCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isPartOfStaticBatch_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_worldToLocalMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_localToWorldMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_lightProbeProxyVolumeOverride_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_lightProbeProxyVolumeOverride_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_probeAnchor_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_probeAnchor_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetLightmapIndex_Injected(IntPtr _unity_self, LightmapType lt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLightmapIndex_Injected(IntPtr _unity_self, int index, LightmapType lt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLightmapST_Injected(IntPtr _unity_self, LightmapType lt, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLightmapST_Injected(IntPtr _unity_self, [In] ref Vector4 st, LightmapType lt);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMaterialCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Material[] GetSharedMaterialArray_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_LODGroup_Injected(IntPtr _unity_self);
 	}
 }

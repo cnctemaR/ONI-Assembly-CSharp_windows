@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngineInternal;
 
 namespace UnityEngine.UIElements
 {
@@ -146,75 +148,87 @@ namespace UnityEngine.UIElements
 
 		public void OnPointerMove(PointerEventData eventData)
 		{
-			if (this.m_Panel == null || !this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
+			if (!this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
 			{
 				return;
 			}
 			using (PointerMoveEvent pooled = PointerEventBase<PointerMoveEvent>.GetPooled(this.m_PointerEvent))
 			{
+				this.UpdatePointerEventTarget<PointerMoveEvent>(pooled, this.m_PointerEvent);
 				this.SendEvent(pooled, eventData);
 			}
 		}
 
 		public void OnPointerUp(PointerEventData eventData)
 		{
-			if (this.m_Panel == null || !this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Up))
+			if (!this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Up))
 			{
 				return;
 			}
 			using (PointerUpEvent pooled = PointerEventBase<PointerUpEvent>.GetPooled(this.m_PointerEvent))
 			{
+				this.UpdatePointerEventTarget<PointerUpEvent>(pooled, this.m_PointerEvent);
 				this.SendEvent(pooled, eventData);
 				if (pooled.pressedButtons == 0)
 				{
-					PointerDeviceState.SetPlayerPanelWithSoftPointerCapture(pooled.pointerId, null);
+					PointerDeviceState.SetElementWithSoftPointerCapture(pooled.pointerId, null, null);
 				}
 			}
 		}
 
 		public void OnPointerDown(PointerEventData eventData)
 		{
-			if (this.m_Panel == null || !this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Down))
+			if (!this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Down))
 			{
 				return;
 			}
+			Focusable focusable = this.currentFocusedElement ?? this.m_Panel.visualTree;
+			this.ProcessImguiEvents(focusable);
 			if (this.eventSystem != null)
 			{
 				this.eventSystem.SetSelectedGameObject(this.selectableGameObject);
 			}
 			using (PointerDownEvent pooled = PointerEventBase<PointerDownEvent>.GetPooled(this.m_PointerEvent))
 			{
+				this.UpdatePointerEventTarget<PointerDownEvent>(pooled, this.m_PointerEvent);
 				this.SendEvent(pooled, eventData);
-				PointerDeviceState.SetPlayerPanelWithSoftPointerCapture(pooled.pointerId, this.m_Panel);
+				PointerDeviceState.SetElementWithSoftPointerCapture(pooled.pointerId, pooled.elementTarget, eventData.pressEventCamera);
 			}
 		}
 
 		public void OnPointerExit(PointerEventData eventData)
 		{
-			if (this.m_Panel == null || !this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
+			this.m_ContainedPointers.Remove(eventData);
+			if (!this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
 			{
+				if (this.m_Panel != null && !this.m_Panel.isFlat)
+				{
+					this.m_Panel.PointerLeavesPanel(this.m_PointerEvent.pointerId);
+				}
 				return;
 			}
 			if (eventData.pointerCurrentRaycast.gameObject == base.gameObject && eventData.pointerPressRaycast.gameObject != base.gameObject && this.m_PointerEvent.pointerId != PointerId.mousePointerId)
 			{
 				using (PointerCancelEvent pooled = PointerEventBase<PointerCancelEvent>.GetPooled(this.m_PointerEvent))
 				{
+					this.UpdatePointerEventTarget<PointerCancelEvent>(pooled, this.m_PointerEvent);
 					this.SendEvent(pooled, eventData);
 					if (pooled.pressedButtons == 0)
 					{
-						PointerDeviceState.SetPlayerPanelWithSoftPointerCapture(pooled.pointerId, null);
+						PointerDeviceState.SetElementWithSoftPointerCapture(pooled.pointerId, null, null);
 					}
 				}
 			}
-			this.m_Panel.PointerLeavesPanel(this.m_PointerEvent.pointerId, this.m_PointerEvent.position);
+			this.m_Panel.PointerLeavesPanel(this.m_PointerEvent.pointerId);
 		}
 
 		public void OnPointerEnter(PointerEventData eventData)
 		{
-			if (this.m_Panel == null || !this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
+			if (!this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
 			{
 				return;
 			}
+			this.m_ContainedPointers.Add(eventData);
 			this.m_Panel.PointerEntersPanel(this.m_PointerEvent.pointerId, this.m_PointerEvent.position);
 		}
 
@@ -231,7 +245,7 @@ namespace UnityEngine.UIElements
 			}
 			Focusable focusable = this.currentFocusedElement ?? this.m_Panel.visualTree;
 			this.ProcessImguiEvents(focusable);
-			using (NavigationSubmitEvent pooled = NavigationEventBase<NavigationSubmitEvent>.GetPooled(PanelEventHandler.s_Modifiers))
+			using (NavigationSubmitEvent pooled = NavigationEventBase<NavigationSubmitEvent>.GetPooled(this.GetDeviceType(eventData), PanelEventHandler.s_Modifiers))
 			{
 				pooled.target = focusable;
 				this.SendEvent(pooled, eventData);
@@ -246,7 +260,7 @@ namespace UnityEngine.UIElements
 			}
 			Focusable focusable = this.currentFocusedElement ?? this.m_Panel.visualTree;
 			this.ProcessImguiEvents(focusable);
-			using (NavigationCancelEvent pooled = NavigationEventBase<NavigationCancelEvent>.GetPooled(PanelEventHandler.s_Modifiers))
+			using (NavigationCancelEvent pooled = NavigationEventBase<NavigationCancelEvent>.GetPooled(this.GetDeviceType(eventData), PanelEventHandler.s_Modifiers))
 			{
 				pooled.target = focusable;
 				this.SendEvent(pooled, eventData);
@@ -261,7 +275,7 @@ namespace UnityEngine.UIElements
 			}
 			Focusable focusable = this.currentFocusedElement ?? this.m_Panel.visualTree;
 			this.ProcessImguiEvents(focusable);
-			using (NavigationMoveEvent pooled = NavigationMoveEvent.GetPooled(eventData.moveVector, PanelEventHandler.s_Modifiers))
+			using (NavigationMoveEvent pooled = NavigationMoveEvent.GetPooled(eventData.moveVector, this.GetDeviceType(eventData), PanelEventHandler.s_Modifiers))
 			{
 				pooled.target = focusable;
 				this.SendEvent(pooled, eventData);
@@ -270,13 +284,13 @@ namespace UnityEngine.UIElements
 
 		public void OnScroll(PointerEventData eventData)
 		{
-			if (this.m_Panel == null || !this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
+			if (!this.ReadPointerData(this.m_PointerEvent, eventData, PanelEventHandler.PointerEventType.Default))
 			{
 				return;
 			}
-			Vector2 vector = eventData.scrollDelta;
+			Vector2 scrollDelta = eventData.scrollDelta;
+			Vector2 vector = this.eventSystem.currentInputModule.ConvertPointerEventScrollDeltaToTicks(scrollDelta) * 3f;
 			vector.y = -vector.y;
-			vector /= 20f;
 			using (WheelEvent pooled = WheelEvent.GetPooled(vector, this.m_PointerEvent))
 			{
 				this.SendEvent(pooled, eventData);
@@ -297,12 +311,13 @@ namespace UnityEngine.UIElements
 			this.m_Panel.SendEvent(e, DispatchMode.Default);
 		}
 
-		internal void Update()
+		public void Update()
 		{
 			if (this.isCurrentFocusedPanel)
 			{
 				this.ProcessImguiEvents(this.currentFocusedElement ?? this.m_Panel.visualTree);
 			}
+			this.UpdateWorldSpacePointers();
 		}
 
 		private void LateUpdate()
@@ -381,21 +396,53 @@ namespace UnityEngine.UIElements
 
 		private bool ReadPointerData(PanelEventHandler.PointerEvent pe, PointerEventData eventData, PanelEventHandler.PointerEventType eventType = PanelEventHandler.PointerEventType.Default)
 		{
-			if (this.eventSystem == null || this.eventSystem.currentInputModule == null)
+			if (this.m_Panel == null || this.eventSystem == null || this.eventSystem.currentInputModule == null)
 			{
 				return false;
 			}
 			pe.Read(this, eventData, eventType);
-			Vector2 vector;
-			Vector2 vector2;
-			this.m_Panel.ScreenToPanel(pe.position, pe.deltaPosition, out vector, out vector2, true);
-			pe.SetPosition(vector, vector2);
-			return true;
+			return pe.ComputeTarget(this.m_Panel);
+		}
+
+		private void UpdatePointerEventTarget<TPointerEvent>(TPointerEvent e, PanelEventHandler.PointerEvent eventData) where TPointerEvent : PointerEventBase<TPointerEvent>, new()
+		{
+			e.target = eventData.elementTarget;
+			if (!this.m_Panel.isFlat)
+			{
+				this.m_Panel.SetTopElementUnderPointer(eventData.pointerId, eventData.elementUnderPointer, e);
+			}
+		}
+
+		private NavigationDeviceType GetDeviceType(BaseEventData eventData)
+		{
+			if (this.eventSystem == null || this.eventSystem.currentInputModule == null)
+			{
+				return NavigationDeviceType.Unknown;
+			}
+			return (NavigationDeviceType)this.eventSystem.currentInputModule.GetNavigationEventDeviceType(eventData);
+		}
+
+		private void UpdateWorldSpacePointers()
+		{
+			if (this.m_Panel == null || this.m_Panel.isFlat || this.eventSystem == null || this.eventSystem.currentInputModule == null)
+			{
+				return;
+			}
+			foreach (PointerEventData pointerEventData in this.m_ContainedPointers)
+			{
+				if (this.ReadPointerData(this.m_PointerEvent, pointerEventData, PanelEventHandler.PointerEventType.Default))
+				{
+					this.m_Panel.SetTopElementUnderPointer(this.m_PointerEvent.pointerId, this.m_PointerEvent.elementUnderPointer, this.m_PointerEvent.position);
+					this.m_Panel.CommitElementUnderPointers();
+				}
+			}
 		}
 
 		private BaseRuntimePanel m_Panel;
 
 		private readonly PanelEventHandler.PointerEvent m_PointerEvent = new PanelEventHandler.PointerEvent();
+
+		private readonly List<PointerEventData> m_ContainedPointers = new List<PointerEventData>();
 
 		private float m_LastClickTime;
 
@@ -498,23 +545,35 @@ namespace UnityEngine.UIElements
 				}
 			}
 
+			public Vector3 screenPosition { get; private set; }
+
+			public Vector3 screenDelta { get; private set; }
+
+			public Ray worldRay { get; private set; }
+
+			public UIDocument document { get; private set; }
+
+			public VisualElement elementTarget { get; private set; }
+
+			public VisualElement elementUnderPointer { get; private set; }
+
 			public void Read(PanelEventHandler self, PointerEventData eventData, PanelEventHandler.PointerEventType eventType)
 			{
 				this.pointerId = self.eventSystem.currentInputModule.ConvertUIToolkitPointerId(eventData);
-				this.pointerType = (PanelEventHandler.PointerEvent.<Read>g__InRange|90_0(this.pointerId, PointerId.touchPointerIdBase, PointerId.touchPointerCount) ? PointerType.touch : (PanelEventHandler.PointerEvent.<Read>g__InRange|90_0(this.pointerId, PointerId.penPointerIdBase, PointerId.penPointerCount) ? PointerType.pen : PointerType.mouse));
+				this.pointerType = (PanelEventHandler.PointerEvent.<Read>g__InRange|114_0(this.pointerId, PointerId.touchPointerIdBase, PointerId.touchPointerCount) ? PointerType.touch : (PanelEventHandler.PointerEvent.<Read>g__InRange|114_0(this.pointerId, PointerId.penPointerIdBase, PointerId.penPointerCount) ? PointerType.pen : PointerType.mouse));
 				this.isPrimary = this.pointerId == PointerId.mousePointerId || this.pointerId == PointerId.touchPointerIdBase || this.pointerId == PointerId.penPointerIdBase;
 				int num = Screen.height;
 				Vector3 relativeMousePositionForRaycast = MultipleDisplayUtilities.GetRelativeMousePositionForRaycast(eventData);
 				int num2 = (int)relativeMousePositionForRaycast.z;
-				if (num2 > 0 && num2 < Display.displays.Length)
+				if (DisplayInternal.IsASecondaryDisplayIndex(num2))
 				{
 					num = Display.displays[num2].systemHeight;
 				}
 				Vector2 delta = eventData.delta;
 				relativeMousePositionForRaycast.y = (float)num - relativeMousePositionForRaycast.y;
 				delta.y = -delta.y;
-				this.localPosition = (this.position = relativeMousePositionForRaycast);
-				this.deltaPosition = delta;
+				this.screenPosition = relativeMousePositionForRaycast;
+				this.screenDelta = delta;
 				this.deltaTime = 0f;
 				this.pressure = eventData.pressure;
 				this.tangentialPressure = eventData.tangentialPressure;
@@ -552,17 +611,55 @@ namespace UnityEngine.UIElements
 					this.clickCount = Mathf.Max(1, this.clickCount);
 				}
 				this.pressedButtons = PointerDeviceState.GetPressedButtons(this.pointerId);
+				Vector3 origin = eventData.pointerCurrentRaycast.origin;
+				this.worldRay = new Ray(origin, eventData.pointerCurrentRaycast.worldPosition - origin);
+				this.document = eventData.pointerCurrentRaycast.document;
+				this.elementUnderPointer = eventData.pointerCurrentRaycast.element;
 			}
 
-			public void SetPosition(Vector3 positionOverride, Vector3 deltaOverride)
+			public bool ComputeTarget(BaseRuntimePanel panel)
 			{
-				this.position = positionOverride;
-				this.localPosition = positionOverride;
-				this.deltaPosition = deltaOverride;
+				Vector3 panelPosition;
+				if (panel.isFlat)
+				{
+					panel.ScreenToPanel(this.screenPosition, this.screenDelta, out panelPosition, true);
+					this.elementTarget = null;
+				}
+				else
+				{
+					if (this.document == null)
+					{
+						return false;
+					}
+					VisualElement visualElement = RuntimePanel.s_EventDispatcher.pointerState.GetCapturingElement(this.pointerId) as VisualElement;
+					if (visualElement != null && visualElement.panel != panel)
+					{
+						return false;
+					}
+					VisualElement visualElement2;
+					if ((visualElement2 = visualElement) == null)
+					{
+						visualElement2 = this.elementUnderPointer ?? this.document.rootVisualElement;
+					}
+					this.elementTarget = visualElement2;
+					panelPosition = this.GetPanelPosition(this.elementTarget, this.document, this.worldRay);
+				}
+				this.localPosition = (this.position = panelPosition);
+				this.deltaPosition = PointerDeviceState.GetPointerDeltaPosition(this.pointerId, ContextType.Player, this.position);
+				return true;
+			}
+
+			private Vector3 GetPanelPosition(VisualElement pickedElement, UIDocument document, Ray worldRay)
+			{
+				Ray ray = document.transform.worldToLocalMatrix.TransformRay(worldRay);
+				float num;
+				Vector3 vector;
+				pickedElement.IntersectWorldRay(ray, out num, out vector);
+				return ray.origin + ray.direction * num;
 			}
 
 			[CompilerGenerated]
-			internal static bool <Read>g__InRange|90_0(int i, int start, int count)
+			internal static bool <Read>g__InRange|114_0(int i, int start, int count)
 			{
 				return i >= start && i < start + count;
 			}

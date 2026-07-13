@@ -780,7 +780,8 @@ public class CustomGameSettings : KMonoBehaviour
 		List<CustomGameSettings.MetricSettingsData> list = new List<CustomGameSettings.MetricSettingsData>();
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentMixingLevelsBySetting)
 		{
-			if (DlcManager.IsAllContentSubscribed(this.MixingSettings[keyValuePair.Key].required_content))
+			SettingConfig settingConfig;
+			if (this.MixingSettings.TryGetValue(keyValuePair.Key, out settingConfig) && DlcManager.IsAllContentSubscribed(settingConfig.required_content))
 			{
 				list.Add(new CustomGameSettings.MetricSettingsData
 				{

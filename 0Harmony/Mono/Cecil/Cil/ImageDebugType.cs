@@ -2,10 +2,11 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum ImageDebugType
+	internal enum ImageDebugType
 	{
 		CodeView = 2,
 		Deterministic = 16,
-		EmbeddedPortablePdb
+		EmbeddedPortablePdb,
+		PdbChecksum = 19
 	}
 }

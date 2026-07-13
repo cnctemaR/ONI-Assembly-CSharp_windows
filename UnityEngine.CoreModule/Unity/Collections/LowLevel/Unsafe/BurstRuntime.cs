@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Bindings;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.AudioModule" })]
 	internal static class BurstRuntime
 	{
 		public static long GetHashCode64<T>()

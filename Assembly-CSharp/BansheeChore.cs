@@ -51,6 +51,11 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 			{
 				num3 = this.FindIdleCell();
 			}
+			if (num3 == Grid.InvalidCell)
+			{
+				this.GoTo(base.sm.wail);
+				return;
+			}
 			base.sm.targetWailLocation.Set(num3, base.smi, false);
 			this.GoTo(base.sm.moveToAudience);
 		}

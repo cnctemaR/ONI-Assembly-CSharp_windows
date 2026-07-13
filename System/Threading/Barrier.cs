@@ -6,8 +6,8 @@ using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[ComVisible(false)]
 	[DebuggerDisplay("Participant Count={ParticipantCount},Participants Remaining={ParticipantsRemaining}")]
+	[ComVisible(false)]
 	[HostProtection(SecurityAction.LinkDemand, Synchronization = true, ExternalThreading = true)]
 	public class Barrier : IDisposable
 	{

@@ -98,6 +98,7 @@ namespace Unity.Burst
 		ERR_MethodNotSupported,
 		ERR_VectorsLoadFieldIsAddress,
 		ERR_ConstantExpressionRequired,
+		WRN_HWInstrinsicsWithFPDeterminism,
 		ERR_PointerArgumentsUnexpectedAliasing = 1310,
 		ERR_LoopIntrinsicMustBeCalledInsideLoop = 1320,
 		ERR_LoopUnexpectedAutoVectorization,

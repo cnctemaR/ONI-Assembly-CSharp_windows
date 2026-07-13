@@ -24,6 +24,11 @@ public class TelepadSideScreen : SideScreenContent
 		{
 			ManagementMenu.Instance.ToggleSkills();
 		};
+		this.viewResearchBtn.onClick += delegate
+		{
+			ManagementMenu.Instance.ToggleResearch();
+		};
+		this.researchAttentionIcon.gameObject.SetActive(ManagementMenu.Instance.HasActiveResearch);
 		this.BuildVictoryConditions();
 	}
 
@@ -56,14 +61,14 @@ public class TelepadSideScreen : SideScreenContent
 			if (GameFlowManager.Instance != null && GameFlowManager.Instance.IsGameOver())
 			{
 				base.gameObject.SetActive(false);
-				this.timeLabel.text = UI.UISIDESCREENS.TELEPADSIDESCREEN.GAMEOVER;
+				this.viewImmigrantsBtnText.text = UI.UISIDESCREENS.TELEPADSIDESCREEN.GAMEOVER;
 				this.SetContentState(true);
 			}
 			else
 			{
 				if (this.targetTelepad.GetComponent<Operational>().IsOperational)
 				{
-					this.timeLabel.text = string.Format(UI.UISIDESCREENS.TELEPADSIDESCREEN.NEXTPRODUCTION, GameUtil.GetFormattedCycles(this.targetTelepad.GetTimeRemaining(), "F1", false));
+					this.viewImmigrantsBtnText.text = this.TimeRemainingString;
 				}
 				else
 				{
@@ -77,16 +82,20 @@ public class TelepadSideScreen : SideScreenContent
 		}
 	}
 
+	private string TimeRemainingString
+	{
+		get
+		{
+			return string.Format(UI.UISIDESCREENS.TELEPADSIDESCREEN.NEXTPRODUCTION, GameUtil.GetFormattedCycles(this.targetTelepad.GetTimeRemaining(), "F1", false));
+		}
+	}
+
 	private void SetContentState(bool isLabel)
 	{
-		if (this.timeLabel.gameObject.activeInHierarchy != isLabel)
-		{
-			this.timeLabel.gameObject.SetActive(isLabel);
-		}
-		if (this.viewImmigrantsBtn.gameObject.activeInHierarchy == isLabel)
-		{
-			this.viewImmigrantsBtn.gameObject.SetActive(!isLabel);
-		}
+		this.viewResearchBtn.isInteractable = ManagementMenu.Instance.CheckHasResearchCenter();
+		this.viewImmigrantsBtn.isInteractable = !isLabel;
+		this.viewImmigrantsBtnText.text = (isLabel ? this.TimeRemainingString : UI.VIEWDUPLICANTS);
+		this.immigrantBtnAttentionIcon.SetActive(!isLabel);
 	}
 
 	private void BuildVictoryConditions()
@@ -164,10 +173,13 @@ public class TelepadSideScreen : SideScreenContent
 	}
 
 	[SerializeField]
-	private LocText timeLabel;
+	private KButton viewImmigrantsBtn;
 
 	[SerializeField]
-	private KButton viewImmigrantsBtn;
+	private LocText viewImmigrantsBtnText;
+
+	[SerializeField]
+	private GameObject immigrantBtnAttentionIcon;
 
 	[SerializeField]
 	private Telepad targetTelepad;
@@ -183,6 +195,12 @@ public class TelepadSideScreen : SideScreenContent
 
 	[SerializeField]
 	private Image skillPointsAvailable;
+
+	[SerializeField]
+	private KButton viewResearchBtn;
+
+	[SerializeField]
+	private GameObject researchAttentionIcon;
 
 	[SerializeField]
 	private GameObject victoryConditionsContainer;

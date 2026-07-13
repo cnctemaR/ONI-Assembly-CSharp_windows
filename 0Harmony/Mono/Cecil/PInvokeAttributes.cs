@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum PInvokeAttributes : ushort
+	internal enum PInvokeAttributes : ushort
 	{
 		NoMangle = 1,
 		CharSetMask = 6,

@@ -44,6 +44,10 @@ public class FossilBits : FossilExcavationWorkable, ISidescreenButtonControl
 		base.OnSpawn();
 		this.SetEntombStatusItemVisibility(this.MarkedForDig);
 		base.SetShouldShowSkillPerkStatusItem(this.IsMarkedForExcavation());
+		if (this.MarkedForDig)
+		{
+			this.CreateWorkableChore();
+		}
 	}
 
 	private void OnOperationalChanged(object state)

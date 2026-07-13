@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Rendering;
 using UnityEngine.Scripting;
@@ -12,70 +13,202 @@ namespace UnityEngine.VFX
 	[NativeHeader("Modules/VFX/Public/VisualEffect.h")]
 	public class VisualEffect : Behaviour
 	{
-		public extern bool pause
+		public bool pause
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_pause_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VisualEffect.set_pause_Injected(intPtr, value);
+			}
 		}
 
-		public extern float playRate
+		public float playRate
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_playRate_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VisualEffect.set_playRate_Injected(intPtr, value);
+			}
 		}
 
-		public extern uint startSeed
+		public uint startSeed
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_startSeed_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VisualEffect.set_startSeed_Injected(intPtr, value);
+			}
 		}
 
-		public extern bool resetSeedOnPlay
+		public bool resetSeedOnPlay
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_resetSeedOnPlay_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VisualEffect.set_resetSeedOnPlay_Injected(intPtr, value);
+			}
 		}
 
-		public extern int initialEventID
+		public int initialEventID
 		{
 			[FreeFunction(Name = "VisualEffectBindings::GetInitialEventID", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_initialEventID_Injected(intPtr);
+			}
 			[FreeFunction(Name = "VisualEffectBindings::SetInitialEventID", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VisualEffect.set_initialEventID_Injected(intPtr, value);
+			}
 		}
 
-		public extern string initialEventName
+		public unsafe string initialEventName
 		{
 			[FreeFunction(Name = "VisualEffectBindings::GetInitialEventName", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					VisualEffect.get_initialEventName_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 			[FreeFunction(Name = "VisualEffectBindings::SetInitialEventName", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					VisualEffect.set_initialEventName_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
-		public extern bool culled
+		public bool culled
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_culled_Injected(intPtr);
+			}
 		}
 
-		public extern VisualEffectAsset visualEffectAsset
+		public VisualEffectAsset visualEffectAsset
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<VisualEffectAsset>(VisualEffect.get_visualEffectAsset_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				VisualEffect.set_visualEffectAsset_Injected(intPtr, Object.MarshalledUnityObject.Marshal<VisualEffectAsset>(value));
+			}
 		}
 
 		public VFXEventAttribute CreateVFXEventAttribute()
@@ -104,8 +237,15 @@ namespace UnityEngine.VFX
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SendEventFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SendEventFromScript(int eventNameID, VFXEventAttribute eventAttribute);
+		private void SendEventFromScript(int eventNameID, VFXEventAttribute eventAttribute)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SendEventFromScript_Injected(intPtr, eventNameID, (eventAttribute == null) ? ((IntPtr)0) : VFXEventAttribute.BindingsMarshaller.ConvertToNative(eventAttribute));
+		}
 
 		public void SendEvent(int eventNameID, VFXEventAttribute eventAttribute)
 		{
@@ -153,206 +293,647 @@ namespace UnityEngine.VFX
 			this.Reinit(true);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Reinit(bool sendInitialEventAndPrewarm = true);
+		internal void Reinit(bool sendInitialEventAndPrewarm = true)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.Reinit_Injected(intPtr, sendInitialEventAndPrewarm);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void AdvanceOneFrame();
+		public void AdvanceOneFrame()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.AdvanceOneFrame_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void RecreateData();
+		internal void RecreateData()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.RecreateData_Injected(intPtr);
+		}
+
+		[FreeFunction(Name = "VisualEffectBindings::GetGPUTaskMarkerName", HasExplicitThis = true, ThrowsException = true)]
+		[NativeConditional("ENABLE_PROFILER")]
+		private string GetGPUTaskMarkerName(int nameID, int taskIndex)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				VisualEffect.GetGPUTaskMarkerName_Injected(intPtr, nameID, taskIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		[NativeConditional("ENABLE_PROFILER")]
+		[FreeFunction(Name = "VisualEffectBindings::GetCPUEffectMarkerName", HasExplicitThis = true, ThrowsException = true)]
+		internal string GetCPUEffectMarkerName(int markerIndex)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				VisualEffect.GetCPUEffectMarkerName_Injected(intPtr, markerIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		[NativeConditional("ENABLE_PROFILER")]
+		[FreeFunction(Name = "VisualEffectBindings::GetCPUSystemMarkerName", HasExplicitThis = true, ThrowsException = true)]
+		private string GetCPUSystemMarkerName(int nameID)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				VisualEffect.GetCPUSystemMarkerName_Injected(intPtr, nameID, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
+
+		[FreeFunction(Name = "VisualEffectBindings::RegisterForProfiling", HasExplicitThis = true, ThrowsException = false)]
+		[NativeConditional("ENABLE_PROFILER")]
+		internal void RegisterForProfiling()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.RegisterForProfiling_Injected(intPtr);
+		}
+
+		[FreeFunction(Name = "VisualEffectBindings::UnregisterForProfiling", HasExplicitThis = true, ThrowsException = false)]
+		[NativeConditional("ENABLE_PROFILER")]
+		internal void UnregisterForProfiling()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.UnregisterForProfiling_Injected(intPtr);
+		}
+
+		[FreeFunction(Name = "VisualEffectBindings::IsRegisteredForProfiling", HasExplicitThis = true, ThrowsException = false)]
+		[NativeConditional("ENABLE_PROFILER")]
+		internal bool IsRegisteredForProfiling()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.IsRegisteredForProfiling_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::ResetOverrideFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ResetOverride(int nameID);
+		public void ResetOverride(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.ResetOverride_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetTextureDimensionFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern TextureDimension GetTextureDimension(int nameID);
+		public TextureDimension GetTextureDimension(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.GetTextureDimension_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<bool>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasBool(int nameID);
+		public bool HasBool(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasBool_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<int>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasInt(int nameID);
+		public bool HasInt(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasInt_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<UInt32>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasUInt(int nameID);
+		public bool HasUInt(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasUInt_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<float>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasFloat(int nameID);
+		public bool HasFloat(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasFloat_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<Vector2f>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasVector2(int nameID);
+		public bool HasVector2(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasVector2_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<Vector3f>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasVector3(int nameID);
+		public bool HasVector3(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasVector3_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<Vector4f>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasVector4(int nameID);
+		public bool HasVector4(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasVector4_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<Matrix4x4f>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasMatrix4x4(int nameID);
+		public bool HasMatrix4x4(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasMatrix4x4_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<Texture*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasTexture(int nameID);
+		public bool HasTexture(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasTexture_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<AnimationCurve*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasAnimationCurve(int nameID);
+		public bool HasAnimationCurve(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasAnimationCurve_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<Gradient*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasGradient(int nameID);
+		public bool HasGradient(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasGradient_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<Mesh*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasMesh(int nameID);
+		public bool HasMesh(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasMesh_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<SkinnedMeshRenderer*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasSkinnedMeshRenderer(int nameID);
+		public bool HasSkinnedMeshRenderer(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasSkinnedMeshRenderer_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::HasValueFromScript<GraphicsBuffer*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasGraphicsBuffer(int nameID);
+		public bool HasGraphicsBuffer(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasGraphicsBuffer_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<bool>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBool(int nameID, bool b);
+		public void SetBool(int nameID, bool b)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetBool_Injected(intPtr, nameID, b);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<int>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetInt(int nameID, int i);
+		public void SetInt(int nameID, int i)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetInt_Injected(intPtr, nameID, i);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<UInt32>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetUInt(int nameID, uint i);
+		public void SetUInt(int nameID, uint i)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetUInt_Injected(intPtr, nameID, i);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<float>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetFloat(int nameID, float f);
+		public void SetFloat(int nameID, float f)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetFloat_Injected(intPtr, nameID, f);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<Vector2f>", HasExplicitThis = true)]
 		public void SetVector2(int nameID, Vector2 v)
 		{
-			this.SetVector2_Injected(nameID, ref v);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetVector2_Injected(intPtr, nameID, ref v);
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<Vector3f>", HasExplicitThis = true)]
 		public void SetVector3(int nameID, Vector3 v)
 		{
-			this.SetVector3_Injected(nameID, ref v);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetVector3_Injected(intPtr, nameID, ref v);
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<Vector4f>", HasExplicitThis = true)]
 		public void SetVector4(int nameID, Vector4 v)
 		{
-			this.SetVector4_Injected(nameID, ref v);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetVector4_Injected(intPtr, nameID, ref v);
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<Matrix4x4f>", HasExplicitThis = true)]
 		public void SetMatrix4x4(int nameID, Matrix4x4 v)
 		{
-			this.SetMatrix4x4_Injected(nameID, ref v);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetMatrix4x4_Injected(intPtr, nameID, ref v);
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<Texture*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetTexture(int nameID, [NotNull("ArgumentNullException")] Texture t);
+		public void SetTexture(int nameID, [NotNull] Texture t)
+		{
+			if (t == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(t, "t");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Texture>(t);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(t, "t");
+			}
+			VisualEffect.SetTexture_Injected(intPtr, nameID, intPtr2);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<AnimationCurve*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetAnimationCurve(int nameID, [NotNull("ArgumentNullException")] AnimationCurve c);
+		public void SetAnimationCurve(int nameID, [NotNull] AnimationCurve c)
+		{
+			if (c == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(c, "c");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = AnimationCurve.BindingsMarshaller.ConvertToNative(c);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(c, "c");
+			}
+			VisualEffect.SetAnimationCurve_Injected(intPtr, nameID, intPtr2);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<Gradient*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGradient(int nameID, [NotNull("ArgumentNullException")] Gradient g);
+		public void SetGradient(int nameID, [NotNull] Gradient g)
+		{
+			if (g == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(g, "g");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Gradient.BindingsMarshaller.ConvertToNative(g);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(g, "g");
+			}
+			VisualEffect.SetGradient_Injected(intPtr, nameID, intPtr2);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<Mesh*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetMesh(int nameID, [NotNull("ArgumentNullException")] Mesh m);
+		public void SetMesh(int nameID, [NotNull] Mesh m)
+		{
+			if (m == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(m, "m");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(m);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(m, "m");
+			}
+			VisualEffect.SetMesh_Injected(intPtr, nameID, intPtr2);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<SkinnedMeshRenderer*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetSkinnedMeshRenderer(int nameID, SkinnedMeshRenderer m);
+		public void SetSkinnedMeshRenderer(int nameID, SkinnedMeshRenderer m)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetSkinnedMeshRenderer_Injected(intPtr, nameID, Object.MarshalledUnityObject.Marshal<SkinnedMeshRenderer>(m));
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::SetValueFromScript<GraphicsBuffer*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetGraphicsBuffer(int nameID, GraphicsBuffer g);
+		public void SetGraphicsBuffer(int nameID, GraphicsBuffer g)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.SetGraphicsBuffer_Injected(intPtr, nameID, (g == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(g));
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<bool>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetBool(int nameID);
+		public bool GetBool(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.GetBool_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<int>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetInt(int nameID);
+		public int GetInt(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.GetInt_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<UInt32>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern uint GetUInt(int nameID);
+		public uint GetUInt(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.GetUInt_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<float>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetFloat(int nameID);
+		public float GetFloat(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.GetFloat_Injected(intPtr, nameID);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<Vector2f>", HasExplicitThis = true)]
 		public Vector2 GetVector2(int nameID)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector2 vector;
-			this.GetVector2_Injected(nameID, out vector);
+			VisualEffect.GetVector2_Injected(intPtr, nameID, out vector);
 			return vector;
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<Vector3f>", HasExplicitThis = true)]
 		public Vector3 GetVector3(int nameID)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetVector3_Injected(nameID, out vector);
+			VisualEffect.GetVector3_Injected(intPtr, nameID, out vector);
 			return vector;
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<Vector4f>", HasExplicitThis = true)]
 		public Vector4 GetVector4(int nameID)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetVector4_Injected(nameID, out vector);
+			VisualEffect.GetVector4_Injected(intPtr, nameID, out vector);
 			return vector;
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<Matrix4x4f>", HasExplicitThis = true)]
 		public Matrix4x4 GetMatrix4x4(int nameID)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetMatrix4x4_Injected(nameID, out matrix4x);
+			VisualEffect.GetMatrix4x4_Injected(intPtr, nameID, out matrix4x);
 			return matrix4x;
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<Texture*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Texture GetTexture(int nameID);
+		public Texture GetTexture(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture>(VisualEffect.GetTexture_Injected(intPtr, nameID));
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<Mesh*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Mesh GetMesh(int nameID);
+		public Mesh GetMesh(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Mesh>(VisualEffect.GetMesh_Injected(intPtr, nameID));
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<SkinnedMeshRenderer*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern SkinnedMeshRenderer GetSkinnedMeshRenderer(int nameID);
+		public SkinnedMeshRenderer GetSkinnedMeshRenderer(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<SkinnedMeshRenderer>(VisualEffect.GetSkinnedMeshRenderer_Injected(intPtr, nameID));
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetValueFromScript<GraphicsBuffer*>", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern GraphicsBuffer GetGraphicsBuffer(int nameID);
+		internal GraphicsBuffer GetGraphicsBuffer(int nameID)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr graphicsBuffer_Injected = VisualEffect.GetGraphicsBuffer_Injected(intPtr, nameID);
+			return (graphicsBuffer_Injected == 0) ? null : GraphicsBuffer.BindingsMarshaller.ConvertToManaged(graphicsBuffer_Injected);
+		}
 
 		public Gradient GetGradient(int nameID)
 		{
@@ -362,8 +943,15 @@ namespace UnityEngine.VFX
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::Internal_GetGradientFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_GetGradient(int nameID, Gradient gradient);
+		private void Internal_GetGradient(int nameID, Gradient gradient)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.Internal_GetGradient_Injected(intPtr, nameID, (gradient == null) ? ((IntPtr)0) : Gradient.BindingsMarshaller.ConvertToNative(gradient));
+		}
 
 		public AnimationCurve GetAnimationCurve(int nameID)
 		{
@@ -373,37 +961,73 @@ namespace UnityEngine.VFX
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::Internal_GetAnimationCurveFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_GetAnimationCurve(int nameID, AnimationCurve curve);
+		private void Internal_GetAnimationCurve(int nameID, AnimationCurve curve)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.Internal_GetAnimationCurve_Injected(intPtr, nameID, (curve == null) ? ((IntPtr)0) : AnimationCurve.BindingsMarshaller.ConvertToNative(curve));
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetParticleSystemInfo", HasExplicitThis = true, ThrowsException = true)]
 		public VFXParticleSystemInfo GetParticleSystemInfo(int nameID)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			VFXParticleSystemInfo vfxparticleSystemInfo;
-			this.GetParticleSystemInfo_Injected(nameID, out vfxparticleSystemInfo);
+			VisualEffect.GetParticleSystemInfo_Injected(intPtr, nameID, out vfxparticleSystemInfo);
 			return vfxparticleSystemInfo;
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetSpawnSystemInfo", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetSpawnSystemInfo(int nameID, IntPtr spawnerState);
+		private void GetSpawnSystemInfo(int nameID, IntPtr spawnerState)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.GetSpawnSystemInfo_Injected(intPtr, nameID, spawnerState);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasAnySystemAwake();
+		public bool HasAnySystemAwake()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VisualEffect.HasAnySystemAwake_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetComputedBounds", HasExplicitThis = true)]
 		internal Bounds GetComputedBounds(int nameID)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Bounds bounds;
-			this.GetComputedBounds_Injected(nameID, out bounds);
+			VisualEffect.GetComputedBounds_Injected(intPtr, nameID, out bounds);
 			return bounds;
 		}
 
 		[FreeFunction(Name = "VisualEffectBindings::GetCurrentBoundsPadding", HasExplicitThis = true)]
 		internal Vector3 GetCurrentBoundsPadding(int nameID)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetCurrentBoundsPadding_Injected(nameID, out vector);
+			VisualEffect.GetCurrentBoundsPadding_Injected(intPtr, nameID, out vector);
 			return vector;
 		}
 
@@ -742,6 +1366,21 @@ namespace UnityEngine.VFX
 			return this.GetParticleSystemInfo(Shader.PropertyToID(name));
 		}
 
+		internal string GetGPUTaskMarkerName(string systemName, int taskIndex)
+		{
+			return this.GetGPUTaskMarkerName(Shader.PropertyToID(systemName), taskIndex);
+		}
+
+		internal string GetCPUSystemMarkerName(string systemName)
+		{
+			return this.GetCPUSystemMarkerName(Shader.PropertyToID(systemName));
+		}
+
+		internal string GetCPUEffectMarkerName(VisualEffect.VFXCPUEffectMarkers markerId)
+		{
+			return this.GetCPUEffectMarkerName((int)markerId);
+		}
+
 		public VFXSpawnerState GetSpawnSystemInfo(string name)
 		{
 			return this.GetSpawnSystemInfo(Shader.PropertyToID(name));
@@ -757,20 +1396,41 @@ namespace UnityEngine.VFX
 			return this.GetCurrentBoundsPadding(Shader.PropertyToID(name));
 		}
 
-		public extern int aliveParticleCount
+		public int aliveParticleCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_aliveParticleCount_Injected(intPtr);
+			}
 		}
 
-		internal extern float time
+		internal float time
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VisualEffect.get_time_Injected(intPtr);
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Simulate(float stepDeltaTime, uint stepCount = 1U);
+		public void Simulate(float stepDeltaTime, uint stepCount = 1U)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VisualEffect>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VisualEffect.Simulate_Injected(intPtr, stepDeltaTime, stepCount);
+		}
 
 		[RequiredByNativeCode]
 		private static VFXEventAttribute InvokeGetCachedEventAttributeForOutputEvent_Internal(VisualEffect source)
@@ -801,40 +1461,245 @@ namespace UnityEngine.VFX
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVector2_Injected(int nameID, ref Vector2 v);
+		private static extern bool get_pause_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVector3_Injected(int nameID, ref Vector3 v);
+		private static extern void set_pause_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVector4_Injected(int nameID, ref Vector4 v);
+		private static extern float get_playRate_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMatrix4x4_Injected(int nameID, ref Matrix4x4 v);
+		private static extern void set_playRate_Injected(IntPtr _unity_self, float value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVector2_Injected(int nameID, out Vector2 ret);
+		private static extern uint get_startSeed_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVector3_Injected(int nameID, out Vector3 ret);
+		private static extern void set_startSeed_Injected(IntPtr _unity_self, uint value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVector4_Injected(int nameID, out Vector4 ret);
+		private static extern bool get_resetSeedOnPlay_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetMatrix4x4_Injected(int nameID, out Matrix4x4 ret);
+		private static extern void set_resetSeedOnPlay_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetParticleSystemInfo_Injected(int nameID, out VFXParticleSystemInfo ret);
+		private static extern int get_initialEventID_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetComputedBounds_Injected(int nameID, out Bounds ret);
+		private static extern void set_initialEventID_Injected(IntPtr _unity_self, int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetCurrentBoundsPadding_Injected(int nameID, out Vector3 ret);
+		private static extern void get_initialEventName_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_initialEventName_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_culled_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_visualEffectAsset_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_visualEffectAsset_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendEventFromScript_Injected(IntPtr _unity_self, int eventNameID, IntPtr eventAttribute);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Reinit_Injected(IntPtr _unity_self, bool sendInitialEventAndPrewarm);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AdvanceOneFrame_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RecreateData_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetGPUTaskMarkerName_Injected(IntPtr _unity_self, int nameID, int taskIndex, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCPUEffectMarkerName_Injected(IntPtr _unity_self, int markerIndex, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCPUSystemMarkerName_Injected(IntPtr _unity_self, int nameID, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RegisterForProfiling_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UnregisterForProfiling_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsRegisteredForProfiling_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ResetOverride_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureDimension GetTextureDimension_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasBool_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasInt_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasUInt_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasFloat_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasVector2_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasVector3_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasVector4_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasMatrix4x4_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasTexture_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasAnimationCurve_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasGradient_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasMesh_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasSkinnedMeshRenderer_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasGraphicsBuffer_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBool_Injected(IntPtr _unity_self, int nameID, bool b);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetInt_Injected(IntPtr _unity_self, int nameID, int i);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetUInt_Injected(IntPtr _unity_self, int nameID, uint i);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetFloat_Injected(IntPtr _unity_self, int nameID, float f);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVector2_Injected(IntPtr _unity_self, int nameID, [In] ref Vector2 v);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVector3_Injected(IntPtr _unity_self, int nameID, [In] ref Vector3 v);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVector4_Injected(IntPtr _unity_self, int nameID, [In] ref Vector4 v);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMatrix4x4_Injected(IntPtr _unity_self, int nameID, [In] ref Matrix4x4 v);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTexture_Injected(IntPtr _unity_self, int nameID, IntPtr t);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAnimationCurve_Injected(IntPtr _unity_self, int nameID, IntPtr c);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGradient_Injected(IntPtr _unity_self, int nameID, IntPtr g);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMesh_Injected(IntPtr _unity_self, int nameID, IntPtr m);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSkinnedMeshRenderer_Injected(IntPtr _unity_self, int nameID, IntPtr m);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGraphicsBuffer_Injected(IntPtr _unity_self, int nameID, IntPtr g);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetBool_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetInt_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetUInt_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetFloat_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVector2_Injected(IntPtr _unity_self, int nameID, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVector3_Injected(IntPtr _unity_self, int nameID, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVector4_Injected(IntPtr _unity_self, int nameID, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMatrix4x4_Injected(IntPtr _unity_self, int nameID, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetTexture_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetMesh_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSkinnedMeshRenderer_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetGraphicsBuffer_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetGradient_Injected(IntPtr _unity_self, int nameID, IntPtr gradient);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetAnimationCurve_Injected(IntPtr _unity_self, int nameID, IntPtr curve);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetParticleSystemInfo_Injected(IntPtr _unity_self, int nameID, out VFXParticleSystemInfo ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSpawnSystemInfo_Injected(IntPtr _unity_self, int nameID, IntPtr spawnerState);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasAnySystemAwake_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetComputedBounds_Injected(IntPtr _unity_self, int nameID, out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCurrentBoundsPadding_Injected(IntPtr _unity_self, int nameID, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_aliveParticleCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float get_time_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Simulate_Injected(IntPtr _unity_self, float stepDeltaTime, uint stepCount);
 
 		private VFXEventAttribute m_cachedEventAttribute;
 
 		public Action<VFXOutputEventArgs> outputEventReceived;
+
+		internal enum VFXCPUEffectMarkers
+		{
+			FullUpdate,
+			ProcessUpdate,
+			EvaluateExpressions
+		}
 	}
 }

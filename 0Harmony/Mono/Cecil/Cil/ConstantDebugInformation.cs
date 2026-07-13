@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class ConstantDebugInformation : DebugInformation
+	internal sealed class ConstantDebugInformation : DebugInformation
 	{
 		public string Name
 		{

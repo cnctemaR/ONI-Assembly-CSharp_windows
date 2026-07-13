@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -142,7 +143,7 @@ namespace Unity.Jobs
 		private unsafe static extern void CombineDependenciesInternalPtr_Injected(void* jobs, int count, out JobHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CheckFenceIsDependencyOrDidSyncFence_Injected(ref JobHandle jobHandle, ref JobHandle dependsOn);
+		private static extern bool CheckFenceIsDependencyOrDidSyncFence_Injected([In] ref JobHandle jobHandle, [In] ref JobHandle dependsOn);
 
 		internal ulong jobGroup;
 

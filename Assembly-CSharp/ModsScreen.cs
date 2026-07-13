@@ -10,6 +10,17 @@ public class ModsScreen : KModalScreen
 	protected override void OnActivate()
 	{
 		base.OnActivate();
+		if (Global.Instance.modManager.safe_mode_enabled)
+		{
+			this.windowTitle.text = UI.FRONTEND.MODS.TITLE_SAFE_MODE;
+			this.windowTitle.ApplySettings();
+			Global.Instance.modManager.ShowSafeModeDialog(base.gameObject);
+		}
+		else
+		{
+			this.windowTitle.text = UI.FRONTEND.MODS.TITLE;
+			this.windowTitle.ApplySettings();
+		}
 		this.closeButtonTitle.onClick += this.Exit;
 		this.closeButton.onClick += this.Exit;
 		global::System.Action action = delegate
@@ -176,14 +187,22 @@ public class ModsScreen : KModalScreen
 				LocText reference3 = hierarchyReferences.GetReference<LocText>("Version");
 				if (mod.packagedModInfo != null && mod.packagedModInfo.version != null && mod.packagedModInfo.version.Length > 0)
 				{
-					string text6 = mod.packagedModInfo.version;
-					if (text6.StartsWith("V"))
+					string text6;
+					if (mod.status == Mod.Status.ReinstallPending)
 					{
-						text6 = "v" + text6.Substring(1, text6.Length - 1);
+						text6 = UI.FRONTEND.MODS.INSTALLED_VERSION_NEWER_THAN_LOADED_VERSION;
 					}
-					else if (!text6.StartsWith("v"))
+					else
 					{
-						text6 = "v" + text6;
+						text6 = mod.packagedModInfo.version;
+						if (text6.StartsWith("V"))
+						{
+							text6 = "v" + text6.Substring(1, text6.Length - 1);
+						}
+						else if (!text6.StartsWith("v"))
+						{
+							text6 = "v" + text6;
+						}
 					}
 					reference3.text = text6;
 					reference3.gameObject.SetActive(true);
@@ -297,6 +316,9 @@ public class ModsScreen : KModalScreen
 
 	[SerializeField]
 	private Transform entryParent;
+
+	[SerializeField]
+	private LocText windowTitle;
 
 	private List<ModsScreen.DisplayedMod> displayedMods = new List<ModsScreen.DisplayedMod>();
 

@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public abstract class Resource
+	internal abstract class Resource
 	{
 		public string Name
 		{

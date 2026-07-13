@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Modules/IMGUI/GUIContent.h")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public class GUIContent
@@ -23,10 +23,11 @@ namespace UnityEngine
 			}
 			set
 			{
-				bool flag = value == this.m_Text;
+				bool flag = this.m_Text == value;
 				if (!flag)
 				{
 					this.m_Text = value;
+					this.textWithWhitespace = value;
 					Action onTextChanged = this.OnTextChanged;
 					if (onTextChanged != null)
 					{
@@ -34,6 +35,24 @@ namespace UnityEngine
 					}
 				}
 			}
+		}
+
+		internal string textWithWhitespace
+		{
+			get
+			{
+				return string.IsNullOrEmpty(this.m_TextWithWhitespace) ? GUIContent.k_ZeroWidthSpace : this.m_TextWithWhitespace;
+			}
+			set
+			{
+				this.m_TextWithWhitespace = value + GUIContent.k_ZeroWidthSpace;
+			}
+		}
+
+		internal void SetTextWithoutNotify(string value)
+		{
+			this.m_Text = value;
+			this.textWithWhitespace = value;
 		}
 
 		public Texture image
@@ -120,6 +139,7 @@ namespace UnityEngine
 		internal static GUIContent Temp(string t)
 		{
 			GUIContent.s_Text.m_Text = t;
+			GUIContent.s_Text.textWithWhitespace = t;
 			GUIContent.s_Text.m_Tooltip = string.Empty;
 			return GUIContent.s_Text;
 		}
@@ -127,6 +147,7 @@ namespace UnityEngine
 		internal static GUIContent Temp(string t, string tooltip)
 		{
 			GUIContent.s_Text.m_Text = t;
+			GUIContent.s_Text.textWithWhitespace = t;
 			GUIContent.s_Text.m_Tooltip = tooltip;
 			return GUIContent.s_Text;
 		}
@@ -148,18 +169,23 @@ namespace UnityEngine
 		internal static GUIContent Temp(string t, Texture i)
 		{
 			GUIContent.s_TextImage.m_Text = t;
+			GUIContent.s_Text.textWithWhitespace = t;
 			GUIContent.s_TextImage.m_Image = i;
 			return GUIContent.s_TextImage;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static void ClearStaticCache()
 		{
 			GUIContent.s_Text.m_Text = null;
+			GUIContent.s_Text.m_TextWithWhitespace = null;
 			GUIContent.s_Text.m_Tooltip = string.Empty;
 			GUIContent.s_Image.m_Image = null;
 			GUIContent.s_Image.m_Tooltip = string.Empty;
+			GUIContent.s_Image.m_TextWithWhitespace = null;
 			GUIContent.s_TextImage.m_Text = null;
 			GUIContent.s_TextImage.m_Image = null;
+			GUIContent.s_TextImage.m_TextWithWhitespace = null;
 		}
 
 		internal static GUIContent[] Temp(string[] texts)
@@ -201,11 +227,16 @@ namespace UnityEngine
 		[SerializeField]
 		private string m_Tooltip = string.Empty;
 
+		[SerializeField]
+		private string m_TextWithWhitespace = string.Empty;
+
 		private static readonly GUIContent s_Text = new GUIContent();
 
 		private static readonly GUIContent s_Image = new GUIContent();
 
 		private static readonly GUIContent s_TextImage = new GUIContent();
+
+		internal static string k_ZeroWidthSpace = "\u200b";
 
 		public static GUIContent none = new GUIContent("");
 	}

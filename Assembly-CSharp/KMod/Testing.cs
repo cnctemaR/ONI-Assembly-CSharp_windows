@@ -12,6 +12,8 @@ namespace KMod
 
 		public const Testing.Boot BOOT = Testing.Boot.NoTesting;
 
+		public const Testing.DiskIo DISK_IO = Testing.DiskIo.NoTesting;
+
 		public enum DLLLoading
 		{
 			NoTesting,
@@ -38,6 +40,14 @@ namespace KMod
 		{
 			NoTesting,
 			Crash
+		}
+
+		[Flags]
+		public enum DiskIo
+		{
+			NoTesting = 0,
+			FailDeleteDirectory = 1,
+			FailCreateDirectory = 2
 		}
 	}
 }

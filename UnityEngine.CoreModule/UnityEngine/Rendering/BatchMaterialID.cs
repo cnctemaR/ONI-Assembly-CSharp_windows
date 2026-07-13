@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[NativeClass("BatchMaterialID")]
 	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
+	[NativeClass("BatchMaterialID")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct BatchMaterialID : IEquatable<BatchMaterialID>
 	{

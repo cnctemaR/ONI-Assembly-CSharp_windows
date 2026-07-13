@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	[ComVisible(false)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public sealed class ManagedToNativeComInteropStubAttribute : Attribute
 	{
 		public ManagedToNativeComInteropStubAttribute(Type classType, string methodName)

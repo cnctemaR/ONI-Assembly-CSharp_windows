@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Toggle", 30)]
+	[AddComponentMenu("UI (Canvas)/Toggle", 30)]
 	[RequireComponent(typeof(RectTransform))]
 	public class Toggle : Selectable, IPointerClickHandler, IEventSystemHandler, ISubmitHandler, ICanvasElement
 	{

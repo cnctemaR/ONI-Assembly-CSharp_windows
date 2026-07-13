@@ -5,8 +5,8 @@ using UnityEngine.Bindings;
 namespace UnityEngine.IO
 {
 	[NativeHeader("Runtime/VirtualFileSystem/VirtualFileSystem.h")]
-	[StaticAccessor("FileAccessor", StaticAccessorType.DoubleColon)]
 	[NativeConditional("ENABLE_PROFILER")]
+	[StaticAccessor("FileAccessor", StaticAccessorType.DoubleColon)]
 	internal static class File
 	{
 		internal static ulong totalOpenCalls

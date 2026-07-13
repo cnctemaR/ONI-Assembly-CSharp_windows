@@ -48,13 +48,59 @@ namespace Unity.Properties
 			case PropertyPathPartKind.Index:
 			{
 				IIndexedProperties<TContainer> indexedProperties = properties as IIndexedProperties<TContainer>;
-				IProperty<TContainer> property;
-				bool flag2 = indexedProperties != null && indexedProperties.TryGetProperty(ref container, propertyPathPart.Index, out property);
+				bool flag2 = indexedProperties != null;
 				if (flag2)
 				{
-					using ((property as IAttributes).CreateAttributesScope(this.Property as IAttributes))
+					IIndexedCollectionPropertyBagEnumerator<TContainer> indexedCollectionPropertyBagEnumerator = properties as IIndexedCollectionPropertyBagEnumerator<TContainer>;
+					bool flag3 = indexedCollectionPropertyBagEnumerator != null && propertyPathPart.Index < indexedCollectionPropertyBagEnumerator.GetCount(ref container);
+					if (flag3)
 					{
-						property.Accept(this, ref container);
+						IndexedCollectionSharedPropertyState sharedPropertyState = indexedCollectionPropertyBagEnumerator.GetSharedPropertyState();
+						indexedCollectionPropertyBagEnumerator.SetSharedPropertyState(new IndexedCollectionSharedPropertyState
+						{
+							Index = propertyPathPart.Index,
+							IsReadOnly = false
+						});
+						IProperty<TContainer> sharedProperty = indexedCollectionPropertyBagEnumerator.GetSharedProperty();
+						IAttributes attributes = sharedProperty as IAttributes;
+						AttributesScope? attributesScope = ((attributes != null) ? new AttributesScope?(attributes.CreateAttributesScope(this.Property as IAttributes)) : null);
+						try
+						{
+							sharedProperty.Accept(this, ref container);
+						}
+						finally
+						{
+							if (attributesScope != null)
+							{
+								((IDisposable)attributesScope.GetValueOrDefault()).Dispose();
+							}
+						}
+						indexedCollectionPropertyBagEnumerator.SetSharedPropertyState(sharedPropertyState);
+					}
+					else
+					{
+						IProperty<TContainer> property;
+						bool flag4 = indexedProperties.TryGetProperty(ref container, propertyPathPart.Index, out property);
+						if (flag4)
+						{
+							IAttributes attributes2 = property as IAttributes;
+							AttributesScope? attributesScope2 = ((attributes2 != null) ? new AttributesScope?(attributes2.CreateAttributesScope(this.Property as IAttributes)) : null);
+							try
+							{
+								property.Accept(this, ref container);
+							}
+							finally
+							{
+								if (attributesScope2 != null)
+								{
+									((IDisposable)attributesScope2.GetValueOrDefault()).Dispose();
+								}
+							}
+						}
+						else
+						{
+							this.ReturnCode = VisitReturnCode.InvalidPath;
+						}
 					}
 				}
 				else
@@ -67,8 +113,8 @@ namespace Unity.Properties
 			{
 				IKeyedProperties<TContainer, object> keyedProperties = properties as IKeyedProperties<TContainer, object>;
 				IProperty<TContainer> property;
-				bool flag3 = keyedProperties != null && keyedProperties.TryGetProperty(ref container, propertyPathPart.Key, out property);
-				if (flag3)
+				bool flag5 = keyedProperties != null && keyedProperties.TryGetProperty(ref container, propertyPathPart.Key, out property);
+				if (flag5)
 				{
 					using ((property as IAttributes).CreateAttributesScope(this.Property as IAttributes))
 					{

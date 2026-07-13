@@ -169,7 +169,9 @@ namespace UnityEngine.Timeline
 				{
 					if (playableDirector.playableAsset != this.m_ControlDirectorAsset)
 					{
-						outplayables.Add(DirectorControlPlayable.Create(graph, playableDirector));
+						ScriptPlayable<DirectorControlPlayable> scriptPlayable = DirectorControlPlayable.Create(graph, playableDirector);
+						scriptPlayable.GetBehaviour().pauseAction = this.directorOnClipEnd;
+						outplayables.Add(scriptPlayable);
 						this.controllingDirectors = true;
 					}
 					else if (disableSelfReferences)
@@ -411,6 +413,9 @@ namespace UnityEngine.Timeline
 
 		[SerializeField]
 		public ActivationControlPlayable.PostPlaybackState postPlayback = ActivationControlPlayable.PostPlaybackState.Revert;
+
+		[SerializeField]
+		public DirectorControlPlayable.PauseAction directorOnClipEnd;
 
 		private PlayableAsset m_ControlDirectorAsset;
 

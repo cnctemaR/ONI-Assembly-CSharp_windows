@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum ModuleAttributes
+	internal enum ModuleAttributes
 	{
 		ILOnly = 1,
 		Required32Bit = 2,

@@ -15,6 +15,8 @@ namespace UnityEngineInternal.Input
 			this.time = time;
 		}
 
+		public const int alignment = 4;
+
 		public const int structSize = 20;
 
 		[FieldOffset(0)]

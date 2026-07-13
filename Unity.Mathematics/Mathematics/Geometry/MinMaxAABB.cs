@@ -6,7 +6,7 @@ namespace Unity.Mathematics.Geometry
 {
 	[Il2CppEagerStaticClassConstruction]
 	[Serializable]
-	internal struct MinMaxAABB : IEquatable<MinMaxAABB>
+	public struct MinMaxAABB : IEquatable<MinMaxAABB>
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public MinMaxAABB(float3 min, float3 max)

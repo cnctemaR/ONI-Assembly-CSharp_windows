@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 {
@@ -10,19 +9,12 @@ public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 		{
 			return HandleVector<int>.InvalidHandle;
 		}
-		HandleVector<int>.Handle[] array = new HandleVector<int>.Handle[consumed_elements.Length];
-		for (int i = 0; i < consumed_elements.Length; i++)
-		{
-			array[i] = Game.Instance.accumulators.Add("ElementsConsumed", storage);
-		}
-		HandleVector<int>.Handle handle = HandleVector<int>.InvalidHandle;
 		if (consumed_elements.Length == 1)
 		{
-			handle = base.Allocate(new PlantElementAbsorber
+			return base.Allocate(new PlantElementAbsorber
 			{
 				storage = storage,
 				consumedElements = null,
-				accumulators = array,
 				localInfo = new PlantElementAbsorber.LocalInfo
 				{
 					tag = consumed_elements[0].tag,
@@ -30,21 +22,16 @@ public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 				}
 			});
 		}
-		else
+		return base.Allocate(new PlantElementAbsorber
 		{
-			handle = base.Allocate(new PlantElementAbsorber
+			storage = storage,
+			consumedElements = consumed_elements,
+			localInfo = new PlantElementAbsorber.LocalInfo
 			{
-				storage = storage,
-				consumedElements = consumed_elements,
-				accumulators = array,
-				localInfo = new PlantElementAbsorber.LocalInfo
-				{
-					tag = Tag.Invalid,
-					massConsumptionRate = 0f
-				}
-			});
-		}
-		return handle;
+				tag = Tag.Invalid,
+				massConsumptionRate = 0f
+			}
+		});
 	}
 
 	public HandleVector<int>.Handle Remove(HandleVector<int>.Handle h)
@@ -64,52 +51,26 @@ public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 	{
 		int count = this.data.Count;
 		this.updating = true;
+		ListPool<PlantElementAbsorber.Planner.ConsumeCommand, PlantElementAbsorbers>.PooledList pooledList = ListPool<PlantElementAbsorber.Planner.ConsumeCommand, PlantElementAbsorbers>.Allocate();
 		for (int i = 0; i < count; i++)
 		{
 			PlantElementAbsorber plantElementAbsorber = this.data[i];
-			if (!(plantElementAbsorber.storage == null))
+			pooledList.Clear();
+			if (plantElementAbsorber.PlanConsume(dt, pooledList))
 			{
-				if (plantElementAbsorber.consumedElements == null)
+				foreach (PlantElementAbsorber.Planner.ConsumeCommand consumeCommand in pooledList)
 				{
-					float num = plantElementAbsorber.localInfo.massConsumptionRate * dt;
-					PrimaryElement primaryElement = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.localInfo.tag, 0f);
-					if (primaryElement != null)
-					{
-						float num2 = Mathf.Min(num, primaryElement.Mass);
-						primaryElement.Mass -= num2;
-						num -= num2;
-						Game.Instance.accumulators.Accumulate(plantElementAbsorber.accumulators[0], num2);
-						plantElementAbsorber.storage.Trigger(-1697596308, primaryElement.gameObject);
-					}
-				}
-				else
-				{
-					for (int j = 0; j < plantElementAbsorber.consumedElements.Length; j++)
-					{
-						float num3 = plantElementAbsorber.consumedElements[j].massConsumptionRate * dt;
-						PrimaryElement primaryElement2 = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.consumedElements[j].tag, 0f);
-						while (primaryElement2 != null)
-						{
-							float num4 = Mathf.Min(num3, primaryElement2.Mass);
-							primaryElement2.Mass -= num4;
-							num3 -= num4;
-							Game.Instance.accumulators.Accumulate(plantElementAbsorber.accumulators[j], num4);
-							plantElementAbsorber.storage.Trigger(-1697596308, primaryElement2.gameObject);
-							if (num3 <= 0f)
-							{
-								break;
-							}
-							primaryElement2 = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.consumedElements[j].tag, 0f);
-						}
-					}
+					consumeCommand.primaryElement.Mass -= consumeCommand.deltaMass;
+					plantElementAbsorber.storage.Trigger(-1697596308, consumeCommand.primaryElement.gameObject);
 				}
 				this.data[i] = plantElementAbsorber;
 			}
 		}
+		pooledList.Recycle();
 		this.updating = false;
-		for (int k = 0; k < this.queuedRemoves.Count; k++)
+		for (int j = 0; j < this.queuedRemoves.Count; j++)
 		{
-			HandleVector<int>.Handle handle = this.queuedRemoves[k];
+			HandleVector<int>.Handle handle = this.queuedRemoves[j];
 			this.Remove(handle);
 		}
 		this.queuedRemoves.Clear();

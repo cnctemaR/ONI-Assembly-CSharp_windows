@@ -9,9 +9,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Windows.WebCam
 {
+	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[StaticAccessor("VideoCaptureBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("PlatformDependent/Win/Webcam/VideoCaptureBindings.h")]
-	[MovedFrom("UnityEngine.XR.WSA.WebCam")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class VideoCapture : IDisposable
 	{
@@ -57,8 +57,23 @@ namespace UnityEngine.Windows.WebCam
 
 		[NativeName("GetSupportedResolutions")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Resolution[] GetSupportedResolutions_Internal();
+		private static Resolution[] GetSupportedResolutions_Internal()
+		{
+			Resolution[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				VideoCapture.GetSupportedResolutions_Internal_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Resolution[] array;
+				blittableArrayWrapper.Unmarshal<Resolution>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		public static IEnumerable<float> GetSupportedFrameRatesForResolution(Resolution resolution)
 		{
@@ -67,15 +82,37 @@ namespace UnityEngine.Windows.WebCam
 
 		[NativeName("GetSupportedFrameRatesForResolution")]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float[] GetSupportedFrameRatesForResolution_Internal(int resolutionWidth, int resolutionHeight);
-
-		public extern bool IsRecording
+		private static float[] GetSupportedFrameRatesForResolution_Internal(int resolutionWidth, int resolutionHeight)
 		{
-			[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+			float[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				VideoCapture.GetSupportedFrameRatesForResolution_Internal_Injected(resolutionWidth, resolutionHeight, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				float[] array;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
+
+		public bool IsRecording
+		{
 			[NativeMethod("VideoCaptureBindings::IsRecording", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+			get
+			{
+				IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return VideoCapture.get_IsRecording_Injected(intPtr);
+			}
 		}
 
 		public static void CreateAsync(bool showHolograms, VideoCapture.OnVideoCaptureResourceCreatedCallback onCreatedCallback)
@@ -142,11 +179,16 @@ namespace UnityEngine.Windows.WebCam
 			this.StartVideoMode_Internal(setupParams, audioState, onVideoModeStartedCallback);
 		}
 
-		[NativeMethod("VideoCaptureBindings::StartVideoMode", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
+		[NativeMethod("VideoCaptureBindings::StartVideoMode", HasExplicitThis = true)]
 		private void StartVideoMode_Internal(CameraParameters cameraParameters, VideoCapture.AudioState audioState, VideoCapture.OnVideoModeStartedCallback onVideoModeStartedCallback)
 		{
-			this.StartVideoMode_Internal_Injected(ref cameraParameters, audioState, onVideoModeStartedCallback);
+			IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoCapture.StartVideoMode_Internal_Injected(intPtr, ref cameraParameters, audioState, onVideoModeStartedCallback);
 		}
 
 		[RequiredByNativeCode]
@@ -155,10 +197,21 @@ namespace UnityEngine.Windows.WebCam
 			callback(VideoCapture.MakeCaptureResult(hResult));
 		}
 
-		[NativeMethod("VideoCaptureBindings::StopVideoMode", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StopVideoModeAsync([NotNull("ArgumentNullException")] VideoCapture.OnVideoModeStoppedCallback onVideoModeStoppedCallback);
+		[NativeMethod("VideoCaptureBindings::StopVideoMode", HasExplicitThis = true)]
+		public void StopVideoModeAsync([NotNull] VideoCapture.OnVideoModeStoppedCallback onVideoModeStoppedCallback)
+		{
+			if (onVideoModeStoppedCallback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(onVideoModeStoppedCallback, "onVideoModeStoppedCallback");
+			}
+			IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoCapture.StopVideoModeAsync_Injected(intPtr, onVideoModeStoppedCallback);
+		}
 
 		[RequiredByNativeCode]
 		private static void InvokeOnVideoModeStoppedDelegate(VideoCapture.OnVideoModeStoppedCallback callback, long hResult)
@@ -195,8 +248,31 @@ namespace UnityEngine.Windows.WebCam
 
 		[NativeMethod("VideoCaptureBindings::StartRecordingVideoToDisk", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void StartRecordingVideoToDisk_Internal(string filename, VideoCapture.OnStartedRecordingVideoCallback onStartedRecordingVideoCallback);
+		private unsafe void StartRecordingVideoToDisk_Internal(string filename, VideoCapture.OnStartedRecordingVideoCallback onStartedRecordingVideoCallback)
+		{
+			try
+			{
+				IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(filename, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = filename.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				VideoCapture.StartRecordingVideoToDisk_Internal_Injected(intPtr, ref managedSpanWrapper, onStartedRecordingVideoCallback);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[RequiredByNativeCode]
 		private static void InvokeOnStartedRecordingVideoToDiskDelegate(VideoCapture.OnStartedRecordingVideoCallback callback, long hResult)
@@ -206,8 +282,19 @@ namespace UnityEngine.Windows.WebCam
 
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[NativeMethod("VideoCaptureBindings::StopRecordingVideoToDisk", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void StopRecordingAsync([NotNull("ArgumentNullException")] VideoCapture.OnStoppedRecordingVideoCallback onStoppedRecordingVideoCallback);
+		public void StopRecordingAsync([NotNull] VideoCapture.OnStoppedRecordingVideoCallback onStoppedRecordingVideoCallback)
+		{
+			if (onStoppedRecordingVideoCallback == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(onStoppedRecordingVideoCallback, "onStoppedRecordingVideoCallback");
+			}
+			IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoCapture.StopRecordingAsync_Injected(intPtr, onStoppedRecordingVideoCallback);
+		}
 
 		[RequiredByNativeCode]
 		private static void InvokeOnStoppedRecordingVideoToDiskDelegate(VideoCapture.OnStoppedRecordingVideoCallback callback, long hResult)
@@ -216,10 +303,17 @@ namespace UnityEngine.Windows.WebCam
 		}
 
 		[ThreadAndSerializationSafe]
-		[NativeMethod("VideoCaptureBindings::GetUnsafePointerToVideoDeviceController", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetUnsafePointerToVideoDeviceController();
+		[NativeMethod("VideoCaptureBindings::GetUnsafePointerToVideoDeviceController", HasExplicitThis = true)]
+		public IntPtr GetUnsafePointerToVideoDeviceController()
+		{
+			IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VideoCapture.GetUnsafePointerToVideoDeviceController_Injected(intPtr);
+		}
 
 		public void Dispose()
 		{
@@ -234,8 +328,15 @@ namespace UnityEngine.Windows.WebCam
 
 		[NativeMethod("VideoCaptureBindings::Dispose", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Dispose_Internal();
+		private void Dispose_Internal()
+		{
+			IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoCapture.Dispose_Internal_Injected(intPtr);
+		}
 
 		protected override void Finalize()
 		{
@@ -257,11 +358,45 @@ namespace UnityEngine.Windows.WebCam
 		[NativeMethod("VideoCaptureBindings::DisposeThreaded", HasExplicitThis = true)]
 		[NativeConditional("(PLATFORM_WIN || PLATFORM_WINRT) && !PLATFORM_XBOXONE")]
 		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DisposeThreaded_Internal();
+		private void DisposeThreaded_Internal()
+		{
+			IntPtr intPtr = VideoCapture.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VideoCapture.DisposeThreaded_Internal_Injected(intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void StartVideoMode_Internal_Injected(ref CameraParameters cameraParameters, VideoCapture.AudioState audioState, VideoCapture.OnVideoModeStartedCallback onVideoModeStartedCallback);
+		private static extern void GetSupportedResolutions_Internal_Injected(out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSupportedFrameRatesForResolution_Internal_Injected(int resolutionWidth, int resolutionHeight, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_IsRecording_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StartVideoMode_Internal_Injected(IntPtr _unity_self, [In] ref CameraParameters cameraParameters, VideoCapture.AudioState audioState, VideoCapture.OnVideoModeStartedCallback onVideoModeStartedCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StopVideoModeAsync_Injected(IntPtr _unity_self, VideoCapture.OnVideoModeStoppedCallback onVideoModeStoppedCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StartRecordingVideoToDisk_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper filename, VideoCapture.OnStartedRecordingVideoCallback onStartedRecordingVideoCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void StopRecordingAsync_Injected(IntPtr _unity_self, VideoCapture.OnStoppedRecordingVideoCallback onStoppedRecordingVideoCallback);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetUnsafePointerToVideoDeviceController_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Dispose_Internal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisposeThreaded_Internal_Injected(IntPtr _unity_self);
 
 		internal IntPtr m_NativePtr;
 
@@ -307,5 +442,13 @@ namespace UnityEngine.Windows.WebCam
 		public delegate void OnStartedRecordingVideoCallback(VideoCapture.VideoCaptureResult result);
 
 		public delegate void OnStoppedRecordingVideoCallback(VideoCapture.VideoCaptureResult result);
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(VideoCapture videoCapture)
+			{
+				return videoCapture.m_NativePtr;
+			}
+		}
 	}
 }

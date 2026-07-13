@@ -116,11 +116,11 @@ namespace System.Diagnostics
 			this.changed = false;
 		}
 
-		[SRDescription("The category name for this performance counter.")]
-		[ReadOnly(true)]
 		[DefaultValue("")]
-		[TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[ReadOnly(true)]
 		[SettingsBindable(true)]
+		[TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[SRDescription("The category name for this performance counter.")]
 		public string CategoryName
 		{
 			get
@@ -150,11 +150,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[TypeConverter("System.Diagnostics.Design.CounterNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[DefaultValue("")]
 		[SRDescription("The name of this performance counter.")]
-		[SettingsBindable(true)]
+		[DefaultValue("")]
 		[ReadOnly(true)]
+		[SettingsBindable(true)]
+		[TypeConverter("System.Diagnostics.Design.CounterNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string CounterName
 		{
 			get
@@ -200,11 +200,11 @@ namespace System.Diagnostics
 			}
 		}
 
+		[SRDescription("The instance name for this performance counter.")]
 		[DefaultValue("")]
+		[TypeConverter("System.Diagnostics.Design.InstanceNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[ReadOnly(true)]
 		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.InstanceNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[SRDescription("The instance name for this performance counter.")]
 		public string InstanceName
 		{
 			get
@@ -222,11 +222,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[SRDescription("The machine where this performance counter resides.")]
-		[SettingsBindable(true)]
 		[DefaultValue(".")]
-		[MonoTODO("What's the machine name format?")]
 		[Browsable(false)]
+		[SettingsBindable(true)]
+		[SRDescription("The machine where this performance counter resides.")]
+		[MonoTODO("What's the machine name format?")]
 		public string MachineName
 		{
 			get
@@ -278,9 +278,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
-		[MonitoringDescription("The accessability level of the counter.")]
 		[DefaultValue(true)]
+		[MonitoringDescription("The accessability level of the counter.")]
+		[Browsable(false)]
 		public bool ReadOnly
 		{
 			get
@@ -379,8 +379,8 @@ namespace System.Diagnostics
 			return num;
 		}
 
-		[MonoTODO]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[MonoTODO]
 		public void RemoveInstance()
 		{
 			throw new NotImplementedException();

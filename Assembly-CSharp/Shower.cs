@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/Shower")]
-public class Shower : Workable, IGameObjectEffectDescriptor
+public class Shower : Workable
 {
 	private Shower()
 	{

@@ -8,10 +8,10 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[StaticAccessor("AndroidJNIBindingsHelpers", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
-	[UsedByNativeCode]
 	[NativeConditional("PLATFORM_ANDROID")]
+	[UsedByNativeCode]
+	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
+	[StaticAccessor("AndroidJNIBindingsHelpers", StaticAccessorType.DoubleColon)]
 	public static class AndroidJNIHelper
 	{
 		public static extern bool debug
@@ -73,7 +73,7 @@ namespace UnityEngine
 			IntPtr intPtr;
 			try
 			{
-				intPtr = _AndroidJNIHelper.CreateJavaProxy(AndroidApp.UnityPlayerRaw, GCHandle.ToIntPtr(gchandle), proxy);
+				intPtr = _AndroidJNIHelper.CreateJavaProxy(AndroidApplication.UnityPlayerRaw, GCHandle.ToIntPtr(gchandle), proxy);
 			}
 			catch
 			{

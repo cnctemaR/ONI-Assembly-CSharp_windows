@@ -554,8 +554,8 @@ namespace System.Collections.Generic
 			internal const int DictEntry = 2;
 		}
 
-		[DebuggerDisplay("Count = {Count}")]
 		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
+		[DebuggerDisplay("Count = {Count}")]
 		[Serializable]
 		public sealed class KeyCollection : ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection, IReadOnlyCollection<TKey>
 		{

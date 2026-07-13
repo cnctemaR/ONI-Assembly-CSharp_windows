@@ -180,7 +180,7 @@ public class DevToolSceneBrowser : DevTool
 			ImGui.SameLine();
 			if (ImGui.InputText("Filter", ref DevToolSceneBrowser.SearchFilter, 64U))
 			{
-				DevToolSceneBrowser.SearchResults = (from go in global::UnityEngine.Object.FindObjectsOfType<GameObject>()
+				DevToolSceneBrowser.SearchResults = (from go in global::UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsSortMode.InstanceID)
 					where go.name.IndexOf(DevToolSceneBrowser.SearchFilter, 0, StringComparison.CurrentCultureIgnoreCase) != -1
 					orderby go.name
 					select go).ToList<GameObject>();

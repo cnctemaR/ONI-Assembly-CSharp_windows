@@ -13,9 +13,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	[RequiredByNativeCode]
 	[ExcludeFromPreset]
-	[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 	public sealed class Mesh : Object
 	{
 		[FreeFunction("MeshScripting::CreateMesh")]
@@ -29,276 +29,960 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("MeshScripting::MeshFromInstanceId")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Mesh FromInstanceID(int id);
-
-		public extern IndexFormat indexFormat
+		internal static Mesh FromInstanceID(EntityId id)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			return Unmarshal.UnmarshalUnityObject<Mesh>(Mesh.FromInstanceID_Injected(ref id));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern uint GetTotalIndexCount();
+		public IndexFormat indexFormat
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_indexFormat_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Mesh.set_indexFormat_Injected(intPtr, value);
+			}
+		}
+
+		internal uint GetTotalIndexCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetTotalIndexCount_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::SetIndexBufferParams", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetIndexBufferParams(int indexCount, IndexFormat format);
+		public void SetIndexBufferParams(int indexCount, IndexFormat format)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetIndexBufferParams_Injected(intPtr, indexCount, format);
+		}
 
 		[FreeFunction(Name = "MeshScripting::InternalSetIndexBufferData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetIndexBufferData(IntPtr data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
+		private void InternalSetIndexBufferData(IntPtr data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.InternalSetIndexBufferData_Injected(intPtr, data, dataStart, meshBufferStart, count, elemSize, flags);
+		}
 
 		[FreeFunction(Name = "MeshScripting::InternalSetIndexBufferDataFromArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetIndexBufferDataFromArray(Array data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
+		private void InternalSetIndexBufferDataFromArray(Array data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.InternalSetIndexBufferDataFromArray_Injected(intPtr, data, dataStart, meshBufferStart, count, elemSize, flags);
+		}
 
 		[FreeFunction(Name = "MeshScripting::SetVertexBufferParamsFromPtr", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVertexBufferParamsFromPtr(int vertexCount, IntPtr attributesPtr, int attributesCount);
+		private void SetVertexBufferParamsFromPtr(int vertexCount, IntPtr attributesPtr, int attributesCount)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetVertexBufferParamsFromPtr_Injected(intPtr, vertexCount, attributesPtr, attributesCount);
+		}
 
 		[FreeFunction(Name = "MeshScripting::SetVertexBufferParamsFromArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVertexBufferParamsFromArray(int vertexCount, [Unmarshalled] params VertexAttributeDescriptor[] attributes);
+		private unsafe void SetVertexBufferParamsFromArray(int vertexCount, params VertexAttributeDescriptor[] attributes)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<VertexAttributeDescriptor> span = new Span<VertexAttributeDescriptor>(attributes);
+			fixed (VertexAttributeDescriptor* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Mesh.SetVertexBufferParamsFromArray_Injected(intPtr, vertexCount, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction(Name = "MeshScripting::InternalSetVertexBufferData", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetVertexBufferData(int stream, IntPtr data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
+		private void InternalSetVertexBufferData(int stream, IntPtr data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.InternalSetVertexBufferData_Injected(intPtr, stream, data, dataStart, meshBufferStart, count, elemSize, flags);
+		}
 
 		[FreeFunction(Name = "MeshScripting::InternalSetVertexBufferDataFromArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetVertexBufferDataFromArray(int stream, Array data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
+		private void InternalSetVertexBufferDataFromArray(int stream, Array data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.InternalSetVertexBufferDataFromArray_Injected(intPtr, stream, data, dataStart, meshBufferStart, count, elemSize, flags);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesAlloc", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Array GetVertexAttributesAlloc();
+		private Array GetVertexAttributesAlloc()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetVertexAttributesAlloc_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVertexAttributesArray([Unmarshalled] [NotNull("ArgumentNullException")] VertexAttributeDescriptor[] attributes);
+		private unsafe int GetVertexAttributesArray([NotNull] VertexAttributeDescriptor[] attributes)
+		{
+			if (attributes == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(attributes, "attributes");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<VertexAttributeDescriptor> span = new Span<VertexAttributeDescriptor>(attributes);
+			int vertexAttributesArray_Injected;
+			fixed (VertexAttributeDescriptor* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				vertexAttributesArray_Injected = Mesh.GetVertexAttributesArray_Injected(intPtr, ref managedSpanWrapper);
+			}
+			return vertexAttributesArray_Injected;
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesList", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVertexAttributesList([NotNull("ArgumentNullException")] List<VertexAttributeDescriptor> attributes);
+		private unsafe int GetVertexAttributesList([NotNull] List<VertexAttributeDescriptor> attributes)
+		{
+			if (attributes == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(attributes, "attributes");
+			}
+			int vertexAttributesList_Injected;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				fixed (VertexAttributeDescriptor[] array = NoAllocHelpers.ExtractArrayFromList<VertexAttributeDescriptor>(attributes))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, attributes.Count);
+					vertexAttributesList_Injected = Mesh.GetVertexAttributesList_Injected(intPtr, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<VertexAttributeDescriptor>(attributes);
+			}
+			return vertexAttributesList_Injected;
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributesCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVertexAttributeCountImpl();
+		private int GetVertexAttributeCountImpl()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetVertexAttributeCountImpl_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetVertexAttributeByIndex", HasExplicitThis = true, ThrowsException = true)]
 		public VertexAttributeDescriptor GetVertexAttribute(int index)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			VertexAttributeDescriptor vertexAttributeDescriptor;
-			this.GetVertexAttribute_Injected(index, out vertexAttributeDescriptor);
+			Mesh.GetVertexAttribute_Injected(intPtr, index, out vertexAttributeDescriptor);
 			return vertexAttributeDescriptor;
 		}
 
 		[FreeFunction(Name = "MeshScripting::GetIndexStart", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern uint GetIndexStartImpl(int submesh);
+		private uint GetIndexStartImpl(int submesh, int meshlod)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetIndexStartImpl_Injected(intPtr, submesh, meshlod);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetIndexCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern uint GetIndexCountImpl(int submesh);
+		private uint GetIndexCountImpl(int submesh, int meshlod)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetIndexCountImpl_Injected(intPtr, submesh, meshlod);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetTrianglesCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern uint GetTrianglesCountImpl(int submesh);
+		private uint GetTrianglesCountImpl(int submesh, int meshlod)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetTrianglesCountImpl_Injected(intPtr, submesh, meshlod);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBaseVertex", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern uint GetBaseVertexImpl(int submesh);
+		private uint GetBaseVertexImpl(int submesh)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetBaseVertexImpl_Injected(intPtr, submesh);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetTriangles", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int[] GetTrianglesImpl(int submesh, bool applyBaseVertex);
+		private int[] GetTrianglesImpl(int submesh, bool applyBaseVertex, int meshlod)
+		{
+			int[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Mesh.GetTrianglesImpl_Injected(intPtr, submesh, applyBaseVertex, meshlod, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				int[] array;
+				blittableArrayWrapper.Unmarshal<int>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetIndices", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int[] GetIndicesImpl(int submesh, bool applyBaseVertex);
+		private int[] GetIndicesImpl(int submesh, bool applyBaseVertex, int meshlod)
+		{
+			int[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Mesh.GetIndicesImpl_Injected(intPtr, submesh, applyBaseVertex, meshlod, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				int[] array;
+				blittableArrayWrapper.Unmarshal<int>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "SetMeshIndicesFromScript", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetIndicesImpl(int submesh, MeshTopology topology, IndexFormat indicesFormat, Array indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex);
+		private void SetIndicesImpl(int submesh, MeshTopology topology, IndexFormat indicesFormat, Array indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex, int meshlod)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetIndicesImpl_Injected(intPtr, submesh, topology, indicesFormat, indices, arrayStart, arraySize, calculateBounds, baseVertex, meshlod);
+		}
 
 		[FreeFunction(Name = "SetMeshIndicesFromNativeArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetIndicesNativeArrayImpl(int submesh, MeshTopology topology, IndexFormat indicesFormat, IntPtr indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex);
+		private void SetIndicesNativeArrayImpl(int submesh, MeshTopology topology, IndexFormat indicesFormat, IntPtr indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex, int meshlod)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetIndicesNativeArrayImpl_Injected(intPtr, submesh, topology, indicesFormat, indices, arrayStart, arraySize, calculateBounds, baseVertex, meshlod);
+		}
 
 		[FreeFunction(Name = "MeshScripting::ExtractTrianglesToArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTrianglesNonAllocImpl([Out] int[] values, int submesh, bool applyBaseVertex);
+		private unsafe void GetTrianglesNonAllocImpl([Out] int[] values, int submesh, bool applyBaseVertex, int meshlod)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (values != null)
+				{
+					fixed (int[] array = values)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Mesh.GetTrianglesNonAllocImpl_Injected(intPtr, out blittableArrayWrapper, submesh, applyBaseVertex, meshlod);
+			}
+			finally
+			{
+				int[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<int>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MeshScripting::ExtractTrianglesToArray16", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetTrianglesNonAllocImpl16([Out] ushort[] values, int submesh, bool applyBaseVertex);
+		private unsafe void GetTrianglesNonAllocImpl16([Out] ushort[] values, int submesh, bool applyBaseVertex, int meshlod)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (values != null)
+				{
+					fixed (ushort[] array = values)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Mesh.GetTrianglesNonAllocImpl16_Injected(intPtr, out blittableArrayWrapper, submesh, applyBaseVertex, meshlod);
+			}
+			finally
+			{
+				ushort[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<ushort>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MeshScripting::ExtractIndicesToArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetIndicesNonAllocImpl([Out] int[] values, int submesh, bool applyBaseVertex);
+		private unsafe void GetIndicesNonAllocImpl([Out] int[] values, int submesh, bool applyBaseVertex, int meshlod)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (values != null)
+				{
+					fixed (int[] array = values)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Mesh.GetIndicesNonAllocImpl_Injected(intPtr, out blittableArrayWrapper, submesh, applyBaseVertex, meshlod);
+			}
+			finally
+			{
+				int[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<int>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MeshScripting::ExtractIndicesToArray16", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetIndicesNonAllocImpl16([Out] ushort[] values, int submesh, bool applyBaseVertex);
+		private unsafe void GetIndicesNonAllocImpl16([Out] ushort[] values, int submesh, bool applyBaseVertex, int meshlod)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (values != null)
+				{
+					fixed (ushort[] array = values)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Mesh.GetIndicesNonAllocImpl16_Injected(intPtr, out blittableArrayWrapper, submesh, applyBaseVertex, meshlod);
+			}
+			finally
+			{
+				ushort[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<ushort>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MeshScripting::PrintErrorCantAccessChannel", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void PrintErrorCantAccessChannel(VertexAttribute ch);
+		private void PrintErrorCantAccessChannel(VertexAttribute ch)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.PrintErrorCantAccessChannel_Injected(intPtr, ch);
+		}
 
 		[FreeFunction(Name = "MeshScripting::HasChannel", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasVertexAttribute(VertexAttribute attr);
+		public bool HasVertexAttribute(VertexAttribute attr)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.HasVertexAttribute_Injected(intPtr, attr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetChannelDimension", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetVertexAttributeDimension(VertexAttribute attr);
+		public int GetVertexAttributeDimension(VertexAttribute attr)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetVertexAttributeDimension_Injected(intPtr, attr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetChannelFormat", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern VertexAttributeFormat GetVertexAttributeFormat(VertexAttribute attr);
+		public VertexAttributeFormat GetVertexAttributeFormat(VertexAttribute attr)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetVertexAttributeFormat_Injected(intPtr, attr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetChannelStream", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetVertexAttributeStream(VertexAttribute attr);
+		public int GetVertexAttributeStream(VertexAttribute attr)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetVertexAttributeStream_Injected(intPtr, attr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetChannelOffset", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetVertexAttributeOffset(VertexAttribute attr);
+		public int GetVertexAttributeOffset(VertexAttribute attr)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetVertexAttributeOffset_Injected(intPtr, attr);
+		}
 
 		[FreeFunction(Name = "SetMeshComponentFromArrayFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags);
+		private void SetArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetArrayForChannelImpl_Injected(intPtr, channel, format, dim, values, arraySize, valuesStart, valuesCount, flags);
+		}
 
 		[FreeFunction(Name = "SetMeshComponentFromNativeArrayFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetNativeArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, IntPtr values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags);
+		private void SetNativeArrayForChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, IntPtr values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetNativeArrayForChannelImpl_Injected(intPtr, channel, format, dim, values, arraySize, valuesStart, valuesCount, flags);
+		}
 
 		[FreeFunction(Name = "AllocExtractMeshComponentFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Array GetAllocArrayFromChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim);
+		private Array GetAllocArrayFromChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetAllocArrayFromChannelImpl_Injected(intPtr, channel, format, dim);
+		}
 
 		[FreeFunction(Name = "ExtractMeshComponentFromScript", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetArrayFromChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values);
+		private void GetArrayFromChannelImpl(VertexAttribute channel, VertexAttributeFormat format, int dim, Array values)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.GetArrayFromChannelImpl_Injected(intPtr, channel, format, dim, values);
+		}
 
-		public extern int vertexBufferCount
+		public int vertexBufferCount
 		{
 			[FreeFunction(Name = "MeshScripting::GetVertexBufferCount", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_vertexBufferCount_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction(Name = "MeshScripting::GetVertexBufferStride", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetVertexBufferStride(int stream);
+		public int GetVertexBufferStride(int stream)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetVertexBufferStride_Injected(intPtr, stream);
+		}
 
-		[FreeFunction(Name = "MeshScripting::GetNativeVertexBufferPtr", HasExplicitThis = true)]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetNativeVertexBufferPtr(int index);
+		[FreeFunction(Name = "MeshScripting::GetNativeVertexBufferPtr", HasExplicitThis = true)]
+		public IntPtr GetNativeVertexBufferPtr(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetNativeVertexBufferPtr_Injected(intPtr, index);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetNativeIndexBufferPtr", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern IntPtr GetNativeIndexBufferPtr();
+		public IntPtr GetNativeIndexBufferPtr()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetNativeIndexBufferPtr_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetVertexBufferPtr", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GraphicsBuffer GetVertexBufferImpl(int index);
+		private GraphicsBuffer GetVertexBufferImpl(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr vertexBufferImpl_Injected = Mesh.GetVertexBufferImpl_Injected(intPtr, index);
+			return (vertexBufferImpl_Injected == 0) ? null : GraphicsBuffer.BindingsMarshaller.ConvertToManaged(vertexBufferImpl_Injected);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetIndexBufferPtr", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GraphicsBuffer GetIndexBufferImpl();
+		private GraphicsBuffer GetIndexBufferImpl()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr indexBufferImpl_Injected = Mesh.GetIndexBufferImpl_Injected(intPtr);
+			return (indexBufferImpl_Injected == 0) ? null : GraphicsBuffer.BindingsMarshaller.ConvertToManaged(indexBufferImpl_Injected);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBoneWeightBufferPtr", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GraphicsBuffer GetBoneWeightBufferImpl(int bonesPerVertex);
+		private GraphicsBuffer GetBoneWeightBufferImpl(int bonesPerVertex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr boneWeightBufferImpl_Injected = Mesh.GetBoneWeightBufferImpl_Injected(intPtr, bonesPerVertex);
+			return (boneWeightBufferImpl_Injected == 0) ? null : GraphicsBuffer.BindingsMarshaller.ConvertToManaged(boneWeightBufferImpl_Injected);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBlendShapeBufferPtr", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern GraphicsBuffer GetBlendShapeBufferImpl(int layout);
-
-		public extern GraphicsBuffer.Target vertexBufferTarget
+		private GraphicsBuffer GetBlendShapeBufferImpl(int layout)
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr blendShapeBufferImpl_Injected = Mesh.GetBlendShapeBufferImpl_Injected(intPtr, layout);
+			return (blendShapeBufferImpl_Injected == 0) ? null : GraphicsBuffer.BindingsMarshaller.ConvertToManaged(blendShapeBufferImpl_Injected);
 		}
 
-		public extern GraphicsBuffer.Target indexBufferTarget
+		public GraphicsBuffer.Target vertexBufferTarget
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_vertexBufferTarget_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Mesh.set_vertexBufferTarget_Injected(intPtr, value);
+			}
 		}
 
-		public extern int blendShapeCount
+		public GraphicsBuffer.Target indexBufferTarget
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_indexBufferTarget_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Mesh.set_indexBufferTarget_Injected(intPtr, value);
+			}
+		}
+
+		public int blendShapeCount
 		{
 			[NativeMethod(Name = "GetBlendShapeChannelCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_blendShapeCount_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction(Name = "MeshScripting::ClearBlendShapes", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ClearBlendShapes();
+		public void ClearBlendShapes()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.ClearBlendShapes_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBlendShapeName", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string GetBlendShapeName(int shapeIndex);
+		public string GetBlendShapeName(int shapeIndex)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				Mesh.GetBlendShapeName_Injected(intPtr, shapeIndex, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBlendShapeIndex", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetBlendShapeIndex(string blendShapeName);
+		public unsafe int GetBlendShapeIndex(string blendShapeName)
+		{
+			int blendShapeIndex_Injected;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(blendShapeName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = blendShapeName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				blendShapeIndex_Injected = Mesh.GetBlendShapeIndex_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return blendShapeIndex_Injected;
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBlendShapeFrameCount", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetBlendShapeFrameCount(int shapeIndex);
+		public int GetBlendShapeFrameCount(int shapeIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetBlendShapeFrameCount_Injected(intPtr, shapeIndex);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBlendShapeFrameWeight", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetBlendShapeFrameWeight(int shapeIndex, int frameIndex);
+		public float GetBlendShapeFrameWeight(int shapeIndex, int frameIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetBlendShapeFrameWeight_Injected(intPtr, shapeIndex, frameIndex);
+		}
 
 		[FreeFunction(Name = "GetBlendShapeFrameVerticesFromScript", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetBlendShapeFrameVertices(int shapeIndex, int frameIndex, [Unmarshalled] Vector3[] deltaVertices, [Unmarshalled] Vector3[] deltaNormals, [Unmarshalled] Vector3[] deltaTangents);
+		public unsafe void GetBlendShapeFrameVertices(int shapeIndex, int frameIndex, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector3> span = new Span<Vector3>(deltaVertices);
+			fixed (Vector3* ptr = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+				Span<Vector3> span2 = new Span<Vector3>(deltaNormals);
+				fixed (Vector3* ptr2 = span2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, span2.Length);
+					Span<Vector3> span3 = new Span<Vector3>(deltaTangents);
+					fixed (Vector3* pinnableReference = span3.GetPinnableReference())
+					{
+						ManagedSpanWrapper managedSpanWrapper3 = new ManagedSpanWrapper((void*)pinnableReference, span3.Length);
+						Mesh.GetBlendShapeFrameVertices_Injected(intPtr, shapeIndex, frameIndex, ref managedSpanWrapper, ref managedSpanWrapper2, ref managedSpanWrapper3);
+						ptr = null;
+						ptr2 = null;
+					}
+				}
+			}
+		}
 
 		[FreeFunction(Name = "AddBlendShapeFrameFromScript", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void AddBlendShapeFrame(string shapeName, float frameWeight, [Unmarshalled] Vector3[] deltaVertices, [Unmarshalled] Vector3[] deltaNormals, [Unmarshalled] Vector3[] deltaTangents);
+		public unsafe void AddBlendShapeFrame(string shapeName, float frameWeight, ReadOnlySpan<Vector3> deltaVertices, ReadOnlySpan<Vector3> deltaNormals, ReadOnlySpan<Vector3> deltaTangents)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(shapeName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = shapeName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ReadOnlySpan<Vector3> readOnlySpan2 = deltaVertices;
+				fixed (Vector3* ptr2 = readOnlySpan2.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					ReadOnlySpan<Vector3> readOnlySpan3 = deltaNormals;
+					fixed (Vector3* ptr3 = readOnlySpan3.GetPinnableReference())
+					{
+						ManagedSpanWrapper managedSpanWrapper3 = new ManagedSpanWrapper((void*)ptr3, readOnlySpan3.Length);
+						ReadOnlySpan<Vector3> readOnlySpan4 = deltaTangents;
+						fixed (Vector3* ptr4 = readOnlySpan4.GetPinnableReference())
+						{
+							ManagedSpanWrapper managedSpanWrapper4 = new ManagedSpanWrapper((void*)ptr4, readOnlySpan4.Length);
+							Mesh.AddBlendShapeFrame_Injected(intPtr, ref managedSpanWrapper, frameWeight, ref managedSpanWrapper2, ref managedSpanWrapper3, ref managedSpanWrapper4);
+						}
+					}
+				}
+			}
+			finally
+			{
+				char* ptr = null;
+				Vector3* ptr2 = null;
+				Vector3* ptr3 = null;
+				Vector3* ptr4 = null;
+			}
+		}
+
+		public void AddBlendShapeFrame(string shapeName, float frameWeight, Vector3[] deltaVertices, Vector3[] deltaNormals, Vector3[] deltaTangents)
+		{
+			this.AddBlendShapeFrame(shapeName, frameWeight, new ReadOnlySpan<Vector3>(deltaVertices), new ReadOnlySpan<Vector3>(deltaNormals), new ReadOnlySpan<Vector3>(deltaTangents));
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBlendShapeOffset", HasExplicitThis = true)]
 		private BlendShape GetBlendShapeOffsetInternal(int index)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			BlendShape blendShape;
-			this.GetBlendShapeOffsetInternal_Injected(index, out blendShape);
+			Mesh.GetBlendShapeOffsetInternal_Injected(intPtr, index, out blendShape);
 			return blendShape;
 		}
 
 		[NativeMethod("HasBoneWeights")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasBoneWeights();
+		private bool HasBoneWeights()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.HasBoneWeights_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBoneWeights", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern BoneWeight[] GetBoneWeightsImpl();
+		private BoneWeight[] GetBoneWeightsImpl()
+		{
+			BoneWeight[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Mesh.GetBoneWeightsImpl_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				BoneWeight[] array;
+				blittableArrayWrapper.Unmarshal<BoneWeight>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction(Name = "MeshScripting::SetBoneWeights", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetBoneWeightsImpl(BoneWeight[] weights);
+		private unsafe void SetBoneWeightsImpl(BoneWeight[] weights)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<BoneWeight> span = new Span<BoneWeight>(weights);
+			fixed (BoneWeight* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Mesh.SetBoneWeightsImpl_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		public void SetBoneWeights(NativeArray<byte> bonesPerVertex, NativeArray<BoneWeight1> weights)
 		{
 			this.InternalSetBoneWeights((IntPtr)bonesPerVertex.GetUnsafeReadOnlyPtr<byte>(), bonesPerVertex.Length, (IntPtr)weights.GetUnsafeReadOnlyPtr<BoneWeight1>(), weights.Length);
 		}
 
-		[FreeFunction(Name = "MeshScripting::SetBoneWeights", HasExplicitThis = true)]
 		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InternalSetBoneWeights(IntPtr bonesPerVertex, int bonesPerVertexSize, IntPtr weights, int weightsSize);
+		[FreeFunction(Name = "MeshScripting::SetBoneWeights", HasExplicitThis = true)]
+		private void InternalSetBoneWeights(IntPtr bonesPerVertex, int bonesPerVertexSize, IntPtr weights, int weightsSize)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.InternalSetBoneWeights_Injected(intPtr, bonesPerVertex, bonesPerVertexSize, weights, weightsSize);
+		}
 
 		public unsafe NativeArray<BoneWeight1> GetAllBoneWeights()
 		{
@@ -312,36 +996,103 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "MeshScripting::GetAllBoneWeightsArraySize", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetAllBoneWeightsArraySize();
+		private int GetAllBoneWeightsArraySize()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetAllBoneWeightsArraySize_Injected(intPtr);
+		}
 
 		[NativeMethod("GetBoneWeightBufferDimension")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetBoneWeightBufferLayoutInternal();
+		private int GetBoneWeightBufferLayoutInternal()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetBoneWeightBufferLayoutInternal_Injected(intPtr);
+		}
 
-		[SecurityCritical]
 		[FreeFunction(Name = "MeshScripting::GetAllBoneWeightsArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetAllBoneWeightsArray();
+		[SecurityCritical]
+		private IntPtr GetAllBoneWeightsArray()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetAllBoneWeightsArray_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetBonesPerVertexArray", HasExplicitThis = true)]
 		[SecurityCritical]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetBonesPerVertexArray();
-
-		public extern int bindposeCount
+		private IntPtr GetBonesPerVertexArray()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetBonesPerVertexArray_Injected(intPtr);
+		}
+
+		public int bindposeCount
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_bindposeCount_Injected(intPtr);
+			}
 		}
 
 		[NativeName("BindPosesFromScript")]
-		public extern Matrix4x4[] bindposes
+		public unsafe Matrix4x4[] bindposes
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				Matrix4x4[] array2;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					BlittableArrayWrapper blittableArrayWrapper;
+					Mesh.get_bindposes_Injected(intPtr, out blittableArrayWrapper);
+				}
+				finally
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					Matrix4x4[] array;
+					blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+					array2 = array;
+				}
+				return array2;
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Span<Matrix4x4> span = new Span<Matrix4x4>(value);
+				fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Mesh.set_bindposes_Injected(intPtr, ref managedSpanWrapper);
+				}
+			}
 		}
 
 		public unsafe NativeArray<Matrix4x4> GetBindposes()
@@ -349,145 +1100,563 @@ namespace UnityEngine
 			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Matrix4x4>((void*)this.GetBindposesArray(), this.bindposeCount, Allocator.None);
 		}
 
-		[SecurityCritical]
+		public void SetBindposes(NativeArray<Matrix4x4> poses)
+		{
+			bool flag = !poses.IsCreated || poses.Length == 0;
+			if (flag)
+			{
+				throw new ArgumentException("Cannot set bindposes as the native poses array is empty.", "poses");
+			}
+			this.SetBindposesFromScript_NativeArray((IntPtr)poses.GetUnsafeReadOnlyPtr<Matrix4x4>(), poses.Length);
+		}
+
+		[NativeMethod("SetBindposes")]
+		private void SetBindposesFromScript_NativeArray(IntPtr posesPtr, int posesCount)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetBindposesFromScript_NativeArray_Injected(intPtr, posesPtr, posesCount);
+		}
+
 		[FreeFunction(Name = "MeshScripting::GetBindposesArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetBindposesArray();
+		[SecurityCritical]
+		private IntPtr GetBindposesArray()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetBindposesArray_Injected(intPtr);
+		}
 
 		[FreeFunction(Name = "MeshScripting::ExtractBoneWeightsIntoArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetBoneWeightsNonAllocImpl([Out] BoneWeight[] values);
+		private unsafe void GetBoneWeightsNonAllocImpl([Out] BoneWeight[] values)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (values != null)
+				{
+					fixed (BoneWeight[] array = values)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Mesh.GetBoneWeightsNonAllocImpl_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BoneWeight[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<BoneWeight>(ref array);
+			}
+		}
 
 		[FreeFunction(Name = "MeshScripting::ExtractBindPosesIntoArray", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetBindposesNonAllocImpl([Out] Matrix4x4[] values);
+		private unsafe void GetBindposesNonAllocImpl([Out] Matrix4x4[] values)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (values != null)
+				{
+					fixed (Matrix4x4[] array = values)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Mesh.GetBindposesNonAllocImpl_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Matrix4x4[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+			}
+		}
 
-		public extern bool isReadable
+		public bool isReadable
 		{
 			[NativeMethod("GetIsReadable")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_isReadable_Injected(intPtr);
+			}
 		}
 
-		internal extern bool canAccess
+		internal bool canAccess
 		{
 			[NativeMethod("CanAccessFromScript")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_canAccess_Injected(intPtr);
+			}
 		}
 
-		public extern int vertexCount
+		public int vertexCount
 		{
 			[NativeMethod("GetVertexCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_vertexCount_Injected(intPtr);
+			}
 		}
 
-		public extern int subMeshCount
+		public int subMeshCount
 		{
 			[NativeMethod(Name = "GetSubMeshCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Mesh.get_subMeshCount_Injected(intPtr);
+			}
 			[FreeFunction(Name = "MeshScripting::SetSubMeshCount", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Mesh.set_subMeshCount_Injected(intPtr, value);
+			}
 		}
 
 		[FreeFunction("MeshScripting::SetSubMesh", HasExplicitThis = true, ThrowsException = true)]
 		public void SetSubMesh(int index, SubMeshDescriptor desc, MeshUpdateFlags flags = MeshUpdateFlags.Default)
 		{
-			this.SetSubMesh_Injected(index, ref desc, flags);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetSubMesh_Injected(intPtr, index, ref desc, flags);
 		}
 
 		[FreeFunction("MeshScripting::GetSubMesh", HasExplicitThis = true, ThrowsException = true)]
 		public SubMeshDescriptor GetSubMesh(int index)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			SubMeshDescriptor subMeshDescriptor;
-			this.GetSubMesh_Injected(index, out subMeshDescriptor);
+			Mesh.GetSubMesh_Injected(intPtr, index, out subMeshDescriptor);
 			return subMeshDescriptor;
 		}
 
 		[FreeFunction("MeshScripting::SetAllSubMeshesAtOnceFromArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetAllSubMeshesAtOnceFromArray(SubMeshDescriptor[] desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+		private unsafe void SetAllSubMeshesAtOnceFromArray(SubMeshDescriptor[] desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<SubMeshDescriptor> span = new Span<SubMeshDescriptor>(desc);
+			fixed (SubMeshDescriptor* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Mesh.SetAllSubMeshesAtOnceFromArray_Injected(intPtr, ref managedSpanWrapper, start, count, flags);
+			}
+		}
 
 		[FreeFunction("MeshScripting::SetAllSubMeshesAtOnceFromNativeArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetAllSubMeshesAtOnceFromNativeArray(IntPtr desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+		private void SetAllSubMeshesAtOnceFromNativeArray(IntPtr desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetAllSubMeshesAtOnceFromNativeArray_Injected(intPtr, desc, start, count, flags);
+		}
+
+		[FreeFunction("MeshScripting::SetLodCount", HasExplicitThis = true, ThrowsException = true)]
+		private void SetLodCount(int numLevels)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetLodCount_Injected(intPtr, numLevels);
+		}
+
+		[FreeFunction("MeshScripting::SetLodSelectionCurve", HasExplicitThis = true, ThrowsException = true)]
+		private void SetLodSelectionCurve(Mesh.LodSelectionCurve lodSelectionCurve)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetLodSelectionCurve_Injected(intPtr, ref lodSelectionCurve);
+		}
+
+		[FreeFunction("MeshScripting::SetLods", HasExplicitThis = true, ThrowsException = true)]
+		private unsafe void SetLodsFromArray(MeshLodRange[] levelRanges, int start, int count, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<MeshLodRange> span = new Span<MeshLodRange>(levelRanges);
+			fixed (MeshLodRange* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Mesh.SetLodsFromArray_Injected(intPtr, ref managedSpanWrapper, start, count, submesh, flags);
+			}
+		}
+
+		[FreeFunction("MeshScripting::SetLodsFromNativeArray", HasExplicitThis = true, ThrowsException = true)]
+		private void SetLodsFromNativeArray(IntPtr lodLevels, int count, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetLodsFromNativeArray_Injected(intPtr, lodLevels, count, submesh, flags);
+		}
+
+		[FreeFunction("MeshScripting::SetLod", HasExplicitThis = true, ThrowsException = true)]
+		private void SetLodImpl(int subMeshIndex, int level, MeshLodRange levelRange, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.SetLodImpl_Injected(intPtr, subMeshIndex, level, ref levelRange, flags);
+		}
+
+		[FreeFunction("MeshScripting::GetLods", HasExplicitThis = true, ThrowsException = true)]
+		private MeshLodRange[] GetLodsAlloc(int subMeshIndex)
+		{
+			MeshLodRange[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Mesh.GetLodsAlloc_Injected(intPtr, subMeshIndex, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				MeshLodRange[] array;
+				blittableArrayWrapper.Unmarshal<MeshLodRange>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
+
+		[FreeFunction(Name = "MeshScripting::GetLodsNonAlloc", HasExplicitThis = true, ThrowsException = true)]
+		private unsafe void GetLodsNonAlloc([Out] MeshLodRange[] levels, int subMeshIndex)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (levels != null)
+				{
+					fixed (MeshLodRange[] array = levels)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				Mesh.GetLodsNonAlloc_Injected(intPtr, out blittableArrayWrapper, subMeshIndex);
+			}
+			finally
+			{
+				MeshLodRange[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<MeshLodRange>(ref array);
+			}
+		}
+
+		[FreeFunction("MeshScripting::GetLodCount", HasExplicitThis = true)]
+		private int GetLodCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetLodCount_Injected(intPtr);
+		}
+
+		[FreeFunction("MeshScripting::GetLodSelectionCurve", HasExplicitThis = true)]
+		private Mesh.LodSelectionCurve GetLodSelectionCurve()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.LodSelectionCurve lodSelectionCurve;
+			Mesh.GetLodSelectionCurve_Injected(intPtr, out lodSelectionCurve);
+			return lodSelectionCurve;
+		}
+
+		[FreeFunction("MeshScripting::GetLod", HasExplicitThis = true, ThrowsException = true)]
+		public MeshLodRange GetLod(int subMeshIndex, int levelIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MeshLodRange meshLodRange;
+			Mesh.GetLod_Injected(intPtr, subMeshIndex, levelIndex, out meshLodRange);
+			return meshLodRange;
+		}
 
 		public Bounds bounds
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_bounds_Injected(out bounds);
+				Mesh.get_bounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 			set
 			{
-				this.set_bounds_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Mesh.set_bounds_Injected(intPtr, ref value);
 			}
 		}
 
 		[NativeMethod("Clear")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ClearImpl(bool keepVertexLayout);
+		private void ClearImpl(bool keepVertexLayout)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.ClearImpl_Injected(intPtr, keepVertexLayout);
+		}
 
 		[NativeMethod("RecalculateBounds")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateBoundsImpl(MeshUpdateFlags flags);
+		private void RecalculateBoundsImpl(MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.RecalculateBoundsImpl_Injected(intPtr, flags);
+		}
 
 		[NativeMethod("RecalculateNormals")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateNormalsImpl(MeshUpdateFlags flags);
+		private void RecalculateNormalsImpl(MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.RecalculateNormalsImpl_Injected(intPtr, flags);
+		}
 
 		[NativeMethod("RecalculateTangents")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateTangentsImpl(MeshUpdateFlags flags);
+		private void RecalculateTangentsImpl(MeshUpdateFlags flags)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.RecalculateTangentsImpl_Injected(intPtr, flags);
+		}
 
 		[NativeMethod("MarkDynamic")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void MarkDynamicImpl();
+		private void MarkDynamicImpl()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.MarkDynamicImpl_Injected(intPtr);
+		}
 
 		[NativeMethod("MarkModified")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void MarkModified();
+		public void MarkModified()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.MarkModified_Injected(intPtr);
+		}
 
 		[NativeMethod("UploadMeshData")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void UploadMeshDataImpl(bool markNoLongerReadable);
+		private void UploadMeshDataImpl(bool markNoLongerReadable)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.UploadMeshDataImpl_Injected(intPtr, markNoLongerReadable);
+		}
 
 		[FreeFunction(Name = "MeshScripting::GetPrimitiveType", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern MeshTopology GetTopologyImpl(int submesh);
+		private MeshTopology GetTopologyImpl(int submesh)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetTopologyImpl_Injected(intPtr, submesh);
+		}
 
 		[NativeMethod("RecalculateMeshMetric")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateUVDistributionMetricImpl(int uvSetIndex, float uvAreaThreshold);
+		private void RecalculateUVDistributionMetricImpl(int uvSetIndex, float uvAreaThreshold)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.RecalculateUVDistributionMetricImpl_Injected(intPtr, uvSetIndex, uvAreaThreshold);
+		}
 
 		[NativeMethod("RecalculateMeshMetrics")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RecalculateUVDistributionMetricsImpl(float uvAreaThreshold);
+		private void RecalculateUVDistributionMetricsImpl(float uvAreaThreshold)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.RecalculateUVDistributionMetricsImpl_Injected(intPtr, uvAreaThreshold);
+		}
 
 		[NativeMethod("GetMeshMetric")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetUVDistributionMetric(int uvSetIndex);
+		public float GetUVDistributionMetric(int uvSetIndex)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Mesh.GetUVDistributionMetric_Injected(intPtr, uvSetIndex);
+		}
 
 		[NativeMethod(Name = "MeshScripting::CombineMeshes", IsFreeFunction = true, ThrowsException = true, HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void CombineMeshesImpl(CombineInstance[] combine, bool mergeSubMeshes, bool useMatrices, bool hasLightmapData);
+		private unsafe void CombineMeshesImpl(CombineInstance[] combine, bool mergeSubMeshes, bool useMatrices, bool hasLightmapData)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<CombineInstance> span = new Span<CombineInstance>(combine);
+			fixed (CombineInstance* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Mesh.CombineMeshesImpl_Injected(intPtr, ref managedSpanWrapper, mergeSubMeshes, useMatrices, hasLightmapData);
+			}
+		}
 
 		[NativeMethod("Optimize")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void OptimizeImpl();
+		private void OptimizeImpl()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.OptimizeImpl_Injected(intPtr);
+		}
 
 		[NativeMethod("OptimizeIndexBuffers")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void OptimizeIndexBuffersImpl();
+		private void OptimizeIndexBuffersImpl()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.OptimizeIndexBuffersImpl_Injected(intPtr);
+		}
 
 		[NativeMethod("OptimizeReorderVertexBuffer")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void OptimizeReorderVertexBufferImpl();
+		private void OptimizeReorderVertexBufferImpl()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Mesh.OptimizeReorderVertexBufferImpl_Injected(intPtr);
+		}
 
 		internal static VertexAttribute GetUVChannel(int uvIndex)
 		{
@@ -635,12 +1804,12 @@ namespace UnityEngine
 
 		private void SetListForChannel<T>(VertexAttribute channel, VertexAttributeFormat format, int dim, List<T> values, int start, int length, MeshUpdateFlags flags)
 		{
-			this.SetSizedArrayForChannel(channel, format, dim, NoAllocHelpers.ExtractArrayFromList(values), NoAllocHelpers.SafeLength<T>(values), start, length, flags);
+			this.SetSizedArrayForChannel(channel, format, dim, NoAllocHelpers.ExtractArrayFromList<T>(values), NoAllocHelpers.SafeLength<T>(values), start, length, flags);
 		}
 
 		private void SetListForChannel<T>(VertexAttribute channel, List<T> values, int start, int length, MeshUpdateFlags flags)
 		{
-			this.SetSizedArrayForChannel(channel, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(channel), NoAllocHelpers.ExtractArrayFromList(values), NoAllocHelpers.SafeLength<T>(values), start, length, flags);
+			this.SetSizedArrayForChannel(channel, VertexAttributeFormat.Float32, Mesh.DefaultDimensionForChannel(channel), NoAllocHelpers.ExtractArrayFromList<T>(values), NoAllocHelpers.SafeLength<T>(values), start, length, flags);
 		}
 
 		private void GetListForChannel<T>(List<T> buffer, int capacity, VertexAttribute channel, int dim)
@@ -662,7 +1831,7 @@ namespace UnityEngine
 				if (!flag2)
 				{
 					NoAllocHelpers.EnsureListElemCount<T>(buffer, capacity);
-					this.GetArrayFromChannelImpl(channel, channelType, dim, NoAllocHelpers.ExtractArrayFromList(buffer));
+					this.GetArrayFromChannelImpl(channel, channelType, dim, NoAllocHelpers.ExtractArrayFromList<T>(buffer));
 				}
 			}
 		}
@@ -820,6 +1989,55 @@ namespace UnityEngine
 			set
 			{
 				this.SetArrayForChannel<Color32>(VertexAttribute.Color, VertexAttributeFormat.UNorm8, 4, value, MeshUpdateFlags.Default);
+			}
+		}
+
+		public int lodCount
+		{
+			get
+			{
+				return this.GetLodCount();
+			}
+			set
+			{
+				bool flag = value < 1;
+				if (flag)
+				{
+					throw new ArgumentException("The number of Mesh LODs must be greater than zero.");
+				}
+				bool flag2 = value > 1;
+				if (flag2)
+				{
+					for (int i = 0; i < this.subMeshCount; i++)
+					{
+						bool flag3 = this.GetSubMesh(i).topology > MeshTopology.Triangles;
+						if (flag3)
+						{
+							throw new InvalidOperationException("Mesh LOD selection only works for triangle topology. The LOD count value cannot be higher than 1 if the topology is not set to triangles for all submeshes.");
+						}
+					}
+				}
+				this.SetLodCount(value);
+			}
+		}
+
+		internal bool isLodSelectionActive
+		{
+			get
+			{
+				return this.lodCount > 1;
+			}
+		}
+
+		public Mesh.LodSelectionCurve lodSelectionCurve
+		{
+			get
+			{
+				return this.GetLodSelectionCurve();
+			}
+			set
+			{
+				this.SetLodSelectionCurve(value);
 			}
 		}
 
@@ -1385,12 +2603,12 @@ namespace UnityEngine
 			{
 				throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (dataStart:{0} meshBufferStart:{1} count:{2})", dataStart, meshBufferStart, count));
 			}
-			this.InternalSetVertexBufferDataFromArray(stream, NoAllocHelpers.ExtractArrayFromList(data), dataStart, meshBufferStart, count, UnsafeUtility.SizeOf<T>(), flags);
+			this.InternalSetVertexBufferDataFromArray(stream, NoAllocHelpers.ExtractArrayFromList<T>(data), dataStart, meshBufferStart, count, UnsafeUtility.SizeOf<T>(), flags);
 		}
 
 		public static Mesh.MeshDataArray AcquireReadOnlyMeshData(Mesh mesh)
 		{
-			return new Mesh.MeshDataArray(mesh, true);
+			return new Mesh.MeshDataArray(mesh, true, false);
 		}
 
 		public static Mesh.MeshDataArray AcquireReadOnlyMeshData(Mesh[] meshes)
@@ -1400,7 +2618,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("meshes", "Mesh array is null");
 			}
-			return new Mesh.MeshDataArray(meshes, meshes.Length, true);
+			return new Mesh.MeshDataArray(meshes, meshes.Length, true, false);
 		}
 
 		public static Mesh.MeshDataArray AcquireReadOnlyMeshData(List<Mesh> meshes)
@@ -1410,12 +2628,37 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("meshes", "Mesh list is null");
 			}
-			return new Mesh.MeshDataArray(NoAllocHelpers.ExtractArrayFromListT<Mesh>(meshes), meshes.Count, true);
+			return new Mesh.MeshDataArray(NoAllocHelpers.ExtractArrayFromList<Mesh>(meshes), meshes.Count, true, false);
 		}
 
 		public static Mesh.MeshDataArray AllocateWritableMeshData(int meshCount)
 		{
 			return new Mesh.MeshDataArray(meshCount);
+		}
+
+		public static Mesh.MeshDataArray AllocateWritableMeshData(Mesh mesh)
+		{
+			return new Mesh.MeshDataArray(mesh, true, true);
+		}
+
+		public static Mesh.MeshDataArray AllocateWritableMeshData(Mesh[] meshes)
+		{
+			bool flag = meshes == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("meshes", "Mesh array is null");
+			}
+			return new Mesh.MeshDataArray(meshes, meshes.Length, true, true);
+		}
+
+		public static Mesh.MeshDataArray AllocateWritableMeshData(List<Mesh> meshes)
+		{
+			bool flag = meshes == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("meshes", "Mesh list is null");
+			}
+			return new Mesh.MeshDataArray(NoAllocHelpers.ExtractArrayFromList<Mesh>(meshes), meshes.Count, true, true);
 		}
 
 		public static void ApplyAndDisposeWritableMeshData(Mesh.MeshDataArray data, Mesh mesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
@@ -1460,7 +2703,7 @@ namespace UnityEngine
 			{
 				throw new InvalidOperationException(string.Format("{0} length ({1}) must match destination meshes list length ({2})", "MeshDataArray", data.Length, meshes.Count));
 			}
-			data.ApplyToMeshesAndDispose(NoAllocHelpers.ExtractArrayFromListT<Mesh>(meshes), flags);
+			data.ApplyToMeshesAndDispose(NoAllocHelpers.ExtractArrayFromList<Mesh>(meshes), flags);
 		}
 
 		public GraphicsBuffer GetVertexBuffer(int index)
@@ -1624,7 +2867,7 @@ namespace UnityEngine
 				int[] array;
 				if (canAccess)
 				{
-					array = this.GetTrianglesImpl(-1, true);
+					array = this.GetTrianglesImpl(-1, true, 0);
 				}
 				else
 				{
@@ -1638,7 +2881,7 @@ namespace UnityEngine
 				bool canAccess = this.canAccess;
 				if (canAccess)
 				{
-					this.SetTrianglesImpl(-1, IndexFormat.UInt32, value, NoAllocHelpers.SafeLength(value), 0, NoAllocHelpers.SafeLength(value), true, 0);
+					this.SetTrianglesImpl(-1, IndexFormat.UInt32, value, NoAllocHelpers.SafeLength(value), 0, NoAllocHelpers.SafeLength(value), true, 0, 0);
 				}
 				else
 				{
@@ -1654,31 +2897,40 @@ namespace UnityEngine
 
 		public int[] GetTriangles(int submesh, [DefaultValue("true")] bool applyBaseVertex)
 		{
-			return this.CheckCanAccessSubmeshTriangles(submesh) ? this.GetTrianglesImpl(submesh, applyBaseVertex) : new int[0];
+			return this.GetTriangles(submesh, 0, applyBaseVertex);
+		}
+
+		public int[] GetTriangles(int submesh, int meshLod, bool applyBaseVertex)
+		{
+			bool flag = !this.CheckCanAccessSubmeshTriangles(submesh);
+			int[] array;
+			if (flag)
+			{
+				array = new int[0];
+			}
+			else
+			{
+				bool flag2 = meshLod >= this.lodCount;
+				if (flag2)
+				{
+					throw new IndexOutOfRangeException(string.Format("The Mesh LOD index ({0}) must be less than the lodCount value ({1}).", meshLod, this.lodCount));
+				}
+				array = this.GetTrianglesImpl(submesh, applyBaseVertex, meshLod);
+			}
+			return array;
 		}
 
 		public void GetTriangles(List<int> triangles, int submesh)
 		{
-			this.GetTriangles(triangles, submesh, true);
+			this.GetTriangles(triangles, submesh, 0, true);
 		}
 
 		public void GetTriangles(List<int> triangles, int submesh, [DefaultValue("true")] bool applyBaseVertex)
 		{
-			bool flag = triangles == null;
-			if (flag)
-			{
-				throw new ArgumentNullException("triangles", "The result triangles list cannot be null.");
-			}
-			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
-			if (flag2)
-			{
-				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
-			}
-			NoAllocHelpers.EnsureListElemCount<int>(triangles, (int)(3U * this.GetTrianglesCountImpl(submesh)));
-			this.GetTrianglesNonAllocImpl(NoAllocHelpers.ExtractArrayFromListT<int>(triangles), submesh, applyBaseVertex);
+			this.GetTriangles(triangles, submesh, 0, applyBaseVertex);
 		}
 
-		public void GetTriangles(List<ushort> triangles, int submesh, bool applyBaseVertex = true)
+		public void GetTriangles(List<int> triangles, int submesh, int meshLod, bool applyBaseVertex = true)
 		{
 			bool flag = triangles == null;
 			if (flag)
@@ -1690,44 +2942,84 @@ namespace UnityEngine
 			{
 				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
 			}
-			NoAllocHelpers.EnsureListElemCount<ushort>(triangles, (int)(3U * this.GetTrianglesCountImpl(submesh)));
-			this.GetTrianglesNonAllocImpl16(NoAllocHelpers.ExtractArrayFromListT<ushort>(triangles), submesh, applyBaseVertex);
+			bool flag3 = meshLod >= this.lodCount;
+			if (flag3)
+			{
+				throw new IndexOutOfRangeException(string.Format("The Mesh LOD index ({0}) must be less than the lodCount value ({1}).", meshLod, this.lodCount));
+			}
+			NoAllocHelpers.EnsureListElemCount<int>(triangles, (int)(3U * this.GetTrianglesCountImpl(submesh, meshLod)));
+			this.GetTrianglesNonAllocImpl(NoAllocHelpers.ExtractArrayFromList<int>(triangles), submesh, applyBaseVertex, meshLod);
+		}
+
+		public void GetTriangles(List<ushort> triangles, int submesh, bool applyBaseVertex = true)
+		{
+			this.GetTriangles(triangles, submesh, 0, applyBaseVertex);
+		}
+
+		public void GetTriangles(List<ushort> triangles, int submesh, int meshLod, bool applyBaseVertex = true)
+		{
+			bool flag = triangles == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("triangles", "The result triangles list cannot be null.");
+			}
+			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
+			if (flag2)
+			{
+				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
+			}
+			bool flag3 = meshLod >= this.lodCount;
+			if (flag3)
+			{
+				throw new IndexOutOfRangeException(string.Format("The Mesh LOD index ({0}) must be less than the lodCount value ({1}).", meshLod, this.lodCount));
+			}
+			NoAllocHelpers.EnsureListElemCount<ushort>(triangles, (int)(3U * this.GetTrianglesCountImpl(submesh, meshLod)));
+			this.GetTrianglesNonAllocImpl16(NoAllocHelpers.ExtractArrayFromList<ushort>(triangles), submesh, applyBaseVertex, meshLod);
 		}
 
 		[ExcludeFromDocs]
 		public int[] GetIndices(int submesh)
 		{
-			return this.GetIndices(submesh, true);
+			return this.GetIndices(submesh, 0, true);
 		}
 
 		public int[] GetIndices(int submesh, [DefaultValue("true")] bool applyBaseVertex)
 		{
-			return this.CheckCanAccessSubmeshIndices(submesh) ? this.GetIndicesImpl(submesh, applyBaseVertex) : new int[0];
+			return this.GetIndices(submesh, 0, applyBaseVertex);
+		}
+
+		public int[] GetIndices(int submesh, int meshLod, bool applyBaseVertex = true)
+		{
+			bool flag = !this.CheckCanAccessSubmeshIndices(submesh);
+			int[] array;
+			if (flag)
+			{
+				array = new int[0];
+			}
+			else
+			{
+				bool flag2 = meshLod >= this.lodCount;
+				if (flag2)
+				{
+					throw new IndexOutOfRangeException(string.Format("The Mesh LOD index ({0}) must be less than the lodCount value ({1}).", meshLod, this.lodCount));
+				}
+				array = this.GetIndicesImpl(submesh, applyBaseVertex, meshLod);
+			}
+			return array;
 		}
 
 		[ExcludeFromDocs]
 		public void GetIndices(List<int> indices, int submesh)
 		{
-			this.GetIndices(indices, submesh, true);
+			this.GetIndices(indices, submesh, 0, true);
 		}
 
 		public void GetIndices(List<int> indices, int submesh, [DefaultValue("true")] bool applyBaseVertex)
 		{
-			bool flag = indices == null;
-			if (flag)
-			{
-				throw new ArgumentNullException("indices", "The result indices list cannot be null.");
-			}
-			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
-			if (flag2)
-			{
-				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
-			}
-			NoAllocHelpers.EnsureListElemCount<int>(indices, (int)this.GetIndexCount(submesh));
-			this.GetIndicesNonAllocImpl(NoAllocHelpers.ExtractArrayFromListT<int>(indices), submesh, applyBaseVertex);
+			this.GetIndices(indices, submesh, 0, applyBaseVertex);
 		}
 
-		public void GetIndices(List<ushort> indices, int submesh, bool applyBaseVertex = true)
+		public void GetIndices(List<int> indices, int submesh, int meshLod, bool applyBaseVertex = false)
 		{
 			bool flag = indices == null;
 			if (flag)
@@ -1739,8 +3031,34 @@ namespace UnityEngine
 			{
 				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
 			}
-			NoAllocHelpers.EnsureListElemCount<ushort>(indices, (int)this.GetIndexCount(submesh));
-			this.GetIndicesNonAllocImpl16(NoAllocHelpers.ExtractArrayFromListT<ushort>(indices), submesh, applyBaseVertex);
+			bool flag3 = meshLod >= this.lodCount;
+			if (flag3)
+			{
+				throw new IndexOutOfRangeException(string.Format("The Mesh LOD index ({0}) must be less than the lodCount value ({1}).", meshLod, this.lodCount));
+			}
+			NoAllocHelpers.EnsureListElemCount<int>(indices, (int)this.GetIndexCount(submesh, meshLod));
+			this.GetIndicesNonAllocImpl(NoAllocHelpers.ExtractArrayFromList<int>(indices), submesh, applyBaseVertex, meshLod);
+		}
+
+		public void GetIndices(List<ushort> indices, int submesh, bool applyBaseVertex = true)
+		{
+			this.GetIndices(indices, submesh, 0, applyBaseVertex);
+		}
+
+		public void GetIndices(List<ushort> indices, int submesh, int meshLod, bool applyBaseVertex = true)
+		{
+			bool flag = indices == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("indices", "The result indices list cannot be null.");
+			}
+			bool flag2 = submesh < 0 || submesh >= this.subMeshCount;
+			if (flag2)
+			{
+				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
+			}
+			NoAllocHelpers.EnsureListElemCount<ushort>(indices, (int)this.GetIndexCount(submesh, meshLod));
+			this.GetIndicesNonAllocImpl16(NoAllocHelpers.ExtractArrayFromList<ushort>(indices), submesh, applyBaseVertex, meshLod);
 		}
 
 		public void SetIndexBufferData<T>(NativeArray<T> data, int dataStart, int meshBufferStart, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default) where T : struct
@@ -1803,7 +3121,7 @@ namespace UnityEngine
 				{
 					throw new ArgumentOutOfRangeException(string.Format("Bad start/count arguments (dataStart:{0} meshBufferStart:{1} count:{2})", dataStart, meshBufferStart, count));
 				}
-				this.InternalSetIndexBufferDataFromArray(NoAllocHelpers.ExtractArrayFromList(data), dataStart, meshBufferStart, count, UnsafeUtility.SizeOf<T>(), flags);
+				this.InternalSetIndexBufferDataFromArray(NoAllocHelpers.ExtractArrayFromList<T>(data), dataStart, meshBufferStart, count, UnsafeUtility.SizeOf<T>(), flags);
 			}
 		}
 
@@ -1814,7 +3132,22 @@ namespace UnityEngine
 			{
 				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
 			}
-			return this.GetIndexStartImpl(submesh);
+			return this.GetIndexStartImpl(submesh, 0);
+		}
+
+		public uint GetIndexStart(int submesh, int meshLod)
+		{
+			bool flag = submesh < 0 || submesh >= this.subMeshCount;
+			if (flag)
+			{
+				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
+			}
+			bool flag2 = meshLod >= this.lodCount;
+			if (flag2)
+			{
+				throw new IndexOutOfRangeException(string.Format("Specified Mesh LOD index ({0}) is out of range. Must be less than the lodCount value ({1}).", meshLod, this.lodCount));
+			}
+			return this.GetIndexStartImpl(submesh, meshLod);
 		}
 
 		public uint GetIndexCount(int submesh)
@@ -1824,7 +3157,22 @@ namespace UnityEngine
 			{
 				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
 			}
-			return this.GetIndexCountImpl(submesh);
+			return this.GetIndexCountImpl(submesh, 0);
+		}
+
+		public uint GetIndexCount(int submesh, int meshLod)
+		{
+			bool flag = submesh < 0 || submesh >= this.subMeshCount;
+			if (flag)
+			{
+				throw new IndexOutOfRangeException("Specified sub mesh is out of range. Must be greater or equal to 0 and less than subMeshCount.");
+			}
+			bool flag2 = meshLod >= this.lodCount;
+			if (flag2)
+			{
+				throw new IndexOutOfRangeException(string.Format("Specified Mesh LOD index ({0}) is out of range. Must be less than the lodCount value ({1}).", meshLod, this.lodCount));
+			}
+			return this.GetIndexCountImpl(submesh, meshLod);
 		}
 
 		public uint GetBaseVertex(int submesh)
@@ -1861,10 +3209,10 @@ namespace UnityEngine
 			}
 		}
 
-		private void SetTrianglesImpl(int submesh, IndexFormat indicesFormat, Array triangles, int trianglesArrayLength, int start, int length, bool calculateBounds, int baseVertex)
+		private void SetTrianglesImpl(int submesh, IndexFormat indicesFormat, Array triangles, int trianglesArrayLength, int start, int length, bool calculateBounds, int baseVertex, int meshLod)
 		{
 			this.CheckIndicesArrayRange(trianglesArrayLength, start, length);
-			this.SetIndicesImpl(submesh, MeshTopology.Triangles, indicesFormat, triangles, start, length, calculateBounds, baseVertex);
+			this.SetIndicesImpl(submesh, MeshTopology.Triangles, indicesFormat, triangles, start, length, calculateBounds, baseVertex, meshLod);
 		}
 
 		[ExcludeFromDocs]
@@ -1884,12 +3232,22 @@ namespace UnityEngine
 			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength(triangles), submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetTriangles(int[] triangles, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength(triangles), submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetTriangles(int[] triangles, int trianglesStart, int trianglesLength, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, trianglesStart, trianglesLength, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetTriangles(int[] triangles, int trianglesStart, int trianglesLength, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshTriangles(submesh);
 			if (flag)
 			{
-				this.SetTrianglesImpl(submesh, IndexFormat.UInt32, triangles, NoAllocHelpers.SafeLength(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex);
+				this.SetTrianglesImpl(submesh, IndexFormat.UInt32, triangles, NoAllocHelpers.SafeLength(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -1898,12 +3256,22 @@ namespace UnityEngine
 			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength(triangles), submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetTriangles(ushort[] triangles, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength(triangles), submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetTriangles(ushort[] triangles, int trianglesStart, int trianglesLength, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, trianglesStart, trianglesLength, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetTriangles(ushort[] triangles, int trianglesStart, int trianglesLength, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshTriangles(submesh);
 			if (flag)
 			{
-				this.SetTrianglesImpl(submesh, IndexFormat.UInt16, triangles, NoAllocHelpers.SafeLength(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex);
+				this.SetTrianglesImpl(submesh, IndexFormat.UInt16, triangles, NoAllocHelpers.SafeLength(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -1924,12 +3292,22 @@ namespace UnityEngine
 			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength<int>(triangles), submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetTriangles(List<int> triangles, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength<int>(triangles), submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetTriangles(List<int> triangles, int trianglesStart, int trianglesLength, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, trianglesStart, trianglesLength, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetTriangles(List<int> triangles, int trianglesStart, int trianglesLength, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshTriangles(submesh);
 			if (flag)
 			{
-				this.SetTrianglesImpl(submesh, IndexFormat.UInt32, NoAllocHelpers.ExtractArrayFromList(triangles), NoAllocHelpers.SafeLength<int>(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex);
+				this.SetTrianglesImpl(submesh, IndexFormat.UInt32, NoAllocHelpers.ExtractArrayFromList<int>(triangles), NoAllocHelpers.SafeLength<int>(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -1938,12 +3316,22 @@ namespace UnityEngine
 			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength<ushort>(triangles), submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetTriangles(List<ushort> triangles, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, 0, NoAllocHelpers.SafeLength<ushort>(triangles), submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetTriangles(List<ushort> triangles, int trianglesStart, int trianglesLength, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetTriangles(triangles, trianglesStart, trianglesLength, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetTriangles(List<ushort> triangles, int trianglesStart, int trianglesLength, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshTriangles(submesh);
 			if (flag)
 			{
-				this.SetTrianglesImpl(submesh, IndexFormat.UInt16, NoAllocHelpers.ExtractArrayFromList(triangles), NoAllocHelpers.SafeLength<ushort>(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex);
+				this.SetTrianglesImpl(submesh, IndexFormat.UInt16, NoAllocHelpers.ExtractArrayFromList<ushort>(triangles), NoAllocHelpers.SafeLength<ushort>(triangles), trianglesStart, trianglesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -1964,13 +3352,23 @@ namespace UnityEngine
 			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength(indices), topology, submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetIndices(int[] indices, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength(indices), topology, submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetIndices(int[] indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, indicesStart, indicesLength, topology, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetIndices(int[] indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshIndices(submesh);
 			if (flag)
 			{
 				this.CheckIndicesArrayRange(NoAllocHelpers.SafeLength(indices), indicesStart, indicesLength);
-				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt32, indices, indicesStart, indicesLength, calculateBounds, baseVertex);
+				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt32, indices, indicesStart, indicesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -1979,13 +3377,23 @@ namespace UnityEngine
 			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength(indices), topology, submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetIndices(ushort[] indices, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength(indices), topology, submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetIndices(ushort[] indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, indicesStart, indicesLength, topology, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetIndices(ushort[] indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshIndices(submesh);
 			if (flag)
 			{
 				this.CheckIndicesArrayRange(NoAllocHelpers.SafeLength(indices), indicesStart, indicesLength);
-				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt16, indices, indicesStart, indicesLength, calculateBounds, baseVertex);
+				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt16, indices, indicesStart, indicesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -1994,7 +3402,17 @@ namespace UnityEngine
 			this.SetIndices<T>(indices, 0, indices.Length, topology, submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetIndices<T>(NativeArray<T> indices, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0) where T : struct
+		{
+			this.SetIndices<T>(indices, 0, indices.Length, topology, submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetIndices<T>(NativeArray<T> indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, bool calculateBounds = true, int baseVertex = 0) where T : struct
+		{
+			this.SetIndices<T>(indices, indicesStart, indicesLength, topology, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetIndices<T>(NativeArray<T> indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0) where T : struct
 		{
 			bool flag = this.CheckCanAccessSubmeshIndices(submesh);
 			if (flag)
@@ -2006,7 +3424,7 @@ namespace UnityEngine
 					throw new ArgumentException("SetIndices with NativeArray should use type is 2 or 4 bytes in size");
 				}
 				this.CheckIndicesArrayRange(indices.Length, indicesStart, indicesLength);
-				this.SetIndicesNativeArrayImpl(submesh, topology, (num == 2) ? IndexFormat.UInt16 : IndexFormat.UInt32, (IntPtr)indices.GetUnsafeReadOnlyPtr<T>(), indicesStart, indicesLength, calculateBounds, baseVertex);
+				this.SetIndicesNativeArrayImpl(submesh, topology, (num == 2) ? IndexFormat.UInt16 : IndexFormat.UInt32, (IntPtr)indices.GetUnsafeReadOnlyPtr<T>(), indicesStart, indicesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -2015,14 +3433,24 @@ namespace UnityEngine
 			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength<int>(indices), topology, submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetIndices(List<int> indices, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength<int>(indices), topology, submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetIndices(List<int> indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, indicesStart, indicesLength, topology, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetIndices(List<int> indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshIndices(submesh);
 			if (flag)
 			{
-				Array array = NoAllocHelpers.ExtractArrayFromList(indices);
+				int[] array = NoAllocHelpers.ExtractArrayFromList<int>(indices);
 				this.CheckIndicesArrayRange(NoAllocHelpers.SafeLength<int>(indices), indicesStart, indicesLength);
-				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt32, array, indicesStart, indicesLength, calculateBounds, baseVertex);
+				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt32, array, indicesStart, indicesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -2031,14 +3459,24 @@ namespace UnityEngine
 			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength<ushort>(indices), topology, submesh, calculateBounds, baseVertex);
 		}
 
+		public void SetIndices(List<ushort> indices, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, 0, NoAllocHelpers.SafeLength<ushort>(indices), topology, submesh, meshLod, calculateBounds, baseVertex);
+		}
+
 		public void SetIndices(List<ushort> indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, bool calculateBounds = true, int baseVertex = 0)
+		{
+			this.SetIndices(indices, indicesStart, indicesLength, topology, submesh, 0, calculateBounds, baseVertex);
+		}
+
+		public void SetIndices(List<ushort> indices, int indicesStart, int indicesLength, MeshTopology topology, int submesh, int meshLod, bool calculateBounds = true, int baseVertex = 0)
 		{
 			bool flag = this.CheckCanAccessSubmeshIndices(submesh);
 			if (flag)
 			{
-				Array array = NoAllocHelpers.ExtractArrayFromList(indices);
+				ushort[] array = NoAllocHelpers.ExtractArrayFromList<ushort>(indices);
 				this.CheckIndicesArrayRange(NoAllocHelpers.SafeLength<ushort>(indices), indicesStart, indicesLength);
-				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt16, array, indicesStart, indicesLength, calculateBounds, baseVertex);
+				this.SetIndicesImpl(submesh, topology, IndexFormat.UInt16, array, indicesStart, indicesLength, calculateBounds, baseVertex, meshLod);
 			}
 		}
 
@@ -2068,6 +3506,11 @@ namespace UnityEngine
 				{
 					throw new ArgumentException("desc", string.Format("{0}-th submesh descriptor has triangles strip topology, which is no longer supported.", i));
 				}
+				bool flag5 = this.isLodSelectionActive && topology > MeshTopology.Triangles;
+				if (flag5)
+				{
+					throw new ArgumentException("desc", string.Format("Submesh descriptor with index {0} has topology {1} which is not supported by Mesh LOD.", i, topology));
+				}
 			}
 			this.SetAllSubMeshesAtOnceFromArray(desc, start, count, flags);
 		}
@@ -2079,12 +3522,12 @@ namespace UnityEngine
 
 		public void SetSubMeshes(List<SubMeshDescriptor> desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default)
 		{
-			this.SetSubMeshes(NoAllocHelpers.ExtractArrayFromListT<SubMeshDescriptor>(desc), start, count, flags);
+			this.SetSubMeshes(NoAllocHelpers.ExtractArrayFromList<SubMeshDescriptor>(desc), start, count, flags);
 		}
 
 		public void SetSubMeshes(List<SubMeshDescriptor> desc, MeshUpdateFlags flags = MeshUpdateFlags.Default)
 		{
-			this.SetSubMeshes(NoAllocHelpers.ExtractArrayFromListT<SubMeshDescriptor>(desc), 0, (desc != null) ? desc.Count : 0, flags);
+			this.SetSubMeshes(NoAllocHelpers.ExtractArrayFromList<SubMeshDescriptor>(desc), 0, (desc != null) ? desc.Count : 0, flags);
 		}
 
 		public void SetSubMeshes<T>(NativeArray<T> desc, int start, int count, MeshUpdateFlags flags = MeshUpdateFlags.Default) where T : struct
@@ -2107,6 +3550,201 @@ namespace UnityEngine
 			this.SetSubMeshes<T>(desc, 0, desc.Length, flags);
 		}
 
+		private void ValidateLodIndex(int level)
+		{
+			int lodCount = this.lodCount;
+			bool flag = level < 0 || level >= lodCount;
+			if (flag)
+			{
+				throw new IndexOutOfRangeException(string.Format("Specified Mesh LOD index ({0}) is out of range. Must be greater or equal to 0 and less than the lodCount value ({1}).", level, lodCount));
+			}
+		}
+
+		private void ValidateSubMeshIndex(int submesh)
+		{
+			bool flag = submesh < 0 || submesh >= this.subMeshCount;
+			if (flag)
+			{
+				throw new IndexOutOfRangeException(string.Format("Specified submesh index ({0}) is out of range. Must be greater or equal to 0 and less than the subMeshCount value ({1}).", submesh, this.subMeshCount));
+			}
+		}
+
+		private void ValidateCanWriteToLods()
+		{
+			bool flag = !this.isLodSelectionActive;
+			if (flag)
+			{
+				throw new InvalidOperationException("Unable to modify LOD0. Please enable Mesh LOD selection first by setting lodCount to a value greater than 1 or modify the submesh descriptors directly.");
+			}
+		}
+
+		public void SetLod(int submesh, int level, MeshLodRange levelRange, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.ValidateCanWriteToLods();
+			this.ValidateSubMeshIndex(submesh);
+			this.ValidateLodIndex(level);
+			this.SetLodImpl(submesh, level, levelRange, flags);
+		}
+
+		public void SetLods(List<MeshLodRange> levels, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.ValidateCanWriteToLods();
+			this.ValidateSubMeshIndex(submesh);
+			bool flag = levels == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("levels", "The result levelRanges list cannot be null.");
+			}
+			int num = NoAllocHelpers.SafeLength<MeshLodRange>(levels);
+			bool flag2 = num > this.lodCount;
+			if (flag2)
+			{
+				throw new ArgumentException("levels", string.Format("The number of levels ({0}) in the list cannot exceed the lodCount value ({1}) of the mesh. Please increase the lodCount value first if you need additional levels.", num, this.lodCount));
+			}
+			this.SetLods(NoAllocHelpers.ExtractArrayFromList<MeshLodRange>(levels), 0, num, submesh, flags);
+		}
+
+		public void SetLods(List<MeshLodRange> levels, int start, int count, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.ValidateCanWriteToLods();
+			this.ValidateSubMeshIndex(submesh);
+			bool flag = levels == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("levels", "The Mesh LOD ranges cannot be set to null.");
+			}
+			int num = NoAllocHelpers.SafeLength<MeshLodRange>(levels);
+			bool flag2 = start < 0 || count < 0 || start + count > num;
+			if (flag2)
+			{
+				throw new ArgumentOutOfRangeException("start", string.Format("The start ({0}) and the count ({1}) values must be greater than 0, the combined value ({2}) must be less than the list length ({3}).", new object[]
+				{
+					start,
+					count,
+					start + count,
+					num
+				}));
+			}
+			bool flag3 = count > this.lodCount;
+			if (flag3)
+			{
+				throw new ArgumentException("count", string.Format("The count value ({0}) cannot exceed the lodCount value ({1}) of the mesh. Please increase the lodCount value first if you need additional levels of detail.", num, this.lodCount));
+			}
+			this.SetLodsFromArray(NoAllocHelpers.ExtractArrayFromList<MeshLodRange>(levels), start, count, submesh, flags);
+		}
+
+		public void SetLods(MeshLodRange[] levels, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.ValidateCanWriteToLods();
+			this.ValidateSubMeshIndex(submesh);
+			bool flag = levels == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("levels", "The Mesh LOD ranges cannot be set to null.");
+			}
+			int num = NoAllocHelpers.SafeLength(levels);
+			bool flag2 = num > this.lodCount;
+			if (flag2)
+			{
+				throw new ArgumentException("levels", string.Format("The array length ({0}) cannot exceed the lodCount value ({1}) of the mesh. Please increase the lodCount value first if you need additional levels.", num, this.lodCount));
+			}
+			this.SetLodsFromArray(levels, 0, num, submesh, flags);
+		}
+
+		public void SetLods(MeshLodRange[] levels, int start, int count, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.ValidateCanWriteToLods();
+			this.ValidateSubMeshIndex(submesh);
+			bool flag = levels == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("levels", "The Mesh LOD ranges cannot be set to null.");
+			}
+			int num = NoAllocHelpers.SafeLength(levels);
+			bool flag2 = start < 0 || count < 0 || start + count > num;
+			if (flag2)
+			{
+				throw new ArgumentOutOfRangeException("start", string.Format("The start ({0}) and the count ({1}) values must be greater than 0, the combined value ({2}) must be less than the list length ({3}).", new object[]
+				{
+					start,
+					count,
+					start + count,
+					num
+				}));
+			}
+			bool flag3 = count > this.lodCount;
+			if (flag3)
+			{
+				throw new ArgumentException("count", string.Format("The count value ({0}) cannot exceed the lodCount value ({1}) of the mesh. Please increase the lodCount value first if you need additional levels.", count, this.lodCount));
+			}
+			this.SetLodsFromArray(levels, start, count, submesh, flags);
+		}
+
+		public void SetLods(NativeArray<MeshLodRange> levels, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.ValidateCanWriteToLods();
+			this.ValidateSubMeshIndex(submesh);
+			bool flag = !levels.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("levels", "The NativeArray levels is not created.");
+			}
+			int length = levels.Length;
+			bool flag2 = length > this.lodCount;
+			if (flag2)
+			{
+				throw new ArgumentException("levels", string.Format("The array length ({0}) cannot exceed the lodCount value ({1}) of the mesh. Please increase the lodCount value first if you need additional levels.", length, this.lodCount));
+			}
+			this.SetLodsFromNativeArray((IntPtr)levels.GetUnsafeReadOnlyPtr<MeshLodRange>(), length, submesh, flags);
+		}
+
+		public unsafe void SetLods(NativeArray<MeshLodRange> levels, int start, int count, int submesh, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+		{
+			this.ValidateCanWriteToLods();
+			this.ValidateSubMeshIndex(submesh);
+			bool flag = !levels.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("levels", "The NativeArray levels is not created.");
+			}
+			int length = levels.Length;
+			bool flag2 = start < 0 || count < 0 || start + count > length;
+			if (flag2)
+			{
+				throw new ArgumentOutOfRangeException("start", string.Format("The start ({0}) and the count ({1}) values must be greater than 0, the combined value ({2}) must be less than the list length ({3}).", new object[]
+				{
+					start,
+					count,
+					start + count,
+					length
+				}));
+			}
+			bool flag3 = count > this.lodCount;
+			if (flag3)
+			{
+				throw new ArgumentException("levels", string.Format("The count value ({0}) cannot exceed the lodCount value ({1}) of the mesh. Please increase the lodCount value first if you need additional levels.", count, this.lodCount));
+			}
+			this.SetLodsFromNativeArray((IntPtr)levels.GetUnsafeReadOnlyPtr<MeshLodRange>() + start * sizeof(MeshLodRange), count, submesh, flags);
+		}
+
+		public MeshLodRange[] GetLods(int submesh)
+		{
+			this.ValidateSubMeshIndex(submesh);
+			return this.GetLodsAlloc(submesh);
+		}
+
+		public void GetLods(List<MeshLodRange> levels, int submesh)
+		{
+			bool flag = levels == null;
+			if (flag)
+			{
+				throw new ArgumentNullException("levels", "The result levels list cannot be null.");
+			}
+			this.ValidateSubMeshIndex(submesh);
+			NoAllocHelpers.EnsureListElemCount<MeshLodRange>(levels, this.lodCount);
+			this.GetLodsNonAlloc(NoAllocHelpers.ExtractArrayFromList<MeshLodRange>(levels), submesh);
+		}
+
 		public void GetBindposes(List<Matrix4x4> bindposes)
 		{
 			bool flag = bindposes == null;
@@ -2115,7 +3753,7 @@ namespace UnityEngine
 				throw new ArgumentNullException("bindposes", "The result bindposes list cannot be null.");
 			}
 			NoAllocHelpers.EnsureListElemCount<Matrix4x4>(bindposes, this.bindposeCount);
-			this.GetBindposesNonAllocImpl(NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(bindposes));
+			this.GetBindposesNonAllocImpl(NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(bindposes));
 		}
 
 		public void GetBoneWeights(List<BoneWeight> boneWeights)
@@ -2130,7 +3768,7 @@ namespace UnityEngine
 			{
 				NoAllocHelpers.EnsureListElemCount<BoneWeight>(boneWeights, this.vertexCount);
 			}
-			this.GetBoneWeightsNonAllocImpl(NoAllocHelpers.ExtractArrayFromListT<BoneWeight>(boneWeights));
+			this.GetBoneWeightsNonAllocImpl(NoAllocHelpers.ExtractArrayFromList<BoneWeight>(boneWeights));
 		}
 
 		public BoneWeight[] boneWeights
@@ -2344,25 +3982,383 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVertexAttribute_Injected(int index, out VertexAttributeDescriptor ret);
+		private static extern IntPtr FromInstanceID_Injected([In] ref EntityId id);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetBlendShapeOffsetInternal_Injected(int index, out BlendShape ret);
+		private static extern IndexFormat get_indexFormat_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetSubMesh_Injected(int index, ref SubMeshDescriptor desc, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+		private static extern void set_indexFormat_Injected(IntPtr _unity_self, IndexFormat value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetSubMesh_Injected(int index, out SubMeshDescriptor ret);
+		private static extern uint GetTotalIndexCount_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_bounds_Injected(out Bounds ret);
+		private static extern void SetIndexBufferParams_Injected(IntPtr _unity_self, int indexCount, IndexFormat format);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_bounds_Injected(ref Bounds value);
+		private static extern void InternalSetIndexBufferData_Injected(IntPtr _unity_self, IntPtr data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
 
-		[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetIndexBufferDataFromArray_Injected(IntPtr _unity_self, Array data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVertexBufferParamsFromPtr_Injected(IntPtr _unity_self, int vertexCount, IntPtr attributesPtr, int attributesCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVertexBufferParamsFromArray_Injected(IntPtr _unity_self, int vertexCount, params ManagedSpanWrapper attributes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetVertexBufferData_Injected(IntPtr _unity_self, int stream, IntPtr data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetVertexBufferDataFromArray_Injected(IntPtr _unity_self, int stream, Array data, int dataStart, int meshBufferStart, int count, int elemSize, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Array GetVertexAttributesAlloc_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVertexAttributesArray_Injected(IntPtr _unity_self, ref ManagedSpanWrapper attributes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVertexAttributesList_Injected(IntPtr _unity_self, ref BlittableListWrapper attributes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVertexAttributeCountImpl_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVertexAttribute_Injected(IntPtr _unity_self, int index, out VertexAttributeDescriptor ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetIndexStartImpl_Injected(IntPtr _unity_self, int submesh, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetIndexCountImpl_Injected(IntPtr _unity_self, int submesh, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetTrianglesCountImpl_Injected(IntPtr _unity_self, int submesh, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint GetBaseVertexImpl_Injected(IntPtr _unity_self, int submesh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTrianglesImpl_Injected(IntPtr _unity_self, int submesh, bool applyBaseVertex, int meshlod, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetIndicesImpl_Injected(IntPtr _unity_self, int submesh, bool applyBaseVertex, int meshlod, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIndicesImpl_Injected(IntPtr _unity_self, int submesh, MeshTopology topology, IndexFormat indicesFormat, Array indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIndicesNativeArrayImpl_Injected(IntPtr _unity_self, int submesh, MeshTopology topology, IndexFormat indicesFormat, IntPtr indices, int arrayStart, int arraySize, bool calculateBounds, int baseVertex, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTrianglesNonAllocImpl_Injected(IntPtr _unity_self, out BlittableArrayWrapper values, int submesh, bool applyBaseVertex, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetTrianglesNonAllocImpl16_Injected(IntPtr _unity_self, out BlittableArrayWrapper values, int submesh, bool applyBaseVertex, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetIndicesNonAllocImpl_Injected(IntPtr _unity_self, out BlittableArrayWrapper values, int submesh, bool applyBaseVertex, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetIndicesNonAllocImpl16_Injected(IntPtr _unity_self, out BlittableArrayWrapper values, int submesh, bool applyBaseVertex, int meshlod);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void PrintErrorCantAccessChannel_Injected(IntPtr _unity_self, VertexAttribute ch);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasVertexAttribute_Injected(IntPtr _unity_self, VertexAttribute attr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVertexAttributeDimension_Injected(IntPtr _unity_self, VertexAttribute attr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern VertexAttributeFormat GetVertexAttributeFormat_Injected(IntPtr _unity_self, VertexAttribute attr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVertexAttributeStream_Injected(IntPtr _unity_self, VertexAttribute attr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVertexAttributeOffset_Injected(IntPtr _unity_self, VertexAttribute attr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetArrayForChannelImpl_Injected(IntPtr _unity_self, VertexAttribute channel, VertexAttributeFormat format, int dim, Array values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetNativeArrayForChannelImpl_Injected(IntPtr _unity_self, VertexAttribute channel, VertexAttributeFormat format, int dim, IntPtr values, int arraySize, int valuesStart, int valuesCount, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Array GetAllocArrayFromChannelImpl_Injected(IntPtr _unity_self, VertexAttribute channel, VertexAttributeFormat format, int dim);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetArrayFromChannelImpl_Injected(IntPtr _unity_self, VertexAttribute channel, VertexAttributeFormat format, int dim, Array values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_vertexBufferCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVertexBufferStride_Injected(IntPtr _unity_self, int stream);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetNativeVertexBufferPtr_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetNativeIndexBufferPtr_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetVertexBufferImpl_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetIndexBufferImpl_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetBoneWeightBufferImpl_Injected(IntPtr _unity_self, int bonesPerVertex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetBlendShapeBufferImpl_Injected(IntPtr _unity_self, int layout);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsBuffer.Target get_vertexBufferTarget_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_vertexBufferTarget_Injected(IntPtr _unity_self, GraphicsBuffer.Target value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GraphicsBuffer.Target get_indexBufferTarget_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_indexBufferTarget_Injected(IntPtr _unity_self, GraphicsBuffer.Target value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_blendShapeCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearBlendShapes_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBlendShapeName_Injected(IntPtr _unity_self, int shapeIndex, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetBlendShapeIndex_Injected(IntPtr _unity_self, ref ManagedSpanWrapper blendShapeName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetBlendShapeFrameCount_Injected(IntPtr _unity_self, int shapeIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetBlendShapeFrameWeight_Injected(IntPtr _unity_self, int shapeIndex, int frameIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBlendShapeFrameVertices_Injected(IntPtr _unity_self, int shapeIndex, int frameIndex, ref ManagedSpanWrapper deltaVertices, ref ManagedSpanWrapper deltaNormals, ref ManagedSpanWrapper deltaTangents);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddBlendShapeFrame_Injected(IntPtr _unity_self, ref ManagedSpanWrapper shapeName, float frameWeight, ref ManagedSpanWrapper deltaVertices, ref ManagedSpanWrapper deltaNormals, ref ManagedSpanWrapper deltaTangents);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBlendShapeOffsetInternal_Injected(IntPtr _unity_self, int index, out BlendShape ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasBoneWeights_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBoneWeightsImpl_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBoneWeightsImpl_Injected(IntPtr _unity_self, ref ManagedSpanWrapper weights);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetBoneWeights_Injected(IntPtr _unity_self, IntPtr bonesPerVertex, int bonesPerVertexSize, IntPtr weights, int weightsSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetAllBoneWeightsArraySize_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetBoneWeightBufferLayoutInternal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetAllBoneWeightsArray_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetBonesPerVertexArray_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_bindposeCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_bindposes_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_bindposes_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBindposesFromScript_NativeArray_Injected(IntPtr _unity_self, IntPtr posesPtr, int posesCount);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetBindposesArray_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBoneWeightsNonAllocImpl_Injected(IntPtr _unity_self, out BlittableArrayWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetBindposesNonAllocImpl_Injected(IntPtr _unity_self, out BlittableArrayWrapper values);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isReadable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_canAccess_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_vertexCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_subMeshCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_subMeshCount_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSubMesh_Injected(IntPtr _unity_self, int index, [In] ref SubMeshDescriptor desc, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSubMesh_Injected(IntPtr _unity_self, int index, out SubMeshDescriptor ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAllSubMeshesAtOnceFromArray_Injected(IntPtr _unity_self, ref ManagedSpanWrapper desc, int start, int count, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAllSubMeshesAtOnceFromNativeArray_Injected(IntPtr _unity_self, IntPtr desc, int start, int count, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLodCount_Injected(IntPtr _unity_self, int numLevels);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLodSelectionCurve_Injected(IntPtr _unity_self, [In] ref Mesh.LodSelectionCurve lodSelectionCurve);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLodsFromArray_Injected(IntPtr _unity_self, ref ManagedSpanWrapper levelRanges, int start, int count, int submesh, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLodsFromNativeArray_Injected(IntPtr _unity_self, IntPtr lodLevels, int count, int submesh, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetLodImpl_Injected(IntPtr _unity_self, int subMeshIndex, int level, [In] ref MeshLodRange levelRange, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLodsAlloc_Injected(IntPtr _unity_self, int subMeshIndex, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLodsNonAlloc_Injected(IntPtr _unity_self, out BlittableArrayWrapper levels, int subMeshIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetLodCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLodSelectionCurve_Injected(IntPtr _unity_self, out Mesh.LodSelectionCurve ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetLod_Injected(IntPtr _unity_self, int subMeshIndex, int levelIndex, out MeshLodRange ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_bounds_Injected(IntPtr _unity_self, out Bounds ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_bounds_Injected(IntPtr _unity_self, [In] ref Bounds value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearImpl_Injected(IntPtr _unity_self, bool keepVertexLayout);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RecalculateBoundsImpl_Injected(IntPtr _unity_self, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RecalculateNormalsImpl_Injected(IntPtr _unity_self, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RecalculateTangentsImpl_Injected(IntPtr _unity_self, MeshUpdateFlags flags);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MarkDynamicImpl_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MarkModified_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void UploadMeshDataImpl_Injected(IntPtr _unity_self, bool markNoLongerReadable);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern MeshTopology GetTopologyImpl_Injected(IntPtr _unity_self, int submesh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RecalculateUVDistributionMetricImpl_Injected(IntPtr _unity_self, int uvSetIndex, float uvAreaThreshold);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RecalculateUVDistributionMetricsImpl_Injected(IntPtr _unity_self, float uvAreaThreshold);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetUVDistributionMetric_Injected(IntPtr _unity_self, int uvSetIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CombineMeshesImpl_Injected(IntPtr _unity_self, ref ManagedSpanWrapper combine, bool mergeSubMeshes, bool useMatrices, bool hasLightmapData);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OptimizeImpl_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OptimizeIndexBuffersImpl_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void OptimizeReorderVertexBufferImpl_Injected(IntPtr _unity_self);
+
+		[UsedByNativeCode]
+		[Serializable]
+		public struct LodSelectionCurve
+		{
+			public LodSelectionCurve(float slope, float bias)
+			{
+				this.m_LodSlope = slope;
+				this.m_LodBias = bias;
+			}
+
+			public bool IsValid()
+			{
+				return this.m_LodSlope > 0.001f;
+			}
+
+			public float lodSlope
+			{
+				get
+				{
+					return this.m_LodSlope;
+				}
+				set
+				{
+					this.m_LodSlope = value;
+				}
+			}
+
+			public float lodBias
+			{
+				get
+				{
+					return this.m_LodBias;
+				}
+				set
+				{
+					this.m_LodBias = value;
+				}
+			}
+
+			[SerializeField]
+			private float m_LodSlope;
+
+			[SerializeField]
+			private float m_LodBias;
+		}
+
 		[StaticAccessor("MeshDataBindings", StaticAccessorType.DoubleColon)]
+		[NativeHeader("Runtime/Graphics/Mesh/MeshScriptBindings.h")]
 		public struct MeshData
 		{
 			[NativeMethod(IsThreadSafe = true)]
@@ -2411,7 +4407,7 @@ namespace UnityEngine
 
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void CopyIndicesIntoPtr(IntPtr self, int submesh, bool applyBaseVertex, int dstStride, IntPtr dst);
+			private static extern void CopyIndicesIntoPtr(IntPtr self, int submesh, int meshLod, bool applyBaseVertex, int dstStride, IntPtr dst);
 
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2419,7 +4415,7 @@ namespace UnityEngine
 
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern int GetIndexCount(IntPtr self, int submesh);
+			private static extern int GetIndexCount(IntPtr self, int submesh, int meshlod);
 
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2432,6 +4428,42 @@ namespace UnityEngine
 			[NativeMethod(IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern int GetSubMeshCount(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern int GetLodCount(IntPtr self);
+
+			[NativeMethod(IsThreadSafe = true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetLodCount(IntPtr self, int count);
+
+			[NativeMethod(IsThreadSafe = true)]
+			private static Mesh.LodSelectionCurve GetLodSelectionCurve(IntPtr self)
+			{
+				Mesh.LodSelectionCurve lodSelectionCurve;
+				Mesh.MeshData.GetLodSelectionCurve_Injected(self, out lodSelectionCurve);
+				return lodSelectionCurve;
+			}
+
+			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
+			private static void SetLodSelectionCurve(IntPtr self, Mesh.LodSelectionCurve lodSelectionCurve)
+			{
+				Mesh.MeshData.SetLodSelectionCurve_Injected(self, ref lodSelectionCurve);
+			}
+
+			[NativeMethod(IsThreadSafe = true)]
+			private static MeshLodRange GetLod(IntPtr self, int submesh, int level)
+			{
+				MeshLodRange meshLodRange;
+				Mesh.MeshData.GetLod_Injected(self, submesh, level, out meshLodRange);
+				return meshLodRange;
+			}
+
+			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
+			private static void SetLod(IntPtr self, int submesh, int level, MeshLodRange levelRange, MeshUpdateFlags flags)
+			{
+				Mesh.MeshData.SetLod_Injected(self, submesh, level, ref levelRange, flags);
+			}
 
 			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
 			private static SubMeshDescriptor GetSubMesh(IntPtr self, int index)
@@ -2446,8 +4478,15 @@ namespace UnityEngine
 			private static extern void SetVertexBufferParamsFromPtr(IntPtr self, int vertexCount, IntPtr attributesPtr, int attributesCount);
 
 			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetVertexBufferParamsFromArray(IntPtr self, int vertexCount, [Unmarshalled] params VertexAttributeDescriptor[] attributes);
+			private unsafe static void SetVertexBufferParamsFromArray(IntPtr self, int vertexCount, params VertexAttributeDescriptor[] attributes)
+			{
+				Span<VertexAttributeDescriptor> span = new Span<VertexAttributeDescriptor>(attributes);
+				fixed (VertexAttributeDescriptor* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Mesh.MeshData.SetVertexBufferParamsFromArray_Injected(self, vertexCount, ref managedSpanWrapper);
+				}
+			}
 
 			[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -2622,34 +4661,54 @@ namespace UnityEngine
 
 			public void GetIndices(NativeArray<ushort> outIndices, int submesh, [DefaultValue("true")] bool applyBaseVertex = true)
 			{
-				bool flag = submesh < 0 || submesh >= this.subMeshCount;
-				if (flag)
-				{
-					throw new IndexOutOfRangeException(string.Format("Specified submesh ({0}) is out of range. Must be greater or equal to 0 and less than subMeshCount ({1}).", submesh, this.subMeshCount));
-				}
-				int indexCount = Mesh.MeshData.GetIndexCount(this.m_Ptr, submesh);
-				bool flag2 = outIndices.Length < indexCount;
-				if (flag2)
-				{
-					throw new InvalidOperationException(string.Format("Not enough space in output buffer (need {0}, has {1})", indexCount, outIndices.Length));
-				}
-				Mesh.MeshData.CopyIndicesIntoPtr(this.m_Ptr, submesh, applyBaseVertex, 2, (IntPtr)outIndices.GetUnsafePtr<ushort>());
+				this.GetIndices(outIndices, submesh, 0, applyBaseVertex);
 			}
 
-			public void GetIndices(NativeArray<int> outIndices, int submesh, [DefaultValue("true")] bool applyBaseVertex = true)
+			public void GetIndices(NativeArray<ushort> outIndices, int submesh, int meshlod, [DefaultValue("true")] bool applyBaseVertex = true)
 			{
 				bool flag = submesh < 0 || submesh >= this.subMeshCount;
 				if (flag)
 				{
 					throw new IndexOutOfRangeException(string.Format("Specified submesh ({0}) is out of range. Must be greater or equal to 0 and less than subMeshCount ({1}).", submesh, this.subMeshCount));
 				}
-				int indexCount = Mesh.MeshData.GetIndexCount(this.m_Ptr, submesh);
-				bool flag2 = outIndices.Length < indexCount;
+				bool flag2 = meshlod > 0 && meshlod >= this.lodCount;
 				if (flag2)
+				{
+					throw new IndexOutOfRangeException(string.Format("Specified Mesh LOD index ({0}) is out of range. Must be less than the lodCount value ({1})", meshlod, this.lodCount));
+				}
+				int indexCount = Mesh.MeshData.GetIndexCount(this.m_Ptr, submesh, meshlod);
+				bool flag3 = outIndices.Length < indexCount;
+				if (flag3)
 				{
 					throw new InvalidOperationException(string.Format("Not enough space in output buffer (need {0}, has {1})", indexCount, outIndices.Length));
 				}
-				Mesh.MeshData.CopyIndicesIntoPtr(this.m_Ptr, submesh, applyBaseVertex, 4, (IntPtr)outIndices.GetUnsafePtr<int>());
+				Mesh.MeshData.CopyIndicesIntoPtr(this.m_Ptr, submesh, meshlod, applyBaseVertex, 2, (IntPtr)outIndices.GetUnsafePtr<ushort>());
+			}
+
+			public void GetIndices(NativeArray<int> outIndices, int submesh, [DefaultValue("true")] bool applyBaseVertex = true)
+			{
+				this.GetIndices(outIndices, submesh, 0, applyBaseVertex);
+			}
+
+			public void GetIndices(NativeArray<int> outIndices, int submesh, int meshlod, [DefaultValue("true")] bool applyBaseVertex = true)
+			{
+				bool flag = submesh < 0 || submesh >= this.subMeshCount;
+				if (flag)
+				{
+					throw new IndexOutOfRangeException(string.Format("Specified submesh ({0}) is out of range. Must be greater or equal to 0 and less than subMeshCount ({1}).", submesh, this.subMeshCount));
+				}
+				bool flag2 = meshlod > 0 && meshlod >= this.lodCount;
+				if (flag2)
+				{
+					throw new IndexOutOfRangeException(string.Format("Specified Mesh LOD index ({0}) is out of range. Must be less than the lodCount value ({1})", meshlod, this.lodCount));
+				}
+				int indexCount = Mesh.MeshData.GetIndexCount(this.m_Ptr, submesh, meshlod);
+				bool flag3 = outIndices.Length < indexCount;
+				if (flag3)
+				{
+					throw new InvalidOperationException(string.Format("Not enough space in output buffer (need {0}, has {1})", indexCount, outIndices.Length));
+				}
+				Mesh.MeshData.CopyIndicesIntoPtr(this.m_Ptr, submesh, meshlod, applyBaseVertex, 4, (IntPtr)outIndices.GetUnsafePtr<int>());
 			}
 
 			public unsafe NativeArray<T> GetIndexData<T>() where T : struct
@@ -2663,6 +4722,25 @@ namespace UnityEngine
 				}
 				ulong num2 = indexDataSize / num;
 				return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)Mesh.MeshData.GetIndexDataPtr(this.m_Ptr), (int)num2, Allocator.None);
+			}
+
+			public MeshLodRange GetLod(int submesh, int level)
+			{
+				this.ValidateSubMeshIndex(submesh);
+				this.ValidateLodIndex(level);
+				return Mesh.MeshData.GetLod(this.m_Ptr, submesh, level);
+			}
+
+			public void SetLod(int submesh, int level, MeshLodRange levelRange, MeshUpdateFlags flags = MeshUpdateFlags.Default)
+			{
+				bool flag = !this.isLodSelectionActive;
+				if (flag)
+				{
+					throw new InvalidOperationException("Unable to modify LOD0. Please enable Mesh LOD selection first by setting lodCount to a value greater than 1 or modify the submesh descriptors directly.");
+				}
+				this.ValidateSubMeshIndex(submesh);
+				this.ValidateLodIndex(level);
+				Mesh.MeshData.SetLod(this.m_Ptr, submesh, level, levelRange, flags);
 			}
 
 			public int subMeshCount
@@ -2687,6 +4765,55 @@ namespace UnityEngine
 				Mesh.MeshData.SetSubMeshImpl(this.m_Ptr, index, desc, flags);
 			}
 
+			public int lodCount
+			{
+				get
+				{
+					return Mesh.MeshData.GetLodCount(this.m_Ptr);
+				}
+				set
+				{
+					bool flag = value < 1;
+					if (flag)
+					{
+						throw new ArgumentException("LOD count must be greater than zero.");
+					}
+					bool flag2 = value > 1;
+					if (flag2)
+					{
+						for (int i = 0; i < this.subMeshCount; i++)
+						{
+							bool flag3 = this.GetSubMesh(i).topology > MeshTopology.Triangles;
+							if (flag3)
+							{
+								throw new InvalidOperationException("Mesh LOD selection only works for triangle topology. The LOD count value cannot be higher than 1 if the topology is not set to triangles for all submeshes.");
+							}
+						}
+					}
+					Mesh.MeshData.SetLodCount(this.m_Ptr, value);
+				}
+			}
+
+			internal bool isLodSelectionActive
+			{
+				get
+				{
+					return this.lodCount > 1;
+				}
+			}
+
+			public Mesh.LodSelectionCurve lodSelectionCurve
+			{
+				get
+				{
+					return Mesh.MeshData.GetLodSelectionCurve(this.m_Ptr);
+				}
+				set
+				{
+					Mesh.MeshData.SetLodSelectionCurve(this.m_Ptr, value);
+				}
+			}
+
 			[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 			private void CheckReadAccess()
 			{
@@ -2697,26 +4824,100 @@ namespace UnityEngine
 			{
 			}
 
+			private void ValidateSubMeshIndex(int submesh)
+			{
+				bool flag = submesh < 0 || submesh >= this.subMeshCount;
+				if (flag)
+				{
+					throw new IndexOutOfRangeException(string.Format("Specified submesh index ({0}) is out of range. Must be greater or equal to 0 and less than the subMeshCount value ({1}).", submesh, this.subMeshCount));
+				}
+			}
+
+			private void ValidateLodIndex(int level)
+			{
+				int lodCount = this.lodCount;
+				bool flag = level < 0 || level >= lodCount;
+				if (flag)
+				{
+					throw new IndexOutOfRangeException(string.Format("Specified Mesh LOD index ({0}) is out of range. Must be greater than or equal to 0 and less than the lodCount value ({1}).", level, lodCount));
+				}
+			}
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void GetLodSelectionCurve_Injected(IntPtr self, out Mesh.LodSelectionCurve ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetLodSelectionCurve_Injected(IntPtr self, [In] ref Mesh.LodSelectionCurve lodSelectionCurve);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void GetLod_Injected(IntPtr self, int submesh, int level, out MeshLodRange ret);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetLod_Injected(IntPtr self, int submesh, int level, [In] ref MeshLodRange levelRange, MeshUpdateFlags flags);
+
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern void GetSubMesh_Injected(IntPtr self, int index, out SubMeshDescriptor ret);
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void SetSubMeshImpl_Injected(IntPtr self, int index, ref SubMeshDescriptor desc, MeshUpdateFlags flags);
+			private static extern void SetVertexBufferParamsFromArray_Injected(IntPtr self, int vertexCount, params ManagedSpanWrapper attributes);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void SetSubMeshImpl_Injected(IntPtr self, int index, [In] ref SubMeshDescriptor desc, MeshUpdateFlags flags);
 
 			[NativeDisableUnsafePtrRestriction]
 			internal IntPtr m_Ptr;
 		}
 
-		[NativeContainer]
 		[NativeContainerSupportsMinMaxWriteRestriction]
 		[StaticAccessor("MeshDataArrayBindings", StaticAccessorType.DoubleColon)]
+		[NativeContainer]
 		public struct MeshDataArray : IDisposable
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private unsafe static extern void AcquireReadOnlyMeshData([NotNull("ArgumentNullException")] Mesh mesh, IntPtr* datas);
+			private unsafe static void AcquireReadOnlyMeshData([NotNull] Mesh mesh, IntPtr* datas)
+			{
+				if (mesh == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+				}
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(mesh);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+				}
+				Mesh.MeshDataArray.AcquireReadOnlyMeshData_Injected(intPtr, datas);
+			}
 
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private unsafe static extern void AcquireReadOnlyMeshDatas([NotNull("ArgumentNullException")] Mesh[] meshes, IntPtr* datas, int count);
+			private unsafe static void AcquireReadOnlyMeshDatas([NotNull] Mesh[] meshes, IntPtr* datas, int count)
+			{
+				if (meshes == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(meshes, "meshes");
+				}
+				Mesh.MeshDataArray.AcquireReadOnlyMeshDatas_Injected(meshes, datas, count);
+			}
+
+			private unsafe static void AcquireMeshDataCopy([NotNull] Mesh mesh, IntPtr* datas)
+			{
+				if (mesh == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+				}
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(mesh);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+				}
+				Mesh.MeshDataArray.AcquireMeshDataCopy_Injected(intPtr, datas);
+			}
+
+			private unsafe static void AcquireMeshDatasCopy([NotNull] Mesh[] meshes, IntPtr* datas, int count)
+			{
+				if (meshes == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(meshes, "meshes");
+				}
+				Mesh.MeshDataArray.AcquireMeshDatasCopy_Injected(meshes, datas, count);
+			}
 
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private unsafe static extern void ReleaseMeshDatas(IntPtr* datas, int count);
@@ -2725,12 +4926,29 @@ namespace UnityEngine
 			private unsafe static extern void CreateNewMeshDatas(IntPtr* datas, int count);
 
 			[NativeThrows]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private unsafe static extern void ApplyToMeshesImpl([NotNull("ArgumentNullException")] Mesh[] meshes, IntPtr* datas, int count, MeshUpdateFlags flags);
+			private unsafe static void ApplyToMeshesImpl([NotNull] Mesh[] meshes, IntPtr* datas, int count, MeshUpdateFlags flags)
+			{
+				if (meshes == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(meshes, "meshes");
+				}
+				Mesh.MeshDataArray.ApplyToMeshesImpl_Injected(meshes, datas, count, flags);
+			}
 
 			[NativeThrows]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			private static extern void ApplyToMeshImpl([NotNull("ArgumentNullException")] Mesh mesh, IntPtr data, MeshUpdateFlags flags);
+			private static void ApplyToMeshImpl([NotNull] Mesh mesh, IntPtr data, MeshUpdateFlags flags)
+			{
+				if (mesh == null)
+				{
+					ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+				}
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Mesh>(mesh);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowArgumentNullException(mesh, "mesh");
+				}
+				Mesh.MeshDataArray.ApplyToMeshImpl_Injected(intPtr, data, flags);
+			}
 
 			public int Length
 			{
@@ -2794,7 +5012,7 @@ namespace UnityEngine
 				this.Dispose();
 			}
 
-			internal unsafe MeshDataArray(Mesh mesh, bool checkReadWrite = true)
+			internal unsafe MeshDataArray(Mesh mesh, bool checkReadWrite = true, bool createAsCopy = false)
 			{
 				bool flag = mesh == null;
 				if (flag)
@@ -2809,11 +5027,18 @@ namespace UnityEngine
 				this.m_Length = 1;
 				int num = UnsafeUtility.SizeOf<IntPtr>();
 				this.m_Ptrs = (IntPtr*)UnsafeUtility.Malloc((long)num, UnsafeUtility.AlignOf<IntPtr>(), Allocator.Persistent);
-				Mesh.MeshDataArray.AcquireReadOnlyMeshData(mesh, this.m_Ptrs);
+				if (createAsCopy)
+				{
+					Mesh.MeshDataArray.AcquireMeshDataCopy(mesh, this.m_Ptrs);
+				}
+				else
+				{
+					Mesh.MeshDataArray.AcquireReadOnlyMeshData(mesh, this.m_Ptrs);
+				}
 				UnsafeUtility.LeakRecord((IntPtr)((void*)this.m_Ptrs), LeakCategory.MeshDataArray, 0);
 			}
 
-			internal unsafe MeshDataArray(Mesh[] meshes, int meshesCount, bool checkReadWrite = true)
+			internal unsafe MeshDataArray(Mesh[] meshes, int meshesCount, bool checkReadWrite = true, bool createAsCopy = false)
 			{
 				bool flag = meshes.Length < meshesCount;
 				if (flag)
@@ -2837,7 +5062,14 @@ namespace UnityEngine
 				this.m_Length = meshesCount;
 				int num = UnsafeUtility.SizeOf<IntPtr>() * meshesCount;
 				this.m_Ptrs = (IntPtr*)UnsafeUtility.Malloc((long)num, UnsafeUtility.AlignOf<IntPtr>(), Allocator.Persistent);
-				Mesh.MeshDataArray.AcquireReadOnlyMeshDatas(meshes, this.m_Ptrs, meshesCount);
+				if (createAsCopy)
+				{
+					Mesh.MeshDataArray.AcquireMeshDatasCopy(meshes, this.m_Ptrs, meshesCount);
+				}
+				else
+				{
+					Mesh.MeshDataArray.AcquireReadOnlyMeshDatas(meshes, this.m_Ptrs, meshesCount);
+				}
 			}
 
 			internal unsafe MeshDataArray(int meshesCount)
@@ -2857,6 +5089,24 @@ namespace UnityEngine
 			private void CheckElementReadAccess(int index)
 			{
 			}
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void AcquireReadOnlyMeshData_Injected(IntPtr mesh, IntPtr* datas);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void AcquireReadOnlyMeshDatas_Injected(Mesh[] meshes, IntPtr* datas, int count);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void AcquireMeshDataCopy_Injected(IntPtr mesh, IntPtr* datas);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void AcquireMeshDatasCopy_Injected(Mesh[] meshes, IntPtr* datas, int count);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private unsafe static extern void ApplyToMeshesImpl_Injected(Mesh[] meshes, IntPtr* datas, int count, MeshUpdateFlags flags);
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern void ApplyToMeshImpl_Injected(IntPtr mesh, IntPtr data, MeshUpdateFlags flags);
 
 			[NativeDisableUnsafePtrRestriction]
 			internal unsafe IntPtr* m_Ptrs;

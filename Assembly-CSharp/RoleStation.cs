@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/RoleStation")]
-public class RoleStation : Workable, IGameObjectEffectDescriptor
+public class RoleStation : Workable
 {
 	protected override void OnPrefabInit()
 	{

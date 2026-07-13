@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D453}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BDA8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.PhysicsModule</AssemblyName>
@@ -48,13 +48,26 @@
     <Compile Include="FixedJoint.cs" />
     <Compile Include="ForceMode.cs" />
     <Compile Include="HingeJoint.cs" />
+    <Compile Include="IntegrationInfo.cs" />
     <Compile Include="Joint.cs" />
     <Compile Include="JointDrive.cs" />
-    <Compile Include="JointDriveMode.cs" />
     <Compile Include="JointLimits.cs" />
     <Compile Include="JointMotor.cs" />
     <Compile Include="JointProjectionMode.cs" />
     <Compile Include="JointSpring.cs" />
+    <Compile Include="LowLevelPhysics\BoxGeometry.cs" />
+    <Compile Include="LowLevelPhysics\CapsuleGeometry.cs" />
+    <Compile Include="LowLevelPhysics\ConvexMeshGeometry.cs" />
+    <Compile Include="LowLevelPhysics\GeometryHolder.cs" />
+    <Compile Include="LowLevelPhysics\GeometryType.cs" />
+    <Compile Include="LowLevelPhysics\IGeometry.cs" />
+    <Compile Include="LowLevelPhysics\ImmediateContact.cs" />
+    <Compile Include="LowLevelPhysics\ImmediatePhysics.cs" />
+    <Compile Include="LowLevelPhysics\ImmediateTransform.cs" />
+    <Compile Include="LowLevelPhysics\PhysXGeometryHolderExtension.cs" />
+    <Compile Include="LowLevelPhysics\SphereGeometry.cs" />
+    <Compile Include="LowLevelPhysics\TerrainGeometry.cs" />
+    <Compile Include="LowLevelPhysics\TriangleMeshGeometry.cs" />
     <Compile Include="MeshCollider.cs" />
     <Compile Include="MeshColliderCookingOptions.cs" />
     <Compile Include="ModifiableContact.cs" />
@@ -67,6 +80,8 @@
     <Compile Include="PhysicMaterial.cs" />
     <Compile Include="PhysicMaterialCombine.cs" />
     <Compile Include="Physics.cs" />
+    <Compile Include="PhysicsMaterial.cs" />
+    <Compile Include="PhysicsMaterialCombine.cs" />
     <Compile Include="PhysicsScene.cs" />
     <Compile Include="PhysicsSceneExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -79,6 +94,8 @@
     <Compile Include="RigidbodyInterpolation.cs" />
     <Compile Include="RotationDriveMode.cs" />
     <Compile Include="SimulationMode.cs" />
+    <Compile Include="SimulationOption.cs" />
+    <Compile Include="SimulationStage.cs" />
     <Compile Include="SoftJointLimit.cs" />
     <Compile Include="SoftJointLimitSpring.cs" />
     <Compile Include="SpherecastCommand.cs" />
@@ -88,15 +105,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D416}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D440}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D458}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDAF}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

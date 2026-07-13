@@ -97,7 +97,13 @@ public class KInputManager
 		{
 			return KInputManager.virtualCursorPos;
 		}
-		return Input.mousePosition;
+		Vector3 mousePosition = Input.mousePosition;
+		Vector3 vector = Display.RelativeMouseAt(mousePosition);
+		if (!(vector != Vector3.zero))
+		{
+			return mousePosition;
+		}
+		return new Vector3(vector.x, vector.y, 0f);
 	}
 
 	protected List<KInputController> mControllers = new List<KInputController>();

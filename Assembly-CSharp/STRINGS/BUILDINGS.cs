@@ -6070,14 +6070,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Telescopes are necessary for learning starmaps and conducting rocket missions.";
 
-				public static LocString EFFECT = string.Concat(new string[]
-				{
-					"Maps Starmap destinations, producing ",
-					UI.FormatAsLink("Data Banks", "DATABANK"),
-					" in the process.\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Field Research", "RESEARCHING2"),
-					" skill.\n\nBuilding must be exposed to space to function."
-				});
+				public static LocString EFFECT = "Maps Starmap destinations for space exploration.\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Field Research", "RESEARCHING2") + " skill.\n\nBuilding must be exposed to space to function.";
 
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}
@@ -6104,11 +6097,13 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Enclosed Telescope", "CLUSTERTELESCOPEENCLOSED");
 
-				public static LocString DESC = "Telescopes are necessary for studying space, allowing rocket travel to other worlds.";
+				public static LocString DESC = "It's easier to focus on work when shielded from the vacuum of space.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Reveals visitable Planetoids in space... in comfort!\n\nAssigned Duplicants must possess the ",
+					"Reveals visitable Planetoids in space and produces ",
+					UI.FormatAsLink("Data Banks", "DATABANK"),
+					"... in comfort!\n\nAssigned Duplicants must possess the ",
 					UI.FormatAsLink("Astronomy", "ASTRONOMY"),
 					" skill.\n\nExcellent sunburn protection (100%), partial ",
 					UI.FormatAsLink("Radiation", "RADIATION"),
@@ -9760,20 +9755,18 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Milking Station", "MILKINGSTATION");
 
-				public static LocString DESC = "The harvested liquid is basically the equivalent of soda for critters.";
+				public static LocString DESC = "Brackene can be used at the Critter Fountain to improve critters' moods.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Allows Duplicants with the ",
 					UI.FormatAsLink("Critter Ranching II", "RANCHING2"),
 					" skill to milk ",
-					UI.FormatAsLink("Gassy Moos", "MOO"),
-					" for ",
+					UI.FormatAsLink("Moos", "MOOSPECIES"),
+					" for  ",
 					ELEMENTS.MILK.NAME,
-					".\n\n",
-					ELEMENTS.MILK.NAME,
-					" can be used to refill the ",
-					BUILDINGS.PREFABS.MILKFEEDER.NAME,
+					" or  ",
+					ELEMENTS.REFINEDLIPID.NAME,
 					"."
 				});
 			}
@@ -10151,7 +10144,7 @@ namespace STRINGS
 					"A hanging respite area for adult ",
 					UI.FormatAsLink("Pufts", "PUFT"),
 					", ",
-					UI.FormatAsLink("Gassy Moos", "MOOSPECIES"),
+					UI.FormatAsLink("Moos", "MOOSPECIES"),
 					" and ",
 					UI.FormatAsLink("Shine Bugs", "LIGHTBUG"),
 					"."

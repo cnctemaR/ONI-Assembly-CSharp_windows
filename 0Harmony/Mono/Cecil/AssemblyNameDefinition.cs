@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public sealed class AssemblyNameDefinition : AssemblyNameReference
+	internal sealed class AssemblyNameDefinition : AssemblyNameReference
 	{
 		public override byte[] Hash
 		{

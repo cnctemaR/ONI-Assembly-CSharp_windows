@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
 	[RequiredByNativeCode]
-	[NativeConditional("ENABLE_VR")]
-	[NativeHeader("Modules/XR/XRPrefix.h")]
-	[NativeHeader("XRScriptingClasses.h")]
-	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
 	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
+	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
+	[NativeHeader("XRScriptingClasses.h")]
+	[NativeHeader("Modules/XR/XRPrefix.h")]
+	[NativeConditional("ENABLE_VR")]
 	public struct Bone : IEquatable<Bone>
 	{
 		internal ulong deviceId
@@ -65,9 +66,32 @@ namespace UnityEngine.XR
 			return Bone.Bone_TryGetChildBones(this, childBones);
 		}
 
-		private static bool Bone_TryGetChildBones(Bone bone, [NotNull("ArgumentNullException")] List<Bone> childBones)
+		private unsafe static bool Bone_TryGetChildBones(Bone bone, [NotNull] List<Bone> childBones)
 		{
-			return Bone.Bone_TryGetChildBones_Injected(ref bone, childBones);
+			if (childBones == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(childBones, "childBones");
+			}
+			bool flag;
+			try
+			{
+				fixed (Bone[] array = NoAllocHelpers.ExtractArrayFromList<Bone>(childBones))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, childBones.Count);
+					flag = Bone.Bone_TryGetChildBones_Injected(ref bone, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<Bone>(childBones);
+			}
+			return flag;
 		}
 
 		public override bool Equals(object obj)
@@ -97,16 +121,16 @@ namespace UnityEngine.XR
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Bone_TryGetPosition_Injected(ref Bone bone, out Vector3 position);
+		private static extern bool Bone_TryGetPosition_Injected([In] ref Bone bone, out Vector3 position);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Bone_TryGetRotation_Injected(ref Bone bone, out Quaternion rotation);
+		private static extern bool Bone_TryGetRotation_Injected([In] ref Bone bone, out Quaternion rotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Bone_TryGetParentBone_Injected(ref Bone bone, out Bone parentBone);
+		private static extern bool Bone_TryGetParentBone_Injected([In] ref Bone bone, out Bone parentBone);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Bone_TryGetChildBones_Injected(ref Bone bone, List<Bone> childBones);
+		private static extern bool Bone_TryGetChildBones_Injected([In] ref Bone bone, ref BlittableListWrapper childBones);
 
 		private ulong m_DeviceId;
 

@@ -6,7 +6,7 @@ using Mono.Collections.Generic;
 namespace Mono.Cecil
 {
 	[DebuggerDisplay("{AttributeType}")]
-	public sealed class CustomAttribute : ICustomAttribute
+	internal sealed class CustomAttribute : ICustomAttribute
 	{
 		public MethodReference Constructor
 		{

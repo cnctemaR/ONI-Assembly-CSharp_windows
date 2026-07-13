@@ -13,6 +13,7 @@ namespace ProcGenGame
 			successCallbackFn(UI.WORLDGEN.PLACINGTEMPLATES.key, 0f, WorldGenProgressStages.Stages.PlaceTemplates);
 			List<TemplateSpawning.TemplateSpawner> list = new List<TemplateSpawning.TemplateSpawner>();
 			TemplateSpawning.s_poiPadding = settings.GetIntSetting("POIPadding");
+			TemplateSpawning.ValidateTemplateRules(settings);
 			TemplateSpawning.s_minProgressPercent = 0f;
 			TemplateSpawning.s_maxProgressPercent = 0.33f;
 			TemplateSpawning.SpawnStartingTemplate(settings, terrainCells, ref list, ref placedPOIBounds, isRunningDebugGen, successCallbackFn);
@@ -152,71 +153,76 @@ namespace ProcGenGame
 			placedPOIBounds.RemoveAll((RectInt bound) => bound.center == toRemove.position);
 		}
 
+		private static void ValidateTemplateRules(List<global::ProcGen.World.TemplateSpawnRules> rules, string context)
+		{
+			foreach (global::ProcGen.World.TemplateSpawnRules templateSpawnRules in rules)
+			{
+				foreach (string text in templateSpawnRules.names)
+				{
+					DebugUtil.DevAssert(TemplateCache.TemplateExists(text), string.Format(string.Concat(new string[] { "TemplateSpawning: Missing template '", text, "' in '", context, "'" }), Array.Empty<object>()), null);
+				}
+			}
+		}
+
+		private static void ValidateTemplateRules(WorldGenSettings settings)
+		{
+			TemplateSpawning.ValidateTemplateRules(settings.world.worldTemplateRules, settings.world.filePath);
+			foreach (WeightedSubworldName weightedSubworldName in settings.world.subworldFiles)
+			{
+				SubWorld subWorld = settings.GetSubWorld(weightedSubworldName.name);
+				if (subWorld.subworldTemplateRules != null)
+				{
+					TemplateSpawning.ValidateTemplateRules(subWorld.subworldTemplateRules, subWorld.name);
+				}
+			}
+			foreach (WorldTrait worldTrait in settings.GetStoryTraitCandiates())
+			{
+				TemplateSpawning.ValidateTemplateRules(worldTrait.additionalWorldTemplateRules, "Story Trait Candidates");
+			}
+		}
+
 		private static bool ApplyTemplateRule(WorldGenSettings settings, List<TerrainCell> terrainCells, SeededRandom myRandom, ref List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, ref List<RectInt> placedPOIBounds, global::ProcGen.World.TemplateSpawnRules rule, ref HashSet<string> usedTemplates, out string errorMessage, ref List<TemplateSpawning.TemplateSpawner> newTemplateSpawnTargets)
 		{
-			int i = 0;
-			Predicate<TerrainCell> <>9__0;
-			while (i < rule.times)
+			TemplateSpawning.<>c__DisplayClass14_0 CS$<>8__locals1 = new TemplateSpawning.<>c__DisplayClass14_0();
+			CS$<>8__locals1.rule = rule;
+			CS$<>8__locals1.candidates = ListPool<string, TemplateSpawning>.Allocate();
+			for (int i = 0; i < CS$<>8__locals1.rule.times; i++)
 			{
-				ListPool<string, TemplateSpawning>.PooledList pooledList = ListPool<string, TemplateSpawning>.Allocate();
-				if (!rule.allowDuplicates)
+				CS$<>8__locals1.candidates.Clear();
+				foreach (string text in CS$<>8__locals1.rule.names)
 				{
-					using (List<string>.Enumerator enumerator = rule.names.GetEnumerator())
+					if ((CS$<>8__locals1.rule.allowDuplicates || !usedTemplates.Contains(text)) && TemplateCache.TemplateExists(text))
 					{
-						while (enumerator.MoveNext())
-						{
-							string text = enumerator.Current;
-							if (!usedTemplates.Contains(text))
-							{
-								if (!TemplateCache.TemplateExists(text))
-								{
-									DebugUtil.DevLogError(string.Concat(new string[]
-									{
-										"TemplateSpawning: Missing template '",
-										text,
-										"' in world '",
-										settings.world.filePath,
-										"'"
-									}));
-								}
-								else
-								{
-									pooledList.Add(text);
-								}
-							}
-						}
-						goto IL_00CC;
+						CS$<>8__locals1.candidates.Add(text);
 					}
 				}
-				goto IL_00BB;
-				IL_00CC:
-				pooledList.ShuffleSeeded<string>(myRandom.RandomSource());
-				if (pooledList.Count != 0)
+				CS$<>8__locals1.candidates.ShuffleSeeded<string>(myRandom.RandomSource());
+				if (CS$<>8__locals1.candidates.Count != 0)
 				{
 					int num = 0;
-					if (rule.listRule == global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeRange || rule.listRule == global::ProcGen.World.TemplateSpawnRules.ListRule.TryRange)
+					if (CS$<>8__locals1.rule.listRule == global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeRange || CS$<>8__locals1.rule.listRule == global::ProcGen.World.TemplateSpawnRules.ListRule.TryRange)
 					{
-						num = myRandom.RandomRange(rule.range.x, rule.range.y);
+						num = myRandom.RandomRange(CS$<>8__locals1.rule.range.x, CS$<>8__locals1.rule.range.y);
 					}
 					int num2 = 0;
 					int num3 = 0;
-					switch (rule.listRule)
+					switch (CS$<>8__locals1.rule.listRule)
 					{
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeOne:
 						num2 = 1;
 						num3 = 1;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeSome:
-						num2 = rule.someCount;
-						num3 = rule.someCount;
+						num2 = CS$<>8__locals1.rule.someCount;
+						num3 = CS$<>8__locals1.rule.someCount;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeSomeTryMore:
-						num2 = rule.someCount;
-						num3 = rule.someCount + rule.moreCount;
+						num2 = CS$<>8__locals1.rule.someCount;
+						num3 = CS$<>8__locals1.rule.someCount + CS$<>8__locals1.rule.moreCount;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeAll:
-						num2 = pooledList.Count;
-						num3 = pooledList.Count;
+						num2 = CS$<>8__locals1.candidates.Count;
+						num3 = CS$<>8__locals1.candidates.Count;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.GuaranteeRange:
 						num2 = num;
@@ -226,17 +232,17 @@ namespace ProcGenGame
 						num3 = 1;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.TrySome:
-						num3 = rule.someCount;
+						num3 = CS$<>8__locals1.rule.someCount;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.TryRange:
 						num3 = num;
 						break;
 					case global::ProcGen.World.TemplateSpawnRules.ListRule.TryAll:
-						num3 = pooledList.Count;
+						num3 = CS$<>8__locals1.candidates.Count;
 						break;
 					}
 					string text2 = "";
-					foreach (string text3 in pooledList)
+					foreach (string text3 in CS$<>8__locals1.candidates)
 					{
 						if (num3 <= 0)
 						{
@@ -248,13 +254,13 @@ namespace ProcGenGame
 							bool flag = num2 > 0;
 							Vector2I vector2I = Vector2I.zero;
 							TerrainCell terrainCell;
-							if (rule.overridePlacement != Vector2I.minusone)
+							if (CS$<>8__locals1.rule.overridePlacement != Vector2I.minusone)
 							{
-								vector2I = rule.overridePlacement;
+								vector2I = CS$<>8__locals1.rule.overridePlacement;
 								Predicate<TerrainCell> predicate;
-								if ((predicate = <>9__0) == null)
+								if ((predicate = CS$<>8__locals1.<>9__1) == null)
 								{
-									predicate = (<>9__0 = (TerrainCell x) => x.poly.Contains(rule.overridePlacement));
+									predicate = (CS$<>8__locals1.<>9__1 = (TerrainCell x) => x.poly.Contains(CS$<>8__locals1.rule.overridePlacement));
 								}
 								terrainCell = terrainCells.Find(predicate);
 								if (num2 > 0 && terrainCell.node.templateTag != Tag.Invalid)
@@ -266,15 +272,15 @@ namespace ProcGenGame
 										vector2I.y,
 										terrainCell.node.templateTag
 									});
-									return false;
+									return CS$<>8__locals1.<ApplyTemplateRule>g__ExitFn|0(false);
 								}
 							}
 							else
 							{
-								terrainCell = TemplateSpawning.FindTargetForTemplate(template, rule, terrainCells, myRandom, ref templateSpawnTargets, ref placedPOIBounds, flag, settings);
+								terrainCell = TemplateSpawning.FindTargetForTemplate(template, CS$<>8__locals1.rule, terrainCells, myRandom, ref templateSpawnTargets, ref placedPOIBounds, flag, settings);
 								if (terrainCell != null)
 								{
-									vector2I = new Vector2I((int)terrainCell.poly.Centroid().x + rule.overrideOffset.x, (int)terrainCell.poly.Centroid().y + rule.overrideOffset.y);
+									vector2I = new Vector2I((int)terrainCell.poly.Centroid().x + CS$<>8__locals1.rule.overrideOffset.x, (int)terrainCell.poly.Centroid().y + CS$<>8__locals1.rule.overrideOffset.y);
 								}
 							}
 							if (terrainCell != null)
@@ -295,7 +301,6 @@ namespace ProcGenGame
 							}
 						}
 					}
-					pooledList.Recycle();
 					if (num2 > 0)
 					{
 						string text4 = string.Join(", ", settings.GetWorldTraitIDs());
@@ -305,7 +310,13 @@ namespace ProcGenGame
 							"TemplateSpawning: Guaranteed placement failure on ",
 							settings.world.filePath,
 							"\n",
-							string.Format("    listRule={0} someCount={1} moreCount={2} count={3}\n", new object[] { rule.listRule, rule.someCount, rule.moreCount, pooledList.Count }),
+							string.Format("    listRule={0} someCount={1} moreCount={2} count={3}\n", new object[]
+							{
+								CS$<>8__locals1.rule.listRule,
+								CS$<>8__locals1.rule.someCount,
+								CS$<>8__locals1.rule.moreCount,
+								CS$<>8__locals1.candidates.Count
+							}),
 							"    Could not place templates:",
 							text2,
 							"\n    world traits=",
@@ -313,20 +324,13 @@ namespace ProcGenGame
 							"\n    story traits=",
 							text5
 						});
-						return false;
+						return CS$<>8__locals1.<ApplyTemplateRule>g__ExitFn|0(false);
 					}
-					goto IL_04E3;
 				}
-				pooledList.Recycle();
-				IL_04E3:
-				i++;
-				continue;
-				IL_00BB:
-				pooledList.AddRange(rule.names);
-				goto IL_00CC;
+				IL_04BD:;
 			}
 			errorMessage = "";
-			return true;
+			return CS$<>8__locals1.<ApplyTemplateRule>g__ExitFn|0(true);
 		}
 
 		private static void UpdateNodeTags(Node node, string template, bool remove = false)

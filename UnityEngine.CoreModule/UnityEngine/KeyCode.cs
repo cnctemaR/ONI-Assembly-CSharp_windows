@@ -145,6 +145,8 @@ namespace UnityEngine
 		SysReq,
 		Break,
 		Menu,
+		WheelUp = 321,
+		WheelDown,
 		F16 = 670,
 		F17,
 		F18,

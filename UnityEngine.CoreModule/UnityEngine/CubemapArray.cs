@@ -10,27 +10,48 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[ExcludeFromPreset]
 	[NativeHeader("Runtime/Graphics/CubemapArrayTexture.h")]
+	[ExcludeFromPreset]
 	public sealed class CubemapArray : Texture
 	{
-		public extern int cubemapCount
+		public int cubemapCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CubemapArray.get_cubemapCount_Injected(intPtr);
+			}
 		}
 
-		public extern TextureFormat format
+		public TextureFormat format
 		{
 			[NativeName("GetTextureFormat")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CubemapArray.get_format_Injected(intPtr);
+			}
 		}
 
-		public override extern bool isReadable
+		public override bool isReadable
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CubemapArray.get_isReadable_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction("CubemapArrayScripting::Create")]
@@ -47,12 +68,27 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "CubemapArrayScripting::Apply", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable);
+		private void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CubemapArray.ApplyImpl_Injected(intPtr, updateMipmaps, makeNoLongerReadable);
+		}
 
 		[FreeFunction(Name = "CubemapArrayScripting::GetPixels", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color[] GetPixels(CubemapFace face, int arrayElement, int miplevel);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color[] GetPixels(CubemapFace face, int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CubemapArray.GetPixels_Injected(intPtr, face, arrayElement, miplevel);
+		}
 
 		public Color[] GetPixels(CubemapFace face, int arrayElement)
 		{
@@ -60,8 +96,16 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "CubemapArrayScripting::GetPixels32", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32(CubemapFace face, int arrayElement, int miplevel);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color32[] GetPixels32(CubemapFace face, int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CubemapArray.GetPixels32_Injected(intPtr, face, arrayElement, miplevel);
+		}
 
 		public Color32[] GetPixels32(CubemapFace face, int arrayElement)
 		{
@@ -69,8 +113,20 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "CubemapArrayScripting::SetPixels", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels([Unmarshalled] Color[] colors, CubemapFace face, int arrayElement, int miplevel);
+		public unsafe void SetPixels(Color[] colors, CubemapFace face, int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color> span = new Span<Color>(colors);
+			fixed (Color* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CubemapArray.SetPixels_Injected(intPtr, ref managedSpanWrapper, face, arrayElement, miplevel);
+			}
+		}
 
 		public void SetPixels(Color[] colors, CubemapFace face, int arrayElement)
 		{
@@ -78,8 +134,20 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "CubemapArrayScripting::SetPixels32", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels32([Unmarshalled] Color32[] colors, CubemapFace face, int arrayElement, int miplevel);
+		public unsafe void SetPixels32(Color32[] colors, CubemapFace face, int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color32> span = new Span<Color32>(colors);
+			fixed (Color32* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CubemapArray.SetPixels32_Injected(intPtr, ref managedSpanWrapper, face, arrayElement, miplevel);
+			}
+		}
 
 		public void SetPixels32(Color32[] colors, CubemapFace face, int arrayElement)
 		{
@@ -87,15 +155,69 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "CubemapArrayScripting::SetPixelDataArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool SetPixelDataImplArray(Array data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+		private bool SetPixelDataImplArray(Array data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CubemapArray.SetPixelDataImplArray_Injected(intPtr, data, mipLevel, face, element, elementSize, dataArraySize, sourceDataStartIndex);
+		}
 
 		[FreeFunction(Name = "CubemapArrayScripting::SetPixelData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool SetPixelDataImpl(IntPtr data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+		private bool SetPixelDataImpl(IntPtr data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CubemapArray.SetPixelDataImpl_Injected(intPtr, data, mipLevel, face, element, elementSize, dataArraySize, sourceDataStartIndex);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetImageDataPointer();
+		[FreeFunction(Name = "CubemapArrayScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Full(Texture src)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CubemapArray.CopyPixels_Full_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src));
+		}
+
+		[FreeFunction(Name = "CubemapArrayScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Slice(Texture src, int srcElement, int srcMip, int dstElement, int dstMip)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CubemapArray.CopyPixels_Slice_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src), srcElement, srcMip, dstElement, dstMip);
+		}
+
+		[FreeFunction(Name = "CubemapArrayScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Region(Texture src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CubemapArray.CopyPixels_Region_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src), srcElement, srcMip, srcX, srcY, srcWidth, srcHeight, dstElement, dstMip, dstX, dstY);
+		}
+
+		private IntPtr GetImageData()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CubemapArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CubemapArray.GetImageData_Injected(intPtr);
+		}
 
 		[ExcludeFromDocs]
 		public CubemapArray(int width, int cubemapCount, DefaultFormat format, TextureCreationFlags flags)
@@ -118,7 +240,7 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public CubemapArray(int width, int cubemapCount, GraphicsFormat format, TextureCreationFlags flags, [DefaultValue("Texture.GenerateAllMips")] int mipCount)
 		{
-			bool flag = !base.ValidateFormat(format, FormatUsage.Sample);
+			bool flag = !base.ValidateFormat(format, GraphicsFormatUsage.Sample);
 			if (!flag)
 			{
 				CubemapArray.ValidateIsNotCrunched(flags);
@@ -263,8 +385,53 @@ namespace UnityEngine
 			{
 				throw base.CreateNativeArrayLengthOverflowException();
 			}
-			IntPtr intPtr = new IntPtr((long)this.GetImageDataPointer() + (long)(pixelDataOffset * (ulong)((long)num) + pixelDataOffset2));
+			IntPtr intPtr = new IntPtr((long)this.GetImageData() + (long)(pixelDataOffset * (ulong)((long)num) + pixelDataOffset2));
 			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, (int)num3, Allocator.None);
+		}
+
+		public void CopyPixels(Texture src)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Full(src);
+		}
+
+		public void CopyPixels(Texture src, int srcElement, int srcMip, int dstElement, int dstMip)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Slice(src, srcElement, srcMip, dstElement, dstMip);
+		}
+
+		public void CopyPixels(Texture src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Region(src, srcElement, srcMip, srcX, srcY, srcWidth, srcHeight, dstElement, dstMip, dstX, dstY);
 		}
 
 		private static void ValidateIsNotCrunched(TextureCreationFlags flags)
@@ -275,5 +442,47 @@ namespace UnityEngine
 				throw new ArgumentException("Crunched TextureCubeArray is not supported.");
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_cubemapCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureFormat get_format_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isReadable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ApplyImpl_Injected(IntPtr _unity_self, bool updateMipmaps, bool makeNoLongerReadable);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color[] GetPixels_Injected(IntPtr _unity_self, CubemapFace face, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color32[] GetPixels32_Injected(IntPtr _unity_self, CubemapFace face, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPixels_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, CubemapFace face, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPixels32_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, CubemapFace face, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPixelDataImplArray_Injected(IntPtr _unity_self, Array data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPixelDataImpl_Injected(IntPtr _unity_self, IntPtr data, int mipLevel, int face, int element, int elementSize, int dataArraySize, int sourceDataStartIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Full_Injected(IntPtr _unity_self, IntPtr src);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Slice_Injected(IntPtr _unity_self, IntPtr src, int srcElement, int srcMip, int dstElement, int dstMip);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Region_Injected(IntPtr _unity_self, IntPtr src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetImageData_Injected(IntPtr _unity_self);
 	}
 }

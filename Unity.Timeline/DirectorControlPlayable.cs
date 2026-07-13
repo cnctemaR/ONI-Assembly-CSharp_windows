@@ -48,7 +48,7 @@ namespace UnityEngine.Timeline
 		{
 			if (this.director != null && this.director.playableAsset != null)
 			{
-				if (info.effectivePlayState == PlayState.Playing)
+				if (info.effectivePlayState == PlayState.Playing || (info.effectivePlayState == PlayState.Paused && this.pauseAction == DirectorControlPlayable.PauseAction.PauseDirector))
 				{
 					this.director.Pause();
 					return;
@@ -173,8 +173,16 @@ namespace UnityEngine.Timeline
 
 		public PlayableDirector director;
 
+		public DirectorControlPlayable.PauseAction pauseAction;
+
 		private bool m_SyncTime;
 
 		private double m_AssetDuration = double.MaxValue;
+
+		public enum PauseAction
+		{
+			StopDirector,
+			PauseDirector
+		}
 	}
 }

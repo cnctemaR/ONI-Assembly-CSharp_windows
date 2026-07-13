@@ -7,25 +7,12 @@ using UnityEngineInternal;
 
 namespace UnityEngine
 {
+	[NativeHeader("NativeKernel/Math/FloatConversion.h")]
 	[NativeHeader("Runtime/Math/PerlinNoise.h")]
-	[NativeHeader("Runtime/Utilities/BitUtility.h")]
-	[Il2CppEagerStaticClassConstruction]
-	[NativeHeader("Runtime/Math/FloatConversion.h")]
 	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
+	[Il2CppEagerStaticClassConstruction]
 	public struct Mathf
 	{
-		[FreeFunction(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int ClosestPowerOfTwo(int value);
-
-		[FreeFunction(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool IsPowerOfTwo(int value);
-
-		[FreeFunction(IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int NextPowerOfTwo(int value);
-
 		[FreeFunction(IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GammaToLinearSpace(float value);
@@ -458,15 +445,16 @@ namespace UnityEngine
 			num4 = Mathf.Clamp(num4, -num6, num6);
 			target = current - num4;
 			float num7 = (currentVelocity + num * num4) * deltaTime;
+			float num8 = currentVelocity;
 			currentVelocity = (currentVelocity - num * num7) * num3;
-			float num8 = target + (num4 + num7) * num3;
-			bool flag = num5 - current > 0f == num8 > num5;
+			float num9 = target + (num4 + num7) * num3;
+			bool flag = num5 - current > 0f == num9 > num5;
 			if (flag)
 			{
-				num8 = num5;
-				currentVelocity = (num8 - num5) / deltaTime;
+				num9 = num5;
+				currentVelocity = ((deltaTime != 0f) ? ((num9 - num5) / deltaTime) : num8);
 			}
-			return num8;
+			return num9;
 		}
 
 		[ExcludeFromDocs]
@@ -601,6 +589,7 @@ namespace UnityEngine
 			return (long)(BitConverter.ToUInt64(array, 0) & 9223372036854775807UL);
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static float ClampToFloat(double value)
 		{
 			bool flag = double.IsPositiveInfinity(value);
@@ -640,6 +629,7 @@ namespace UnityEngine
 			return num;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule", "UnityEditor.UIBuilderModule" })]
 		internal static int ClampToInt(long value)
 		{
 			bool flag = value < -2147483648L;
@@ -663,6 +653,7 @@ namespace UnityEngine
 			return num;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static uint ClampToUInt(long value)
 		{
 			bool flag = value < 0L;
@@ -726,6 +717,7 @@ namespace UnityEngine
 			return (int)Math.Max(0.0, -Math.Floor(Math.Log10(Math.Abs(minDifference))));
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static float RoundBasedOnMinimumDifference(float valueToRound, float minDifference)
 		{
 			bool flag = minDifference == 0f;
@@ -741,6 +733,7 @@ namespace UnityEngine
 			return num;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal static double RoundBasedOnMinimumDifference(double valueToRound, double minDifference)
 		{
 			bool flag = minDifference == 0.0;
@@ -775,6 +768,39 @@ namespace UnityEngine
 				num2 = 0.0;
 			}
 			return num2;
+		}
+
+		public static int NextPowerOfTwo(int value)
+		{
+			value--;
+			value |= value >> 16;
+			value |= value >> 8;
+			value |= value >> 4;
+			value |= value >> 2;
+			value |= value >> 1;
+			return value + 1;
+		}
+
+		public static int ClosestPowerOfTwo(int value)
+		{
+			int num = Mathf.NextPowerOfTwo(value);
+			int num2 = num >> 1;
+			bool flag = value - num2 < num - value;
+			int num3;
+			if (flag)
+			{
+				num3 = num2;
+			}
+			else
+			{
+				num3 = num;
+			}
+			return num3;
+		}
+
+		public static bool IsPowerOfTwo(int value)
+		{
+			return (value & (value - 1)) == 0;
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

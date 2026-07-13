@@ -24,7 +24,7 @@ namespace System.IO
 					}
 					if (num == 5 && FileSystem.DirectoryExists(destFullPath))
 					{
-						throw new IOException(SR.Format("The target file '{0}' is a directory, not a file.", destFullPath), 5);
+						throw new UnauthorizedAccessException(SR.Format("The target file '{0}' is a directory, not a file.", destFullPath));
 					}
 				}
 				throw Win32Marshal.GetExceptionForWin32Error(num, text);

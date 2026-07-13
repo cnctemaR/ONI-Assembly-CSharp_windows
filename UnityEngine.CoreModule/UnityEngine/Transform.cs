@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Configuration/UnityConfigure.h")]
 	[NativeHeader("Runtime/Transform/Transform.h")]
 	[NativeHeader("Runtime/Transform/ScriptBindings/TransformScriptBindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Configuration/UnityConfigure.h")]
 	public class Transform : Component, IEnumerable
 	{
 		protected Transform()
@@ -21,13 +22,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_position_Injected(out vector);
+				Transform.get_position_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_position_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Transform.set_position_Injected(intPtr, ref value);
 			}
 		}
 
@@ -35,32 +46,57 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_localPosition_Injected(out vector);
+				Transform.get_localPosition_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_localPosition_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Transform.set_localPosition_Injected(intPtr, ref value);
 			}
 		}
 
 		internal Vector3 GetLocalEulerAngles(RotationOrder order)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetLocalEulerAngles_Injected(order, out vector);
+			Transform.GetLocalEulerAngles_Injected(intPtr, order, out vector);
 			return vector;
 		}
 
 		internal void SetLocalEulerAngles(Vector3 euler, RotationOrder order)
 		{
-			this.SetLocalEulerAngles_Injected(ref euler, order);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetLocalEulerAngles_Injected(intPtr, ref euler, order);
 		}
 
 		[NativeConditional("UNITY_EDITOR")]
 		internal void SetLocalEulerHint(Vector3 euler)
 		{
-			this.SetLocalEulerHint_Injected(ref euler);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetLocalEulerHint_Injected(intPtr, ref euler);
 		}
 
 		public Vector3 eulerAngles
@@ -127,13 +163,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Quaternion quaternion;
-				this.get_rotation_Injected(out quaternion);
+				Transform.get_rotation_Injected(intPtr, out quaternion);
 				return quaternion;
 			}
 			set
 			{
-				this.set_rotation_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Transform.set_rotation_Injected(intPtr, ref value);
 			}
 		}
 
@@ -141,13 +187,23 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Quaternion quaternion;
-				this.get_localRotation_Injected(out quaternion);
+				Transform.get_localRotation_Injected(intPtr, out quaternion);
 				return quaternion;
 			}
 			set
 			{
-				this.set_localRotation_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Transform.set_localRotation_Injected(intPtr, ref value);
 			}
 		}
 
@@ -164,27 +220,51 @@ namespace UnityEngine
 			}
 		}
 
-		[NativeConditional("UNITY_EDITOR")]
 		[NativeMethod("GetRotationOrder")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern int GetRotationOrderInternal();
+		[NativeConditional("UNITY_EDITOR")]
+		internal int GetRotationOrderInternal()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Transform.GetRotationOrderInternal_Injected(intPtr);
+		}
 
 		[NativeMethod("SetRotationOrder")]
 		[NativeConditional("UNITY_EDITOR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetRotationOrderInternal(RotationOrder rotationOrder);
+		internal void SetRotationOrderInternal(RotationOrder rotationOrder)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetRotationOrderInternal_Injected(intPtr, rotationOrder);
+		}
 
 		public Vector3 localScale
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_localScale_Injected(out vector);
+				Transform.get_localScale_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_localScale_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Transform.set_localScale_Injected(intPtr, ref value);
 			}
 		}
 
@@ -217,8 +297,15 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Transform GetParent();
+		private Transform GetParent()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Transform>(Transform.GetParent_Injected(intPtr));
+		}
 
 		public void SetParent(Transform p)
 		{
@@ -226,15 +313,27 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("SetParent", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetParent(Transform parent, bool worldPositionStays);
+		public void SetParent(Transform parent, bool worldPositionStays)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetParent_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Transform>(parent), worldPositionStays);
+		}
 
 		public Matrix4x4 worldToLocalMatrix
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_worldToLocalMatrix_Injected(out matrix4x);
+				Transform.get_worldToLocalMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 		}
@@ -243,27 +342,56 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Matrix4x4 matrix4x;
-				this.get_localToWorldMatrix_Injected(out matrix4x);
+				Transform.get_localToWorldMatrix_Injected(intPtr, out matrix4x);
 				return matrix4x;
 			}
 		}
 
 		public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
 		{
-			this.SetPositionAndRotation_Injected(ref position, ref rotation);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetPositionAndRotation_Injected(intPtr, ref position, ref rotation);
 		}
 
 		public void SetLocalPositionAndRotation(Vector3 localPosition, Quaternion localRotation)
 		{
-			this.SetLocalPositionAndRotation_Injected(ref localPosition, ref localRotation);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetLocalPositionAndRotation_Injected(intPtr, ref localPosition, ref localRotation);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
+		public void GetPositionAndRotation(out Vector3 position, out Quaternion rotation)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.GetPositionAndRotation_Injected(intPtr, out position, out rotation);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void GetLocalPositionAndRotation(out Vector3 localPosition, out Quaternion localRotation);
+		public void GetLocalPositionAndRotation(out Vector3 localPosition, out Quaternion localRotation)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.GetLocalPositionAndRotation_Injected(intPtr, out localPosition, out localRotation);
+		}
 
 		public void Translate(Vector3 translation, [DefaultValue("Space.Self")] Space relativeTo)
 		{
@@ -343,7 +471,12 @@ namespace UnityEngine
 		[NativeMethod("RotateAround")]
 		internal void RotateAroundInternal(Vector3 axis, float angle)
 		{
-			this.RotateAroundInternal_Injected(ref axis, angle);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.RotateAroundInternal_Injected(intPtr, ref axis, angle);
 		}
 
 		public void Rotate(Vector3 axis, float angle, [DefaultValue("Space.Self")] Space relativeTo)
@@ -406,13 +539,23 @@ namespace UnityEngine
 		[FreeFunction("Internal_LookAt", HasExplicitThis = true)]
 		private void Internal_LookAt(Vector3 worldPosition, Vector3 worldUp)
 		{
-			this.Internal_LookAt_Injected(ref worldPosition, ref worldUp);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.Internal_LookAt_Injected(intPtr, ref worldPosition, ref worldUp);
 		}
 
 		public Vector3 TransformDirection(Vector3 direction)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.TransformDirection_Injected(ref direction, out vector);
+			Transform.TransformDirection_Injected(intPtr, ref direction, out vector);
 			return vector;
 		}
 
@@ -421,36 +564,52 @@ namespace UnityEngine
 			return this.TransformDirection(new Vector3(x, y, z));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe extern void TransformDirections([Span("count", true)] Vector3* directions, int count, [Span("transformedCount", false)] Vector3* transformedDirections, int transformedCount);
+		[NativeMethod(Name = "TransformDirections")]
+		internal unsafe void TransformDirectionsInternal(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<Vector3> readOnlySpan = directions;
+			fixed (Vector3* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<Vector3> span = transformedDirections;
+				fixed (Vector3* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Transform.TransformDirectionsInternal_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
 
-		public unsafe void TransformDirections(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
+		public void TransformDirections(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
 		{
 			bool flag = directions.Length != transformedDirections.Length;
 			if (flag)
 			{
 				throw new InvalidOperationException("Both spans passed to Transform.TransformDirections() must be the same length");
 			}
-			fixed (Vector3* pinnableReference = directions.GetPinnableReference())
-			{
-				Vector3* ptr = pinnableReference;
-				fixed (Vector3* pinnableReference2 = transformedDirections.GetPinnableReference())
-				{
-					Vector3* ptr2 = pinnableReference2;
-					this.TransformDirections(ptr, directions.Length, ptr2, transformedDirections.Length);
-				}
-			}
+			this.TransformDirectionsInternal(directions, transformedDirections);
 		}
 
 		public void TransformDirections(Span<Vector3> directions)
 		{
-			this.TransformDirections(directions, directions);
+			this.TransformDirectionsInternal(directions, directions);
 		}
 
 		public Vector3 InverseTransformDirection(Vector3 direction)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.InverseTransformDirection_Injected(ref direction, out vector);
+			Transform.InverseTransformDirection_Injected(intPtr, ref direction, out vector);
 			return vector;
 		}
 
@@ -459,36 +618,52 @@ namespace UnityEngine
 			return this.InverseTransformDirection(new Vector3(x, y, z));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe extern void InverseTransformDirections([Span("count", true)] Vector3* directions, int count, [Span("transformedCount", false)] Vector3* transformedDirections, int transformedCount);
+		[NativeMethod(Name = "InverseTransformDirections")]
+		internal unsafe void InverseTransformDirectionsInternal(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<Vector3> readOnlySpan = directions;
+			fixed (Vector3* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<Vector3> span = transformedDirections;
+				fixed (Vector3* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Transform.InverseTransformDirectionsInternal_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
 
-		public unsafe void InverseTransformDirections(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
+		public void InverseTransformDirections(ReadOnlySpan<Vector3> directions, Span<Vector3> transformedDirections)
 		{
 			bool flag = directions.Length != transformedDirections.Length;
 			if (flag)
 			{
 				throw new InvalidOperationException("Both spans passed to Transform.InverseTransformDirections() must be the same length");
 			}
-			fixed (Vector3* pinnableReference = directions.GetPinnableReference())
-			{
-				Vector3* ptr = pinnableReference;
-				fixed (Vector3* pinnableReference2 = transformedDirections.GetPinnableReference())
-				{
-					Vector3* ptr2 = pinnableReference2;
-					this.InverseTransformDirections(ptr, directions.Length, ptr2, transformedDirections.Length);
-				}
-			}
+			this.InverseTransformDirectionsInternal(directions, transformedDirections);
 		}
 
 		public void InverseTransformDirections(Span<Vector3> directions)
 		{
-			this.InverseTransformDirections(directions, directions);
+			this.InverseTransformDirectionsInternal(directions, directions);
 		}
 
 		public Vector3 TransformVector(Vector3 vector)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector2;
-			this.TransformVector_Injected(ref vector, out vector2);
+			Transform.TransformVector_Injected(intPtr, ref vector, out vector2);
 			return vector2;
 		}
 
@@ -497,36 +672,52 @@ namespace UnityEngine
 			return this.TransformVector(new Vector3(x, y, z));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe extern void TransformVectors([Span("count", true)] Vector3* vectors, int count, [Span("transformedCount", false)] Vector3* transformedVectors, int transformedCount);
+		[NativeMethod(Name = "TransformVectors")]
+		internal unsafe void TransformVectorsInternal(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<Vector3> readOnlySpan = vectors;
+			fixed (Vector3* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<Vector3> span = transformedVectors;
+				fixed (Vector3* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Transform.TransformVectorsInternal_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
 
-		public unsafe void TransformVectors(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
+		public void TransformVectors(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
 		{
 			bool flag = vectors.Length != transformedVectors.Length;
 			if (flag)
 			{
 				throw new InvalidOperationException("Both spans passed to Transform.TransformVectors() must be the same length");
 			}
-			fixed (Vector3* pinnableReference = vectors.GetPinnableReference())
-			{
-				Vector3* ptr = pinnableReference;
-				fixed (Vector3* pinnableReference2 = transformedVectors.GetPinnableReference())
-				{
-					Vector3* ptr2 = pinnableReference2;
-					this.TransformVectors(ptr, vectors.Length, ptr2, transformedVectors.Length);
-				}
-			}
+			this.TransformVectorsInternal(vectors, transformedVectors);
 		}
 
 		public void TransformVectors(Span<Vector3> vectors)
 		{
-			this.TransformVectors(vectors, vectors);
+			this.TransformVectorsInternal(vectors, vectors);
 		}
 
 		public Vector3 InverseTransformVector(Vector3 vector)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector2;
-			this.InverseTransformVector_Injected(ref vector, out vector2);
+			Transform.InverseTransformVector_Injected(intPtr, ref vector, out vector2);
 			return vector2;
 		}
 
@@ -535,36 +726,52 @@ namespace UnityEngine
 			return this.InverseTransformVector(new Vector3(x, y, z));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe extern void InverseTransformVectors([Span("count", true)] Vector3* vectors, int count, [Span("transformedCount", false)] Vector3* transformedVectors, int transformedCount);
+		[NativeMethod(Name = "InverseTransformVectors")]
+		internal unsafe void InverseTransformVectorsInternal(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<Vector3> readOnlySpan = vectors;
+			fixed (Vector3* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<Vector3> span = transformedVectors;
+				fixed (Vector3* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Transform.InverseTransformVectorsInternal_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
 
-		public unsafe void InverseTransformVectors(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
+		public void InverseTransformVectors(ReadOnlySpan<Vector3> vectors, Span<Vector3> transformedVectors)
 		{
 			bool flag = vectors.Length != transformedVectors.Length;
 			if (flag)
 			{
 				throw new InvalidOperationException("Both spans passed to Transform.InverseTransformVectors() must be the same length");
 			}
-			fixed (Vector3* pinnableReference = vectors.GetPinnableReference())
-			{
-				Vector3* ptr = pinnableReference;
-				fixed (Vector3* pinnableReference2 = transformedVectors.GetPinnableReference())
-				{
-					Vector3* ptr2 = pinnableReference2;
-					this.InverseTransformVectors(ptr, vectors.Length, ptr2, transformedVectors.Length);
-				}
-			}
+			this.InverseTransformVectorsInternal(vectors, transformedVectors);
 		}
 
 		public void InverseTransformVectors(Span<Vector3> vectors)
 		{
-			this.InverseTransformVectors(vectors, vectors);
+			this.InverseTransformVectorsInternal(vectors, vectors);
 		}
 
 		public Vector3 TransformPoint(Vector3 position)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.TransformPoint_Injected(ref position, out vector);
+			Transform.TransformPoint_Injected(intPtr, ref position, out vector);
 			return vector;
 		}
 
@@ -573,36 +780,52 @@ namespace UnityEngine
 			return this.TransformPoint(new Vector3(x, y, z));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe extern void TransformPoints([Span("count", true)] Vector3* positions, int count, [Span("transformedCount", false)] Vector3* transformedPositions, int transformedCount);
+		[NativeMethod(Name = "TransformPoints")]
+		internal unsafe void TransformPointsInternal(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<Vector3> readOnlySpan = positions;
+			fixed (Vector3* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<Vector3> span = transformedPositions;
+				fixed (Vector3* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Transform.TransformPointsInternal_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
 
-		public unsafe void TransformPoints(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
+		public void TransformPoints(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
 		{
 			bool flag = positions.Length != transformedPositions.Length;
 			if (flag)
 			{
 				throw new InvalidOperationException("Both spans passed to Transform.TransformPoints() must be the same length");
 			}
-			fixed (Vector3* pinnableReference = positions.GetPinnableReference())
-			{
-				Vector3* ptr = pinnableReference;
-				fixed (Vector3* pinnableReference2 = transformedPositions.GetPinnableReference())
-				{
-					Vector3* ptr2 = pinnableReference2;
-					this.TransformPoints(ptr, positions.Length, ptr2, transformedPositions.Length);
-				}
-			}
+			this.TransformPointsInternal(positions, transformedPositions);
 		}
 
 		public void TransformPoints(Span<Vector3> positions)
 		{
-			this.TransformPoints(positions, positions);
+			this.TransformPointsInternal(positions, positions);
 		}
 
 		public Vector3 InverseTransformPoint(Vector3 position)
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.InverseTransformPoint_Injected(ref position, out vector);
+			Transform.InverseTransformPoint_Injected(intPtr, ref position, out vector);
 			return vector;
 		}
 
@@ -611,25 +834,36 @@ namespace UnityEngine
 			return this.InverseTransformPoint(new Vector3(x, y, z));
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal unsafe extern void InverseTransformPoints([Span("count", true)] Vector3* positions, int count, [Span("transformedCount", false)] Vector3* transformedPositions, int transformedCount);
+		[NativeMethod(Name = "InverseTransformPoints")]
+		internal unsafe void InverseTransformPointsInternal(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<Vector3> readOnlySpan = positions;
+			fixed (Vector3* ptr = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+				Span<Vector3> span = transformedPositions;
+				fixed (Vector3* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper2 = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					Transform.InverseTransformPointsInternal_Injected(intPtr, ref managedSpanWrapper, ref managedSpanWrapper2);
+					ptr = null;
+				}
+			}
+		}
 
-		public unsafe void InverseTransformPoints(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
+		public void InverseTransformPoints(ReadOnlySpan<Vector3> positions, Span<Vector3> transformedPositions)
 		{
 			bool flag = positions.Length != transformedPositions.Length;
 			if (flag)
 			{
 				throw new InvalidOperationException("Both spans passed to Transform.InverseTransformPoints() must be the same length");
 			}
-			fixed (Vector3* pinnableReference = positions.GetPinnableReference())
-			{
-				Vector3* ptr = pinnableReference;
-				fixed (Vector3* pinnableReference2 = transformedPositions.GetPinnableReference())
-				{
-					Vector3* ptr2 = pinnableReference2;
-					this.InverseTransformPoints(ptr, positions.Length, ptr2, transformedPositions.Length);
-				}
-			}
+			this.InverseTransformPointsInternal(positions, transformedPositions);
 		}
 
 		public void InverseTransformPoints(Span<Vector3> positions)
@@ -645,39 +879,122 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Transform GetRoot();
+		private Transform GetRoot()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Transform>(Transform.GetRoot_Injected(intPtr));
+		}
 
-		public extern int childCount
+		public int childCount
 		{
 			[NativeMethod("GetChildrenCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Transform.get_childCount_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction("DetachChildren", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void DetachChildren();
+		public void DetachChildren()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.DetachChildren_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetAsFirstSibling();
+		public void SetAsFirstSibling()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetAsFirstSibling_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetAsLastSibling();
+		public void SetAsLastSibling()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetAsLastSibling_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetSiblingIndex(int index);
+		public void SetSiblingIndex(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetSiblingIndex_Injected(intPtr, index);
+		}
 
 		[NativeMethod("MoveAfterSiblingInternal")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void MoveAfterSibling(Transform transform, bool notifyEditorAndMarkDirty);
+		internal void MoveAfterSibling(Transform transform, bool notifyEditorAndMarkDirty)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.MoveAfterSibling_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Transform>(transform), notifyEditorAndMarkDirty);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetSiblingIndex();
+		public int GetSiblingIndex()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Transform.GetSiblingIndex_Injected(intPtr);
+		}
 
-		[FreeFunction]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Transform FindRelativeTransformWithPath([NotNull("NullExceptionObject")] Transform transform, string path, [DefaultValue("false")] bool isActiveOnly);
+		[FreeFunction(HasExplicitThis = true)]
+		private unsafe Transform FindRelativeTransformWithPath(string path, [DefaultValue("false")] bool isActiveOnly)
+		{
+			Transform transform;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = path.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr2 = Transform.FindRelativeTransformWithPath_Injected(intPtr, ref managedSpanWrapper, isActiveOnly);
+			}
+			finally
+			{
+				IntPtr intPtr2;
+				transform = Unmarshal.UnmarshalUnityObject<Transform>(intPtr2);
+				char* ptr = null;
+			}
+			return transform;
+		}
 
 		public Transform Find(string n)
 		{
@@ -686,35 +1003,77 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("Name cannot be null");
 			}
-			return Transform.FindRelativeTransformWithPath(this, n, false);
+			return this.FindRelativeTransformWithPath(n, false);
 		}
 
 		[NativeConditional("UNITY_EDITOR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SendTransformChangedScale();
+		internal void SendTransformChangedScale()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SendTransformChangedScale_Injected(intPtr);
+		}
 
 		public Vector3 lossyScale
 		{
 			[NativeMethod("GetWorldScaleLossy")]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_lossyScale_Injected(out vector);
+				Transform.get_lossyScale_Injected(intPtr, out vector);
 				return vector;
 			}
 		}
 
-		[FreeFunction("Internal_IsChildOrSameTransform", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsChildOf([NotNull("ArgumentNullException")] Transform parent);
+		[FreeFunction("Internal_IsChildOrSameAsOtherTransform", HasExplicitThis = true)]
+		public bool IsChildOf([NotNull] Transform parent)
+		{
+			if (parent == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(parent, "parent");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Transform>(parent);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(parent, "parent");
+			}
+			return Transform.IsChildOf_Injected(intPtr, intPtr2);
+		}
 
 		[NativeProperty("HasChangedDeprecated")]
-		public extern bool hasChanged
+		public bool hasChanged
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Transform.get_hasChanged_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Transform.set_hasChanged_Injected(intPtr, value);
+			}
 		}
 
 		[Obsolete("FindChild has been deprecated. Use Find instead (UnityUpgradable) -> Find([mscorlib] System.String)", false)]
@@ -731,24 +1090,48 @@ namespace UnityEngine
 		[Obsolete("warning use Transform.Rotate instead.")]
 		public void RotateAround(Vector3 axis, float angle)
 		{
-			this.RotateAround_Injected(ref axis, angle);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.RotateAround_Injected(intPtr, ref axis, angle);
 		}
 
 		[Obsolete("warning use Transform.Rotate instead.")]
 		public void RotateAroundLocal(Vector3 axis, float angle)
 		{
-			this.RotateAroundLocal_Injected(ref axis, angle);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.RotateAroundLocal_Injected(intPtr, ref axis, angle);
 		}
 
 		[FreeFunction("GetChild", HasExplicitThis = true)]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Transform GetChild(int index);
+		public Transform GetChild(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Transform>(Transform.GetChild_Injected(intPtr, index));
+		}
 
 		[Obsolete("warning use Transform.childCount instead (UnityUpgradable) -> Transform.childCount", false)]
 		[NativeMethod("GetChildrenCount")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetChildCount();
+		public int GetChildCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Transform.GetChildCount_Injected(intPtr);
+		}
 
 		public int hierarchyCapacity
 		{
@@ -763,12 +1146,26 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("GetHierarchyCapacity", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int internal_getHierarchyCapacity();
+		private int internal_getHierarchyCapacity()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Transform.internal_getHierarchyCapacity_Injected(intPtr);
+		}
 
 		[FreeFunction("SetHierarchyCapacity", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void internal_setHierarchyCapacity(int value);
+		private void internal_setHierarchyCapacity(int value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.internal_setHierarchyCapacity_Injected(intPtr, value);
+		}
 
 		public int hierarchyCount
 		{
@@ -779,13 +1176,27 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("GetHierarchyCount", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int internal_getHierarchyCount();
+		private int internal_getHierarchyCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Transform.internal_getHierarchyCount_Injected(intPtr);
+		}
 
-		[FreeFunction("IsNonUniformScaleTransform", HasExplicitThis = true)]
 		[NativeConditional("UNITY_EDITOR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern bool IsNonUniformScaleTransform();
+		[FreeFunction("IsNonUniformScaleTransform", HasExplicitThis = true)]
+		internal bool IsNonUniformScaleTransform()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Transform.IsNonUniformScaleTransform_Injected(intPtr);
+		}
 
 		[NativeConditional("UNITY_EDITOR")]
 		internal bool constrainProportionsScale
@@ -801,96 +1212,209 @@ namespace UnityEngine
 		}
 
 		[NativeConditional("UNITY_EDITOR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetConstrainProportionsScale(bool isLinked);
+		private void SetConstrainProportionsScale(bool isLinked)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Transform.SetConstrainProportionsScale_Injected(intPtr, isLinked);
+		}
 
 		[NativeConditional("UNITY_EDITOR")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsConstrainProportionsScale();
+		private bool IsConstrainProportionsScale()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Transform>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Transform.IsConstrainProportionsScale_Injected(intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_position_Injected(out Vector3 ret);
+		private static extern void get_position_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_position_Injected(ref Vector3 value);
+		private static extern void set_position_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localPosition_Injected(out Vector3 ret);
+		private static extern void get_localPosition_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_localPosition_Injected(ref Vector3 value);
+		private static extern void set_localPosition_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetLocalEulerAngles_Injected(RotationOrder order, out Vector3 ret);
+		private static extern void GetLocalEulerAngles_Injected(IntPtr _unity_self, RotationOrder order, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLocalEulerAngles_Injected(ref Vector3 euler, RotationOrder order);
+		private static extern void SetLocalEulerAngles_Injected(IntPtr _unity_self, [In] ref Vector3 euler, RotationOrder order);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLocalEulerHint_Injected(ref Vector3 euler);
+		private static extern void SetLocalEulerHint_Injected(IntPtr _unity_self, [In] ref Vector3 euler);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_rotation_Injected(out Quaternion ret);
+		private static extern void get_rotation_Injected(IntPtr _unity_self, out Quaternion ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_rotation_Injected(ref Quaternion value);
+		private static extern void set_rotation_Injected(IntPtr _unity_self, [In] ref Quaternion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localRotation_Injected(out Quaternion ret);
+		private static extern void get_localRotation_Injected(IntPtr _unity_self, out Quaternion ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_localRotation_Injected(ref Quaternion value);
+		private static extern void set_localRotation_Injected(IntPtr _unity_self, [In] ref Quaternion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localScale_Injected(out Vector3 ret);
+		private static extern int GetRotationOrderInternal_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_localScale_Injected(ref Vector3 value);
+		private static extern void SetRotationOrderInternal_Injected(IntPtr _unity_self, RotationOrder rotationOrder);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_worldToLocalMatrix_Injected(out Matrix4x4 ret);
+		private static extern void get_localScale_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_localToWorldMatrix_Injected(out Matrix4x4 ret);
+		private static extern void set_localScale_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetPositionAndRotation_Injected(ref Vector3 position, ref Quaternion rotation);
+		private static extern IntPtr GetParent_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetLocalPositionAndRotation_Injected(ref Vector3 localPosition, ref Quaternion localRotation);
+		private static extern void SetParent_Injected(IntPtr _unity_self, IntPtr parent, bool worldPositionStays);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RotateAroundInternal_Injected(ref Vector3 axis, float angle);
+		private static extern void get_worldToLocalMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_LookAt_Injected(ref Vector3 worldPosition, ref Vector3 worldUp);
+		private static extern void get_localToWorldMatrix_Injected(IntPtr _unity_self, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void TransformDirection_Injected(ref Vector3 direction, out Vector3 ret);
+		private static extern void SetPositionAndRotation_Injected(IntPtr _unity_self, [In] ref Vector3 position, [In] ref Quaternion rotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InverseTransformDirection_Injected(ref Vector3 direction, out Vector3 ret);
+		private static extern void SetLocalPositionAndRotation_Injected(IntPtr _unity_self, [In] ref Vector3 localPosition, [In] ref Quaternion localRotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void TransformVector_Injected(ref Vector3 vector, out Vector3 ret);
+		private static extern void GetPositionAndRotation_Injected(IntPtr _unity_self, out Vector3 position, out Quaternion rotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InverseTransformVector_Injected(ref Vector3 vector, out Vector3 ret);
+		private static extern void GetLocalPositionAndRotation_Injected(IntPtr _unity_self, out Vector3 localPosition, out Quaternion localRotation);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void TransformPoint_Injected(ref Vector3 position, out Vector3 ret);
+		private static extern void RotateAroundInternal_Injected(IntPtr _unity_self, [In] ref Vector3 axis, float angle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InverseTransformPoint_Injected(ref Vector3 position, out Vector3 ret);
+		private static extern void Internal_LookAt_Injected(IntPtr _unity_self, [In] ref Vector3 worldPosition, [In] ref Vector3 worldUp);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_lossyScale_Injected(out Vector3 ret);
+		private static extern void TransformDirection_Injected(IntPtr _unity_self, [In] ref Vector3 direction, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RotateAround_Injected(ref Vector3 axis, float angle);
+		private static extern void TransformDirectionsInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper directions, ref ManagedSpanWrapper transformedDirections);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void RotateAroundLocal_Injected(ref Vector3 axis, float angle);
+		private static extern void InverseTransformDirection_Injected(IntPtr _unity_self, [In] ref Vector3 direction, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InverseTransformDirectionsInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper directions, ref ManagedSpanWrapper transformedDirections);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void TransformVector_Injected(IntPtr _unity_self, [In] ref Vector3 vector, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void TransformVectorsInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper vectors, ref ManagedSpanWrapper transformedVectors);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InverseTransformVector_Injected(IntPtr _unity_self, [In] ref Vector3 vector, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InverseTransformVectorsInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper vectors, ref ManagedSpanWrapper transformedVectors);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void TransformPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void TransformPointsInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper positions, ref ManagedSpanWrapper transformedPositions);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InverseTransformPoint_Injected(IntPtr _unity_self, [In] ref Vector3 position, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InverseTransformPointsInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper positions, ref ManagedSpanWrapper transformedPositions);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetRoot_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_childCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DetachChildren_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAsFirstSibling_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAsLastSibling_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSiblingIndex_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void MoveAfterSibling_Injected(IntPtr _unity_self, IntPtr transform, bool notifyEditorAndMarkDirty);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetSiblingIndex_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr FindRelativeTransformWithPath_Injected(IntPtr _unity_self, ref ManagedSpanWrapper path, [DefaultValue("false")] bool isActiveOnly);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendTransformChangedScale_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_lossyScale_Injected(IntPtr _unity_self, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsChildOf_Injected(IntPtr _unity_self, IntPtr parent);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_hasChanged_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_hasChanged_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RotateAround_Injected(IntPtr _unity_self, [In] ref Vector3 axis, float angle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RotateAroundLocal_Injected(IntPtr _unity_self, [In] ref Vector3 axis, float angle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetChild_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetChildCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int internal_getHierarchyCapacity_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void internal_setHierarchyCapacity_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int internal_getHierarchyCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsNonUniformScaleTransform_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetConstrainProportionsScale_Injected(IntPtr _unity_self, bool isLinked);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsConstrainProportionsScale_Injected(IntPtr _unity_self);
 
 		private class Enumerator : IEnumerator
 		{

@@ -3,7 +3,7 @@ using Klei;
 using Klei.AI;
 using UnityEngine;
 
-public class OilChangerWorkableUse : Workable, IGameObjectEffectDescriptor
+public class OilChangerWorkableUse : Workable
 {
 	private OilChangerWorkableUse()
 	{

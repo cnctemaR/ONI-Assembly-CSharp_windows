@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public interface IMetadataImporterProvider
+	internal interface IMetadataImporterProvider
 	{
 		IMetadataImporter GetMetadataImporter(ModuleDefinition module);
 	}

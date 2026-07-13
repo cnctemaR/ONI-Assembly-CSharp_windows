@@ -18,7 +18,7 @@ public class GravitasFridgeConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Steel, true);
 		component.Temperature = 294.15f;
-		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntryThenNext("story_trait_hijackheadquarters_initial", UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_SUCCESS.SEARCH4, new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextEmail), true));
+		LoreBearerUtil.AddLoreTo(gameObject, LoreBearerUtil.UnlockSpecificEntryThenNext("story_trait_hijackheadquarters_initial", UI.USERMENUACTIONS.READLORE.SEARCH_OBJECT_SUCCESS.SEARCH3, new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextResearchNote), true));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

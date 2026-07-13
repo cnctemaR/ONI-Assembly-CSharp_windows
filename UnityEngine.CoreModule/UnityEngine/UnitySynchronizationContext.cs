@@ -8,6 +8,14 @@ namespace UnityEngine
 {
 	internal sealed class UnitySynchronizationContext : SynchronizationContext
 	{
+		internal int MainThreadId
+		{
+			get
+			{
+				return this.m_MainThreadID;
+			}
+		}
+
 		private UnitySynchronizationContext(int mainThreadID)
 		{
 			this.m_AsyncWorkQueue = new List<UnitySynchronizationContext.WorkRequest>(20);
@@ -89,7 +97,9 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		private static void InitializeSynchronizationContext()
 		{
-			SynchronizationContext.SetSynchronizationContext(new UnitySynchronizationContext(Thread.CurrentThread.ManagedThreadId));
+			UnitySynchronizationContext unitySynchronizationContext = new UnitySynchronizationContext(Thread.CurrentThread.ManagedThreadId);
+			SynchronizationContext.SetSynchronizationContext(unitySynchronizationContext);
+			Awaitable.SetSynchronizationContext(unitySynchronizationContext);
 		}
 
 		[RequiredByNativeCode]

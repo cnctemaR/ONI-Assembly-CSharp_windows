@@ -7,6 +7,14 @@ using UnityEngine.UI;
 
 public class ResearchScreen : KModalScreen
 {
+	public bool HasActiveResearch
+	{
+		get
+		{
+			return this.currentResearch != null;
+		}
+	}
+
 	public bool IsBeingResearched(Tech tech)
 	{
 		return Research.Instance.IsBeingResearched(tech);

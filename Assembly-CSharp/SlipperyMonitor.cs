@@ -157,7 +157,7 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 		{
 			this.smi.master.gameObject.GetAmounts().Get(Db.Get().Amounts.Stress.Id).ApplyDelta(3f);
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, 3f.ToString() + "% " + Db.Get().Amounts.Stress.Name, this.gameObject.transform, 1.5f, false);
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, 3f, DUPLICANTS.MODIFIERS.SLIPPED.NAME, this.gameObject.GetProperName());
+			ReportManager.Instance.ReportValueWithGameObjectContext(ReportManager.ReportType.StressDelta, 3f, this.gameObject, DUPLICANTS.MODIFIERS.SLIPPED.NAME);
 		}
 
 		protected override void InternalEnd()

@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum MethodImplAttributes : ushort
+	internal enum MethodImplAttributes : ushort
 	{
 		CodeTypeMask = 3,
 		IL = 0,
@@ -19,6 +19,7 @@ namespace Mono.Cecil
 		Synchronized = 32,
 		NoOptimization = 64,
 		NoInlining = 8,
-		AggressiveInlining = 256
+		AggressiveInlining = 256,
+		AggressiveOptimization = 512
 	}
 }

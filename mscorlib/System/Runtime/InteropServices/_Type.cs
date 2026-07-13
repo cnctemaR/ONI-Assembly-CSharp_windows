@@ -5,10 +5,10 @@ using System.Reflection;
 namespace System.Runtime.InteropServices
 {
 	[ComVisible(true)]
-	[Guid("BCA8B44D-AAD6-3A86-8AB7-03349F4F2DA2")]
 	[CLSCompliant(false)]
-	[TypeLibImportClass(typeof(Type))]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("BCA8B44D-AAD6-3A86-8AB7-03349F4F2DA2")]
+	[TypeLibImportClass(typeof(Type))]
 	public interface _Type
 	{
 		void GetTypeInfoCount(out uint pcTInfo);

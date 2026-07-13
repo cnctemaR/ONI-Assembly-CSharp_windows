@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum ExceptionHandlerType
+	internal enum ExceptionHandlerType
 	{
 		Catch,
 		Filter,

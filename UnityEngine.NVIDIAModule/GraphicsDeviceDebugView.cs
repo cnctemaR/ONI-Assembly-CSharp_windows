@@ -27,23 +27,24 @@ namespace UnityEngine.NVIDIA
 			}
 		}
 
+		[Obsolete("This property causes garbage collection and is inefficient. Use dlssFeatureInfosSpan and dlssFeatureInfoCount instead.", false)]
 		public IEnumerable<DLSSDebugFeatureInfos> dlssFeatureInfos
 		{
 			get
 			{
-				IEnumerable<DLSSDebugFeatureInfos> enumerable;
-				if (this.m_DlssDebugFeatures != null)
-				{
-					IEnumerable<DLSSDebugFeatureInfos> dlssDebugFeatures = this.m_DlssDebugFeatures;
-					enumerable = dlssDebugFeatures;
-				}
-				else
-				{
-					enumerable = Enumerable.Empty<DLSSDebugFeatureInfos>();
-				}
-				return enumerable;
+				return this.m_DlssDebugFeatures.Take<DLSSDebugFeatureInfos>((int)this.m_DlssFeatureValidCount);
 			}
 		}
+
+		public ReadOnlySpan<DLSSDebugFeatureInfos> dlssFeatureInfosSpan
+		{
+			get
+			{
+				return new ReadOnlySpan<DLSSDebugFeatureInfos>(this.m_DlssDebugFeatures, 0, (int)this.m_DlssFeatureValidCount);
+			}
+		}
+
+		internal const int MaxFeatures = 16;
 
 		internal uint m_ViewId = 0U;
 
@@ -51,6 +52,8 @@ namespace UnityEngine.NVIDIA
 
 		internal uint m_NgxVersion = 0U;
 
-		internal DLSSDebugFeatureInfos[] m_DlssDebugFeatures = null;
+		internal readonly DLSSDebugFeatureInfos[] m_DlssDebugFeatures = new DLSSDebugFeatureInfos[16];
+
+		internal uint m_DlssFeatureValidCount = 0U;
 	}
 }

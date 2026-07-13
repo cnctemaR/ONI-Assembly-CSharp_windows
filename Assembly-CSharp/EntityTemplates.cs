@@ -761,9 +761,7 @@ public class EntityTemplates
 			manualDeliveryKG.choreTypeIDHash = idHash;
 		}
 		KPrefabID component = template.GetComponent<KPrefabID>();
-		FertilizationMonitor.Def def = template.AddOrGetDef<FertilizationMonitor.Def>();
-		def.wrongFertilizerTestTag = GameTags.Solid;
-		def.consumedElements = fertilizers;
+		template.AddOrGetDef<FertilizationMonitor.Def>().consumedElements = fertilizers;
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			ManualDeliveryKG[] components = inst.GetComponents<ManualDeliveryKG>();
@@ -825,11 +823,18 @@ public class EntityTemplates
 		return gameObject;
 	}
 
-	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, IHasDlcRestrictions dlcRestrictions, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, Tag replantGroundTag = default(Tag), int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "", bool ignoreDefaultSeedTag = false)
+	public static GameObject CreateAndRegisterSeedForPlantAsFood(GameObject plant, IHasDlcRestrictions dlcRestrictions, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, EdiblesManager.FoodInfo foodInfo, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, Tag replantGroundTag = default(Tag), int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "", bool ignoreDefaultSeedTag = false)
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, desc, 1f, true, anim, initialAnim, Grid.SceneLayer.Front, collisionShape, width, height, true, SORTORDER.SEEDS + sortOrder, SimHashes.Creature, null);
 		gameObject.AddOrGet<EntitySplitter>();
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterCompostableFromPrefab(gameObject);
+		if (foodInfo != null)
+		{
+			EntityTemplates.ExtendEntityToFood(gameObject, foodInfo);
+		}
+		if (foodInfo == null || !foodInfo.CanRot)
+		{
+			EntityTemplates.CreateAndRegisterCompostableFromPrefab(gameObject);
+		}
 		PlantableSeed plantableSeed = gameObject.AddOrGet<PlantableSeed>();
 		plantableSeed.PlantID = new Tag(plant.name);
 		plantableSeed.replantGroundTag = replantGroundTag;
@@ -847,17 +852,22 @@ public class EntityTemplates
 			component.AddTag(GameTags.Seed, false);
 		}
 		component.AddTag(GameTags.PedestalDisplayable, false);
-		MutantPlant component2 = plant.GetComponent<MutantPlant>();
-		if (component2 != null)
+		MutantPlant mutantPlant;
+		if (plant.TryGetComponent<MutantPlant>(out mutantPlant))
 		{
-			MutantPlant mutantPlant = gameObject.AddOrGet<MutantPlant>();
-			MutantPlant mutantPlant2 = gameObject2.AddOrGet<MutantPlant>();
-			mutantPlant.SpeciesID = component2.SpeciesID;
-			mutantPlant2.SpeciesID = component2.SpeciesID;
+			MutantPlant mutantPlant2 = gameObject.AddOrGet<MutantPlant>();
+			MutantPlant mutantPlant3 = gameObject.GetComponent<Compostable>().compostPrefab.AddOrGet<MutantPlant>();
+			mutantPlant2.SpeciesID = mutantPlant.SpeciesID;
+			mutantPlant3.SpeciesID = mutantPlant.SpeciesID;
 		}
 		Assets.AddPrefab(component);
 		plant.AddOrGet<SeedProducer>().Configure(id, productionType, numberOfSeeds);
 		return gameObject;
+	}
+
+	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, IHasDlcRestrictions dlcRestrictions, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, Tag replantGroundTag = default(Tag), int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "", bool ignoreDefaultSeedTag = false)
+	{
+		return EntityTemplates.CreateAndRegisterSeedForPlantAsFood(plant, dlcRestrictions, productionType, id, name, desc, anim, null, initialAnim, numberOfSeeds, additionalTags, planterDirection, replantGroundTag, sortOrder, domesticatedDescription, collisionShape, width, height, recipe_ingredients, recipe_description, ignoreDefaultSeedTag);
 	}
 
 	[Obsolete("Use version with IHasDlcRestrictions instead")]

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Mono.Cecil.Cil
 {
-	public interface ISymbolReaderProvider
+	internal interface ISymbolReaderProvider
 	{
 		ISymbolReader GetSymbolReader(ModuleDefinition module, string fileName);
 

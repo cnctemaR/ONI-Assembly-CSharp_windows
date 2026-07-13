@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Rocks
 {
-	public static class ILParser
+	internal static class ILParser
 	{
 		public static void Parse(MethodDefinition method, IILVisitor visitor)
 		{

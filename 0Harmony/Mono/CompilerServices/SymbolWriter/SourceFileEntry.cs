@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class SourceFileEntry
+	internal class SourceFileEntry
 	{
 		public static int Size
 		{
@@ -68,7 +68,7 @@ namespace Mono.CompilerServices.SymbolWriter
 			}
 			bw.Write(this.guid);
 			bw.Write(this.hash);
-			bw.Write(this.auto_generated ? 1 : 0);
+			bw.Write((this.auto_generated > false) ? 1 : 0);
 		}
 
 		internal void Write(BinaryWriter bw)

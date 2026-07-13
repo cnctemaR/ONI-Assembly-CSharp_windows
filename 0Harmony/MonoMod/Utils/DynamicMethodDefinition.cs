@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +14,9 @@ using MonoMod.Utils.Cil;
 
 namespace MonoMod.Utils
 {
-	public sealed class DynamicMethodDefinition : IDisposable
+	[NullableContext(1)]
+	[Nullable(0)]
+	internal sealed class DynamicMethodDefinition : IDisposable
 	{
 		private static void _InitCopier()
 		{
@@ -38,32 +40,38 @@ namespace MonoMod.Utils
 			}
 		}
 
-		private void _CopyMethodToDefinition()
+		private static void _CopyMethodToDefinition(MethodBase from, MethodDefinition into)
 		{
 			DynamicMethodDefinition.<>c__DisplayClass3_0 CS$<>8__locals1 = new DynamicMethodDefinition.<>c__DisplayClass3_0();
-			MethodBase originalMethod = this.OriginalMethod;
-			CS$<>8__locals1.moduleFrom = originalMethod.Module;
-			global::System.Reflection.MethodBody methodBody = originalMethod.GetMethodBody();
-			byte[] array = ((methodBody != null) ? methodBody.GetILAsByteArray() : null);
-			if (array == null)
+			CS$<>8__locals1.into = into;
+			CS$<>8__locals1.moduleFrom = from.Module;
+			global::System.Reflection.MethodBody methodBody = from.GetMethodBody();
+			if (methodBody == null)
 			{
 				throw new NotSupportedException("Body-less method");
 			}
-			CS$<>8__locals1.def = this.Definition;
-			CS$<>8__locals1.moduleTo = CS$<>8__locals1.def.Module;
-			CS$<>8__locals1.bodyTo = CS$<>8__locals1.def.Body;
+			global::System.Reflection.MethodBody methodBody2 = methodBody;
+			byte[] ilasByteArray = methodBody2.GetILAsByteArray();
+			if (ilasByteArray == null)
+			{
+				throw new InvalidOperationException();
+			}
+			byte[] array = ilasByteArray;
+			CS$<>8__locals1.moduleTo = CS$<>8__locals1.into.Module;
+			CS$<>8__locals1.bodyTo = CS$<>8__locals1.into.Body;
 			CS$<>8__locals1.bodyTo.GetILProcessor();
 			CS$<>8__locals1.typeArguments = null;
-			if (originalMethod.DeclaringType.IsGenericType)
+			Type declaringType = from.DeclaringType;
+			if (declaringType != null && declaringType.IsGenericType)
 			{
-				CS$<>8__locals1.typeArguments = originalMethod.DeclaringType.GetGenericArguments();
+				CS$<>8__locals1.typeArguments = from.DeclaringType.GetGenericArguments();
 			}
 			CS$<>8__locals1.methodArguments = null;
-			if (originalMethod.IsGenericMethod)
+			if (from.IsGenericMethod)
 			{
-				CS$<>8__locals1.methodArguments = originalMethod.GetGenericArguments();
+				CS$<>8__locals1.methodArguments = from.GetGenericArguments();
 			}
-			foreach (LocalVariableInfo localVariableInfo in methodBody.LocalVariables)
+			foreach (LocalVariableInfo localVariableInfo in methodBody2.LocalVariables)
 			{
 				TypeReference typeReference = CS$<>8__locals1.moduleTo.ImportReference(localVariableInfo.LocalType);
 				if (localVariableInfo.IsPinned)
@@ -115,7 +123,7 @@ namespace MonoMod.Utils
 				}
 				instruction3.Operand = CS$<>8__locals1.<_CopyMethodToDefinition>g__GetInstruction|2((int)instruction3.Operand);
 			}
-			foreach (ExceptionHandlingClause exceptionHandlingClause in methodBody.ExceptionHandlingClauses)
+			foreach (ExceptionHandlingClause exceptionHandlingClause in methodBody2.ExceptionHandlingClauses)
 			{
 				Mono.Cecil.Cil.ExceptionHandler exceptionHandler = new Mono.Cecil.Cil.ExceptionHandler((ExceptionHandlerType)exceptionHandlingClause.Flags);
 				CS$<>8__locals1.bodyTo.ExceptionHandlers.Add(exceptionHandler);
@@ -131,9 +139,9 @@ namespace MonoMod.Utils
 		static DynamicMethodDefinition()
 		{
 			bool flag;
-			if (!ReflectionHelper.IsMono || DynamicMethodDefinition._IsNewMonoSRE || DynamicMethodDefinition._IsOldMonoSRE)
+			if (PlatformDetection.Runtime != RuntimeKind.Mono || DynamicMethodDefinition._IsNewMonoSRE || DynamicMethodDefinition._IsOldMonoSRE)
 			{
-				if (!ReflectionHelper.IsMono)
+				if (PlatformDetection.Runtime != RuntimeKind.Mono)
 				{
 					Type type = typeof(ILGenerator).Assembly.GetType("System.Reflection.Emit.DynamicILGenerator");
 					flag = ((type != null) ? type.GetField("m_scope", BindingFlags.Instance | BindingFlags.NonPublic) : null) == null;
@@ -149,10 +157,10 @@ namespace MonoMod.Utils
 			}
 			DynamicMethodDefinition._PreferCecil = flag;
 			DynamicMethodDefinition.c_DebuggableAttribute = typeof(DebuggableAttribute).GetConstructor(new Type[] { typeof(DebuggableAttribute.DebuggingModes) });
-			DynamicMethodDefinition.c_UnverifiableCodeAttribute = typeof(UnverifiableCodeAttribute).GetConstructor(new Type[0]);
+			DynamicMethodDefinition.c_UnverifiableCodeAttribute = typeof(UnverifiableCodeAttribute).GetConstructor(ArrayEx.Empty<Type>());
 			DynamicMethodDefinition.c_IgnoresAccessChecksToAttribute = typeof(IgnoresAccessChecksToAttribute).GetConstructor(new Type[] { typeof(string) });
-			DynamicMethodDefinition.t__IDMDGenerator = typeof(_IDMDGenerator);
-			DynamicMethodDefinition._DMDGeneratorCache = new Dictionary<string, _IDMDGenerator>();
+			DynamicMethodDefinition.t__IDMDGenerator = typeof(IDMDGenerator);
+			DynamicMethodDefinition._DMDGeneratorCache = new ConcurrentDictionary<string, IDMDGenerator>();
 			DynamicMethodDefinition._InitCopier();
 		}
 
@@ -164,142 +172,183 @@ namespace MonoMod.Utils
 			}
 		}
 
-		[Obsolete("Use OriginalMethod instead.")]
-		public MethodBase Method
+		[Nullable(2)]
+		public MethodBase OriginalMethod
 		{
-			get
-			{
-				return this.OriginalMethod;
-			}
+			[NullableContext(2)]
+			get;
 		}
 
-		public MethodBase OriginalMethod { get; private set; }
+		public MethodDefinition Definition { get; }
 
-		public MethodDefinition Definition
+		public ModuleDefinition Module { get; }
+
+		[Nullable(2)]
+		public string Name
 		{
-			get
-			{
-				return this._Definition;
-			}
+			[NullableContext(2)]
+			get;
 		}
 
-		public ModuleDefinition Module
-		{
-			get
-			{
-				return this._Module;
-			}
-		}
+		public bool Debug { get; set; }
 
-		internal DynamicMethodDefinition()
+		private static bool GetDefaultDebugValue()
 		{
-			this.Debug = Environment.GetEnvironmentVariable("MONOMOD_DMD_DEBUG") == "1";
+			bool flag;
+			return Switches.TryGetSwitchEnabled("DMDDebug", out flag) && flag;
 		}
 
 		public DynamicMethodDefinition(MethodBase method)
-			: this()
 		{
-			if (method == null)
-			{
-				throw new ArgumentNullException("method");
-			}
+			Helpers.ThrowIfArgumentNull<MethodBase>(method, "method");
 			this.OriginalMethod = method;
-			this.Reload();
+			this.Debug = DynamicMethodDefinition.GetDefaultDebugValue();
+			ModuleDefinition moduleDefinition;
+			MethodDefinition methodDefinition;
+			this.LoadFromMethod(method, out moduleDefinition, out methodDefinition);
+			this.Module = moduleDefinition;
+			this.Definition = methodDefinition;
 		}
 
-		public DynamicMethodDefinition(string name, Type returnType, Type[] parameterTypes)
-			: this()
+		public DynamicMethodDefinition(DynamicMethodDefinition method)
 		{
+			Helpers.ThrowIfArgumentNull<DynamicMethodDefinition>(method, "method");
+			this.OriginalMethod = null;
+			this.Debug = DynamicMethodDefinition.GetDefaultDebugValue();
+			this.Name = method.Name;
+			ModuleDefinition moduleDefinition;
+			MethodDefinition methodDefinition;
+			this.CreateFromDmd(method, out moduleDefinition, out methodDefinition);
+			this.Module = moduleDefinition;
+			this.Definition = methodDefinition;
+		}
+
+		public DynamicMethodDefinition(string name, [Nullable(2)] Type returnType, Type[] parameterTypes)
+		{
+			Helpers.ThrowIfArgumentNull<string>(name, "name");
+			Helpers.ThrowIfArgumentNull<Type[]>(parameterTypes, "parameterTypes");
 			this.Name = name;
 			this.OriginalMethod = null;
-			this._CreateDynModule(name, returnType, parameterTypes);
+			this.Debug = DynamicMethodDefinition.GetDefaultDebugValue();
+			ModuleDefinition moduleDefinition;
+			MethodDefinition methodDefinition;
+			this._CreateDynModule(name, returnType, parameterTypes, out moduleDefinition, out methodDefinition);
+			this.Module = moduleDefinition;
+			this.Definition = methodDefinition;
 		}
 
+		[MemberNotNull("Definition")]
 		public ILProcessor GetILProcessor()
 		{
+			if (this.Definition == null)
+			{
+				throw new InvalidOperationException();
+			}
 			return this.Definition.Body.GetILProcessor();
 		}
 
+		[MemberNotNull("Definition")]
 		public ILGenerator GetILGenerator()
 		{
+			if (this.Definition == null)
+			{
+				throw new InvalidOperationException();
+			}
 			return new CecilILGenerator(this.Definition.Body.GetILProcessor()).GetProxy();
 		}
 
-		private ModuleDefinition _CreateDynModule(string name, Type returnType, Type[] parameterTypes)
+		private void _CreateDynModule(string name, [Nullable(2)] Type returnType, Type[] parameterTypes, out ModuleDefinition Module, out MethodDefinition Definition)
 		{
-			ModuleDefinition moduleDefinition = (this._Module = ModuleDefinition.CreateModule(string.Format("DMD:DynModule<{0}>?{1}", name, this.GetHashCode()), new ModuleParameters
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(16, 2);
+			defaultInterpolatedStringHandler.AppendLiteral("DMD:DynModule<");
+			defaultInterpolatedStringHandler.AppendFormatted(name);
+			defaultInterpolatedStringHandler.AppendLiteral(">?");
+			defaultInterpolatedStringHandler.AppendFormatted<int>(this.GetHashCode());
+			ModuleDefinition moduleDefinition;
+			Module = (moduleDefinition = ModuleDefinition.CreateModule(defaultInterpolatedStringHandler.ToStringAndClear(), new ModuleParameters
 			{
 				Kind = ModuleKind.Dll,
 				ReflectionImporterProvider = MMReflectionImporter.ProviderNoDefault
 			}));
-			TypeDefinition typeDefinition = new TypeDefinition("", string.Format("DMD<{0}>?{1}", name, this.GetHashCode()), Mono.Cecil.TypeAttributes.Public);
-			moduleDefinition.Types.Add(typeDefinition);
-			MethodDefinition methodDefinition = (this._Definition = new MethodDefinition(name, Mono.Cecil.MethodAttributes.FamANDAssem | Mono.Cecil.MethodAttributes.Family | Mono.Cecil.MethodAttributes.Static | Mono.Cecil.MethodAttributes.HideBySig, (returnType != null) ? moduleDefinition.ImportReference(returnType) : moduleDefinition.TypeSystem.Void));
+			ModuleDefinition moduleDefinition2 = moduleDefinition;
+			string text = "";
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler2 = new DefaultInterpolatedStringHandler(6, 2);
+			defaultInterpolatedStringHandler2.AppendLiteral("DMD<");
+			defaultInterpolatedStringHandler2.AppendFormatted(name);
+			defaultInterpolatedStringHandler2.AppendLiteral(">?");
+			defaultInterpolatedStringHandler2.AppendFormatted<int>(this.GetHashCode());
+			TypeDefinition typeDefinition = new TypeDefinition(text, defaultInterpolatedStringHandler2.ToStringAndClear(), Mono.Cecil.TypeAttributes.Public);
+			moduleDefinition2.Types.Add(typeDefinition);
+			MethodDefinition methodDefinition;
+			Definition = (methodDefinition = new MethodDefinition(name, Mono.Cecil.MethodAttributes.FamANDAssem | Mono.Cecil.MethodAttributes.Family | Mono.Cecil.MethodAttributes.Static | Mono.Cecil.MethodAttributes.HideBySig, (returnType != null) ? moduleDefinition2.ImportReference(returnType) : moduleDefinition2.TypeSystem.Void));
+			MethodDefinition methodDefinition2 = methodDefinition;
 			foreach (Type type in parameterTypes)
 			{
-				methodDefinition.Parameters.Add(new ParameterDefinition(moduleDefinition.ImportReference(type)));
+				methodDefinition2.Parameters.Add(new ParameterDefinition(moduleDefinition2.ImportReference(type)));
 			}
-			typeDefinition.Methods.Add(methodDefinition);
-			return moduleDefinition;
+			typeDefinition.Methods.Add(methodDefinition2);
 		}
 
-		public void Reload()
+		private void CreateFromDmd(DynamicMethodDefinition src, out ModuleDefinition Module, out MethodDefinition Definition)
 		{
-			MethodBase originalMethod = this.OriginalMethod;
-			if (originalMethod == null)
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(16, 2);
+			defaultInterpolatedStringHandler.AppendLiteral("DMD:DynModule<");
+			defaultInterpolatedStringHandler.AppendFormatted(src.Name);
+			defaultInterpolatedStringHandler.AppendLiteral(">?");
+			defaultInterpolatedStringHandler.AppendFormatted<int>(this.GetHashCode());
+			ModuleDefinition moduleDefinition;
+			Module = (moduleDefinition = ModuleDefinition.CreateModule(defaultInterpolatedStringHandler.ToStringAndClear(), new ModuleParameters
 			{
-				throw new InvalidOperationException();
+				Kind = ModuleKind.Dll,
+				ReflectionImporterProvider = MMReflectionImporter.ProviderNoDefault
+			}));
+			ModuleDefinition moduleDefinition2 = moduleDefinition;
+			string text = "";
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler2 = new DefaultInterpolatedStringHandler(6, 2);
+			defaultInterpolatedStringHandler2.AppendLiteral("DMD<");
+			defaultInterpolatedStringHandler2.AppendFormatted(src.Name);
+			defaultInterpolatedStringHandler2.AppendLiteral(">?");
+			defaultInterpolatedStringHandler2.AppendFormatted<int>(this.GetHashCode());
+			TypeDefinition typeDefinition = new TypeDefinition(text, defaultInterpolatedStringHandler2.ToStringAndClear(), Mono.Cecil.TypeAttributes.Public);
+			moduleDefinition2.Types.Add(typeDefinition);
+			MethodDefinition methodDefinition = new MethodDefinition(src.Name, Mono.Cecil.MethodAttributes.FamANDAssem | Mono.Cecil.MethodAttributes.Family | Mono.Cecil.MethodAttributes.Static | Mono.Cecil.MethodAttributes.HideBySig, moduleDefinition2.ImportReference(src.Definition.ReturnType));
+			typeDefinition.Methods.Add(methodDefinition);
+			MethodDefinition methodDefinition2;
+			Definition = (methodDefinition2 = src.Definition.Clone(methodDefinition));
+			methodDefinition = methodDefinition2;
+			methodDefinition.DeclaringType = typeDefinition;
+		}
+
+		private void LoadFromMethod(MethodBase orig, out ModuleDefinition Module, out MethodDefinition def)
+		{
+			ParameterInfo[] parameters = orig.GetParameters();
+			int num = 0;
+			Type[] array;
+			if (!orig.IsStatic)
+			{
+				num++;
+				array = new Type[parameters.Length + 1];
+				array[0] = orig.GetThisParamType();
 			}
-			ModuleDefinition moduleDefinition = null;
-			try
+			else
 			{
-				this._Definition = null;
-				ModuleDefinition module = this._Module;
-				if (module != null)
-				{
-					module.Dispose();
-				}
-				this._Module = null;
-				ParameterInfo[] parameters = originalMethod.GetParameters();
-				int num = 0;
-				Type[] array;
-				if (!originalMethod.IsStatic)
-				{
-					num++;
-					array = new Type[parameters.Length + 1];
-					array[0] = originalMethod.GetThisParamType();
-				}
-				else
-				{
-					array = new Type[parameters.Length];
-				}
-				for (int i = 0; i < parameters.Length; i++)
-				{
-					array[i + num] = parameters[i].ParameterType;
-				}
-				string id = originalMethod.GetID(null, null, true, false, true);
-				MethodInfo methodInfo = originalMethod as MethodInfo;
-				moduleDefinition = this._CreateDynModule(id, (methodInfo != null) ? methodInfo.ReturnType : null, array);
-				this._CopyMethodToDefinition();
-				MethodDefinition definition = this.Definition;
-				if (!originalMethod.IsStatic)
-				{
-					definition.Parameters[0].Name = "this";
-				}
-				for (int j = 0; j < parameters.Length; j++)
-				{
-					definition.Parameters[j + num].Name = parameters[j].Name;
-				}
-				this._Module = moduleDefinition;
-				moduleDefinition = null;
+				array = new Type[parameters.Length];
 			}
-			catch
+			for (int i = 0; i < parameters.Length; i++)
 			{
-				if (moduleDefinition != null)
-				{
-					moduleDefinition.Dispose();
-				}
-				throw;
+				array[i + num] = parameters[i].ParameterType;
+			}
+			string id = orig.GetID(null, null, true, false, true);
+			MethodInfo methodInfo = orig as MethodInfo;
+			this._CreateDynModule(id, (methodInfo != null) ? methodInfo.ReturnType : null, array, out Module, out def);
+			DynamicMethodDefinition._CopyMethodToDefinition(orig, def);
+			if (!orig.IsStatic)
+			{
+				def.Parameters[0].Name = "this";
+			}
+			for (int j = 0; j < parameters.Length; j++)
+			{
+				def.Parameters[j + num].Name = parameters[j].Name;
 			}
 		}
 
@@ -308,76 +357,87 @@ namespace MonoMod.Utils
 			return this.Generate(null);
 		}
 
-		public MethodInfo Generate(object context)
+		public MethodInfo Generate([Nullable(2)] object context)
 		{
-			string environmentVariable = Environment.GetEnvironmentVariable("MONOMOD_DMD_TYPE");
-			string text = ((environmentVariable != null) ? environmentVariable.ToLower(CultureInfo.InvariantCulture) : null);
-			if (text == "dynamicmethod" || text == "dm")
+			object obj;
+			string text = (Switches.TryGetSwitchValue("DMDType", out obj) ? (obj as string) : null);
+			if (text != null)
 			{
-				return DMDGenerator<DMDEmitDynamicMethodGenerator>.Generate(this, context);
-			}
-			if (text == "methodbuilder" || text == "mb")
-			{
-				return DMDGenerator<DMDEmitMethodBuilderGenerator>.Generate(this, context);
-			}
-			if (text == "cecil" || text == "md")
-			{
-				return DMDGenerator<DMDCecilGenerator>.Generate(this, context);
-			}
-			Type type = ReflectionHelper.GetType(environmentVariable);
-			if (type != null)
-			{
-				if (!DynamicMethodDefinition.t__IDMDGenerator.IsCompatible(type))
+				if (text.Equals("dynamicmethod", StringComparison.OrdinalIgnoreCase) || text.Equals("dm", StringComparison.OrdinalIgnoreCase))
 				{
-					throw new ArgumentException("Invalid DMDGenerator type: " + environmentVariable);
+					return DMDGenerator<DMDEmitDynamicMethodGenerator>.Generate(this, context);
 				}
-				_IDMDGenerator idmdgenerator;
-				if (!DynamicMethodDefinition._DMDGeneratorCache.TryGetValue(environmentVariable, out idmdgenerator))
-				{
-					idmdgenerator = (DynamicMethodDefinition._DMDGeneratorCache[environmentVariable] = Activator.CreateInstance(type) as _IDMDGenerator);
-				}
-				return idmdgenerator.Generate(this, context);
-			}
-			else
-			{
-				if (DynamicMethodDefinition._PreferCecil)
+				if (text.Equals("cecil", StringComparison.OrdinalIgnoreCase) || text.Equals("md", StringComparison.OrdinalIgnoreCase))
 				{
 					return DMDGenerator<DMDCecilGenerator>.Generate(this, context);
 				}
-				if (this.Debug)
+				if (text.Equals("methodbuilder", StringComparison.OrdinalIgnoreCase) || text.Equals("mb", StringComparison.OrdinalIgnoreCase))
 				{
 					return DMDGenerator<DMDEmitMethodBuilderGenerator>.Generate(this, context);
 				}
-				if (this.Definition.Body.ExceptionHandlers.Any<Mono.Cecil.Cil.ExceptionHandler>((Mono.Cecil.Cil.ExceptionHandler eh) => eh.HandlerType == ExceptionHandlerType.Fault || eh.HandlerType == ExceptionHandlerType.Filter))
-				{
-					return DMDGenerator<DMDEmitMethodBuilderGenerator>.Generate(this, context);
-				}
-				return DMDGenerator<DMDEmitDynamicMethodGenerator>.Generate(this, context);
 			}
+			if (text != null)
+			{
+				Type type = ReflectionHelper.GetType(text);
+				if (type != null)
+				{
+					if (!DynamicMethodDefinition.t__IDMDGenerator.IsCompatible(type))
+					{
+						throw new ArgumentException("Invalid DMDGenerator type: " + text);
+					}
+					return DynamicMethodDefinition._DMDGeneratorCache.GetOrAdd(text, (string _) => (IDMDGenerator)Activator.CreateInstance(type)).Generate(this, context);
+				}
+			}
+			if (DynamicMethodDefinition._PreferCecil)
+			{
+				return DMDGenerator<DMDCecilGenerator>.Generate(this, context);
+			}
+			if (this.Debug)
+			{
+				return DMDGenerator<DMDEmitMethodBuilderGenerator>.Generate(this, context);
+			}
+			if (this.Definition.Body.ExceptionHandlers.Any<Mono.Cecil.Cil.ExceptionHandler>(delegate(Mono.Cecil.Cil.ExceptionHandler eh)
+			{
+				ExceptionHandlerType handlerType = eh.HandlerType;
+				return handlerType == ExceptionHandlerType.Filter || handlerType == ExceptionHandlerType.Fault;
+			}))
+			{
+				return DMDGenerator<DMDEmitMethodBuilderGenerator>.Generate(this, context);
+			}
+			return DMDGenerator<DMDEmitDynamicMethodGenerator>.Generate(this, context);
 		}
 
 		public void Dispose()
 		{
-			if (this._IsDisposed)
+			if (this.isDisposed)
 			{
 				return;
 			}
-			this._IsDisposed = true;
-			this._Module.Dispose();
+			this.isDisposed = true;
+			ModuleDefinition module = this.Module;
+			if (module == null)
+			{
+				return;
+			}
+			module.Dispose();
 		}
 
 		public string GetDumpName(string type)
 		{
-			return string.Format("DMDASM.{0:X8}{1}", this.GUID.GetHashCode(), string.IsNullOrEmpty(type) ? "" : ("." + type));
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(7, 2);
+			defaultInterpolatedStringHandler.AppendLiteral("DMDASM.");
+			defaultInterpolatedStringHandler.AppendFormatted<int>(this.GUID.GetHashCode(), "X8");
+			defaultInterpolatedStringHandler.AppendFormatted(string.IsNullOrEmpty(type) ? "" : ("." + type));
+			return defaultInterpolatedStringHandler.ToStringAndClear();
 		}
 
-		private static Mono.Cecil.Cil.OpCode[] _CecilOpCodes1X;
+		private static Mono.Cecil.Cil.OpCode[] _CecilOpCodes1X = null;
 
-		private static Mono.Cecil.Cil.OpCode[] _CecilOpCodes2X;
+		private static Mono.Cecil.Cil.OpCode[] _CecilOpCodes2X = null;
 
-		internal static readonly bool _IsNewMonoSRE = ReflectionHelper.IsMono && typeof(DynamicMethod).GetField("il_info", BindingFlags.Instance | BindingFlags.NonPublic) != null;
+		internal static readonly bool _IsNewMonoSRE = PlatformDetection.Runtime == RuntimeKind.Mono && typeof(DynamicMethod).GetField("il_info", BindingFlags.Instance | BindingFlags.NonPublic) != null;
 
-		internal static readonly bool _IsOldMonoSRE = ReflectionHelper.IsMono && !DynamicMethodDefinition._IsNewMonoSRE && typeof(DynamicMethod).GetField("ilgen", BindingFlags.Instance | BindingFlags.NonPublic) != null;
+		internal static readonly bool _IsOldMonoSRE = PlatformDetection.Runtime == RuntimeKind.Mono && !DynamicMethodDefinition._IsNewMonoSRE && typeof(DynamicMethod).GetField("ilgen", BindingFlags.Instance | BindingFlags.NonPublic) != null;
 
 		private static bool _PreferCecil;
 
@@ -389,22 +449,13 @@ namespace MonoMod.Utils
 
 		internal static readonly Type t__IDMDGenerator;
 
-		internal static readonly Dictionary<string, _IDMDGenerator> _DMDGeneratorCache;
-
-		private MethodDefinition _Definition;
-
-		private ModuleDefinition _Module;
-
-		public string Name;
-
-		public Type OwnerType;
-
-		public bool Debug;
+		internal static readonly ConcurrentDictionary<string, IDMDGenerator> _DMDGeneratorCache;
 
 		private Guid GUID = Guid.NewGuid();
 
-		private bool _IsDisposed;
+		private bool isDisposed;
 
+		[NullableContext(0)]
 		private enum TokenResolutionMode
 		{
 			Any,

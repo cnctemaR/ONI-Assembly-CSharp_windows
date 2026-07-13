@@ -5,8 +5,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Rendering
 {
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Camera/BatchRendererGroup.h")]
+	[UsedByNativeCode]
 	internal struct BatchRendererCullingOutput
 	{
 		public JobHandle cullingJobsFence;
@@ -35,8 +35,16 @@ namespace UnityEngine.Rendering
 
 		public uint cullingLayerMask;
 
+		public byte splitExclusionMask;
+
 		public ulong sceneCullingMask;
 
 		public unsafe BatchCullingOutputDrawCommands* drawCommands;
+
+		public uint brgId;
+
+		public IntPtr occlusionBuffer;
+
+		public IntPtr customCullingResult;
 	}
 }

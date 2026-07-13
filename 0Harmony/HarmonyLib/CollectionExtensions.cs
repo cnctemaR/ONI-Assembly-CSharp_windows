@@ -25,7 +25,7 @@ namespace HarmonyLib
 
 		public static IEnumerable<T> AddItem<T>(this IEnumerable<T> sequence, T item)
 		{
-			return (sequence ?? Enumerable.Empty<T>()).Concat<T>(new T[] { item });
+			return (sequence ?? Array.Empty<T>()).Concat<T>(new T[] { item });
 		}
 
 		public static T[] AddToArray<T>(this T[] sequence, T item)
@@ -35,7 +35,10 @@ namespace HarmonyLib
 
 		public static T[] AddRangeToArray<T>(this T[] sequence, T[] items)
 		{
-			return (sequence ?? Enumerable.Empty<T>()).Concat<T>(items).ToArray<T>();
+			List<T> list = new List<T>();
+			list.AddRange(sequence ?? Enumerable.Empty<T>());
+			list.AddRange(items);
+			return list.ToArray();
 		}
 
 		internal static Dictionary<K, V> Merge<K, V>(this IEnumerable<KeyValuePair<K, V>> firstDict, params IEnumerable<KeyValuePair<K, V>>[] otherDicts)
@@ -45,9 +48,9 @@ namespace HarmonyLib
 			{
 				dictionary[keyValuePair.Key] = keyValuePair.Value;
 			}
-			for (int i = 0; i < otherDicts.Length; i++)
+			foreach (IEnumerable<KeyValuePair<K, V>> enumerable in otherDicts)
 			{
-				foreach (KeyValuePair<K, V> keyValuePair2 in otherDicts[i])
+				foreach (KeyValuePair<K, V> keyValuePair2 in enumerable)
 				{
 					dictionary[keyValuePair2.Key] = keyValuePair2.Value;
 				}

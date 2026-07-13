@@ -8,6 +8,7 @@ using UnityEngine.Bindings;
 namespace UnityEngine.Analytics
 {
 	[NativeHeader("Modules/UnityAnalytics/Public/UnityAnalytics.h")]
+	[NativeHeader("Modules/UnityAnalyticsCommon/Public/UnityAnalyticsCommon.h")]
 	[NativeHeader("Modules/UnityConnect/UnityConnectSettings.h")]
 	[NativeHeader("Modules/UnityAnalytics/Public/Events/UserCustomEvent.h")]
 	[StructLayout(LayoutKind.Sequential)]
@@ -45,8 +46,8 @@ namespace UnityEngine.Analytics
 			return analyticsResult;
 		}
 
-		[NativeMethod("ResumeInitialization")]
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		[NativeMethod("ResumeInitialization")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AnalyticsResult ResumeInitializationInternal();
 
@@ -85,27 +86,66 @@ namespace UnityEngine.Analytics
 		}
 
 		[StaticAccessor("GetUnityConnectSettings()", StaticAccessorType.Dot)]
-		private static extern string eventUrlInternal
+		private static string eventUrlInternal
 		{
 			[NativeMethod("GetEventUrl")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Analytics.get_eventUrlInternal_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		[StaticAccessor("GetUnityConnectSettings()", StaticAccessorType.Dot)]
-		private static extern string configUrlInternal
+		private static string configUrlInternal
 		{
 			[NativeMethod("GetConfigUrl")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Analytics.get_configUrlInternal_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		[StaticAccessor("GetUnityConnectSettings()", StaticAccessorType.Dot)]
-		private static extern string dashboardUrlInternal
+		private static string dashboardUrlInternal
 		{
 			[NativeMethod("GetDashboardUrl")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Analytics.get_dashboardUrlInternal_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
@@ -130,66 +170,458 @@ namespace UnityEngine.Analytics
 			set;
 		}
 
-		[NativeMethod("FlushEvents")]
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		[NativeMethod("FlushEvents")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool FlushArchivedEvents();
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AnalyticsResult Transaction(string productId, double amount, string currency, string receiptPurchaseData, string signature, bool usingIAPService);
+		private unsafe static AnalyticsResult Transaction(string productId, double amount, string currency, string receiptPurchaseData, string signature, bool usingIAPService)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(productId, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = productId.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(currency, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = currency.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(receiptPurchaseData, ref managedSpanWrapper3))
+				{
+					ReadOnlySpan<char> readOnlySpan3 = receiptPurchaseData.AsSpan();
+					fixed (char* ptr3 = readOnlySpan3.GetPinnableReference())
+					{
+						managedSpanWrapper3 = new ManagedSpanWrapper((void*)ptr3, readOnlySpan3.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper4;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(signature, ref managedSpanWrapper4))
+				{
+					ReadOnlySpan<char> readOnlySpan4 = signature.AsSpan();
+					fixed (char* ptr4 = readOnlySpan4.GetPinnableReference())
+					{
+						managedSpanWrapper4 = new ManagedSpanWrapper((void*)ptr4, readOnlySpan4.Length);
+					}
+				}
+				analyticsResult = Analytics.Transaction_Injected(ref managedSpanWrapper, amount, ref managedSpanWrapper2, ref managedSpanWrapper3, ref managedSpanWrapper4, usingIAPService);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				char* ptr3 = null;
+				char* ptr4 = null;
+			}
+			return analyticsResult;
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AnalyticsResult SendCustomEventName(string customEventName);
+		private unsafe static AnalyticsResult SendCustomEventName(string customEventName)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(customEventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = customEventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				analyticsResult = Analytics.SendCustomEventName_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return analyticsResult;
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AnalyticsResult SendCustomEvent(CustomEventData eventData);
+		private static AnalyticsResult SendCustomEvent(CustomEventData eventData)
+		{
+			return Analytics.SendCustomEvent_Injected((eventData == null) ? ((IntPtr)0) : CustomEventData.BindingsMarshaller.ConvertToNative(eventData));
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult IsCustomEventWithLimitEnabled(string customEventName);
+		internal unsafe static AnalyticsResult IsCustomEventWithLimitEnabled(string customEventName)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(customEventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = customEventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				analyticsResult = Analytics.IsCustomEventWithLimitEnabled_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return analyticsResult;
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult EnableCustomEventWithLimit(string customEventName, bool enable);
+		internal unsafe static AnalyticsResult EnableCustomEventWithLimit(string customEventName, bool enable)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(customEventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = customEventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				analyticsResult = Analytics.EnableCustomEventWithLimit_Injected(ref managedSpanWrapper, enable);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return analyticsResult;
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult IsEventWithLimitEnabled(string eventName, int ver, string prefix);
+		internal unsafe static AnalyticsResult IsEventWithLimitEnabled(string eventName, int ver, string prefix)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(eventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = eventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = prefix.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				analyticsResult = Analytics.IsEventWithLimitEnabled_Injected(ref managedSpanWrapper, ver, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return analyticsResult;
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult EnableEventWithLimit(string eventName, bool enable, int ver, string prefix);
+		internal unsafe static AnalyticsResult EnableEventWithLimit(string eventName, bool enable, int ver, string prefix)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(eventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = eventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = prefix.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				analyticsResult = Analytics.EnableEventWithLimit_Injected(ref managedSpanWrapper, enable, ver, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return analyticsResult;
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult RegisterEventWithLimit(string eventName, int maxEventPerHour, int maxItems, string vendorKey, int ver, string prefix, string assemblyInfo, bool notifyServer);
+		internal unsafe static AnalyticsResult RegisterEventWithLimit(string eventName, int maxEventPerHour, int maxItems, string vendorKey, int ver, string prefix, string assemblyInfo, bool notifyServer)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(eventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = eventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(vendorKey, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = vendorKey.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper3))
+				{
+					ReadOnlySpan<char> readOnlySpan3 = prefix.AsSpan();
+					fixed (char* ptr3 = readOnlySpan3.GetPinnableReference())
+					{
+						managedSpanWrapper3 = new ManagedSpanWrapper((void*)ptr3, readOnlySpan3.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper4;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(assemblyInfo, ref managedSpanWrapper4))
+				{
+					ReadOnlySpan<char> readOnlySpan4 = assemblyInfo.AsSpan();
+					fixed (char* ptr4 = readOnlySpan4.GetPinnableReference())
+					{
+						managedSpanWrapper4 = new ManagedSpanWrapper((void*)ptr4, readOnlySpan4.Length);
+					}
+				}
+				analyticsResult = Analytics.RegisterEventWithLimit_Injected(ref managedSpanWrapper, maxEventPerHour, maxItems, ref managedSpanWrapper2, ver, ref managedSpanWrapper3, ref managedSpanWrapper4, notifyServer);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				char* ptr3 = null;
+				char* ptr4 = null;
+			}
+			return analyticsResult;
+		}
 
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult RegisterEventsWithLimit(string[] eventName, int maxEventPerHour, int maxItems, string vendorKey, int ver, string prefix, string assemblyInfo, bool notifyServer);
+		internal unsafe static AnalyticsResult RegisterEventsWithLimit(string[] eventName, int maxEventPerHour, int maxItems, string vendorKey, int ver, string prefix, string assemblyInfo, bool notifyServer)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(vendorKey, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = vendorKey.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = prefix.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(assemblyInfo, ref managedSpanWrapper3))
+				{
+					ReadOnlySpan<char> readOnlySpan3 = assemblyInfo.AsSpan();
+					fixed (char* ptr3 = readOnlySpan3.GetPinnableReference())
+					{
+						managedSpanWrapper3 = new ManagedSpanWrapper((void*)ptr3, readOnlySpan3.Length);
+					}
+				}
+				analyticsResult = Analytics.RegisterEventsWithLimit_Injected(eventName, maxEventPerHour, maxItems, ref managedSpanWrapper, ver, ref managedSpanWrapper2, ref managedSpanWrapper3, notifyServer);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				char* ptr3 = null;
+			}
+			return analyticsResult;
+		}
 
-		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult SendEventWithLimit(string eventName, object parameters, int ver, string prefix);
-
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult SetEventWithLimitEndPoint(string eventName, string endPoint, int ver, string prefix);
+		internal unsafe static AnalyticsResult SendEventWithLimit(string eventName, object parameters, int ver, string prefix)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(eventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = eventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = prefix.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				analyticsResult = Analytics.SendEventWithLimit_Injected(ref managedSpanWrapper, parameters, ver, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return analyticsResult;
+		}
 
-		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AnalyticsResult SetEventWithLimitPriority(string eventName, AnalyticsEventPriority eventPriority, int ver, string prefix);
+		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		internal unsafe static AnalyticsResult SetEventWithLimitEndPoint(string eventName, string endPoint, int ver, string prefix)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(eventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = eventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(endPoint, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = endPoint.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper3))
+				{
+					ReadOnlySpan<char> readOnlySpan3 = prefix.AsSpan();
+					fixed (char* ptr3 = readOnlySpan3.GetPinnableReference())
+					{
+						managedSpanWrapper3 = new ManagedSpanWrapper((void*)ptr3, readOnlySpan3.Length);
+					}
+				}
+				analyticsResult = Analytics.SetEventWithLimitEndPoint_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, ver, ref managedSpanWrapper3);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				char* ptr3 = null;
+			}
+			return analyticsResult;
+		}
 
 		[ThreadSafe]
 		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool QueueEvent(string eventName, object parameters, int ver, string prefix);
+		internal unsafe static AnalyticsResult SetEventWithLimitPriority(string eventName, AnalyticsEventPriority eventPriority, int ver, string prefix)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(eventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = eventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = prefix.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				analyticsResult = Analytics.SetEventWithLimitPriority_Injected(ref managedSpanWrapper, eventPriority, ver, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return analyticsResult;
+		}
+
+		[ThreadSafe]
+		[StaticAccessor("GetUnityAnalytics()", StaticAccessorType.Dot)]
+		internal unsafe static AnalyticsResult QueueEvent(string eventName, object parameters, int ver, string prefix)
+		{
+			AnalyticsResult analyticsResult;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(eventName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = eventName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(prefix, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = prefix.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				analyticsResult = Analytics.QueueEvent_Injected(ref managedSpanWrapper, parameters, ver, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return analyticsResult;
+		}
 
 		public static bool playerOptedOut
 		{
@@ -664,5 +1096,53 @@ namespace UnityEngine.Analytics
 			}
 			return analyticsResult;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_eventUrlInternal_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_configUrlInternal_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_dashboardUrlInternal_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult Transaction_Injected(ref ManagedSpanWrapper productId, double amount, ref ManagedSpanWrapper currency, ref ManagedSpanWrapper receiptPurchaseData, ref ManagedSpanWrapper signature, bool usingIAPService);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult SendCustomEventName_Injected(ref ManagedSpanWrapper customEventName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult SendCustomEvent_Injected(IntPtr eventData);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult IsCustomEventWithLimitEnabled_Injected(ref ManagedSpanWrapper customEventName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult EnableCustomEventWithLimit_Injected(ref ManagedSpanWrapper customEventName, bool enable);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult IsEventWithLimitEnabled_Injected(ref ManagedSpanWrapper eventName, int ver, ref ManagedSpanWrapper prefix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult EnableEventWithLimit_Injected(ref ManagedSpanWrapper eventName, bool enable, int ver, ref ManagedSpanWrapper prefix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult RegisterEventWithLimit_Injected(ref ManagedSpanWrapper eventName, int maxEventPerHour, int maxItems, ref ManagedSpanWrapper vendorKey, int ver, ref ManagedSpanWrapper prefix, ref ManagedSpanWrapper assemblyInfo, bool notifyServer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult RegisterEventsWithLimit_Injected(string[] eventName, int maxEventPerHour, int maxItems, ref ManagedSpanWrapper vendorKey, int ver, ref ManagedSpanWrapper prefix, ref ManagedSpanWrapper assemblyInfo, bool notifyServer);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult SendEventWithLimit_Injected(ref ManagedSpanWrapper eventName, object parameters, int ver, ref ManagedSpanWrapper prefix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult SetEventWithLimitEndPoint_Injected(ref ManagedSpanWrapper eventName, ref ManagedSpanWrapper endPoint, int ver, ref ManagedSpanWrapper prefix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult SetEventWithLimitPriority_Injected(ref ManagedSpanWrapper eventName, AnalyticsEventPriority eventPriority, int ver, ref ManagedSpanWrapper prefix);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnalyticsResult QueueEvent_Injected(ref ManagedSpanWrapper eventName, object parameters, int ver, ref ManagedSpanWrapper prefix);
 	}
 }

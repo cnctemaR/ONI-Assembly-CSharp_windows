@@ -2,7 +2,7 @@
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public struct CapturedScope
+	internal struct CapturedScope
 	{
 		public CapturedScope(int scope, string captured_name)
 		{

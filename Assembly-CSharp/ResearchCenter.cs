@@ -5,7 +5,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/ResearchCenter")]
-public class ResearchCenter : Workable, IGameObjectEffectDescriptor, ISim200ms, IResearchCenter
+public class ResearchCenter : Workable, ISim200ms, IResearchCenter
 {
 	protected override void OnPrefabInit()
 	{

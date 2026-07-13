@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class MethodBody
+	internal sealed class MethodBody
 	{
 		public MethodDefinition Method
 		{

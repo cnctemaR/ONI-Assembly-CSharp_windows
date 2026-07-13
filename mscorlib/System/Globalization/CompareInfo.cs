@@ -1435,7 +1435,7 @@ namespace System.Globalization
 		{
 			if (matchLengthPtr != null)
 			{
-				throw new NotImplementedException();
+				*matchLengthPtr = target.Length;
 			}
 			return this.internal_index_switch(source, startIndex, count, target, options, true);
 		}

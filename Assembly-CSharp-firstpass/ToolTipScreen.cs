@@ -175,7 +175,7 @@ public class ToolTipScreen : KScreen
 				this.multiTooltipContainer.rectTransform().sizeDelta = new Vector2(component.minWidth, component.minHeight);
 				this.multiTooltipContainer.transform.parent.rectTransform().sizeDelta = this.multiTooltipContainer.rectTransform().sizeDelta;
 			}
-			component2.ForceMeshUpdate();
+			component2.ForceMeshUpdate(false, false);
 		}
 		this.tooltipIncubating = true;
 	}

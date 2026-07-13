@@ -1,18 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace HarmonyLib
 {
 	public class CodeMatch : CodeInstruction
 	{
+		[Obsolete("Use opcodeSet instead")]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public List<OpCode> opcodes
+		{
+			get
+			{
+				return this.opcodeSet.ToList<OpCode>();
+			}
+			set
+			{
+				HashSet<OpCode> hashSet = new HashSet<OpCode>();
+				foreach (OpCode opCode in value)
+				{
+					hashSet.Add(opCode);
+				}
+				this.opcodeSet = hashSet;
+			}
+		}
+
 		internal CodeMatch Set(object operand, string name)
 		{
 			if (this.operand == null)
 			{
 				this.operand = operand;
+			}
+			if (operand != null)
+			{
+				this.operands.Add(operand);
+			}
+			if (this.name == null)
+			{
+				this.name = name;
+			}
+			return this;
+		}
+
+		internal CodeMatch Set(OpCode opcode, object operand, string name)
+		{
+			this.opcode = opcode;
+			this.opcodeSet.Add(opcode);
+			if (this.operand == null)
+			{
+				this.operand = operand;
+			}
+			if (operand != null)
+			{
+				this.operands.Add(operand);
 			}
 			if (this.name == null)
 			{
@@ -27,7 +71,7 @@ namespace HarmonyLib
 			{
 				OpCode valueOrDefault = opcode.GetValueOrDefault();
 				this.opcode = valueOrDefault;
-				this.opcodes.Add(valueOrDefault);
+				this.opcodeSet.Add(valueOrDefault);
 			}
 			if (operand != null)
 			{
@@ -37,25 +81,33 @@ namespace HarmonyLib
 			this.name = name;
 		}
 
+		public static CodeMatch WithOpcodes(HashSet<OpCode> opcodes, object operand = null, string name = null)
+		{
+			return new CodeMatch(null, operand, name)
+			{
+				opcodeSet = opcodes
+			};
+		}
+
 		public CodeMatch(Expression<Action> expression, string name = null)
 		{
-			this.opcodes.AddRange(new OpCode[]
-			{
-				OpCodes.Call,
-				OpCodes.Callvirt
-			});
+			this.opcodeSet.UnionWith(CodeInstructionExtensions.opcodesCalling);
 			this.operand = SymbolExtensions.GetMethodInfo(expression);
+			if (this.operand != null)
+			{
+				this.operands.Add(this.operand);
+			}
 			this.name = name;
 		}
 
 		public CodeMatch(LambdaExpression expression, string name = null)
 		{
-			this.opcodes.AddRange(new OpCode[]
-			{
-				OpCodes.Call,
-				OpCodes.Callvirt
-			});
+			this.opcodeSet.UnionWith(CodeInstructionExtensions.opcodesCalling);
 			this.operand = SymbolExtensions.GetMethodInfo(expression);
+			if (this.operand != null)
+			{
+				this.operands.Add(this.operand);
+			}
 			this.name = name;
 		}
 
@@ -76,7 +128,7 @@ namespace HarmonyLib
 			{
 				return this.predicate(instruction);
 			}
-			if (this.opcodes.Count > 0 && !this.opcodes.Contains(instruction.opcode))
+			if (this.opcodeSet.Count > 0 && !this.opcodeSet.Contains(instruction.opcode))
 			{
 				return false;
 			}
@@ -116,6 +168,106 @@ namespace HarmonyLib
 			return true;
 		}
 
+		public static CodeMatch IsLdarg(int? n = null)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.IsLdarg(n), null);
+		}
+
+		public static CodeMatch IsLdarga(int? n = null)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.IsLdarga(n), null);
+		}
+
+		public static CodeMatch IsStarg(int? n = null)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.IsStarg(n), null);
+		}
+
+		public static CodeMatch IsLdloc(LocalBuilder variable = null)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.IsLdloc(variable), null);
+		}
+
+		public static CodeMatch IsStloc(LocalBuilder variable = null)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.IsStloc(variable), null);
+		}
+
+		public static CodeMatch Calls(MethodInfo method)
+		{
+			return CodeMatch.WithOpcodes(CodeInstructionExtensions.opcodesCalling, method, null);
+		}
+
+		public static CodeMatch LoadsConstant()
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.LoadsConstant(), null);
+		}
+
+		public static CodeMatch LoadsConstant(long number)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.LoadsConstant(number), null);
+		}
+
+		public static CodeMatch LoadsConstant(double number)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.LoadsConstant(number), null);
+		}
+
+		public static CodeMatch LoadsConstant(Enum e)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.LoadsConstant(e), null);
+		}
+
+		public static CodeMatch LoadsConstant(string str)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.LoadsConstant(str), null);
+		}
+
+		public static CodeMatch LoadsField(FieldInfo field, bool byAddress = false)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.LoadsField(field, byAddress), null);
+		}
+
+		public static CodeMatch StoresField(FieldInfo field)
+		{
+			return new CodeMatch((CodeInstruction instruction) => instruction.StoresField(field), null);
+		}
+
+		public static CodeMatch Calls(Expression<Action> expression)
+		{
+			return new CodeMatch(expression, null);
+		}
+
+		public static CodeMatch Calls(LambdaExpression expression)
+		{
+			return new CodeMatch(expression, null);
+		}
+
+		public static CodeMatch LoadsLocal(bool useAddress = false, string name = null)
+		{
+			return CodeMatch.WithOpcodes(useAddress ? CodeInstructionExtensions.opcodesLoadingLocalByAddress : CodeInstructionExtensions.opcodesLoadingLocalNormal, null, name);
+		}
+
+		public static CodeMatch StoresLocal(string name = null)
+		{
+			return CodeMatch.WithOpcodes(CodeInstructionExtensions.opcodesStoringLocal, null, name);
+		}
+
+		public static CodeMatch LoadsArgument(bool useAddress = false, string name = null)
+		{
+			return CodeMatch.WithOpcodes(useAddress ? CodeInstructionExtensions.opcodesLoadingArgumentByAddress : CodeInstructionExtensions.opcodesLoadingArgumentNormal, null, name);
+		}
+
+		public static CodeMatch StoresArgument(string name = null)
+		{
+			return CodeMatch.WithOpcodes(CodeInstructionExtensions.opcodesStoringArgument, null, name);
+		}
+
+		public static CodeMatch Branches(string name = null)
+		{
+			return CodeMatch.WithOpcodes(CodeInstructionExtensions.opcodesBranching, null, name);
+		}
+
 		public override string ToString()
 		{
 			string text = "[";
@@ -123,9 +275,9 @@ namespace HarmonyLib
 			{
 				text = text + this.name + ": ";
 			}
-			if (this.opcodes.Count > 0)
+			if (this.opcodeSet.Count > 0)
 			{
-				text = text + "opcodes=" + this.opcodes.Join<OpCode>(null, ", ") + " ";
+				text = text + "opcodes=" + this.opcodeSet.Join<OpCode>(null, ", ") + " ";
 			}
 			if (this.operands.Count > 0)
 			{
@@ -156,7 +308,7 @@ namespace HarmonyLib
 
 		public string name;
 
-		public List<OpCode> opcodes = new List<OpCode>();
+		public HashSet<OpCode> opcodeSet = new HashSet<OpCode>();
 
 		public List<object> operands = new List<object>();
 

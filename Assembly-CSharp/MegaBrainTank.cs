@@ -109,7 +109,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 				smi.CleanTank(true);
 			}).Update(delegate(MegaBrainTank.StatesInstance smi, float dt)
 			{
-				smi.Digest(dt);
+				smi.Digest();
 			}, UpdateRate.SIM_33ms, false).UpdateTransition(this.common.idle, (MegaBrainTank.StatesInstance smi, float _) => smi.IsHungry || !smi.gameObject.GetComponent<Operational>().enabled, UpdateRate.SIM_1000ms, false);
 			this.StatBonus = new Effect("MegaBrainTankBonus", DUPLICANTS.MODIFIERS.MEGABRAINTANKBONUS.NAME, DUPLICANTS.MODIFIERS.MEGABRAINTANKBONUS.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
 			object[,] stat_BONUSES = MegaBrainTankConfig.STAT_BONUSES;
@@ -177,19 +177,27 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			}
 		}
 
-		public int TimeTilDigested
+		public int JournalsStored
 		{
 			get
 			{
-				return (int)this.timeTilDigested;
+				return (int)this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
 			}
 		}
 
-		public int ActivationProgress
+		private float DesiredMeterPosition
 		{
 			get
 			{
-				return (int)(25f * this.meterFill);
+				return (float)this.JournalsStored / 25f;
+			}
+		}
+
+		public float DigestionTimeRemaining
+		{
+			get
+			{
+				return (float)this.JournalsStored * 60f;
 			}
 		}
 
@@ -207,6 +215,19 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			{
 				int num = (int)(this.nextActiveBrain - 1 + 5);
 				return MegaBrainTankConfig.ACTIVATION_ANIMS[num];
+			}
+		}
+
+		private float MeterPosition
+		{
+			get
+			{
+				return this.meterPositionValue;
+			}
+			set
+			{
+				this.meterPositionValue = value;
+				this.meter.SetPositionPercent(value);
 			}
 		}
 
@@ -235,28 +256,25 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			brainStorage.OnWorkableEventCB = (Action<Workable, Workable.WorkableEvent>)Delegate.Combine(brainStorage.OnWorkableEventCB, new Action<Workable, Workable.WorkableEvent>(this.OnJournalDeliveryStateChanged));
 			this.brainHum = GlobalAssets.GetSound("MegaBrainTank_brain_wave_LP", false);
 			StoryManager.Instance.DiscoverStoryEvent(Db.Get().Stories.MegaBrainTank);
-			float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
+			this.MeterPosition = this.DesiredMeterPosition;
 			if (this.GetCurrentState() == base.sm.common.dormant)
 			{
-				this.meterFill = (this.targetProgress = unitsAvailable / 25f);
-				this.meter.SetPositionPercent(this.meterFill);
-				short num = (short)(5f * this.meterFill);
+				short num = (short)(5f * this.MeterPosition);
 				if (num > 0)
 				{
 					this.nextActiveBrain = num;
 					this.BrainSounds.StartSound(this.brainHum);
 					this.BrainSounds.SetParameter(this.brainHum, "BrainTankProgress", (float)num);
 					this.CompleteBrainActivation();
+					return;
 				}
-				return;
 			}
-			this.timeTilDigested = unitsAvailable * 60f;
-			this.meterFill = this.timeTilDigested - this.timeTilDigested % 0.04f;
-			this.meterFill /= 1500f;
-			this.meter.SetPositionPercent(this.meterFill);
-			StoryManager.Instance.BeginStoryEvent(Db.Get().Stories.MegaBrainTank);
-			this.nextActiveBrain = 5;
-			this.CompleteBrainActivation();
+			else
+			{
+				StoryManager.Instance.BeginStoryEvent(Db.Get().Stories.MegaBrainTank);
+				this.nextActiveBrain = 5;
+				this.CompleteBrainActivation();
+			}
 		}
 
 		public override void StopSM(string reason)
@@ -399,8 +417,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			}
 			this.ShelfController.PlayMode = KAnim.PlayMode.Paused;
 			this.ShelfController.SetPositionPercent(0f);
-			float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
-			this.targetProgress = Mathf.Clamp01(unitsAvailable / 25f);
+			this.meterTarget = this.DesiredMeterPosition;
 		}
 
 		public void ActivateBrains(float dt)
@@ -409,7 +426,7 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			{
 				return;
 			}
-			this.currentlyActivating = (float)this.nextActiveBrain / 5f - this.meterFill <= 0.001f;
+			this.currentlyActivating = (float)this.nextActiveBrain / 5f - this.MeterPosition <= 0.001f;
 			if (!this.currentlyActivating)
 			{
 				return;
@@ -429,27 +446,18 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			this.currentlyActivating = false;
 			if (this.nextActiveBrain > 5)
 			{
-				float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
-				this.timeTilDigested = unitsAvailable * 60f;
 				this.CompleteEvent();
 			}
 		}
 
-		public void Digest(float dt)
+		public void Digest()
 		{
-			float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
-			this.timeTilDigested = unitsAvailable * 60f;
-			if (this.targetProgress - this.meterFill > Mathf.Epsilon)
+			if (this.meterTarget > this.MeterPosition)
 			{
 				return;
 			}
-			this.targetProgress = 0f;
-			float num = this.meterFill - this.timeTilDigested / 1500f;
-			if (num >= 0.04f)
-			{
-				this.meterFill -= num - num % 0.04f;
-				this.meter.SetPositionPercent(this.meterFill);
-			}
+			this.meterTarget = 0f;
+			this.MeterPosition = this.DesiredMeterPosition;
 		}
 
 		public void CleanTank(bool active)
@@ -459,8 +467,6 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 			this.Selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.MegaBrainTankDreamAnalysis, active, this);
 			this.ElementConverter.SetAllConsumedActive(active);
 			this.BrainController.ClearQueue();
-			float unitsAvailable = this.BrainStorage.GetUnitsAvailable(DreamJournalConfig.ID);
-			this.timeTilDigested = unitsAvailable * 60f;
 			if (active)
 			{
 				this.nextActiveBrain = 5;
@@ -469,12 +475,10 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 				this.BrainSounds.SetParameter(this.brainHum, "BrainTankProgress", (float)this.nextActiveBrain);
 				return;
 			}
-			if (this.timeTilDigested < 0.016666668f)
+			if (this.BrainStorage.GetMassAvailable(DreamJournalConfig.ID) > 0f && !this.ElementConverter.HasEnoughMassToStartConverting(true))
 			{
 				this.BrainStorage.ConsumeAllIgnoringDisease(DreamJournalConfig.ID);
-				this.timeTilDigested = 0f;
-				this.meterFill = 0f;
-				this.meter.SetPositionPercent(this.meterFill);
+				this.MeterPosition = 0f;
 			}
 			this.BrainController.QueueAndSyncTransition(MegaBrainTankConfig.DEACTIVATE_ALL, KAnim.PlayMode.Once, 1f, 0f);
 			this.BrainSounds.StopSound(this.brainHum);
@@ -482,17 +486,12 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 
 		public bool IncrementMeter(float dt)
 		{
-			if (this.targetProgress - this.meterFill <= Mathf.Epsilon)
+			if (this.meterTarget <= this.MeterPosition)
 			{
 				return false;
 			}
-			this.meterFill += Mathf.Lerp(0f, 1f, 0.04f * dt);
-			if (1f - this.meterFill <= 0.001f)
-			{
-				this.meterFill = 1f;
-			}
-			this.meter.SetPositionPercent(this.meterFill);
-			return this.targetProgress - this.meterFill > 0.001f;
+			this.MeterPosition = Mathf.Min(this.MeterPosition + 0.04f * dt, this.meterTarget);
+			return this.meterTarget > this.MeterPosition;
 		}
 
 		public void CompleteEvent()
@@ -545,11 +544,9 @@ public class MegaBrainTank : StateMachineComponent<MegaBrainTank.StatesInstance>
 
 		public short UnitsFromLastStore;
 
-		private float meterFill = 0.04f;
+		private float meterPositionValue;
 
-		private float targetProgress;
-
-		private float timeTilDigested;
+		private float meterTarget;
 
 		private float journalActivationTimer;
 

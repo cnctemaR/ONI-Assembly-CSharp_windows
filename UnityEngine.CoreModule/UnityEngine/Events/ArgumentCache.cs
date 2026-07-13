@@ -85,8 +85,8 @@ namespace UnityEngine.Events
 			this.m_ObjectArgumentAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_ObjectArgumentAssemblyTypeName);
 		}
 
-		[FormerlySerializedAs("objectArgument")]
 		[SerializeField]
+		[FormerlySerializedAs("objectArgument")]
 		private Object m_ObjectArgument;
 
 		[FormerlySerializedAs("objectArgumentAssemblyTypeName")]
@@ -97,12 +97,12 @@ namespace UnityEngine.Events
 		[SerializeField]
 		private int m_IntArgument;
 
-		[SerializeField]
 		[FormerlySerializedAs("floatArgument")]
+		[SerializeField]
 		private float m_FloatArgument;
 
-		[SerializeField]
 		[FormerlySerializedAs("stringArgument")]
+		[SerializeField]
 		private string m_StringArgument;
 
 		[SerializeField]

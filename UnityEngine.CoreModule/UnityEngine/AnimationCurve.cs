@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -16,41 +17,119 @@ namespace UnityEngine
 		private static extern void Internal_Destroy(IntPtr ptr);
 
 		[FreeFunction("AnimationCurveBindings::Internal_Create", IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr Internal_Create(Keyframe[] keys);
+		private unsafe static IntPtr Internal_Create(Keyframe[] keys)
+		{
+			Span<Keyframe> span = new Span<Keyframe>(keys);
+			IntPtr intPtr;
+			fixed (Keyframe* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				intPtr = AnimationCurve.Internal_Create_Injected(ref managedSpanWrapper);
+			}
+			return intPtr;
+		}
 
 		[FreeFunction("AnimationCurveBindings::Internal_Equals", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool Internal_Equals(IntPtr other);
+		private bool Internal_Equals(IntPtr other)
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AnimationCurve.Internal_Equals_Injected(intPtr, other);
+		}
 
 		[FreeFunction("AnimationCurveBindings::Internal_CopyFrom", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Internal_CopyFrom(IntPtr other);
-
-		~AnimationCurve()
+		private void Internal_CopyFrom(IntPtr other)
 		{
-			AnimationCurve.Internal_Destroy(this.m_Ptr);
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			AnimationCurve.Internal_CopyFrom_Injected(intPtr, other);
+		}
+
+		protected override void Finalize()
+		{
+			try
+			{
+				bool requiresNativeCleanup = this.m_RequiresNativeCleanup;
+				if (requiresNativeCleanup)
+				{
+					AnimationCurve.Internal_Destroy(this.m_Ptr);
+				}
+			}
+			finally
+			{
+				base.Finalize();
+			}
 		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float Evaluate(float time);
-
-		public Keyframe[] keys
+		public float Evaluate(float time)
 		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AnimationCurve.Evaluate_Injected(intPtr, time);
+		}
+
+		public unsafe Keyframe[] keys
+		{
+			[FreeFunction("AnimationCurveBindings::GetKeysArray", HasExplicitThis = true, IsThreadSafe = true)]
 			get
 			{
-				return this.GetKeys();
+				Keyframe[] array2;
+				try
+				{
+					IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					BlittableArrayWrapper blittableArrayWrapper;
+					AnimationCurve.get_keys_Injected(intPtr, out blittableArrayWrapper);
+				}
+				finally
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					Keyframe[] array;
+					blittableArrayWrapper.Unmarshal<Keyframe>(ref array);
+					array2 = array;
+				}
+				return array2;
 			}
+			[FreeFunction("AnimationCurveBindings::SetKeysWithSpan", HasExplicitThis = true, IsThreadSafe = true)]
 			set
 			{
-				this.SetKeys(value);
+				IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Span<Keyframe> span = new Span<Keyframe>(value);
+				fixed (Keyframe* pinnableReference = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+					AnimationCurve.set_keys_Injected(intPtr, ref managedSpanWrapper);
+				}
 			}
 		}
 
 		[FreeFunction("AnimationCurveBindings::AddKeySmoothTangents", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int AddKey(float time, float value);
+		public int AddKey(float time, float value)
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AnimationCurve.AddKey_Injected(intPtr, time, value);
+		}
 
 		public int AddKey(Keyframe key)
 		{
@@ -60,24 +139,48 @@ namespace UnityEngine
 		[NativeMethod("AddKey", IsThreadSafe = true)]
 		private int AddKey_Internal(Keyframe key)
 		{
-			return this.AddKey_Internal_Injected(ref key);
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AnimationCurve.AddKey_Internal_Injected(intPtr, ref key);
 		}
 
 		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::MoveKey", HasExplicitThis = true, IsThreadSafe = true)]
 		public int MoveKey(int index, Keyframe key)
 		{
-			return this.MoveKey_Injected(index, ref key);
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AnimationCurve.MoveKey_Injected(intPtr, index, ref key);
 		}
 
 		[FreeFunction("AnimationCurveBindings::ClearKeys", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void ClearKeys();
+		public void ClearKeys()
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			AnimationCurve.ClearKeys_Injected(intPtr);
+		}
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::RemoveKey", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void RemoveKey(int index);
+		[NativeThrows]
+		public void RemoveKey(int index)
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			AnimationCurve.RemoveKey_Injected(intPtr, index);
+		}
 
 		public Keyframe this[int index]
 		{
@@ -87,38 +190,124 @@ namespace UnityEngine
 			}
 		}
 
-		public extern int length
+		public int length
 		{
 			[NativeMethod("GetKeyCount", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AnimationCurve.get_length_Injected(intPtr);
+			}
 		}
 
-		[FreeFunction("AnimationCurveBindings::SetKeys", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetKeys(Keyframe[] keys);
-
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::GetKey", HasExplicitThis = true, IsThreadSafe = true)]
+		[NativeThrows]
 		private Keyframe GetKey(int index)
 		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Keyframe keyframe;
-			this.GetKey_Injected(index, out keyframe);
+			AnimationCurve.GetKey_Injected(intPtr, index, out keyframe);
 			return keyframe;
 		}
 
-		[FreeFunction("AnimationCurveBindings::GetKeys", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Keyframe[] GetKeys();
+		[FreeFunction("AnimationCurveBindings::GetKeysArray", HasExplicitThis = true, IsThreadSafe = true)]
+		private Keyframe[] GetKeysArray()
+		{
+			Keyframe[] array2;
+			try
+			{
+				IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				AnimationCurve.GetKeysArray_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Keyframe[] array;
+				blittableArrayWrapper.Unmarshal<Keyframe>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
+
+		public void GetKeys(Span<Keyframe> keys)
+		{
+			int length = this.length;
+			bool flag = length > keys.Length;
+			if (flag)
+			{
+				throw new ArgumentException("Destination array must be large enough to store the keys", "keys");
+			}
+			this.GetKeysWithSpan(keys);
+		}
+
+		[SecurityCritical]
+		[FreeFunction(Name = "AnimationCurveBindings::GetKeysWithSpan", HasExplicitThis = true, IsThreadSafe = true)]
+		private unsafe void GetKeysWithSpan(Span<Keyframe> keys)
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Keyframe> span = keys;
+			fixed (Keyframe* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				AnimationCurve.GetKeysWithSpan_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
+
+		[FreeFunction("AnimationCurveBindings::SetKeysWithSpan", HasExplicitThis = true, IsThreadSafe = true)]
+		public unsafe void SetKeys(ReadOnlySpan<Keyframe> keys)
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			ReadOnlySpan<Keyframe> readOnlySpan = keys;
+			fixed (Keyframe* pinnableReference = readOnlySpan.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, readOnlySpan.Length);
+				AnimationCurve.SetKeys_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("AnimationCurveBindings::GetHashCode", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public override extern int GetHashCode();
+		public override int GetHashCode()
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AnimationCurve.GetHashCode_Injected(intPtr);
+		}
 
-		[NativeThrows]
 		[FreeFunction("AnimationCurveBindings::SmoothTangents", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SmoothTangents(int index, float weight);
+		[NativeThrows]
+		public void SmoothTangents(int index, float weight)
+		{
+			IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			AnimationCurve.SmoothTangents_Injected(intPtr, index, weight);
+		}
 
 		public static AnimationCurve Constant(float timeStart, float timeEnd, float value)
 		{
@@ -168,35 +357,72 @@ namespace UnityEngine
 			return animationCurve;
 		}
 
-		public extern WrapMode preWrapMode
+		public WrapMode preWrapMode
 		{
 			[NativeMethod("GetPreInfinity", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AnimationCurve.get_preWrapMode_Injected(intPtr);
+			}
 			[NativeMethod("SetPreInfinity", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				AnimationCurve.set_preWrapMode_Injected(intPtr, value);
+			}
 		}
 
-		public extern WrapMode postWrapMode
+		public WrapMode postWrapMode
 		{
 			[NativeMethod("GetPostInfinity", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AnimationCurve.get_postWrapMode_Injected(intPtr);
+			}
 			[NativeMethod("SetPostInfinity", IsThreadSafe = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = AnimationCurve.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				AnimationCurve.set_postWrapMode_Injected(intPtr, value);
+			}
 		}
 
 		public AnimationCurve(params Keyframe[] keys)
 		{
 			this.m_Ptr = AnimationCurve.Internal_Create(keys);
+			this.m_RequiresNativeCleanup = true;
 		}
 
 		[RequiredByNativeCode]
 		public AnimationCurve()
 		{
 			this.m_Ptr = AnimationCurve.Internal_Create(null);
+			this.m_RequiresNativeCleanup = true;
+		}
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.ParticleSystemModule" })]
+		internal AnimationCurve(IntPtr ptr, bool ownMemory)
+		{
+			this.m_Ptr = ptr;
+			this.m_RequiresNativeCleanup = ownMemory;
 		}
 
 		public override bool Equals(object o)
@@ -237,14 +463,87 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int AddKey_Internal_Injected(ref Keyframe key);
+		private static extern IntPtr Internal_Create_Injected(ref ManagedSpanWrapper keys);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int MoveKey_Injected(int index, ref Keyframe key);
+		private static extern bool Internal_Equals_Injected(IntPtr _unity_self, IntPtr other);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetKey_Injected(int index, out Keyframe ret);
+		private static extern void Internal_CopyFrom_Injected(IntPtr _unity_self, IntPtr other);
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float Evaluate_Injected(IntPtr _unity_self, float time);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_keys_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_keys_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int AddKey_Injected(IntPtr _unity_self, float time, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int AddKey_Internal_Injected(IntPtr _unity_self, [In] ref Keyframe key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int MoveKey_Injected(IntPtr _unity_self, int index, [In] ref Keyframe key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearKeys_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RemoveKey_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_length_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetKey_Injected(IntPtr _unity_self, int index, out Keyframe ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetKeysArray_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetKeysWithSpan_Injected(IntPtr _unity_self, ref ManagedSpanWrapper keys);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetKeys_Injected(IntPtr _unity_self, ref ManagedSpanWrapper keys);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetHashCode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SmoothTangents_Injected(IntPtr _unity_self, int index, float weight);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern WrapMode get_preWrapMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_preWrapMode_Injected(IntPtr _unity_self, WrapMode value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern WrapMode get_postWrapMode_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_postWrapMode_Injected(IntPtr _unity_self, WrapMode value);
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.ParticleSystemModule" })]
 		internal IntPtr m_Ptr;
+
+		private bool m_RequiresNativeCleanup;
+
+		internal static class BindingsMarshaller
+		{
+			public static AnimationCurve ConvertToManaged(IntPtr ptr)
+			{
+				return new AnimationCurve(ptr, true);
+			}
+
+			public static IntPtr ConvertToNative(AnimationCurve animationCurve)
+			{
+				return animationCurve.m_Ptr;
+			}
+		}
 	}
 }

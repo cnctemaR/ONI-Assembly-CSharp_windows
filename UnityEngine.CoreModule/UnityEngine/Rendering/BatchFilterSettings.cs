@@ -1,9 +1,23 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.Rendering
 {
 	public struct BatchFilterSettings
 	{
+		public byte batchLayer
+		{
+			get
+			{
+				return this.m_batchLayer;
+			}
+			set
+			{
+				this.m_batchLayer = value;
+			}
+		}
+
 		public MotionVectorGenerationMode motionMode
 		{
 			get
@@ -64,9 +78,32 @@ namespace UnityEngine.Rendering
 			}
 		}
 
+		[FreeFunction("BatchFilterSettings::DefaultCullingMask", IsThreadSafe = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong DefaultCullingMask();
+
+		public ulong sceneCullingMask
+		{
+			get
+			{
+				return (this.m_isSceneCullingMaskSet != 0) ? this.m_sceneCullingMask : BatchFilterSettings.DefaultCullingMask();
+			}
+			set
+			{
+				this.m_isSceneCullingMaskSet = 1;
+				this.m_sceneCullingMask = value;
+			}
+		}
+
 		public uint renderingLayerMask;
 
+		public int rendererPriority;
+
+		private ulong m_sceneCullingMask;
+
 		public byte layer;
+
+		private byte m_batchLayer;
 
 		private byte m_motionMode;
 
@@ -77,5 +114,7 @@ namespace UnityEngine.Rendering
 		private byte m_staticShadowCaster;
 
 		private byte m_allDepthSorted;
+
+		private byte m_isSceneCullingMaskSet;
 	}
 }

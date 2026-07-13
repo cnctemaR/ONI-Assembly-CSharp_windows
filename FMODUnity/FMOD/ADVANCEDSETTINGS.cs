@@ -18,7 +18,7 @@ namespace FMOD
 
 		public int maxFADPCMCodecs;
 
-		public int maxPCMCodecs;
+		public int maxOpusCodecs;
 
 		public int ASIONumChannels;
 
@@ -45,8 +45,6 @@ namespace FMOD
 		public uint randomSeed;
 
 		public int maxConvolutionThreads;
-
-		public int maxOpusCodecs;
 
 		public int maxSpatialObjects;
 	}

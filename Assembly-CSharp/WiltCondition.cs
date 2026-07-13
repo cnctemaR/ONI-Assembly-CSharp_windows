@@ -80,7 +80,6 @@ public class WiltCondition : KMonoBehaviour
 			this.DoWilt();
 			if (!this.goingToWilt)
 			{
-				this.goingToWilt = true;
 				this.Recover();
 				return;
 			}
@@ -138,7 +137,7 @@ public class WiltCondition : KMonoBehaviour
 				return;
 			}
 		}
-		else if (this.goingToWilt)
+		else
 		{
 			this.Recover();
 		}
@@ -163,10 +162,10 @@ public class WiltCondition : KMonoBehaviour
 		{
 			this.goingToWilt = false;
 			this.wiltSchedulerHandler.ClearScheduler();
-			if (!this.recoverSchedulerHandler.IsValid)
-			{
-				this.recoverSchedulerHandler = GameScheduler.Instance.Schedule("Recover", this.RecoveryDelay, new Action<object>(WiltCondition.DoRecoverCallback), this, null);
-			}
+		}
+		if (!this.recoverSchedulerHandler.IsValid)
+		{
+			this.recoverSchedulerHandler = GameScheduler.Instance.Schedule("Recover", this.RecoveryDelay, new Action<object>(WiltCondition.DoRecoverCallback), this, null);
 		}
 	}
 

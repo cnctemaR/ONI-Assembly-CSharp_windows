@@ -498,11 +498,26 @@ public class KleiInventoryScreen : KModalScreen
 			this.selectionCollectionLabel.gameObject.SetActive(true);
 			if (selectedPermit.Rarity == PermitRarity.UniversalLocked)
 			{
+				DlcManager.DlcInfo dlcInfo;
+				if (DlcManager.DLC_PACKS.TryGetValue(dlcIdFrom, out dlcInfo) && dlcInfo.isCosmetic)
+				{
+					this.selectionCollectionLabel.SetText(UI.KLEI_INVENTORY_SCREEN.COLLECTION_COMING_SOON_THE.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom)));
+					return;
+				}
 				this.selectionCollectionLabel.SetText(UI.KLEI_INVENTORY_SCREEN.COLLECTION_COMING_SOON.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom)));
 				return;
 			}
-			this.selectionCollectionLabel.SetText(UI.KLEI_INVENTORY_SCREEN.COLLECTION.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom)));
-			return;
+			else
+			{
+				DlcManager.DlcInfo dlcInfo2;
+				if (DlcManager.DLC_PACKS.TryGetValue(dlcIdFrom, out dlcInfo2) && dlcInfo2.isCosmetic)
+				{
+					this.selectionCollectionLabel.SetText(UI.KLEI_INVENTORY_SCREEN.COLLECTION_THE.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom)));
+					return;
+				}
+				this.selectionCollectionLabel.SetText(UI.KLEI_INVENTORY_SCREEN.COLLECTION.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom)));
+				return;
+			}
 		}
 		else
 		{

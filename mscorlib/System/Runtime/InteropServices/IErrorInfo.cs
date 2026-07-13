@@ -4,9 +4,9 @@ using System.Security;
 
 namespace System.Runtime.InteropServices
 {
-	[SuppressUnmanagedCodeSecurity]
 	[Guid("1CF2B120-547D-101B-8E65-08002B2BD119")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[SuppressUnmanagedCodeSecurity]
 	[ComImport]
 	internal interface IErrorInfo
 	{

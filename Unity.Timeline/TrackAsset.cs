@@ -37,6 +37,7 @@ namespace UnityEngine.Timeline
 				}
 			}
 			this.OnBeforeTrackSerialize();
+			this.ComputeBlendsFromOverlaps(false);
 		}
 
 		void ISerializationCallbackReceiver.OnAfterDeserialize()
@@ -176,6 +177,18 @@ namespace UnityEngine.Timeline
 					this.m_ClipsCache = this.m_Clips.ToArray();
 				}
 				return this.m_ClipsCache;
+			}
+		}
+
+		internal bool blendsValid
+		{
+			get
+			{
+				return this.m_BlendsValid;
+			}
+			set
+			{
+				this.m_BlendsValid = value;
 			}
 		}
 
@@ -580,6 +593,10 @@ namespace UnityEngine.Timeline
 			{
 				this.m_Clips.Add(newClip);
 				this.m_ClipsCache = null;
+				if (newClip.SupportsBlending())
+				{
+					this.blendsValid = false;
+				}
 			}
 		}
 
@@ -767,9 +784,13 @@ namespace UnityEngine.Timeline
 			this.Invalidate();
 		}
 
-		internal void OnClipMove()
+		internal void OnClipMove(ITimelineClipAsset clip)
 		{
 			this.m_CacheSorted = false;
+			if (clip != null && clip.clipCaps.HasAny(ClipCaps.Blending))
+			{
+				this.m_BlendsValid = false;
+			}
 		}
 
 		internal TimelineClip CreateNewClipContainerInternal()
@@ -846,6 +867,10 @@ namespace UnityEngine.Timeline
 		{
 			this.m_Clips.Remove(clip);
 			this.m_ClipsCache = null;
+			if (clip.SupportsBlending())
+			{
+				this.blendsValid = false;
+			}
 		}
 
 		internal virtual void GetEvaluationTime(out double outStart, out double outDuration)
@@ -1195,6 +1220,8 @@ namespace UnityEngine.Timeline
 		private DiscreteTime m_End;
 
 		private bool m_CacheSorted;
+
+		private bool m_BlendsValid = true;
 
 		private bool? m_SupportsNotifications;
 

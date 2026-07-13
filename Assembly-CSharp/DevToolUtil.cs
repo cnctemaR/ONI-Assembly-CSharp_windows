@@ -103,7 +103,7 @@ public static class DevToolUtil
 	public static bool TryGetCellIndexForUniqueBuilding(string prefabId, out int index)
 	{
 		index = -1;
-		BuildingComplete[] array = global::UnityEngine.Object.FindObjectsOfType<BuildingComplete>(true);
+		BuildingComplete[] array = global::UnityEngine.Object.FindObjectsByType<BuildingComplete>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID);
 		if (array == null)
 		{
 			return false;

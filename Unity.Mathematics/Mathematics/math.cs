@@ -9,6 +9,126 @@ namespace Unity.Mathematics
 	public static class math
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform AffineTransform(float3 translation, quaternion rotation)
+		{
+			return new AffineTransform(translation, rotation);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform AffineTransform(float3 translation, quaternion rotation, float3 scale)
+		{
+			return new AffineTransform(translation, rotation, scale);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform AffineTransform(float3 translation, float3x3 rotationScale)
+		{
+			return new AffineTransform(translation, rotationScale);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform AffineTransform(float3x3 rotationScale)
+		{
+			return new AffineTransform(rotationScale);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform AffineTransform(float4x4 m)
+		{
+			return new AffineTransform(m);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform AffineTransform(float3x4 m)
+		{
+			return new AffineTransform(m);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform AffineTransform(RigidTransform rigid)
+		{
+			return new AffineTransform(rigid);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float4x4 float4x4(AffineTransform transform)
+		{
+			return math.float4x4(math.float4(transform.rs.c0, 0f), math.float4(transform.rs.c1, 0f), math.float4(transform.rs.c2, 0f), math.float4(transform.t, 1f));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3x4 float3x4(AffineTransform transform)
+		{
+			return math.float3x4(transform.rs.c0, transform.rs.c1, transform.rs.c2, transform.t);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform mul(AffineTransform a, AffineTransform b)
+		{
+			return new AffineTransform(math.transform(a, b.t), math.mul(a.rs, b.rs));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform mul(float3x3 a, AffineTransform b)
+		{
+			return new AffineTransform(math.mul(a, b.t), math.mul(a, b.rs));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform mul(AffineTransform a, float3x3 b)
+		{
+			return new AffineTransform(a.t, math.mul(b, a.rs));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float4 mul(AffineTransform a, float4 pos)
+		{
+			return math.float4(math.mul(a.rs, pos.xyz) + a.t * pos.w, pos.w);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 rotate(AffineTransform a, float3 dir)
+		{
+			return math.mul(a.rs, dir);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 transform(AffineTransform a, float3 pos)
+		{
+			return a.t + math.mul(a.rs, pos);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static AffineTransform inverse(AffineTransform a)
+		{
+			AffineTransform affineTransform;
+			affineTransform.rs = math.pseudoinverse(a.rs);
+			affineTransform.t = math.mul(affineTransform.rs, -a.t);
+			return affineTransform;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void decompose(AffineTransform a, out float3 translation, out quaternion rotation, out float3 scale)
+		{
+			translation = a.t;
+			rotation = math.rotation(a.rs);
+			float3x3 float3x = math.mul(math.float3x3(math.conjugate(rotation)), a.rs);
+			scale = math.float3(float3x.c0.x, float3x.c1.y, float3x.c2.z);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint hash(AffineTransform a)
+		{
+			return math.hash(a.rs) + 3318036811U * math.hash(a.t);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint4 hashwide(AffineTransform a)
+		{
+			return math.hashwide(a.rs).xyzz + 3318036811U * math.hashwide(a.t).xyzz;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool2 bool2(bool x, bool y)
 		{
 			return new bool2(x, y);
@@ -4768,54 +4888,51 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int asint(uint x)
+		public unsafe static int asint(uint x)
 		{
-			return (int)x;
+			return (int)(*(&x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int2 asint(uint2 x)
+		public unsafe static int2 asint(uint2 x)
 		{
-			return math.int2((int)x.x, (int)x.y);
+			return *(int2*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int3 asint(uint3 x)
+		public unsafe static int3 asint(uint3 x)
 		{
-			return math.int3((int)x.x, (int)x.y, (int)x.z);
+			return *(int3*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int4 asint(uint4 x)
+		public unsafe static int4 asint(uint4 x)
 		{
-			return math.int4((int)x.x, (int)x.y, (int)x.z, (int)x.w);
+			return *(int4*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int asint(float x)
+		public unsafe static int asint(float x)
 		{
-			math.IntFloatUnion intFloatUnion;
-			intFloatUnion.intValue = 0;
-			intFloatUnion.floatValue = x;
-			return intFloatUnion.intValue;
+			return *(int*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int2 asint(float2 x)
+		public unsafe static int2 asint(float2 x)
 		{
-			return math.int2(math.asint(x.x), math.asint(x.y));
+			return *(int2*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int3 asint(float3 x)
+		public unsafe static int3 asint(float3 x)
 		{
-			return math.int3(math.asint(x.x), math.asint(x.y), math.asint(x.z));
+			return *(int3*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int4 asint(float4 x)
+		public unsafe static int4 asint(float4 x)
 		{
-			return math.int4(math.asint(x.x), math.asint(x.y), math.asint(x.z), math.asint(x.w));
+			return *(int4*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -4825,45 +4942,45 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint2 asuint(int2 x)
+		public unsafe static uint2 asuint(int2 x)
 		{
-			return math.uint2((uint)x.x, (uint)x.y);
+			return *(uint2*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint3 asuint(int3 x)
+		public unsafe static uint3 asuint(int3 x)
 		{
-			return math.uint3((uint)x.x, (uint)x.y, (uint)x.z);
+			return *(uint3*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint4 asuint(int4 x)
+		public unsafe static uint4 asuint(int4 x)
 		{
-			return math.uint4((uint)x.x, (uint)x.y, (uint)x.z, (uint)x.w);
+			return *(uint4*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint asuint(float x)
+		public unsafe static uint asuint(float x)
 		{
-			return (uint)math.asint(x);
+			return *(uint*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint2 asuint(float2 x)
+		public unsafe static uint2 asuint(float2 x)
 		{
-			return math.uint2(math.asuint(x.x), math.asuint(x.y));
+			return *(uint2*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint3 asuint(float3 x)
+		public unsafe static uint3 asuint(float3 x)
 		{
-			return math.uint3(math.asuint(x.x), math.asuint(x.y), math.asuint(x.z));
+			return *(uint3*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint4 asuint(float4 x)
+		public unsafe static uint4 asuint(float4 x)
 		{
-			return math.uint4(math.asuint(x.x), math.asuint(x.y), math.asuint(x.z), math.asuint(x.w));
+			return *(uint4*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -4873,12 +4990,9 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static long aslong(double x)
+		public unsafe static long aslong(double x)
 		{
-			math.LongDoubleUnion longDoubleUnion;
-			longDoubleUnion.longValue = 0L;
-			longDoubleUnion.doubleValue = x;
-			return longDoubleUnion.longValue;
+			return *(long*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -4888,60 +5002,57 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ulong asulong(double x)
+		public unsafe static ulong asulong(double x)
 		{
-			return (ulong)math.aslong(x);
+			return (ulong)(*(long*)(&x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float asfloat(int x)
+		public unsafe static float asfloat(int x)
 		{
-			math.IntFloatUnion intFloatUnion;
-			intFloatUnion.floatValue = 0f;
-			intFloatUnion.intValue = x;
-			return intFloatUnion.floatValue;
+			return *(float*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 asfloat(int2 x)
+		public unsafe static float2 asfloat(int2 x)
 		{
-			return math.float2(math.asfloat(x.x), math.asfloat(x.y));
+			return *(float2*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 asfloat(int3 x)
+		public unsafe static float3 asfloat(int3 x)
 		{
-			return math.float3(math.asfloat(x.x), math.asfloat(x.y), math.asfloat(x.z));
+			return *(float3*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 asfloat(int4 x)
+		public unsafe static float4 asfloat(int4 x)
 		{
-			return math.float4(math.asfloat(x.x), math.asfloat(x.y), math.asfloat(x.z), math.asfloat(x.w));
+			return *(float4*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float asfloat(uint x)
+		public unsafe static float asfloat(uint x)
 		{
-			return math.asfloat((int)x);
+			return *(float*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 asfloat(uint2 x)
+		public unsafe static float2 asfloat(uint2 x)
 		{
-			return math.float2(math.asfloat(x.x), math.asfloat(x.y));
+			return *(float2*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 asfloat(uint3 x)
+		public unsafe static float3 asfloat(uint3 x)
 		{
-			return math.float3(math.asfloat(x.x), math.asfloat(x.y), math.asfloat(x.z));
+			return *(float3*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 asfloat(uint4 x)
+		public unsafe static float4 asfloat(uint4 x)
 		{
-			return math.float4(math.asfloat(x.x), math.asfloat(x.y), math.asfloat(x.z), math.asfloat(x.w));
+			return *(float4*)(&x);
 		}
 
 		public static int bitmask(bool4 value)
@@ -4967,18 +5078,15 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double asdouble(long x)
+		public unsafe static double asdouble(long x)
 		{
-			math.LongDoubleUnion longDoubleUnion;
-			longDoubleUnion.doubleValue = 0.0;
-			longDoubleUnion.longValue = x;
-			return longDoubleUnion.doubleValue;
+			return *(double*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double asdouble(ulong x)
+		public unsafe static double asdouble(ulong x)
 		{
-			return math.asdouble((long)x);
+			return *(double*)(&x);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -5438,399 +5546,399 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float lerp(float x, float y, float s)
+		public static float lerp(float start, float end, float t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 lerp(float2 x, float2 y, float s)
+		public static float2 lerp(float2 start, float2 end, float t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 lerp(float3 x, float3 y, float s)
+		public static float3 lerp(float3 start, float3 end, float t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 lerp(float4 x, float4 y, float s)
+		public static float4 lerp(float4 start, float4 end, float t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 lerp(float2 x, float2 y, float2 s)
+		public static float2 lerp(float2 start, float2 end, float2 t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 lerp(float3 x, float3 y, float3 s)
+		public static float3 lerp(float3 start, float3 end, float3 t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 lerp(float4 x, float4 y, float4 s)
+		public static float4 lerp(float4 start, float4 end, float4 t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double lerp(double x, double y, double s)
+		public static double lerp(double start, double end, double t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 lerp(double2 x, double2 y, double s)
+		public static double2 lerp(double2 start, double2 end, double t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 lerp(double3 x, double3 y, double s)
+		public static double3 lerp(double3 start, double3 end, double t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 lerp(double4 x, double4 y, double s)
+		public static double4 lerp(double4 start, double4 end, double t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 lerp(double2 x, double2 y, double2 s)
+		public static double2 lerp(double2 start, double2 end, double2 t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 lerp(double3 x, double3 y, double3 s)
+		public static double3 lerp(double3 start, double3 end, double3 t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 lerp(double4 x, double4 y, double4 s)
+		public static double4 lerp(double4 start, double4 end, double4 t)
 		{
-			return x + s * (y - x);
+			return start + t * (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float unlerp(float a, float b, float x)
+		public static float unlerp(float start, float end, float x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 unlerp(float2 a, float2 b, float2 x)
+		public static float2 unlerp(float2 start, float2 end, float2 x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 unlerp(float3 a, float3 b, float3 x)
+		public static float3 unlerp(float3 start, float3 end, float3 x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 unlerp(float4 a, float4 b, float4 x)
+		public static float4 unlerp(float4 start, float4 end, float4 x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double unlerp(double a, double b, double x)
+		public static double unlerp(double start, double end, double x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 unlerp(double2 a, double2 b, double2 x)
+		public static double2 unlerp(double2 start, double2 end, double2 x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 unlerp(double3 a, double3 b, double3 x)
+		public static double3 unlerp(double3 start, double3 end, double3 x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 unlerp(double4 a, double4 b, double4 x)
+		public static double4 unlerp(double4 start, double4 end, double4 x)
 		{
-			return (x - a) / (b - a);
+			return (x - start) / (end - start);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float remap(float a, float b, float c, float d, float x)
+		public static float remap(float srcStart, float srcEnd, float dstStart, float dstEnd, float x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 remap(float2 a, float2 b, float2 c, float2 d, float2 x)
+		public static float2 remap(float2 srcStart, float2 srcEnd, float2 dstStart, float2 dstEnd, float2 x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 remap(float3 a, float3 b, float3 c, float3 d, float3 x)
+		public static float3 remap(float3 srcStart, float3 srcEnd, float3 dstStart, float3 dstEnd, float3 x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 remap(float4 a, float4 b, float4 c, float4 d, float4 x)
+		public static float4 remap(float4 srcStart, float4 srcEnd, float4 dstStart, float4 dstEnd, float4 x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double remap(double a, double b, double c, double d, double x)
+		public static double remap(double srcStart, double srcEnd, double dstStart, double dstEnd, double x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 remap(double2 a, double2 b, double2 c, double2 d, double2 x)
+		public static double2 remap(double2 srcStart, double2 srcEnd, double2 dstStart, double2 dstEnd, double2 x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 remap(double3 a, double3 b, double3 c, double3 d, double3 x)
+		public static double3 remap(double3 srcStart, double3 srcEnd, double3 dstStart, double3 dstEnd, double3 x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 remap(double4 a, double4 b, double4 c, double4 d, double4 x)
+		public static double4 remap(double4 srcStart, double4 srcEnd, double4 dstStart, double4 dstEnd, double4 x)
 		{
-			return math.lerp(c, d, math.unlerp(a, b, x));
+			return math.lerp(dstStart, dstEnd, math.unlerp(srcStart, srcEnd, x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int mad(int a, int b, int c)
+		public static int mad(int mulA, int mulB, int addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int2 mad(int2 a, int2 b, int2 c)
+		public static int2 mad(int2 mulA, int2 mulB, int2 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int3 mad(int3 a, int3 b, int3 c)
+		public static int3 mad(int3 mulA, int3 mulB, int3 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int4 mad(int4 a, int4 b, int4 c)
+		public static int4 mad(int4 mulA, int4 mulB, int4 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint mad(uint a, uint b, uint c)
+		public static uint mad(uint mulA, uint mulB, uint addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint2 mad(uint2 a, uint2 b, uint2 c)
+		public static uint2 mad(uint2 mulA, uint2 mulB, uint2 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint3 mad(uint3 a, uint3 b, uint3 c)
+		public static uint3 mad(uint3 mulA, uint3 mulB, uint3 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint4 mad(uint4 a, uint4 b, uint4 c)
+		public static uint4 mad(uint4 mulA, uint4 mulB, uint4 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static long mad(long a, long b, long c)
+		public static long mad(long mulA, long mulB, long addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ulong mad(ulong a, ulong b, ulong c)
+		public static ulong mad(ulong mulA, ulong mulB, ulong addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float mad(float a, float b, float c)
+		public static float mad(float mulA, float mulB, float addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 mad(float2 a, float2 b, float2 c)
+		public static float2 mad(float2 mulA, float2 mulB, float2 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 mad(float3 a, float3 b, float3 c)
+		public static float3 mad(float3 mulA, float3 mulB, float3 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 mad(float4 a, float4 b, float4 c)
+		public static float4 mad(float4 mulA, float4 mulB, float4 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double mad(double a, double b, double c)
+		public static double mad(double mulA, double mulB, double addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 mad(double2 a, double2 b, double2 c)
+		public static double2 mad(double2 mulA, double2 mulB, double2 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 mad(double3 a, double3 b, double3 c)
+		public static double3 mad(double3 mulA, double3 mulB, double3 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 mad(double4 a, double4 b, double4 c)
+		public static double4 mad(double4 mulA, double4 mulB, double4 addC)
 		{
-			return a * b + c;
+			return mulA * mulB + addC;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int clamp(int x, int a, int b)
+		public static int clamp(int valueToClamp, int lowerBound, int upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int2 clamp(int2 x, int2 a, int2 b)
+		public static int2 clamp(int2 valueToClamp, int2 lowerBound, int2 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int3 clamp(int3 x, int3 a, int3 b)
+		public static int3 clamp(int3 valueToClamp, int3 lowerBound, int3 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int4 clamp(int4 x, int4 a, int4 b)
+		public static int4 clamp(int4 valueToClamp, int4 lowerBound, int4 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint clamp(uint x, uint a, uint b)
+		public static uint clamp(uint valueToClamp, uint lowerBound, uint upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint2 clamp(uint2 x, uint2 a, uint2 b)
+		public static uint2 clamp(uint2 valueToClamp, uint2 lowerBound, uint2 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint3 clamp(uint3 x, uint3 a, uint3 b)
+		public static uint3 clamp(uint3 valueToClamp, uint3 lowerBound, uint3 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint4 clamp(uint4 x, uint4 a, uint4 b)
+		public static uint4 clamp(uint4 valueToClamp, uint4 lowerBound, uint4 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static long clamp(long x, long a, long b)
+		public static long clamp(long valueToClamp, long lowerBound, long upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ulong clamp(ulong x, ulong a, ulong b)
+		public static ulong clamp(ulong valueToClamp, ulong lowerBound, ulong upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float clamp(float x, float a, float b)
+		public static float clamp(float valueToClamp, float lowerBound, float upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 clamp(float2 x, float2 a, float2 b)
+		public static float2 clamp(float2 valueToClamp, float2 lowerBound, float2 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 clamp(float3 x, float3 a, float3 b)
+		public static float3 clamp(float3 valueToClamp, float3 lowerBound, float3 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 clamp(float4 x, float4 a, float4 b)
+		public static float4 clamp(float4 valueToClamp, float4 lowerBound, float4 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double clamp(double x, double a, double b)
+		public static double clamp(double valueToClamp, double lowerBound, double upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 clamp(double2 x, double2 a, double2 b)
+		public static double2 clamp(double2 valueToClamp, double2 lowerBound, double2 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 clamp(double3 x, double3 a, double3 b)
+		public static double3 clamp(double3 valueToClamp, double3 lowerBound, double3 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 clamp(double4 x, double4 a, double4 b)
+		public static double4 clamp(double4 valueToClamp, double4 lowerBound, double4 upperBound)
 		{
-			return math.max(a, math.min(b, x));
+			return math.max(lowerBound, math.min(upperBound, valueToClamp));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -6824,6 +6932,30 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int sign(int x)
+		{
+			return ((x > 0) ? 1 : 0) - ((x < 0) ? 1 : 0);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int2 sign(int2 x)
+		{
+			return new int2(math.sign(x.x), math.sign(x.y));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int3 sign(int3 x)
+		{
+			return new int3(math.sign(x.x), math.sign(x.y), math.sign(x.z));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int4 sign(int4 x)
+		{
+			return new int4(math.sign(x.x), math.sign(x.y), math.sign(x.z), math.sign(x.w));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float sign(float x)
 		{
 			return ((x > 0f) ? 1f : 0f) - ((x < 0f) ? 1f : 0f);
@@ -7694,58 +7826,58 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float smoothstep(float a, float b, float x)
+		public static float smoothstep(float xMin, float xMax, float x)
 		{
-			float num = math.saturate((x - a) / (b - a));
+			float num = math.saturate((x - xMin) / (xMax - xMin));
 			return num * num * (3f - 2f * num);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 smoothstep(float2 a, float2 b, float2 x)
+		public static float2 smoothstep(float2 xMin, float2 xMax, float2 x)
 		{
-			float2 @float = math.saturate((x - a) / (b - a));
+			float2 @float = math.saturate((x - xMin) / (xMax - xMin));
 			return @float * @float * (3f - 2f * @float);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 smoothstep(float3 a, float3 b, float3 x)
+		public static float3 smoothstep(float3 xMin, float3 xMax, float3 x)
 		{
-			float3 @float = math.saturate((x - a) / (b - a));
+			float3 @float = math.saturate((x - xMin) / (xMax - xMin));
 			return @float * @float * (3f - 2f * @float);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 smoothstep(float4 a, float4 b, float4 x)
+		public static float4 smoothstep(float4 xMin, float4 xMax, float4 x)
 		{
-			float4 @float = math.saturate((x - a) / (b - a));
+			float4 @float = math.saturate((x - xMin) / (xMax - xMin));
 			return @float * @float * (3f - 2f * @float);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double smoothstep(double a, double b, double x)
+		public static double smoothstep(double xMin, double xMax, double x)
 		{
-			double num = math.saturate((x - a) / (b - a));
+			double num = math.saturate((x - xMin) / (xMax - xMin));
 			return num * num * (3.0 - 2.0 * num);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 smoothstep(double2 a, double2 b, double2 x)
+		public static double2 smoothstep(double2 xMin, double2 xMax, double2 x)
 		{
-			double2 @double = math.saturate((x - a) / (b - a));
+			double2 @double = math.saturate((x - xMin) / (xMax - xMin));
 			return @double * @double * (3.0 - 2.0 * @double);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 smoothstep(double3 a, double3 b, double3 x)
+		public static double3 smoothstep(double3 xMin, double3 xMax, double3 x)
 		{
-			double3 @double = math.saturate((x - a) / (b - a));
+			double3 @double = math.saturate((x - xMin) / (xMax - xMin));
 			return @double * @double * (3.0 - 2.0 * @double);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 smoothstep(double4 a, double4 b, double4 x)
+		public static double4 smoothstep(double4 xMin, double4 xMax, double4 x)
 		{
-			double4 @double = math.saturate((x - a) / (b - a));
+			double4 @double = math.saturate((x - xMin) / (xMax - xMin));
 			return @double * @double * (3.0 - 2.0 * @double);
 		}
 
@@ -7930,303 +8062,303 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int select(int a, int b, bool c)
+		public static int select(int falseValue, int trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int2 select(int2 a, int2 b, bool c)
+		public static int2 select(int2 falseValue, int2 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int3 select(int3 a, int3 b, bool c)
+		public static int3 select(int3 falseValue, int3 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int4 select(int4 a, int4 b, bool c)
+		public static int4 select(int4 falseValue, int4 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int2 select(int2 a, int2 b, bool2 c)
+		public static int2 select(int2 falseValue, int2 trueValue, bool2 test)
 		{
-			return new int2(c.x ? b.x : a.x, c.y ? b.y : a.y);
+			return new int2(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int3 select(int3 a, int3 b, bool3 c)
+		public static int3 select(int3 falseValue, int3 trueValue, bool3 test)
 		{
-			return new int3(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
+			return new int3(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int4 select(int4 a, int4 b, bool4 c)
+		public static int4 select(int4 falseValue, int4 trueValue, bool4 test)
 		{
-			return new int4(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
+			return new int4(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z, test.w ? trueValue.w : falseValue.w);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint select(uint a, uint b, bool c)
+		public static uint select(uint falseValue, uint trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint2 select(uint2 a, uint2 b, bool c)
+		public static uint2 select(uint2 falseValue, uint2 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint3 select(uint3 a, uint3 b, bool c)
+		public static uint3 select(uint3 falseValue, uint3 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint4 select(uint4 a, uint4 b, bool c)
+		public static uint4 select(uint4 falseValue, uint4 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint2 select(uint2 a, uint2 b, bool2 c)
+		public static uint2 select(uint2 falseValue, uint2 trueValue, bool2 test)
 		{
-			return new uint2(c.x ? b.x : a.x, c.y ? b.y : a.y);
+			return new uint2(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint3 select(uint3 a, uint3 b, bool3 c)
+		public static uint3 select(uint3 falseValue, uint3 trueValue, bool3 test)
 		{
-			return new uint3(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
+			return new uint3(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static uint4 select(uint4 a, uint4 b, bool4 c)
+		public static uint4 select(uint4 falseValue, uint4 trueValue, bool4 test)
 		{
-			return new uint4(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
+			return new uint4(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z, test.w ? trueValue.w : falseValue.w);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static long select(long a, long b, bool c)
+		public static long select(long falseValue, long trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ulong select(ulong a, ulong b, bool c)
+		public static ulong select(ulong falseValue, ulong trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float select(float a, float b, bool c)
+		public static float select(float falseValue, float trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 select(float2 a, float2 b, bool c)
+		public static float2 select(float2 falseValue, float2 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 select(float3 a, float3 b, bool c)
+		public static float3 select(float3 falseValue, float3 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 select(float4 a, float4 b, bool c)
+		public static float4 select(float4 falseValue, float4 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 select(float2 a, float2 b, bool2 c)
+		public static float2 select(float2 falseValue, float2 trueValue, bool2 test)
 		{
-			return new float2(c.x ? b.x : a.x, c.y ? b.y : a.y);
+			return new float2(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 select(float3 a, float3 b, bool3 c)
+		public static float3 select(float3 falseValue, float3 trueValue, bool3 test)
 		{
-			return new float3(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
+			return new float3(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 select(float4 a, float4 b, bool4 c)
+		public static float4 select(float4 falseValue, float4 trueValue, bool4 test)
 		{
-			return new float4(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
+			return new float4(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z, test.w ? trueValue.w : falseValue.w);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double select(double a, double b, bool c)
+		public static double select(double falseValue, double trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 select(double2 a, double2 b, bool c)
+		public static double2 select(double2 falseValue, double2 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 select(double3 a, double3 b, bool c)
+		public static double3 select(double3 falseValue, double3 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 select(double4 a, double4 b, bool c)
+		public static double4 select(double4 falseValue, double4 trueValue, bool test)
 		{
-			if (!c)
+			if (!test)
 			{
-				return a;
+				return falseValue;
 			}
-			return b;
+			return trueValue;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 select(double2 a, double2 b, bool2 c)
+		public static double2 select(double2 falseValue, double2 trueValue, bool2 test)
 		{
-			return new double2(c.x ? b.x : a.x, c.y ? b.y : a.y);
+			return new double2(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 select(double3 a, double3 b, bool3 c)
+		public static double3 select(double3 falseValue, double3 trueValue, bool3 test)
 		{
-			return new double3(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z);
+			return new double3(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 select(double4 a, double4 b, bool4 c)
+		public static double4 select(double4 falseValue, double4 trueValue, bool4 test)
 		{
-			return new double4(c.x ? b.x : a.x, c.y ? b.y : a.y, c.z ? b.z : a.z, c.w ? b.w : a.w);
+			return new double4(test.x ? trueValue.x : falseValue.x, test.y ? trueValue.y : falseValue.y, test.z ? trueValue.z : falseValue.z, test.w ? trueValue.w : falseValue.w);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float step(float y, float x)
+		public static float step(float threshold, float x)
 		{
-			return math.select(0f, 1f, x >= y);
+			return math.select(0f, 1f, x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 step(float2 y, float2 x)
+		public static float2 step(float2 threshold, float2 x)
 		{
-			return math.select(math.float2(0f), math.float2(1f), x >= y);
+			return math.select(math.float2(0f), math.float2(1f), x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 step(float3 y, float3 x)
+		public static float3 step(float3 threshold, float3 x)
 		{
-			return math.select(math.float3(0f), math.float3(1f), x >= y);
+			return math.select(math.float3(0f), math.float3(1f), x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 step(float4 y, float4 x)
+		public static float4 step(float4 threshold, float4 x)
 		{
-			return math.select(math.float4(0f), math.float4(1f), x >= y);
+			return math.select(math.float4(0f), math.float4(1f), x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double step(double y, double x)
+		public static double step(double threshold, double x)
 		{
-			return math.select(0.0, 1.0, x >= y);
+			return math.select(0.0, 1.0, x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 step(double2 y, double2 x)
+		public static double2 step(double2 threshold, double2 x)
 		{
-			return math.select(math.double2(0.0), math.double2(1.0), x >= y);
+			return math.select(math.double2(0.0), math.double2(1.0), x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 step(double3 y, double3 x)
+		public static double3 step(double3 threshold, double3 x)
 		{
-			return math.select(math.double3(0.0), math.double3(1.0), x >= y);
+			return math.select(math.double3(0.0), math.double3(1.0), x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 step(double4 y, double4 x)
+		public static double4 step(double4 threshold, double4 x)
 		{
-			return math.select(math.double4(0.0), math.double4(1.0), x >= y);
+			return math.select(math.double4(0.0), math.double4(1.0), x >= threshold);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -8266,128 +8398,128 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 refract(float2 i, float2 n, float eta)
+		public static float2 refract(float2 i, float2 n, float indexOfRefraction)
 		{
 			float num = math.dot(n, i);
-			float num2 = 1f - eta * eta * (1f - num * num);
-			return math.select(0f, eta * i - (eta * num + math.sqrt(num2)) * n, num2 >= 0f);
+			float num2 = 1f - indexOfRefraction * indexOfRefraction * (1f - num * num);
+			return math.select(0f, indexOfRefraction * i - (indexOfRefraction * num + math.sqrt(num2)) * n, num2 >= 0f);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 refract(float3 i, float3 n, float eta)
+		public static float3 refract(float3 i, float3 n, float indexOfRefraction)
 		{
 			float num = math.dot(n, i);
-			float num2 = 1f - eta * eta * (1f - num * num);
-			return math.select(0f, eta * i - (eta * num + math.sqrt(num2)) * n, num2 >= 0f);
+			float num2 = 1f - indexOfRefraction * indexOfRefraction * (1f - num * num);
+			return math.select(0f, indexOfRefraction * i - (indexOfRefraction * num + math.sqrt(num2)) * n, num2 >= 0f);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 refract(float4 i, float4 n, float eta)
+		public static float4 refract(float4 i, float4 n, float indexOfRefraction)
 		{
 			float num = math.dot(n, i);
-			float num2 = 1f - eta * eta * (1f - num * num);
-			return math.select(0f, eta * i - (eta * num + math.sqrt(num2)) * n, num2 >= 0f);
+			float num2 = 1f - indexOfRefraction * indexOfRefraction * (1f - num * num);
+			return math.select(0f, indexOfRefraction * i - (indexOfRefraction * num + math.sqrt(num2)) * n, num2 >= 0f);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 refract(double2 i, double2 n, double eta)
+		public static double2 refract(double2 i, double2 n, double indexOfRefraction)
 		{
 			double num = math.dot(n, i);
-			double num2 = 1.0 - eta * eta * (1.0 - num * num);
-			return math.select(0f, eta * i - (eta * num + math.sqrt(num2)) * n, num2 >= 0.0);
+			double num2 = 1.0 - indexOfRefraction * indexOfRefraction * (1.0 - num * num);
+			return math.select(0f, indexOfRefraction * i - (indexOfRefraction * num + math.sqrt(num2)) * n, num2 >= 0.0);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 refract(double3 i, double3 n, double eta)
+		public static double3 refract(double3 i, double3 n, double indexOfRefraction)
 		{
 			double num = math.dot(n, i);
-			double num2 = 1.0 - eta * eta * (1.0 - num * num);
-			return math.select(0f, eta * i - (eta * num + math.sqrt(num2)) * n, num2 >= 0.0);
+			double num2 = 1.0 - indexOfRefraction * indexOfRefraction * (1.0 - num * num);
+			return math.select(0f, indexOfRefraction * i - (indexOfRefraction * num + math.sqrt(num2)) * n, num2 >= 0.0);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 refract(double4 i, double4 n, double eta)
+		public static double4 refract(double4 i, double4 n, double indexOfRefraction)
 		{
 			double num = math.dot(n, i);
-			double num2 = 1.0 - eta * eta * (1.0 - num * num);
-			return math.select(0f, eta * i - (eta * num + math.sqrt(num2)) * n, num2 >= 0.0);
+			double num2 = 1.0 - indexOfRefraction * indexOfRefraction * (1.0 - num * num);
+			return math.select(0f, indexOfRefraction * i - (indexOfRefraction * num + math.sqrt(num2)) * n, num2 >= 0.0);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 project(float2 a, float2 b)
+		public static float2 project(float2 a, float2 ontoB)
 		{
-			return math.dot(a, b) / math.dot(b, b) * b;
+			return math.dot(a, ontoB) / math.dot(ontoB, ontoB) * ontoB;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 project(float3 a, float3 b)
+		public static float3 project(float3 a, float3 ontoB)
 		{
-			return math.dot(a, b) / math.dot(b, b) * b;
+			return math.dot(a, ontoB) / math.dot(ontoB, ontoB) * ontoB;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 project(float4 a, float4 b)
+		public static float4 project(float4 a, float4 ontoB)
 		{
-			return math.dot(a, b) / math.dot(b, b) * b;
+			return math.dot(a, ontoB) / math.dot(ontoB, ontoB) * ontoB;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 projectsafe(float2 a, float2 b, float2 defaultValue = default(float2))
+		public static float2 projectsafe(float2 a, float2 ontoB, float2 defaultValue = default(float2))
 		{
-			float2 @float = math.project(a, b);
+			float2 @float = math.project(a, ontoB);
 			return math.select(defaultValue, @float, math.all(math.isfinite(@float)));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 projectsafe(float3 a, float3 b, float3 defaultValue = default(float3))
+		public static float3 projectsafe(float3 a, float3 ontoB, float3 defaultValue = default(float3))
 		{
-			float3 @float = math.project(a, b);
+			float3 @float = math.project(a, ontoB);
 			return math.select(defaultValue, @float, math.all(math.isfinite(@float)));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 projectsafe(float4 a, float4 b, float4 defaultValue = default(float4))
+		public static float4 projectsafe(float4 a, float4 ontoB, float4 defaultValue = default(float4))
 		{
-			float4 @float = math.project(a, b);
+			float4 @float = math.project(a, ontoB);
 			return math.select(defaultValue, @float, math.all(math.isfinite(@float)));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 project(double2 a, double2 b)
+		public static double2 project(double2 a, double2 ontoB)
 		{
-			return math.dot(a, b) / math.dot(b, b) * b;
+			return math.dot(a, ontoB) / math.dot(ontoB, ontoB) * ontoB;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 project(double3 a, double3 b)
+		public static double3 project(double3 a, double3 ontoB)
 		{
-			return math.dot(a, b) / math.dot(b, b) * b;
+			return math.dot(a, ontoB) / math.dot(ontoB, ontoB) * ontoB;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 project(double4 a, double4 b)
+		public static double4 project(double4 a, double4 ontoB)
 		{
-			return math.dot(a, b) / math.dot(b, b) * b;
+			return math.dot(a, ontoB) / math.dot(ontoB, ontoB) * ontoB;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double2 projectsafe(double2 a, double2 b, double2 defaultValue = default(double2))
+		public static double2 projectsafe(double2 a, double2 ontoB, double2 defaultValue = default(double2))
 		{
-			double2 @double = math.project(a, b);
+			double2 @double = math.project(a, ontoB);
 			return math.select(defaultValue, @double, math.all(math.isfinite(@double)));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double3 projectsafe(double3 a, double3 b, double3 defaultValue = default(double3))
+		public static double3 projectsafe(double3 a, double3 ontoB, double3 defaultValue = default(double3))
 		{
-			double3 @double = math.project(a, b);
+			double3 @double = math.project(a, ontoB);
 			return math.select(defaultValue, @double, math.all(math.isfinite(@double)));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double4 projectsafe(double4 a, double4 b, double4 defaultValue = default(double4))
+		public static double4 projectsafe(double4 a, double4 ontoB, double4 defaultValue = default(double4))
 		{
-			double4 @double = math.project(a, b);
+			double4 @double = math.project(a, ontoB);
 			return math.select(defaultValue, @double, math.all(math.isfinite(@double)));
 		}
 
@@ -9445,6 +9577,102 @@ namespace Unity.Mathematics
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float square(float x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float2 square(float2 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 square(float3 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float4 square(float4 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double square(double x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double2 square(double2 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double3 square(double3 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double4 square(double4 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int square(int x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int2 square(int2 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int3 square(int3 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int4 square(int4 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint square(uint x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint2 square(uint2 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint3 square(uint3 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint4 square(uint4 x)
+		{
+			return x * x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe static int compress(int* output, int index, int4 val, bool4 mask)
 		{
 			if (mask.x)
@@ -9546,7 +9774,63 @@ namespace Unity.Mathematics
 			return math.select((uint4)(math.asint(math.min(math.asfloat(uint2) * 1.92593E-34f, 260042750f)) + 4096) >> 13, math.select(31744U, 32256U, (int4)uint2 > 2139095040), (int4)uint2 >= 2139095040) | ((@uint & 2147487743U) >> 16);
 		}
 
-		public unsafe static uint hash(void* pBuffer, int numBytes, uint seed = 0U)
+		public static void orthonormal_basis(float3 normal, out float3 basis1, out float3 basis2)
+		{
+			float num = ((normal.z >= 0f) ? 1f : (-1f));
+			float num2 = -1f / (num + normal.z);
+			float num3 = normal.x * normal.y * num2;
+			basis1.x = 1f + num * normal.x * normal.x * num2;
+			basis1.y = num * num3;
+			basis1.z = -num * normal.x;
+			basis2.x = num3;
+			basis2.y = num + normal.y * normal.y * num2;
+			basis2.z = -normal.y;
+		}
+
+		public static void orthonormal_basis(double3 normal, out double3 basis1, out double3 basis2)
+		{
+			double num = ((normal.z >= 0.0) ? 1.0 : (-1.0));
+			double num2 = -1.0 / (num + normal.z);
+			double num3 = normal.x * normal.y * num2;
+			basis1.x = 1.0 + num * normal.x * normal.x * num2;
+			basis1.y = num * num3;
+			basis1.z = -num * normal.x;
+			basis2.x = num3;
+			basis2.y = num + normal.y * normal.y * num2;
+			basis2.z = -normal.y;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float chgsign(float x, float y)
+		{
+			return math.asfloat(math.asuint(x) ^ (math.asuint(y) & 2147483648U));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float2 chgsign(float2 x, float2 y)
+		{
+			return math.asfloat(math.asuint(x) ^ (math.asuint(y) & 2147483648U));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 chgsign(float3 x, float3 y)
+		{
+			return math.asfloat(math.asuint(x) ^ (math.asuint(y) & 2147483648U));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float4 chgsign(float4 x, float4 y)
+		{
+			return math.asfloat(math.asuint(x) ^ (math.asuint(y) & 2147483648U));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private unsafe static uint read32_little_endian(void* pBuffer)
+		{
+			return (uint)((int)(*(byte*)pBuffer) | ((int)((byte*)pBuffer)[1] << 8) | ((int)((byte*)pBuffer)[2] << 16) | ((int)((byte*)pBuffer)[3] << 24));
+		}
+
+		private unsafe static uint hash_with_unaligned_loads(void* pBuffer, int numBytes, uint seed)
 		{
 			uint4* ptr = (uint4*)pBuffer;
 			uint num = seed + 374761393U;
@@ -9580,6 +9864,48 @@ namespace Unity.Mathematics
 			num ^= num >> 13;
 			num *= 3266489917U;
 			return num ^ (num >> 16);
+		}
+
+		private unsafe static uint hash_without_unaligned_loads(void* pBuffer, int numBytes, uint seed)
+		{
+			byte* ptr = (byte*)pBuffer;
+			uint num = seed + 374761393U;
+			if (numBytes >= 16)
+			{
+				uint4 @uint = new uint4(606290984U, 2246822519U, 0U, 1640531535U) + seed;
+				int num2 = numBytes >> 4;
+				for (int i = 0; i < num2; i++)
+				{
+					uint4 uint2 = new uint4(math.read32_little_endian((void*)ptr), math.read32_little_endian((void*)(ptr + 4)), math.read32_little_endian((void*)(ptr + 8)), math.read32_little_endian((void*)(ptr + 12)));
+					@uint += uint2 * 2246822519U;
+					@uint = math.rol(@uint, 13);
+					@uint *= 2654435761U;
+					ptr += 16;
+				}
+				num = math.rol(@uint.x, 1) + math.rol(@uint.y, 7) + math.rol(@uint.z, 12) + math.rol(@uint.w, 18);
+			}
+			num += (uint)numBytes;
+			for (int j = 0; j < ((numBytes >> 2) & 3); j++)
+			{
+				num += math.read32_little_endian((void*)ptr) * 3266489917U;
+				num = math.rol(num, 17) * 668265263U;
+				ptr += 4;
+			}
+			for (int k = 0; k < (numBytes & 3); k++)
+			{
+				num += (uint)(*(ptr++)) * 374761393U;
+				num = math.rol(num, 11) * 2654435761U;
+			}
+			num ^= num >> 15;
+			num *= 2246822519U;
+			num ^= num >> 13;
+			num *= 3266489917U;
+			return num ^ (num >> 16);
+		}
+
+		public unsafe static uint hash(void* pBuffer, int numBytes, uint seed = 0U)
+		{
+			return math.hash_with_unaligned_loads(pBuffer, numBytes, seed);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -9616,6 +9942,208 @@ namespace Unity.Mathematics
 		public static float3 right()
 		{
 			return new float3(1f, 0f, 0f);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 EulerXYZ(quaternion q)
+		{
+			float4 value = q.value;
+			float4 @float = value * value.wwww * math.float4(2f);
+			float4 float2 = value * value.yzxw * math.float4(2f);
+			float4 float3 = value * value;
+			float3 float4 = Unity.Mathematics.float3.zero;
+			float num = float2.z - @float.y;
+			if (num * num < 0.99999595f)
+			{
+				float num2 = float2.y + @float.x;
+				float num3 = float3.z + float3.w - float3.y - float3.x;
+				float num4 = float2.x + @float.z;
+				float num5 = float3.x + float3.w - float3.y - float3.z;
+				float4 = math.float3(math.atan2(num2, num3), -math.asin(num), math.atan2(num4, num5));
+			}
+			else
+			{
+				num = math.clamp(num, -1f, 1f);
+				float4 float5 = math.float4(float2.z, @float.y, float2.x, @float.z);
+				float num6 = 2f * (float5.x * float5.w + float5.y * float5.z);
+				float num7 = math.csum(float5 * float5 * math.float4(-1f, 1f, -1f, 1f));
+				float4 = math.float3(math.atan2(num6, num7), -math.asin(num), 0f);
+			}
+			return float4;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 EulerXZY(quaternion q)
+		{
+			float4 value = q.value;
+			float4 @float = value * value.wwww * math.float4(2f);
+			float4 float2 = value * value.yzxw * math.float4(2f);
+			float4 float3 = value * value;
+			float3 float4 = Unity.Mathematics.float3.zero;
+			float num = float2.x + @float.z;
+			if (num * num < 0.99999595f)
+			{
+				float num2 = -float2.y + @float.x;
+				float num3 = float3.y + float3.w - float3.z - float3.x;
+				float num4 = -float2.z + @float.y;
+				float num5 = float3.x + float3.w - float3.y - float3.z;
+				float4 = math.float3(math.atan2(num2, num3), math.asin(num), math.atan2(num4, num5));
+			}
+			else
+			{
+				num = math.clamp(num, -1f, 1f);
+				float4 float5 = math.float4(float2.x, @float.z, float2.z, @float.y);
+				float num6 = 2f * (float5.x * float5.w + float5.y * float5.z);
+				float num7 = math.csum(float5 * float5 * math.float4(-1f, 1f, -1f, 1f));
+				float4 = math.float3(math.atan2(num6, num7), math.asin(num), 0f);
+			}
+			return float4.xzy;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 EulerYXZ(quaternion q)
+		{
+			float4 value = q.value;
+			float4 @float = value * value.wwww * math.float4(2f);
+			float4 float2 = value * value.yzxw * math.float4(2f);
+			float4 float3 = value * value;
+			float3 float4 = Unity.Mathematics.float3.zero;
+			float num = float2.y + @float.x;
+			if (num * num < 0.99999595f)
+			{
+				float num2 = -float2.z + @float.y;
+				float num3 = float3.z + float3.w - float3.x - float3.y;
+				float num4 = -float2.x + @float.z;
+				float num5 = float3.y + float3.w - float3.z - float3.x;
+				float4 = math.float3(math.atan2(num2, num3), math.asin(num), math.atan2(num4, num5));
+			}
+			else
+			{
+				num = math.clamp(num, -1f, 1f);
+				float4 float5 = math.float4(float2.x, @float.z, float2.y, @float.x);
+				float num6 = 2f * (float5.x * float5.w + float5.y * float5.z);
+				float num7 = math.csum(float5 * float5 * math.float4(-1f, 1f, -1f, 1f));
+				float4 = math.float3(math.atan2(num6, num7), math.asin(num), 0f);
+			}
+			return float4.yxz;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 EulerYZX(quaternion q)
+		{
+			float4 value = q.value;
+			float4 @float = value * value.wwww * math.float4(2f);
+			float4 float2 = value * value.yzxw * math.float4(2f);
+			float4 float3 = value * value;
+			float3 float4 = Unity.Mathematics.float3.zero;
+			float num = float2.x - @float.z;
+			if (num * num < 0.99999595f)
+			{
+				float num2 = float2.z + @float.y;
+				float num3 = float3.x + float3.w - float3.z - float3.y;
+				float num4 = float2.y + @float.x;
+				float num5 = float3.y + float3.w - float3.x - float3.z;
+				float4 = math.float3(math.atan2(num2, num3), -math.asin(num), math.atan2(num4, num5));
+			}
+			else
+			{
+				num = math.clamp(num, -1f, 1f);
+				float4 float5 = math.float4(float2.x, @float.z, float2.y, @float.x);
+				float num6 = 2f * (float5.x * float5.w + float5.y * float5.z);
+				float num7 = math.csum(float5 * float5 * math.float4(-1f, 1f, -1f, 1f));
+				float4 = math.float3(math.atan2(num6, num7), -math.asin(num), 0f);
+			}
+			return float4.zxy;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 EulerZXY(quaternion q)
+		{
+			float4 value = q.value;
+			float4 @float = value * value.wwww * math.float4(2f);
+			float4 float2 = value * value.yzxw * math.float4(2f);
+			float4 float3 = value * value;
+			float3 float4 = Unity.Mathematics.float3.zero;
+			float num = float2.y - @float.x;
+			if (num * num < 0.99999595f)
+			{
+				float num2 = float2.x + @float.z;
+				float num3 = float3.y + float3.w - float3.x - float3.z;
+				float num4 = float2.z + @float.y;
+				float num5 = float3.z + float3.w - float3.x - float3.y;
+				float4 = math.float3(math.atan2(num2, num3), -math.asin(num), math.atan2(num4, num5));
+			}
+			else
+			{
+				num = math.clamp(num, -1f, 1f);
+				float4 float5 = math.float4(float2.z, @float.y, float2.y, @float.x);
+				float num6 = 2f * (float5.x * float5.w + float5.y * float5.z);
+				float num7 = math.csum(float5 * float5 * math.float4(-1f, 1f, -1f, 1f));
+				float4 = math.float3(math.atan2(num6, num7), -math.asin(num), 0f);
+			}
+			return float4.yzx;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 EulerZYX(quaternion q)
+		{
+			float4 value = q.value;
+			float4 @float = value * value.wwww * math.float4(2f);
+			float4 float2 = value * value.yzxw * math.float4(2f);
+			float4 float3 = value * value;
+			float3 float4 = Unity.Mathematics.float3.zero;
+			float num = float2.z + @float.y;
+			if (num * num < 0.99999595f)
+			{
+				float num2 = -float2.x + @float.z;
+				float num3 = float3.x + float3.w - float3.y - float3.z;
+				float num4 = -float2.y + @float.x;
+				float num5 = float3.z + float3.w - float3.y - float3.x;
+				float4 = math.float3(math.atan2(num2, num3), math.asin(num), math.atan2(num4, num5));
+			}
+			else
+			{
+				num = math.clamp(num, -1f, 1f);
+				float4 float5 = math.float4(float2.z, @float.y, float2.y, @float.x);
+				float num6 = 2f * (float5.x * float5.w + float5.y * float5.z);
+				float num7 = math.csum(float5 * float5 * math.float4(-1f, 1f, -1f, 1f));
+				float4 = math.float3(math.atan2(num6, num7), math.asin(num), 0f);
+			}
+			return float4.zyx;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3 Euler(quaternion q, math.RotationOrder order = math.RotationOrder.ZXY)
+		{
+			switch (order)
+			{
+			case math.RotationOrder.XYZ:
+				return math.EulerXYZ(q);
+			case math.RotationOrder.XZY:
+				return math.EulerXZY(q);
+			case math.RotationOrder.YXZ:
+				return math.EulerYXZ(q);
+			case math.RotationOrder.YZX:
+				return math.EulerYZX(q);
+			case math.RotationOrder.ZXY:
+				return math.EulerZXY(q);
+			case math.RotationOrder.ZYX:
+				return math.EulerZYX(q);
+			default:
+				return Unity.Mathematics.float3.zero;
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3x3 mulScale(float3x3 m, float3 s)
+		{
+			return new float3x3(m.c0 * s.x, m.c1 * s.y, m.c2 * s.z);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3x3 scaleMul(float3 s, float3x3 m)
+		{
+			return new float3x3(m.c0 * s, m.c1 * s, m.c2 * s);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -9736,6 +10264,24 @@ namespace Unity.Mathematics
 			float3x.c1 = math.select(math.float3(0f, 1f, 0f), @float / num2, flag);
 			float3x.c2 = math.cross(float3x.c0, float3x.c1);
 			return float3x;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float3x3 pseudoinverse(float3x3 m)
+		{
+			float num = 0.333333f * (math.lengthsq(m.c0) + math.lengthsq(m.c1) + math.lengthsq(m.c2));
+			if (num < 1E-30f)
+			{
+				return Unity.Mathematics.float3x3.zero;
+			}
+			float3 @float = math.rsqrt(num);
+			float3x3 float3x = math.mulScale(m, @float);
+			float3x3 float3x2;
+			if (!math.adjInverse(float3x, out float3x2, 1E-06f))
+			{
+				float3x2 = svd.svdInverse(float3x);
+			}
+			return math.mulScale(float3x2, @float);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -11052,11 +11598,7 @@ namespace Unity.Mathematics
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static quaternion nlerp(quaternion q1, quaternion q2, float t)
 		{
-			if (math.dot(q1, q2) < 0f)
-			{
-				q2.value = -q2.value;
-			}
-			return math.normalize(math.quaternion(math.lerp(q1.value, q2.value, t)));
+			return math.normalize(q1.value + t * (math.chgsign(q2.value, math.dot(q1, q2)) - q1.value));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -11077,6 +11619,54 @@ namespace Unity.Mathematics
 				return math.quaternion(q1.value * num4 + q2.value * num5);
 			}
 			return math.nlerp(q1, q2, t);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float angle(quaternion q1, quaternion q2)
+		{
+			float num = math.asin(math.length(math.normalize(math.mul(math.conjugate(q1), q2)).value.xyz));
+			return num + num;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static quaternion rotation(float3x3 m)
+		{
+			float num = math.determinant(m);
+			if (math.abs(1f - num) < 1E-06f)
+			{
+				return math.quaternion(m);
+			}
+			if (math.abs(num) > 1E-06f)
+			{
+				float3x3 float3x = math.mulScale(m, math.rsqrt(math.float3(math.lengthsq(m.c0), math.lengthsq(m.c1), math.lengthsq(m.c2))));
+				if (math.abs(1f - math.determinant(float3x)) < 1E-06f)
+				{
+					return math.quaternion(float3x);
+				}
+			}
+			return svd.svdRotation(m);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static float3x3 adj(float3x3 m, out float det)
+		{
+			float3x3 float3x;
+			float3x.c0 = math.cross(m.c1, m.c2);
+			float3x.c1 = math.cross(m.c2, m.c0);
+			float3x.c2 = math.cross(m.c0, m.c1);
+			det = math.dot(m.c0, float3x.c0);
+			return math.transpose(float3x);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static bool adjInverse(float3x3 m, out float3x3 i, float epsilon = 1E-30f)
+		{
+			float num;
+			i = math.adj(m, out num);
+			bool flag = math.abs(num) > epsilon;
+			float3 @float = math.select(math.float3(1f), math.rcp(num), flag);
+			i = math.scaleMul(@float, i);
+			return flag;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -12345,6 +12935,16 @@ namespace Unity.Mathematics
 
 		public const double PI_DBL = 3.141592653589793;
 
+		public const double PI2_DBL = 6.283185307179586;
+
+		public const double PIHALF_DBL = 1.5707963267948966;
+
+		public const double TAU_DBL = 6.283185307179586;
+
+		public const double TODEGREES_DBL = 57.29577951308232;
+
+		public const double TORADIANS_DBL = 0.017453292519943295;
+
 		public const double SQRT2_DBL = 1.4142135623730951;
 
 		public const double EPSILON_DBL = 2.220446049250313E-16;
@@ -12368,6 +12968,16 @@ namespace Unity.Mathematics
 		public const float LN10 = 2.3025851f;
 
 		public const float PI = 3.1415927f;
+
+		public const float PI2 = 6.2831855f;
+
+		public const float PIHALF = 1.5707964f;
+
+		public const float TAU = 6.2831855f;
+
+		public const float TODEGREES = 57.29578f;
+
+		public const float TORADIANS = 0.017453292f;
 
 		public const float SQRT2 = 1.4142135f;
 
@@ -12398,16 +13008,6 @@ namespace Unity.Mathematics
 			RightY,
 			RightZ,
 			RightW
-		}
-
-		[StructLayout(LayoutKind.Explicit)]
-		internal struct IntFloatUnion
-		{
-			[FieldOffset(0)]
-			public int intValue;
-
-			[FieldOffset(0)]
-			public float floatValue;
 		}
 
 		[StructLayout(LayoutKind.Explicit)]

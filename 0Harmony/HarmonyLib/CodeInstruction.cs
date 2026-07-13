@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using MonoMod.Utils;
 
 namespace HarmonyLib
@@ -12,6 +13,20 @@ namespace HarmonyLib
 	{
 		internal CodeInstruction()
 		{
+		}
+
+		internal static CodeInstruction Annotation(string annotation)
+		{
+			return new CodeInstruction(OpCodes.Nop, annotation);
+		}
+
+		internal string IsAnnotation()
+		{
+			if (!(this.opcode == OpCodes.Nop))
+			{
+				return null;
+			}
+			return this.operand as string;
 		}
 
 		public CodeInstruction(OpCode opcode, object operand = null)
@@ -56,13 +71,16 @@ namespace HarmonyLib
 			MethodInfo methodInfo = AccessTools.Method(type, name, parameters, generics);
 			if (methodInfo == null)
 			{
-				throw new ArgumentException(string.Format("No method found for type={0}, name={1}, parameters={2}, generics={3}", new object[]
-				{
-					type,
-					name,
-					parameters.Description(),
-					generics.Description()
-				}));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(56, 4);
+				defaultInterpolatedStringHandler.AppendLiteral("No method found for type=");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(", name=");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				defaultInterpolatedStringHandler.AppendLiteral(", parameters=");
+				defaultInterpolatedStringHandler.AppendFormatted(parameters.Description());
+				defaultInterpolatedStringHandler.AppendLiteral(", generics=");
+				defaultInterpolatedStringHandler.AppendFormatted(generics.Description());
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return new CodeInstruction(OpCodes.Call, methodInfo);
 		}
@@ -72,15 +90,14 @@ namespace HarmonyLib
 			MethodInfo methodInfo = AccessTools.Method(typeColonMethodname, parameters, generics);
 			if (methodInfo == null)
 			{
-				throw new ArgumentException(string.Concat(new string[]
-				{
-					"No method found for ",
-					typeColonMethodname,
-					", parameters=",
-					parameters.Description(),
-					", generics=",
-					generics.Description()
-				}));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(44, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("No method found for ");
+				defaultInterpolatedStringHandler.AppendFormatted(typeColonMethodname);
+				defaultInterpolatedStringHandler.AppendLiteral(", parameters=");
+				defaultInterpolatedStringHandler.AppendFormatted(parameters.Description());
+				defaultInterpolatedStringHandler.AppendLiteral(", generics=");
+				defaultInterpolatedStringHandler.AppendFormatted(generics.Description());
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return new CodeInstruction(OpCodes.Call, methodInfo);
 		}
@@ -125,13 +142,13 @@ namespace HarmonyLib
 			{
 				flag = false;
 			}
-			if (flag)
+			bool flag2 = flag;
+			if (flag2)
 			{
-				int count = CodeInstruction.State.closureCache.Count;
-				CodeInstruction.State.closureCache[count] = closure;
-				ilgenerator.Emit(OpCodes.Ldsfld, AccessTools.Field(typeof(Transpilers), "closureCache"));
-				ilgenerator.Emit(OpCodes.Ldc_I4, count);
-				ilgenerator.Emit(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Dictionary<int, Delegate>), "Item"));
+				CodeInstruction.State.closureCache.Add(closure);
+				ilgenerator.Emit(OpCodes.Ldsfld, AccessTools.Field(typeof(CodeInstruction.State), "closureCache"));
+				ilgenerator.Emit(OpCodes.Ldc_I4, CodeInstruction.State.closureCache.Count - 1);
+				ilgenerator.Emit(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(List<Delegate>), "Item"));
 			}
 			else
 			{
@@ -164,7 +181,12 @@ namespace HarmonyLib
 			FieldInfo fieldInfo = AccessTools.Field(type, name);
 			if (fieldInfo == null)
 			{
-				throw new ArgumentException(string.Format("No field found for {0} and {1}", type, name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(24, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("No field found for ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return new CodeInstruction(useAddress ? (fieldInfo.IsStatic ? OpCodes.Ldsflda : OpCodes.Ldflda) : (fieldInfo.IsStatic ? OpCodes.Ldsfld : OpCodes.Ldfld), fieldInfo);
 		}
@@ -174,9 +196,126 @@ namespace HarmonyLib
 			FieldInfo fieldInfo = AccessTools.Field(type, name);
 			if (fieldInfo == null)
 			{
-				throw new ArgumentException(string.Format("No field found for {0} and {1}", type, name));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(24, 2);
+				defaultInterpolatedStringHandler.AppendLiteral("No field found for ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(type);
+				defaultInterpolatedStringHandler.AppendLiteral(" and ");
+				defaultInterpolatedStringHandler.AppendFormatted(name);
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return new CodeInstruction(fieldInfo.IsStatic ? OpCodes.Stsfld : OpCodes.Stfld, fieldInfo);
+		}
+
+		public static CodeInstruction LoadLocal(int index, bool useAddress = false)
+		{
+			if (useAddress)
+			{
+				if (index < 256)
+				{
+					return new CodeInstruction(OpCodes.Ldloca_S, Convert.ToByte(index));
+				}
+				return new CodeInstruction(OpCodes.Ldloca, index);
+			}
+			else
+			{
+				if (index == 0)
+				{
+					return new CodeInstruction(OpCodes.Ldloc_0, null);
+				}
+				if (index == 1)
+				{
+					return new CodeInstruction(OpCodes.Ldloc_1, null);
+				}
+				if (index == 2)
+				{
+					return new CodeInstruction(OpCodes.Ldloc_2, null);
+				}
+				if (index == 3)
+				{
+					return new CodeInstruction(OpCodes.Ldloc_3, null);
+				}
+				if (index < 256)
+				{
+					return new CodeInstruction(OpCodes.Ldloc_S, Convert.ToByte(index));
+				}
+				return new CodeInstruction(OpCodes.Ldloc, index);
+			}
+		}
+
+		public static CodeInstruction StoreLocal(int index)
+		{
+			if (index == 0)
+			{
+				return new CodeInstruction(OpCodes.Stloc_0, null);
+			}
+			if (index == 1)
+			{
+				return new CodeInstruction(OpCodes.Stloc_1, null);
+			}
+			if (index == 2)
+			{
+				return new CodeInstruction(OpCodes.Stloc_2, null);
+			}
+			if (index == 3)
+			{
+				return new CodeInstruction(OpCodes.Stloc_3, null);
+			}
+			if (index < 256)
+			{
+				return new CodeInstruction(OpCodes.Stloc_S, Convert.ToByte(index));
+			}
+			return new CodeInstruction(OpCodes.Stloc, index);
+		}
+
+		public static CodeInstruction LoadArgument(int index, bool useAddress = false)
+		{
+			if (useAddress)
+			{
+				if (index < 256)
+				{
+					return new CodeInstruction(OpCodes.Ldarga_S, Convert.ToByte(index));
+				}
+				return new CodeInstruction(OpCodes.Ldarga, index);
+			}
+			else
+			{
+				if (index == 0)
+				{
+					return new CodeInstruction(OpCodes.Ldarg_0, null);
+				}
+				if (index == 1)
+				{
+					return new CodeInstruction(OpCodes.Ldarg_1, null);
+				}
+				if (index == 2)
+				{
+					return new CodeInstruction(OpCodes.Ldarg_2, null);
+				}
+				if (index == 3)
+				{
+					return new CodeInstruction(OpCodes.Ldarg_3, null);
+				}
+				if (index < 256)
+				{
+					return new CodeInstruction(OpCodes.Ldarg_S, Convert.ToByte(index));
+				}
+				return new CodeInstruction(OpCodes.Ldarg, index);
+			}
+		}
+
+		public static CodeInstruction StoreArgument(int index)
+		{
+			if (index < 256)
+			{
+				return new CodeInstruction(OpCodes.Starg_S, Convert.ToByte(index));
+			}
+			return new CodeInstruction(OpCodes.Starg, index);
+		}
+
+		public bool HasBlock(ExceptionBlockType type)
+		{
+			List<ExceptionBlock> list = this.blocks;
+			return list != null && list.Any<ExceptionBlock>((ExceptionBlock block) => block.blockType == type);
 		}
 
 		public override string ToString()
@@ -184,14 +323,18 @@ namespace HarmonyLib
 			List<string> list = new List<string>();
 			foreach (Label label in this.labels)
 			{
-				list.Add(string.Format("Label{0}", label.GetHashCode()));
+				List<string> list2 = list;
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(5, 1);
+				defaultInterpolatedStringHandler.AppendLiteral("Label");
+				defaultInterpolatedStringHandler.AppendFormatted<int>(label.GetHashCode());
+				list2.Add(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			foreach (ExceptionBlock exceptionBlock in this.blocks)
 			{
 				list.Add("EX_" + exceptionBlock.blockType.ToString().Replace("Block", ""));
 			}
 			string text = ((list.Count > 0) ? (" [" + string.Join(", ", list.ToArray()) + "]") : "");
-			string text2 = Emitter.FormatArgument(this.operand, null);
+			string text2 = Emitter.FormatOperand(this.operand);
 			if (text2.Length > 0)
 			{
 				text2 = " " + text2;
@@ -210,7 +353,7 @@ namespace HarmonyLib
 
 		internal static class State
 		{
-			internal static readonly Dictionary<int, Delegate> closureCache = new Dictionary<int, Delegate>();
+			internal static readonly List<Delegate> closureCache = new List<Delegate>();
 		}
 	}
 }

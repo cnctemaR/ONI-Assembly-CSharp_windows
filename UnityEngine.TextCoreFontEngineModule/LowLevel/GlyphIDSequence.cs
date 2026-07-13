@@ -20,8 +20,8 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 		}
 
-		[SerializeField]
 		[NativeName("glyphIDs")]
+		[SerializeField]
 		private uint[] m_GlyphIDs;
 	}
 }

@@ -13,15 +13,25 @@ namespace UnityEngine.Audio
 		}
 
 		[NativeProperty]
-		public extern AudioMixer audioMixer
+		public AudioMixer audioMixer
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AudioMixerSnapshot>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<AudioMixer>(AudioMixerSnapshot.get_audioMixer_Injected(intPtr));
+			}
 		}
 
 		public void TransitionTo(float timeToReach)
 		{
 			this.audioMixer.TransitionToSnapshot(this, timeToReach);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_audioMixer_Injected(IntPtr _unity_self);
 	}
 }

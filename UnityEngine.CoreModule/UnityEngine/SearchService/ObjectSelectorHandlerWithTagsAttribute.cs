@@ -2,8 +2,8 @@
 
 namespace UnityEngine.SearchService
 {
-	[AttributeUsage(AttributeTargets.Field)]
 	[Obsolete("ObjectSelectorHandlerWithTagsAttribute has been deprecated. Use SearchContextAttribute instead.", true)]
+	[AttributeUsage(AttributeTargets.Field)]
 	public class ObjectSelectorHandlerWithTagsAttribute : Attribute
 	{
 		public string[] tags { get; }

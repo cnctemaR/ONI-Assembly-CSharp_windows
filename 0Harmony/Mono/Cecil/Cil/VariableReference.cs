@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public abstract class VariableReference
+	internal abstract class VariableReference
 	{
 		public TypeReference VariableType
 		{

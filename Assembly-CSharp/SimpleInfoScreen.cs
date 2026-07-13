@@ -499,7 +499,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			text2 = storedItemCategoryData2.name;
 			if (storedItemCategoryData2.instancesFound == 1)
 			{
-				SimpleInfoScreen.ForgeNameAndTooltipForStoredItem(storedItemCategoryData2.lastInstance, storedItemCategoryData2.lastPEInstance, out text2, out text4, out text5, out text3, true);
+				SimpleInfoScreen.ForgeNameAndTooltipForStoredItem(storedItemCategoryData2.lastInstance, storedItemCategoryData2.lastPEInstance, out text2, out text4, out text5, out text3, false);
 				text2 = "• " + text2;
 				KSelectable itemSelectable = storedItemCategoryData2.lastInstance.GetComponent<KSelectable>();
 				targetPanel.SetLabelWithButton("storage_" + num.ToString(), text2, text4, text5, text3, delegate
@@ -714,7 +714,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 							string text2 = "";
 							string text3 = "";
 							string text4 = "";
-							SimpleInfoScreen.ForgeNameAndTooltipForStoredItem(component, null, out text, out text3, out text2, out text4, true);
+							SimpleInfoScreen.ForgeNameAndTooltipForStoredItem(component, null, out text, out text3, out text2, out text4, false);
 							DetailLabelWithButton detailLabelWithButton = collapsableLabel.AddOrGetAvailableContentRow();
 							detailLabelWithButton.label.SetText(text);
 							detailLabelWithButton.label2.SetText(text3);
@@ -1062,8 +1062,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 
 	private static void RefreshStressPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)
 	{
-		MinionIdentity identity = ((targetEntity != null) ? targetEntity.GetComponent<MinionIdentity>() : null);
-		if (identity != null)
+		if (((targetEntity != null) ? targetEntity.GetComponent<MinionIdentity>() : null) != null)
 		{
 			List<ReportManager.ReportEntry.Note> stressNotes = new List<ReportManager.ReportEntry.Note>();
 			targetPanel.gameObject.SetActive(true);
@@ -1071,8 +1070,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 			ReportManager.ReportEntry reportEntry = ReportManager.Instance.TodaysReport.reportEntries.Find((ReportManager.ReportEntry entry) => entry.reportType == ReportManager.ReportType.StressDelta);
 			float num = 0f;
 			stressNotes.Clear();
-			int num2 = reportEntry.contextEntries.FindIndex((ReportManager.ReportEntry entry) => entry.context == identity.GetProperName());
-			ReportManager.ReportEntry reportEntry2 = ((num2 != -1) ? reportEntry.contextEntries[num2] : null);
+			ReportManager.ReportEntry reportEntry2 = reportEntry.FindEntryFromGameObject(targetEntity);
 			if (reportEntry2 != null)
 			{
 				reportEntry2.IterateNotes(delegate(ReportManager.ReportEntry.Note note)

@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	public enum AssemblyRegistrationFlags
 	{
 		None = 0,

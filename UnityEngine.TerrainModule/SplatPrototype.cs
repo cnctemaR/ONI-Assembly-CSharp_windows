@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	[UsedByNativeCode]
 	[Obsolete("SplatPrototype is obsolete. Use TerrainLayer instead.", false)]
+	[NativeAsStruct]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class SplatPrototype
 	{
@@ -95,16 +97,22 @@ namespace UnityEngine
 			}
 		}
 
+		[NativeName("texture")]
 		internal Texture2D m_Texture;
 
+		[NativeName("normalMap")]
 		internal Texture2D m_NormalMap;
 
+		[NativeName("tileSize")]
 		internal Vector2 m_TileSize = new Vector2(15f, 15f);
 
+		[NativeName("tileOffset")]
 		internal Vector2 m_TileOffset = new Vector2(0f, 0f);
 
+		[NativeName("specularMetallic")]
 		internal Vector4 m_SpecularMetallic = new Vector4(0f, 0f, 0f, 0f);
 
+		[NativeName("smoothness")]
 		internal float m_Smoothness = 0f;
 	}
 }

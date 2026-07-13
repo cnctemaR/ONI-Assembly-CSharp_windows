@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
-	[UsedByNativeCode]
 	[DebuggerDisplay("First glyphIndex = {m_FirstAdjustmentRecord.m_GlyphIndex},  Second glyphIndex = {m_SecondAdjustmentRecord.m_GlyphIndex}")]
+	[UsedByNativeCode]
 	[Serializable]
 	public struct GlyphPairAdjustmentRecord : IEquatable<GlyphPairAdjustmentRecord>
 	{
@@ -88,8 +88,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeName("firstAdjustmentRecord")]
 		private GlyphAdjustmentRecord m_FirstAdjustmentRecord;
 
-		[SerializeField]
 		[NativeName("secondAdjustmentRecord")]
+		[SerializeField]
 		private GlyphAdjustmentRecord m_SecondAdjustmentRecord;
 
 		[SerializeField]

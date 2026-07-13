@@ -170,8 +170,8 @@ namespace System.Threading
 			return Semaphore.OpenExistingResult.Success;
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[PrePrepareMethod]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public int Release()
 		{
 			return this.Release(1);

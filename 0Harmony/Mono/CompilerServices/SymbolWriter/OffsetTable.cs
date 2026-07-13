@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class OffsetTable
+	internal class OffsetTable
 	{
 		internal OffsetTable()
 		{

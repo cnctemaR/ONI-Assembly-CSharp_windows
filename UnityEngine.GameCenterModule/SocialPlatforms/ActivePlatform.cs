@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms
 {
+	[Obsolete("ActivePlatform is deprecated and will be removed in a future release.", false)]
 	internal static class ActivePlatform
 	{
 		internal static ISocialPlatform Instance

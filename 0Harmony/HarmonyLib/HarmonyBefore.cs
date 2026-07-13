@@ -2,7 +2,7 @@
 
 namespace HarmonyLib
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method)]
 	public class HarmonyBefore : HarmonyAttribute
 	{
 		public HarmonyBefore(params string[] before)

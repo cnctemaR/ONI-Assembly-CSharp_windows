@@ -8,12 +8,32 @@ namespace UnityEngine
 	internal sealed class DebugLogHandler : ILogHandler
 	{
 		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Internal_Log(LogType level, LogOption options, string msg, Object obj);
+		internal unsafe static void Internal_Log(LogType level, LogOption options, string msg, Object obj)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(msg, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = msg.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				DebugLogHandler.Internal_Log_Injected(level, options, ref managedSpanWrapper, Object.MarshalledUnityObject.Marshal<Object>(obj));
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[ThreadAndSerializationSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Internal_LogException(Exception ex, Object obj);
+		internal static void Internal_LogException(Exception ex, Object obj)
+		{
+			DebugLogHandler.Internal_LogException_Injected(ex, Object.MarshalledUnityObject.Marshal<Object>(obj));
+		}
 
 		public void LogFormat(LogType logType, Object context, string format, params object[] args)
 		{
@@ -34,5 +54,11 @@ namespace UnityEngine
 			}
 			DebugLogHandler.Internal_LogException(exception, context);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_Log_Injected(LogType level, LogOption options, ref ManagedSpanWrapper msg, IntPtr obj);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_LogException_Injected(Exception ex, IntPtr obj);
 	}
 }

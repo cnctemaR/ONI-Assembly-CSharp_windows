@@ -9,13 +9,13 @@ namespace HarmonyLib
 	{
 		internal static byte[] Serialize(this PatchInfo patchInfo)
 		{
-			byte[] buffer;
+			byte[] array;
 			using (MemoryStream memoryStream = new MemoryStream())
 			{
 				PatchInfoSerialization.binaryFormatter.Serialize(memoryStream, patchInfo);
-				buffer = memoryStream.GetBuffer();
+				array = memoryStream.ToArray();
 			}
-			return buffer;
+			return array;
 		}
 
 		internal static PatchInfo Deserialize(byte[] bytes)
@@ -49,12 +49,13 @@ namespace HarmonyLib
 		{
 			public override Type BindToType(string assemblyName, string typeName)
 			{
-				foreach (Type type in new Type[]
+				Type[] array = new Type[]
 				{
 					typeof(PatchInfo),
 					typeof(Patch[]),
 					typeof(Patch)
-				})
+				};
+				foreach (Type type in array)
 				{
 					if (typeName == type.FullName)
 					{

@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
-using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
 
 namespace HarmonyLib
@@ -14,6 +13,14 @@ namespace HarmonyLib
 		static HarmonySharedState()
 		{
 			Type orCreateSharedStateType = HarmonySharedState.GetOrCreateSharedStateType();
+			if (AccessTools.IsMonoRuntime)
+			{
+				FieldInfo fieldInfo = AccessTools.Field(typeof(StackFrame), "methodAddress");
+				if (fieldInfo != null)
+				{
+					HarmonySharedState.methodAddressRef = AccessTools.FieldRefAccess<StackFrame, long>(fieldInfo);
+				}
+			}
 			FieldInfo field = orCreateSharedStateType.GetField("version");
 			if ((int)field.GetValue(null) == 0)
 			{
@@ -30,42 +37,22 @@ namespace HarmonyLib
 			{
 				field3.SetValue(null, new Dictionary<MethodInfo, MethodBase>());
 			}
+			FieldInfo field4 = orCreateSharedStateType.GetField("originalsMono");
+			if (field4 != null && field4.GetValue(null) == null)
+			{
+				field4.SetValue(null, new Dictionary<long, MethodBase[]>());
+			}
 			HarmonySharedState.state = (Dictionary<MethodBase, byte[]>)field2.GetValue(null);
 			HarmonySharedState.originals = new Dictionary<MethodInfo, MethodBase>();
 			if (field3 != null)
 			{
 				HarmonySharedState.originals = (Dictionary<MethodInfo, MethodBase>)field3.GetValue(null);
 			}
-			HarmonySharedState.methodStarts = new Dictionary<long, MethodInfo>();
-			HarmonySharedState.RefreshMethodStarts();
-			DetourHelper.Runtime.OnMethodCompiled += delegate(MethodBase method, IntPtr codeStart, ulong codeLen)
+			HarmonySharedState.originalsMono = new Dictionary<long, MethodBase[]>();
+			if (field4 != null)
 			{
-				if (method == null)
-				{
-					return;
-				}
-				PatchInfo patchInfo = HarmonySharedState.GetPatchInfo(method);
-				if (patchInfo == null)
-				{
-					return;
-				}
-				PatchFunctions.UpdateRecompiledMethod(method, codeStart, patchInfo);
-				HarmonySharedState.methodStartsInvalidated = true;
-			};
-		}
-
-		private static void RefreshMethodStarts()
-		{
-			Dictionary<MethodInfo, MethodBase> dictionary = HarmonySharedState.originals;
-			lock (dictionary)
-			{
-				HarmonySharedState.methodStarts.Clear();
-				foreach (MethodInfo methodInfo in HarmonySharedState.originals.Keys)
-				{
-					HarmonySharedState.methodStarts.Add(methodInfo.GetNativeStart().ToInt64(), methodInfo);
-				}
+				HarmonySharedState.originalsMono = (Dictionary<long, MethodBase[]>)field4.GetValue(null);
 			}
-			HarmonySharedState.methodStartsInvalidated = false;
 		}
 
 		private static Type GetOrCreateSharedStateType()
@@ -90,6 +77,7 @@ namespace HarmonyLib
 				moduleDefinition.Types.Add(typeDefinition);
 				typeDefinition.Fields.Add(new FieldDefinition("state", Mono.Cecil.FieldAttributes.FamANDAssem | Mono.Cecil.FieldAttributes.Family | Mono.Cecil.FieldAttributes.Static, moduleDefinition.ImportReference(typeof(Dictionary<MethodBase, byte[]>))));
 				typeDefinition.Fields.Add(new FieldDefinition("originals", Mono.Cecil.FieldAttributes.FamANDAssem | Mono.Cecil.FieldAttributes.Family | Mono.Cecil.FieldAttributes.Static, moduleDefinition.ImportReference(typeof(Dictionary<MethodInfo, MethodBase>))));
+				typeDefinition.Fields.Add(new FieldDefinition("originalsMono", Mono.Cecil.FieldAttributes.FamANDAssem | Mono.Cecil.FieldAttributes.Family | Mono.Cecil.FieldAttributes.Static, moduleDefinition.ImportReference(typeof(Dictionary<long, MethodBase[]>))));
 				typeDefinition.Fields.Add(new FieldDefinition("version", Mono.Cecil.FieldAttributes.FamANDAssem | Mono.Cecil.FieldAttributes.Family | Mono.Cecil.FieldAttributes.Static, moduleDefinition.ImportReference(typeof(int))));
 				type2 = ReflectionHelper.Load(moduleDefinition).GetType("HarmonySharedState");
 			}
@@ -124,6 +112,7 @@ namespace HarmonyLib
 
 		internal static void UpdatePatchInfo(MethodBase original, MethodInfo replacement, PatchInfo patchInfo)
 		{
+			patchInfo.VersionCount++;
 			byte[] array = patchInfo.Serialize();
 			Dictionary<MethodBase, byte[]> dictionary = HarmonySharedState.state;
 			lock (dictionary)
@@ -133,58 +122,68 @@ namespace HarmonyLib
 			Dictionary<MethodInfo, MethodBase> dictionary2 = HarmonySharedState.originals;
 			lock (dictionary2)
 			{
-				HarmonySharedState.originals[replacement] = original;
+				HarmonySharedState.originals[replacement.Identifiable()] = original;
 			}
-			Dictionary<long, MethodInfo> dictionary3 = HarmonySharedState.methodStarts;
-			lock (dictionary3)
+			if (AccessTools.IsMonoRuntime)
 			{
-				HarmonySharedState.methodStarts[replacement.GetNativeStart().ToInt64()] = replacement;
+				long num = (long)replacement.MethodHandle.GetFunctionPointer();
+				Dictionary<long, MethodBase[]> dictionary3 = HarmonySharedState.originalsMono;
+				lock (dictionary3)
+				{
+					HarmonySharedState.originalsMono[num] = new MethodBase[] { original, replacement };
+				}
 			}
 		}
 
-		internal static MethodBase GetOriginal(MethodInfo replacement)
+		internal static MethodBase GetRealMethod(MethodInfo method, bool useReplacement)
 		{
+			MethodInfo methodInfo = method.Identifiable();
 			Dictionary<MethodInfo, MethodBase> dictionary = HarmonySharedState.originals;
-			MethodBase valueSafe;
 			lock (dictionary)
 			{
-				valueSafe = HarmonySharedState.originals.GetValueSafe(replacement);
+				MethodBase methodBase;
+				if (HarmonySharedState.originals.TryGetValue(methodInfo, out methodBase))
+				{
+					return methodBase;
+				}
 			}
-			return valueSafe;
+			if (AccessTools.IsMonoRuntime)
+			{
+				long num = (long)method.MethodHandle.GetFunctionPointer();
+				Dictionary<long, MethodBase[]> dictionary2 = HarmonySharedState.originalsMono;
+				lock (dictionary2)
+				{
+					MethodBase[] array;
+					if (HarmonySharedState.originalsMono.TryGetValue(num, out array))
+					{
+						return useReplacement ? array[1] : array[0];
+					}
+				}
+			}
+			return method;
 		}
 
-		internal static MethodBase FindReplacement(StackFrame frame)
+		internal unsafe static MethodBase GetStackFrameMethod(StackFrame frame, bool useReplacement)
 		{
-			MethodBase method = frame.GetMethod();
-			long num;
-			if (method == null || method.IsGenericMethod)
+			MethodInfo methodInfo = frame.GetMethod() as MethodInfo;
+			if (methodInfo != null)
 			{
-				if (HarmonySharedState.methodAddress == null)
+				return HarmonySharedState.GetRealMethod(methodInfo, useReplacement);
+			}
+			if (HarmonySharedState.methodAddressRef != null)
+			{
+				long num = *HarmonySharedState.methodAddressRef(frame);
+				Dictionary<long, MethodBase[]> dictionary = HarmonySharedState.originalsMono;
+				lock (dictionary)
 				{
-					return null;
+					MethodBase[] array;
+					if (HarmonySharedState.originalsMono.TryGetValue(num, out array))
+					{
+						return useReplacement ? array[1] : array[0];
+					}
 				}
-				num = (long)HarmonySharedState.methodAddress.GetValue(frame);
 			}
-			else
-			{
-				num = DetourHelper.Runtime.GetIdentifiable(method).GetNativeStart().ToInt64();
-			}
-			if (num == 0L)
-			{
-				return method;
-			}
-			Dictionary<long, MethodInfo> dictionary = HarmonySharedState.methodStarts;
-			MethodBase methodBase;
-			lock (dictionary)
-			{
-				if (HarmonySharedState.methodStartsInvalidated)
-				{
-					HarmonySharedState.RefreshMethodStarts();
-				}
-				MethodInfo methodInfo;
-				methodBase = (HarmonySharedState.methodStarts.TryGetValue(num, out methodInfo) ? methodInfo : method);
-			}
-			return methodBase;
+			return null;
 		}
 
 		private const string name = "HarmonySharedState";
@@ -195,12 +194,10 @@ namespace HarmonyLib
 
 		private static readonly Dictionary<MethodInfo, MethodBase> originals;
 
-		private static readonly Dictionary<long, MethodInfo> methodStarts;
+		private static readonly Dictionary<long, MethodBase[]> originalsMono;
 
-		private static bool methodStartsInvalidated;
+		private static readonly AccessTools.FieldRef<StackFrame, long> methodAddressRef;
 
 		internal static readonly int actualVersion;
-
-		private static readonly FieldInfo methodAddress = typeof(StackFrame).GetField("methodAddress", BindingFlags.Instance | BindingFlags.NonPublic);
 	}
 }

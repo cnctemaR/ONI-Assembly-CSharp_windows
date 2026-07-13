@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
 {
-	[NativeHeader("Modules/AI/Builder/NavMeshBuilder.bindings.h")]
 	[StaticAccessor("NavMeshBuilderBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Modules/AI/Builder/NavMeshBuilder.bindings.h")]
 	public static class NavMeshBuilder
 	{
 		public static void CollectSources(Bounds includedWorldBounds, int includedLayerMask, NavMeshCollectGeometry geometry, int defaultArea, bool generateLinksByDefault, List<NavMeshBuildMarkup> markups, bool includeOnlyMarkedObjects, List<NavMeshBuildSource> results)
@@ -54,9 +55,29 @@ namespace UnityEngine.AI
 			NavMeshBuilder.CollectSources(root, includedLayerMask, geometry, defaultArea, false, markups, false, results);
 		}
 
-		private static NavMeshBuildSource[] CollectSourcesInternal(int includedLayerMask, Bounds includedWorldBounds, Transform root, bool useBounds, NavMeshCollectGeometry geometry, int defaultArea, bool generateLinksByDefault, NavMeshBuildMarkup[] markups, bool includeOnlyMarkedObjects)
+		private unsafe static NavMeshBuildSource[] CollectSourcesInternal(int includedLayerMask, Bounds includedWorldBounds, Transform root, bool useBounds, NavMeshCollectGeometry geometry, int defaultArea, bool generateLinksByDefault, NavMeshBuildMarkup[] markups, bool includeOnlyMarkedObjects)
 		{
-			return NavMeshBuilder.CollectSourcesInternal_Injected(includedLayerMask, ref includedWorldBounds, root, useBounds, geometry, defaultArea, generateLinksByDefault, markups, includeOnlyMarkedObjects);
+			NavMeshBuildSource[] array2;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.Marshal<Transform>(root);
+				Span<NavMeshBuildMarkup> span = new Span<NavMeshBuildMarkup>(markups);
+				fixed (NavMeshBuildMarkup* ptr = span.GetPinnableReference())
+				{
+					ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, span.Length);
+					BlittableArrayWrapper blittableArrayWrapper;
+					NavMeshBuilder.CollectSourcesInternal_Injected(includedLayerMask, ref includedWorldBounds, intPtr, useBounds, geometry, defaultArea, generateLinksByDefault, ref managedSpanWrapper, includeOnlyMarkedObjects, out blittableArrayWrapper);
+				}
+			}
+			finally
+			{
+				NavMeshBuildMarkup* ptr = null;
+				BlittableArrayWrapper blittableArrayWrapper;
+				NavMeshBuildSource[] array;
+				blittableArrayWrapper.Unmarshal<NavMeshBuildSource>(ref array);
+				array2 = array;
+			}
+			return array2;
 		}
 
 		public static NavMeshData BuildNavMeshData(NavMeshBuildSettings buildSettings, List<NavMeshBuildSource> sources, Bounds localBounds, Vector3 position, Quaternion rotation)
@@ -92,7 +113,7 @@ namespace UnityEngine.AI
 
 		private static bool UpdateNavMeshDataListInternal(NavMeshData data, NavMeshBuildSettings buildSettings, object sources, Bounds localBounds)
 		{
-			return NavMeshBuilder.UpdateNavMeshDataListInternal_Injected(data, ref buildSettings, sources, ref localBounds);
+			return NavMeshBuilder.UpdateNavMeshDataListInternal_Injected(Object.MarshalledUnityObject.Marshal<NavMeshData>(data), ref buildSettings, sources, ref localBounds);
 		}
 
 		public static AsyncOperation UpdateNavMeshDataAsync(NavMeshData data, NavMeshBuildSettings buildSettings, List<NavMeshBuildSource> sources, Bounds localBounds)
@@ -110,24 +131,30 @@ namespace UnityEngine.AI
 			return NavMeshBuilder.UpdateNavMeshDataAsyncListInternal(data, buildSettings, sources, localBounds);
 		}
 
-		[StaticAccessor("GetNavMeshManager().GetNavMeshBuildManager()", StaticAccessorType.Arrow)]
-		[NativeMethod("Purge")]
 		[NativeHeader("Modules/AI/NavMeshManager.h")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void Cancel(NavMeshData data);
+		[NativeMethod("Purge")]
+		[StaticAccessor("GetNavMeshManager().GetNavMeshBuildManager()", StaticAccessorType.Arrow)]
+		public static void Cancel(NavMeshData data)
+		{
+			NavMeshBuilder.Cancel_Injected(Object.MarshalledUnityObject.Marshal<NavMeshData>(data));
+		}
 
 		private static AsyncOperation UpdateNavMeshDataAsyncListInternal(NavMeshData data, NavMeshBuildSettings buildSettings, object sources, Bounds localBounds)
 		{
-			return NavMeshBuilder.UpdateNavMeshDataAsyncListInternal_Injected(data, ref buildSettings, sources, ref localBounds);
+			IntPtr intPtr = NavMeshBuilder.UpdateNavMeshDataAsyncListInternal_Injected(Object.MarshalledUnityObject.Marshal<NavMeshData>(data), ref buildSettings, sources, ref localBounds);
+			return (intPtr == 0) ? null : AsyncOperation.BindingsMarshaller.ConvertToManaged(intPtr);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern NavMeshBuildSource[] CollectSourcesInternal_Injected(int includedLayerMask, ref Bounds includedWorldBounds, Transform root, bool useBounds, NavMeshCollectGeometry geometry, int defaultArea, bool generateLinksByDefault, NavMeshBuildMarkup[] markups, bool includeOnlyMarkedObjects);
+		private static extern void CollectSourcesInternal_Injected(int includedLayerMask, [In] ref Bounds includedWorldBounds, IntPtr root, bool useBounds, NavMeshCollectGeometry geometry, int defaultArea, bool generateLinksByDefault, ref ManagedSpanWrapper markups, bool includeOnlyMarkedObjects, out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool UpdateNavMeshDataListInternal_Injected(NavMeshData data, ref NavMeshBuildSettings buildSettings, object sources, ref Bounds localBounds);
+		private static extern bool UpdateNavMeshDataListInternal_Injected(IntPtr data, [In] ref NavMeshBuildSettings buildSettings, object sources, [In] ref Bounds localBounds);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AsyncOperation UpdateNavMeshDataAsyncListInternal_Injected(NavMeshData data, ref NavMeshBuildSettings buildSettings, object sources, ref Bounds localBounds);
+		private static extern void Cancel_Injected(IntPtr data);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr UpdateNavMeshDataAsyncListInternal_Injected(IntPtr data, [In] ref NavMeshBuildSettings buildSettings, object sources, [In] ref Bounds localBounds);
 	}
 }

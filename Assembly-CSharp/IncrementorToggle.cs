@@ -22,25 +22,33 @@ public class IncrementorToggle : MultiToggle
 
 	private void PlayClickSound()
 	{
-		if (this.play_sound_on_click)
+		if (!this.play_sound_on_click)
 		{
-			if (this.states[this.state].on_click_override_sound_path == "")
-			{
-				KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));
-				return;
-			}
-			KFMOD.PlayUISound(GlobalAssets.GetSound(this.states[this.state].on_click_override_sound_path, false));
+			return;
 		}
+		string text = this.states[this.state].on_click_override_sound_path;
+		if (text == "")
+		{
+			text = "HUD_Click";
+		}
+		KFMOD.PlayUISound(GlobalAssets.GetSound(text, false));
 	}
 
 	public override void OnPointerUp(PointerEventData eventData)
 	{
 		base.OnPointerUp(eventData);
-		this.timeToNextIncrement = this.timeBetweenIncrementsMax;
+		if (base.AllowClick(eventData))
+		{
+			this.timeToNextIncrement = this.timeBetweenIncrementsMax;
+		}
 	}
 
 	public override void OnPointerDown(PointerEventData eventData)
 	{
+		if (!base.AllowClick(eventData))
+		{
+			return;
+		}
 		if (!this.clickHeldDown)
 		{
 			this.clickHeldDown = true;

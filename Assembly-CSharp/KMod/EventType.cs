@@ -14,6 +14,7 @@ namespace KMod
 		InstallFailed,
 		Installed,
 		Uninstalled,
+		CannotInstall,
 		VersionUpdate,
 		AvailableContentChanged,
 		RestartRequested,

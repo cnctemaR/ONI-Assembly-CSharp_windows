@@ -2,6 +2,7 @@
 
 namespace UnityEngine.Experimental.AI
 {
+	[Obsolete("The experimental PolygonId struct has been deprecated without replacement.")]
 	public struct PolygonId : IEquatable<PolygonId>
 	{
 		public bool IsNull()

@@ -5,8 +5,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[NativeHeader("Runtime/Director/Core/FrameRate.h")]
 	[UsedByNativeCode("FrameRate")]
+	[NativeHeader("Runtime/Director/Core/FrameRate.h")]
+	[VisibleToOtherModules(new string[] { "UnityEngine.DirectorModule" })]
 	internal struct FrameRate : IEquatable<FrameRate>
 	{
 		public bool dropFrame
@@ -102,7 +103,7 @@ namespace UnityEngine.Playables
 			{
 				formatProvider = CultureInfo.InvariantCulture.NumberFormat;
 			}
-			return UnityString.Format("{0} Fps", new object[] { this.rate.ToString(format, formatProvider) });
+			return string.Format("{0} Fps", this.rate.ToString(format, formatProvider));
 		}
 
 		internal static int FrameRateToInt(FrameRate framerate)

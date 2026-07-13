@@ -3,7 +3,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public interface IMethodSignature : IMetadataTokenProvider
+	internal interface IMethodSignature : IMetadataTokenProvider
 	{
 		bool HasThis { get; set; }
 

@@ -7,7 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/ToiletWorkableUse")]
-public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
+public class ToiletWorkableUse : Workable
 {
 	private ToiletWorkableUse()
 	{

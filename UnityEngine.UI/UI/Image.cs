@@ -9,7 +9,7 @@ using UnityEngine.U2D;
 namespace UnityEngine.UI
 {
 	[RequireComponent(typeof(CanvasRenderer))]
-	[AddComponentMenu("UI/Image", 11)]
+	[AddComponentMenu("UI (Canvas)/Image", 11)]
 	public class Image : MaskableGraphic, ISerializationCallbackReceiver, ILayoutElement, ICanvasRaycastFilter
 	{
 		public Sprite sprite
@@ -25,7 +25,7 @@ namespace UnityEngine.UI
 					if (this.m_Sprite != value)
 					{
 						this.m_SkipLayoutUpdate = this.m_Sprite.rect.size.Equals(value ? value.rect.size : Vector2.zero);
-						this.m_SkipMaterialUpdate = this.m_Sprite.texture == (value ? value.texture : null);
+						this.m_SkipMaterialUpdate = this.m_Sprite.texture == (value ? value.texture : null) && !this.CheckSecondaryTexturesChanged(value);
 						this.m_Sprite = value;
 						this.<set_sprite>g__ResetAlphaHitThresholdIfNeeded|11_0();
 						this.SetAllDirty();
@@ -36,7 +36,7 @@ namespace UnityEngine.UI
 				else if (value != null)
 				{
 					this.m_SkipLayoutUpdate = value.rect.size == Vector2.zero;
-					this.m_SkipMaterialUpdate = value.texture == null;
+					this.m_SkipMaterialUpdate = value.texture == null && value.GetSecondaryTextureCount() == 0;
 					this.m_Sprite = value;
 					this.<set_sprite>g__ResetAlphaHitThresholdIfNeeded|11_0();
 					this.SetAllDirty();
@@ -452,6 +452,84 @@ namespace UnityEngine.UI
 			}
 		}
 
+		internal SecondarySpriteTexture[] secondaryTextures
+		{
+			get
+			{
+				return this.m_SecondaryTextures;
+			}
+		}
+
+		private static void ClearArray(ref SecondarySpriteTexture[] array)
+		{
+			array = Array.Empty<SecondarySpriteTexture>();
+		}
+
+		private bool CheckSecondaryTexturesChanged(Sprite sprite)
+		{
+			bool flag = this.CheckSecondaryTexturesChanged(sprite, ref Image.s_TempNewSecondaryTextures);
+			Image.ClearArray(ref Image.s_TempNewSecondaryTextures);
+			return flag;
+		}
+
+		private bool CheckSecondaryTexturesChanged(Sprite sprite, ref SecondarySpriteTexture[] newSecondaryTextures)
+		{
+			if (newSecondaryTextures == null)
+			{
+				newSecondaryTextures = new SecondarySpriteTexture[0];
+			}
+			bool flag = this.m_SecondaryTextures != null && this.m_SecondaryTextures.Length != 0;
+			int num = ((sprite != null) ? sprite.GetSecondaryTextureCount() : 0);
+			if (!flag && num == 0)
+			{
+				return false;
+			}
+			if (sprite != null)
+			{
+				Array.Resize<SecondarySpriteTexture>(ref newSecondaryTextures, num);
+				sprite.GetSecondaryTextures(newSecondaryTextures);
+			}
+			else
+			{
+				Image.ClearArray(ref newSecondaryTextures);
+			}
+			return this.m_SecondaryTextures == null || !Image.<CheckSecondaryTexturesChanged>g__Compare|93_0(this.m_SecondaryTextures, newSecondaryTextures);
+		}
+
+		internal void SetSecondaryTextures(CanvasRenderer renderer)
+		{
+			if (this.CheckSecondaryTexturesChanged(this.activeSprite, ref Image.s_TempNewSecondaryTextures))
+			{
+				if (Image.s_TempNewSecondaryTextures.Length == 0)
+				{
+					this.m_SecondaryTextures = null;
+				}
+				else
+				{
+					if (this.m_SecondaryTextures == null)
+					{
+						this.m_SecondaryTextures = new SecondarySpriteTexture[Image.s_TempNewSecondaryTextures.Length];
+					}
+					else
+					{
+						Array.Resize<SecondarySpriteTexture>(ref this.m_SecondaryTextures, Image.s_TempNewSecondaryTextures.Length);
+					}
+					Array.Copy(Image.s_TempNewSecondaryTextures, this.m_SecondaryTextures, Image.s_TempNewSecondaryTextures.Length);
+				}
+			}
+			SecondarySpriteTexture[] secondaryTextures = this.m_SecondaryTextures;
+			renderer.SetSecondaryTextureCount((secondaryTextures != null) ? secondaryTextures.Length : 0);
+			if (this.m_SecondaryTextures != null)
+			{
+				for (int i = 0; i < this.m_SecondaryTextures.Length; i++)
+				{
+					SecondarySpriteTexture secondarySpriteTexture = this.m_SecondaryTextures[i];
+					renderer.SetSecondaryTexture(i, secondarySpriteTexture.name, secondarySpriteTexture.texture);
+				}
+			}
+			Image.ClearArray(ref Image.s_TempNewSecondaryTextures);
+		}
+
 		protected override void UpdateMaterial()
 		{
 			base.UpdateMaterial();
@@ -465,6 +543,7 @@ namespace UnityEngine.UI
 			{
 				base.canvasRenderer.SetAlphaTexture(associatedAlphaSplitTexture);
 			}
+			this.SetSecondaryTextures(base.canvasRenderer);
 		}
 
 		protected override void OnCanvasHierarchyChanged()
@@ -1325,6 +1404,23 @@ namespace UnityEngine.UI
 			return this.m_Sprite != null && this.m_Sprite.texture != null && !GraphicsFormatUtility.IsCrunchFormat(this.m_Sprite.texture.format) && this.m_Sprite.texture.isReadable;
 		}
 
+		[CompilerGenerated]
+		internal static bool <CheckSecondaryTexturesChanged>g__Compare|93_0(SecondarySpriteTexture[] array1, SecondarySpriteTexture[] array2)
+		{
+			if (array1.Length != array2.Length)
+			{
+				return false;
+			}
+			for (int i = 0; i < array1.Length; i++)
+			{
+				if (array1[i] != array2[i])
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		protected static Material s_ETC1DefaultUI = null;
 
 		[FormerlySerializedAs("m_Frame")]
@@ -1367,6 +1463,10 @@ namespace UnityEngine.UI
 		private float m_PixelsPerUnitMultiplier = 1f;
 
 		private float m_CachedReferencePixelsPerUnit = 100f;
+
+		private static SecondarySpriteTexture[] s_TempNewSecondaryTextures = new SecondarySpriteTexture[0];
+
+		private SecondarySpriteTexture[] m_SecondaryTextures;
 
 		private static readonly Vector2[] s_VertScratch = new Vector2[4];
 

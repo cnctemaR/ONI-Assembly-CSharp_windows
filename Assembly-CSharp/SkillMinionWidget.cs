@@ -48,6 +48,10 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IEventSys
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
+		if (eventData.button != PointerEventData.InputButton.Left)
+		{
+			return;
+		}
 		this.skillsScreen.CurrentlySelectedMinion = this.assignableIdentity;
 		base.GetComponent<NotificationHighlightTarget>().View();
 		KFMOD.PlayUISound(GlobalAssets.GetSound("HUD_Click", false));

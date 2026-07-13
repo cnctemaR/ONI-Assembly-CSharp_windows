@@ -7,6 +7,18 @@ namespace FMODUnity
 	[AddComponentMenu("FMOD Studio/FMOD Studio Listener")]
 	public class StudioListener : MonoBehaviour
 	{
+		public GameObject AttenuationObject
+		{
+			get
+			{
+				return this.attenuationObject;
+			}
+			set
+			{
+				this.attenuationObject = value;
+			}
+		}
+
 		public static int ListenerCount
 		{
 			get
@@ -28,7 +40,14 @@ namespace FMODUnity
 			float num = float.MaxValue;
 			for (int i = 0; i < StudioListener.listeners.Count; i++)
 			{
-				num = Mathf.Min(num, Vector3.Distance(position, StudioListener.listeners[i].transform.position));
+				if (StudioListener.listeners[i].attenuationObject == null)
+				{
+					num = Mathf.Min(num, Vector3.Distance(position, StudioListener.listeners[i].transform.position));
+				}
+				else
+				{
+					num = Mathf.Min(num, Vector3.Distance(position, StudioListener.listeners[i].attenuationObject.transform.position));
+				}
 			}
 			return num;
 		}
@@ -38,7 +57,14 @@ namespace FMODUnity
 			float num = float.MaxValue;
 			for (int i = 0; i < StudioListener.listeners.Count; i++)
 			{
-				num = Mathf.Min(num, (position - StudioListener.listeners[i].transform.position).sqrMagnitude);
+				if (StudioListener.listeners[i].attenuationObject == null)
+				{
+					num = Mathf.Min(num, (position - StudioListener.listeners[i].transform.position).sqrMagnitude);
+				}
+				else
+				{
+					num = Mathf.Min(num, (position - StudioListener.listeners[i].attenuationObject.transform.position).sqrMagnitude);
+				}
 			}
 			return num;
 		}
@@ -68,8 +94,19 @@ namespace FMODUnity
 		{
 			RuntimeUtils.EnforceLibraryOrder();
 			this.rigidBody = base.gameObject.GetComponent<Rigidbody>();
+			if (this.nonRigidbodyVelocity && this.rigidBody)
+			{
+				Debug.LogWarning(string.Format("[FMOD] Non-Rigidbody Velocity is enabled on Listener attached to GameObject \"{0}\", which also has a Rigidbody component attached - this will be disabled in favor of velocity from Rigidbody component.", base.name));
+				this.nonRigidbodyVelocity = false;
+			}
 			this.rigidBody2D = base.gameObject.GetComponent<Rigidbody2D>();
+			if (this.nonRigidbodyVelocity && this.rigidBody2D)
+			{
+				Debug.LogWarning(string.Format("[FMOD] Non-Rigidbody Velocity is enabled on Listener attached to GameObject \"{0}\", which also has a Rigidbody2D component attached - this will be disabled in favor of velocity from Rigidbody2D component.", base.name));
+				this.nonRigidbodyVelocity = false;
+			}
 			StudioListener.AddListener(this);
+			this.lastFramePosition = base.transform.position;
 		}
 
 		private void OnDisable()
@@ -79,14 +116,23 @@ namespace FMODUnity
 
 		private void Update()
 		{
-			if (this.ListenerNumber >= 0 && this.ListenerNumber < 8)
+			if (this.ListenerNumber < 0 || this.ListenerNumber >= 8)
 			{
-				this.SetListenerLocation();
+				return;
 			}
-		}
-
-		private void SetListenerLocation()
-		{
+			if (this.nonRigidbodyVelocity)
+			{
+				Vector3 vector = Vector3.zero;
+				Vector3 position = base.transform.position;
+				if (Time.deltaTime != 0f)
+				{
+					vector = (position - this.lastFramePosition) / Time.deltaTime;
+					vector = Vector3.ClampMagnitude(vector, 20f);
+				}
+				this.lastFramePosition = position;
+				RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.attenuationObject, vector);
+				return;
+			}
 			if (this.rigidBody)
 			{
 				RuntimeManager.SetListenerLocation(this.ListenerNumber, base.gameObject, this.rigidBody, this.attenuationObject);
@@ -101,7 +147,12 @@ namespace FMODUnity
 		}
 
 		[SerializeField]
+		private bool nonRigidbodyVelocity;
+
+		[SerializeField]
 		private GameObject attenuationObject;
+
+		private Vector3 lastFramePosition = Vector3.zero;
 
 		private Rigidbody rigidBody;
 

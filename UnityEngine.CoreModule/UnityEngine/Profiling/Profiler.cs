@@ -11,14 +11,14 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Profiling
 {
+	[NativeHeader("NativeKernel/Allocator/MemoryManager.h")]
+	[NativeHeader("NativeKernel/Utilities/MemoryUtilities.h")]
+	[NativeHeader("Runtime/ScriptingBackend/ScriptingApi.h")]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/Profiler.bindings.h")]
+	[NativeHeader("Runtime/Profiler/Profiler.h")]
+	[NativeHeader("Runtime/Profiler/MemoryProfiler.h")]
 	[MovedFrom("UnityEngine")]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Allocator/MemoryManager.h")]
-	[NativeHeader("Runtime/Profiler/ScriptBindings/Profiler.bindings.h")]
-	[NativeHeader("Runtime/ScriptingBackend/ScriptingApi.h")]
-	[NativeHeader("Runtime/Profiler/MemoryProfiler.h")]
-	[NativeHeader("Runtime/Utilities/MemoryUtilities.h")]
-	[NativeHeader("Runtime/Profiler/Profiler.h")]
 	public sealed class Profiler
 	{
 		private Profiler()
@@ -33,12 +33,43 @@ namespace UnityEngine.Profiling
 		}
 
 		[StaticAccessor("ProfilerBindings", StaticAccessorType.DoubleColon)]
-		public static extern string logFile
+		public unsafe static string logFile
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					Profiler.get_logFile_Injected(out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+			set
+			{
+				try
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					Profiler.set_logFile_Injected(ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
 		}
 
 		public static extern bool enableBinaryLog
@@ -82,8 +113,8 @@ namespace UnityEngine.Profiling
 			set;
 		}
 
-		[Conditional("ENABLE_PROFILER")]
 		[FreeFunction("ProfilerBindings::profiler_set_area_enabled")]
+		[Conditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetAreaEnabled(ProfilerArea area, bool enabled);
 
@@ -95,8 +126,8 @@ namespace UnityEngine.Profiling
 			}
 		}
 
-		[NativeConditional("ENABLE_PROFILER")]
 		[FreeFunction("ProfilerBindings::profiler_is_area_enabled")]
+		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool GetAreaEnabled(ProfilerArea area);
 
@@ -114,12 +145,34 @@ namespace UnityEngine.Profiling
 			}
 		}
 
-		[NativeMethod(Name = "LoadFromFile")]
-		[StaticAccessor("profiling::GetProfilerSessionPtr()", StaticAccessorType.Arrow)]
+		[NativeMethod(Name = "ProfilerBindings::SetScreenshotCaptureFrameInterval", IsFreeFunction = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetScreenshotCaptureFrameInterval(int frames);
+
 		[NativeConditional("ENABLE_PROFILER && UNITY_EDITOR")]
 		[NativeHeader("Modules/ProfilerEditor/Public/ProfilerSession.h")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddFramesFromFile_Internal(string file, bool keepExistingFrames);
+		[NativeMethod(Name = "LoadFromFile")]
+		[StaticAccessor("profiling::GetProfilerSessionPtr()", StaticAccessorType.Arrow)]
+		private unsafe static void AddFramesFromFile_Internal(string file, bool keepExistingFrames)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(file, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = file.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Profiler.AddFramesFromFile_Internal_Injected(ref managedSpanWrapper, keepExistingFrames);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[Conditional("ENABLE_PROFILER")]
 		public static void BeginThreadProfiling(string threadGroupName, string threadName)
@@ -137,10 +190,38 @@ namespace UnityEngine.Profiling
 			Profiler.BeginThreadProfilingInternal(threadGroupName, threadName);
 		}
 
-		[NativeConditional("ENABLE_PROFILER")]
 		[NativeMethod(Name = "ProfilerBindings::BeginThreadProfiling", IsFreeFunction = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void BeginThreadProfilingInternal(string threadGroupName, string threadName);
+		[NativeConditional("ENABLE_PROFILER")]
+		private unsafe static void BeginThreadProfilingInternal(string threadGroupName, string threadName)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(threadGroupName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = threadGroupName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(threadName, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = threadName.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				Profiler.BeginThreadProfilingInternal_Injected(ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+		}
 
 		[NativeConditional("ENABLE_PROFILER")]
 		public static void EndThreadProfiling()
@@ -174,11 +255,29 @@ namespace UnityEngine.Profiling
 		}
 
 		[NativeMethod(Name = "ProfilerBindings::BeginSample", IsFreeFunction = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void BeginSampleImpl(string name, Object targetObject);
+		private unsafe static void BeginSampleImpl(string name, Object targetObject)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Profiler.BeginSampleImpl_Injected(ref managedSpanWrapper, Object.MarshalledUnityObject.Marshal<Object>(targetObject));
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
-		[NativeMethod(Name = "ProfilerBindings::EndSample", IsFreeFunction = true, IsThreadSafe = true)]
 		[Conditional("ENABLE_PROFILER")]
+		[NativeMethod(Name = "ProfilerBindings::EndSample", IsFreeFunction = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndSample();
 
@@ -217,8 +316,19 @@ namespace UnityEngine.Profiling
 		}
 
 		[NativeMethod(Name = "ProfilerBindings::GetRuntimeMemorySizeLong", IsFreeFunction = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern long GetRuntimeMemorySizeLong([NotNull("ArgumentNullException")] Object o);
+		public static long GetRuntimeMemorySizeLong([NotNull] Object o)
+		{
+			if (o == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(o, "o");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Object>(o);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(o, "o");
+			}
+			return Profiler.GetRuntimeMemorySizeLong_Injected(intPtr);
+		}
 
 		[Obsolete("GetMonoHeapSize has been deprecated since it is limited to 4GB. Please use GetMonoHeapSizeLong() instead.")]
 		public static uint GetMonoHeapSize()
@@ -240,8 +350,8 @@ namespace UnityEngine.Profiling
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetMonoUsedSizeLong();
 
-		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
 		[NativeConditional("ENABLE_MEMORY_MANAGER")]
+		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool SetTempAllocatorRequestedSize(uint size);
 
@@ -256,9 +366,9 @@ namespace UnityEngine.Profiling
 			return (uint)Profiler.GetTotalAllocatedMemoryLong();
 		}
 
-		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[NativeMethod(Name = "GetTotalAllocatedMemory")]
 		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
+		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetTotalAllocatedMemoryLong();
 
@@ -268,8 +378,8 @@ namespace UnityEngine.Profiling
 			return (uint)Profiler.GetTotalUnusedReservedMemoryLong();
 		}
 
-		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
 		[NativeMethod(Name = "GetTotalUnusedReservedMemory")]
+		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
 		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetTotalUnusedReservedMemoryLong();
@@ -280,8 +390,8 @@ namespace UnityEngine.Profiling
 			return (uint)Profiler.GetTotalReservedMemoryLong();
 		}
 
-		[NativeMethod(Name = "GetTotalReservedMemory")]
 		[StaticAccessor("GetMemoryManager()", StaticAccessorType.Dot)]
+		[NativeMethod(Name = "GetTotalReservedMemory")]
 		[NativeConditional("ENABLE_MEMORY_MANAGER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetTotalReservedMemoryLong();
@@ -298,8 +408,8 @@ namespace UnityEngine.Profiling
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern long InternalGetTotalFragmentationInfo(IntPtr pStats, int count);
 
-		[StaticAccessor("MemoryProfiler", StaticAccessorType.DoubleColon)]
 		[NativeMethod(Name = "GetRegisteredGFXDriverMemory", IsThreadSafe = true)]
+		[StaticAccessor("MemoryProfiler", StaticAccessorType.DoubleColon)]
 		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetAllocatedMemoryForGraphicsDriver();
@@ -335,7 +445,7 @@ namespace UnityEngine.Profiling
 			{
 				throw new ArgumentException(string.Format("{0} type must be blittable", typeFromHandle));
 			}
-			Profiler.Internal_EmitGlobalMetaData_Array((void*)(&id), 16, tag, NoAllocHelpers.ExtractArrayFromList(data), data.Count, UnsafeUtility.SizeOf(typeFromHandle), true);
+			Profiler.Internal_EmitGlobalMetaData_Array((void*)(&id), 16, tag, NoAllocHelpers.ExtractArrayFromList<T>(data), data.Count, UnsafeUtility.SizeOf(typeFromHandle), true);
 		}
 
 		[Conditional("ENABLE_PROFILER")]
@@ -375,7 +485,7 @@ namespace UnityEngine.Profiling
 			{
 				throw new ArgumentException(string.Format("{0} type must be blittable", typeFromHandle));
 			}
-			Profiler.Internal_EmitGlobalMetaData_Array((void*)(&id), 16, tag, NoAllocHelpers.ExtractArrayFromList(data), data.Count, UnsafeUtility.SizeOf(typeFromHandle), false);
+			Profiler.Internal_EmitGlobalMetaData_Array((void*)(&id), 16, tag, NoAllocHelpers.ExtractArrayFromList<T>(data), data.Count, UnsafeUtility.SizeOf(typeFromHandle), false);
 		}
 
 		[Conditional("ENABLE_PROFILER")]
@@ -384,8 +494,8 @@ namespace UnityEngine.Profiling
 			Profiler.Internal_EmitGlobalMetaData_Native((void*)(&id), 16, tag, (IntPtr)data.GetUnsafeReadOnlyPtr<T>(), data.Length, UnsafeUtility.SizeOf<T>(), false);
 		}
 
-		[NativeMethod(Name = "ProfilerBindings::Internal_EmitGlobalMetaData_Array", IsFreeFunction = true, IsThreadSafe = true)]
 		[NativeConditional("ENABLE_PROFILER")]
+		[NativeMethod(Name = "ProfilerBindings::Internal_EmitGlobalMetaData_Array", IsFreeFunction = true, IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private unsafe static extern void Internal_EmitGlobalMetaData_Array(void* id, int idLen, int tag, Array data, int count, int elementSize, bool frameData);
 
@@ -453,6 +563,24 @@ namespace UnityEngine.Profiling
 		[NativeConditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool Internal_IsCategoryEnabled(ushort categoryId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_logFile_Injected(out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_logFile_Injected(ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddFramesFromFile_Internal_Injected(ref ManagedSpanWrapper file, bool keepExistingFrames);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginThreadProfilingInternal_Injected(ref ManagedSpanWrapper threadGroupName, ref ManagedSpanWrapper threadName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BeginSampleImpl_Injected(ref ManagedSpanWrapper name, IntPtr targetObject);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetRuntimeMemorySizeLong_Injected(IntPtr o);
 
 		internal const uint invalidProfilerArea = 4294967295U;
 	}

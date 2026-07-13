@@ -9,6 +9,7 @@ namespace UnityEngine.TextCore
 	[Serializable]
 	public struct FaceInfo
 	{
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal int faceIndex
 		{
 			get
@@ -45,7 +46,7 @@ namespace UnityEngine.TextCore
 			}
 		}
 
-		public int pointSize
+		public float pointSize
 		{
 			get
 			{
@@ -69,6 +70,7 @@ namespace UnityEngine.TextCore
 			}
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 		internal int unitsPerEM
 		{
 			get
@@ -266,7 +268,7 @@ namespace UnityEngine.TextCore
 			this.m_FaceIndex = 0;
 			this.m_FamilyName = familyName;
 			this.m_StyleName = styleName;
-			this.m_PointSize = pointSize;
+			this.m_PointSize = (float)pointSize;
 			this.m_Scale = scale;
 			this.m_UnitsPerEM = unitsPerEM;
 			this.m_LineHeight = lineHeight;
@@ -299,13 +301,13 @@ namespace UnityEngine.TextCore
 		[NativeName("familyName")]
 		private string m_FamilyName;
 
-		[SerializeField]
 		[NativeName("styleName")]
+		[SerializeField]
 		private string m_StyleName;
 
-		[SerializeField]
 		[NativeName("pointSize")]
-		private int m_PointSize;
+		[SerializeField]
+		private float m_PointSize;
 
 		[NativeName("scale")]
 		[SerializeField]
@@ -323,12 +325,12 @@ namespace UnityEngine.TextCore
 		[NativeName("ascentLine")]
 		private float m_AscentLine;
 
-		[SerializeField]
 		[NativeName("capLine")]
+		[SerializeField]
 		private float m_CapLine;
 
-		[SerializeField]
 		[NativeName("meanLine")]
+		[SerializeField]
 		private float m_MeanLine;
 
 		[SerializeField]
@@ -339,40 +341,40 @@ namespace UnityEngine.TextCore
 		[NativeName("descentLine")]
 		private float m_DescentLine;
 
-		[NativeName("superscriptOffset")]
 		[SerializeField]
+		[NativeName("superscriptOffset")]
 		private float m_SuperscriptOffset;
 
-		[NativeName("superscriptSize")]
 		[SerializeField]
+		[NativeName("superscriptSize")]
 		private float m_SuperscriptSize;
 
-		[SerializeField]
 		[NativeName("subscriptOffset")]
+		[SerializeField]
 		private float m_SubscriptOffset;
 
-		[SerializeField]
 		[NativeName("subscriptSize")]
+		[SerializeField]
 		private float m_SubscriptSize;
 
-		[NativeName("underlineOffset")]
 		[SerializeField]
+		[NativeName("underlineOffset")]
 		private float m_UnderlineOffset;
 
-		[NativeName("underlineThickness")]
 		[SerializeField]
+		[NativeName("underlineThickness")]
 		private float m_UnderlineThickness;
 
-		[NativeName("strikethroughOffset")]
 		[SerializeField]
+		[NativeName("strikethroughOffset")]
 		private float m_StrikethroughOffset;
 
-		[SerializeField]
 		[NativeName("strikethroughThickness")]
+		[SerializeField]
 		private float m_StrikethroughThickness;
 
-		[SerializeField]
 		[NativeName("tabWidth")]
+		[SerializeField]
 		private float m_TabWidth;
 	}
 }

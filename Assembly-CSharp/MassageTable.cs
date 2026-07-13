@@ -5,7 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class MassageTable : RelaxationPoint, IGameObjectEffectDescriptor, IActivationRangeTarget
+public class MassageTable : RelaxationPoint, IActivationRangeTarget
 {
 	public string ActivateTooltip
 	{

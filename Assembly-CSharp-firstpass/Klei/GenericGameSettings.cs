@@ -78,6 +78,8 @@ namespace Klei
 
 		public bool devBootModReport { get; set; }
 
+		public bool devQuitAfterLoadingSave { get; set; }
+
 		public bool enableAudioLogging { get; set; }
 
 		public GenericGameSettings.ScriptedProfile scriptedProfile { get; set; }

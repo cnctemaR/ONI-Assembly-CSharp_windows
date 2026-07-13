@@ -32,10 +32,12 @@ namespace UnityEngine.Rendering
 
 		public LightmapsMode lightmapsModes { get; set; } = LightmapsMode.CombinedDirectional;
 
-		[Obsolete("Bake with the Progressive Lightmapper. The backend that uses Enlighten to bake is deprecated.", false)]
-		public bool enlightenLightmapper { get; set; } = true;
+		[Obsolete("Bake with the Progressive Lightmapper. The backend that uses Enlighten to bake is obsolete.", true)]
+		public bool enlightenLightmapper { get; set; } = false;
 
 		public bool enlighten { get; set; } = true;
+
+		public bool skyOcclusion { get; set; } = false;
 
 		public bool lightProbeProxyVolumes { get; set; } = true;
 
@@ -71,9 +73,35 @@ namespace UnityEngine.Rendering
 
 		public bool particleSystemInstancing { get; set; } = true;
 
-		public bool autoAmbientProbeBaking { get; set; } = true;
+		[Obsolete("autoAmbientProbeBaking is obsolete. To enable or disable baking of the ambient probe, use ambientProbeBaking instead. (UnityUpgradable) -> ambientProbeBaking", false)]
+		public bool autoAmbientProbeBaking
+		{
+			get
+			{
+				return this.ambientProbeBaking;
+			}
+			set
+			{
+				this.ambientProbeBaking = value;
+			}
+		}
 
-		public bool autoDefaultReflectionProbeBaking { get; set; } = true;
+		[Obsolete("autoDefaultReflectionProbeBaking is obsolete. To enable or disable baking of the default reflection probe, use defaultReflectionProbeBaking instead. (UnityUpgradable) -> defaultReflectionProbeBaking", false)]
+		public bool autoDefaultReflectionProbeBaking
+		{
+			get
+			{
+				return this.defaultReflectionProbeBaking;
+			}
+			set
+			{
+				this.defaultReflectionProbeBaking = value;
+			}
+		}
+
+		public bool ambientProbeBaking { get; set; } = true;
+
+		public bool defaultReflectionProbeBaking { get; set; } = true;
 
 		public bool overridesShadowmask { get; set; } = false;
 
@@ -81,7 +109,9 @@ namespace UnityEngine.Rendering
 
 		public bool supportsHDR { get; set; } = false;
 
-		public string overridesLightProbeSystemWarningMessage { get; set; } = "The rendering pipeline used has an alternative method to handle light probes. Please consult the documentation for the used SRP to setup the alternative.";
+		public bool supportsClouds { get; set; } = false;
+
+		public string overridesLightProbeSystemWarningMessage { get; set; } = "Light Probe Groups are unavailable as Probe Volumes have been enabled by the current Render Pipeline.";
 
 		internal unsafe static MixedLightingMode FallbackMixedLightingMode()
 		{
@@ -214,7 +244,7 @@ namespace UnityEngine.Rendering
 		internal unsafe static void IsLightmapperSupportedByRef(int lightmapper, IntPtr isSupportedPtr)
 		{
 			bool* ptr = (bool*)(void*)isSupportedPtr;
-			*ptr = lightmapper != 0 || SupportedRenderingFeatures.active.enlightenLightmapper;
+			*ptr = lightmapper != 0;
 		}
 
 		[RequiredByNativeCode]
@@ -225,17 +255,17 @@ namespace UnityEngine.Rendering
 		}
 
 		[RequiredByNativeCode]
-		internal unsafe static void IsAutoAmbientProbeBakingSupported(IntPtr isSupportedPtr)
+		internal unsafe static void IsAmbientProbeBakingSupported(IntPtr isSupportedPtr)
 		{
 			bool* ptr = (bool*)(void*)isSupportedPtr;
-			*ptr = SupportedRenderingFeatures.active.autoAmbientProbeBaking;
+			*ptr = SupportedRenderingFeatures.active.ambientProbeBaking;
 		}
 
 		[RequiredByNativeCode]
-		internal unsafe static void IsAutoDefaultReflectionProbeBakingSupported(IntPtr isSupportedPtr)
+		internal unsafe static void IsDefaultReflectionProbeBakingSupported(IntPtr isSupportedPtr)
 		{
 			bool* ptr = (bool*)(void*)isSupportedPtr;
-			*ptr = SupportedRenderingFeatures.active.autoDefaultReflectionProbeBaking;
+			*ptr = SupportedRenderingFeatures.active.defaultReflectionProbeBaking;
 		}
 
 		[RequiredByNativeCode]
@@ -257,6 +287,13 @@ namespace UnityEngine.Rendering
 		{
 			int* ptr = (int*)(void*)lightmapperPtr;
 			*ptr = 1;
+		}
+
+		[RequiredByNativeCode]
+		internal unsafe static void IsRotatingReflectionProbesSupported(IntPtr isSupportedPtr)
+		{
+			bool* ptr = (bool*)(void*)isSupportedPtr;
+			*ptr = (SupportedRenderingFeatures.active.reflectionProbeModes & SupportedRenderingFeatures.ReflectionProbeModes.Rotation) > SupportedRenderingFeatures.ReflectionProbeModes.None;
 		}
 
 		[Obsolete("terrainDetailUnsupported is deprecated.")]

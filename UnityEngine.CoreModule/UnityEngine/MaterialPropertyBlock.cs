@@ -7,67 +7,67 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine
 {
+	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
+	[NativeHeader("Runtime/Shaders/ShaderPropertySheet.h")]
 	[NativeHeader("Runtime/Math/SphericalHarmonicsL2.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeHeader("Runtime/Shaders/ShaderPropertySheet.h")]
-	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
 	public sealed class MaterialPropertyBlock
 	{
-		[Obsolete("Use SetFloat instead (UnityUpgradable) -> SetFloat(*)", false)]
+		[Obsolete("Use SetFloat instead (UnityUpgradable) -> SetFloat(*)", true)]
 		public void AddFloat(string name, float value)
 		{
 			this.SetFloat(Shader.PropertyToID(name), value);
 		}
 
-		[Obsolete("Use SetFloat instead (UnityUpgradable) -> SetFloat(*)", false)]
+		[Obsolete("Use SetFloat instead (UnityUpgradable) -> SetFloat(*)", true)]
 		public void AddFloat(int nameID, float value)
 		{
 			this.SetFloat(nameID, value);
 		}
 
-		[Obsolete("Use SetVector instead (UnityUpgradable) -> SetVector(*)", false)]
+		[Obsolete("Use SetVector instead (UnityUpgradable) -> SetVector(*)", true)]
 		public void AddVector(string name, Vector4 value)
 		{
 			this.SetVector(Shader.PropertyToID(name), value);
 		}
 
-		[Obsolete("Use SetVector instead (UnityUpgradable) -> SetVector(*)", false)]
+		[Obsolete("Use SetVector instead (UnityUpgradable) -> SetVector(*)", true)]
 		public void AddVector(int nameID, Vector4 value)
 		{
 			this.SetVector(nameID, value);
 		}
 
-		[Obsolete("Use SetColor instead (UnityUpgradable) -> SetColor(*)", false)]
+		[Obsolete("Use SetColor instead (UnityUpgradable) -> SetColor(*)", true)]
 		public void AddColor(string name, Color value)
 		{
 			this.SetColor(Shader.PropertyToID(name), value);
 		}
 
-		[Obsolete("Use SetColor instead (UnityUpgradable) -> SetColor(*)", false)]
+		[Obsolete("Use SetColor instead (UnityUpgradable) -> SetColor(*)", true)]
 		public void AddColor(int nameID, Color value)
 		{
 			this.SetColor(nameID, value);
 		}
 
-		[Obsolete("Use SetMatrix instead (UnityUpgradable) -> SetMatrix(*)", false)]
+		[Obsolete("Use SetMatrix instead (UnityUpgradable) -> SetMatrix(*)", true)]
 		public void AddMatrix(string name, Matrix4x4 value)
 		{
 			this.SetMatrix(Shader.PropertyToID(name), value);
 		}
 
-		[Obsolete("Use SetMatrix instead (UnityUpgradable) -> SetMatrix(*)", false)]
+		[Obsolete("Use SetMatrix instead (UnityUpgradable) -> SetMatrix(*)", true)]
 		public void AddMatrix(int nameID, Matrix4x4 value)
 		{
 			this.SetMatrix(nameID, value);
 		}
 
-		[Obsolete("Use SetTexture instead (UnityUpgradable) -> SetTexture(*)", false)]
+		[Obsolete("Use SetTexture instead (UnityUpgradable) -> SetTexture(*)", true)]
 		public void AddTexture(string name, Texture value)
 		{
 			this.SetTexture(Shader.PropertyToID(name), value);
 		}
 
-		[Obsolete("Use SetTexture instead (UnityUpgradable) -> SetTexture(*)", false)]
+		[Obsolete("Use SetTexture instead (UnityUpgradable) -> SetTexture(*)", true)]
 		public void AddTexture(int nameID, Texture value)
 		{
 			this.SetTexture(nameID, value);
@@ -75,20 +75,39 @@ namespace UnityEngine
 
 		[NativeName("GetIntFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetIntImpl(int name);
+		private int GetIntImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.GetIntImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("GetFloatFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float GetFloatImpl(int name);
+		private float GetFloatImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.GetFloatImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("GetVectorFromScript")]
 		[ThreadSafe]
 		private Vector4 GetVectorImpl(int name)
 		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetVectorImpl_Injected(name, out vector);
+			MaterialPropertyBlock.GetVectorImpl_Injected(intPtr, name, out vector);
 			return vector;
 		}
 
@@ -96,8 +115,13 @@ namespace UnityEngine
 		[NativeName("GetColorFromScript")]
 		private Color GetColorImpl(int name)
 		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Color color;
-			this.GetColorImpl_Injected(name, out color);
+			MaterialPropertyBlock.GetColorImpl_Injected(intPtr, name, out color);
 			return color;
 		}
 
@@ -105,178 +129,549 @@ namespace UnityEngine
 		[NativeName("GetMatrixFromScript")]
 		private Matrix4x4 GetMatrixImpl(int name)
 		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetMatrixImpl_Injected(name, out matrix4x);
+			MaterialPropertyBlock.GetMatrixImpl_Injected(intPtr, name, out matrix4x);
 			return matrix4x;
 		}
 
-		[NativeName("GetTextureFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Texture GetTextureImpl(int name);
+		[NativeName("GetTextureFromScript")]
+		private Texture GetTextureImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture>(MaterialPropertyBlock.GetTextureImpl_Injected(intPtr, name));
+		}
 
 		[NativeName("HasPropertyFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasPropertyImpl(int name);
+		private bool HasPropertyImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasPropertyImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("HasFloatFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasFloatImpl(int name);
+		private bool HasFloatImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasFloatImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("HasIntegerFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasIntImpl(int name);
+		private bool HasIntImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasIntImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("HasTextureFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasTextureImpl(int name);
+		private bool HasTextureImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasTextureImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("HasMatrixFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasMatrixImpl(int name);
+		private bool HasMatrixImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasMatrixImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("HasVectorFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasVectorImpl(int name);
+		private bool HasVectorImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasVectorImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("HasBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasBufferImpl(int name);
+		private bool HasBufferImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasBufferImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("HasConstantBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool HasConstantBufferImpl(int name);
+		private bool HasConstantBufferImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.HasConstantBufferImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("SetIntFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetIntImpl(int name, int value);
+		private void SetIntImpl(int name, int value)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetIntImpl_Injected(intPtr, name, value);
+		}
 
 		[ThreadSafe]
 		[NativeName("SetFloatFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFloatImpl(int name, float value);
+		private void SetFloatImpl(int name, float value)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetFloatImpl_Injected(intPtr, name, value);
+		}
 
-		[ThreadSafe]
 		[NativeName("SetVectorFromScript")]
+		[ThreadSafe]
 		private void SetVectorImpl(int name, Vector4 value)
 		{
-			this.SetVectorImpl_Injected(name, ref value);
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetVectorImpl_Injected(intPtr, name, ref value);
 		}
 
-		[NativeName("SetColorFromScript")]
 		[ThreadSafe]
+		[NativeName("SetColorFromScript")]
 		private void SetColorImpl(int name, Color value)
 		{
-			this.SetColorImpl_Injected(name, ref value);
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetColorImpl_Injected(intPtr, name, ref value);
 		}
 
-		[NativeName("SetMatrixFromScript")]
 		[ThreadSafe]
+		[NativeName("SetMatrixFromScript")]
 		private void SetMatrixImpl(int name, Matrix4x4 value)
 		{
-			this.SetMatrixImpl_Injected(name, ref value);
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetMatrixImpl_Injected(intPtr, name, ref value);
 		}
 
 		[NativeName("SetTextureFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTextureImpl(int name, [NotNull("ArgumentNullException")] Texture value);
+		private void SetTextureImpl(int name, [NotNull] Texture value)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(value, "value");
+			}
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Texture>(value);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(value, "value");
+			}
+			MaterialPropertyBlock.SetTextureImpl_Injected(intPtr, name, intPtr2);
+		}
 
 		[ThreadSafe]
 		[NativeName("SetRenderTextureFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetRenderTextureImpl(int name, [NotNull("ArgumentNullException")] RenderTexture value, RenderTextureSubElement element);
+		private void SetRenderTextureImpl(int name, [NotNull] RenderTexture value, RenderTextureSubElement element)
+		{
+			if (value == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(value, "value");
+			}
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<RenderTexture>(value);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(value, "value");
+			}
+			MaterialPropertyBlock.SetRenderTextureImpl_Injected(intPtr, name, intPtr2, element);
+		}
 
 		[NativeName("SetBufferFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetBufferImpl(int name, ComputeBuffer value);
+		private void SetBufferImpl(int name, ComputeBuffer value)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
 
 		[ThreadSafe]
 		[NativeName("SetBufferFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetGraphicsBufferImpl(int name, GraphicsBuffer value);
+		private void SetGraphicsBufferImpl(int name, GraphicsBuffer value)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetGraphicsBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(value));
+		}
 
 		[NativeName("SetConstantBufferFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size);
+		private void SetConstantBufferImpl(int name, ComputeBuffer value, int offset, int size)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetConstantBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : ComputeBuffer.BindingsMarshaller.ConvertToNative(value), offset, size);
+		}
 
-		[NativeName("SetConstantBufferFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size);
+		[NativeName("SetConstantBufferFromScript")]
+		private void SetConstantGraphicsBufferImpl(int name, GraphicsBuffer value, int offset, int size)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.SetConstantGraphicsBufferImpl_Injected(intPtr, name, (value == null) ? ((IntPtr)0) : GraphicsBuffer.BindingsMarshaller.ConvertToNative(value), offset, size);
+		}
 
 		[ThreadSafe]
 		[NativeName("SetFloatArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFloatArrayImpl(int name, float[] values, int count);
+		private unsafe void SetFloatArrayImpl(int name, float[] values, int count)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<float> span = new Span<float>(values);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				MaterialPropertyBlock.SetFloatArrayImpl_Injected(intPtr, name, ref managedSpanWrapper, count);
+			}
+		}
 
-		[ThreadSafe]
 		[NativeName("SetVectorArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVectorArrayImpl(int name, Vector4[] values, int count);
+		[ThreadSafe]
+		private unsafe void SetVectorArrayImpl(int name, Vector4[] values, int count)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Vector4> span = new Span<Vector4>(values);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				MaterialPropertyBlock.SetVectorArrayImpl_Injected(intPtr, name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[ThreadSafe]
 		[NativeName("SetMatrixArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMatrixArrayImpl(int name, Matrix4x4[] values, int count);
+		private unsafe void SetMatrixArrayImpl(int name, Matrix4x4[] values, int count)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Matrix4x4> span = new Span<Matrix4x4>(values);
+			fixed (Matrix4x4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				MaterialPropertyBlock.SetMatrixArrayImpl_Injected(intPtr, name, ref managedSpanWrapper, count);
+			}
+		}
 
 		[ThreadSafe]
 		[NativeName("GetFloatArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float[] GetFloatArrayImpl(int name);
+		private float[] GetFloatArrayImpl(int name)
+		{
+			float[] array2;
+			try
+			{
+				IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				MaterialPropertyBlock.GetFloatArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				float[] array;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
-		[ThreadSafe]
 		[NativeName("GetVectorArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Vector4[] GetVectorArrayImpl(int name);
+		[ThreadSafe]
+		private Vector4[] GetVectorArrayImpl(int name)
+		{
+			Vector4[] array2;
+			try
+			{
+				IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				MaterialPropertyBlock.GetVectorArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Vector4[] array;
+				blittableArrayWrapper.Unmarshal<Vector4>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[ThreadSafe]
 		[NativeName("GetMatrixArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Matrix4x4[] GetMatrixArrayImpl(int name);
+		private Matrix4x4[] GetMatrixArrayImpl(int name)
+		{
+			Matrix4x4[] array2;
+			try
+			{
+				IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				MaterialPropertyBlock.GetMatrixArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Matrix4x4[] array;
+				blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
-		[ThreadSafe]
 		[NativeName("GetFloatArrayCountFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetFloatArrayCountImpl(int name);
+		[ThreadSafe]
+		private int GetFloatArrayCountImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.GetFloatArrayCountImpl_Injected(intPtr, name);
+		}
 
 		[NativeName("GetVectorArrayCountFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetVectorArrayCountImpl(int name);
+		private int GetVectorArrayCountImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.GetVectorArrayCountImpl_Injected(intPtr, name);
+		}
 
+		[ThreadSafe]
 		[NativeName("GetMatrixArrayCountFromScript")]
-		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetMatrixArrayCountImpl(int name);
+		private int GetMatrixArrayCountImpl(int name)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return MaterialPropertyBlock.GetMatrixArrayCountImpl_Injected(intPtr, name);
+		}
 
-		[ThreadSafe]
 		[NativeName("ExtractFloatArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ExtractFloatArrayImpl(int name, [Out] float[] val);
-
-		[NativeName("ExtractVectorArrayFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ExtractVectorArrayImpl(int name, [Out] Vector4[] val);
+		private unsafe void ExtractFloatArrayImpl(int name, [Out] float[] val)
+		{
+			try
+			{
+				IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (float[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				MaterialPropertyBlock.ExtractFloatArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				float[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<float>(ref array);
+			}
+		}
+
+		[ThreadSafe]
+		[NativeName("ExtractVectorArrayFromScript")]
+		private unsafe void ExtractVectorArrayImpl(int name, [Out] Vector4[] val)
+		{
+			try
+			{
+				IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (Vector4[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				MaterialPropertyBlock.ExtractVectorArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Vector4[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Vector4>(ref array);
+			}
+		}
 
 		[ThreadSafe]
 		[NativeName("ExtractMatrixArrayFromScript")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ExtractMatrixArrayImpl(int name, [Out] Matrix4x4[] val);
+		private unsafe void ExtractMatrixArrayImpl(int name, [Out] Matrix4x4[] val)
+		{
+			try
+			{
+				IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (val != null)
+				{
+					fixed (Matrix4x4[] array = val)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				MaterialPropertyBlock.ExtractMatrixArrayImpl_Injected(intPtr, name, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Matrix4x4[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Matrix4x4>(ref array);
+			}
+		}
 
-		[FreeFunction("ConvertAndCopySHCoefficientArraysToPropertySheetFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Internal_CopySHCoefficientArraysFrom(MaterialPropertyBlock properties, SphericalHarmonicsL2[] lightProbes, int sourceStart, int destStart, int count);
+		[FreeFunction("ConvertAndCopySHCoefficientArraysToPropertySheetFromScript")]
+		internal unsafe static void Internal_CopySHCoefficientArraysFrom(MaterialPropertyBlock properties, SphericalHarmonicsL2[] lightProbes, int sourceStart, int destStart, int count)
+		{
+			IntPtr intPtr = ((properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+			Span<SphericalHarmonicsL2> span = new Span<SphericalHarmonicsL2>(lightProbes);
+			fixed (SphericalHarmonicsL2* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				MaterialPropertyBlock.Internal_CopySHCoefficientArraysFrom_Injected(intPtr, ref managedSpanWrapper, sourceStart, destStart, count);
+			}
+		}
 
 		[FreeFunction("CopyProbeOcclusionArrayToPropertySheetFromScript")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void Internal_CopyProbeOcclusionArrayFrom(MaterialPropertyBlock properties, Vector4[] occlusionProbes, int sourceStart, int destStart, int count);
+		internal unsafe static void Internal_CopyProbeOcclusionArrayFrom(MaterialPropertyBlock properties, Vector4[] occlusionProbes, int sourceStart, int destStart, int count)
+		{
+			IntPtr intPtr = ((properties == null) ? ((IntPtr)0) : MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(properties));
+			Span<Vector4> span = new Span<Vector4>(occlusionProbes);
+			fixed (Vector4* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				MaterialPropertyBlock.Internal_CopyProbeOcclusionArrayFrom_Injected(intPtr, ref managedSpanWrapper, sourceStart, destStart, count);
+			}
+		}
 
 		[NativeMethod(Name = "MaterialPropertyBlockScripting::Create", IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -286,17 +681,31 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyImpl(IntPtr mpb);
 
-		public extern bool isEmpty
+		public bool isEmpty
 		{
-			[ThreadSafe]
 			[NativeName("IsEmpty")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			[ThreadSafe]
+			get
+			{
+				IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return MaterialPropertyBlock.get_isEmpty_Injected(intPtr);
+			}
 		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Clear(bool keepMemory);
+		private void Clear(bool keepMemory)
+		{
+			IntPtr intPtr = MaterialPropertyBlock.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			MaterialPropertyBlock.Clear_Injected(intPtr, keepMemory);
+		}
 
 		public void Clear()
 		{
@@ -376,7 +785,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<float>(values, floatArrayCountImpl);
-				this.ExtractFloatArrayImpl(name, (float[])NoAllocHelpers.ExtractArrayFromList(values));
+				this.ExtractFloatArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<float>(values));
 			}
 		}
 
@@ -393,7 +802,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Vector4>(values, vectorArrayCountImpl);
-				this.ExtractVectorArrayImpl(name, (Vector4[])NoAllocHelpers.ExtractArrayFromList(values));
+				this.ExtractVectorArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<Vector4>(values));
 			}
 		}
 
@@ -410,7 +819,7 @@ namespace UnityEngine
 			if (flag2)
 			{
 				NoAllocHelpers.EnsureListElemCount<Matrix4x4>(values, matrixArrayCountImpl);
-				this.ExtractMatrixArrayImpl(name, (Matrix4x4[])NoAllocHelpers.ExtractArrayFromList(values));
+				this.ExtractMatrixArrayImpl(name, NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values));
 			}
 		}
 
@@ -557,12 +966,12 @@ namespace UnityEngine
 
 		public void SetFloatArray(string name, List<float> values)
 		{
-			this.SetFloatArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
+			this.SetFloatArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<float>(values), values.Count);
 		}
 
 		public void SetFloatArray(int nameID, List<float> values)
 		{
-			this.SetFloatArray(nameID, NoAllocHelpers.ExtractArrayFromListT<float>(values), values.Count);
+			this.SetFloatArray(nameID, NoAllocHelpers.ExtractArrayFromList<float>(values), values.Count);
 		}
 
 		public void SetFloatArray(string name, float[] values)
@@ -577,12 +986,12 @@ namespace UnityEngine
 
 		public void SetVectorArray(string name, List<Vector4> values)
 		{
-			this.SetVectorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
+			this.SetVectorArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<Vector4>(values), values.Count);
 		}
 
 		public void SetVectorArray(int nameID, List<Vector4> values)
 		{
-			this.SetVectorArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Vector4>(values), values.Count);
+			this.SetVectorArray(nameID, NoAllocHelpers.ExtractArrayFromList<Vector4>(values), values.Count);
 		}
 
 		public void SetVectorArray(string name, Vector4[] values)
@@ -597,12 +1006,12 @@ namespace UnityEngine
 
 		public void SetMatrixArray(string name, List<Matrix4x4> values)
 		{
-			this.SetMatrixArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
+			this.SetMatrixArray(Shader.PropertyToID(name), NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values), values.Count);
 		}
 
 		public void SetMatrixArray(int nameID, List<Matrix4x4> values)
 		{
-			this.SetMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(values), values.Count);
+			this.SetMatrixArray(nameID, NoAllocHelpers.ExtractArrayFromList<Matrix4x4>(values), values.Count);
 		}
 
 		public void SetMatrixArray(string name, Matrix4x4[] values)
@@ -852,7 +1261,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("lightProbes");
 			}
-			this.CopySHCoefficientArraysFrom(NoAllocHelpers.ExtractArrayFromListT<SphericalHarmonicsL2>(lightProbes), 0, 0, lightProbes.Count);
+			this.CopySHCoefficientArraysFrom(NoAllocHelpers.ExtractArrayFromList<SphericalHarmonicsL2>(lightProbes), 0, 0, lightProbes.Count);
 		}
 
 		public void CopySHCoefficientArraysFrom(SphericalHarmonicsL2[] lightProbes)
@@ -867,7 +1276,7 @@ namespace UnityEngine
 
 		public void CopySHCoefficientArraysFrom(List<SphericalHarmonicsL2> lightProbes, int sourceStart, int destStart, int count)
 		{
-			this.CopySHCoefficientArraysFrom(NoAllocHelpers.ExtractArrayFromListT<SphericalHarmonicsL2>(lightProbes), sourceStart, destStart, count);
+			this.CopySHCoefficientArraysFrom(NoAllocHelpers.ExtractArrayFromList<SphericalHarmonicsL2>(lightProbes), sourceStart, destStart, count);
 		}
 
 		public void CopySHCoefficientArraysFrom(SphericalHarmonicsL2[] lightProbes, int sourceStart, int destStart, int count)
@@ -907,7 +1316,7 @@ namespace UnityEngine
 			{
 				throw new ArgumentNullException("occlusionProbes");
 			}
-			this.CopyProbeOcclusionArrayFrom(NoAllocHelpers.ExtractArrayFromListT<Vector4>(occlusionProbes), 0, 0, occlusionProbes.Count);
+			this.CopyProbeOcclusionArrayFrom(NoAllocHelpers.ExtractArrayFromList<Vector4>(occlusionProbes), 0, 0, occlusionProbes.Count);
 		}
 
 		public void CopyProbeOcclusionArrayFrom(Vector4[] occlusionProbes)
@@ -922,7 +1331,7 @@ namespace UnityEngine
 
 		public void CopyProbeOcclusionArrayFrom(List<Vector4> occlusionProbes, int sourceStart, int destStart, int count)
 		{
-			this.CopyProbeOcclusionArrayFrom(NoAllocHelpers.ExtractArrayFromListT<Vector4>(occlusionProbes), sourceStart, destStart, count);
+			this.CopyProbeOcclusionArrayFrom(NoAllocHelpers.ExtractArrayFromList<Vector4>(occlusionProbes), sourceStart, destStart, count);
 		}
 
 		public void CopyProbeOcclusionArrayFrom(Vector4[] occlusionProbes, int sourceStart, int destStart, int count)
@@ -956,23 +1365,136 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVectorImpl_Injected(int name, out Vector4 ret);
+		private static extern int GetIntImpl_Injected(IntPtr _unity_self, int name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetColorImpl_Injected(int name, out Color ret);
+		private static extern float GetFloatImpl_Injected(IntPtr _unity_self, int name);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetMatrixImpl_Injected(int name, out Matrix4x4 ret);
+		private static extern void GetVectorImpl_Injected(IntPtr _unity_self, int name, out Vector4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetVectorImpl_Injected(int name, ref Vector4 value);
+		private static extern void GetColorImpl_Injected(IntPtr _unity_self, int name, out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColorImpl_Injected(int name, ref Color value);
+		private static extern void GetMatrixImpl_Injected(IntPtr _unity_self, int name, out Matrix4x4 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetMatrixImpl_Injected(int name, ref Matrix4x4 value);
+		private static extern IntPtr GetTextureImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasPropertyImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasFloatImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasIntImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasTextureImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasMatrixImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasVectorImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasBufferImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool HasConstantBufferImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIntImpl_Injected(IntPtr _unity_self, int name, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetFloatImpl_Injected(IntPtr _unity_self, int name, float value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVectorImpl_Injected(IntPtr _unity_self, int name, [In] ref Vector4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetColorImpl_Injected(IntPtr _unity_self, int name, [In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMatrixImpl_Injected(IntPtr _unity_self, int name, [In] ref Matrix4x4 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTextureImpl_Injected(IntPtr _unity_self, int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetRenderTextureImpl_Injected(IntPtr _unity_self, int name, IntPtr value, RenderTextureSubElement element);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetGraphicsBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetConstantBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetConstantGraphicsBufferImpl_Injected(IntPtr _unity_self, int name, IntPtr value, int offset, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetFloatArrayImpl_Injected(IntPtr _unity_self, int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetVectorArrayImpl_Injected(IntPtr _unity_self, int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMatrixArrayImpl_Injected(IntPtr _unity_self, int name, ref ManagedSpanWrapper values, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetFloatArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVectorArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMatrixArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetFloatArrayCountImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetVectorArrayCountImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetMatrixArrayCountImpl_Injected(IntPtr _unity_self, int name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractFloatArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractVectorArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ExtractMatrixArrayImpl_Injected(IntPtr _unity_self, int name, out BlittableArrayWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_CopySHCoefficientArraysFrom_Injected(IntPtr properties, ref ManagedSpanWrapper lightProbes, int sourceStart, int destStart, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_CopyProbeOcclusionArrayFrom_Injected(IntPtr properties, ref ManagedSpanWrapper occlusionProbes, int sourceStart, int destStart, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isEmpty_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Clear_Injected(IntPtr _unity_self, bool keepMemory);
 
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(MaterialPropertyBlock materialPropertyBlock)
+			{
+				return materialPropertyBlock.m_Ptr;
+			}
+		}
 	}
 }

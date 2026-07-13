@@ -8,8 +8,10 @@ namespace UnityEngine.Serialization
 	public sealed class ManagedReferenceUtility
 	{
 		[NativeMethod("SetManagedReferenceIdForObject")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SetManagedReferenceIdForObjectInternal(Object obj, object scriptObj, long refId);
+		private static bool SetManagedReferenceIdForObjectInternal(Object obj, object scriptObj, long refId)
+		{
+			return ManagedReferenceUtility.SetManagedReferenceIdForObjectInternal_Injected(Object.MarshalledUnityObject.Marshal<Object>(obj), scriptObj, refId);
+		}
 
 		public static bool SetManagedReferenceIdForObject(Object obj, object scriptObj, long refId)
 		{
@@ -33,8 +35,10 @@ namespace UnityEngine.Serialization
 		}
 
 		[NativeMethod("GetManagedReferenceIdForObject")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetManagedReferenceIdForObjectInternal(Object obj, object scriptObj);
+		private static long GetManagedReferenceIdForObjectInternal(Object obj, object scriptObj)
+		{
+			return ManagedReferenceUtility.GetManagedReferenceIdForObjectInternal_Injected(Object.MarshalledUnityObject.Marshal<Object>(obj), scriptObj);
+		}
 
 		public static long GetManagedReferenceIdForObject(Object obj, object scriptObj)
 		{
@@ -42,8 +46,10 @@ namespace UnityEngine.Serialization
 		}
 
 		[NativeMethod("GetManagedReference")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern object GetManagedReferenceInternal(Object obj, long id);
+		private static object GetManagedReferenceInternal(Object obj, long id)
+		{
+			return ManagedReferenceUtility.GetManagedReferenceInternal_Injected(Object.MarshalledUnityObject.Marshal<Object>(obj), id);
+		}
 
 		public static object GetManagedReference(Object obj, long id)
 		{
@@ -51,13 +57,40 @@ namespace UnityEngine.Serialization
 		}
 
 		[NativeMethod("GetManagedReferenceIds")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long[] GetManagedReferenceIdsForObjectInternal(Object obj);
+		private static long[] GetManagedReferenceIdsForObjectInternal(Object obj)
+		{
+			long[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				ManagedReferenceUtility.GetManagedReferenceIdsForObjectInternal_Injected(Object.MarshalledUnityObject.Marshal<Object>(obj), out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				long[] array;
+				blittableArrayWrapper.Unmarshal<long>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		public static long[] GetManagedReferenceIds(Object obj)
 		{
 			return ManagedReferenceUtility.GetManagedReferenceIdsForObjectInternal(obj);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetManagedReferenceIdForObjectInternal_Injected(IntPtr obj, object scriptObj, long refId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetManagedReferenceIdForObjectInternal_Injected(IntPtr obj, object scriptObj);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern object GetManagedReferenceInternal_Injected(IntPtr obj, long id);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetManagedReferenceIdsForObjectInternal_Injected(IntPtr obj, out BlittableArrayWrapper ret);
 
 		public const long RefIdUnknown = -1L;
 

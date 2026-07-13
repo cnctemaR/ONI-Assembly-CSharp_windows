@@ -1,9 +1,18 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace FMOD
 {
 	public struct DSP_STATE
 	{
+		public DSP_STATE_FUNCTIONS functions
+		{
+			get
+			{
+				return Marshal.PtrToStructure<DSP_STATE_FUNCTIONS>(this.functions_internal);
+			}
+		}
+
 		public IntPtr instance;
 
 		public IntPtr plugindata;
@@ -16,7 +25,7 @@ namespace FMOD
 
 		public int sidechainchannels;
 
-		public IntPtr functions;
+		private IntPtr functions_internal;
 
 		public int systemobject;
 	}

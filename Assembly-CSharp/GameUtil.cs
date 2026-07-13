@@ -548,6 +548,10 @@ public static class GameUtil
 			builder.AppendFormat("{0:##0.#}", f);
 			return;
 		}
+		if (f < 100f && f >= 99.5f)
+		{
+			f = 99f;
+		}
 		builder.AppendFormat("{0:##0}", f);
 	}
 

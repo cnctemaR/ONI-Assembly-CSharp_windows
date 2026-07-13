@@ -138,17 +138,16 @@ public class SoundEvent : AnimEvent
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
-			string[] array = new string[7];
-			array[0] = behaviour.name;
-			array[1] = ", ";
-			array[2] = sound;
-			array[3] = ", ";
-			array[4] = base.frame.ToString();
-			array[5] = ", ";
-			int num = 6;
-			Vector3 vector2 = vector;
-			array[num] = vector2.ToString();
-			global::Debug.Log(string.Concat(array));
+			global::Debug.Log(string.Concat(new string[]
+			{
+				behaviour.name,
+				", ",
+				sound,
+				", ",
+				base.frame.ToString(),
+				", ",
+				vector.ToString()
+			}));
 		}
 		try
 		{
@@ -267,17 +266,16 @@ public class SoundEvent : AnimEvent
 	{
 		if (sound != null)
 		{
-			string[] array = new string[7];
-			array[0] = anim_name;
-			array[1] = ", ";
-			array[2] = sound_name;
-			array[3] = ", ";
-			array[4] = base.frame.ToString();
-			array[5] = ", ";
-			int num = 6;
-			Vector3 vector = sound_pos;
-			array[num] = vector.ToString();
-			global::Debug.Log(string.Concat(array));
+			global::Debug.Log(string.Concat(new string[]
+			{
+				anim_name,
+				", ",
+				sound_name,
+				", ",
+				base.frame.ToString(),
+				", ",
+				sound_pos.ToString()
+			}));
 			return;
 		}
 		global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name);

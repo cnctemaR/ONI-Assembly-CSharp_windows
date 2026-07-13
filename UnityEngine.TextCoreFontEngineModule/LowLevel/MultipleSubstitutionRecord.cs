@@ -5,6 +5,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine.TextCore.LowLevel
 {
 	[UsedByNativeCode]
+	[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 	[Serializable]
 	internal struct MultipleSubstitutionRecord
 	{

@@ -5,7 +5,7 @@ public class SceneInitializerLoader : MonoBehaviour
 {
 	private void Awake()
 	{
-		Camera[] array = global::UnityEngine.Object.FindObjectsOfType<Camera>();
+		Camera[] array = global::UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None);
 		for (int i = 0; i < array.Length; i++)
 		{
 			array[i].enabled = false;

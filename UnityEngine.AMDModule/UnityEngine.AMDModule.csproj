@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD82}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.AMD</RootNamespace>
+    <AssemblyName>UnityEngine.AMDModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="AMDUnityPlugin.cs" />
+    <Compile Include="FfxFsr2InitializationFlags.cs" />
+    <Compile Include="FSR2CommandExecutionData.cs" />
+    <Compile Include="FSR2CommandInitializationData.cs" />
+    <Compile Include="FSR2Context.cs" />
+    <Compile Include="FSR2Quality.cs" />
+    <Compile Include="FSR2TextureTable.cs" />
+    <Compile Include="GraphicsDevice.cs" />
+    <Compile Include="NativeData.cs" />
+    <Compile Include="PluginEvent.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDAF}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

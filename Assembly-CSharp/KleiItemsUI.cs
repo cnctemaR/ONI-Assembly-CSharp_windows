@@ -139,9 +139,22 @@ public static class KleiItemsUI
 		string dlcIdFrom = permit.GetDlcIdFrom();
 		if (DlcManager.IsDlcId(dlcIdFrom))
 		{
+			DlcManager.DlcInfo dlcInfo;
+			bool flag = DlcManager.DLC_PACKS.TryGetValue(dlcIdFrom, out dlcInfo) && dlcInfo.isCosmetic;
 			if (permit.Rarity == PermitRarity.UniversalLocked)
 			{
-				text = text + "\n\n" + UI.KLEI_INVENTORY_SCREEN.COLLECTION_COMING_SOON.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom));
+				if (flag)
+				{
+					text = text + "\n\n" + UI.KLEI_INVENTORY_SCREEN.COLLECTION_COMING_SOON_THE.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom));
+				}
+				else
+				{
+					text = text + "\n\n" + UI.KLEI_INVENTORY_SCREEN.COLLECTION_COMING_SOON.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom));
+				}
+			}
+			else if (flag)
+			{
+				text = text + "\n\n" + UI.KLEI_INVENTORY_SCREEN.COLLECTION_THE.Replace("{Collection}", DlcManager.GetDlcTitle(dlcIdFrom));
 			}
 			else
 			{

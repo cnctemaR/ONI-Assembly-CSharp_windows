@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
@@ -25,8 +26,13 @@ namespace UnityEngine.AI
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshData>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Bounds bounds;
-				this.get_sourceBounds_Injected(out bounds);
+				NavMeshData.get_sourceBounds_Injected(intPtr, out bounds);
 				return bounds;
 			}
 		}
@@ -35,13 +41,23 @@ namespace UnityEngine.AI
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshData>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_position_Injected(out vector);
+				NavMeshData.get_position_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_position_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshData>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshData.set_position_Injected(intPtr, ref value);
 			}
 		}
 
@@ -49,49 +65,74 @@ namespace UnityEngine.AI
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshData>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Quaternion quaternion;
-				this.get_rotation_Injected(out quaternion);
+				NavMeshData.get_rotation_Injected(intPtr, out quaternion);
 				return quaternion;
 			}
 			set
 			{
-				this.set_rotation_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshData>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				NavMeshData.set_rotation_Injected(intPtr, ref value);
 			}
 		}
 
-		internal extern bool hasHeightMeshData
+		internal bool hasHeightMeshData
 		{
 			[NativeMethod("HasHeightMeshData")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshData>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshData.get_hasHeightMeshData_Injected(intPtr);
+			}
 		}
 
 		internal NavMeshBuildSettings buildSettings
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<NavMeshData>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				NavMeshBuildSettings navMeshBuildSettings;
-				this.get_buildSettings_Injected(out navMeshBuildSettings);
+				NavMeshData.get_buildSettings_Injected(intPtr, out navMeshBuildSettings);
 				return navMeshBuildSettings;
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_sourceBounds_Injected(out Bounds ret);
+		private static extern void get_sourceBounds_Injected(IntPtr _unity_self, out Bounds ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_position_Injected(out Vector3 ret);
+		private static extern void get_position_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_position_Injected(ref Vector3 value);
+		private static extern void set_position_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_rotation_Injected(out Quaternion ret);
+		private static extern void get_rotation_Injected(IntPtr _unity_self, out Quaternion ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_rotation_Injected(ref Quaternion value);
+		private static extern void set_rotation_Injected(IntPtr _unity_self, [In] ref Quaternion value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_buildSettings_Injected(out NavMeshBuildSettings ret);
+		private static extern bool get_hasHeightMeshData_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_buildSettings_Injected(IntPtr _unity_self, out NavMeshBuildSettings ret);
 	}
 }

@@ -6,8 +6,8 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.AI
 {
-	[MovedFrom("UnityEngine")]
 	[NativeHeader("Modules/AI/NavMeshPath.bindings.h")]
+	[MovedFrom("UnityEngine")]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class NavMeshPath
 	{
@@ -31,16 +31,72 @@ namespace UnityEngine.AI
 		private static extern void DestroyNavMeshPath(IntPtr ptr);
 
 		[FreeFunction("NavMeshPathScriptBindings::GetCornersNonAlloc", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetCornersNonAlloc([Out] Vector3[] results);
+		public unsafe int GetCornersNonAlloc([Out] Vector3[] results)
+		{
+			int cornersNonAlloc_Injected;
+			try
+			{
+				IntPtr intPtr = NavMeshPath.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				if (results != null)
+				{
+					fixed (Vector3[] array = results)
+					{
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+					}
+				}
+				cornersNonAlloc_Injected = NavMeshPath.GetCornersNonAlloc_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				Vector3[] array;
+				BlittableArrayWrapper blittableArrayWrapper;
+				blittableArrayWrapper.Unmarshal<Vector3>(ref array);
+			}
+			return cornersNonAlloc_Injected;
+		}
 
 		[FreeFunction("NavMeshPathScriptBindings::CalculateCornersInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Vector3[] CalculateCornersInternal();
+		private Vector3[] CalculateCornersInternal()
+		{
+			Vector3[] array2;
+			try
+			{
+				IntPtr intPtr = NavMeshPath.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				NavMeshPath.CalculateCornersInternal_Injected(intPtr, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Vector3[] array;
+				blittableArrayWrapper.Unmarshal<Vector3>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		[FreeFunction("NavMeshPathScriptBindings::ClearCornersInternal", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ClearCornersInternal();
+		private void ClearCornersInternal()
+		{
+			IntPtr intPtr = NavMeshPath.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			NavMeshPath.ClearCornersInternal_Injected(intPtr);
+		}
 
 		public void ClearCorners()
 		{
@@ -66,14 +122,41 @@ namespace UnityEngine.AI
 			}
 		}
 
-		public extern NavMeshPathStatus status
+		public NavMeshPathStatus status
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = NavMeshPath.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return NavMeshPath.get_status_Injected(intPtr);
+			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetCornersNonAlloc_Injected(IntPtr _unity_self, out BlittableArrayWrapper results);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CalculateCornersInternal_Injected(IntPtr _unity_self, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ClearCornersInternal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern NavMeshPathStatus get_status_Injected(IntPtr _unity_self);
 
 		internal IntPtr m_Ptr;
 
 		internal Vector3[] m_Corners;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(NavMeshPath navMeshPath)
+			{
+				return navMeshPath.m_Ptr;
+			}
+		}
 	}
 }

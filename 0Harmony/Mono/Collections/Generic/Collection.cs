@@ -5,7 +5,7 @@ using Mono.Cecil;
 
 namespace Mono.Collections.Generic
 {
-	public class Collection<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection
+	internal class Collection<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection
 	{
 		public int Count
 		{

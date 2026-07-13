@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
-	[NativeHeader("Modules/XR/XRPrefix.h")]
-	[RequiredByNativeCode]
 	[StaticAccessor("XRInputDevices::Get()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/XR/Subsystems/Input/Public/XRInputDevices.h")]
+	[NativeHeader("Modules/XR/XRPrefix.h")]
 	[NativeHeader("XRScriptingClasses.h")]
 	[NativeConditional("ENABLE_VR")]
+	[RequiredByNativeCode]
 	public struct Hand : IEquatable<Hand>
 	{
 		internal ulong deviceId
@@ -50,9 +51,32 @@ namespace UnityEngine.XR
 			return Hand.Hand_TryGetFingerBonesAsList(this, finger, bonesOut);
 		}
 
-		private static bool Hand_TryGetFingerBonesAsList(Hand hand, HandFinger finger, [NotNull("ArgumentNullException")] List<Bone> bonesOut)
+		private unsafe static bool Hand_TryGetFingerBonesAsList(Hand hand, HandFinger finger, [NotNull] List<Bone> bonesOut)
 		{
-			return Hand.Hand_TryGetFingerBonesAsList_Injected(ref hand, finger, bonesOut);
+			if (bonesOut == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(bonesOut, "bonesOut");
+			}
+			bool flag;
+			try
+			{
+				fixed (Bone[] array = NoAllocHelpers.ExtractArrayFromList<Bone>(bonesOut))
+				{
+					BlittableArrayWrapper blittableArrayWrapper;
+					if (array.Length != 0)
+					{
+						blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+					}
+					BlittableListWrapper blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, bonesOut.Count);
+					flag = Hand.Hand_TryGetFingerBonesAsList_Injected(ref hand, finger, ref blittableListWrapper);
+				}
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<Bone>(bonesOut);
+			}
+			return flag;
 		}
 
 		public override bool Equals(object obj)
@@ -82,10 +106,10 @@ namespace UnityEngine.XR
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Hand_TryGetRootBone_Injected(ref Hand hand, out Bone boneOut);
+		private static extern bool Hand_TryGetRootBone_Injected([In] ref Hand hand, out Bone boneOut);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Hand_TryGetFingerBonesAsList_Injected(ref Hand hand, HandFinger finger, List<Bone> bonesOut);
+		private static extern bool Hand_TryGetFingerBonesAsList_Injected([In] ref Hand hand, HandFinger finger, ref BlittableListWrapper bonesOut);
 
 		private ulong m_DeviceId;
 

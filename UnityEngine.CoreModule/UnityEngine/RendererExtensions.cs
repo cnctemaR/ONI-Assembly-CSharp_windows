@@ -13,7 +13,12 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("RendererScripting::UpdateGIMaterialsForRenderer")]
+		internal static void UpdateGIMaterialsForRenderer(Renderer renderer)
+		{
+			RendererExtensions.UpdateGIMaterialsForRenderer_Injected(Object.MarshalledUnityObject.Marshal<Renderer>(renderer));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void UpdateGIMaterialsForRenderer(Renderer renderer);
+		private static extern void UpdateGIMaterialsForRenderer_Injected(IntPtr renderer);
 	}
 }

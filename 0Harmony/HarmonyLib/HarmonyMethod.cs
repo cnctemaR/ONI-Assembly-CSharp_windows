@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
@@ -33,6 +34,11 @@ namespace HarmonyLib
 			this.ImportMethod(method);
 		}
 
+		public HarmonyMethod(Delegate @delegate)
+			: this(@delegate.Method)
+		{
+		}
+
 		public HarmonyMethod(MethodInfo method, int priority = -1, string[] before = null, string[] after = null, bool? debug = null)
 		{
 			if (method == null)
@@ -46,12 +52,24 @@ namespace HarmonyLib
 			this.debug = debug;
 		}
 
+		public HarmonyMethod(Delegate @delegate, int priority = -1, string[] before = null, string[] after = null, bool? debug = null)
+			: this(@delegate.Method, priority, before, after, debug)
+		{
+		}
+
 		public HarmonyMethod(Type methodType, string methodName, Type[] argumentTypes = null)
 		{
 			MethodInfo methodInfo = AccessTools.Method(methodType, methodName, argumentTypes, null);
 			if (methodInfo == null)
 			{
-				throw new ArgumentException(string.Format("Cannot not find method for type {0} and name {1} and parameters {2}", methodType, methodName, (argumentTypes != null) ? argumentTypes.Description() : null));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(58, 3);
+				defaultInterpolatedStringHandler.AppendLiteral("Cannot not find method for type ");
+				defaultInterpolatedStringHandler.AppendFormatted<Type>(methodType);
+				defaultInterpolatedStringHandler.AppendLiteral(" and name ");
+				defaultInterpolatedStringHandler.AppendFormatted(methodName);
+				defaultInterpolatedStringHandler.AppendLiteral(" and parameters ");
+				defaultInterpolatedStringHandler.AppendFormatted((argumentTypes != null) ? argumentTypes.Description() : null);
+				throw new ArgumentException(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			this.ImportMethod(methodInfo);
 		}
@@ -66,7 +84,7 @@ namespace HarmonyLib
 		public static HarmonyMethod Merge(List<HarmonyMethod> attributes)
 		{
 			HarmonyMethod harmonyMethod = new HarmonyMethod();
-			if (attributes == null)
+			if (attributes == null || attributes.Count == 0)
 			{
 				return harmonyMethod;
 			}
@@ -96,7 +114,12 @@ namespace HarmonyLib
 				{
 					result += ", ";
 				}
-				result += string.Format("{0}={1}", f, trv.Field(f).GetValue());
+				string result2 = result;
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(1, 2);
+				defaultInterpolatedStringHandler.AppendFormatted(f);
+				defaultInterpolatedStringHandler.AppendLiteral("=");
+				defaultInterpolatedStringHandler.AppendFormatted<object>(trv.Field(f).GetValue());
+				result = result2 + defaultInterpolatedStringHandler.ToStringAndClear();
 			});
 			return "HarmonyMethod[" + result + "]";
 		}
@@ -107,10 +130,32 @@ namespace HarmonyLib
 			string text2 = this.methodName ?? "undefined";
 			string text3 = ((this.methodType != null) ? this.methodType.Value.ToString() : "undefined");
 			string text4 = ((this.argumentTypes != null) ? this.argumentTypes.Description() : "undefined");
-			return string.Concat(new string[] { "(class=", text, ", methodname=", text2, ", type=", text3, ", args=", text4, ")" });
+			DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(35, 4);
+			defaultInterpolatedStringHandler.AppendLiteral("(class=");
+			defaultInterpolatedStringHandler.AppendFormatted(text);
+			defaultInterpolatedStringHandler.AppendLiteral(", methodname=");
+			defaultInterpolatedStringHandler.AppendFormatted(text2);
+			defaultInterpolatedStringHandler.AppendLiteral(", type=");
+			defaultInterpolatedStringHandler.AppendFormatted(text3);
+			defaultInterpolatedStringHandler.AppendLiteral(", args=");
+			defaultInterpolatedStringHandler.AppendFormatted(text4);
+			defaultInterpolatedStringHandler.AppendLiteral(")");
+			return defaultInterpolatedStringHandler.ToStringAndClear();
+		}
+
+		public static implicit operator HarmonyMethod(MethodInfo method)
+		{
+			return new HarmonyMethod(method);
+		}
+
+		public static implicit operator HarmonyMethod(Delegate @delegate)
+		{
+			return new HarmonyMethod(@delegate);
 		}
 
 		public MethodInfo method;
+
+		public string category;
 
 		public Type declaringType;
 

@@ -181,23 +181,23 @@ namespace UnityEngine.Events
 			this.m_TargetAssemblyTypeName = UnityEventTools.TidyAssemblyTypeName(this.m_TargetAssemblyTypeName);
 		}
 
-		[FormerlySerializedAs("instance")]
 		[SerializeField]
+		[FormerlySerializedAs("instance")]
 		private Object m_Target;
 
 		[SerializeField]
 		private string m_TargetAssemblyTypeName;
 
-		[FormerlySerializedAs("methodName")]
 		[SerializeField]
+		[FormerlySerializedAs("methodName")]
 		private string m_MethodName;
 
 		[FormerlySerializedAs("mode")]
 		[SerializeField]
 		private PersistentListenerMode m_Mode = PersistentListenerMode.EventDefined;
 
-		[FormerlySerializedAs("arguments")]
 		[SerializeField]
+		[FormerlySerializedAs("arguments")]
 		private ArgumentCache m_Arguments = new ArgumentCache();
 
 		[FormerlySerializedAs("enabled")]

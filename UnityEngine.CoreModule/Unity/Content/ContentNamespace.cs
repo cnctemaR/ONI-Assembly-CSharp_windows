@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using UnityEngine.Bindings;
 
@@ -67,14 +68,48 @@ namespace Unity.Content
 			throw new InvalidOperationException("Namespace name can only contain alphanumeric characters and a maximum length of 16 characters.");
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern ContentNamespace[] GetAll();
-
-		internal static ContentNamespace GetOrCreate(string name)
+		public static ContentNamespace[] GetAll()
 		{
-			ContentNamespace contentNamespace;
-			ContentNamespace.GetOrCreate_Injected(name, out contentNamespace);
-			return contentNamespace;
+			ContentNamespace[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				ContentNamespace.GetAll_Injected(out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				ContentNamespace[] array;
+				blittableArrayWrapper.Unmarshal<ContentNamespace>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
+
+		internal unsafe static ContentNamespace GetOrCreate(string name)
+		{
+			ContentNamespace contentNamespace2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ContentNamespace contentNamespace;
+				ContentNamespace.GetOrCreate_Injected(ref managedSpanWrapper, out contentNamespace);
+			}
+			finally
+			{
+				char* ptr = null;
+				ContentNamespace contentNamespace;
+				contentNamespace2 = contentNamespace;
+			}
+			return contentNamespace2;
 		}
 
 		internal static void RemoveNamespace(ContentNamespace ns)
@@ -84,7 +119,18 @@ namespace Unity.Content
 
 		internal static string GetNamespaceName(ContentNamespace ns)
 		{
-			return ContentNamespace.GetNamespaceName_Injected(ref ns);
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				ContentNamespace.GetNamespaceName_Injected(ref ns, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
 		}
 
 		internal static bool IsNamespaceHandleValid(ContentNamespace ns)
@@ -93,16 +139,19 @@ namespace Unity.Content
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetOrCreate_Injected(string name, out ContentNamespace ret);
+		private static extern void GetAll_Injected(out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void RemoveNamespace_Injected(ref ContentNamespace ns);
+		private static extern void GetOrCreate_Injected(ref ManagedSpanWrapper name, out ContentNamespace ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetNamespaceName_Injected(ref ContentNamespace ns);
+		private static extern void RemoveNamespace_Injected([In] ref ContentNamespace ns);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsNamespaceHandleValid_Injected(ref ContentNamespace ns);
+		private static extern void GetNamespaceName_Injected([In] ref ContentNamespace ns, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsNamespaceHandleValid_Injected([In] ref ContentNamespace ns);
 
 		internal ulong Id;
 

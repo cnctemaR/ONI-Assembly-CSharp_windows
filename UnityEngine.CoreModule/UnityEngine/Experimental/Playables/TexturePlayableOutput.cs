@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Playables
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Export/Director/TexturePlayableOutput.bindings.h")]
-	[StaticAccessor("TexturePlayableOutputBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[NativeHeader("Runtime/Graphics/Director/TexturePlayableOutput.h")]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[StaticAccessor("TexturePlayableOutputBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	public struct TexturePlayableOutput : IPlayableOutput
 	{
 		public static TexturePlayableOutput Create(PlayableGraph graph, string name, RenderTexture target)
@@ -79,12 +79,22 @@ namespace UnityEngine.Experimental.Playables
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RenderTexture InternalGetTarget(ref PlayableOutputHandle output);
+		private static RenderTexture InternalGetTarget(ref PlayableOutputHandle output)
+		{
+			return Unmarshal.UnmarshalUnityObject<RenderTexture>(TexturePlayableOutput.InternalGetTarget_Injected(ref output));
+		}
 
 		[NativeThrows]
+		private static void InternalSetTarget(ref PlayableOutputHandle output, RenderTexture target)
+		{
+			TexturePlayableOutput.InternalSetTarget_Injected(ref output, Object.MarshalledUnityObject.Marshal<RenderTexture>(target));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InternalSetTarget(ref PlayableOutputHandle output, RenderTexture target);
+		private static extern IntPtr InternalGetTarget_Injected(ref PlayableOutputHandle output);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetTarget_Injected(ref PlayableOutputHandle output, IntPtr target);
 
 		private PlayableOutputHandle m_Handle;
 	}

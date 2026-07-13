@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace UnityEngine.UI
 {
 	[RequireComponent(typeof(CanvasRenderer))]
-	[AddComponentMenu("UI/Legacy/Text", 100)]
+	[AddComponentMenu("UI (Canvas)/Legacy/Text", 100)]
 	public class Text : MaskableGraphic, ILayoutElement
 	{
 		protected Text()

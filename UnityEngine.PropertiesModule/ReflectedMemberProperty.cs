@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using Unity.Collections;
 
 namespace Unity.Properties
 {
@@ -27,22 +26,28 @@ namespace Unity.Properties
 			this.m_Info = info;
 			this.m_IsStructContainerType = TypeTraits<TContainer>.IsValueType;
 			base.AddAttributes(info.GetCustomAttributes());
-			bool flag = this.m_Info.IsReadOnly || base.HasAttribute<ReadOnlyAttribute>();
+			bool flag = this.m_Info.IsReadOnly;
+			bool flag2 = base.HasAttribute<CreatePropertyAttribute>();
+			if (flag2)
+			{
+				CreatePropertyAttribute attribute = base.GetAttribute<CreatePropertyAttribute>();
+				flag |= attribute.ReadOnly;
+			}
 			this.IsReadOnly = flag;
 			IMemberInfo memberInfo = this.m_Info;
 			FieldMember fieldMember;
-			bool flag2;
+			bool flag3;
 			if (memberInfo is FieldMember)
 			{
 				fieldMember = (FieldMember)memberInfo;
-				flag2 = true;
+				flag3 = true;
 			}
 			else
 			{
-				flag2 = false;
+				flag3 = false;
 			}
-			bool flag3 = flag2;
-			if (flag3)
+			bool flag4 = flag3;
+			if (flag4)
 			{
 				FieldInfo fieldInfo = fieldMember.m_FieldInfo;
 				DynamicMethod dynamicMethod = new DynamicMethod(string.Empty, fieldInfo.FieldType, new Type[] { this.m_IsStructContainerType ? fieldInfo.ReflectedType.MakeByRefType() : fieldInfo.ReflectedType }, true);
@@ -59,8 +64,8 @@ namespace Unity.Properties
 				{
 					this.m_GetClassValueAction = (ReflectedMemberProperty<TContainer, TValue>.GetClassValueAction)dynamicMethod.CreateDelegate(typeof(ReflectedMemberProperty<TContainer, TValue>.GetClassValueAction));
 				}
-				bool flag4 = !flag;
-				if (flag4)
+				bool flag5 = !flag;
+				if (flag5)
 				{
 					dynamicMethod = new DynamicMethod(string.Empty, typeof(void), new Type[]
 					{
@@ -87,26 +92,26 @@ namespace Unity.Properties
 			{
 				memberInfo = this.m_Info;
 				PropertyMember propertyMember;
-				bool flag5;
+				bool flag6;
 				if (memberInfo is PropertyMember)
 				{
 					propertyMember = (PropertyMember)memberInfo;
-					flag5 = true;
+					flag6 = true;
 				}
 				else
 				{
-					flag5 = false;
+					flag6 = false;
 				}
-				bool flag6 = flag5;
-				if (flag6)
+				bool flag7 = flag6;
+				if (flag7)
 				{
 					bool isStructContainerType3 = this.m_IsStructContainerType;
 					if (isStructContainerType3)
 					{
 						MethodInfo getMethod = propertyMember.m_PropertyInfo.GetGetMethod(true);
 						this.m_GetStructValueAction = (ReflectedMemberProperty<TContainer, TValue>.GetStructValueAction)Delegate.CreateDelegate(typeof(ReflectedMemberProperty<TContainer, TValue>.GetStructValueAction), getMethod);
-						bool flag7 = !flag;
-						if (flag7)
+						bool flag8 = !flag;
+						if (flag8)
 						{
 							MethodInfo setMethod = propertyMember.m_PropertyInfo.GetSetMethod(true);
 							this.m_SetStructValueAction = (ReflectedMemberProperty<TContainer, TValue>.SetStructValueAction)Delegate.CreateDelegate(typeof(ReflectedMemberProperty<TContainer, TValue>.SetStructValueAction), setMethod);
@@ -116,8 +121,8 @@ namespace Unity.Properties
 					{
 						MethodInfo getMethod2 = propertyMember.m_PropertyInfo.GetGetMethod(true);
 						this.m_GetClassValueAction = (ReflectedMemberProperty<TContainer, TValue>.GetClassValueAction)Delegate.CreateDelegate(typeof(ReflectedMemberProperty<TContainer, TValue>.GetClassValueAction), getMethod2);
-						bool flag8 = !flag;
-						if (flag8)
+						bool flag9 = !flag;
+						if (flag9)
 						{
 							MethodInfo setMethod2 = propertyMember.m_PropertyInfo.GetSetMethod(true);
 							this.m_SetClassValueAction = (ReflectedMemberProperty<TContainer, TValue>.SetClassValueAction)Delegate.CreateDelegate(typeof(ReflectedMemberProperty<TContainer, TValue>.SetClassValueAction), setMethod2);

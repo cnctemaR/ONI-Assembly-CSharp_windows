@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum ModuleKind
+	internal enum ModuleKind
 	{
 		Dll,
 		Console,

@@ -1,99 +1,82 @@
 ﻿using System;
-using Unity.Collections.LowLevel.Unsafe;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine.Internal;
 
 namespace UnityEngine
 {
-	[ExcludeFromDocs]
-	public class AsyncInstantiateOperation<T> : CustomYieldInstruction where T : Object
+	public class AsyncInstantiateOperation<T> : AsyncInstantiateOperation
 	{
-		internal AsyncInstantiateOperation(AsyncInstantiateOperation op)
+		internal AsyncInstantiateOperation(IntPtr ptr, CancellationToken cancellationToken)
+			: base(ptr, cancellationToken)
 		{
-			this.m_op = op;
 		}
 
-		public override bool keepWaiting
-		{
-			get
-			{
-				return !this.m_op.isDone;
-			}
-		}
-
-		public AsyncInstantiateOperation GetOperation()
-		{
-			return this.m_op;
-		}
-
-		public static implicit operator AsyncInstantiateOperation(AsyncInstantiateOperation<T> generic)
-		{
-			return generic.m_op;
-		}
-
-		public bool IsWaitingForSceneActivation()
-		{
-			return this.m_op.IsWaitingForSceneActivation();
-		}
-
-		public event Action<AsyncOperation> completed
-		{
-			add
-			{
-				this.m_op.completed += value;
-			}
-			remove
-			{
-				this.m_op.completed -= value;
-			}
-		}
-
-		public bool isDone
+		public new T[] Result
 		{
 			get
 			{
-				return this.m_op.isDone;
+				return (T[])this.m_Result;
 			}
 		}
 
-		public float progress
+		internal override Object[] CreateResultArray(int size)
 		{
-			get
+			this.m_Result = (Object[])new T[size];
+			return this.m_Result;
+		}
+
+		[ExcludeFromDocs]
+		public AsyncInstantiateOperation<T>.Awaiter GetAwaiter()
+		{
+			return new AsyncInstantiateOperation<T>.Awaiter(this);
+		}
+
+		internal new static class BindingsMarshaller
+		{
+			public static AsyncInstantiateOperation<T> ConvertToManaged(IntPtr ptr)
 			{
-				return this.m_op.progress;
+				return new AsyncInstantiateOperation<T>(ptr, CancellationToken.None);
 			}
-		}
 
-		public bool allowSceneActivation
-		{
-			get
+			public static IntPtr ConvertToNative(AsyncInstantiateOperation<T> obj)
 			{
-				return this.m_op.allowSceneActivation;
+				return obj.m_Ptr;
 			}
-			set
+		}
+
+		[ExcludeFromDocs]
+		public struct Awaiter : INotifyCompletion
+		{
+			public Awaiter(AsyncInstantiateOperation<T> op)
 			{
-				this.m_op.allowSceneActivation = value;
+				this._awaitable = Awaitable.FromAsyncOperation(op, default(CancellationToken));
+				this._op = op;
 			}
-		}
 
-		public void WaitForCompletion()
-		{
-			this.m_op.WaitForCompletion();
-		}
-
-		public void Cancel()
-		{
-			this.m_op.Cancel();
-		}
-
-		public unsafe T[] Result
-		{
-			get
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			public void OnCompleted(Action continuation)
 			{
-				Object[] result = this.m_op.Result;
-				return *UnsafeUtility.As<Object[], T[]>(ref result);
+				this._awaitable.SetContinuation(continuation);
 			}
-		}
 
-		internal AsyncInstantiateOperation m_op;
+			public bool IsCompleted
+			{
+				get
+				{
+					return this._awaitable.IsCompleted;
+				}
+			}
+
+			public T[] GetResult()
+			{
+				this._awaitable.GetAwaiter().GetResult();
+				return this._op.Result;
+			}
+
+			private readonly Awaitable _awaitable;
+
+			private readonly AsyncInstantiateOperation<T> _op;
+		}
 	}
 }

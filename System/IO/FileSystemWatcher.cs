@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace System.IO
 {
-	[DefaultEvent("Changed")]
 	[IODescription("")]
+	[DefaultEvent("Changed")]
 	public class FileSystemWatcher : Component, ISupportInitialize
 	{
 		public FileSystemWatcher()
@@ -226,9 +226,9 @@ namespace System.IO
 		}
 
 		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[DefaultValue("*.*")]
-		[IODescription("File name filter pattern")]
 		[SettingsBindable(true)]
+		[IODescription("File name filter pattern")]
+		[DefaultValue("*.*")]
 		public string Filter
 		{
 			get
@@ -250,8 +250,8 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue(false)]
 		[IODescription("Flag to indicate we want to watch subdirectories")]
+		[DefaultValue(false)]
 		public bool IncludeSubdirectories
 		{
 			get
@@ -323,11 +323,11 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue("")]
 		[IODescription("The directory to monitor")]
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[Editor("System.Diagnostics.Design.FSWPathEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[DefaultValue("")]
+		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[SettingsBindable(true)]
 		public string Path
 		{
 			get
@@ -389,9 +389,9 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue(null)]
 		[Browsable(false)]
 		[IODescription("The object used to marshal the event handler calls resulting from a directory change")]
+		[DefaultValue(null)]
 		public ISynchronizeInvoke SynchronizingObject
 		{
 			get

@@ -8,29 +8,42 @@ namespace UnityEngine.Rendering
 	public readonly struct LocalKeywordSpace : IEquatable<LocalKeywordSpace>
 	{
 		[FreeFunction("keywords::GetKeywords", HasExplicitThis = true)]
-		private LocalKeyword[] GetKeywords()
-		{
-			return LocalKeywordSpace.GetKeywords_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern LocalKeyword[] GetKeywords();
 
 		[FreeFunction("keywords::GetKeywordNames", HasExplicitThis = true)]
-		private string[] GetKeywordNames()
-		{
-			return LocalKeywordSpace.GetKeywordNames_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern string[] GetKeywordNames();
 
 		[FreeFunction("keywords::GetKeywordCount", HasExplicitThis = true)]
-		private uint GetKeywordCount()
-		{
-			return LocalKeywordSpace.GetKeywordCount_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern uint GetKeywordCount();
 
 		[FreeFunction("keywords::GetKeyword", HasExplicitThis = true)]
-		private LocalKeyword GetKeyword(string name)
+		private unsafe LocalKeyword GetKeyword(string name)
 		{
-			LocalKeyword localKeyword;
-			LocalKeywordSpace.GetKeyword_Injected(ref this, name, out localKeyword);
-			return localKeyword;
+			LocalKeyword localKeyword2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				LocalKeyword localKeyword;
+				LocalKeywordSpace.GetKeyword_Injected(ref this, ref managedSpanWrapper, out localKeyword);
+			}
+			finally
+			{
+				char* ptr = null;
+				LocalKeyword localKeyword;
+				localKeyword2 = localKeyword;
+			}
+			return localKeyword2;
 		}
 
 		public LocalKeyword[] keywords
@@ -98,16 +111,7 @@ namespace UnityEngine.Rendering
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern LocalKeyword[] GetKeywords_Injected(ref LocalKeywordSpace _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string[] GetKeywordNames_Injected(ref LocalKeywordSpace _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern uint GetKeywordCount_Injected(ref LocalKeywordSpace _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetKeyword_Injected(ref LocalKeywordSpace _unity_self, string name, out LocalKeyword ret);
+		private static extern void GetKeyword_Injected(ref LocalKeywordSpace _unity_self, ref ManagedSpanWrapper name, out LocalKeyword ret);
 
 		private readonly IntPtr m_KeywordSpace;
 	}

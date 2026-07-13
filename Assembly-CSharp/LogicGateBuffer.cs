@@ -103,6 +103,15 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.UserSpecified, Grid.SceneLayer.LogicGatesFront, Vector3.zero, null);
 		this.meter.SetPositionPercent(1f);
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		logicCircuitManager.onLogicTick = (global::System.Action)Delegate.Combine(logicCircuitManager.onLogicTick, new global::System.Action(this.onLogicTick));
+	}
+
+	protected override void OnCleanUp()
+	{
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		logicCircuitManager.onLogicTick = (global::System.Action)Delegate.Remove(logicCircuitManager.onLogicTick, new global::System.Action(this.onLogicTick));
+		base.OnCleanUp();
 	}
 
 	private void Update()
@@ -123,7 +132,7 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 		this.meter.SetPositionPercent(num);
 	}
 
-	public override void LogicTick()
+	public void onLogicTick()
 	{
 		if (!this.input_was_previously_positive && this.delayTicksRemaining > 0)
 		{

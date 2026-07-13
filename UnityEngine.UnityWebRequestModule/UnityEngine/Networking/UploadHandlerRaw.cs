@@ -12,7 +12,7 @@ namespace UnityEngine.Networking
 	public sealed class UploadHandlerRaw : UploadHandler
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern IntPtr Create(UploadHandlerRaw self, byte* data, int dataLength);
+		private unsafe static extern IntPtr Create([UnityMarshalAs(NativeType.ScriptingObjectPtr)] UploadHandlerRaw self, byte* data, int dataLength);
 
 		public UploadHandlerRaw(byte[] data)
 			: this((data == null || data.Length == 0) ? default(NativeArray<byte>) : new NativeArray<byte>(data, Allocator.Persistent), true)
@@ -83,5 +83,13 @@ namespace UnityEngine.Networking
 		}
 
 		private NativeArray<byte> m_Payload;
+
+		internal new static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(UploadHandlerRaw uploadHandler)
+			{
+				return uploadHandler.m_Ptr;
+			}
+		}
 	}
 }

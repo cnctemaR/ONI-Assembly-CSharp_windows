@@ -3,7 +3,7 @@
 namespace Mono.Cecil.Cil
 {
 	[Flags]
-	public enum VariableAttributes : ushort
+	internal enum VariableAttributes : ushort
 	{
 		None = 0,
 		DebuggerHidden = 1

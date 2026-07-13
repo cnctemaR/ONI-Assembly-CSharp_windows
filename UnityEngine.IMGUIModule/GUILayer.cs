@@ -4,9 +4,9 @@ using System.ComponentModel;
 namespace UnityEngine
 {
 	[Obsolete("GUILayer has been removed.", true)]
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	[ExcludeFromObjectFactory]
 	[ExcludeFromPreset]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	public sealed class GUILayer
 	{
 		[Obsolete("GUILayer has been removed.", true)]

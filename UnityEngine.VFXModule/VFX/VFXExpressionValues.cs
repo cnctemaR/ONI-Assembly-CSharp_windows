@@ -24,71 +24,133 @@ namespace UnityEngine.VFX
 			};
 		}
 
-		[NativeThrows]
 		[NativeName("GetValueFromScript<bool>")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool GetBool(int nameID);
+		[NativeThrows]
+		public bool GetBool(int nameID)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VFXExpressionValues.GetBool_Injected(intPtr, nameID);
+		}
 
 		[NativeName("GetValueFromScript<int>")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetInt(int nameID);
+		public int GetInt(int nameID)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VFXExpressionValues.GetInt_Injected(intPtr, nameID);
+		}
 
 		[NativeThrows]
 		[NativeName("GetValueFromScript<UInt32>")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern uint GetUInt(int nameID);
+		public uint GetUInt(int nameID)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VFXExpressionValues.GetUInt_Injected(intPtr, nameID);
+		}
 
+		[NativeThrows]
 		[NativeName("GetValueFromScript<float>")]
-		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetFloat(int nameID);
+		public float GetFloat(int nameID)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return VFXExpressionValues.GetFloat_Injected(intPtr, nameID);
+		}
 
-		[NativeName("GetValueFromScript<Vector2f>")]
 		[NativeThrows]
+		[NativeName("GetValueFromScript<Vector2f>")]
 		public Vector2 GetVector2(int nameID)
 		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector2 vector;
-			this.GetVector2_Injected(nameID, out vector);
+			VFXExpressionValues.GetVector2_Injected(intPtr, nameID, out vector);
 			return vector;
 		}
 
-		[NativeName("GetValueFromScript<Vector3f>")]
 		[NativeThrows]
+		[NativeName("GetValueFromScript<Vector3f>")]
 		public Vector3 GetVector3(int nameID)
 		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector3 vector;
-			this.GetVector3_Injected(nameID, out vector);
+			VFXExpressionValues.GetVector3_Injected(intPtr, nameID, out vector);
 			return vector;
 		}
 
-		[NativeName("GetValueFromScript<Vector4f>")]
 		[NativeThrows]
+		[NativeName("GetValueFromScript<Vector4f>")]
 		public Vector4 GetVector4(int nameID)
 		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Vector4 vector;
-			this.GetVector4_Injected(nameID, out vector);
+			VFXExpressionValues.GetVector4_Injected(intPtr, nameID, out vector);
 			return vector;
 		}
 
-		[NativeName("GetValueFromScript<Matrix4x4f>")]
 		[NativeThrows]
+		[NativeName("GetValueFromScript<Matrix4x4f>")]
 		public Matrix4x4 GetMatrix4x4(int nameID)
 		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Matrix4x4 matrix4x;
-			this.GetMatrix4x4_Injected(nameID, out matrix4x);
+			VFXExpressionValues.GetMatrix4x4_Injected(intPtr, nameID, out matrix4x);
 			return matrix4x;
 		}
 
 		[NativeName("GetValueFromScript<Texture*>")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Texture GetTexture(int nameID);
+		public Texture GetTexture(int nameID)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture>(VFXExpressionValues.GetTexture_Injected(intPtr, nameID));
+		}
 
 		[NativeName("GetValueFromScript<Mesh*>")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Mesh GetMesh(int nameID);
+		public Mesh GetMesh(int nameID)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Mesh>(VFXExpressionValues.GetMesh_Injected(intPtr, nameID));
+		}
 
 		public AnimationCurve GetAnimationCurve(int nameID)
 		{
@@ -98,8 +160,15 @@ namespace UnityEngine.VFX
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_GetAnimationCurveFromScript(int nameID, AnimationCurve curve);
+		internal void Internal_GetAnimationCurveFromScript(int nameID, AnimationCurve curve)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VFXExpressionValues.Internal_GetAnimationCurveFromScript_Injected(intPtr, nameID, (curve == null) ? ((IntPtr)0) : AnimationCurve.BindingsMarshaller.ConvertToNative(curve));
+		}
 
 		public Gradient GetGradient(int nameID)
 		{
@@ -109,8 +178,15 @@ namespace UnityEngine.VFX
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void Internal_GetGradientFromScript(int nameID, Gradient gradient);
+		internal void Internal_GetGradientFromScript(int nameID, Gradient gradient)
+		{
+			IntPtr intPtr = VFXExpressionValues.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			VFXExpressionValues.Internal_GetGradientFromScript_Injected(intPtr, nameID, (gradient == null) ? ((IntPtr)0) : Gradient.BindingsMarshaller.ConvertToNative(gradient));
+		}
 
 		public bool GetBool(string name)
 		{
@@ -173,17 +249,49 @@ namespace UnityEngine.VFX
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVector2_Injected(int nameID, out Vector2 ret);
+		private static extern bool GetBool_Injected(IntPtr _unity_self, int nameID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVector3_Injected(int nameID, out Vector3 ret);
+		private static extern int GetInt_Injected(IntPtr _unity_self, int nameID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetVector4_Injected(int nameID, out Vector4 ret);
+		private static extern uint GetUInt_Injected(IntPtr _unity_self, int nameID);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetMatrix4x4_Injected(int nameID, out Matrix4x4 ret);
+		private static extern float GetFloat_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVector2_Injected(IntPtr _unity_self, int nameID, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVector3_Injected(IntPtr _unity_self, int nameID, out Vector3 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetVector4_Injected(IntPtr _unity_self, int nameID, out Vector4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetMatrix4x4_Injected(IntPtr _unity_self, int nameID, out Matrix4x4 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetTexture_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetMesh_Injected(IntPtr _unity_self, int nameID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetAnimationCurveFromScript_Injected(IntPtr _unity_self, int nameID, IntPtr curve);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_GetGradientFromScript_Injected(IntPtr _unity_self, int nameID, IntPtr gradient);
 
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(VFXExpressionValues vFXExpressionValues)
+			{
+				return vFXExpressionValues.m_Ptr;
+			}
+		}
 	}
 }

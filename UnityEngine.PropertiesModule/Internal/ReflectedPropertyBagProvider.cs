@@ -247,6 +247,7 @@ namespace Unity.Properties.Internal
 								bool hasCreatePropertyAttribute = member.GetCustomAttribute<CreatePropertyAttribute>() != null;
 								bool hasNonSerializedAttribute = member.GetCustomAttribute<NonSerializedAttribute>() != null;
 								bool hasSerializedFieldAttribute = member.GetCustomAttribute<SerializeField>() != null;
+								bool hasSerializeReferenceAttribute = member.GetCustomAttribute<SerializeReference>() != null;
 								bool flag4 = hasDontCreatePropertyAttribute;
 								if (!flag4)
 								{
@@ -267,14 +268,22 @@ namespace Unity.Properties.Internal
 											}
 											else
 											{
-												FieldInfo field = member as FieldInfo;
-												bool flag8 = field != null && field.IsPublic;
+												bool flag8 = hasSerializeReferenceAttribute;
 												if (flag8)
 												{
 													yield return member;
 												}
-												field = null;
-												member = null;
+												else
+												{
+													FieldInfo field = member as FieldInfo;
+													bool flag9 = field != null && field.IsPublic;
+													if (flag9)
+													{
+														yield return member;
+													}
+													field = null;
+													member = null;
+												}
 											}
 										}
 									}

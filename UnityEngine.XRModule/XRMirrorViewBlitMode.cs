@@ -17,5 +17,7 @@ namespace UnityEngine.XR
 		public const int Distort = -5;
 
 		public const int None = -6;
+
+		public const int MotionVectors = -7;
 	}
 }

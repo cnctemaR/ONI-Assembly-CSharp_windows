@@ -296,7 +296,8 @@ namespace Mono.Cecil
 			attribute.arguments = new Collection<CustomAttributeArgument>(count);
 			for (int i = 0; i < count; i++)
 			{
-				attribute.arguments.Add(this.ReadCustomAttributeFixedArgument(parameters[i].ParameterType));
+				TypeReference typeReference = GenericParameterResolver.ResolveParameterTypeIfNeeded(attribute.Constructor, parameters[i]);
+				attribute.arguments.Add(this.ReadCustomAttributeFixedArgument(typeReference));
 			}
 		}
 
@@ -386,14 +387,19 @@ namespace Mono.Cecil
 
 		private object ReadCustomAttributeElementValue(TypeReference type)
 		{
-			ElementType etype = type.etype;
-			if (etype != ElementType.None)
+			ElementType elementType = type.etype;
+			if (elementType == ElementType.GenericInst)
 			{
-				if (etype == ElementType.String)
+				type = type.GetElementType();
+				elementType = type.etype;
+			}
+			if (elementType != ElementType.None)
+			{
+				if (elementType == ElementType.String)
 				{
 					return this.ReadUTF8String();
 				}
-				return this.ReadPrimitiveValue(etype);
+				return this.ReadPrimitiveValue(elementType);
 			}
 			else
 			{

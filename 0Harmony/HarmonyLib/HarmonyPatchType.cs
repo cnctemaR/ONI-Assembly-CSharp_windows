@@ -9,6 +9,8 @@ namespace HarmonyLib
 		Postfix,
 		Transpiler,
 		Finalizer,
-		ReversePatch
+		ReversePatch,
+		InnerPrefix,
+		InnerPostfix
 	}
 }

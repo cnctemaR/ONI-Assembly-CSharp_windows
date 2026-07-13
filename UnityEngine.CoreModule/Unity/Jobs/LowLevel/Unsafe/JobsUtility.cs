@@ -62,8 +62,8 @@ namespace Unity.Jobs.LowLevel.Unsafe
 			return jobHandle;
 		}
 
-		[NativeMethod(IsThreadSafe = true, IsFreeFunction = true)]
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		[NativeMethod(IsThreadSafe = true, IsFreeFunction = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void PatchBufferMinMaxRanges(IntPtr bufferRangePatchData, void* jobdata, int startIndex, int rangeSize);
 
@@ -95,7 +95,7 @@ namespace Unity.Jobs.LowLevel.Unsafe
 
 		public static extern bool IsExecutingJob
 		{
-			[NativeMethod(IsFreeFunction = true, IsThreadSafe = true)]
+			[NativeMethod(Name = "GetIsExecutingScriptingJob", IsFreeFunction = true, IsThreadSafe = true)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}

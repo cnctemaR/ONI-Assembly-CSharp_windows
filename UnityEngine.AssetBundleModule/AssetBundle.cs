@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngineInternal;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromMemoryAsyncOperation.h")]
-	[ExcludeFromPreset]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetOperation.h")]
-	[NativeHeader("Runtime/Scripting/ScriptingExportUtility.h")]
-	[NativeHeader("Runtime/Scripting/ScriptingObjectWithIntPtrField.h")]
-	[NativeHeader("Runtime/Scripting/ScriptingUtility.h")]
 	[NativeHeader("AssetBundleScriptingClasses.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleSaveAndLoadHelper.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleUtility.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleSaveAndLoadHelper.h")]
+	[NativeHeader("Runtime/Scripting/ScriptingUtility.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetUtility.h")]
-	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromFileAsyncOperation.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadAssetOperation.h")]
 	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromManagedStreamAsyncOperation.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromMemoryAsyncOperation.h")]
+	[NativeHeader("Modules/AssetBundle/Public/AssetBundleLoadFromFileAsyncOperation.h")]
+	[NativeHeader("Runtime/Scripting/ScriptingExportUtility.h")]
+	[ExcludeFromPreset]
 	public class AssetBundle : Object
 	{
 		private AssetBundle()
@@ -36,8 +36,19 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("LoadMainObjectFromAssetBundle", true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Object returnMainAsset([NotNull("NullExceptionObject")] AssetBundle bundle);
+		internal static Object returnMainAsset([NotNull] AssetBundle bundle)
+		{
+			if (bundle == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(bundle, "bundle");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(bundle);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(bundle, "bundle");
+			}
+			return Unmarshal.UnmarshalUnityObject<Object>(AssetBundle.returnMainAsset_Injected(intPtr));
+		}
 
 		[FreeFunction("UnloadAllAssetBundles")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -53,8 +64,31 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("LoadFromFileAsync")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AssetBundleCreateRequest LoadFromFileAsync_Internal(string path, uint crc, ulong offset);
+		internal unsafe static AssetBundleCreateRequest LoadFromFileAsync_Internal(string path, uint crc, ulong offset)
+		{
+			AssetBundleCreateRequest assetBundleCreateRequest;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = path.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr = AssetBundle.LoadFromFileAsync_Internal_Injected(ref managedSpanWrapper, crc, offset);
+			}
+			finally
+			{
+				IntPtr intPtr;
+				IntPtr intPtr2 = intPtr;
+				assetBundleCreateRequest = ((intPtr2 == 0) ? null : AssetBundleCreateRequest.BindingsMarshaller.ConvertToManaged(intPtr2));
+				char* ptr = null;
+			}
+			return assetBundleCreateRequest;
+		}
 
 		public static AssetBundleCreateRequest LoadFromFileAsync(string path)
 		{
@@ -72,8 +106,30 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("LoadFromFile")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AssetBundle LoadFromFile_Internal(string path, uint crc, ulong offset);
+		internal unsafe static AssetBundle LoadFromFile_Internal(string path, uint crc, ulong offset)
+		{
+			AssetBundle assetBundle;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(path, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = path.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr = AssetBundle.LoadFromFile_Internal_Injected(ref managedSpanWrapper, crc, offset);
+			}
+			finally
+			{
+				IntPtr intPtr;
+				assetBundle = Unmarshal.UnmarshalUnityObject<AssetBundle>(intPtr);
+				char* ptr = null;
+			}
+			return assetBundle;
+		}
 
 		public static AssetBundle LoadFromFile(string path)
 		{
@@ -91,8 +147,18 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("LoadFromMemoryAsync")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AssetBundleCreateRequest LoadFromMemoryAsync_Internal(byte[] binary, uint crc);
+		internal unsafe static AssetBundleCreateRequest LoadFromMemoryAsync_Internal(byte[] binary, uint crc)
+		{
+			Span<byte> span = new Span<byte>(binary);
+			AssetBundleCreateRequest assetBundleCreateRequest;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				IntPtr intPtr = AssetBundle.LoadFromMemoryAsync_Internal_Injected(ref managedSpanWrapper, crc);
+				assetBundleCreateRequest = ((intPtr == 0) ? null : AssetBundleCreateRequest.BindingsMarshaller.ConvertToManaged(intPtr));
+			}
+			return assetBundleCreateRequest;
+		}
 
 		public static AssetBundleCreateRequest LoadFromMemoryAsync(byte[] binary)
 		{
@@ -105,8 +171,17 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("LoadFromMemory")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AssetBundle LoadFromMemory_Internal(byte[] binary, uint crc);
+		internal unsafe static AssetBundle LoadFromMemory_Internal(byte[] binary, uint crc)
+		{
+			Span<byte> span = new Span<byte>(binary);
+			AssetBundle assetBundle;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				assetBundle = Unmarshal.UnmarshalUnityObject<AssetBundle>(AssetBundle.LoadFromMemory_Internal_Injected(ref managedSpanWrapper, crc));
+			}
+			return assetBundle;
+		}
 
 		public static AssetBundle LoadFromMemory(byte[] binary)
 		{
@@ -174,33 +249,70 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("LoadFromStreamAsyncInternal")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AssetBundleCreateRequest LoadFromStreamAsyncInternal(Stream stream, uint crc, uint managedReadBufferSize);
+		internal static AssetBundleCreateRequest LoadFromStreamAsyncInternal(Stream stream, uint crc, uint managedReadBufferSize)
+		{
+			IntPtr intPtr = AssetBundle.LoadFromStreamAsyncInternal_Injected(stream, crc, managedReadBufferSize);
+			return (intPtr == 0) ? null : AssetBundleCreateRequest.BindingsMarshaller.ConvertToManaged(intPtr);
+		}
 
 		[FreeFunction("LoadFromStreamInternal")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern AssetBundle LoadFromStreamInternal(Stream stream, uint crc, uint managedReadBufferSize);
+		internal static AssetBundle LoadFromStreamInternal(Stream stream, uint crc, uint managedReadBufferSize)
+		{
+			return Unmarshal.UnmarshalUnityObject<AssetBundle>(AssetBundle.LoadFromStreamInternal_Injected(stream, crc, managedReadBufferSize));
+		}
 
-		public extern bool isStreamedSceneAssetBundle
+		public bool isStreamedSceneAssetBundle
 		{
 			[NativeMethod("GetIsStreamedSceneAssetBundle")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return AssetBundle.get_isStreamedSceneAssetBundle_Injected(intPtr);
+			}
 		}
 
 		[NativeMethod("Contains")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool Contains(string name);
+		public unsafe bool Contains(string name)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = AssetBundle.Contains_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
 
-		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		public Object Load(string name)
 		{
 			return null;
 		}
 
-		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
 		public Object Load<T>(string name)
 		{
 			return null;
@@ -220,8 +332,8 @@ namespace UnityEngine
 			return null;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		private Object[] LoadAll(Type type)
 		{
 			return null;
@@ -234,8 +346,8 @@ namespace UnityEngine
 			return null;
 		}
 
-		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
 		public T[] LoadAll<T>() where T : Object
 		{
 			return null;
@@ -275,8 +387,35 @@ namespace UnityEngine
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
 		[NativeMethod("LoadAsset_Internal")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Object LoadAsset_Internal(string name, Type type);
+		private unsafe Object LoadAsset_Internal(string name, Type type)
+		{
+			Object @object;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr2 = AssetBundle.LoadAsset_Internal_Injected(intPtr, ref managedSpanWrapper, type);
+			}
+			finally
+			{
+				IntPtr intPtr2;
+				@object = Unmarshal.UnmarshalUnityObject<Object>(intPtr2);
+				char* ptr = null;
+			}
+			return @object;
+		}
 
 		public AssetBundleRequest LoadAssetAsync(string name)
 		{
@@ -436,47 +575,188 @@ namespace UnityEngine
 
 		[NativeMethod("LoadAssetAsync_Internal")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern AssetBundleRequest LoadAssetAsync_Internal(string name, Type type);
+		private unsafe AssetBundleRequest LoadAssetAsync_Internal(string name, Type type)
+		{
+			AssetBundleRequest assetBundleRequest;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr2 = AssetBundle.LoadAssetAsync_Internal_Injected(intPtr, ref managedSpanWrapper, type);
+			}
+			finally
+			{
+				IntPtr intPtr2;
+				IntPtr intPtr3 = intPtr2;
+				assetBundleRequest = ((intPtr3 == 0) ? null : AssetBundleRequest.BindingsMarshaller.ConvertToManaged(intPtr3));
+				char* ptr = null;
+			}
+			return assetBundleRequest;
+		}
 
 		[NativeMethod("Unload")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Unload(bool unloadAllLoadedObjects);
+		public void Unload(bool unloadAllLoadedObjects)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			AssetBundle.Unload_Injected(intPtr, unloadAllLoadedObjects);
+		}
 
-		[NativeMethod("UnloadAsync")]
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern AssetBundleUnloadOperation UnloadAsync(bool unloadAllLoadedObjects);
+		[NativeMethod("UnloadAsync")]
+		public AssetBundleUnloadOperation UnloadAsync(bool unloadAllLoadedObjects)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntPtr intPtr2 = AssetBundle.UnloadAsync_Injected(intPtr, unloadAllLoadedObjects);
+			return (intPtr2 == 0) ? null : AssetBundleUnloadOperation.BindingsMarshaller.ConvertToManaged(intPtr2);
+		}
 
 		[NativeMethod("GetAllAssetNames")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string[] GetAllAssetNames();
+		public string[] GetAllAssetNames()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AssetBundle.GetAllAssetNames_Injected(intPtr);
+		}
 
 		[NativeMethod("GetAllScenePaths")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string[] GetAllScenePaths();
+		public string[] GetAllScenePaths()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return AssetBundle.GetAllScenePaths_Injected(intPtr);
+		}
 
 		[NativeThrows]
 		[NativeMethod("LoadAssetWithSubAssets_Internal")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Object[] LoadAssetWithSubAssets_Internal(string name, Type type);
+		internal unsafe Object[] LoadAssetWithSubAssets_Internal(string name, Type type)
+		{
+			Object[] array;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				array = AssetBundle.LoadAssetWithSubAssets_Internal_Injected(intPtr, ref managedSpanWrapper, type);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return array;
+		}
 
 		[NativeThrows]
 		[NativeMethod("LoadAssetWithSubAssetsAsync_Internal")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern AssetBundleRequest LoadAssetWithSubAssetsAsync_Internal(string name, Type type);
+		private unsafe AssetBundleRequest LoadAssetWithSubAssetsAsync_Internal(string name, Type type)
+		{
+			AssetBundleRequest assetBundleRequest;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<AssetBundle>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr2 = AssetBundle.LoadAssetWithSubAssetsAsync_Internal_Injected(intPtr, ref managedSpanWrapper, type);
+			}
+			finally
+			{
+				IntPtr intPtr2;
+				IntPtr intPtr3 = intPtr2;
+				assetBundleRequest = ((intPtr3 == 0) ? null : AssetBundleRequest.BindingsMarshaller.ConvertToManaged(intPtr3));
+				char* ptr = null;
+			}
+			return assetBundleRequest;
+		}
 
 		public static AssetBundleRecompressOperation RecompressAssetBundleAsync(string inputPath, string outputPath, BuildCompression method, uint expectedCRC = 0U, ThreadPriority priority = ThreadPriority.Low)
 		{
 			return AssetBundle.RecompressAssetBundleAsync_Internal(inputPath, outputPath, method, expectedCRC, priority);
 		}
 
-		[FreeFunction("RecompressAssetBundleAsync_Internal")]
 		[NativeThrows]
-		internal static AssetBundleRecompressOperation RecompressAssetBundleAsync_Internal(string inputPath, string outputPath, BuildCompression method, uint expectedCRC, ThreadPriority priority)
+		[FreeFunction("RecompressAssetBundleAsync_Internal")]
+		internal unsafe static AssetBundleRecompressOperation RecompressAssetBundleAsync_Internal(string inputPath, string outputPath, BuildCompression method, uint expectedCRC, ThreadPriority priority)
 		{
-			return AssetBundle.RecompressAssetBundleAsync_Internal_Injected(inputPath, outputPath, ref method, expectedCRC, priority);
+			AssetBundleRecompressOperation assetBundleRecompressOperation;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(inputPath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = inputPath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(outputPath, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = outputPath.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				IntPtr intPtr = AssetBundle.RecompressAssetBundleAsync_Internal_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, ref method, expectedCRC, priority);
+			}
+			finally
+			{
+				IntPtr intPtr;
+				IntPtr intPtr2 = intPtr;
+				assetBundleRecompressOperation = ((intPtr2 == 0) ? null : AssetBundleRecompressOperation.BindingsMarshaller.ConvertToManaged(intPtr2));
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return assetBundleRecompressOperation;
 		}
 
 		public static uint memoryBudgetKB
@@ -492,6 +772,57 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AssetBundleRecompressOperation RecompressAssetBundleAsync_Internal_Injected(string inputPath, string outputPath, ref BuildCompression method, uint expectedCRC, ThreadPriority priority);
+		private static extern IntPtr returnMainAsset_Injected(IntPtr bundle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadFromFileAsync_Internal_Injected(ref ManagedSpanWrapper path, uint crc, ulong offset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadFromFile_Internal_Injected(ref ManagedSpanWrapper path, uint crc, ulong offset);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadFromMemoryAsync_Internal_Injected(ref ManagedSpanWrapper binary, uint crc);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadFromMemory_Internal_Injected(ref ManagedSpanWrapper binary, uint crc);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadFromStreamAsyncInternal_Injected(Stream stream, uint crc, uint managedReadBufferSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadFromStreamInternal_Injected(Stream stream, uint crc, uint managedReadBufferSize);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isStreamedSceneAssetBundle_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Contains_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadAsset_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name, Type type);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadAssetAsync_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name, Type type);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Unload_Injected(IntPtr _unity_self, bool unloadAllLoadedObjects);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr UnloadAsync_Injected(IntPtr _unity_self, bool unloadAllLoadedObjects);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetAllAssetNames_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string[] GetAllScenePaths_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Object[] LoadAssetWithSubAssets_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name, Type type);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr LoadAssetWithSubAssetsAsync_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper name, Type type);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr RecompressAssetBundleAsync_Internal_Injected(ref ManagedSpanWrapper inputPath, ref ManagedSpanWrapper outputPath, [In] ref BuildCompression method, uint expectedCRC, ThreadPriority priority);
 	}
 }

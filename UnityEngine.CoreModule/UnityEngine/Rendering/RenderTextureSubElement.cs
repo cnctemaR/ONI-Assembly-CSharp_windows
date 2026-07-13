@@ -7,6 +7,7 @@ namespace UnityEngine.Rendering
 		Color,
 		Depth,
 		Stencil,
-		Default
+		Default,
+		ShadingRate
 	}
 }

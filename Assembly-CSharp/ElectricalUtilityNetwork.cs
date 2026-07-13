@@ -141,12 +141,15 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 		}
 	}
 
-	public float GetMaxSafeWattage()
+	public float GetMaxSafeWattage(List<WireUtilityNetworkLink>[] bridgeGroups)
 	{
 		for (int i = 0; i < this.wireGroups.Length; i++)
 		{
 			List<Wire> list = this.wireGroups[i];
-			if (list != null && list.Count > 0)
+			bool flag = list != null && list.Count > 0;
+			List<WireUtilityNetworkLink> list2 = bridgeGroups[i];
+			bool flag2 = list2 != null && list2.Count > 0;
+			if (flag || flag2)
 			{
 				return Wire.GetMaxWattageAsFloat((Wire.WattageRating)i);
 			}

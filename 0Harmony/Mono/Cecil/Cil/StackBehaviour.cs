@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum StackBehaviour
+	internal enum StackBehaviour
 	{
 		Pop0,
 		Pop1,

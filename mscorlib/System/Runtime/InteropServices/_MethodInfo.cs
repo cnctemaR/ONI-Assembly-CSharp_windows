@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
+	[ComVisible(true)]
 	[TypeLibImportClass(typeof(MethodInfo))]
+	[Guid("FFCC1B5D-ECB8-38DD-9B01-3DC8ABC2AA5F")]
 	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("FFCC1B5D-ECB8-38DD-9B01-3DC8ABC2AA5F")]
-	[ComVisible(true)]
 	public interface _MethodInfo
 	{
 		void GetTypeInfoCount(out uint pcTInfo);

@@ -8,9 +8,9 @@ namespace UnityEngine.Audio
 {
 	[NativeHeader("Modules/Audio/Public/ScriptBindings/AudioPlayableOutput.bindings.h")]
 	[NativeHeader("Modules/Audio/Public/Director/AudioPlayableOutput.h")]
-	[StaticAccessor("AudioPlayableOutputBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
 	[NativeHeader("Modules/Audio/Public/AudioSource.h")]
+	[StaticAccessor("AudioPlayableOutputBindings", StaticAccessorType.DoubleColon)]
 	public struct AudioPlayableOutput : IPlayableOutput
 	{
 		public static AudioPlayableOutput Create(PlayableGraph graph, string name, AudioSource target)
@@ -89,12 +89,16 @@ namespace UnityEngine.Audio
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern AudioSource InternalGetTarget(ref PlayableOutputHandle output);
+		private static AudioSource InternalGetTarget(ref PlayableOutputHandle output)
+		{
+			return Unmarshal.UnmarshalUnityObject<AudioSource>(AudioPlayableOutput.InternalGetTarget_Injected(ref output));
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InternalSetTarget(ref PlayableOutputHandle output, AudioSource target);
+		private static void InternalSetTarget(ref PlayableOutputHandle output, AudioSource target)
+		{
+			AudioPlayableOutput.InternalSetTarget_Injected(ref output, Object.MarshalledUnityObject.Marshal<AudioSource>(target));
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -103,6 +107,12 @@ namespace UnityEngine.Audio
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InternalSetEvaluateOnSeek(ref PlayableOutputHandle output, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr InternalGetTarget_Injected(ref PlayableOutputHandle output);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InternalSetTarget_Injected(ref PlayableOutputHandle output, IntPtr target);
 
 		private PlayableOutputHandle m_Handle;
 	}

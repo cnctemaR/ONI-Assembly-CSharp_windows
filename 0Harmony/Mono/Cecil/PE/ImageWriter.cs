@@ -329,7 +329,7 @@ namespace Mono.Cecil.PE
 			this.BaseStream.Seek((long)((ulong)this.GetRVAFileOffset(section, rva)), SeekOrigin.Begin);
 		}
 
-		private void MoveToRVA(TextSegment segment)
+		internal void MoveToRVA(TextSegment segment)
 		{
 			this.MoveToRVA(this.text, this.text_map.GetRVA(segment));
 		}
@@ -439,7 +439,7 @@ namespace Mono.Cecil.PE
 
 		private ushort GetStreamCount()
 		{
-			return (ushort)(2 + (this.metadata.user_string_heap.IsEmpty ? 0 : 1) + (this.metadata.guid_heap.IsEmpty ? 0 : 1) + (this.metadata.blob_heap.IsEmpty ? 0 : 1) + ((this.metadata.pdb_heap == null) ? 0 : 1));
+			return (ushort)(2 + ((!this.metadata.user_string_heap.IsEmpty) ? 1 : 0) + ((!this.metadata.guid_heap.IsEmpty) ? 1 : 0) + ((!this.metadata.blob_heap.IsEmpty) ? 1 : 0) + ((this.metadata.pdb_heap != null) ? 1 : 0));
 		}
 
 		private void WriteStreamHeader(ref uint offset, TextSegment heap, string name)
@@ -517,6 +517,7 @@ namespace Mono.Cecil.PE
 				base.WriteInt32(num);
 				num += imageDebugHeaderEntry.Data.Length;
 			}
+			this.debug_header_entries_position = this.BaseStream.Position;
 			for (int j = 0; j < this.debug_header.Entries.Length; j++)
 			{
 				ImageDebugHeaderEntry imageDebugHeaderEntry2 = this.debug_header.Entries[j];
@@ -606,7 +607,7 @@ namespace Mono.Cecil.PE
 			TextMap textMap = this.text_map;
 			textMap.AddMap(TextSegment.Code, this.metadata.code.length, (!this.pe64) ? 4 : 16);
 			textMap.AddMap(TextSegment.Resources, this.metadata.resources.length, 8);
-			textMap.AddMap(TextSegment.Data, this.metadata.data.length, 4);
+			textMap.AddMap(TextSegment.Data, this.metadata.data.length, this.metadata.data.BufferAlign);
 			if (this.metadata.data.length > 0)
 			{
 				this.metadata.table_heap.FixupData(textMap.GetRVA(TextSegment.Data));
@@ -626,7 +627,7 @@ namespace Mono.Cecil.PE
 					directory.AddressOfRawData = ((imageDebugHeaderEntry.Data.Length == 0) ? 0 : num3);
 					imageDebugHeaderEntry.Directory = directory;
 					num4 += imageDebugHeaderEntry.Data.Length;
-					num3 += num4;
+					num3 += imageDebugHeaderEntry.Data.Length;
 				}
 				num = num2 + num4;
 			}
@@ -781,5 +782,7 @@ namespace Mono.Cecil.PE
 		internal Section reloc;
 
 		private ushort sections;
+
+		internal long debug_header_entries_position;
 	}
 }

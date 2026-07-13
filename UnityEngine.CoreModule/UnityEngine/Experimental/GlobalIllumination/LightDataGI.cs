@@ -6,10 +6,36 @@ namespace UnityEngine.Experimental.GlobalIllumination
 	[UsedByNativeCode]
 	public struct LightDataGI
 	{
+		[Obsolete("Please use entityId instead.", false)]
+		public int instanceID
+		{
+			get
+			{
+				return this.entityId;
+			}
+			set
+			{
+				this.entityId = value;
+			}
+		}
+
+		[Obsolete("Please use cookieTextureEntityId instead.", false)]
+		public int cookieID
+		{
+			get
+			{
+				return this.cookieTextureEntityId;
+			}
+			set
+			{
+				this.cookieTextureEntityId = value;
+			}
+		}
+
 		public void Init(ref DirectionalLight light, ref Cookie cookie)
 		{
-			this.instanceID = light.instanceID;
-			this.cookieID = cookie.instanceID;
+			this.entityId = light.entityId;
+			this.cookieTextureEntityId = cookie.entityId;
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
@@ -28,8 +54,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public void Init(ref PointLight light, ref Cookie cookie)
 		{
-			this.instanceID = light.instanceID;
-			this.cookieID = cookie.instanceID;
+			this.entityId = light.entityId;
+			this.cookieTextureEntityId = cookie.entityId;
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
@@ -48,8 +74,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public void Init(ref SpotLight light, ref Cookie cookie)
 		{
-			this.instanceID = light.instanceID;
-			this.cookieID = cookie.instanceID;
+			this.entityId = light.entityId;
+			this.cookieTextureEntityId = cookie.entityId;
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
@@ -68,8 +94,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public void Init(ref RectangleLight light, ref Cookie cookie)
 		{
-			this.instanceID = light.instanceID;
-			this.cookieID = cookie.instanceID;
+			this.entityId = light.entityId;
+			this.cookieTextureEntityId = cookie.entityId;
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
@@ -88,8 +114,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public void Init(ref DiscLight light, ref Cookie cookie)
 		{
-			this.instanceID = light.instanceID;
-			this.cookieID = cookie.instanceID;
+			this.entityId = light.entityId;
+			this.cookieTextureEntityId = cookie.entityId;
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
@@ -108,8 +134,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public void Init(ref SpotLightBoxShape light, ref Cookie cookie)
 		{
-			this.instanceID = light.instanceID;
-			this.cookieID = cookie.instanceID;
+			this.entityId = light.entityId;
+			this.cookieTextureEntityId = cookie.entityId;
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
@@ -128,8 +154,8 @@ namespace UnityEngine.Experimental.GlobalIllumination
 
 		public void Init(ref SpotLightPyramidShape light, ref Cookie cookie)
 		{
-			this.instanceID = light.instanceID;
-			this.cookieID = cookie.instanceID;
+			this.entityId = light.entityId;
+			this.cookieTextureEntityId = cookie.entityId;
 			this.cookieScale = cookie.scale;
 			this.color = light.color;
 			this.indirectColor = light.indirectColor;
@@ -188,15 +214,22 @@ namespace UnityEngine.Experimental.GlobalIllumination
 			this.Init(ref light, ref cookie);
 		}
 
-		public void InitNoBake(int lightInstanceID)
+		public void InitNoBake(EntityId lightEntityId)
 		{
-			this.instanceID = lightInstanceID;
+			this.entityId = lightEntityId;
 			this.mode = LightMode.Unknown;
 		}
 
-		public int instanceID;
+		[Obsolete("Please use InitNoBake with an EntityId argument instead.", false)]
+		public void InitNoBake(int lightInstanceID)
+		{
+			this.entityId = lightInstanceID;
+			this.mode = LightMode.Unknown;
+		}
 
-		public int cookieID;
+		public EntityId entityId;
+
+		public EntityId cookieTextureEntityId;
 
 		public float cookieScale;
 

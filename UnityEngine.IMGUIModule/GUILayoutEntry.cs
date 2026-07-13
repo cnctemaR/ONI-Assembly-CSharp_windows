@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal class GUILayoutEntry
 	{
 		public GUIStyle style
@@ -206,7 +208,7 @@ namespace UnityEngine
 			return string.Concat(new string[]
 			{
 				text,
-				UnityString.Format("{1}-{0} (x:{2}-{3}, y:{4}-{5})", new object[]
+				string.Format("{1}-{0} (x:{2}-{3}, y:{4}-{5})", new object[]
 				{
 					(this.style != null) ? this.style.name : "NULL",
 					base.GetType(),

@@ -176,8 +176,8 @@ namespace UnityEngine.Device
 			Screen.SetResolution(width, height, fullscreenMode, preferredRefreshRate);
 		}
 
-		[Obsolete("SetResolution(int, int, FullScreenMode, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("SetResolution(int, int, FullScreenMode, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
 		public static void SetResolution(int width, int height, FullScreenMode fullscreenMode, [DefaultValue("0")] int preferredRefreshRate)
 		{
 			bool flag = preferredRefreshRate < 0;
@@ -201,8 +201,8 @@ namespace UnityEngine.Device
 			});
 		}
 
-		[Obsolete("SetResolution(int, int, bool, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("SetResolution(int, int, bool, int) is obsolete. Use SetResolution(int, int, FullScreenMode, RefreshRate) instead.")]
 		public static void SetResolution(int width, int height, bool fullscreen, [DefaultValue("0")] int preferredRefreshRate)
 		{
 			bool flag = preferredRefreshRate < 0;
@@ -250,6 +250,19 @@ namespace UnityEngine.Device
 		public static AsyncOperation MoveMainWindowTo(in DisplayInfo display, Vector2Int position)
 		{
 			return Screen.MoveMainWindowTo(in display, position);
+		}
+
+		public static void SetMSAASamples(int numSamples)
+		{
+			Screen.SetMSAASamples(numSamples);
+		}
+
+		public static int msaaSamples
+		{
+			get
+			{
+				return Screen.msaaSamples;
+			}
 		}
 	}
 }

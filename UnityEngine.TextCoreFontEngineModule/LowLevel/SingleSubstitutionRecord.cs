@@ -32,8 +32,8 @@ namespace UnityEngine.TextCore.LowLevel
 			}
 		}
 
-		[NativeName("targetGlyphID")]
 		[SerializeField]
+		[NativeName("targetGlyphID")]
 		private uint m_TargetGlyphID;
 
 		[SerializeField]

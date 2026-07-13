@@ -119,9 +119,9 @@ namespace Mono.Cecil
 			if (!name.IsWindowsRuntime)
 			{
 				string[] array = new string[2];
-				array[0] = ".exe";
+				array[0] = ".dll";
 				array2 = array;
-				array[1] = ".dll";
+				array[1] = ".exe";
 			}
 			else
 			{

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Rendering;
 
@@ -172,20 +173,28 @@ namespace UnityEngine
 		}
 
 		[NativeProperty("SkyboxMaterial")]
-		public static extern Material skybox
+		public static Material skybox
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Material>(RenderSettings.get_skybox_Injected());
+			}
+			set
+			{
+				RenderSettings.set_skybox_Injected(Object.MarshalledUnityObject.Marshal<Material>(value));
+			}
 		}
 
-		public static extern Light sun
+		public static Light sun
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Light>(RenderSettings.get_sun_Injected());
+			}
+			set
+			{
+				RenderSettings.set_sun_Injected(Object.MarshalledUnityObject.Marshal<Light>(value));
+			}
 		}
 
 		public static SphericalHarmonicsL2 ambientProbe
@@ -224,13 +233,17 @@ namespace UnityEngine
 		}
 
 		[NativeProperty("CustomReflection")]
-		public static extern Texture customReflectionTexture
+		public static Texture customReflectionTexture
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Texture>(RenderSettings.get_customReflectionTexture_Injected());
+			}
 			[NativeThrows]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				RenderSettings.set_customReflectionTexture_Injected(Object.MarshalledUnityObject.Marshal<Texture>(value));
+			}
 		}
 
 		public static extern float reflectionIntensity
@@ -250,10 +263,12 @@ namespace UnityEngine
 		}
 
 		[NativeProperty("GeneratedSkyboxReflection")]
-		internal static extern Cubemap defaultReflection
+		internal static Cubemap defaultReflection
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Cubemap>(RenderSettings.get_defaultReflection_Injected());
+			}
 		}
 
 		public static extern DefaultReflectionMode defaultReflectionMode
@@ -297,53 +312,116 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("GetRenderSettings")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Object GetRenderSettings();
+		internal static Object GetRenderSettings()
+		{
+			return Unmarshal.UnmarshalUnityObject<Object>(RenderSettings.GetRenderSettings_Injected());
+		}
 
 		[StaticAccessor("RenderSettingsScripting", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Reset();
 
+		[NativeProperty("DefaultSpotCookie")]
+		internal static Texture2D spotCookieTexture
+		{
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(RenderSettings.get_spotCookieTexture_Injected());
+			}
+			set
+			{
+				RenderSettings.set_spotCookieTexture_Injected(Object.MarshalledUnityObject.Marshal<Texture2D>(value));
+			}
+		}
+
+		internal static Texture2D haloTexture
+		{
+			get
+			{
+				return Unmarshal.UnmarshalUnityObject<Texture2D>(RenderSettings.get_haloTexture_Injected());
+			}
+			set
+			{
+				RenderSettings.set_haloTexture_Injected(Object.MarshalledUnityObject.Marshal<Texture2D>(value));
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_fogColor_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_fogColor_Injected(ref Color value);
+		private static extern void set_fogColor_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_ambientSkyColor_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_ambientSkyColor_Injected(ref Color value);
+		private static extern void set_ambientSkyColor_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_ambientEquatorColor_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_ambientEquatorColor_Injected(ref Color value);
+		private static extern void set_ambientEquatorColor_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_ambientGroundColor_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_ambientGroundColor_Injected(ref Color value);
+		private static extern void set_ambientGroundColor_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_ambientLight_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_ambientLight_Injected(ref Color value);
+		private static extern void set_ambientLight_Injected([In] ref Color value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_subtractiveShadowColor_Injected(out Color ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_subtractiveShadowColor_Injected(ref Color value);
+		private static extern void set_subtractiveShadowColor_Injected([In] ref Color value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_skybox_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_skybox_Injected(IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_sun_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_sun_Injected(IntPtr value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_ambientProbe_Injected(out SphericalHarmonicsL2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_ambientProbe_Injected(ref SphericalHarmonicsL2 value);
+		private static extern void set_ambientProbe_Injected([In] ref SphericalHarmonicsL2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_customReflectionTexture_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_customReflectionTexture_Injected(IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_defaultReflection_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetRenderSettings_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_spotCookieTexture_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_spotCookieTexture_Injected(IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_haloTexture_Injected();
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_haloTexture_Injected(IntPtr value);
 	}
 }

@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Text;
 using UnityEngine.Bindings;
 using UnityEngine.TextCore.Text;
 
 namespace UnityEngine
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 	internal class TextEditingUtilities
 	{
 		private bool hasSelection
@@ -43,6 +47,18 @@ namespace UnityEngine
 			}
 		}
 
+		internal int stringCursorIndex
+		{
+			get
+			{
+				return this.textHandle.GetCorrespondingStringIndex(this.cursorIndex);
+			}
+			set
+			{
+				this.cursorIndex = this.textHandle.GetCorrespondingCodePointIndex(value);
+			}
+		}
+
 		private int cursorIndex
 		{
 			get
@@ -52,6 +68,50 @@ namespace UnityEngine
 			set
 			{
 				this.m_TextSelectingUtility.cursorIndex = value;
+			}
+		}
+
+		private int cursorIndexNoValidation
+		{
+			get
+			{
+				return this.m_TextSelectingUtility.cursorIndexNoValidation;
+			}
+			set
+			{
+				this.m_TextSelectingUtility.cursorIndexNoValidation = value;
+			}
+		}
+
+		private int selectIndexNoValidation
+		{
+			get
+			{
+				return this.m_TextSelectingUtility.selectIndexNoValidation;
+			}
+			set
+			{
+				this.m_TextSelectingUtility.selectIndexNoValidation = value;
+			}
+		}
+
+		private int stringCursorIndexNoValidation
+		{
+			get
+			{
+				return this.textHandle.GetCorrespondingStringIndex(this.m_TextSelectingUtility.cursorIndexNoValidation);
+			}
+		}
+
+		internal int stringSelectIndex
+		{
+			get
+			{
+				return this.textHandle.GetCorrespondingStringIndex(this.selectIndex);
+			}
+			set
+			{
+				this.selectIndex = this.textHandle.GetCorrespondingCodePointIndex(value);
 			}
 		}
 
@@ -79,14 +139,24 @@ namespace UnityEngine
 				if (!flag)
 				{
 					this.m_Text = value ?? string.Empty;
+					Action onTextChanged = this.OnTextChanged;
+					if (onTextChanged != null)
+					{
+						onTextChanged();
+					}
 				}
 			}
+		}
+
+		internal void SetTextWithoutNotify(string value)
+		{
+			this.m_Text = value;
 		}
 
 		public TextEditingUtilities(TextSelectingUtilities selectingUtilities, TextHandle textHandle, string text)
 		{
 			this.m_TextSelectingUtility = selectingUtilities;
-			this.m_TextHandle = textHandle;
+			this.textHandle = textHandle;
 			this.m_Text = text;
 		}
 
@@ -117,7 +187,7 @@ namespace UnityEngine
 
 		public void SetImeWindowPosition(Vector2 worldPosition)
 		{
-			Vector2 cursorPositionFromStringIndexUsingCharacterHeight = this.m_TextHandle.GetCursorPositionFromStringIndexUsingCharacterHeight(this.cursorIndex, true);
+			Vector2 cursorPositionFromStringIndexUsingCharacterHeight = this.textHandle.GetCursorPositionFromStringIndexUsingCharacterHeight(this.cursorIndex, true);
 			GUIUtility.compositionCursorPos = worldPosition + cursorPositionFromStringIndexUsingCharacterHeight;
 		}
 
@@ -129,7 +199,7 @@ namespace UnityEngine
 			string text;
 			if (flag)
 			{
-				text = (richText ? this.text.Insert(this.cursorIndex, "<u>" + compositionString + "</u>") : this.text.Insert(this.cursorIndex, compositionString));
+				text = (richText ? this.text.Insert(this.stringCursorIndex, "<u>" + compositionString + "</u>") : this.text.Insert(this.stringCursorIndex, compositionString));
 			}
 			else
 			{
@@ -143,8 +213,8 @@ namespace UnityEngine
 			bool flag = this.m_CursorIndexSavedState != -1;
 			if (!flag)
 			{
-				this.m_CursorIndexSavedState = this.m_TextSelectingUtility.cursorIndex;
-				this.cursorIndex = (this.selectIndex = this.m_CursorIndexSavedState + GUIUtility.compositionString.Length);
+				this.m_CursorIndexSavedState = this.m_TextSelectingUtility.cursorIndexNoValidation;
+				this.cursorIndexNoValidation = (this.selectIndexNoValidation = this.m_CursorIndexSavedState + GUIUtility.compositionString.Length);
 			}
 		}
 
@@ -158,28 +228,50 @@ namespace UnityEngine
 			}
 		}
 
-		[VisibleToOtherModules]
 		internal bool HandleKeyEvent(Event e)
 		{
-			this.RestoreCursorState();
-			this.InitKeyActions();
-			EventModifiers modifiers = e.modifiers;
-			e.modifiers &= ~EventModifiers.CapsLock;
-			bool flag = TextEditingUtilities.s_KeyEditOps.ContainsKey(e);
+			return this.HandleKeyEvent(e.keyCode, e.modifiers);
+		}
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
+		internal bool HandleKeyEvent(KeyCode key, EventModifiers modifiers)
+		{
+			TextEditOp? textEditOp = TextEditingUtilities.TextEditOpFromEnum(key, modifiers, SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX);
+			bool flag = textEditOp != null;
 			bool flag2;
 			if (flag)
 			{
-				TextEditOp textEditOp = TextEditingUtilities.s_KeyEditOps[e];
-				this.PerformOperation(textEditOp);
-				e.modifiers = modifiers;
+				this.PerformOperation(textEditOp.Value);
 				flag2 = true;
 			}
 			else
 			{
-				e.modifiers = modifiers;
 				flag2 = false;
 			}
 			return flag2;
+		}
+
+		internal static TextEditOp? TextEditOpFromEnum(KeyCode key, EventModifiers modifiers, bool IsMacOsFamily)
+		{
+			modifiers &= ~EventModifiers.CapsLock;
+			TextEditingUtilities.KeyEvent keyEvent = new TextEditingUtilities.KeyEvent(key, modifiers);
+			foreach (ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp> valueTuple in TextEditingUtilities.s_GlobalKeyMappings)
+			{
+				bool flag = valueTuple.Item1 == keyEvent;
+				if (flag)
+				{
+					return new TextEditOp?(valueTuple.Item2);
+				}
+			}
+			foreach (ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp> valueTuple2 in (IsMacOsFamily ? TextEditingUtilities.s_MacKeyMappings : TextEditingUtilities.s_WindowsLinuxKeyMappings))
+			{
+				bool flag2 = valueTuple2.Item1 == keyEvent;
+				if (flag2)
+				{
+					return new TextEditOp?(valueTuple2.Item2);
+				}
+			}
+			return null;
 		}
 
 		private void PerformOperation(TextEditOp operation)
@@ -260,72 +352,6 @@ namespace UnityEngine
 			Debug.Log("Unimplemented: " + operation.ToString());
 		}
 
-		private static void MapKey(string key, TextEditOp action)
-		{
-			TextEditingUtilities.s_KeyEditOps[Event.KeyboardEvent(key)] = action;
-		}
-
-		private void InitKeyActions()
-		{
-			bool flag = TextEditingUtilities.s_KeyEditOps != null;
-			if (!flag)
-			{
-				TextEditingUtilities.s_KeyEditOps = new Dictionary<Event, TextEditOp>();
-				TextEditingUtilities.MapKey("left", TextEditOp.MoveLeft);
-				TextEditingUtilities.MapKey("right", TextEditOp.MoveRight);
-				TextEditingUtilities.MapKey("up", TextEditOp.MoveUp);
-				TextEditingUtilities.MapKey("down", TextEditOp.MoveDown);
-				TextEditingUtilities.MapKey("delete", TextEditOp.Delete);
-				TextEditingUtilities.MapKey("backspace", TextEditOp.Backspace);
-				TextEditingUtilities.MapKey("#backspace", TextEditOp.Backspace);
-				bool flag2 = SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX;
-				if (flag2)
-				{
-					TextEditingUtilities.MapKey("^left", TextEditOp.MoveGraphicalLineStart);
-					TextEditingUtilities.MapKey("^right", TextEditOp.MoveGraphicalLineEnd);
-					TextEditingUtilities.MapKey("&left", TextEditOp.MoveWordLeft);
-					TextEditingUtilities.MapKey("&right", TextEditOp.MoveWordRight);
-					TextEditingUtilities.MapKey("&up", TextEditOp.MoveParagraphBackward);
-					TextEditingUtilities.MapKey("&down", TextEditOp.MoveParagraphForward);
-					TextEditingUtilities.MapKey("%left", TextEditOp.MoveGraphicalLineStart);
-					TextEditingUtilities.MapKey("%right", TextEditOp.MoveGraphicalLineEnd);
-					TextEditingUtilities.MapKey("%up", TextEditOp.MoveTextStart);
-					TextEditingUtilities.MapKey("%down", TextEditOp.MoveTextEnd);
-					TextEditingUtilities.MapKey("%x", TextEditOp.Cut);
-					TextEditingUtilities.MapKey("%v", TextEditOp.Paste);
-					TextEditingUtilities.MapKey("^d", TextEditOp.Delete);
-					TextEditingUtilities.MapKey("^h", TextEditOp.Backspace);
-					TextEditingUtilities.MapKey("^b", TextEditOp.MoveLeft);
-					TextEditingUtilities.MapKey("^f", TextEditOp.MoveRight);
-					TextEditingUtilities.MapKey("^a", TextEditOp.MoveLineStart);
-					TextEditingUtilities.MapKey("^e", TextEditOp.MoveLineEnd);
-					TextEditingUtilities.MapKey("&delete", TextEditOp.DeleteWordForward);
-					TextEditingUtilities.MapKey("&backspace", TextEditOp.DeleteWordBack);
-					TextEditingUtilities.MapKey("%backspace", TextEditOp.DeleteLineBack);
-				}
-				else
-				{
-					TextEditingUtilities.MapKey("home", TextEditOp.MoveGraphicalLineStart);
-					TextEditingUtilities.MapKey("end", TextEditOp.MoveGraphicalLineEnd);
-					TextEditingUtilities.MapKey("%left", TextEditOp.MoveWordLeft);
-					TextEditingUtilities.MapKey("%right", TextEditOp.MoveWordRight);
-					TextEditingUtilities.MapKey("%up", TextEditOp.MoveParagraphBackward);
-					TextEditingUtilities.MapKey("%down", TextEditOp.MoveParagraphForward);
-					TextEditingUtilities.MapKey("^left", TextEditOp.MoveToEndOfPreviousWord);
-					TextEditingUtilities.MapKey("^right", TextEditOp.MoveToStartOfNextWord);
-					TextEditingUtilities.MapKey("^up", TextEditOp.MoveParagraphBackward);
-					TextEditingUtilities.MapKey("^down", TextEditOp.MoveParagraphForward);
-					TextEditingUtilities.MapKey("^delete", TextEditOp.DeleteWordForward);
-					TextEditingUtilities.MapKey("^backspace", TextEditOp.DeleteWordBack);
-					TextEditingUtilities.MapKey("%backspace", TextEditOp.DeleteLineBack);
-					TextEditingUtilities.MapKey("^x", TextEditOp.Cut);
-					TextEditingUtilities.MapKey("^v", TextEditOp.Paste);
-					TextEditingUtilities.MapKey("#delete", TextEditOp.Cut);
-					TextEditingUtilities.MapKey("#insert", TextEditOp.Paste);
-				}
-			}
-		}
-
 		public bool DeleteLineBack()
 		{
 			this.RestoreCursorState();
@@ -338,32 +364,38 @@ namespace UnityEngine
 			}
 			else
 			{
-				int num = this.cursorIndex;
-				int num2 = num;
-				while (num2-- != 0)
+				bool useAdvancedText = this.textHandle.useAdvancedText;
+				if (useAdvancedText)
 				{
-					bool flag2 = this.text[num2] == '\n';
+					int firstCharacterIndexOnLine = this.textHandle.GetFirstCharacterIndexOnLine(this.cursorIndex);
+					bool flag2 = firstCharacterIndexOnLine != this.cursorIndex;
 					if (flag2)
 					{
-						num = num2 + 1;
-						break;
+						this.text = this.text.Remove(firstCharacterIndexOnLine, this.stringCursorIndex - firstCharacterIndexOnLine);
+						this.cursorIndex = (this.selectIndex = firstCharacterIndexOnLine);
+						flag = true;
 					}
-				}
-				bool flag3 = num2 == -1;
-				if (flag3)
-				{
-					num = 0;
-				}
-				bool flag4 = this.cursorIndex != num;
-				if (flag4)
-				{
-					this.text = this.text.Remove(num, this.cursorIndex - num);
-					this.m_TextSelectingUtility.selectIndex = (this.cursorIndex = num);
-					flag = true;
+					else
+					{
+						flag = false;
+					}
 				}
 				else
 				{
-					flag = false;
+					LineInfo lineInfoFromCharacterIndex = this.textHandle.GetLineInfoFromCharacterIndex(this.cursorIndex);
+					int firstCharacterIndex = lineInfoFromCharacterIndex.firstCharacterIndex;
+					int correspondingStringIndex = this.textHandle.GetCorrespondingStringIndex(firstCharacterIndex);
+					bool flag3 = firstCharacterIndex != this.cursorIndex;
+					if (flag3)
+					{
+						this.text = this.text.Remove(correspondingStringIndex, this.stringCursorIndex - correspondingStringIndex);
+						this.cursorIndex = (this.selectIndex = firstCharacterIndex);
+						flag = true;
+					}
+					else
+					{
+						flag = false;
+					}
 				}
 			}
 			return flag;
@@ -385,7 +417,8 @@ namespace UnityEngine
 				bool flag2 = this.cursorIndex != num;
 				if (flag2)
 				{
-					this.text = this.text.Remove(num, this.cursorIndex - num);
+					int correspondingStringIndex = this.textHandle.GetCorrespondingStringIndex(num);
+					this.text = this.text.Remove(correspondingStringIndex, this.stringCursorIndex - correspondingStringIndex);
 					this.selectIndex = (this.cursorIndex = num);
 					flag = true;
 				}
@@ -413,7 +446,8 @@ namespace UnityEngine
 				bool flag2 = this.cursorIndex < this.text.Length;
 				if (flag2)
 				{
-					this.text = this.text.Remove(this.cursorIndex, num - this.cursorIndex);
+					int correspondingStringIndex = this.textHandle.GetCorrespondingStringIndex(num);
+					this.text = this.text.Remove(this.stringCursorIndex, correspondingStringIndex - this.stringCursorIndex);
 					flag = true;
 				}
 				else
@@ -436,10 +470,20 @@ namespace UnityEngine
 			}
 			else
 			{
-				bool flag2 = this.cursorIndex < this.text.Length;
+				bool flag2 = this.stringCursorIndex < this.text.Length;
 				if (flag2)
 				{
-					this.text = this.text.Remove(this.cursorIndex, this.m_TextSelectingUtility.NextCodePointIndex(this.cursorIndex) - this.cursorIndex);
+					bool useAdvancedText = this.textHandle.useAdvancedText;
+					int num;
+					if (useAdvancedText)
+					{
+						num = Mathf.Abs(this.textHandle.NextCodePointIndex(this.cursorIndex) - this.cursorIndex);
+					}
+					else
+					{
+						num = this.textHandle.textInfo.textElementInfo[this.cursorIndex].stringLength;
+					}
+					this.text = this.text.Remove(this.stringCursorIndex, num);
 					flag = true;
 				}
 				else
@@ -466,9 +510,19 @@ namespace UnityEngine
 				if (flag2)
 				{
 					int num = this.m_TextSelectingUtility.PreviousCodePointIndex(this.cursorIndex);
-					this.text = this.text.Remove(num, this.cursorIndex - num);
-					this.m_TextSelectingUtility.SetCursorIndexWithoutNotify(num);
-					this.m_TextSelectingUtility.SetSelectIndexWithoutNotify(num);
+					bool useAdvancedText = this.textHandle.useAdvancedText;
+					int num2;
+					if (useAdvancedText)
+					{
+						num2 = Mathf.Abs(this.cursorIndex - num);
+					}
+					else
+					{
+						num2 = this.textHandle.textInfo.textElementInfo[this.cursorIndex - 1].stringLength;
+					}
+					this.text = this.text.Remove(this.stringCursorIndex - num2, num2);
+					this.cursorIndex = (this.textHandle.useAdvancedText ? Math.Max(0, this.cursorIndex - num2) : num);
+					this.selectIndex = (this.textHandle.useAdvancedText ? Math.Max(0, this.selectIndex - num2) : num);
 					this.m_TextSelectingUtility.ClearCursorPos();
 					flag = true;
 				}
@@ -493,13 +547,13 @@ namespace UnityEngine
 				bool flag3 = this.cursorIndex < this.selectIndex;
 				if (flag3)
 				{
-					this.text = this.text.Substring(0, this.cursorIndex) + this.text.Substring(this.selectIndex, this.text.Length - this.selectIndex);
-					this.m_TextSelectingUtility.SetSelectIndexWithoutNotify(this.cursorIndex);
+					this.text = this.text.Substring(0, this.stringCursorIndex) + this.text.Substring(this.stringSelectIndex, this.text.Length - this.stringSelectIndex);
+					this.selectIndex = this.cursorIndex;
 				}
 				else
 				{
-					this.text = this.text.Substring(0, this.selectIndex) + this.text.Substring(this.cursorIndex, this.text.Length - this.cursorIndex);
-					this.m_TextSelectingUtility.SetCursorIndexWithoutNotify(this.selectIndex);
+					this.text = this.text.Substring(0, this.stringSelectIndex) + this.text.Substring(this.stringCursorIndex, this.text.Length - this.stringCursorIndex);
+					this.cursorIndex = this.selectIndex;
 				}
 				this.m_TextSelectingUtility.ClearCursorPos();
 				flag2 = true;
@@ -511,16 +565,40 @@ namespace UnityEngine
 		{
 			this.RestoreCursorState();
 			this.DeleteSelection();
-			this.text = this.text.Insert(this.cursorIndex, replace);
-			int num = this.cursorIndex + replace.Length;
-			this.m_TextSelectingUtility.SetCursorIndexWithoutNotify(num);
-			this.m_TextSelectingUtility.SetSelectIndexWithoutNotify(num);
+			this.text = this.text.Insert(this.stringCursorIndex, replace);
+			int num = (this.textHandle.useAdvancedText ? replace.Length : new StringInfo(replace).LengthInTextElements);
+			int num2 = this.cursorIndexNoValidation + num;
+			this.cursorIndexNoValidation = num2;
+			this.selectIndexNoValidation = num2;
 			this.m_TextSelectingUtility.ClearCursorPos();
 		}
 
-		public void Insert(char c)
+		public bool Insert(char c)
 		{
-			this.ReplaceSelection(c.ToString());
+			bool flag = char.IsHighSurrogate(c);
+			bool flag2;
+			if (flag)
+			{
+				this.m_HighSurrogate = c;
+				flag2 = false;
+			}
+			else
+			{
+				bool flag3 = char.IsLowSurrogate(c);
+				if (flag3)
+				{
+					char c2 = c;
+					string text = new string(new char[] { this.m_HighSurrogate, c2 });
+					this.ReplaceSelection(text.ToString());
+					flag2 = true;
+				}
+				else
+				{
+					this.ReplaceSelection(c.ToString());
+					flag2 = true;
+				}
+			}
+			return flag2;
 		}
 
 		public void MoveSelectionToAltCursor()
@@ -586,12 +664,16 @@ namespace UnityEngine
 			return value;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal void OnBlur()
 		{
 			this.revealCursor = false;
+			this.isCompositionActive = false;
+			this.RestoreCursorState();
 			this.m_TextSelectingUtility.SelectNone();
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal bool TouchScreenKeyboardShouldBeUsed()
 		{
 			RuntimePlatform platform = Application.platform;
@@ -611,18 +693,155 @@ namespace UnityEngine
 
 		private TextSelectingUtilities m_TextSelectingUtility;
 
-		private TextHandle m_TextHandle;
+		internal TextHandle textHandle;
 
 		private int m_CursorIndexSavedState = -1;
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.UIElementsModule" })]
 		internal bool isCompositionActive;
 
 		private bool m_UpdateImeWindowPosition;
+
+		internal Action OnTextChanged;
 
 		public bool multiline = false;
 
 		private string m_Text;
 
-		private static Dictionary<Event, TextEditOp> s_KeyEditOps;
+		[TupleElementNames(new string[] { "keyEvent", "operation" })]
+		internal static readonly List<ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>> s_GlobalKeyMappings = new List<ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>>
+		{
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.FunctionKey), TextEditOp.MoveLeft),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.FunctionKey), TextEditOp.MoveRight),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.FunctionKey), TextEditOp.MoveUp),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.FunctionKey), TextEditOp.MoveDown),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Delete, EventModifiers.FunctionKey), TextEditOp.Delete),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Backspace, EventModifiers.FunctionKey), TextEditOp.Backspace),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Backspace, EventModifiers.Shift | EventModifiers.FunctionKey), TextEditOp.Backspace)
+		};
+
+		[TupleElementNames(new string[] { "keyEvent", "operation" })]
+		internal static readonly List<ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>> s_MacKeyMappings = new List<ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>>
+		{
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.MoveGraphicalLineStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.MoveGraphicalLineEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Alt | EventModifiers.FunctionKey), TextEditOp.MoveWordLeft),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Alt | EventModifiers.FunctionKey), TextEditOp.MoveWordRight),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Alt | EventModifiers.FunctionKey), TextEditOp.MoveParagraphBackward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Alt | EventModifiers.FunctionKey), TextEditOp.MoveParagraphForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveGraphicalLineStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveGraphicalLineEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveTextStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveTextEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.X, EventModifiers.Command), TextEditOp.Cut),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.V, EventModifiers.Command), TextEditOp.Paste),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.D, EventModifiers.Control), TextEditOp.Delete),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.H, EventModifiers.Control), TextEditOp.Backspace),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.B, EventModifiers.Control), TextEditOp.MoveLeft),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.F, EventModifiers.Control), TextEditOp.MoveRight),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.A, EventModifiers.Control), TextEditOp.MoveLineStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.E, EventModifiers.Control), TextEditOp.MoveLineEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Delete, EventModifiers.Alt | EventModifiers.FunctionKey), TextEditOp.DeleteWordForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Backspace, EventModifiers.Alt | EventModifiers.FunctionKey), TextEditOp.DeleteWordBack),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Backspace, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.DeleteLineBack)
+		};
+
+		[TupleElementNames(new string[] { "keyEvent", "operation" })]
+		internal static readonly List<ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>> s_WindowsLinuxKeyMappings = new List<ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>>
+		{
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Home, EventModifiers.FunctionKey), TextEditOp.MoveGraphicalLineStart),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.End, EventModifiers.FunctionKey), TextEditOp.MoveGraphicalLineEnd),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveWordLeft),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveWordRight),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveParagraphBackward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.MoveParagraphForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.LeftArrow, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.MoveToEndOfPreviousWord),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.RightArrow, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.MoveToStartOfNextWord),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.UpArrow, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.MoveParagraphBackward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.DownArrow, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.MoveParagraphForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Delete, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.DeleteWordForward),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Backspace, EventModifiers.Control | EventModifiers.FunctionKey), TextEditOp.DeleteWordBack),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Backspace, EventModifiers.Command | EventModifiers.FunctionKey), TextEditOp.DeleteLineBack),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.X, EventModifiers.Control), TextEditOp.Cut),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.V, EventModifiers.Control), TextEditOp.Paste),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Delete, EventModifiers.Shift | EventModifiers.FunctionKey), TextEditOp.Cut),
+			new ValueTuple<TextEditingUtilities.KeyEvent, TextEditOp>(new TextEditingUtilities.KeyEvent(KeyCode.Insert, EventModifiers.Shift | EventModifiers.FunctionKey), TextEditOp.Paste)
+		};
+
+		private char m_HighSurrogate;
+
+		internal struct KeyEvent : IEquatable<TextEditingUtilities.KeyEvent>
+		{
+			public KeyEvent(KeyCode key, EventModifiers modifiers)
+			{
+				this.key = key;
+				this.modifiers = modifiers;
+			}
+
+			public KeyCode key { readonly get; set; }
+
+			public EventModifiers modifiers { readonly get; set; }
+
+			[CompilerGenerated]
+			public override readonly string ToString()
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append("KeyEvent");
+				stringBuilder.Append(" { ");
+				if (this.PrintMembers(stringBuilder))
+				{
+					stringBuilder.Append(' ');
+				}
+				stringBuilder.Append('}');
+				return stringBuilder.ToString();
+			}
+
+			[CompilerGenerated]
+			private readonly bool PrintMembers(StringBuilder builder)
+			{
+				builder.Append("key = ");
+				builder.Append(this.key.ToString());
+				builder.Append(", modifiers = ");
+				builder.Append(this.modifiers.ToString());
+				return true;
+			}
+
+			[CompilerGenerated]
+			public static bool operator !=(TextEditingUtilities.KeyEvent left, TextEditingUtilities.KeyEvent right)
+			{
+				return !(left == right);
+			}
+
+			[CompilerGenerated]
+			public static bool operator ==(TextEditingUtilities.KeyEvent left, TextEditingUtilities.KeyEvent right)
+			{
+				return left.Equals(right);
+			}
+
+			[CompilerGenerated]
+			public override readonly int GetHashCode()
+			{
+				return EqualityComparer<KeyCode>.Default.GetHashCode(this.<key>k__BackingField) * -1521134295 + EqualityComparer<EventModifiers>.Default.GetHashCode(this.<modifiers>k__BackingField);
+			}
+
+			[CompilerGenerated]
+			public override readonly bool Equals(object obj)
+			{
+				return obj is TextEditingUtilities.KeyEvent && this.Equals((TextEditingUtilities.KeyEvent)obj);
+			}
+
+			[CompilerGenerated]
+			public readonly bool Equals(TextEditingUtilities.KeyEvent other)
+			{
+				return EqualityComparer<KeyCode>.Default.Equals(this.<key>k__BackingField, other.<key>k__BackingField) && EqualityComparer<EventModifiers>.Default.Equals(this.<modifiers>k__BackingField, other.<modifiers>k__BackingField);
+			}
+
+			[CompilerGenerated]
+			public readonly void Deconstruct(out KeyCode key, out EventModifiers modifiers)
+			{
+				key = this.key;
+				modifiers = this.modifiers;
+			}
+		}
 	}
 }

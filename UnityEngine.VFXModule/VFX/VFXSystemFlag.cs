@@ -14,6 +14,7 @@ namespace UnityEngine.VFX
 		SystemInWorldSpace = 64,
 		SystemHasDirectLink = 128,
 		SystemHasAttributeBuffer = 256,
-		SystemUsesInstancedRendering = 512
+		SystemUsesInstancedRendering = 512,
+		SystemIsRayTraced = 1024
 	}
 }

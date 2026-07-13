@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -48,9 +49,27 @@ namespace UnityEngine
 		}
 
 		[NativeName("ClearCachedVersion")]
-		internal static bool ClearCachedVersionInternal(string assetBundleName, Hash128 hash)
+		internal unsafe static bool ClearCachedVersionInternal(string assetBundleName, Hash128 hash)
 		{
-			return Caching.ClearCachedVersionInternal_Injected(assetBundleName, ref hash);
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(assetBundleName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = assetBundleName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = Caching.ClearCachedVersionInternal_Injected(ref managedSpanWrapper, ref hash);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
 		}
 
 		public static bool ClearOtherCachedVersions(string assetBundleName, Hash128 hash)
@@ -73,13 +92,56 @@ namespace UnityEngine
 			return Caching.ClearCachedVersions(assetBundleName, default(Hash128), false);
 		}
 
-		internal static bool ClearCachedVersions(string assetBundleName, Hash128 hash, bool keepInputVersion)
+		internal unsafe static bool ClearCachedVersions(string assetBundleName, Hash128 hash, bool keepInputVersion)
 		{
-			return Caching.ClearCachedVersions_Injected(assetBundleName, ref hash, keepInputVersion);
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(assetBundleName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = assetBundleName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = Caching.ClearCachedVersions_Injected(ref managedSpanWrapper, ref hash, keepInputVersion);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Hash128[] GetCachedVersions(string assetBundleName);
+		internal unsafe static Hash128[] GetCachedVersions(string assetBundleName)
+		{
+			Hash128[] array2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(assetBundleName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = assetBundleName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				BlittableArrayWrapper blittableArrayWrapper;
+				Caching.GetCachedVersions_Injected(ref managedSpanWrapper, out blittableArrayWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+				BlittableArrayWrapper blittableArrayWrapper;
+				Hash128[] array;
+				blittableArrayWrapper.Unmarshal<Hash128>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
 		public static void GetCachedVersions(string assetBundleName, List<Hash128> outCachedVersions)
 		{
@@ -123,9 +185,37 @@ namespace UnityEngine
 		}
 
 		[NativeName("IsCached")]
-		internal static bool IsVersionCached(string url, string assetBundleName, Hash128 hash)
+		internal unsafe static bool IsVersionCached(string url, string assetBundleName, Hash128 hash)
 		{
-			return Caching.IsVersionCached_Injected(url, assetBundleName, ref hash);
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(url, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = url.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(assetBundleName, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = assetBundleName.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				flag = Caching.IsVersionCached_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, ref hash);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return flag;
 		}
 
 		[Obsolete("Please use MarkAsUsed with Hash128 instead.")]
@@ -154,9 +244,37 @@ namespace UnityEngine
 			return Caching.MarkAsUsed("", cachedBundle.name, cachedBundle.hash);
 		}
 
-		internal static bool MarkAsUsed(string url, string assetBundleName, Hash128 hash)
+		internal unsafe static bool MarkAsUsed(string url, string assetBundleName, Hash128 hash)
 		{
-			return Caching.MarkAsUsed_Injected(url, assetBundleName, ref hash);
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(url, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = url.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(assetBundleName, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = assetBundleName.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				flag = Caching.MarkAsUsed_Injected(ref managedSpanWrapper, ref managedSpanWrapper2, ref hash);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return flag;
 		}
 
 		[Obsolete("This function is obsolete and will always return -1. Use IsVersionCached instead.")]
@@ -177,8 +295,8 @@ namespace UnityEngine
 		[Obsolete("This property is only used for the current cache, use Cache.spaceOccupied to get used bytes per cache.")]
 		public static extern long spaceOccupied
 		{
-			[NativeName("GetCachingDiskSpaceUsed")]
 			[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
+			[NativeName("GetCachingDiskSpaceUsed")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -195,8 +313,8 @@ namespace UnityEngine
 		[Obsolete("This property is only used for the current cache, use Cache.spaceFree to get unused bytes per cache.")]
 		public static extern long spaceFree
 		{
-			[NativeName("GetCachingDiskSpaceFree")]
 			[StaticAccessor("GetCachingManager().GetCurrentCache()", StaticAccessorType.Dot)]
+			[NativeName("GetCachingDiskSpaceFree")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -258,16 +376,35 @@ namespace UnityEngine
 		}
 
 		[NativeName("AddCachePath")]
-		internal static Cache AddCache(string cachePath, bool isReadonly)
+		internal unsafe static Cache AddCache(string cachePath, bool isReadonly)
 		{
-			Cache cache;
-			Caching.AddCache_Injected(cachePath, isReadonly, out cache);
-			return cache;
+			Cache cache2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(cachePath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = cachePath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Cache cache;
+				Caching.AddCache_Injected(ref managedSpanWrapper, isReadonly, out cache);
+			}
+			finally
+			{
+				char* ptr = null;
+				Cache cache;
+				cache2 = cache;
+			}
+			return cache2;
 		}
 
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
-		[NativeThrows]
 		[NativeName("Caching_GetCacheHandleAt")]
+		[NativeThrows]
 		public static Cache GetCacheAt(int cacheIndex)
 		{
 			Cache cache;
@@ -275,14 +412,33 @@ namespace UnityEngine
 			return cache;
 		}
 
-		[NativeThrows]
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_GetCacheHandleByPath")]
-		public static Cache GetCacheByPath(string cachePath)
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
+		[NativeThrows]
+		public unsafe static Cache GetCacheByPath(string cachePath)
 		{
-			Cache cache;
-			Caching.GetCacheByPath_Injected(cachePath, out cache);
-			return cache;
+			Cache cache2;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(cachePath, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = cachePath.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				Cache cache;
+				Caching.GetCacheByPath_Injected(ref managedSpanWrapper, out cache);
+			}
+			finally
+			{
+				char* ptr = null;
+				Cache cache;
+				cache2 = cache;
+			}
+			return cache2;
 		}
 
 		public static void GetAllCachePaths(List<string> cachePaths)
@@ -294,24 +450,24 @@ namespace UnityEngine
 			}
 		}
 
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeThrows]
 		[NativeName("Caching_RemoveCacheByHandle")]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static bool RemoveCache(Cache cache)
 		{
 			return Caching.RemoveCache_Injected(ref cache);
 		}
 
+		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_MoveCacheBeforeByHandle")]
-		[NativeThrows]
 		public static void MoveCacheBefore(Cache src, Cache dst)
 		{
 			Caching.MoveCacheBefore_Injected(ref src, ref dst);
 		}
 
-		[NativeName("Caching_MoveCacheAfterByHandle")]
 		[NativeThrows]
+		[NativeName("Caching_MoveCacheAfterByHandle")]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static void MoveCacheAfter(Cache src, Cache dst)
 		{
@@ -346,8 +502,8 @@ namespace UnityEngine
 				Caching.get_currentCacheForWriting_Injected(out cache);
 				return cache;
 			}
-			[NativeThrows]
 			[NativeName("Caching_SetCurrentCacheByHandle")]
+			[NativeThrows]
 			set
 			{
 				Caching.set_currentCacheForWriting_Injected(ref value);
@@ -361,34 +517,37 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool ClearCachedVersionInternal_Injected(string assetBundleName, ref Hash128 hash);
+		private static extern bool ClearCachedVersionInternal_Injected(ref ManagedSpanWrapper assetBundleName, [In] ref Hash128 hash);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool ClearCachedVersions_Injected(string assetBundleName, ref Hash128 hash, bool keepInputVersion);
+		private static extern bool ClearCachedVersions_Injected(ref ManagedSpanWrapper assetBundleName, [In] ref Hash128 hash, bool keepInputVersion);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsVersionCached_Injected(string url, string assetBundleName, ref Hash128 hash);
+		private static extern void GetCachedVersions_Injected(ref ManagedSpanWrapper assetBundleName, out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool MarkAsUsed_Injected(string url, string assetBundleName, ref Hash128 hash);
+		private static extern bool IsVersionCached_Injected(ref ManagedSpanWrapper url, ref ManagedSpanWrapper assetBundleName, [In] ref Hash128 hash);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void AddCache_Injected(string cachePath, bool isReadonly, out Cache ret);
+		private static extern bool MarkAsUsed_Injected(ref ManagedSpanWrapper url, ref ManagedSpanWrapper assetBundleName, [In] ref Hash128 hash);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void AddCache_Injected(ref ManagedSpanWrapper cachePath, bool isReadonly, out Cache ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetCacheAt_Injected(int cacheIndex, out Cache ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetCacheByPath_Injected(string cachePath, out Cache ret);
+		private static extern void GetCacheByPath_Injected(ref ManagedSpanWrapper cachePath, out Cache ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool RemoveCache_Injected(ref Cache cache);
+		private static extern bool RemoveCache_Injected([In] ref Cache cache);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MoveCacheBefore_Injected(ref Cache src, ref Cache dst);
+		private static extern void MoveCacheBefore_Injected([In] ref Cache src, [In] ref Cache dst);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void MoveCacheAfter_Injected(ref Cache src, ref Cache dst);
+		private static extern void MoveCacheAfter_Injected([In] ref Cache src, [In] ref Cache dst);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_defaultCache_Injected(out Cache ret);
@@ -397,6 +556,6 @@ namespace UnityEngine
 		private static extern void get_currentCacheForWriting_Injected(out Cache ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_currentCacheForWriting_Injected(ref Cache value);
+		private static extern void set_currentCacheForWriting_Injected([In] ref Cache value);
 	}
 }

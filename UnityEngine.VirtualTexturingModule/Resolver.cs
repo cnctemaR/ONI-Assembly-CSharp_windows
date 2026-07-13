@@ -48,11 +48,25 @@ namespace UnityEngine.Rendering.VirtualTexturing
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ReleaseNative(IntPtr ptr);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Flush_Internal();
+		private void Flush_Internal()
+		{
+			IntPtr intPtr = Resolver.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Resolver.Flush_Internal_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Init_Internal(int width, int height);
+		private void Init_Internal(int width, int height)
+		{
+			IntPtr intPtr = Resolver.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Resolver.Init_Internal_Injected(intPtr, width, height);
+		}
 
 		public int CurrentWidth { get; private set; } = 0;
 
@@ -90,6 +104,20 @@ namespace UnityEngine.Rendering.VirtualTexturing
 			cmd.ProcessVTFeedback(rt, this.m_Ptr, slice, x, width, y, height, mip);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Flush_Internal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Init_Internal_Injected(IntPtr _unity_self, int width, int height);
+
 		internal IntPtr m_Ptr;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(Resolver resolver)
+			{
+				return resolver.m_Ptr;
+			}
+		}
 	}
 }

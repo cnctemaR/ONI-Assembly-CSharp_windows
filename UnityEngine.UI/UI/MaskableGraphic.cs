@@ -221,6 +221,11 @@ namespace UnityEngine.UI
 			this.SetMaterialDirty();
 		}
 
+		public override bool Raycast(Vector2 sp, Camera eventCamera)
+		{
+			return base.Raycast(sp, eventCamera, !this.maskable);
+		}
+
 		GameObject IClippable.get_gameObject()
 		{
 			return base.gameObject;

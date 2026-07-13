@@ -2,8 +2,8 @@
 
 namespace JetBrains.Annotations
 {
-	[Obsolete("Use [ContractAnnotation('=> halt')] instead")]
 	[AttributeUsage(AttributeTargets.Method)]
+	[Obsolete("Use [ContractAnnotation('=> halt')] instead")]
 	public sealed class TerminatesProgramAttribute : Attribute
 	{
 	}

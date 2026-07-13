@@ -156,7 +156,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		MinionIdentity component = gameObject.GetComponent<MinionIdentity>();
 		if (component != null)
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.PersonalTime, GameClock.Instance.GetTimeSinceStartOfReport(), string.Format(UI.ENDOFDAYREPORT.NOTES.PERSONAL_TIME, DUPLICANTS.CHORES.NOT_EXISTING_TASK), gameObject.GetProperName());
+			ReportManager.Instance.ReportValueWithGameObjectContext(ReportManager.ReportType.PersonalTime, GameClock.Instance.GetTimeSinceStartOfReport(), gameObject, string.Format(UI.ENDOFDAYREPORT.NOTES.PERSONAL_TIME, DUPLICANTS.CHORES.NOT_EXISTING_TASK));
 			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.GetWorldItems(base.gameObject.GetComponent<KSelectable>().GetMyWorldId(), false))
 			{
 				minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", true);

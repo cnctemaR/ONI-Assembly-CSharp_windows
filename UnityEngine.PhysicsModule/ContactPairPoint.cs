@@ -1,10 +1,12 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[UsedByNativeCode]
 	public readonly struct ContactPairPoint
 	{
-		public Vector3 Position
+		public Vector3 position
 		{
 			get
 			{
@@ -12,7 +14,7 @@ namespace UnityEngine
 			}
 		}
 
-		public float Separation
+		public float separation
 		{
 			get
 			{
@@ -20,7 +22,7 @@ namespace UnityEngine
 			}
 		}
 
-		public Vector3 Normal
+		public Vector3 normal
 		{
 			get
 			{
@@ -28,11 +30,47 @@ namespace UnityEngine
 			}
 		}
 
-		public Vector3 Impulse
+		public Vector3 impulse
 		{
 			get
 			{
 				return this.m_Impulse;
+			}
+		}
+
+		[Obsolete("Please use ContactPairPoint.position instead. (UnityUpgradable) -> position", false)]
+		public Vector3 Position
+		{
+			get
+			{
+				return this.position;
+			}
+		}
+
+		[Obsolete("Please use ContactPairPoint.separation instead. (UnityUpgradable) -> separation", false)]
+		public float Separation
+		{
+			get
+			{
+				return this.separation;
+			}
+		}
+
+		[Obsolete("Please use ContactPairPoint.normal instead. (UnityUpgradable) -> normal", false)]
+		public Vector3 Normal
+		{
+			get
+			{
+				return this.normal;
+			}
+		}
+
+		[Obsolete("Please use ContactPairPoint.impulse instead. (UnityUpgradable) -> impulse", false)]
+		public Vector3 Impulse
+		{
+			get
+			{
+				return this.impulse;
 			}
 		}
 

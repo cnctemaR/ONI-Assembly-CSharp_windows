@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
@@ -94,12 +95,22 @@ namespace UnityEngine.AI
 		}
 
 		[StaticAccessor("NavMeshBuildSource", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Component InternalGetComponent(int instanceID);
+		private static Component InternalGetComponent(EntityId instanceID)
+		{
+			return Unmarshal.UnmarshalUnityObject<Component>(NavMeshBuildSource.InternalGetComponent_Injected(ref instanceID));
+		}
 
 		[StaticAccessor("NavMeshBuildSource", StaticAccessorType.DoubleColon)]
+		private static Object InternalGetObject(EntityId instanceID)
+		{
+			return Unmarshal.UnmarshalUnityObject<Object>(NavMeshBuildSource.InternalGetObject_Injected(ref instanceID));
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Object InternalGetObject(int instanceID);
+		private static extern IntPtr InternalGetComponent_Injected([In] ref EntityId instanceID);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr InternalGetObject_Injected([In] ref EntityId instanceID);
 
 		private Matrix4x4 m_Transform;
 

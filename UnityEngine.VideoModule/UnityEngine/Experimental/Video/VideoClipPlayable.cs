@@ -8,12 +8,12 @@ using UnityEngine.Video;
 
 namespace UnityEngine.Experimental.Video
 {
-	[StaticAccessor("VideoClipPlayableBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[RequiredByNativeCode]
+	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
 	[NativeHeader("Modules/Video/Public/Director/VideoClipPlayable.h")]
 	[NativeHeader("Modules/Video/Public/VideoClip.h")]
-	[NativeHeader("Modules/Video/Public/ScriptBindings/VideoClipPlayable.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[StaticAccessor("VideoClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	public struct VideoClipPlayable : IPlayable, IEquatable<VideoClipPlayable>
 	{
 		public static VideoClipPlayable Create(PlayableGraph graph, VideoClip clip, bool looping)
@@ -165,12 +165,16 @@ namespace UnityEngine.Experimental.Video
 		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern VideoClip GetClipInternal(ref PlayableHandle hdl);
+		private static VideoClip GetClipInternal(ref PlayableHandle hdl)
+		{
+			return Unmarshal.UnmarshalUnityObject<VideoClip>(VideoClipPlayable.GetClipInternal_Injected(ref hdl));
+		}
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetClipInternal(ref PlayableHandle hdl, VideoClip clip);
+		private static void SetClipInternal(ref PlayableHandle hdl, VideoClip clip)
+		{
+			VideoClipPlayable.SetClipInternal_Injected(ref hdl, Object.MarshalledUnityObject.Marshal<VideoClip>(clip));
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -201,12 +205,23 @@ namespace UnityEngine.Experimental.Video
 		private static extern void SetPauseDelayInternal(ref PlayableHandle hdl, double delay);
 
 		[NativeThrows]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool InternalCreateVideoClipPlayable(ref PlayableGraph graph, VideoClip clip, bool looping, ref PlayableHandle handle);
+		private static bool InternalCreateVideoClipPlayable(ref PlayableGraph graph, VideoClip clip, bool looping, ref PlayableHandle handle)
+		{
+			return VideoClipPlayable.InternalCreateVideoClipPlayable_Injected(ref graph, Object.MarshalledUnityObject.Marshal<VideoClip>(clip), looping, ref handle);
+		}
 
 		[NativeThrows]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool ValidateType(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetClipInternal_Injected(ref PlayableHandle hdl);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetClipInternal_Injected(ref PlayableHandle hdl, IntPtr clip);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool InternalCreateVideoClipPlayable_Injected(ref PlayableGraph graph, IntPtr clip, bool looping, ref PlayableHandle handle);
 
 		private PlayableHandle m_Handle;
 	}

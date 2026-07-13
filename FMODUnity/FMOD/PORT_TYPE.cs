@@ -11,6 +11,8 @@ namespace FMOD
 		PERSONAL,
 		VIBRATION,
 		AUX,
+		PASSTHROUGH,
+		VR_VIBRATION,
 		MAX
 	}
 }

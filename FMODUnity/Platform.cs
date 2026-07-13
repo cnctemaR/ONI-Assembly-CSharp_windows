@@ -92,7 +92,7 @@ namespace FMODUnity
 					string pluginPath = this.GetPluginPath(text);
 					uint num;
 					RESULT result = coreSystem.loadPlugin(pluginPath, out num, 0U);
-					if (result == RESULT.ERR_FILE_BAD || result == RESULT.ERR_FILE_NOTFOUND)
+					if ((result == RESULT.ERR_FILE_BAD || result == RESULT.ERR_FILE_NOTFOUND) && Environment.Is64BitProcess)
 					{
 						string pluginPath2 = this.GetPluginPath(text + "64");
 						result = coreSystem.loadPlugin(pluginPath2, out num, 0U);

@@ -1,11 +1,7 @@
 ﻿using System;
-using UnityEngine.Bindings;
-using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[UsedByNativeCode]
-	[NativeHeader("Modules/Physics/MessageParameters.h")]
 	public struct ContactPoint
 	{
 		public Vector3 point
@@ -36,7 +32,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.GetColliderByInstanceID(this.m_ThisColliderInstanceID);
+				return Physics.GetColliderByInstanceID(this.m_ThisColliderEntityId);
 			}
 		}
 
@@ -44,7 +40,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return Physics.GetColliderByInstanceID(this.m_OtherColliderInstanceID);
+				return Physics.GetColliderByInstanceID(this.m_OtherColliderEntityId);
 			}
 		}
 
@@ -56,14 +52,14 @@ namespace UnityEngine
 			}
 		}
 
-		internal ContactPoint(Vector3 point, Vector3 normal, Vector3 impulse, float separation, int thisInstanceID, int otherInstenceID)
+		internal ContactPoint(Vector3 point, Vector3 normal, Vector3 impulse, float separation, EntityId thisEntityId, EntityId otherEntityId)
 		{
 			this.m_Point = point;
 			this.m_Normal = normal;
 			this.m_Impulse = impulse;
 			this.m_Separation = separation;
-			this.m_ThisColliderInstanceID = thisInstanceID;
-			this.m_OtherColliderInstanceID = otherInstenceID;
+			this.m_ThisColliderEntityId = thisEntityId;
+			this.m_OtherColliderEntityId = otherEntityId;
 		}
 
 		internal Vector3 m_Point;
@@ -72,9 +68,9 @@ namespace UnityEngine
 
 		internal Vector3 m_Impulse;
 
-		internal int m_ThisColliderInstanceID;
+		internal EntityId m_ThisColliderEntityId;
 
-		internal int m_OtherColliderInstanceID;
+		internal EntityId m_OtherColliderEntityId;
 
 		internal float m_Separation;
 	}

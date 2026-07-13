@@ -10,6 +10,8 @@ namespace UnityEngine.NVIDIA
 		MVLowRes = 2,
 		MVJittered = 4,
 		DepthInverted = 8,
-		DoSharpening = 16
+		[Obsolete("Sharpening is deprecated by NVIDIA. It is no longer used and will be removed in a future release.")]
+		DoSharpening = 16,
+		AutoExposure = 32
 	}
 }

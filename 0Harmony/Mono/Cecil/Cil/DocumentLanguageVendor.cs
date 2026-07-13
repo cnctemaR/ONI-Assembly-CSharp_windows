@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum DocumentLanguageVendor
+	internal enum DocumentLanguageVendor
 	{
 		Other,
 		Microsoft

@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Cecil
 {
-	public sealed class ReaderParameters
+	internal sealed class ReaderParameters
 	{
 		public ReadingMode ReadingMode
 		{

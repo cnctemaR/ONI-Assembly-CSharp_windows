@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Mono.Cecil.Rocks
 {
-	public static class ModuleDefinitionRocks
+	internal static class ModuleDefinitionRocks
 	{
 		public static IEnumerable<TypeDefinition> GetAllTypes(this ModuleDefinition self)
 		{

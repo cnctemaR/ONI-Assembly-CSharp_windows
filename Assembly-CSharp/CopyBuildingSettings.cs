@@ -22,60 +22,59 @@ public class CopyBuildingSettings : KMonoBehaviour
 		PlayerController.Instance.ActivateTool(CopySettingsTool.Instance);
 	}
 
-	public static bool ApplyCopy(int targetCell, GameObject sourceGameObject)
+	public static ObjectLayer ResolveLayer(GameObject sourceGameObject)
 	{
 		ObjectLayer objectLayer = ObjectLayer.Building;
-		if (sourceGameObject.GetComponent<MoverLayerOccupier>() != null)
+		MoverLayerOccupier moverLayerOccupier;
+		if (sourceGameObject.TryGetComponent<MoverLayerOccupier>(out moverLayerOccupier))
 		{
 			objectLayer = ObjectLayer.Mover;
 		}
-		Building component = sourceGameObject.GetComponent<BuildingComplete>();
-		if (component != null)
+		BuildingComplete buildingComplete;
+		if (sourceGameObject.TryGetComponent<BuildingComplete>(out buildingComplete))
 		{
-			objectLayer = component.Def.ObjectLayer;
+			objectLayer = buildingComplete.Def.ObjectLayer;
 		}
-		GameObject gameObject = Grid.Objects[targetCell, (int)objectLayer];
+		return objectLayer;
+	}
+
+	public static KPrefabID ResolveTarget(ObjectLayer layer, int targetCell)
+	{
+		GameObject gameObject = Grid.Objects[targetCell, (int)layer];
 		if (gameObject == null)
 		{
-			return false;
+			return null;
 		}
-		if (gameObject == sourceGameObject)
+		KPrefabID kprefabID;
+		gameObject.TryGetComponent<KPrefabID>(out kprefabID);
+		return kprefabID;
+	}
+
+	public static bool ApplyCopy(KPrefabID other_id, GameObject sourceGameObject, KPrefabID source_id, CopyBuildingSettings source_settings)
+	{
+		DebugUtil.DevAssert(other_id.gameObject != sourceGameObject, "source and target must not be equal", null);
+		if (other_id.gameObject == sourceGameObject)
 		{
 			return false;
 		}
-		KPrefabID component2 = sourceGameObject.GetComponent<KPrefabID>();
-		if (component2 == null)
+		CopyBuildingSettings copyBuildingSettings;
+		if (!other_id.gameObject.TryGetComponent<CopyBuildingSettings>(out copyBuildingSettings))
 		{
 			return false;
 		}
-		KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
-		if (component3 == null)
+		if (source_settings.copyGroupTag != Tag.Invalid)
 		{
-			return false;
-		}
-		CopyBuildingSettings component4 = sourceGameObject.GetComponent<CopyBuildingSettings>();
-		if (component4 == null)
-		{
-			return false;
-		}
-		CopyBuildingSettings component5 = gameObject.GetComponent<CopyBuildingSettings>();
-		if (component5 == null)
-		{
-			return false;
-		}
-		if (component4.copyGroupTag != Tag.Invalid)
-		{
-			if (component4.copyGroupTag != component5.copyGroupTag)
+			if (source_settings.copyGroupTag != copyBuildingSettings.copyGroupTag)
 			{
 				return false;
 			}
 		}
-		else if (component3.PrefabID() != component2.PrefabID())
+		else if (other_id.PrefabID() != source_id.PrefabID())
 		{
 			return false;
 		}
-		component3.Trigger(-905833192, sourceGameObject);
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+		other_id.Trigger(-905833192, sourceGameObject);
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, other_id.gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 		return true;
 	}
 

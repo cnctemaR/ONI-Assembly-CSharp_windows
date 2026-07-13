@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace Mono.Cecil.Cil
 {
-	public sealed class Instruction
+	internal sealed class Instruction
 	{
 		public int Offset
 		{
@@ -77,6 +78,11 @@ namespace Mono.Cecil.Cil
 			this.operand = operand;
 		}
 
+		public Instruction GetPrototype()
+		{
+			return new Instruction(this.opcode, this.operand);
+		}
+
 		public int GetSize()
 		{
 			int size = this.opcode.Size;
@@ -133,7 +139,7 @@ namespace Mono.Cecil.Cil
 					stringBuilder.Append('"');
 					stringBuilder.Append(this.operand);
 					stringBuilder.Append('"');
-					goto IL_00E1;
+					goto IL_00EB;
 				}
 			}
 			else
@@ -149,7 +155,7 @@ namespace Mono.Cecil.Cil
 						}
 						Instruction.AppendLabel(stringBuilder, array[i]);
 					}
-					goto IL_00E1;
+					goto IL_00EB;
 				}
 				if (operandType != OperandType.ShortInlineBrTarget)
 				{
@@ -157,10 +163,10 @@ namespace Mono.Cecil.Cil
 				}
 			}
 			Instruction.AppendLabel(stringBuilder, (Instruction)this.operand);
-			goto IL_00E1;
+			goto IL_00EB;
 			IL_00D4:
-			stringBuilder.Append(this.operand);
-			IL_00E1:
+			stringBuilder.Append(Convert.ToString(this.operand, CultureInfo.InvariantCulture));
+			IL_00EB:
 			return stringBuilder.ToString();
 		}
 

@@ -1,8 +1,10 @@
 ﻿using System;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.TextCore.LowLevel
 {
 	[Flags]
+	[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 	internal enum GlyphRasterModes
 	{
 		RASTER_MODE_8BIT = 1,

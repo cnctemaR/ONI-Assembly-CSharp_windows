@@ -1,35 +1,184 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	internal static class RemoteConfigSettingsHelper
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern IntPtr GetSafeMap(IntPtr m, string key);
+		internal unsafe static IntPtr GetSafeMap(IntPtr m, string key)
+		{
+			IntPtr safeMap_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				safeMap_Injected = RemoteConfigSettingsHelper.GetSafeMap_Injected(m, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return safeMap_Injected;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern string[] GetSafeMapKeys(IntPtr m);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern RemoteConfigSettingsHelper.Tag[] GetSafeMapTypes(IntPtr m);
+		internal static RemoteConfigSettingsHelper.Tag[] GetSafeMapTypes(IntPtr m)
+		{
+			RemoteConfigSettingsHelper.Tag[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				RemoteConfigSettingsHelper.GetSafeMapTypes_Injected(m, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				RemoteConfigSettingsHelper.Tag[] array;
+				blittableArrayWrapper.Unmarshal<RemoteConfigSettingsHelper.Tag>(ref array);
+				array2 = array;
+			}
+			return array2;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern long GetSafeNumber(IntPtr m, string key, long defaultValue);
+		internal unsafe static long GetSafeNumber(IntPtr m, string key, long defaultValue)
+		{
+			long safeNumber_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				safeNumber_Injected = RemoteConfigSettingsHelper.GetSafeNumber_Injected(m, ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return safeNumber_Injected;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern float GetSafeFloat(IntPtr m, string key, float defaultValue);
+		internal unsafe static float GetSafeFloat(IntPtr m, string key, float defaultValue)
+		{
+			float safeFloat_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				safeFloat_Injected = RemoteConfigSettingsHelper.GetSafeFloat_Injected(m, ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return safeFloat_Injected;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool GetSafeBool(IntPtr m, string key, bool defaultValue);
+		internal unsafe static bool GetSafeBool(IntPtr m, string key, bool defaultValue)
+		{
+			bool safeBool_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				safeBool_Injected = RemoteConfigSettingsHelper.GetSafeBool_Injected(m, ref managedSpanWrapper, defaultValue);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return safeBool_Injected;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetSafeStringValue(IntPtr m, string key, string defaultValue);
+		internal unsafe static string GetSafeStringValue(IntPtr m, string key, string defaultValue)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(defaultValue, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = defaultValue.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper3;
+				RemoteConfigSettingsHelper.GetSafeStringValue_Injected(m, ref managedSpanWrapper, ref managedSpanWrapper2, out managedSpanWrapper3);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+				ManagedSpanWrapper managedSpanWrapper3;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper3);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern IntPtr GetSafeArray(IntPtr m, string key);
+		internal unsafe static IntPtr GetSafeArray(IntPtr m, string key)
+		{
+			IntPtr safeArray_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(key, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = key.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				safeArray_Injected = RemoteConfigSettingsHelper.GetSafeArray_Injected(m, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return safeArray_Injected;
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern long GetSafeArraySize(IntPtr a);
@@ -52,8 +201,21 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool GetSafeArrayBool(IntPtr a, long i);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern string GetSafeArrayStringValue(IntPtr a, long i);
+		internal static string GetSafeArrayStringValue(IntPtr a, long i)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				RemoteConfigSettingsHelper.GetSafeArrayStringValue_Injected(a, i, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public static IDictionary<string, object> GetDictionary(IntPtr m, string key)
 		{
@@ -227,6 +389,30 @@ namespace UnityEngine
 				break;
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSafeMap_Injected(IntPtr m, ref ManagedSpanWrapper key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSafeMapTypes_Injected(IntPtr m, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetSafeNumber_Injected(IntPtr m, ref ManagedSpanWrapper key, long defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetSafeFloat_Injected(IntPtr m, ref ManagedSpanWrapper key, float defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetSafeBool_Injected(IntPtr m, ref ManagedSpanWrapper key, bool defaultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSafeStringValue_Injected(IntPtr m, ref ManagedSpanWrapper key, ref ManagedSpanWrapper defaultValue, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSafeArray_Injected(IntPtr m, ref ManagedSpanWrapper key);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSafeArrayStringValue_Injected(IntPtr a, long i, out ManagedSpanWrapper ret);
 
 		[RequiredByNativeCode]
 		internal enum Tag

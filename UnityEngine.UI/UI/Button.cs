@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.UI
 {
-	[AddComponentMenu("UI/Button", 30)]
+	[AddComponentMenu("UI (Canvas)/Button", 30)]
 	public class Button : Selectable, IPointerClickHandler, IEventSystemHandler, ISubmitHandler
 	{
 		protected Button()

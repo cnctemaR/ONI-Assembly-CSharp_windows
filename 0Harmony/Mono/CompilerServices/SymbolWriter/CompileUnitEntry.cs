@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Mono.CompilerServices.SymbolWriter
 {
-	public class CompileUnitEntry : ICompileUnit
+	internal class CompileUnitEntry : ICompileUnit
 	{
 		public static int Size
 		{

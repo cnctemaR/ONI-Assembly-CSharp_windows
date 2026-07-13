@@ -9,6 +9,7 @@ using UnityEngine.Scripting;
 
 namespace Unity.Collections.LowLevel.Unsafe
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.ParticleSystemModule", "UnityEngine.AudioModule" })]
 	[NativeHeader("Runtime/Export/BurstLike/BurstLike.bindings.h")]
 	[StaticAccessor("BurstLike", StaticAccessorType.DoubleColon)]
 	internal static class BurstLike
@@ -18,6 +19,7 @@ namespace Unity.Collections.LowLevel.Unsafe
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int NativeFunctionCall_Int_IntPtr_IntPtr(IntPtr function, IntPtr p0, IntPtr p1, out int error);
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.ParticleSystemModule", "UnityEngine.AudioModule" })]
 		internal readonly struct SharedStatic<[IsUnmanaged] T> where T : struct, ValueType
 		{
 			private unsafe SharedStatic(void* buffer)

@@ -10,8 +10,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Runtime/Graphics/Texture2DArray.h")]
 	[ExcludeFromPreset]
+	[NativeHeader("Runtime/Graphics/Texture2DArray.h")]
 	public sealed class Texture2DArray : Texture
 	{
 		public static extern int allSlices
@@ -21,33 +21,133 @@ namespace UnityEngine
 			get;
 		}
 
-		public extern int depth
+		public int depth
 		{
 			[NativeName("GetTextureLayerCount")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture2DArray.get_depth_Injected(intPtr);
+			}
 		}
 
-		public extern TextureFormat format
+		public TextureFormat format
 		{
 			[NativeName("GetTextureFormat")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture2DArray.get_format_Injected(intPtr);
+			}
 		}
 
-		public override extern bool isReadable
+		private bool IgnoreMipmapLimit()
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture2DArray.IgnoreMipmapLimit_Injected(intPtr);
+		}
+
+		private void SetIgnoreMipmapLimitAndReload(bool value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture2DArray.SetIgnoreMipmapLimitAndReload_Injected(intPtr, value);
+		}
+
+		public string mipmapLimitGroup
+		{
+			[NativeName("GetMipmapLimitGroupName")]
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					Texture2DArray.get_mipmapLimitGroup_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
+		}
+
+		public int activeMipmapLimit
+		{
+			[NativeName("GetMipmapLimit")]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture2DArray.get_activeMipmapLimit_Injected(intPtr);
+			}
+		}
+
+		public override bool isReadable
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Texture2DArray.get_isReadable_Injected(intPtr);
+			}
 		}
 
 		[FreeFunction("Texture2DArrayScripting::Create")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Internal_CreateImpl([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags);
-
-		private static void Internal_Create([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags)
+		private unsafe static bool Internal_CreateImpl([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags, bool ignoreMipmapLimit, string mipmapLimitGroupName)
 		{
-			bool flag = !Texture2DArray.Internal_CreateImpl(mono, w, h, d, mipCount, format, colorSpace, flags);
+			bool flag;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(mipmapLimitGroupName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = mipmapLimitGroupName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = Texture2DArray.Internal_CreateImpl_Injected(mono, w, h, d, mipCount, format, colorSpace, flags, ignoreMipmapLimit, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
+
+		private static void Internal_Create([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags, bool ignoreMipmapLimit, string mipmapLimitGroupName)
+		{
+			bool flag = !Texture2DArray.Internal_CreateImpl(mono, w, h, d, mipCount, format, colorSpace, flags, ignoreMipmapLimit, mipmapLimitGroupName);
 			if (flag)
 			{
 				throw new UnityException("Failed to create 2D array texture because of invalid parameters.");
@@ -55,12 +155,27 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture2DArrayScripting::Apply", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable);
+		private void ApplyImpl(bool updateMipmaps, bool makeNoLongerReadable)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture2DArray.ApplyImpl_Injected(intPtr, updateMipmaps, makeNoLongerReadable);
+		}
 
 		[FreeFunction(Name = "Texture2DArrayScripting::GetPixels", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color[] GetPixels(int arrayElement, int miplevel);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color[] GetPixels(int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture2DArray.GetPixels_Injected(intPtr, arrayElement, miplevel);
+		}
 
 		public Color[] GetPixels(int arrayElement)
 		{
@@ -68,16 +183,38 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture2DArrayScripting::SetPixelDataArray", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool SetPixelDataImplArray(Array data, int mipLevel, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+		private bool SetPixelDataImplArray(Array data, int mipLevel, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture2DArray.SetPixelDataImplArray_Injected(intPtr, data, mipLevel, element, elementSize, dataArraySize, sourceDataStartIndex);
+		}
 
 		[FreeFunction(Name = "Texture2DArrayScripting::SetPixelData", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool SetPixelDataImpl(IntPtr data, int mipLevel, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0);
+		private bool SetPixelDataImpl(IntPtr data, int mipLevel, int element, int elementSize, int dataArraySize, int sourceDataStartIndex = 0)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture2DArray.SetPixelDataImpl_Injected(intPtr, data, mipLevel, element, elementSize, dataArraySize, sourceDataStartIndex);
+		}
 
 		[FreeFunction(Name = "Texture2DArrayScripting::GetPixels32", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Color32[] GetPixels32(int arrayElement, int miplevel);
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
+		public Color32[] GetPixels32(int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture2DArray.GetPixels32_Injected(intPtr, arrayElement, miplevel);
+		}
 
 		public Color32[] GetPixels32(int arrayElement)
 		{
@@ -85,8 +222,20 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture2DArrayScripting::SetPixels", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels([Unmarshalled] Color[] colors, int arrayElement, int miplevel);
+		public unsafe void SetPixels(Color[] colors, int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color> span = new Span<Color>(colors);
+			fixed (Color* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Texture2DArray.SetPixels_Injected(intPtr, ref managedSpanWrapper, arrayElement, miplevel);
+			}
+		}
 
 		public void SetPixels(Color[] colors, int arrayElement)
 		{
@@ -94,16 +243,68 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Texture2DArrayScripting::SetPixels32", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPixels32([Unmarshalled] Color32[] colors, int arrayElement, int miplevel);
+		public unsafe void SetPixels32(Color32[] colors, int arrayElement, int miplevel)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<Color32> span = new Span<Color32>(colors);
+			fixed (Color32* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				Texture2DArray.SetPixels32_Injected(intPtr, ref managedSpanWrapper, arrayElement, miplevel);
+			}
+		}
 
 		public void SetPixels32(Color32[] colors, int arrayElement)
 		{
 			this.SetPixels32(colors, arrayElement, 0);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern IntPtr GetImageDataPointer();
+		[FreeFunction(Name = "Texture2DArrayScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Full(Texture src)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture2DArray.CopyPixels_Full_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src));
+		}
+
+		[FreeFunction(Name = "Texture2DArrayScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Slice(Texture src, int srcElement, int srcMip, int dstElement, int dstMip)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture2DArray.CopyPixels_Slice_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src), srcElement, srcMip, dstElement, dstMip);
+		}
+
+		[FreeFunction(Name = "Texture2DArrayScripting::CopyPixels", HasExplicitThis = true, ThrowsException = true)]
+		private void CopyPixels_Region(Texture src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Texture2DArray.CopyPixels_Region_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(src), srcElement, srcMip, srcX, srcY, srcWidth, srcHeight, dstElement, dstMip, dstX, dstY);
+		}
+
+		private IntPtr GetImageData()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Texture2DArray>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Texture2DArray.GetImageData_Injected(intPtr);
+		}
 
 		internal bool ValidateFormat(TextureFormat format, int width, int height)
 		{
@@ -123,7 +324,7 @@ namespace UnityEngine
 
 		internal bool ValidateFormat(GraphicsFormat format, int width, int height)
 		{
-			bool flag = base.ValidateFormat(format, FormatUsage.Sample);
+			bool flag = base.ValidateFormat(format, GraphicsFormatUsage.Sample);
 			bool flag2 = flag;
 			if (flag2)
 			{
@@ -145,35 +346,40 @@ namespace UnityEngine
 
 		[ExcludeFromDocs]
 		public Texture2DArray(int width, int height, int depth, DefaultFormat format, TextureCreationFlags flags, int mipCount)
-			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format), flags)
+			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format), flags, mipCount)
 		{
-			GraphicsFormat graphicsFormat = SystemInfo.GetGraphicsFormat(format);
-			bool flag = !this.ValidateFormat(graphicsFormat, width, height);
-			if (!flag)
-			{
-				Texture2DArray.ValidateIsNotCrunched(flags);
-				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, base.GetTextureColorSpace(graphicsFormat), flags);
-			}
+		}
+
+		[ExcludeFromDocs]
+		public Texture2DArray(int width, int height, int depth, DefaultFormat format, TextureCreationFlags flags, int mipCount, MipmapLimitDescriptor mipmapLimitDescriptor)
+			: this(width, height, depth, SystemInfo.GetGraphicsFormat(format), flags, mipCount, mipmapLimitDescriptor)
+		{
 		}
 
 		[RequiredByNativeCode]
 		public Texture2DArray(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags)
-			: this(width, height, depth, format, flags, Texture.GenerateAllMips)
+			: this(width, height, depth, format, flags, Texture.GenerateAllMips, default(MipmapLimitDescriptor))
 		{
 		}
 
 		[ExcludeFromDocs]
 		public Texture2DArray(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags, int mipCount)
+			: this(width, height, depth, format, flags, mipCount, default(MipmapLimitDescriptor))
+		{
+		}
+
+		[ExcludeFromDocs]
+		public Texture2DArray(int width, int height, int depth, GraphicsFormat format, TextureCreationFlags flags, int mipCount, MipmapLimitDescriptor mipmapLimitDescriptor)
 		{
 			bool flag = !this.ValidateFormat(format, width, height);
 			if (!flag)
 			{
 				Texture2DArray.ValidateIsNotCrunched(flags);
-				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, format, base.GetTextureColorSpace(format), flags);
+				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, format, base.GetTextureColorSpace(format), flags, !mipmapLimitDescriptor.useMipmapLimit, mipmapLimitDescriptor.groupName);
 			}
 		}
 
-		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, int mipCount, bool linear, bool createUninitialized)
+		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, int mipCount, bool linear, bool createUninitialized, MipmapLimitDescriptor mipmapLimitDescriptor)
 		{
 			bool flag = !this.ValidateFormat(textureFormat, width, height);
 			if (!flag)
@@ -190,17 +396,22 @@ namespace UnityEngine
 					textureCreationFlags |= TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate;
 				}
 				Texture2DArray.ValidateIsNotCrunched(textureCreationFlags);
-				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, base.GetTextureColorSpace(linear), textureCreationFlags);
+				Texture2DArray.Internal_Create(this, width, height, depth, mipCount, graphicsFormat, base.GetTextureColorSpace(linear), textureCreationFlags, !mipmapLimitDescriptor.useMipmapLimit, mipmapLimitDescriptor.groupName);
 			}
 		}
 
+		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, int mipCount, bool linear, bool createUninitialized)
+			: this(width, height, depth, textureFormat, mipCount, linear, createUninitialized, default(MipmapLimitDescriptor))
+		{
+		}
+
 		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, int mipCount, bool linear)
-			: this(width, height, depth, textureFormat, mipCount, linear, false)
+			: this(width, height, depth, textureFormat, mipCount, linear, false, default(MipmapLimitDescriptor))
 		{
 		}
 
 		public Texture2DArray(int width, int height, int depth, TextureFormat textureFormat, bool mipChain, [DefaultValue("false")] bool linear, [DefaultValue("false")] bool createUninitialized)
-			: this(width, height, depth, textureFormat, mipChain ? Texture.GenerateAllMips : 1, linear, createUninitialized)
+			: this(width, height, depth, textureFormat, mipChain ? Texture.GenerateAllMips : 1, linear, createUninitialized, default(MipmapLimitDescriptor))
 		{
 		}
 
@@ -304,8 +515,70 @@ namespace UnityEngine
 			{
 				throw base.CreateNativeArrayLengthOverflowException();
 			}
-			IntPtr intPtr = new IntPtr((long)this.GetImageDataPointer() + (long)(pixelDataOffset * (ulong)((long)element) + pixelDataOffset2));
+			IntPtr intPtr = new IntPtr((long)this.GetImageData() + (long)(pixelDataOffset * (ulong)((long)element) + pixelDataOffset2));
 			return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)intPtr, (int)num2, Allocator.None);
+		}
+
+		public void CopyPixels(Texture src)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Full(src);
+		}
+
+		public void CopyPixels(Texture src, int srcElement, int srcMip, int dstElement, int dstMip)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Slice(src, srcElement, srcMip, dstElement, dstMip);
+		}
+
+		public void CopyPixels(Texture src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY)
+		{
+			bool flag = !this.isReadable;
+			if (flag)
+			{
+				throw base.CreateNonReadableException(this);
+			}
+			bool flag2 = !src.isReadable;
+			if (flag2)
+			{
+				throw base.CreateNonReadableException(src);
+			}
+			this.CopyPixels_Region(src, srcElement, srcMip, srcX, srcY, srcWidth, srcHeight, dstElement, dstMip, dstX, dstY);
+		}
+
+		public bool ignoreMipmapLimit
+		{
+			get
+			{
+				return this.IgnoreMipmapLimit();
+			}
+			set
+			{
+				bool flag = !this.isReadable;
+				if (flag)
+				{
+					throw base.IgnoreMipmapLimitCannotBeToggledException(this);
+				}
+				this.SetIgnoreMipmapLimitAndReload(value);
+			}
 		}
 
 		private static void ValidateIsNotCrunched(TextureCreationFlags flags)
@@ -316,5 +589,62 @@ namespace UnityEngine
 				throw new ArgumentException("Crunched Texture2DArray is not supported.");
 			}
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_depth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern TextureFormat get_format_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IgnoreMipmapLimit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetIgnoreMipmapLimitAndReload_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_mipmapLimitGroup_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_activeMipmapLimit_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isReadable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Internal_CreateImpl_Injected([Writable] Texture2DArray mono, int w, int h, int d, int mipCount, GraphicsFormat format, TextureColorSpace colorSpace, TextureCreationFlags flags, bool ignoreMipmapLimit, ref ManagedSpanWrapper mipmapLimitGroupName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ApplyImpl_Injected(IntPtr _unity_self, bool updateMipmaps, bool makeNoLongerReadable);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color[] GetPixels_Injected(IntPtr _unity_self, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPixelDataImplArray_Injected(IntPtr _unity_self, Array data, int mipLevel, int element, int elementSize, int dataArraySize, int sourceDataStartIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPixelDataImpl_Injected(IntPtr _unity_self, IntPtr data, int mipLevel, int element, int elementSize, int dataArraySize, int sourceDataStartIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Color32[] GetPixels32_Injected(IntPtr _unity_self, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPixels_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPixels32_Injected(IntPtr _unity_self, ref ManagedSpanWrapper colors, int arrayElement, int miplevel);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Full_Injected(IntPtr _unity_self, IntPtr src);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Slice_Injected(IntPtr _unity_self, IntPtr src, int srcElement, int srcMip, int dstElement, int dstMip);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void CopyPixels_Region_Injected(IntPtr _unity_self, IntPtr src, int srcElement, int srcMip, int srcX, int srcY, int srcWidth, int srcHeight, int dstElement, int dstMip, int dstX, int dstY);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetImageData_Injected(IntPtr _unity_self);
 	}
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace UnityEngine
 {
@@ -11,7 +9,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_Pair.ImpulseSum;
+				return this.m_Pair.impulseSum;
 			}
 		}
 
@@ -43,7 +41,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_Flipped ? this.m_Header.Body : this.m_Header.OtherBody;
+				return this.m_Flipped ? this.m_Header.body : this.m_Header.otherBody;
 			}
 		}
 
@@ -51,7 +49,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_Flipped ? this.m_Pair.Collider : this.m_Pair.OtherCollider;
+				return this.m_Flipped ? this.m_Pair.collider : this.m_Pair.otherCollider;
 			}
 		}
 
@@ -147,7 +145,7 @@ namespace UnityEngine
 			{
 				float num = (this.m_Flipped ? (-1f) : 1f);
 				ContactPairPoint* contactPoint_Internal = this.m_Pair.GetContactPoint_Internal(index);
-				contactPoint = new ContactPoint(contactPoint_Internal->m_Position, contactPoint_Internal->m_Normal * num, contactPoint_Internal->m_Impulse, contactPoint_Internal->m_Separation, this.m_Flipped ? this.m_Pair.OtherColliderInstanceID : this.m_Pair.ColliderInstanceID, this.m_Flipped ? this.m_Pair.ColliderInstanceID : this.m_Pair.OtherColliderInstanceID);
+				contactPoint = new ContactPoint(contactPoint_Internal->m_Position, contactPoint_Internal->m_Normal * num, contactPoint_Internal->m_Impulse, contactPoint_Internal->m_Separation, this.m_Flipped ? this.m_Pair.otherColliderEntityId : this.m_Pair.colliderEntityId, this.m_Flipped ? this.m_Pair.colliderEntityId : this.m_Pair.otherColliderEntityId);
 			}
 			return contactPoint;
 		}
@@ -208,43 +206,6 @@ namespace UnityEngine
 				}
 			}
 			return num;
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Do not use Collision.GetEnumerator(), enumerate using non-allocating array returned by Collision.GetContacts() or enumerate using Collision.GetContact(index) instead.", false)]
-		public virtual IEnumerator GetEnumerator()
-		{
-			return this.contacts.GetEnumerator();
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Use Collision.relativeVelocity instead. (UnityUpgradable) -> relativeVelocity", false)]
-		public Vector3 impactForceSum
-		{
-			get
-			{
-				return Vector3.zero;
-			}
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Will always return zero.", true)]
-		public Vector3 frictionForceSum
-		{
-			get
-			{
-				return Vector3.zero;
-			}
-		}
-
-		[Obsolete("Please use Collision.rigidbody, Collision.transform or Collision.collider instead", false)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public Component other
-		{
-			get
-			{
-				return (this.body != null) ? this.body : this.collider;
-			}
 		}
 
 		private ContactPairHeader m_Header;

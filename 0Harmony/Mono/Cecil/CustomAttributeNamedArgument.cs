@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public struct CustomAttributeNamedArgument
+	internal struct CustomAttributeNamedArgument
 	{
 		public string Name
 		{

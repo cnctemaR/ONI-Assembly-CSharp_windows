@@ -190,7 +190,6 @@ public static class PointGenerator
 		return list;
 	}
 
-	[SerializeField]
 	public enum SampleBehaviour
 	{
 		UniformSquare,

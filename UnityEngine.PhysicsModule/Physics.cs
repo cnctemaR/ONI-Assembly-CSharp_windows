@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
@@ -12,6 +13,7 @@ namespace UnityEngine
 {
 	[StaticAccessor("GetPhysicsManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Modules/Physics/PhysicsManager.h")]
+	[NativeHeader("Modules/Physics/PhysicsQuery.h")]
 	public class Physics
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -20,8 +22,20 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action<PhysicsScene, NativeArray<ModifiableContactPair>> ContactModifyEventCCD;
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		internal static event Action<PhysicsScene, IntPtr, int, bool> GenericContactModifyEvent;
+
 		[RequiredByNativeCode]
 		private static void OnSceneContactModify(PhysicsScene scene, IntPtr buffer, int count, bool isCCD)
+		{
+			Action<PhysicsScene, IntPtr, int, bool> genericContactModifyEvent = Physics.GenericContactModifyEvent;
+			if (genericContactModifyEvent != null)
+			{
+				genericContactModifyEvent(scene, buffer, count, isCCD);
+			}
+		}
+
+		private static void PhysXOnSceneContactModify(PhysicsScene scene, IntPtr buffer, int count, bool isCCD)
 		{
 			NativeArray<ModifiableContactPair> nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<ModifiableContactPair>(buffer.ToPointer(), count, Allocator.None);
 			bool flag = !isCCD;
@@ -41,6 +55,28 @@ namespace UnityEngine
 					contactModifyEventCCD(scene, nativeArray);
 				}
 			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetIntegrationInfos(out IntPtr integrations, out ulong integrationCount);
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetCurrentIntegrationInfo(out IntPtr integration);
+
+		internal static ReadOnlySpan<IntegrationInfo> GetIntegrationInfos()
+		{
+			IntPtr intPtr;
+			ulong num;
+			Physics.GetIntegrationInfos(out intPtr, out num);
+			return new ReadOnlySpan<IntegrationInfo>(intPtr.ToPointer(), (int)num);
+		}
+
+		public unsafe static IntegrationInfo GetCurrentIntegrationInfo()
+		{
+			IntPtr intPtr;
+			Physics.GetCurrentIntegrationInfo(out intPtr);
+			return *(IntegrationInfo*)intPtr.ToPointer();
 		}
 
 		public static Vector3 gravity
@@ -154,19 +190,36 @@ namespace UnityEngine
 			set;
 		}
 
-		[NativeProperty("DefaultPhysicsSceneHandle", true, TargetType.Function, true)]
 		public static PhysicsScene defaultPhysicsScene
 		{
 			get
 			{
-				PhysicsScene physicsScene;
-				Physics.get_defaultPhysicsScene_Injected(out physicsScene);
-				return physicsScene;
+				return PhysicsScene.GetDefaultScene();
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void IgnoreCollision([NotNull("NullExceptionObject")] Collider collider1, [NotNull("NullExceptionObject")] Collider collider2, [DefaultValue("true")] bool ignore);
+		public static void IgnoreCollision([NotNull] Collider collider1, [NotNull] Collider collider2, [DefaultValue("true")] bool ignore)
+		{
+			if (collider1 == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider1, "collider1");
+			}
+			if (collider2 == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider2, "collider2");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(collider1);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider1, "collider1");
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Collider>(collider2);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider2, "collider2");
+			}
+			Physics.IgnoreCollision_Injected(intPtr, intPtr2, ignore);
+		}
 
 		[ExcludeFromDocs]
 		public static void IgnoreCollision(Collider collider1, Collider collider2)
@@ -187,8 +240,28 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool GetIgnoreLayerCollision(int layer1, int layer2);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool GetIgnoreCollision([NotNull("NullExceptionObject")] Collider collider1, [NotNull("NullExceptionObject")] Collider collider2);
+		public static bool GetIgnoreCollision([NotNull] Collider collider1, [NotNull] Collider collider2)
+		{
+			if (collider1 == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider1, "collider1");
+			}
+			if (collider2 == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider2, "collider2");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(collider1);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider1, "collider1");
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Collider>(collider2);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider2, "collider2");
+			}
+			return Physics.GetIgnoreCollision_Injected(intPtr, intPtr2);
+		}
 
 		public static bool Raycast(Vector3 origin, Vector3 direction, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("DefaultRaycastLayers")] int layerMask, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
 		{
@@ -495,11 +568,23 @@ namespace UnityEngine
 			return Physics.BoxCast(center, halfExtents, direction, out hitInfo, Quaternion.identity, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
-		[NativeName("RaycastAll")]
+		[FreeFunction("Physics::RaycastAll")]
 		private static RaycastHit[] Internal_RaycastAll(PhysicsScene physicsScene, Ray ray, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return Physics.Internal_RaycastAll_Injected(ref physicsScene, ref ray, maxDistance, mask, queryTriggerInteraction);
+			RaycastHit[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Physics.Internal_RaycastAll_Injected(ref physicsScene, ref ray, maxDistance, mask, queryTriggerInteraction, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				RaycastHit[] array;
+				blittableArrayWrapper.Unmarshal<RaycastHit>(ref array);
+				array2 = array;
+			}
+			return array2;
 		}
 
 		public static RaycastHit[] RaycastAll(Vector3 origin, Vector3 direction, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("DefaultRaycastLayers")] int layerMask, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
@@ -609,11 +694,23 @@ namespace UnityEngine
 			return Physics.defaultPhysicsScene.Raycast(origin, direction, results, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("CapsuleCastAll")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
+		[FreeFunction("Physics::CapsuleCastAll")]
 		private static RaycastHit[] Query_CapsuleCastAll(PhysicsScene physicsScene, Vector3 p0, Vector3 p1, float radius, Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return Physics.Query_CapsuleCastAll_Injected(ref physicsScene, ref p0, ref p1, radius, ref direction, maxDistance, mask, queryTriggerInteraction);
+			RaycastHit[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Physics.Query_CapsuleCastAll_Injected(ref physicsScene, ref p0, ref p1, radius, ref direction, maxDistance, mask, queryTriggerInteraction, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				RaycastHit[] array;
+				blittableArrayWrapper.Unmarshal<RaycastHit>(ref array);
+				array2 = array;
+			}
+			return array2;
 		}
 
 		public static RaycastHit[] CapsuleCastAll(Vector3 point1, Vector3 point2, float radius, Vector3 direction, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("DefaultRaycastLayers")] int layerMask, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
@@ -651,11 +748,23 @@ namespace UnityEngine
 			return Physics.CapsuleCastAll(point1, point2, radius, direction, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
-		[NativeName("SphereCastAll")]
+		[FreeFunction("Physics::SphereCastAll")]
 		private static RaycastHit[] Query_SphereCastAll(PhysicsScene physicsScene, Vector3 origin, float radius, Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return Physics.Query_SphereCastAll_Injected(ref physicsScene, ref origin, radius, ref direction, maxDistance, mask, queryTriggerInteraction);
+			RaycastHit[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Physics.Query_SphereCastAll_Injected(ref physicsScene, ref origin, radius, ref direction, maxDistance, mask, queryTriggerInteraction, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				RaycastHit[] array;
+				blittableArrayWrapper.Unmarshal<RaycastHit>(ref array);
+				array2 = array;
+			}
+			return array2;
 		}
 
 		public static RaycastHit[] SphereCastAll(Vector3 origin, float radius, Vector3 direction, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("DefaultRaycastLayers")] int layerMask, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
@@ -716,8 +825,7 @@ namespace UnityEngine
 			return Physics.SphereCastAll(ray, radius, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("OverlapCapsule")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
+		[FreeFunction("Physics::OverlapCapsule")]
 		private static Collider[] OverlapCapsule_Internal(PhysicsScene physicsScene, Vector3 point0, Vector3 point1, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.OverlapCapsule_Internal_Injected(ref physicsScene, ref point0, ref point1, radius, layerMask, queryTriggerInteraction);
@@ -740,8 +848,7 @@ namespace UnityEngine
 			return Physics.OverlapCapsule(point0, point1, radius, -1, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()", StaticAccessorType.Dot)]
-		[NativeName("OverlapSphere")]
+		[FreeFunction("Physics::OverlapSphere")]
 		private static Collider[] OverlapSphere_Internal(PhysicsScene physicsScene, Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.OverlapSphere_Internal_Injected(ref physicsScene, ref position, radius, layerMask, queryTriggerInteraction);
@@ -765,9 +872,9 @@ namespace UnityEngine
 		}
 
 		[NativeName("Simulate")]
-		internal static void Simulate_Internal(PhysicsScene physicsScene, float step)
+		internal static void Simulate_Internal(PhysicsScene physicsScene, float step, SimulationStage stages, SimulationOption options)
 		{
-			Physics.Simulate_Internal_Injected(ref physicsScene, step);
+			Physics.Simulate_Internal_Injected(ref physicsScene, step, stages, options);
 		}
 
 		public static void Simulate(float step)
@@ -779,7 +886,7 @@ namespace UnityEngine
 			}
 			else
 			{
-				Physics.Simulate_Internal(Physics.defaultPhysicsScene, step);
+				Physics.Simulate_Internal(Physics.defaultPhysicsScene, step, SimulationStage.All, SimulationOption.All);
 			}
 		}
 
@@ -798,14 +905,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SyncTransforms();
 
-		public static extern bool autoSyncTransforms
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
 		public static extern bool reuseCollisionCallbacks
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
@@ -814,11 +913,28 @@ namespace UnityEngine
 			set;
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		[NativeName("ComputePenetration")]
-		private static bool Query_ComputePenetration([NotNull("ArgumentNullException")] Collider colliderA, Vector3 positionA, Quaternion rotationA, [NotNull("ArgumentNullException")] Collider colliderB, Vector3 positionB, Quaternion rotationB, ref Vector3 direction, ref float distance)
+		[FreeFunction("Physics::ComputePenetration")]
+		private static bool Query_ComputePenetration([NotNull] Collider colliderA, Vector3 positionA, Quaternion rotationA, [NotNull] Collider colliderB, Vector3 positionB, Quaternion rotationB, ref Vector3 direction, ref float distance)
 		{
-			return Physics.Query_ComputePenetration_Injected(colliderA, ref positionA, ref rotationA, colliderB, ref positionB, ref rotationB, ref direction, ref distance);
+			if (colliderA == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(colliderA, "colliderA");
+			}
+			if (colliderB == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(colliderB, "colliderB");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(colliderA);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(colliderA, "colliderA");
+			}
+			IntPtr intPtr2 = Object.MarshalledUnityObject.MarshalNotNull<Collider>(colliderB);
+			if (intPtr2 == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(colliderB, "colliderB");
+			}
+			return Physics.Query_ComputePenetration_Injected(intPtr, ref positionA, ref rotationA, intPtr2, ref positionB, ref rotationB, ref direction, ref distance);
 		}
 
 		public static bool ComputePenetration(Collider colliderA, Vector3 positionA, Quaternion rotationA, Collider colliderB, Vector3 positionB, Quaternion rotationB, out Vector3 direction, out float distance)
@@ -828,12 +944,20 @@ namespace UnityEngine
 			return Physics.Query_ComputePenetration(colliderA, positionA, rotationA, colliderB, positionB, rotationB, ref direction, ref distance);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		[NativeName("ClosestPoint")]
-		private static Vector3 Query_ClosestPoint([NotNull("ArgumentNullException")] Collider collider, Vector3 position, Quaternion rotation, Vector3 point)
+		[FreeFunction("Physics::ClosestPoint")]
+		private static Vector3 Query_ClosestPoint([NotNull] Collider collider, Vector3 position, Quaternion rotation, Vector3 point)
 		{
+			if (collider == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider, "collider");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<Collider>(collider);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(collider, "collider");
+			}
 			Vector3 vector;
-			Physics.Query_ClosestPoint_Injected(collider, ref position, ref rotation, ref point, out vector);
+			Physics.Query_ClosestPoint_Injected(intPtr, ref position, ref rotation, ref point, out vector);
 			return vector;
 		}
 
@@ -907,8 +1031,7 @@ namespace UnityEngine
 			return Physics.OverlapSphereNonAlloc(position, radius, results, -1, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("SphereTest")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[FreeFunction("Physics::SphereTest")]
 		private static bool CheckSphere_Internal(PhysicsScene physicsScene, Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.CheckSphere_Internal_Injected(ref physicsScene, ref position, radius, layerMask, queryTriggerInteraction);
@@ -1000,8 +1123,7 @@ namespace UnityEngine
 			return Physics.SphereCastNonAlloc(ray, radius, results, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
-		[NativeName("CapsuleTest")]
+		[FreeFunction("Physics::CapsuleTest")]
 		private static bool CheckCapsule_Internal(PhysicsScene physicsScene, Vector3 start, Vector3 end, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.CheckCapsule_Internal_Injected(ref physicsScene, ref start, ref end, radius, layerMask, queryTriggerInteraction);
@@ -1024,8 +1146,7 @@ namespace UnityEngine
 			return Physics.CheckCapsule(start, end, radius, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("BoxTest")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[FreeFunction("Physics::BoxTest")]
 		private static bool CheckBox_Internal(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Quaternion orientation, int layermask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.CheckBox_Internal_Injected(ref physicsScene, ref center, ref halfExtents, ref orientation, layermask, queryTriggerInteraction);
@@ -1054,8 +1175,7 @@ namespace UnityEngine
 			return Physics.CheckBox(center, halfExtents, Quaternion.identity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("OverlapBox")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[FreeFunction("Physics::OverlapBox")]
 		private static Collider[] OverlapBox_Internal(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Quaternion orientation, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
 			return Physics.OverlapBox_Internal_Injected(ref physicsScene, ref center, ref halfExtents, ref orientation, layerMask, queryTriggerInteraction);
@@ -1136,11 +1256,23 @@ namespace UnityEngine
 			return Physics.BoxCastNonAlloc(center, halfExtents, direction, results, Quaternion.identity, float.PositiveInfinity, -5, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("BoxCastAll")]
-		[StaticAccessor("GetPhysicsManager().GetPhysicsQuery()")]
+		[FreeFunction("Physics::BoxCastAll")]
 		private static RaycastHit[] Internal_BoxCastAll(PhysicsScene physicsScene, Vector3 center, Vector3 halfExtents, Vector3 direction, Quaternion orientation, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			return Physics.Internal_BoxCastAll_Injected(ref physicsScene, ref center, ref halfExtents, ref direction, ref orientation, maxDistance, layerMask, queryTriggerInteraction);
+			RaycastHit[] array2;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				Physics.Internal_BoxCastAll_Injected(ref physicsScene, ref center, ref halfExtents, ref direction, ref orientation, maxDistance, layerMask, queryTriggerInteraction, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				RaycastHit[] array;
+				blittableArrayWrapper.Unmarshal<RaycastHit>(ref array);
+				array2 = array;
+			}
+			return array2;
 		}
 
 		public static RaycastHit[] BoxCastAll(Vector3 center, Vector3 halfExtents, Vector3 direction, [DefaultValue("Quaternion.identity")] Quaternion orientation, [DefaultValue("Mathf.Infinity")] float maxDistance, [DefaultValue("DefaultRaycastLayers")] int layerMask, [DefaultValue("QueryTriggerInteraction.UseGlobal")] QueryTriggerInteraction queryTriggerInteraction)
@@ -1201,215 +1333,84 @@ namespace UnityEngine
 			return Physics.OverlapCapsuleNonAlloc(point0, point1, radius, results, -1, QueryTriggerInteraction.UseGlobal);
 		}
 
-		[NativeName("RebuildBroadphaseRegions")]
 		[StaticAccessor("GetPhysicsManager()")]
-		private static void Internal_RebuildBroadphaseRegions(Bounds bounds, int subdivisions)
-		{
-			Physics.Internal_RebuildBroadphaseRegions_Injected(ref bounds, subdivisions);
-		}
-
 		public static void RebuildBroadphaseRegions(Bounds worldBounds, int subdivisions)
 		{
-			bool flag = subdivisions < 1 || subdivisions > 16;
-			if (flag)
-			{
-				throw new ArgumentException("Physics.RebuildBroadphaseRegions requires the subdivisions to be greater than zero and less than 17.");
-			}
-			bool flag2 = worldBounds.extents.x <= 0f || worldBounds.extents.y <= 0f || worldBounds.extents.z <= 0f;
-			if (flag2)
-			{
-				throw new ArgumentException("Physics.RebuildBroadphaseRegions requires the world bounds to be non-empty, and have positive extents.");
-			}
-			Physics.Internal_RebuildBroadphaseRegions(worldBounds, subdivisions);
+			Physics.RebuildBroadphaseRegions_Injected(ref worldBounds, subdivisions);
 		}
 
-		[ThreadSafe]
 		[StaticAccessor("GetPhysicsManager()")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void BakeMesh(int meshID, bool convex, MeshColliderCookingOptions cookingOptions);
+		[ThreadSafe]
+		public static void BakeMesh(EntityId meshEntityId, bool convex, MeshColliderCookingOptions cookingOptions)
+		{
+			Physics.BakeMesh_Injected(ref meshEntityId, convex, cookingOptions);
+		}
 
+		[Obsolete("BakeMesh(int, bool, MeshColliderCookingOptions) is obsolete. Use BakeMesh(EntityId, bool, MeshColliderCookingOptions) instead.")]
+		public static void BakeMesh(int meshID, bool convex, MeshColliderCookingOptions cookingOptions)
+		{
+			Physics.BakeMesh(meshID, convex, cookingOptions);
+		}
+
+		[Obsolete("BakeMesh(int, bool) is obsolete. Use BakeMesh(EntityId, bool) instead.")]
 		public static void BakeMesh(int meshID, bool convex)
 		{
 			Physics.BakeMesh(meshID, convex, MeshColliderCookingOptions.CookForFasterSimulation | MeshColliderCookingOptions.EnableMeshCleaning | MeshColliderCookingOptions.WeldColocatedVertices | MeshColliderCookingOptions.UseFastMidphase);
 		}
 
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Collider ResolveShapeToCollider(IntPtr shapePtr);
+		public static void BakeMesh(EntityId meshEntityId, bool convex)
+		{
+			Physics.BakeMesh(meshEntityId, convex, MeshColliderCookingOptions.CookForFasterSimulation | MeshColliderCookingOptions.EnableMeshCleaning | MeshColliderCookingOptions.WeldColocatedVertices | MeshColliderCookingOptions.UseFastMidphase);
+		}
 
 		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Component ResolveActorToComponent(IntPtr actorPtr);
+		internal static extern bool ConnectPhysicsSDKVisualDebugger();
+
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void DisconnectPhysicsSDKVisualDebugger();
+
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
+		internal static Collider GetColliderByInstanceID(EntityId entityId)
+		{
+			return Unmarshal.UnmarshalUnityObject<Collider>(Physics.GetColliderByInstanceID_Injected(ref entityId));
+		}
+
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
+		internal static Component GetBodyByInstanceID(EntityId entityId)
+		{
+			return Unmarshal.UnmarshalUnityObject<Component>(Physics.GetBodyByInstanceID_Injected(ref entityId));
+		}
 
 		[ThreadSafe]
 		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int ResolveShapeToInstanceID(IntPtr shapePtr);
-
-		[ThreadSafe]
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int ResolveActorToInstanceID(IntPtr actorPtr);
-
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Collider GetColliderByInstanceID(int instanceID);
-
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern Component GetBodyByInstanceID(int instanceID);
-
-		[ThreadSafe]
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint TranslateTriangleIndex(IntPtr shapePtr, uint rawIndex);
-
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint TranslateTriangleIndexFromID(int instanceID, uint faceIndex);
-
-		[ThreadSafe]
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern bool IsShapeTrigger(IntPtr shapePtr);
-
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SendOnCollisionEnter(Component component, Collision collision);
-
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SendOnCollisionStay(Component component, Collision collision);
-
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SendOnCollisionExit(Component component, Collision collision);
-
-		[ThreadSafe]
-		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		internal static Vector3 GetActorLinearVelocity(IntPtr actorPtr)
+		internal static uint TranslateTriangleIndexFromID(EntityId instanceID, uint faceIndex)
 		{
-			Vector3 vector;
-			Physics.GetActorLinearVelocity_Injected(actorPtr, out vector);
-			return vector;
+			return Physics.TranslateTriangleIndexFromID_Injected(ref instanceID, faceIndex);
 		}
 
 		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
-		[ThreadSafe]
-		internal static Vector3 GetActorAngularVelocity(IntPtr actorPtr)
+		private static void SendOnCollisionEnter(Component component, Collision collision)
 		{
-			Vector3 vector;
-			Physics.GetActorAngularVelocity_Injected(actorPtr, out vector);
-			return vector;
+			Physics.SendOnCollisionEnter_Injected(Object.MarshalledUnityObject.Marshal<Component>(component), collision);
 		}
 
-		[Obsolete("Use Physics.defaultContactOffset or Collider.contactOffset instead.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static float minPenetrationForPenalty
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
+		private static void SendOnCollisionStay(Component component, Collision collision)
 		{
-			get
-			{
-				return 0f;
-			}
-			set
-			{
-			}
+			Physics.SendOnCollisionStay_Injected(Object.MarshalledUnityObject.Marshal<Component>(component), collision);
 		}
 
-		[Obsolete("Please use bounceThreshold instead. (UnityUpgradable) -> bounceThreshold")]
-		public static float bounceTreshold
+		[StaticAccessor("PhysicsManager", StaticAccessorType.DoubleColon)]
+		private static void SendOnCollisionExit(Component component, Collision collision)
 		{
-			get
-			{
-				return Physics.bounceThreshold;
-			}
-			set
-			{
-				Physics.bounceThreshold = value;
-			}
-		}
-
-		[Obsolete("The sleepVelocity is no longer supported. Use sleepThreshold. Note that sleepThreshold is energy but not velocity.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static float sleepVelocity
-		{
-			get
-			{
-				return 0f;
-			}
-			set
-			{
-			}
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("The sleepAngularVelocity is no longer supported. Use sleepThreshold. Note that sleepThreshold is energy but not velocity.", true)]
-		public static float sleepAngularVelocity
-		{
-			get
-			{
-				return 0f;
-			}
-			set
-			{
-			}
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Use Rigidbody.maxAngularVelocity instead.", true)]
-		public static float maxAngularVelocity
-		{
-			get
-			{
-				return 0f;
-			}
-			set
-			{
-			}
-		}
-
-		[Obsolete("Please use Physics.defaultSolverIterations instead. (UnityUpgradable) -> defaultSolverIterations")]
-		public static int solverIterationCount
-		{
-			get
-			{
-				return Physics.defaultSolverIterations;
-			}
-			set
-			{
-				Physics.defaultSolverIterations = value;
-			}
-		}
-
-		[Obsolete("Please use Physics.defaultSolverVelocityIterations instead. (UnityUpgradable) -> defaultSolverVelocityIterations")]
-		public static int solverVelocityIterationCount
-		{
-			get
-			{
-				return Physics.defaultSolverVelocityIterations;
-			}
-			set
-			{
-				Physics.defaultSolverVelocityIterations = value;
-			}
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("penetrationPenaltyForce has no effect.", true)]
-		public static float penetrationPenaltyForce
-		{
-			get
-			{
-				return 0f;
-			}
-			set
-			{
-			}
+			Physics.SendOnCollisionExit_Injected(Object.MarshalledUnityObject.Marshal<Component>(component), collision);
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		[Obsolete("Physics.autoSimulation has been replaced by Physics.simulationMode", false)]
+		[ExcludeFromDocs]
 		public static bool autoSimulation
 		{
 			get
@@ -1420,6 +1421,17 @@ namespace UnityEngine
 			{
 				Physics.simulationMode = (value ? SimulationMode.FixedUpdate : SimulationMode.Script);
 			}
+		}
+
+		[ExcludeFromDocs]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Physics.autoSyncTransforms has been deprecated please use Physics.SyncTransforms instead to manually sync physics transforms when required.", false)]
+		public static extern bool autoSyncTransforms
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
 		}
 
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -1459,37 +1471,41 @@ namespace UnityEngine
 				for (int i = 0; i < array.Length; i++)
 				{
 					ContactPairHeader contactPairHeader = array[i];
-					bool hasRemovedBody = contactPairHeader.HasRemovedBody;
+					bool hasRemovedBody = contactPairHeader.hasRemovedBody;
 					if (!hasRemovedBody)
 					{
 						int num = 0;
 						while ((long)num < (long)((ulong)contactPairHeader.m_NbPairs))
 						{
 							readonly ref ContactPair contactPair = ref contactPairHeader.GetContactPair(num);
-							bool hasRemovedCollider = contactPair.HasRemovedCollider;
+							bool hasRemovedCollider = contactPair.hasRemovedCollider;
 							if (!hasRemovedCollider)
 							{
-								Component body = contactPairHeader.Body;
-								Component otherBody = contactPairHeader.OtherBody;
-								Component component = ((body != null) ? body : contactPair.Collider);
-								Component component2 = ((otherBody != null) ? otherBody : contactPair.OtherCollider);
-								bool isCollisionEnter = contactPair.IsCollisionEnter;
-								if (isCollisionEnter)
+								Component body = contactPairHeader.body;
+								Component otherBody = contactPairHeader.otherBody;
+								Component component = ((body != null) ? body : contactPair.collider);
+								Component component2 = ((otherBody != null) ? otherBody : contactPair.otherCollider);
+								bool flag2 = !component || !component2;
+								if (!flag2)
 								{
-									Physics.SendOnCollisionEnter(component, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, false));
-									Physics.SendOnCollisionEnter(component2, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, true));
-								}
-								bool isCollisionStay = contactPair.IsCollisionStay;
-								if (isCollisionStay)
-								{
-									Physics.SendOnCollisionStay(component, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, false));
-									Physics.SendOnCollisionStay(component2, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, true));
-								}
-								bool isCollisionExit = contactPair.IsCollisionExit;
-								if (isCollisionExit)
-								{
-									Physics.SendOnCollisionExit(component, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, false));
-									Physics.SendOnCollisionExit(component2, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, true));
+									bool isCollisionEnter = contactPair.isCollisionEnter;
+									if (isCollisionEnter)
+									{
+										Physics.SendOnCollisionEnter(component, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, false));
+										Physics.SendOnCollisionEnter(component2, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, true));
+									}
+									bool isCollisionStay = contactPair.isCollisionStay;
+									if (isCollisionStay)
+									{
+										Physics.SendOnCollisionStay(component, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, false));
+										Physics.SendOnCollisionStay(component2, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, true));
+									}
+									bool isCollisionExit = contactPair.isCollisionExit;
+									if (isCollisionExit)
+									{
+										Physics.SendOnCollisionExit(component, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, false));
+										Physics.SendOnCollisionExit(component2, Physics.GetCollisionToReport(in contactPairHeader, in contactPair, true));
+									}
 								}
 							}
 							num++;
@@ -1516,74 +1532,99 @@ namespace UnityEngine
 			return collision;
 		}
 
+		// Note: this type is marked as 'beforefieldinit'.
+		static Physics()
+		{
+			Physics.GenericContactModifyEvent = new Action<PhysicsScene, IntPtr, int, bool>(Physics.PhysXOnSceneContactModify);
+			Physics.s_ReusableCollision = new Collision();
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_gravity_Injected(out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_gravity_Injected(ref Vector3 value);
+		private static extern void set_gravity_Injected([In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void get_defaultPhysicsScene_Injected(out PhysicsScene ret);
+		private static extern void IgnoreCollision_Injected(IntPtr collider1, IntPtr collider2, [DefaultValue("true")] bool ignore);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RaycastHit[] Internal_RaycastAll_Injected(ref PhysicsScene physicsScene, ref Ray ray, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool GetIgnoreCollision_Injected(IntPtr collider1, IntPtr collider2);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RaycastHit[] Query_CapsuleCastAll_Injected(ref PhysicsScene physicsScene, ref Vector3 p0, ref Vector3 p1, float radius, ref Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern void Internal_RaycastAll_Injected([In] ref PhysicsScene physicsScene, [In] ref Ray ray, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction, out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RaycastHit[] Query_SphereCastAll_Injected(ref PhysicsScene physicsScene, ref Vector3 origin, float radius, ref Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern void Query_CapsuleCastAll_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 p0, [In] ref Vector3 p1, float radius, [In] ref Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction, out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Collider[] OverlapCapsule_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 point0, ref Vector3 point1, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern void Query_SphereCastAll_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 origin, float radius, [In] ref Vector3 direction, float maxDistance, int mask, QueryTriggerInteraction queryTriggerInteraction, out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Collider[] OverlapSphere_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern Collider[] OverlapCapsule_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 point0, [In] ref Vector3 point1, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Simulate_Internal_Injected(ref PhysicsScene physicsScene, float step);
+		private static extern Collider[] OverlapSphere_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InterpolateBodies_Internal_Injected(ref PhysicsScene physicsScene);
+		private static extern void Simulate_Internal_Injected([In] ref PhysicsScene physicsScene, float step, SimulationStage stages, SimulationOption options);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ResetInterpolationPoses_Internal_Injected(ref PhysicsScene physicsScene);
+		private static extern void InterpolateBodies_Internal_Injected([In] ref PhysicsScene physicsScene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool Query_ComputePenetration_Injected(Collider colliderA, ref Vector3 positionA, ref Quaternion rotationA, Collider colliderB, ref Vector3 positionB, ref Quaternion rotationB, ref Vector3 direction, ref float distance);
+		private static extern void ResetInterpolationPoses_Internal_Injected([In] ref PhysicsScene physicsScene);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Query_ClosestPoint_Injected(Collider collider, ref Vector3 position, ref Quaternion rotation, ref Vector3 point, out Vector3 ret);
+		private static extern bool Query_ComputePenetration_Injected(IntPtr colliderA, [In] ref Vector3 positionA, [In] ref Quaternion rotationA, IntPtr colliderB, [In] ref Vector3 positionB, [In] ref Quaternion rotationB, ref Vector3 direction, ref float distance);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Query_ClosestPoint_Injected(IntPtr collider, [In] ref Vector3 position, [In] ref Quaternion rotation, [In] ref Vector3 point, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_clothGravity_Injected(out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_clothGravity_Injected(ref Vector3 value);
+		private static extern void set_clothGravity_Injected([In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CheckSphere_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool CheckSphere_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 position, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CheckCapsule_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 start, ref Vector3 end, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool CheckCapsule_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 start, [In] ref Vector3 end, float radius, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CheckBox_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 center, ref Vector3 halfExtents, ref Quaternion orientation, int layermask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern bool CheckBox_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 center, [In] ref Vector3 halfExtents, [In] ref Quaternion orientation, int layermask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Collider[] OverlapBox_Internal_Injected(ref PhysicsScene physicsScene, ref Vector3 center, ref Vector3 halfExtents, ref Quaternion orientation, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern Collider[] OverlapBox_Internal_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 center, [In] ref Vector3 halfExtents, [In] ref Quaternion orientation, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RaycastHit[] Internal_BoxCastAll_Injected(ref PhysicsScene physicsScene, ref Vector3 center, ref Vector3 halfExtents, ref Vector3 direction, ref Quaternion orientation, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction);
+		private static extern void Internal_BoxCastAll_Injected([In] ref PhysicsScene physicsScene, [In] ref Vector3 center, [In] ref Vector3 halfExtents, [In] ref Vector3 direction, [In] ref Quaternion orientation, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction, out BlittableArrayWrapper ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_RebuildBroadphaseRegions_Injected(ref Bounds bounds, int subdivisions);
+		private static extern void RebuildBroadphaseRegions_Injected([In] ref Bounds worldBounds, int subdivisions);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetActorLinearVelocity_Injected(IntPtr actorPtr, out Vector3 ret);
+		private static extern void BakeMesh_Injected([In] ref EntityId meshEntityId, bool convex, MeshColliderCookingOptions cookingOptions);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetActorAngularVelocity_Injected(IntPtr actorPtr, out Vector3 ret);
+		private static extern IntPtr GetColliderByInstanceID_Injected([In] ref EntityId entityId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetBodyByInstanceID_Injected([In] ref EntityId entityId);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern uint TranslateTriangleIndexFromID_Injected([In] ref EntityId instanceID, uint faceIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendOnCollisionEnter_Injected(IntPtr component, Collision collision);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendOnCollisionStay_Injected(IntPtr component, Collision collision);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendOnCollisionExit_Injected(IntPtr component, Collision collision);
 
 		internal const float k_MaxFloatMinusEpsilon = 3.4028233E+38f;
 
@@ -1593,19 +1634,7 @@ namespace UnityEngine
 
 		public const int AllLayers = -1;
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Please use Physics.IgnoreRaycastLayer instead. (UnityUpgradable) -> IgnoreRaycastLayer", true)]
-		public const int kIgnoreRaycastLayer = 4;
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Please use Physics.DefaultRaycastLayers instead. (UnityUpgradable) -> DefaultRaycastLayers", true)]
-		public const int kDefaultRaycastLayers = -5;
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		[Obsolete("Please use Physics.AllLayers instead. (UnityUpgradable) -> AllLayers", true)]
-		public const int kAllLayers = -1;
-
-		private static readonly Collision s_ReusableCollision = new Collision();
+		private static readonly Collision s_ReusableCollision;
 
 		public delegate void ContactEventDelegate(PhysicsScene scene, NativeArray<ContactPairHeader>.ReadOnly headerArray);
 	}

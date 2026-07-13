@@ -47,15 +47,14 @@ public class BeanPlantConfig : IEntityConfig
 		string text6 = global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.NAME;
 		string text7 = global::STRINGS.CREATURES.SPECIES.SEEDS.BEAN_PLANT.DESC;
 		KAnimFile anim = Assets.GetAnim("seed_beanplant_kanim");
+		EdiblesManager.FoodInfo bean = FOOD.FOOD_TYPES.BEAN;
 		string text8 = "object";
 		int num6 = 1;
 		List<Tag> list = new List<Tag>();
 		list.Add(GameTags.CropSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		text4 = global::STRINGS.CREATURES.SPECIES.BEAN_PLANT.DOMESTICATEDDESC;
-		GameObject gameObject4 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, hasDlcRestrictions, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 3, text4, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, "", true);
-		EntityTemplates.ExtendEntityToFood(gameObject4, FOOD.FOOD_TYPES.BEAN);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject4, "BeanPlant_preview", Assets.GetAnim("beanplant_kanim"), "place", 1, 2);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlantAsFood(gameObject3, hasDlcRestrictions, productionType, text5, text6, text7, anim, bean, text8, num6, list, receptacleDirection, default(Tag), 3, text4, EntityTemplates.CollisionShape.RECTANGLE, 0.6f, 0.3f, null, "", true), "BeanPlant_preview", Assets.GetAnim("beanplant_kanim"), "place", 1, 2);
 		return gameObject;
 	}
 

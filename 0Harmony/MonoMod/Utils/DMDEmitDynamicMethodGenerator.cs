@@ -2,16 +2,25 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using Mono.Cecil;
+using MonoMod.Logs;
 
 namespace MonoMod.Utils
 {
-	public sealed class DMDEmitDynamicMethodGenerator : DMDGenerator<DMDEmitDynamicMethodGenerator>
+	[NullableContext(1)]
+	[Nullable(new byte[] { 0, 1 })]
+	internal sealed class DMDEmitDynamicMethodGenerator : DMDGenerator<DMDEmitDynamicMethodGenerator>
 	{
-		protected override MethodInfo _Generate(DynamicMethodDefinition dmd, object context)
+		protected override MethodInfo GenerateCore(DynamicMethodDefinition dmd, [Nullable(2)] object context)
 		{
 			MethodBase originalMethod = dmd.OriginalMethod;
 			MethodDefinition definition = dmd.Definition;
+			if (definition == null)
+			{
+				throw new InvalidOperationException();
+			}
+			MethodDefinition methodDefinition = definition;
 			Type[] array;
 			if (originalMethod != null)
 			{
@@ -35,124 +44,112 @@ namespace MonoMod.Utils
 			else
 			{
 				int num2 = 0;
-				if (definition.HasThis)
+				if (methodDefinition.HasThis)
 				{
 					num2++;
-					array = new Type[definition.Parameters.Count + 1];
-					Type type5 = definition.DeclaringType.ResolveReflection();
-					if (type5.IsValueType)
+					array = new Type[methodDefinition.Parameters.Count + 1];
+					Type type3 = methodDefinition.DeclaringType.ResolveReflection();
+					if (type3.IsValueType)
 					{
-						type5 = type5.MakeByRefType();
+						type3 = type3.MakeByRefType();
 					}
-					array[0] = type5;
+					array[0] = type3;
 				}
 				else
 				{
-					array = new Type[definition.Parameters.Count];
+					array = new Type[methodDefinition.Parameters.Count];
 				}
-				for (int j = 0; j < definition.Parameters.Count; j++)
+				for (int j = 0; j < methodDefinition.Parameters.Count; j++)
 				{
-					array[j + num2] = definition.Parameters[j].ParameterType.ResolveReflection();
+					array[j + num2] = methodDefinition.Parameters[j].ParameterType.ResolveReflection();
 				}
 			}
 			string text;
 			if ((text = dmd.Name) == null)
 			{
-				text = "DMD<" + (((originalMethod != null) ? originalMethod.GetID(null, null, true, false, true) : null) ?? definition.GetID(null, null, true, true)) + ">";
+				FormatInterpolatedStringHandler formatInterpolatedStringHandler = new FormatInterpolatedStringHandler(5, 1);
+				formatInterpolatedStringHandler.AppendLiteral("DMD<");
+				formatInterpolatedStringHandler.AppendFormatted<object>(originalMethod ?? methodDefinition.GetID(null, null, true, true));
+				formatInterpolatedStringHandler.AppendLiteral(">");
+				text = DebugFormatter.Format(ref formatInterpolatedStringHandler);
 			}
 			string text2 = text;
 			MethodInfo methodInfo = originalMethod as MethodInfo;
-			Type type2;
-			if ((type2 = ((methodInfo != null) ? methodInfo.ReturnType : null)) == null)
+			Type type2 = ((methodInfo != null) ? methodInfo.ReturnType : null) ?? methodDefinition.ReturnType.ResolveReflection();
+			bool flag;
+			MMDbgLog.DebugLogTraceStringHandler debugLogTraceStringHandler = new MMDbgLog.DebugLogTraceStringHandler(22, 3, out flag);
+			if (flag)
 			{
-				TypeReference returnType = definition.ReturnType;
-				type2 = ((returnType != null) ? returnType.ResolveReflection() : null);
-			}
-			Type type3 = type2;
-			MMDbgLog.Log(string.Format("new DynamicMethod: {0} {1}({2})", type3, text2, string.Join(",", array.Select<Type, string>(delegate(Type type)
-			{
-				if (type == null)
+				debugLogTraceStringHandler.AppendLiteral("new DynamicMethod: ");
+				debugLogTraceStringHandler.AppendFormatted<Type>(type2);
+				debugLogTraceStringHandler.AppendLiteral(" ");
+				debugLogTraceStringHandler.AppendFormatted(text2);
+				debugLogTraceStringHandler.AppendLiteral("(");
+				debugLogTraceStringHandler.AppendFormatted(string.Join(",", array.Select<Type, string>(delegate(Type type)
 				{
-					return null;
-				}
-				return type.ToString();
-			}).ToArray<string>())));
+					if (type == null)
+					{
+						return null;
+					}
+					return type.ToString();
+				}).ToArray<string>()));
+				debugLogTraceStringHandler.AppendLiteral(")");
+			}
+			MMDbgLog.Trace(ref debugLogTraceStringHandler);
 			if (originalMethod != null)
 			{
-				string[] array2 = new string[7];
-				array2[0] = "orig: ";
-				int num3 = 1;
-				MethodInfo methodInfo2 = originalMethod as MethodInfo;
-				string text3;
-				if (methodInfo2 == null)
+				MMDbgLog.DebugLogTraceStringHandler debugLogTraceStringHandler2 = new MMDbgLog.DebugLogTraceStringHandler(6, 1, out flag);
+				if (flag)
 				{
-					text3 = null;
+					debugLogTraceStringHandler2.AppendLiteral("orig: ");
+					debugLogTraceStringHandler2.AppendFormatted<MethodBase>(originalMethod);
 				}
-				else
+				MMDbgLog.Trace(ref debugLogTraceStringHandler2);
+			}
+			MMDbgLog.DebugLogTraceStringHandler debugLogTraceStringHandler3 = new MMDbgLog.DebugLogTraceStringHandler(9, 3, out flag);
+			if (flag)
+			{
+				debugLogTraceStringHandler3.AppendLiteral("mdef: ");
+				TypeReference returnType = methodDefinition.ReturnType;
+				debugLogTraceStringHandler3.AppendFormatted(((returnType != null) ? returnType.ToString() : null) ?? "NULL");
+				debugLogTraceStringHandler3.AppendLiteral(" ");
+				debugLogTraceStringHandler3.AppendFormatted(text2);
+				debugLogTraceStringHandler3.AppendLiteral("(");
+				debugLogTraceStringHandler3.AppendFormatted(string.Join(",", methodDefinition.Parameters.Select<ParameterDefinition, string>(delegate(ParameterDefinition arg)
 				{
-					Type returnType2 = methodInfo2.ReturnType;
-					text3 = ((returnType2 != null) ? returnType2.ToString() : null);
-				}
-				array2[num3] = text3 ?? "NULL";
-				array2[2] = " ";
-				array2[3] = originalMethod.Name;
-				array2[4] = "(";
-				array2[5] = string.Join(",", originalMethod.GetParameters().Select<ParameterInfo, string>(delegate(ParameterInfo arg)
-				{
-					string text5;
+					string text3;
 					if (arg == null)
 					{
-						text5 = null;
+						text3 = null;
 					}
 					else
 					{
-						Type parameterType = arg.ParameterType;
-						text5 = ((parameterType != null) ? parameterType.ToString() : null);
+						TypeReference parameterType = arg.ParameterType;
+						text3 = ((parameterType != null) ? parameterType.ToString() : null);
 					}
-					return text5 ?? "NULL";
-				}).ToArray<string>());
-				array2[6] = ")";
-				MMDbgLog.Log(string.Concat(array2));
+					return text3 ?? "NULL";
+				}).ToArray<string>()));
+				debugLogTraceStringHandler3.AppendLiteral(")");
 			}
-			string[] array3 = new string[7];
-			array3[0] = "mdef: ";
-			int num4 = 1;
-			TypeReference returnType3 = definition.ReturnType;
-			array3[num4] = ((returnType3 != null) ? returnType3.ToString() : null) ?? "NULL";
-			array3[2] = " ";
-			array3[3] = text2;
-			array3[4] = "(";
-			array3[5] = string.Join(",", definition.Parameters.Select<ParameterDefinition, string>(delegate(ParameterDefinition arg)
-			{
-				string text6;
-				if (arg == null)
-				{
-					text6 = null;
-				}
-				else
-				{
-					TypeReference parameterType2 = arg.ParameterType;
-					text6 = ((parameterType2 != null) ? parameterType2.ToString() : null);
-				}
-				return text6 ?? "NULL";
-			}).ToArray<string>());
-			array3[6] = ")";
-			MMDbgLog.Log(string.Concat(array3));
-			string text4 = text2;
-			Type typeFromHandle = typeof(void);
-			Type[] array4 = array;
-			Type type4;
-			if ((type4 = ((originalMethod != null) ? originalMethod.DeclaringType : null)) == null)
-			{
-				type4 = dmd.OwnerType ?? typeof(DynamicMethodDefinition);
-			}
-			DynamicMethod dynamicMethod = new DynamicMethod(text4, typeFromHandle, array4, type4, true);
-			DMDEmitDynamicMethodGenerator._DynamicMethod_returnType.SetValue(dynamicMethod, type3);
+			MMDbgLog.Trace(ref debugLogTraceStringHandler3);
+			DynamicMethod dynamicMethod = new DynamicMethod(text2, typeof(void), array, ((originalMethod != null) ? originalMethod.DeclaringType : null) ?? typeof(DynamicMethodDefinition), true);
+			DMDEmitDynamicMethodGenerator._DynamicMethod_returnType.SetValue(dynamicMethod, type2);
 			ILGenerator ilgenerator = dynamicMethod.GetILGenerator();
 			_DMDEmit.Generate(dmd, dynamicMethod, ilgenerator);
 			return dynamicMethod;
 		}
 
-		private static readonly FieldInfo _DynamicMethod_returnType = typeof(DynamicMethod).GetField("returnType", BindingFlags.Instance | BindingFlags.NonPublic) ?? typeof(DynamicMethod).GetField("m_returnType", BindingFlags.Instance | BindingFlags.NonPublic);
+		// Note: this type is marked as 'beforefieldinit'.
+		static DMDEmitDynamicMethodGenerator()
+		{
+			FieldInfo fieldInfo;
+			if ((fieldInfo = typeof(DynamicMethod).GetField("returnType", BindingFlags.Instance | BindingFlags.NonPublic)) == null && (fieldInfo = typeof(DynamicMethod).GetField("_returnType", BindingFlags.Instance | BindingFlags.NonPublic)) == null && (fieldInfo = typeof(DynamicMethod).GetField("m_returnType", BindingFlags.Instance | BindingFlags.NonPublic)) == null)
+			{
+				throw new InvalidOperationException("Cannot find returnType field on DynamicMethod");
+			}
+			DMDEmitDynamicMethodGenerator._DynamicMethod_returnType = fieldInfo;
+		}
+
+		private static readonly FieldInfo _DynamicMethod_returnType;
 	}
 }

@@ -17,7 +17,7 @@ public class SetTextStyleSetting : KMonoBehaviour
 		{
 			return;
 		}
-		sdfText.enableWordWrapping = style.enableWordWrapping;
+		sdfText.textWrappingMode = (style.enableWordWrapping ? TextWrappingModes.Normal : TextWrappingModes.NoWrap);
 		sdfText.enableKerning = true;
 		sdfText.extraPadding = true;
 		sdfText.fontSize = (float)style.fontSize;

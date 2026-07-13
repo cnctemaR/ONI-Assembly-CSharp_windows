@@ -1,389 +1,291 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MonoMod.Utils.Interop;
 
 namespace MonoMod.Utils
 {
+	[NullableContext(1)]
+	[Nullable(0)]
 	internal static class DynDll
 	{
-		public static T AsDelegate<T>(this IntPtr s) where T : class
+		private static DynDll.BackendImpl CreateCrossplatBackend()
 		{
-			return Marshal.GetDelegateForFunctionPointer(s, typeof(T)) as T;
-		}
-
-		public static void ResolveDynDllImports(this Type type, Dictionary<string, List<DynDllMapping>> mappings = null)
-		{
-			DynDll.InternalResolveDynDllImports(type, null, mappings);
-		}
-
-		public static void ResolveDynDllImports(object instance, Dictionary<string, List<DynDllMapping>> mappings = null)
-		{
-			DynDll.InternalResolveDynDllImports(instance.GetType(), instance, mappings);
-		}
-
-		private static void InternalResolveDynDllImports(Type type, object instance, Dictionary<string, List<DynDllMapping>> mappings)
-		{
-			BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic;
-			if (instance == null)
+			OSKind os = PlatformDetection.OS;
+			if (os.Is(OSKind.Windows))
 			{
-				bindingFlags |= BindingFlags.Static;
+				return new DynDll.WindowsBackend();
 			}
-			else
+			if (os.Is(OSKind.Linux) || os.Is(OSKind.OSX))
 			{
-				bindingFlags |= BindingFlags.Instance;
+				return new DynDll.LinuxOSXBackend(os.Is(OSKind.Linux));
 			}
-			foreach (FieldInfo fieldInfo in type.GetFields(bindingFlags))
-			{
-				bool flag = true;
-				object[] customAttributes = fieldInfo.GetCustomAttributes(typeof(DynDllImportAttribute), true);
-				int j = 0;
-				while (j < customAttributes.Length)
-				{
-					DynDllImportAttribute dynDllImportAttribute = (DynDllImportAttribute)customAttributes[j];
-					flag = false;
-					IntPtr zero = IntPtr.Zero;
-					List<DynDllMapping> list;
-					if (mappings != null && mappings.TryGetValue(dynDllImportAttribute.LibraryName, out list))
-					{
-						bool flag2 = false;
-						foreach (DynDllMapping dynDllMapping in list)
-						{
-							if (DynDll.TryOpenLibrary(dynDllMapping.LibraryName, out zero, true, dynDllMapping.Flags))
-							{
-								flag2 = true;
-								break;
-							}
-						}
-						if (flag2)
-						{
-							goto IL_00DC;
-						}
-					}
-					else if (DynDll.TryOpenLibrary(dynDllImportAttribute.LibraryName, out zero, false, null))
-					{
-						goto IL_00DC;
-					}
-					IL_0158:
-					j++;
-					continue;
-					IL_00DC:
-					foreach (string text in dynDllImportAttribute.EntryPoints.Concat<string>(new string[]
-					{
-						fieldInfo.Name,
-						fieldInfo.FieldType.Name
-					}))
-					{
-						IntPtr intPtr;
-						if (zero.TryGetFunction(text, out intPtr))
-						{
-							fieldInfo.SetValue(instance, Marshal.GetDelegateForFunctionPointer(intPtr, fieldInfo.FieldType));
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						goto IL_0158;
-					}
-					break;
-				}
-				if (!flag)
-				{
-					throw new EntryPointNotFoundException("No matching entry point found for " + fieldInfo.Name + " in " + fieldInfo.DeclaringType.FullName);
-				}
-			}
-		}
-
-		[DllImport("kernel32", SetLastError = true)]
-		private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-		[DllImport("kernel32", SetLastError = true)]
-		private static extern IntPtr LoadLibrary(string lpFileName);
-
-		[DllImport("kernel32", SetLastError = true)]
-		private static extern bool FreeLibrary(IntPtr hLibModule);
-
-		[DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
-		private static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
-		[DllImport("dl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlopen")]
-		private static extern IntPtr dl_dlopen(string filename, int flags);
-
-		[DllImport("dl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlclose")]
-		private static extern bool dl_dlclose(IntPtr handle);
-
-		[DllImport("dl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlsym")]
-		private static extern IntPtr dl_dlsym(IntPtr handle, string symbol);
-
-		[DllImport("dl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlerror")]
-		private static extern IntPtr dl_dlerror();
-
-		[DllImport("libdl.so.2", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlopen")]
-		private static extern IntPtr dl2_dlopen(string filename, int flags);
-
-		[DllImport("libdl.so.2", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlclose")]
-		private static extern bool dl2_dlclose(IntPtr handle);
-
-		[DllImport("libdl.so.2", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlsym")]
-		private static extern IntPtr dl2_dlsym(IntPtr handle, string symbol);
-
-		[DllImport("libdl.so.2", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "dlerror")]
-		private static extern IntPtr dl2_dlerror();
-
-		private static IntPtr dlopen(string filename, int flags)
-		{
-			IntPtr intPtr;
-			for (;;)
-			{
-				try
-				{
-					int num = DynDll.dlVersion;
-					if (num != 0 && num == 1)
-					{
-						intPtr = DynDll.dl2_dlopen(filename, flags);
-					}
-					else
-					{
-						intPtr = DynDll.dl_dlopen(filename, flags);
-					}
-				}
-				catch (DllNotFoundException obj) when (DynDll.dlVersion > 0)
-				{
-					DynDll.dlVersion--;
-					continue;
-				}
-				break;
-			}
-			return intPtr;
-		}
-
-		private static bool dlclose(IntPtr handle)
-		{
 			bool flag;
-			for (;;)
+			MMDbgLog.DebugLogWarningStringHandler debugLogWarningStringHandler = new MMDbgLog.DebugLogWarningStringHandler(55, 1, out flag);
+			if (flag)
 			{
-				try
-				{
-					int num = DynDll.dlVersion;
-					if (num != 0 && num == 1)
-					{
-						flag = DynDll.dl2_dlclose(handle);
-					}
-					else
-					{
-						flag = DynDll.dl_dlclose(handle);
-					}
-				}
-				catch (DllNotFoundException obj) when (DynDll.dlVersion > 0)
-				{
-					DynDll.dlVersion--;
-					continue;
-				}
-				break;
+				debugLogWarningStringHandler.AppendLiteral("Unknown OS ");
+				debugLogWarningStringHandler.AppendFormatted<OSKind>(os);
+				debugLogWarningStringHandler.AppendLiteral(" when setting up DynDll; assuming posix-like");
 			}
-			return flag;
+			MMDbgLog.Warning(ref debugLogWarningStringHandler);
+			return new DynDll.UnknownPosixBackend();
 		}
 
-		private static IntPtr dlsym(IntPtr handle, string symbol)
+		[NullableContext(2)]
+		public static IntPtr OpenLibrary(string name)
 		{
-			IntPtr intPtr;
-			for (;;)
-			{
-				try
-				{
-					int num = DynDll.dlVersion;
-					if (num != 0 && num == 1)
-					{
-						intPtr = DynDll.dl2_dlsym(handle, symbol);
-					}
-					else
-					{
-						intPtr = DynDll.dl_dlsym(handle, symbol);
-					}
-				}
-				catch (DllNotFoundException obj) when (DynDll.dlVersion > 0)
-				{
-					DynDll.dlVersion--;
-					continue;
-				}
-				break;
-			}
-			return intPtr;
+			return DynDll.Backend.OpenLibrary(name, Assembly.GetCallingAssembly());
 		}
 
-		private static IntPtr dlerror()
+		[NullableContext(2)]
+		public static bool TryOpenLibrary(string name, out IntPtr libraryPtr)
 		{
-			IntPtr intPtr;
-			for (;;)
-			{
-				try
-				{
-					int num = DynDll.dlVersion;
-					if (num != 0 && num == 1)
-					{
-						intPtr = DynDll.dl2_dlerror();
-					}
-					else
-					{
-						intPtr = DynDll.dl_dlerror();
-					}
-				}
-				catch (DllNotFoundException obj) when (DynDll.dlVersion > 0)
-				{
-					DynDll.dlVersion--;
-					continue;
-				}
-				break;
-			}
-			return intPtr;
+			return DynDll.Backend.TryOpenLibrary(name, Assembly.GetCallingAssembly(), out libraryPtr);
 		}
 
-		static DynDll()
+		public static void CloseLibrary(IntPtr lib)
 		{
-			if (!PlatformHelper.Is(Platform.Windows))
-			{
-				DynDll.dlerror();
-			}
+			DynDll.Backend.CloseLibrary(lib);
 		}
 
-		private static bool CheckError(out Exception exception)
+		public static bool TryCloseLibrary(IntPtr lib)
 		{
-			if (PlatformHelper.Is(Platform.Windows))
+			return DynDll.Backend.TryCloseLibrary(lib);
+		}
+
+		public static IntPtr GetExport(this IntPtr libraryPtr, string name)
+		{
+			return DynDll.Backend.GetExport(libraryPtr, name);
+		}
+
+		public static bool TryGetExport(this IntPtr libraryPtr, string name, out IntPtr functionPtr)
+		{
+			return DynDll.Backend.TryGetExport(libraryPtr, name, out functionPtr);
+		}
+
+		private static readonly DynDll.BackendImpl Backend = DynDll.CreateCrossplatBackend();
+
+		[Nullable(0)]
+		private abstract class BackendImpl
+		{
+			protected abstract bool TryOpenLibraryCore([Nullable(2)] string name, Assembly assembly, out IntPtr handle);
+
+			public abstract bool TryCloseLibrary(IntPtr handle);
+
+			public abstract bool TryGetExport(IntPtr handle, string name, out IntPtr ptr);
+
+			protected abstract void CheckAndThrowError();
+
+			public virtual bool TryOpenLibrary([Nullable(2)] string name, Assembly assembly, out IntPtr handle)
 			{
-				int lastWin32Error = Marshal.GetLastWin32Error();
-				if (lastWin32Error != 0)
+				if (name != null)
 				{
-					exception = new Win32Exception(lastWin32Error);
+					foreach (string text in this.GetLibrarySearchOrder(name))
+					{
+						if (this.TryOpenLibraryCore(text, assembly, out handle))
+						{
+							return true;
+						}
+					}
+					handle = IntPtr.Zero;
 					return false;
 				}
+				return this.TryOpenLibraryCore(null, assembly, out handle);
 			}
-			else
+
+			protected virtual IEnumerable<string> GetLibrarySearchOrder(string name)
 			{
-				IntPtr intPtr = DynDll.dlerror();
-				if (intPtr != IntPtr.Zero)
+				DynDll.BackendImpl.<GetLibrarySearchOrder>d__6 <GetLibrarySearchOrder>d__ = new DynDll.BackendImpl.<GetLibrarySearchOrder>d__6(-2);
+				<GetLibrarySearchOrder>d__.<>3__name = name;
+				return <GetLibrarySearchOrder>d__;
+			}
+
+			public virtual IntPtr OpenLibrary([Nullable(2)] string name, Assembly assembly)
+			{
+				IntPtr intPtr;
+				if (!this.TryOpenLibrary(name, assembly, out intPtr))
 				{
-					exception = new Win32Exception(Marshal.PtrToStringAnsi(intPtr));
-					return false;
+					this.CheckAndThrowError();
+				}
+				return intPtr;
+			}
+
+			public virtual void CloseLibrary(IntPtr handle)
+			{
+				if (!this.TryCloseLibrary(handle))
+				{
+					this.CheckAndThrowError();
 				}
 			}
-			exception = null;
-			return true;
-		}
 
-		public static IntPtr OpenLibrary(string name, bool skipMapping = false, int? flags = null)
-		{
-			IntPtr intPtr;
-			if (!DynDll.InternalTryOpenLibrary(name, out intPtr, skipMapping, flags))
+			public virtual IntPtr GetExport(IntPtr handle, string name)
 			{
-				throw new DllNotFoundException("Unable to load library '" + name + "'");
-			}
-			Exception ex;
-			if (!DynDll.CheckError(out ex))
-			{
-				throw ex;
-			}
-			return intPtr;
-		}
-
-		public static bool TryOpenLibrary(string name, out IntPtr libraryPtr, bool skipMapping = false, int? flags = null)
-		{
-			Exception ex;
-			return DynDll.InternalTryOpenLibrary(name, out libraryPtr, skipMapping, flags) || DynDll.CheckError(out ex);
-		}
-
-		private static bool InternalTryOpenLibrary(string name, out IntPtr libraryPtr, bool skipMapping, int? flags)
-		{
-			List<DynDllMapping> list;
-			if (name != null && !skipMapping && DynDll.Mappings.TryGetValue(name, out list))
-			{
-				foreach (DynDllMapping dynDllMapping in list)
+				IntPtr intPtr;
+				if (!this.TryGetExport(handle, name, out intPtr))
 				{
-					if (DynDll.InternalTryOpenLibrary(dynDllMapping.LibraryName, out libraryPtr, true, dynDllMapping.Flags))
+					this.CheckAndThrowError();
+				}
+				return intPtr;
+			}
+		}
+
+		[Nullable(0)]
+		private sealed class WindowsBackend : DynDll.BackendImpl
+		{
+			protected override void CheckAndThrowError()
+			{
+				uint lastError = Windows.GetLastError();
+				if (lastError != 0U)
+				{
+					throw new Win32Exception((int)lastError);
+				}
+			}
+
+			protected unsafe override bool TryOpenLibraryCore([Nullable(2)] string name, Assembly assembly, out IntPtr handle)
+			{
+				IntPtr intPtr;
+				if (name == null)
+				{
+					intPtr = (handle = Windows.GetModuleHandleW(null));
+				}
+				else
+				{
+					fixed (char* pinnableReference = name.AsSpan().GetPinnableReference())
 					{
-						return true;
+						char* ptr = pinnableReference;
+						intPtr = (handle = Windows.LoadLibraryW((ushort*)ptr));
 					}
 				}
-				libraryPtr = IntPtr.Zero;
-				return true;
+				return intPtr != IntPtr.Zero;
 			}
-			if (PlatformHelper.Is(Platform.Windows))
+
+			public unsafe override bool TryCloseLibrary(IntPtr handle)
 			{
-				libraryPtr = ((name == null) ? DynDll.GetModuleHandle(name) : DynDll.LoadLibrary(name));
+				return Windows.FreeLibrary(new Windows.HMODULE((void*)handle));
 			}
-			else
+
+			public unsafe override bool TryGetExport(IntPtr handle, string name, out IntPtr ptr)
 			{
-				int num = flags ?? 258;
-				libraryPtr = DynDll.dlopen(name, num);
-				if (libraryPtr == IntPtr.Zero && File.Exists(name))
+				byte[] array2;
+				byte[] array = (array2 = Unix.MarshalToUtf8(name));
+				byte* ptr2;
+				if (array == null || array2.Length == 0)
 				{
-					libraryPtr = DynDll.dlopen(Path.GetFullPath(name), num);
+					ptr2 = null;
+				}
+				else
+				{
+					ptr2 = &array2[0];
+				}
+				IntPtr intPtr = (ptr = Windows.GetProcAddress(new Windows.HMODULE((void*)handle), (sbyte*)ptr2));
+				array2 = null;
+				Unix.FreeMarshalledArray(array);
+				return intPtr != IntPtr.Zero;
+			}
+
+			protected override IEnumerable<string> GetLibrarySearchOrder(string name)
+			{
+				DynDll.WindowsBackend.<GetLibrarySearchOrder>d__4 <GetLibrarySearchOrder>d__ = new DynDll.WindowsBackend.<GetLibrarySearchOrder>d__4(-2);
+				<GetLibrarySearchOrder>d__.<>3__name = name;
+				return <GetLibrarySearchOrder>d__;
+			}
+		}
+
+		[Nullable(0)]
+		private abstract class LibdlBackend : DynDll.BackendImpl
+		{
+			protected LibdlBackend()
+			{
+				Unix.DlError();
+			}
+
+			[global::System.Diagnostics.CodeAnalysis.DoesNotReturn]
+			private static void ThrowError(IntPtr dlerr)
+			{
+				throw new Win32Exception(Marshal.PtrToStringAnsi(dlerr));
+			}
+
+			protected override void CheckAndThrowError()
+			{
+				IntPtr intPtr = DynDll.LibdlBackend.lastDlErrorReturn;
+				IntPtr intPtr2;
+				if (intPtr == IntPtr.Zero)
+				{
+					intPtr2 = Unix.DlError();
+				}
+				else
+				{
+					intPtr2 = intPtr;
+					DynDll.LibdlBackend.lastDlErrorReturn = IntPtr.Zero;
+				}
+				if (intPtr2 != IntPtr.Zero)
+				{
+					DynDll.LibdlBackend.ThrowError(intPtr2);
 				}
 			}
-			return libraryPtr != IntPtr.Zero;
+
+			protected override bool TryOpenLibraryCore([Nullable(2)] string name, Assembly assembly, out IntPtr handle)
+			{
+				Unix.DlopenFlags dlopenFlags = (Unix.DlopenFlags)258;
+				return (handle = Unix.DlOpen(name, dlopenFlags)) != IntPtr.Zero;
+			}
+
+			public override bool TryCloseLibrary(IntPtr handle)
+			{
+				return Unix.DlClose(handle);
+			}
+
+			public override bool TryGetExport(IntPtr handle, string name, out IntPtr ptr)
+			{
+				Unix.DlError();
+				ptr = Unix.DlSym(handle, name);
+				return (DynDll.LibdlBackend.lastDlErrorReturn = Unix.DlError()) == IntPtr.Zero;
+			}
+
+			public override IntPtr GetExport(IntPtr handle, string name)
+			{
+				Unix.DlError();
+				IntPtr intPtr = Unix.DlSym(handle, name);
+				IntPtr intPtr2 = Unix.DlError();
+				if (intPtr2 != IntPtr.Zero)
+				{
+					DynDll.LibdlBackend.ThrowError(intPtr2);
+				}
+				return intPtr;
+			}
+
+			[ThreadStatic]
+			private static IntPtr lastDlErrorReturn;
 		}
 
-		public static bool CloseLibrary(IntPtr lib)
+		[NullableContext(0)]
+		private sealed class LinuxOSXBackend : DynDll.LibdlBackend
 		{
-			if (PlatformHelper.Is(Platform.Windows))
+			public LinuxOSXBackend(bool isLinux)
 			{
-				DynDll.CloseLibrary(lib);
+				this.isLinux = isLinux;
 			}
-			else
+
+			[NullableContext(1)]
+			protected override IEnumerable<string> GetLibrarySearchOrder(string name)
 			{
-				DynDll.dlclose(lib);
+				DynDll.LinuxOSXBackend.<GetLibrarySearchOrder>d__2 <GetLibrarySearchOrder>d__ = new DynDll.LinuxOSXBackend.<GetLibrarySearchOrder>d__2(-2);
+				<GetLibrarySearchOrder>d__.<>4__this = this;
+				<GetLibrarySearchOrder>d__.<>3__name = name;
+				return <GetLibrarySearchOrder>d__;
 			}
-			Exception ex;
-			return DynDll.CheckError(out ex);
+
+			private readonly bool isLinux;
 		}
 
-		public static IntPtr GetFunction(this IntPtr libraryPtr, string name)
+		[NullableContext(0)]
+		private sealed class UnknownPosixBackend : DynDll.LibdlBackend
 		{
-			IntPtr intPtr;
-			if (!DynDll.InternalTryGetFunction(libraryPtr, name, out intPtr))
-			{
-				throw new MissingMethodException("Unable to load function '" + name + "'");
-			}
-			Exception ex;
-			if (!DynDll.CheckError(out ex))
-			{
-				throw ex;
-			}
-			return intPtr;
-		}
-
-		public static bool TryGetFunction(this IntPtr libraryPtr, string name, out IntPtr functionPtr)
-		{
-			Exception ex;
-			return DynDll.InternalTryGetFunction(libraryPtr, name, out functionPtr) || DynDll.CheckError(out ex);
-		}
-
-		private static bool InternalTryGetFunction(IntPtr libraryPtr, string name, out IntPtr functionPtr)
-		{
-			if (libraryPtr == IntPtr.Zero)
-			{
-				throw new ArgumentNullException("libraryPtr");
-			}
-			functionPtr = (PlatformHelper.Is(Platform.Windows) ? DynDll.GetProcAddress(libraryPtr, name) : DynDll.dlsym(libraryPtr, name));
-			return functionPtr != IntPtr.Zero;
-		}
-
-		public static Dictionary<string, List<DynDllMapping>> Mappings = new Dictionary<string, List<DynDllMapping>>();
-
-		private static int dlVersion = 1;
-
-		public static class DlopenFlags
-		{
-			public const int RTLD_LAZY = 1;
-
-			public const int RTLD_NOW = 2;
-
-			public const int RTLD_LOCAL = 0;
-
-			public const int RTLD_GLOBAL = 256;
 		}
 	}
 }

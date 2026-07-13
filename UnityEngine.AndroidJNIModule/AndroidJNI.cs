@@ -1,18 +1,26 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Bindings;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeConditional("PLATFORM_ANDROID")]
 	[StaticAccessor("AndroidJNIBindingsHelpers", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Modules/AndroidJNI/Public/AndroidJNIBindingsHelpers.h")]
-	[NativeConditional("PLATFORM_ANDROID")]
 	public static class AndroidJNI
 	{
-		[StaticAccessor("jni", StaticAccessorType.DoubleColon)]
 		[ThreadSafe]
+		private static void ReleaseStringChars(AndroidJNI.JStringBinding str)
+		{
+			AndroidJNI.ReleaseStringChars_Injected(ref str);
+		}
+
+		[ThreadSafe]
+		[StaticAccessor("jni", StaticAccessorType.DoubleColon)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern IntPtr GetJavaVM();
 
@@ -24,13 +32,43 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int DetachCurrentThread();
 
+		[RequiredByNativeCode]
+		private static void InvokeAction(Action action)
+		{
+			action();
+		}
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void InvokeAttached(Action action);
+
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetVersion();
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr FindClass(string name);
+		public unsafe static IntPtr FindClass(string name)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = AndroidJNI.FindClass_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -61,8 +99,28 @@ namespace UnityEngine
 		public static extern int Throw(IntPtr obj);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int ThrowNew(IntPtr clazz, string message);
+		public unsafe static int ThrowNew(IntPtr clazz, string message)
+		{
+			int num;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(message, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = message.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				num = AndroidJNI.ThrowNew_Injected(clazz, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return num;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -77,8 +135,26 @@ namespace UnityEngine
 		public static extern void ExceptionClear();
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void FatalError(string message);
+		public unsafe static void FatalError(string message)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(message, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = message.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				AndroidJNI.FatalError_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -103,6 +179,10 @@ namespace UnityEngine
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern uint GetQueueGlobalRefsCount();
+
+		[ThreadSafe]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void CleanQueueGlobalRefs();
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -159,20 +239,140 @@ namespace UnityEngine
 		public static extern bool IsInstanceOf(IntPtr obj, IntPtr clazz);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetMethodID(IntPtr clazz, string name, string sig);
+		public unsafe static IntPtr GetMethodID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr methodID_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(sig, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = sig.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				methodID_Injected = AndroidJNI.GetMethodID_Injected(clazz, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return methodID_Injected;
+		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetFieldID(IntPtr clazz, string name, string sig);
+		public unsafe static IntPtr GetFieldID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr fieldID_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(sig, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = sig.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				fieldID_Injected = AndroidJNI.GetFieldID_Injected(clazz, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return fieldID_Injected;
+		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetStaticMethodID(IntPtr clazz, string name, string sig);
+		public unsafe static IntPtr GetStaticMethodID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr staticMethodID_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(sig, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = sig.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				staticMethodID_Injected = AndroidJNI.GetStaticMethodID_Injected(clazz, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return staticMethodID_Injected;
+		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetStaticFieldID(IntPtr clazz, string name, string sig);
+		public unsafe static IntPtr GetStaticFieldID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr staticFieldID_Injected;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(sig, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = sig.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				staticFieldID_Injected = AndroidJNI.GetStaticFieldID_Injected(clazz, ref managedSpanWrapper, ref managedSpanWrapper2);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+			return staticFieldID_Injected;
+		}
 
 		public static IntPtr NewString(string chars)
 		{
@@ -180,20 +380,83 @@ namespace UnityEngine
 		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr NewStringFromStr(string chars);
+		private unsafe static IntPtr NewStringFromStr(string chars)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(chars, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = chars.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = AndroidJNI.NewStringFromStr_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewString(char[] chars);
+		public unsafe static IntPtr NewString(char[] chars)
+		{
+			Span<char> span = new Span<char>(chars);
+			IntPtr intPtr;
+			fixed (char* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				intPtr = AndroidJNI.NewString_Injected(ref managedSpanWrapper);
+			}
+			return intPtr;
+		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewStringUTF(string bytes);
+		public unsafe static IntPtr NewStringUTF(string bytes)
+		{
+			IntPtr intPtr;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(bytes, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = bytes.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				intPtr = AndroidJNI.NewStringUTF_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return intPtr;
+		}
+
+		public static string GetStringChars(IntPtr str)
+		{
+			string text;
+			using (AndroidJNI.JStringBinding stringCharsInternal = AndroidJNI.GetStringCharsInternal(str))
+			{
+				text = stringCharsInternal.ToString();
+			}
+			return text;
+		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetStringChars(IntPtr str);
+		private static AndroidJNI.JStringBinding GetStringCharsInternal(IntPtr str)
+		{
+			AndroidJNI.JStringBinding jstringBinding;
+			AndroidJNI.GetStringCharsInternal_Injected(str, out jstringBinding);
+			return jstringBinding;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -204,8 +467,21 @@ namespace UnityEngine
 		public static extern int GetStringUTFLength(IntPtr str);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetStringUTFChars(IntPtr str);
+		public static string GetStringUTFChars(IntPtr str)
+		{
+			string stringAndDispose;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				AndroidJNI.GetStringUTFChars_Injected(str, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
 		public static string CallStringMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
@@ -221,9 +497,23 @@ namespace UnityEngine
 			}
 		}
 
+		public unsafe static string CallStringMethodUnsafe(IntPtr obj, IntPtr methodID, jvalue* args)
+		{
+			string text;
+			using (AndroidJNI.JStringBinding jstringBinding = AndroidJNI.CallStringMethodUnsafeInternal(obj, methodID, args))
+			{
+				text = jstringBinding.ToString();
+			}
+			return text;
+		}
+
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe static extern string CallStringMethodUnsafe(IntPtr obj, IntPtr methodID, jvalue* args);
+		private unsafe static AndroidJNI.JStringBinding CallStringMethodUnsafeInternal(IntPtr obj, IntPtr methodID, jvalue* args)
+		{
+			AndroidJNI.JStringBinding jstringBinding;
+			AndroidJNI.CallStringMethodUnsafeInternal_Injected(obj, methodID, args, out jstringBinding);
+			return jstringBinding;
+		}
 
 		public static IntPtr CallObjectMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
 		{
@@ -411,9 +701,23 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void CallVoidMethodUnsafe(IntPtr obj, IntPtr methodID, jvalue* args);
 
+		public static string GetStringField(IntPtr obj, IntPtr fieldID)
+		{
+			string text;
+			using (AndroidJNI.JStringBinding stringFieldInternal = AndroidJNI.GetStringFieldInternal(obj, fieldID))
+			{
+				text = stringFieldInternal.ToString();
+			}
+			return text;
+		}
+
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetStringField(IntPtr obj, IntPtr fieldID);
+		private static AndroidJNI.JStringBinding GetStringFieldInternal(IntPtr obj, IntPtr fieldID)
+		{
+			AndroidJNI.JStringBinding jstringBinding;
+			AndroidJNI.GetStringFieldInternal_Injected(obj, fieldID, out jstringBinding);
+			return jstringBinding;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -458,8 +762,26 @@ namespace UnityEngine
 		public static extern double GetDoubleField(IntPtr obj, IntPtr fieldID);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetStringField(IntPtr obj, IntPtr fieldID, string val);
+		public unsafe static void SetStringField(IntPtr obj, IntPtr fieldID, string val)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(val, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = val.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				AndroidJNI.SetStringField_Injected(obj, fieldID, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -517,9 +839,23 @@ namespace UnityEngine
 			}
 		}
 
+		public unsafe static string CallStaticStringMethodUnsafe(IntPtr clazz, IntPtr methodID, jvalue* args)
+		{
+			string text;
+			using (AndroidJNI.JStringBinding jstringBinding = AndroidJNI.CallStaticStringMethodUnsafeInternal(clazz, methodID, args))
+			{
+				text = jstringBinding.ToString();
+			}
+			return text;
+		}
+
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public unsafe static extern string CallStaticStringMethodUnsafe(IntPtr clazz, IntPtr methodID, jvalue* args);
+		private unsafe static AndroidJNI.JStringBinding CallStaticStringMethodUnsafeInternal(IntPtr clazz, IntPtr methodID, jvalue* args)
+		{
+			AndroidJNI.JStringBinding jstringBinding;
+			AndroidJNI.CallStaticStringMethodUnsafeInternal_Injected(clazz, methodID, args, out jstringBinding);
+			return jstringBinding;
+		}
 
 		public static IntPtr CallStaticObjectMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
 		{
@@ -707,9 +1043,23 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public unsafe static extern void CallStaticVoidMethodUnsafe(IntPtr clazz, IntPtr methodID, jvalue* args);
 
+		public static string GetStaticStringField(IntPtr clazz, IntPtr fieldID)
+		{
+			string text;
+			using (AndroidJNI.JStringBinding staticStringFieldInternal = AndroidJNI.GetStaticStringFieldInternal(clazz, fieldID))
+			{
+				text = staticStringFieldInternal.ToString();
+			}
+			return text;
+		}
+
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern string GetStaticStringField(IntPtr clazz, IntPtr fieldID);
+		private static AndroidJNI.JStringBinding GetStaticStringFieldInternal(IntPtr clazz, IntPtr fieldID)
+		{
+			AndroidJNI.JStringBinding jstringBinding;
+			AndroidJNI.GetStaticStringFieldInternal_Injected(clazz, fieldID, out jstringBinding);
+			return jstringBinding;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -754,8 +1104,26 @@ namespace UnityEngine
 		public static extern double GetStaticDoubleField(IntPtr clazz, IntPtr fieldID);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetStaticStringField(IntPtr clazz, IntPtr fieldID, string val);
+		public unsafe static void SetStaticStringField(IntPtr clazz, IntPtr fieldID, string val)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(val, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = val.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				AndroidJNI.SetStaticStringField_Injected(clazz, fieldID, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -800,18 +1168,36 @@ namespace UnityEngine
 		public static extern void SetStaticDoubleField(IntPtr clazz, IntPtr fieldID, double val);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr ConvertToBooleanArray(bool[] array);
+		private unsafe static IntPtr ConvertToBooleanArray(bool[] array)
+		{
+			Span<bool> span = new Span<bool>(array);
+			IntPtr intPtr;
+			fixed (bool* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				intPtr = AndroidJNI.ConvertToBooleanArray_Injected(ref managedSpanWrapper);
+			}
+			return intPtr;
+		}
 
 		public static IntPtr ToBooleanArray(bool[] array)
 		{
 			return (array == null) ? IntPtr.Zero : AndroidJNI.ConvertToBooleanArray(array);
 		}
 
-		[Obsolete("AndroidJNI.ToByteArray is obsolete. Use AndroidJNI.ToSByteArray method instead")]
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToByteArray(byte[] array);
+		[Obsolete("AndroidJNI.ToByteArray is obsolete. Use AndroidJNI.ToSByteArray method instead")]
+		public unsafe static IntPtr ToByteArray(byte[] array)
+		{
+			Span<byte> span = new Span<byte>(array);
+			IntPtr intPtr;
+			fixed (byte* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				intPtr = AndroidJNI.ToByteArray_Injected(ref managedSpanWrapper);
+			}
+			return intPtr;
+		}
 
 		public unsafe static IntPtr ToSByteArray(sbyte[] array)
 		{
@@ -1043,45 +1429,97 @@ namespace UnityEngine
 		}
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern bool[] FromBooleanArray(IntPtr array);
+		public static bool[] FromBooleanArray(IntPtr array)
+		{
+			bool[] array3;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				AndroidJNI.FromBooleanArray_Injected(array, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				bool[] array2;
+				blittableArrayWrapper.Unmarshal<bool>(ref array2);
+				array3 = array2;
+			}
+			return array3;
+		}
 
 		[ThreadSafe]
 		[Obsolete("AndroidJNI.FromByteArray is obsolete. Use AndroidJNI.FromSByteArray method instead")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern byte[] FromByteArray(IntPtr array);
+		public static byte[] FromByteArray(IntPtr array)
+		{
+			byte[] array3;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				AndroidJNI.FromByteArray_Injected(array, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				byte[] array2;
+				blittableArrayWrapper.Unmarshal<byte>(ref array2);
+				array3 = array2;
+			}
+			return array3;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		public static extern sbyte[] FromSByteArray(IntPtr array);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		public static extern char[] FromCharArray(IntPtr array);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		public static extern short[] FromShortArray(IntPtr array);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		public static extern int[] FromIntArray(IntPtr array);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		public static extern long[] FromLongArray(IntPtr array);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		public static extern float[] FromFloatArray(IntPtr array);
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
+		[return: UnityMarshalAs(NativeType.ScriptingObjectPtr)]
 		public static extern double[] FromDoubleArray(IntPtr array);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr[] FromObjectArray(IntPtr array);
+		public static IntPtr[] FromObjectArray(IntPtr array)
+		{
+			IntPtr[] array3;
+			try
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				AndroidJNI.FromObjectArray_Injected(array, out blittableArrayWrapper);
+			}
+			finally
+			{
+				BlittableArrayWrapper blittableArrayWrapper;
+				IntPtr[] array2;
+				blittableArrayWrapper.Unmarshal<IntPtr>(ref array2);
+				array3 = array2;
+			}
+			return array3;
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1330,8 +1768,36 @@ namespace UnityEngine
 		private static extern IntPtr RegisterNativesAllocate(int length);
 
 		[ThreadSafe]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void RegisterNativesSet(IntPtr natives, int idx, string name, string signature, IntPtr fnPtr);
+		private unsafe static void RegisterNativesSet(IntPtr natives, int idx, string name, string signature, IntPtr fnPtr)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				ManagedSpanWrapper managedSpanWrapper2;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(signature, ref managedSpanWrapper2))
+				{
+					ReadOnlySpan<char> readOnlySpan2 = signature.AsSpan();
+					fixed (char* ptr2 = readOnlySpan2.GetPinnableReference())
+					{
+						managedSpanWrapper2 = new ManagedSpanWrapper((void*)ptr2, readOnlySpan2.Length);
+					}
+				}
+				AndroidJNI.RegisterNativesSet_Injected(natives, idx, ref managedSpanWrapper, ref managedSpanWrapper2, fnPtr);
+			}
+			finally
+			{
+				char* ptr = null;
+				char* ptr2 = null;
+			}
+		}
 
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -1340,5 +1806,115 @@ namespace UnityEngine
 		[ThreadSafe]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int UnregisterNatives(IntPtr clazz);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReleaseStringChars_Injected([In] ref AndroidJNI.JStringBinding str);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr FindClass_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ThrowNew_Injected(IntPtr clazz, ref ManagedSpanWrapper message);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FatalError_Injected(ref ManagedSpanWrapper message);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetMethodID_Injected(IntPtr clazz, ref ManagedSpanWrapper name, ref ManagedSpanWrapper sig);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetFieldID_Injected(IntPtr clazz, ref ManagedSpanWrapper name, ref ManagedSpanWrapper sig);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetStaticMethodID_Injected(IntPtr clazz, ref ManagedSpanWrapper name, ref ManagedSpanWrapper sig);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetStaticFieldID_Injected(IntPtr clazz, ref ManagedSpanWrapper name, ref ManagedSpanWrapper sig);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr NewStringFromStr_Injected(ref ManagedSpanWrapper chars);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr NewString_Injected(ref ManagedSpanWrapper chars);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr NewStringUTF_Injected(ref ManagedSpanWrapper bytes);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetStringCharsInternal_Injected(IntPtr str, out AndroidJNI.JStringBinding ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetStringUTFChars_Injected(IntPtr str, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void CallStringMethodUnsafeInternal_Injected(IntPtr obj, IntPtr methodID, jvalue* args, out AndroidJNI.JStringBinding ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetStringFieldInternal_Injected(IntPtr obj, IntPtr fieldID, out AndroidJNI.JStringBinding ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStringField_Injected(IntPtr obj, IntPtr fieldID, ref ManagedSpanWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void CallStaticStringMethodUnsafeInternal_Injected(IntPtr clazz, IntPtr methodID, jvalue* args, out AndroidJNI.JStringBinding ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetStaticStringFieldInternal_Injected(IntPtr clazz, IntPtr fieldID, out AndroidJNI.JStringBinding ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetStaticStringField_Injected(IntPtr clazz, IntPtr fieldID, ref ManagedSpanWrapper val);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr ConvertToBooleanArray_Injected(ref ManagedSpanWrapper array);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr ToByteArray_Injected(ref ManagedSpanWrapper array);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FromBooleanArray_Injected(IntPtr array, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FromByteArray_Injected(IntPtr array, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FromObjectArray_Injected(IntPtr array, out BlittableArrayWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void RegisterNativesSet_Injected(IntPtr natives, int idx, ref ManagedSpanWrapper name, ref ManagedSpanWrapper signature, IntPtr fnPtr);
+
+		private struct JStringBinding : IDisposable
+		{
+			public unsafe override string ToString()
+			{
+				bool flag = this.length == 0;
+				string text;
+				if (flag)
+				{
+					text = ((this.chars == IntPtr.Zero) ? null : string.Empty);
+				}
+				else
+				{
+					text = new string((char*)(void*)this.chars, 0, this.length);
+				}
+				return text;
+			}
+
+			public void Dispose()
+			{
+				bool flag = this.length > 0;
+				if (flag)
+				{
+					AndroidJNI.ReleaseStringChars(this);
+				}
+			}
+
+			private IntPtr javaString;
+
+			private IntPtr chars;
+
+			private int length;
+
+			private bool ownsRef;
+		}
 	}
 }

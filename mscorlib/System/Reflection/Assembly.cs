@@ -15,9 +15,9 @@ using Mono;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_Assembly))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	public abstract class Assembly : ICustomAttributeProvider, _Assembly, IEvidenceFactory, ISerializable

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngineInternal
@@ -26,6 +27,6 @@ namespace UnityEngineInternal
 		private static extern void get_settings_Injected(out GraphicsDeviceDebugSettings ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void set_settings_Injected(ref GraphicsDeviceDebugSettings value);
+		private static extern void set_settings_Injected([In] ref GraphicsDeviceDebugSettings value);
 	}
 }

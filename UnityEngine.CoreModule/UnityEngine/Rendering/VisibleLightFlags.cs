@@ -6,6 +6,7 @@ namespace UnityEngine.Rendering
 	internal enum VisibleLightFlags
 	{
 		IntersectsNearPlane = 1,
-		IntersectsFarPlane = 2
+		IntersectsFarPlane = 2,
+		ForcedVisible = 4
 	}
 }

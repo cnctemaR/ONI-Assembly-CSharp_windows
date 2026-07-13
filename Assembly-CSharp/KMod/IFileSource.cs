@@ -16,7 +16,12 @@ namespace KMod
 
 		IFileDirectory GetFileSystem();
 
-		void CopyTo(string path, List<string> extensions = null);
+		bool TryCopyTo(string path, List<string> extensions = null);
+
+		void CopyTo(string path, List<string> extensions = null)
+		{
+			this.TryCopyTo(path, extensions);
+		}
 
 		string Read(string relative_path);
 

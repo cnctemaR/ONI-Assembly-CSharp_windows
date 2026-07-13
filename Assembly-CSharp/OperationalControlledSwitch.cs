@@ -8,12 +8,12 @@ public class OperationalControlledSwitch : CircuitSwitch
 	{
 		base.OnPrefabInit();
 		this.manuallyControlled = false;
+		base.Subscribe<OperationalControlledSwitch>(-592767678, OperationalControlledSwitch.OnOperationalChangedDelegate);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe<OperationalControlledSwitch>(-592767678, OperationalControlledSwitch.OnOperationalChangedDelegate);
 	}
 
 	private void OnOperationalChanged(object data)

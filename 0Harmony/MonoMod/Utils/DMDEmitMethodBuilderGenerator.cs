@@ -4,19 +4,24 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using Mono.Cecil;
+using MonoMod.Logs;
 
 namespace MonoMod.Utils
 {
+	[NullableContext(1)]
+	[Nullable(new byte[] { 0, 1 })]
 	internal sealed class DMDEmitMethodBuilderGenerator : DMDGenerator<DMDEmitMethodBuilderGenerator>
 	{
-		protected override MethodInfo _Generate(DynamicMethodDefinition dmd, object context)
+		protected override MethodInfo GenerateCore(DynamicMethodDefinition dmd, [Nullable(2)] object context)
 		{
 			TypeBuilder typeBuilder = context as TypeBuilder;
 			MethodBuilder methodBuilder = DMDEmitMethodBuilderGenerator.GenerateMethodBuilder(dmd, typeBuilder);
 			typeBuilder = (TypeBuilder)methodBuilder.DeclaringType;
 			Type type = typeBuilder.CreateType();
-			if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MONOMOD_DMD_DUMP")))
+			object obj;
+			if (!string.IsNullOrEmpty(Switches.TryGetSwitchValue("DMDDumpTo", out obj) ? (obj as string) : null))
 			{
 				string fullyQualifiedName = methodBuilder.Module.FullyQualifiedName;
 				string fileName = Path.GetFileName(fullyQualifiedName);
@@ -34,13 +39,15 @@ namespace MonoMod.Utils
 			return type.GetMethod(methodBuilder.Name, BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 		}
 
-		public static MethodBuilder GenerateMethodBuilder(DynamicMethodDefinition dmd, TypeBuilder typeBuilder)
+		public static MethodBuilder GenerateMethodBuilder(DynamicMethodDefinition dmd, [Nullable(2)] TypeBuilder typeBuilder)
 		{
+			Helpers.ThrowIfArgumentNull<DynamicMethodDefinition>(dmd, "dmd");
 			MethodBase originalMethod = dmd.OriginalMethod;
 			MethodDefinition definition = dmd.Definition;
 			if (typeBuilder == null)
 			{
-				string text = Environment.GetEnvironmentVariable("MONOMOD_DMD_DUMP");
+				object obj;
+				string text = (Switches.TryGetSwitchValue("DMDDumpTo", out obj) ? (obj as string) : null);
 				if (string.IsNullOrEmpty(text))
 				{
 					text = null;
@@ -60,18 +67,12 @@ namespace MonoMod.Utils
 					assemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(DynamicMethodDefinition.c_DebuggableAttribute, new object[] { DebuggableAttribute.DebuggingModes.Default | DebuggableAttribute.DebuggingModes.DisableOptimizations }));
 				}
 				ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyBuilder.GetName().Name + ".dll", assemblyBuilder.GetName().Name + ".dll", dmd.Debug);
-				string text2 = "DMD<{0}>?{1}";
-				object obj;
-				if (originalMethod == null)
-				{
-					obj = null;
-				}
-				else
-				{
-					string id = originalMethod.GetID(null, null, true, false, true);
-					obj = ((id != null) ? id.Replace('.', '_') : null);
-				}
-				typeBuilder = moduleBuilder.DefineType(string.Format(text2, obj, dmd.GetHashCode()), global::System.Reflection.TypeAttributes.Public | global::System.Reflection.TypeAttributes.Abstract | global::System.Reflection.TypeAttributes.Sealed);
+				FormatInterpolatedStringHandler formatInterpolatedStringHandler = new FormatInterpolatedStringHandler(6, 2);
+				formatInterpolatedStringHandler.AppendLiteral("DMD<");
+				formatInterpolatedStringHandler.AppendFormatted<MethodBase>(originalMethod);
+				formatInterpolatedStringHandler.AppendLiteral(">?");
+				formatInterpolatedStringHandler.AppendFormatted<int>(dmd.GetHashCode());
+				typeBuilder = moduleBuilder.DefineType(DebugFormatter.Format(ref formatInterpolatedStringHandler), global::System.Reflection.TypeAttributes.Public | global::System.Reflection.TypeAttributes.Abstract | global::System.Reflection.TypeAttributes.Sealed);
 			}
 			Type[] array;
 			Type[][] array2;
@@ -145,12 +146,12 @@ namespace MonoMod.Utils
 			Type[] array7;
 			_DMDEmit.ResolveWithModifiers(definition.ReturnType, out type3, out array6, out array7, null, null);
 			TypeBuilder typeBuilder2 = typeBuilder;
-			string text3;
-			if ((text3 = dmd.Name) == null)
+			string text2;
+			if ((text2 = dmd.Name) == null)
 			{
-				text3 = (((originalMethod != null) ? originalMethod.Name : null) ?? definition.Name).Replace('.', '_');
+				text2 = (((originalMethod != null) ? originalMethod.Name : null) ?? definition.Name).Replace('.', '_');
 			}
-			MethodBuilder methodBuilder = typeBuilder2.DefineMethod(text3, global::System.Reflection.MethodAttributes.FamANDAssem | global::System.Reflection.MethodAttributes.Family | global::System.Reflection.MethodAttributes.Static | global::System.Reflection.MethodAttributes.HideBySig, CallingConventions.Standard, type3, array6, array7, array, array2, array3);
+			MethodBuilder methodBuilder = typeBuilder2.DefineMethod(text2, global::System.Reflection.MethodAttributes.FamANDAssem | global::System.Reflection.MethodAttributes.Family | global::System.Reflection.MethodAttributes.Static | global::System.Reflection.MethodAttributes.HideBySig, CallingConventions.Standard, type3, array6, array7, array, array2, array3);
 			ILGenerator ilgenerator = methodBuilder.GetILGenerator();
 			_DMDEmit.Generate(dmd, methodBuilder, ilgenerator);
 			return methodBuilder;

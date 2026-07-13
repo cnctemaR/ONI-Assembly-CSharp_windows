@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
@@ -14,21 +15,28 @@ namespace HarmonyLib
 				throw new NullReferenceException("Patch method cannot be null");
 			}
 			object[] customAttributes = patch.GetCustomAttributes(true);
-			HarmonyPatchType? patchType = AttributePatch.GetPatchType(patch.Name, customAttributes);
+			string name = patch.Name;
+			HarmonyPatchType? patchType = AttributePatch.GetPatchType(name, customAttributes);
 			if (patchType == null)
 			{
 				return null;
 			}
-			HarmonyPatchType? harmonyPatchType = patchType;
-			HarmonyPatchType harmonyPatchType2 = HarmonyPatchType.ReversePatch;
-			if (!((harmonyPatchType.GetValueOrDefault() == harmonyPatchType2) & (harmonyPatchType != null)) && !patch.IsStatic)
+			if (patchType.GetValueOrDefault() != HarmonyPatchType.ReversePatch && !patch.IsStatic)
 			{
 				throw new ArgumentException("Patch method " + patch.FullDescription() + " must be static");
 			}
-			HarmonyMethod harmonyMethod = HarmonyMethod.Merge((from attr in customAttributes
-				where attr.GetType().BaseType.FullName == AttributePatch.harmonyAttributeName
-				select AccessTools.Field(attr.GetType(), "info").GetValue(attr) into harmonyInfo
-				select AccessTools.MakeDeepCopy<HarmonyMethod>(harmonyInfo)).ToList<HarmonyMethod>());
+			IEnumerable<object> enumerable = customAttributes.Where<object>((object attr) => attr.GetType().BaseType.FullName == PatchTools.harmonyAttributeFullName).Select<object, object>(delegate(object attr)
+			{
+				FieldInfo fieldInfo = AccessTools.Field(attr.GetType(), "info");
+				return fieldInfo.GetValue(attr);
+			});
+			Func<object, HarmonyMethod> func;
+			if ((func = AttributePatch.<>O.<0>__MakeDeepCopy) == null)
+			{
+				func = (AttributePatch.<>O.<0>__MakeDeepCopy = new Func<object, HarmonyMethod>(AccessTools.MakeDeepCopy<HarmonyMethod>));
+			}
+			List<HarmonyMethod> list = enumerable.Select<object, HarmonyMethod>(func).ToList<HarmonyMethod>();
+			HarmonyMethod harmonyMethod = HarmonyMethod.Merge(list);
 			harmonyMethod.method = patch;
 			return new AttributePatch
 			{
@@ -62,13 +70,19 @@ namespace HarmonyLib
 			HarmonyPatchType.Postfix,
 			HarmonyPatchType.Transpiler,
 			HarmonyPatchType.Finalizer,
-			HarmonyPatchType.ReversePatch
+			HarmonyPatchType.ReversePatch,
+			HarmonyPatchType.InnerPrefix,
+			HarmonyPatchType.InnerPostfix
 		};
 
 		internal HarmonyMethod info;
 
 		internal HarmonyPatchType? type;
 
-		private static readonly string harmonyAttributeName = typeof(HarmonyAttribute).FullName;
+		[CompilerGenerated]
+		private static class <>O
+		{
+			public static Func<object, HarmonyMethod> <0>__MakeDeepCopy;
+		}
 	}
 }

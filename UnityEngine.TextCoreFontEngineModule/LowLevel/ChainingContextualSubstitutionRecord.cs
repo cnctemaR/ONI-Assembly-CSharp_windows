@@ -60,16 +60,16 @@ namespace UnityEngine.TextCore.LowLevel
 		[NativeName("backtrackGlyphSequences")]
 		private GlyphIDSequence[] m_BacktrackGlyphSequences;
 
-		[SerializeField]
 		[NativeName("inputGlyphSequences")]
+		[SerializeField]
 		private GlyphIDSequence[] m_InputGlyphSequences;
 
 		[NativeName("lookaheadGlyphSequences")]
 		[SerializeField]
 		private GlyphIDSequence[] m_LookaheadGlyphSequences;
 
-		[SerializeField]
 		[NativeName("sequenceLookupRecords")]
+		[SerializeField]
 		private SequenceLookupRecord[] m_SequenceLookupRecords;
 	}
 }

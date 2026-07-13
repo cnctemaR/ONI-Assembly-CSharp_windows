@@ -64,8 +64,26 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void StaticConstructScriptingClassMap();
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ReportSingleSubsystemAnalytics(string id);
+		internal unsafe static void ReportSingleSubsystemAnalytics(string id)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(id, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = id.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				SubsystemManager.ReportSingleSubsystemAnalytics_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		static SubsystemManager()
 		{
@@ -119,6 +137,7 @@ namespace UnityEngine
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action afterReloadSubsystems;
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.XRModule" })]
 		internal static IntegratedSubsystem GetIntegratedSubsystemByPtr(IntPtr ptr)
 		{
 			foreach (IntegratedSubsystem integratedSubsystem in SubsystemManager.s_IntegratedSubsystems)
@@ -169,6 +188,7 @@ namespace UnityEngine
 			return null;
 		}
 
+		[Obsolete("Use GetSubsystems instead. (UnityUpgradable) -> GetSubsystems<T>(*)", false)]
 		public static void GetInstances<T>(List<T> subsystems) where T : ISubsystem
 		{
 			SubsystemManager.GetSubsystems<T>(subsystems);
@@ -197,11 +217,16 @@ namespace UnityEngine
 			return null;
 		}
 
+		[Obsolete("Use beforeReloadSubsystems instead. (UnityUpgradable) -> beforeReloadSubsystems", false)]
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action reloadSubsytemsStarted;
 
+		[Obsolete("Use afterReloadSubsystems instead. (UnityUpgradable) -> afterReloadSubsystems", false)]
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static event Action reloadSubsytemsCompleted;
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReportSingleSubsystemAnalytics_Injected(ref ManagedSpanWrapper id);
 
 		private static List<IntegratedSubsystem> s_IntegratedSubsystems = new List<IntegratedSubsystem>();
 

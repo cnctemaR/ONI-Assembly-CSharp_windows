@@ -129,6 +129,14 @@ namespace Mono.Cecil.Mdb
 			return new ImageDebugHeader();
 		}
 
+		public void Write()
+		{
+		}
+
+		public void Write(ICustomDebugInformationProvider provider)
+		{
+		}
+
 		public void Dispose()
 		{
 			this.writer.WriteSymbolFile(this.module.Mvid);

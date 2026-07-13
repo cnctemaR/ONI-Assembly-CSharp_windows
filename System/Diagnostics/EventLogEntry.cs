@@ -72,8 +72,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("An ID number for this event entry.")]
 		[Obsolete("Use InstanceId")]
+		[MonitoringDescription("An ID number for this event entry.")]
 		public int EventID
 		{
 			get
@@ -110,8 +110,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The message of this event entry.")]
 		[Editor("System.ComponentModel.Design.BinaryEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[MonitoringDescription("The message of this event entry.")]
 		public string Message
 		{
 			get

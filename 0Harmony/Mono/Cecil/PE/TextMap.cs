@@ -9,10 +9,27 @@ namespace Mono.Cecil.PE
 			this.map[(int)segment] = new Range(this.GetStart(segment), (uint)length);
 		}
 
+		private uint AlignUp(uint value, uint align)
+		{
+			align -= 1U;
+			return (value + align) & ~align;
+		}
+
 		public void AddMap(TextSegment segment, int length, int align)
 		{
-			align--;
-			this.AddMap(segment, (length + align) & ~align);
+			uint num2;
+			if (segment != TextSegment.ImportAddressTable)
+			{
+				int num = segment - TextSegment.CLIHeader;
+				Range range = this.map[num];
+				num2 = this.AlignUp(range.Start + range.Length, (uint)align);
+				this.map[num].Length = num2 - range.Start;
+			}
+			else
+			{
+				num2 = 8192U;
+			}
+			this.map[(int)segment] = new Range(num2, (uint)length);
 		}
 
 		public void AddMap(TextSegment segment, Range range)

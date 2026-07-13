@@ -4,7 +4,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class CallSite : IMethodSignature, IMetadataTokenProvider
+	internal sealed class CallSite : IMethodSignature, IMetadataTokenProvider
 	{
 		public bool HasThis
 		{

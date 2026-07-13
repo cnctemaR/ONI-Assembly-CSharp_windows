@@ -4,7 +4,20 @@ namespace UnityEngine.Experimental.GlobalIllumination
 {
 	public struct DiscLight
 	{
-		public int instanceID;
+		[Obsolete("Please use entityId instead.", false)]
+		public int instanceID
+		{
+			get
+			{
+				return this.entityId;
+			}
+			set
+			{
+				this.entityId = value;
+			}
+		}
+
+		public EntityId entityId;
 
 		public bool shadow;
 

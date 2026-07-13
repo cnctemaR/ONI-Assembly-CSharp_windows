@@ -20,6 +20,10 @@ public class ScheduleScreenColumnEntry : MonoBehaviour, IPointerEnterHandler, IE
 
 	public void OnPointerDown(PointerEventData event_data)
 	{
+		if (event_data.button != PointerEventData.InputButton.Left)
+		{
+			return;
+		}
 		this.RunCallbacks();
 	}
 

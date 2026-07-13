@@ -65,11 +65,11 @@ namespace UnityEngine.Rendering
 		{
 			get
 			{
-				return Convert.ToBoolean(this.m_IsOrthographic);
+				return this.m_LODParameters.isOrthographic;
 			}
 			set
 			{
-				this.m_IsOrthographic = Convert.ToInt32(value);
+				this.m_LODParameters.isOrthographic = value;
 			}
 		}
 
@@ -338,7 +338,7 @@ namespace UnityEngine.Rendering
 					return false;
 				}
 			}
-			return this.m_IsOrthographic == other.m_IsOrthographic && this.m_LODParameters.Equals(other.m_LODParameters) && this.m_CullingPlaneCount == other.m_CullingPlaneCount && this.m_CullingMask == other.m_CullingMask && this.m_SceneMask == other.m_SceneMask && this.m_ViewID == other.m_ViewID && this.m_LayerCull == other.m_LayerCull && this.m_CullingMatrix.Equals(other.m_CullingMatrix) && this.m_Origin.Equals(other.m_Origin) && this.m_ShadowDistance.Equals(other.m_ShadowDistance) && this.m_ShadowNearPlaneOffset.Equals(other.m_ShadowNearPlaneOffset) && this.m_CullingOptions == other.m_CullingOptions && this.m_ReflectionProbeSortingCriteria == other.m_ReflectionProbeSortingCriteria && this.m_CameraProperties.Equals(other.m_CameraProperties) && this.m_AccurateOcclusionThreshold.Equals(other.m_AccurateOcclusionThreshold) && this.m_StereoViewMatrix.Equals(other.m_StereoViewMatrix) && this.m_StereoProjectionMatrix.Equals(other.m_StereoProjectionMatrix) && this.m_StereoSeparationDistance.Equals(other.m_StereoSeparationDistance) && this.m_maximumVisibleLights == other.m_maximumVisibleLights && this.m_ConservativeEnclosingSphere == other.m_ConservativeEnclosingSphere && this.m_NumIterationsEnclosingSphere == other.m_NumIterationsEnclosingSphere;
+			return this.m_LODParameters.Equals(other.m_LODParameters) && this.m_CullingPlaneCount == other.m_CullingPlaneCount && this.m_CullingMask == other.m_CullingMask && this.m_SceneMask == other.m_SceneMask && this.m_ViewID == other.m_ViewID && this.m_LayerCull == other.m_LayerCull && this.m_CullingMatrix.Equals(other.m_CullingMatrix) && this.m_Origin.Equals(other.m_Origin) && this.m_ShadowDistance.Equals(other.m_ShadowDistance) && this.m_ShadowNearPlaneOffset.Equals(other.m_ShadowNearPlaneOffset) && this.m_CullingOptions == other.m_CullingOptions && this.m_ReflectionProbeSortingCriteria == other.m_ReflectionProbeSortingCriteria && this.m_CameraProperties.Equals(other.m_CameraProperties) && this.m_AccurateOcclusionThreshold.Equals(other.m_AccurateOcclusionThreshold) && this.m_StereoViewMatrix.Equals(other.m_StereoViewMatrix) && this.m_StereoProjectionMatrix.Equals(other.m_StereoProjectionMatrix) && this.m_StereoSeparationDistance.Equals(other.m_StereoSeparationDistance) && this.m_maximumVisibleLights == other.m_maximumVisibleLights && this.m_ConservativeEnclosingSphere == other.m_ConservativeEnclosingSphere && this.m_NumIterationsEnclosingSphere == other.m_NumIterationsEnclosingSphere;
 		}
 
 		public override bool Equals(object obj)
@@ -349,8 +349,7 @@ namespace UnityEngine.Rendering
 
 		public override int GetHashCode()
 		{
-			int num = this.m_IsOrthographic;
-			num = (num * 397) ^ this.m_LODParameters.GetHashCode();
+			int num = this.m_LODParameters.GetHashCode();
 			num = (num * 397) ^ this.m_CullingPlaneCount;
 			num = (num * 397) ^ (int)this.m_CullingMask;
 			num = (num * 397) ^ this.m_SceneMask.GetHashCode();
@@ -382,8 +381,6 @@ namespace UnityEngine.Rendering
 		{
 			return !left.Equals(right);
 		}
-
-		private int m_IsOrthographic;
 
 		private LODParameters m_LODParameters;
 
@@ -445,8 +442,8 @@ namespace UnityEngine.Rendering
 
 		private int m_NumIterationsEnclosingSphere;
 
-		[UnsafeValueType]
 		[CompilerGenerated]
+		[UnsafeValueType]
 		[StructLayout(LayoutKind.Sequential, Size = 160)]
 		public struct <m_CullingPlanes>e__FixedBuffer
 		{

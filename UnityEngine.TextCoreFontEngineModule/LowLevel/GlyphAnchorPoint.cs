@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.TextCore.LowLevel
 {
+	[VisibleToOtherModules(new string[] { "UnityEngine.TextCoreTextEngineModule" })]
 	[UsedByNativeCode]
 	[Serializable]
 	internal struct GlyphAnchorPoint

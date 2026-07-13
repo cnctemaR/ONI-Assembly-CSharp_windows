@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine.Playables
 {
-	[NativeHeader("Runtime/Export/Director/PlayableHandle.bindings.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/Director/PlayableHandle.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	public struct PlayableHandle : IEquatable<PlayableHandle>
 	{
 		internal T GetObject<T>() where T : class, IPlayableBehaviour
@@ -35,6 +36,41 @@ namespace UnityEngine.Playables
 			return t;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.DirectorModule" })]
+		internal T GetPayload<T>() where T : struct
+		{
+			bool flag = !this.IsValid();
+			T t;
+			if (flag)
+			{
+				t = default(T);
+			}
+			else
+			{
+				object scriptInstance = this.GetScriptInstance();
+				bool flag2 = scriptInstance == null;
+				if (flag2)
+				{
+					t = default(T);
+				}
+				else
+				{
+					t = (T)((object)scriptInstance);
+				}
+			}
+			return t;
+		}
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.DirectorModule" })]
+		internal void SetPayload<T>(T payload) where T : struct
+		{
+			bool flag = !this.IsValid();
+			if (!flag)
+			{
+				this.SetScriptInstance(payload);
+			}
+		}
+
 		[VisibleToOtherModules]
 		internal bool IsPlayableOfType<T>()
 		{
@@ -57,6 +93,16 @@ namespace UnityEngine.Playables
 		internal Playable GetOutput(int outputPort)
 		{
 			return new Playable(this.GetOutputHandle(outputPort));
+		}
+
+		internal int GetOutputPortFromInputConnection(int inputPort)
+		{
+			return this.GetOutputPortFromInputIndex(inputPort);
+		}
+
+		internal int GetInputPortFromOutputConnection(int inputPort)
+		{
+			return this.GetInputPortFromOutputIndex(inputPort);
 		}
 
 		internal bool SetInputWeight(int inputIndex, float weight)
@@ -163,149 +209,107 @@ namespace UnityEngine.Playables
 		}
 
 		[VisibleToOtherModules]
-		internal bool IsNull()
-		{
-			return PlayableHandle.IsNull_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool IsNull();
 
 		[VisibleToOtherModules]
-		internal bool IsValid()
-		{
-			return PlayableHandle.IsValid_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool IsValid();
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetPlayableType", HasExplicitThis = true, ThrowsException = true)]
-		internal Type GetPlayableType()
-		{
-			return PlayableHandle.GetPlayableType_Injected(ref this);
-		}
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Type GetPlayableType();
 
 		[FreeFunction("PlayableHandleBindings::GetJobType", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal Type GetJobType()
-		{
-			return PlayableHandle.GetJobType_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Type GetJobType();
 
-		[FreeFunction("PlayableHandleBindings::SetScriptInstance", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal void SetScriptInstance(object scriptInstance)
-		{
-			PlayableHandle.SetScriptInstance_Injected(ref this, scriptInstance);
-		}
+		[FreeFunction("PlayableHandleBindings::SetScriptInstance", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetScriptInstance(object scriptInstance);
 
 		[FreeFunction("PlayableHandleBindings::CanChangeInputs", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal bool CanChangeInputs()
-		{
-			return PlayableHandle.CanChangeInputs_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool CanChangeInputs();
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::CanSetWeights", HasExplicitThis = true, ThrowsException = true)]
-		internal bool CanSetWeights()
-		{
-			return PlayableHandle.CanSetWeights_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool CanSetWeights();
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::CanDestroy", HasExplicitThis = true, ThrowsException = true)]
-		internal bool CanDestroy()
-		{
-			return PlayableHandle.CanDestroy_Injected(ref this);
-		}
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool CanDestroy();
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetPlayState", HasExplicitThis = true, ThrowsException = true)]
-		internal PlayState GetPlayState()
-		{
-			return PlayableHandle.GetPlayState_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern PlayState GetPlayState();
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::Play", HasExplicitThis = true, ThrowsException = true)]
-		internal void Play()
-		{
-			PlayableHandle.Play_Injected(ref this);
-		}
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void Play();
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::Pause", HasExplicitThis = true, ThrowsException = true)]
-		internal void Pause()
-		{
-			PlayableHandle.Pause_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void Pause();
 
+		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetSpeed", HasExplicitThis = true, ThrowsException = true)]
-		[VisibleToOtherModules]
-		internal double GetSpeed()
-		{
-			return PlayableHandle.GetSpeed_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern double GetSpeed();
 
+		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetSpeed", HasExplicitThis = true, ThrowsException = true)]
-		[VisibleToOtherModules]
-		internal void SetSpeed(double value)
-		{
-			PlayableHandle.SetSpeed_Injected(ref this, value);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetSpeed(double value);
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetTime", HasExplicitThis = true, ThrowsException = true)]
-		internal double GetTime()
-		{
-			return PlayableHandle.GetTime_Injected(ref this);
-		}
-
 		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern double GetTime();
+
 		[FreeFunction("PlayableHandleBindings::SetTime", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetTime(double value)
-		{
-			PlayableHandle.SetTime_Injected(ref this, value);
-		}
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetTime(double value);
 
+		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::IsDone", HasExplicitThis = true, ThrowsException = true)]
-		[VisibleToOtherModules]
-		internal bool IsDone()
-		{
-			return PlayableHandle.IsDone_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool IsDone();
 
-		[FreeFunction("PlayableHandleBindings::SetDone", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal void SetDone(bool value)
-		{
-			PlayableHandle.SetDone_Injected(ref this, value);
-		}
+		[FreeFunction("PlayableHandleBindings::SetDone", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetDone(bool value);
 
 		[FreeFunction("PlayableHandleBindings::GetDuration", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal double GetDuration()
-		{
-			return PlayableHandle.GetDuration_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern double GetDuration();
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetDuration", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetDuration(double value)
-		{
-			PlayableHandle.SetDuration_Injected(ref this, value);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetDuration(double value);
 
 		[FreeFunction("PlayableHandleBindings::GetPropagateSetTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal bool GetPropagateSetTime()
-		{
-			return PlayableHandle.GetPropagateSetTime_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool GetPropagateSetTime();
 
-		[FreeFunction("PlayableHandleBindings::SetPropagateSetTime", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal void SetPropagateSetTime(bool value)
-		{
-			PlayableHandle.SetPropagateSetTime_Injected(ref this, value);
-		}
+		[FreeFunction("PlayableHandleBindings::SetPropagateSetTime", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetPropagateSetTime(bool value);
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetGraph", HasExplicitThis = true, ThrowsException = true)]
@@ -318,121 +322,99 @@ namespace UnityEngine.Playables
 
 		[FreeFunction("PlayableHandleBindings::GetInputCount", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal int GetInputCount()
-		{
-			return PlayableHandle.GetInputCount_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetInputCount();
+
+		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetOutputPortFromInputIndex", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetOutputPortFromInputIndex(int index);
+
+		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::GetInputPortFromOutputIndex", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetInputPortFromOutputIndex(int index);
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetInputCount", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetInputCount(int value)
-		{
-			PlayableHandle.SetInputCount_Injected(ref this, value);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetInputCount(int value);
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetOutputCount", HasExplicitThis = true, ThrowsException = true)]
-		internal int GetOutputCount()
-		{
-			return PlayableHandle.GetOutputCount_Injected(ref this);
-		}
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern int GetOutputCount();
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetOutputCount", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetOutputCount(int value)
-		{
-			PlayableHandle.SetOutputCount_Injected(ref this, value);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetOutputCount(int value);
 
-		[FreeFunction("PlayableHandleBindings::SetInputWeight", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetInputWeight", HasExplicitThis = true, ThrowsException = true)]
 		internal void SetInputWeight(PlayableHandle input, float weight)
 		{
 			PlayableHandle.SetInputWeight_Injected(ref this, ref input, weight);
 		}
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetDelay", HasExplicitThis = true, ThrowsException = true)]
-		internal void SetDelay(double delay)
-		{
-			PlayableHandle.SetDelay_Injected(ref this, delay);
-		}
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetDelay(double delay);
 
 		[FreeFunction("PlayableHandleBindings::GetDelay", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal double GetDelay()
-		{
-			return PlayableHandle.GetDelay_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern double GetDelay();
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::IsDelayed", HasExplicitThis = true, ThrowsException = true)]
-		internal bool IsDelayed()
-		{
-			return PlayableHandle.IsDelayed_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern bool IsDelayed();
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetPreviousTime", HasExplicitThis = true, ThrowsException = true)]
-		internal double GetPreviousTime()
-		{
-			return PlayableHandle.GetPreviousTime_Injected(ref this);
-		}
+		[VisibleToOtherModules]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern double GetPreviousTime();
 
+		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::SetLeadTime", HasExplicitThis = true, ThrowsException = true)]
-		[VisibleToOtherModules]
-		internal void SetLeadTime(float value)
-		{
-			PlayableHandle.SetLeadTime_Injected(ref this, value);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetLeadTime(float value);
 
+		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetLeadTime", HasExplicitThis = true, ThrowsException = true)]
-		[VisibleToOtherModules]
-		internal float GetLeadTime()
-		{
-			return PlayableHandle.GetLeadTime_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern float GetLeadTime();
 
-		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetTraversalMode", HasExplicitThis = true, ThrowsException = true)]
-		internal PlayableTraversalMode GetTraversalMode()
-		{
-			return PlayableHandle.GetTraversalMode_Injected(ref this);
-		}
-
-		[FreeFunction("PlayableHandleBindings::SetTraversalMode", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal void SetTraversalMode(PlayableTraversalMode mode)
-		{
-			PlayableHandle.SetTraversalMode_Injected(ref this, mode);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern PlayableTraversalMode GetTraversalMode();
+
+		[VisibleToOtherModules]
+		[FreeFunction("PlayableHandleBindings::SetTraversalMode", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetTraversalMode(PlayableTraversalMode mode);
 
 		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetJobData", HasExplicitThis = true, ThrowsException = true)]
-		internal IntPtr GetJobData()
-		{
-			return PlayableHandle.GetJobData_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern IntPtr GetJobData();
 
+		[VisibleToOtherModules]
 		[FreeFunction("PlayableHandleBindings::GetTimeWrapMode", HasExplicitThis = true, ThrowsException = true)]
-		[VisibleToOtherModules]
-		internal DirectorWrapMode GetTimeWrapMode()
-		{
-			return PlayableHandle.GetTimeWrapMode_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern DirectorWrapMode GetTimeWrapMode();
 
-		[FreeFunction("PlayableHandleBindings::SetTimeWrapMode", HasExplicitThis = true, ThrowsException = true)]
 		[VisibleToOtherModules]
-		internal void SetTimeWrapMode(DirectorWrapMode mode)
-		{
-			PlayableHandle.SetTimeWrapMode_Injected(ref this, mode);
-		}
+		[FreeFunction("PlayableHandleBindings::SetTimeWrapMode", HasExplicitThis = true, ThrowsException = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetTimeWrapMode(DirectorWrapMode mode);
 
 		[FreeFunction("PlayableHandleBindings::GetScriptInstance", HasExplicitThis = true, ThrowsException = true)]
-		private object GetScriptInstance()
-		{
-			return PlayableHandle.GetScriptInstance_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern object GetScriptInstance();
 
 		[FreeFunction("PlayableHandleBindings::GetInputHandle", HasExplicitThis = true, ThrowsException = true)]
 		private PlayableHandle GetInputHandle(int index)
@@ -451,145 +433,24 @@ namespace UnityEngine.Playables
 		}
 
 		[FreeFunction("PlayableHandleBindings::SetInputWeightFromIndex", HasExplicitThis = true, ThrowsException = true)]
-		private void SetInputWeightFromIndex(int index, float weight)
-		{
-			PlayableHandle.SetInputWeightFromIndex_Injected(ref this, index, weight);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void SetInputWeightFromIndex(int index, float weight);
 
 		[FreeFunction("PlayableHandleBindings::GetInputWeightFromIndex", HasExplicitThis = true, ThrowsException = true)]
-		private float GetInputWeightFromIndex(int index)
-		{
-			return PlayableHandle.GetInputWeightFromIndex_Injected(ref this, index);
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsNull_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsValid_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Type GetPlayableType_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Type GetJobType_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetScriptInstance_Injected(ref PlayableHandle _unity_self, object scriptInstance);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CanChangeInputs_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CanSetWeights_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CanDestroy_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern PlayState GetPlayState_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Play_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Pause_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern double GetSpeed_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetSpeed_Injected(ref PlayableHandle _unity_self, double value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern double GetTime_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetTime_Injected(ref PlayableHandle _unity_self, double value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsDone_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetDone_Injected(ref PlayableHandle _unity_self, bool value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern double GetDuration_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetDuration_Injected(ref PlayableHandle _unity_self, double value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetPropagateSetTime_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetPropagateSetTime_Injected(ref PlayableHandle _unity_self, bool value);
+		private extern float GetInputWeightFromIndex(int index);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetGraph_Injected(ref PlayableHandle _unity_self, out PlayableGraph ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetInputCount_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetInputCount_Injected(ref PlayableHandle _unity_self, int value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetOutputCount_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetOutputCount_Injected(ref PlayableHandle _unity_self, int value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetInputWeight_Injected(ref PlayableHandle _unity_self, ref PlayableHandle input, float weight);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetDelay_Injected(ref PlayableHandle _unity_self, double delay);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern double GetDelay_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsDelayed_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern double GetPreviousTime_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetLeadTime_Injected(ref PlayableHandle _unity_self, float value);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float GetLeadTime_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern PlayableTraversalMode GetTraversalMode_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetTraversalMode_Injected(ref PlayableHandle _unity_self, PlayableTraversalMode mode);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetJobData_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern DirectorWrapMode GetTimeWrapMode_Injected(ref PlayableHandle _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetTimeWrapMode_Injected(ref PlayableHandle _unity_self, DirectorWrapMode mode);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern object GetScriptInstance_Injected(ref PlayableHandle _unity_self);
+		private static extern void SetInputWeight_Injected(ref PlayableHandle _unity_self, [In] ref PlayableHandle input, float weight);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetInputHandle_Injected(ref PlayableHandle _unity_self, int index, out PlayableHandle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetOutputHandle_Injected(ref PlayableHandle _unity_self, int index, out PlayableHandle ret);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetInputWeightFromIndex_Injected(ref PlayableHandle _unity_self, int index, float weight);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float GetInputWeightFromIndex_Injected(ref PlayableHandle _unity_self, int index);
 
 		internal IntPtr m_Handle;
 

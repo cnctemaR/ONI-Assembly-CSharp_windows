@@ -759,7 +759,7 @@ public class CircuitManager
 		{
 			return 0f;
 		}
-		return electricalUtilityNetwork.GetMaxSafeWattage();
+		return electricalUtilityNetwork.GetMaxSafeWattage(this.circuitInfo[(int)circuitID].bridgeGroups);
 	}
 
 	public const ushort INVALID_ID = 65535;

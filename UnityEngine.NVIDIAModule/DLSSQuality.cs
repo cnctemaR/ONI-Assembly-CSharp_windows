@@ -7,6 +7,7 @@ namespace UnityEngine.NVIDIA
 		MaximumQuality = 2,
 		Balanced = 1,
 		MaximumPerformance = 0,
-		UltraPerformance = 3
+		UltraPerformance = 3,
+		DLAA
 	}
 }

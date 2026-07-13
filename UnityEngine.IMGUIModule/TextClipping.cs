@@ -5,6 +5,7 @@ namespace UnityEngine
 	public enum TextClipping
 	{
 		Overflow,
-		Clip
+		Clip,
+		Ellipsis
 	}
 }

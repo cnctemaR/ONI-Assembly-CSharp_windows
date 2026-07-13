@@ -82,15 +82,6 @@ public class LocText : TextMeshProUGUI
 		base.OnDestroy();
 	}
 
-	public override void SetLayoutDirty()
-	{
-		if (this.staticLayout)
-		{
-			return;
-		}
-		base.SetLayoutDirty();
-	}
-
 	public void SetLinkOverrideAction(Func<string, bool> action)
 	{
 		this.RefreshLinkHandler();

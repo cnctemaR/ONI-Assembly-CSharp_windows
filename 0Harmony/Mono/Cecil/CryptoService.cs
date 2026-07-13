@@ -8,6 +8,11 @@ namespace Mono.Cecil
 {
 	internal static class CryptoService
 	{
+		private static SHA1 CreateSHA1()
+		{
+			return new SHA1CryptoServiceProvider();
+		}
+
 		public static byte[] GetPublicKey(WriterParameters parameters)
 		{
 			byte[] array3;
@@ -67,9 +72,9 @@ namespace Mono.Cecil
 			}
 			strong_name_pointer = (int)((long)pointerToRawData + (long)((ulong)(strongNameSignatureDirectory.VirtualAddress - text.VirtualAddress)));
 			int size = (int)strongNameSignatureDirectory.Size;
-			SHA1Managed sha1Managed = new SHA1Managed();
+			SHA1 sha = CryptoService.CreateSHA1();
 			byte[] array = new byte[8192];
-			using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, sha1Managed, CryptoStreamMode.Write))
+			using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, sha, CryptoStreamMode.Write))
 			{
 				stream.Seek(0L, SeekOrigin.Begin);
 				CryptoService.CopyStreamChunk(stream, cryptoStream, array, headerSize);
@@ -78,10 +83,10 @@ namespace Mono.Cecil
 				stream.Seek((long)size, SeekOrigin.Current);
 				CryptoService.CopyStreamChunk(stream, cryptoStream, array, (int)(stream.Length - (long)(strong_name_pointer + size)));
 			}
-			return sha1Managed.Hash;
+			return sha.Hash;
 		}
 
-		private static void CopyStreamChunk(Stream stream, Stream dest_stream, byte[] buffer, int length)
+		public static void CopyStreamChunk(Stream stream, Stream dest_stream, byte[] buffer, int length)
 		{
 			while (length > 0)
 			{
@@ -107,26 +112,26 @@ namespace Mono.Cecil
 
 		public static byte[] ComputeHash(Stream stream)
 		{
-			SHA1Managed sha1Managed = new SHA1Managed();
+			SHA1 sha = CryptoService.CreateSHA1();
 			byte[] array = new byte[8192];
-			using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, sha1Managed, CryptoStreamMode.Write))
+			using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, sha, CryptoStreamMode.Write))
 			{
 				CryptoService.CopyStreamChunk(stream, cryptoStream, array, (int)stream.Length);
 			}
-			return sha1Managed.Hash;
+			return sha.Hash;
 		}
 
 		public static byte[] ComputeHash(params ByteBuffer[] buffers)
 		{
-			SHA1Managed sha1Managed = new SHA1Managed();
-			using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, sha1Managed, CryptoStreamMode.Write))
+			SHA1 sha = CryptoService.CreateSHA1();
+			using (CryptoStream cryptoStream = new CryptoStream(Stream.Null, sha, CryptoStreamMode.Write))
 			{
 				for (int i = 0; i < buffers.Length; i++)
 				{
 					cryptoStream.Write(buffers[i].buffer, 0, buffers[i].length);
 				}
 			}
-			return sha1Managed.Hash;
+			return sha.Hash;
 		}
 
 		public static Guid ComputeGuid(byte[] hash)

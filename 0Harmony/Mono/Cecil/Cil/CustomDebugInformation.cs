@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public abstract class CustomDebugInformation : DebugInformation
+	internal abstract class CustomDebugInformation : DebugInformation
 	{
 		public Guid Identifier
 		{

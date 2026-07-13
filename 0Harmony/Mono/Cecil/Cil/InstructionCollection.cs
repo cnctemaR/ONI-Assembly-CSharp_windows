@@ -49,7 +49,7 @@ namespace Mono.Cecil.Cil
 				instruction.previous = item;
 				item.next = instruction;
 			}
-			this.UpdateLocalScopes(null, null);
+			this.UpdateDebugInformation(null, null);
 		}
 
 		protected override void OnSet(Instruction item, int index)
@@ -59,7 +59,7 @@ namespace Mono.Cecil.Cil
 			item.next = instruction.next;
 			instruction.previous = null;
 			instruction.next = null;
-			this.UpdateLocalScopes(item, instruction);
+			this.UpdateDebugInformation(item, instruction);
 		}
 
 		protected override void OnRemove(Instruction item, int index)
@@ -75,7 +75,7 @@ namespace Mono.Cecil.Cil
 				next.previous = item.previous;
 			}
 			this.RemoveSequencePoint(item);
-			this.UpdateLocalScopes(item, next ?? previous);
+			this.UpdateDebugInformation(item, next ?? previous);
 			item.previous = null;
 			item.next = null;
 		}
@@ -98,114 +98,193 @@ namespace Mono.Cecil.Cil
 			}
 		}
 
-		private void UpdateLocalScopes(Instruction removedInstruction, Instruction existingInstruction)
+		private void UpdateDebugInformation(Instruction removedInstruction, Instruction existingInstruction)
 		{
-			MethodDebugInformation debug_info = this.method.debug_info;
-			if (debug_info == null)
+			InstructionCollection.InstructionOffsetResolver instructionOffsetResolver = new InstructionCollection.InstructionOffsetResolver(this.items, removedInstruction, existingInstruction);
+			if (this.method.debug_info != null)
 			{
-				return;
+				this.UpdateLocalScope(this.method.debug_info.Scope, ref instructionOffsetResolver);
 			}
-			InstructionCollection.InstructionOffsetCache instructionOffsetCache = new InstructionCollection.InstructionOffsetCache
+			Collection<CustomDebugInformation> collection;
+			if ((collection = this.method.custom_infos) == null)
 			{
-				Offset = 0,
-				Index = 0,
-				Instruction = this.items[0]
-			};
-			this.UpdateLocalScope(debug_info.Scope, removedInstruction, existingInstruction, ref instructionOffsetCache);
+				MethodDebugInformation debug_info = this.method.debug_info;
+				collection = ((debug_info != null) ? debug_info.custom_infos : null);
+			}
+			Collection<CustomDebugInformation> collection2 = collection;
+			if (collection2 != null)
+			{
+				foreach (CustomDebugInformation customDebugInformation in collection2)
+				{
+					StateMachineScopeDebugInformation stateMachineScopeDebugInformation = customDebugInformation as StateMachineScopeDebugInformation;
+					if (stateMachineScopeDebugInformation == null)
+					{
+						AsyncMethodBodyDebugInformation asyncMethodBodyDebugInformation = customDebugInformation as AsyncMethodBodyDebugInformation;
+						if (asyncMethodBodyDebugInformation != null)
+						{
+							this.UpdateAsyncMethodBody(asyncMethodBodyDebugInformation, ref instructionOffsetResolver);
+						}
+					}
+					else
+					{
+						this.UpdateStateMachineScope(stateMachineScopeDebugInformation, ref instructionOffsetResolver);
+					}
+				}
+			}
 		}
 
-		private void UpdateLocalScope(ScopeDebugInformation scope, Instruction removedInstruction, Instruction existingInstruction, ref InstructionCollection.InstructionOffsetCache cache)
+		private void UpdateLocalScope(ScopeDebugInformation scope, ref InstructionCollection.InstructionOffsetResolver resolver)
 		{
 			if (scope == null)
 			{
 				return;
 			}
-			if (!scope.Start.IsResolved)
-			{
-				scope.Start = this.ResolveInstructionOffset(scope.Start, ref cache);
-			}
-			if (!scope.Start.IsEndOfMethod && scope.Start.ResolvedInstruction == removedInstruction)
-			{
-				scope.Start = new InstructionOffset(existingInstruction);
-			}
+			scope.Start = resolver.Resolve(scope.Start);
 			if (scope.HasScopes)
 			{
 				foreach (ScopeDebugInformation scopeDebugInformation in scope.Scopes)
 				{
-					this.UpdateLocalScope(scopeDebugInformation, removedInstruction, existingInstruction, ref cache);
+					this.UpdateLocalScope(scopeDebugInformation, ref resolver);
 				}
 			}
-			if (!scope.End.IsResolved)
+			scope.End = resolver.Resolve(scope.End);
+		}
+
+		private void UpdateStateMachineScope(StateMachineScopeDebugInformation debugInfo, ref InstructionCollection.InstructionOffsetResolver resolver)
+		{
+			resolver.Restart();
+			foreach (StateMachineScope stateMachineScope in debugInfo.Scopes)
 			{
-				scope.End = this.ResolveInstructionOffset(scope.End, ref cache);
-			}
-			if (!scope.End.IsEndOfMethod && scope.End.ResolvedInstruction == removedInstruction)
-			{
-				scope.End = new InstructionOffset(existingInstruction);
+				stateMachineScope.Start = resolver.Resolve(stateMachineScope.Start);
+				stateMachineScope.End = resolver.Resolve(stateMachineScope.End);
 			}
 		}
 
-		private InstructionOffset ResolveInstructionOffset(InstructionOffset inputOffset, ref InstructionCollection.InstructionOffsetCache cache)
+		private void UpdateAsyncMethodBody(AsyncMethodBodyDebugInformation debugInfo, ref InstructionCollection.InstructionOffsetResolver resolver)
 		{
-			if (inputOffset.IsResolved)
+			if (!debugInfo.CatchHandler.IsResolved)
 			{
-				return inputOffset;
+				resolver.Restart();
+				debugInfo.CatchHandler = resolver.Resolve(debugInfo.CatchHandler);
 			}
-			int offset = inputOffset.Offset;
-			if (cache.Offset == offset)
+			resolver.Restart();
+			for (int i = 0; i < debugInfo.Yields.Count; i++)
 			{
-				return new InstructionOffset(cache.Instruction);
+				debugInfo.Yields[i] = resolver.Resolve(debugInfo.Yields[i]);
 			}
-			if (cache.Offset > offset)
+			resolver.Restart();
+			for (int j = 0; j < debugInfo.Resumes.Count; j++)
 			{
-				int num = 0;
-				for (int i = 0; i < this.items.Length; i++)
-				{
-					if (num == offset)
-					{
-						return new InstructionOffset(this.items[i]);
-					}
-					if (num > offset)
-					{
-						return new InstructionOffset(this.items[i - 1]);
-					}
-					num += this.items[i].GetSize();
-				}
-				return default(InstructionOffset);
+				debugInfo.Resumes[j] = resolver.Resolve(debugInfo.Resumes[j]);
 			}
-			int num2 = cache.Offset;
-			for (int j = cache.Index; j < this.items.Length; j++)
-			{
-				cache.Index = j;
-				cache.Offset = num2;
-				Instruction instruction = this.items[j];
-				if (instruction == null)
-				{
-					break;
-				}
-				cache.Instruction = instruction;
-				if (cache.Offset == offset)
-				{
-					return new InstructionOffset(cache.Instruction);
-				}
-				if (cache.Offset > offset)
-				{
-					return new InstructionOffset(this.items[j - 1]);
-				}
-				num2 += instruction.GetSize();
-			}
-			return default(InstructionOffset);
 		}
 
 		private readonly MethodDefinition method;
 
-		private struct InstructionOffsetCache
+		private struct InstructionOffsetResolver
 		{
-			public int Offset;
+			public int LastOffset
+			{
+				get
+				{
+					return this.cache_offset;
+				}
+			}
 
-			public int Index;
+			public InstructionOffsetResolver(Instruction[] instructions, Instruction removedInstruction, Instruction existingInstruction)
+			{
+				this.items = instructions;
+				this.removed_instruction = removedInstruction;
+				this.existing_instruction = existingInstruction;
+				this.cache_offset = 0;
+				this.cache_index = 0;
+				this.cache_instruction = this.items[0];
+			}
 
-			public Instruction Instruction;
+			public void Restart()
+			{
+				this.cache_offset = 0;
+				this.cache_index = 0;
+				this.cache_instruction = this.items[0];
+			}
+
+			public InstructionOffset Resolve(InstructionOffset inputOffset)
+			{
+				InstructionOffset instructionOffset = this.ResolveInstructionOffset(inputOffset);
+				if (!instructionOffset.IsEndOfMethod && instructionOffset.ResolvedInstruction == this.removed_instruction)
+				{
+					instructionOffset = new InstructionOffset(this.existing_instruction);
+				}
+				return instructionOffset;
+			}
+
+			private InstructionOffset ResolveInstructionOffset(InstructionOffset inputOffset)
+			{
+				if (inputOffset.IsResolved)
+				{
+					return inputOffset;
+				}
+				int offset = inputOffset.Offset;
+				if (this.cache_offset == offset)
+				{
+					return new InstructionOffset(this.cache_instruction);
+				}
+				if (this.cache_offset > offset)
+				{
+					int num = 0;
+					for (int i = 0; i < this.items.Length; i++)
+					{
+						if (this.items[i] == null)
+						{
+							return new InstructionOffset((i == 0) ? this.items[0] : this.items[i - 1]);
+						}
+						if (num == offset)
+						{
+							return new InstructionOffset(this.items[i]);
+						}
+						if (num > offset)
+						{
+							return new InstructionOffset((i == 0) ? this.items[0] : this.items[i - 1]);
+						}
+						num += this.items[i].GetSize();
+					}
+					return default(InstructionOffset);
+				}
+				int num2 = this.cache_offset;
+				for (int j = this.cache_index; j < this.items.Length; j++)
+				{
+					this.cache_index = j;
+					this.cache_offset = num2;
+					Instruction instruction = this.items[j];
+					if (instruction == null)
+					{
+						return new InstructionOffset((j == 0) ? this.items[0] : this.items[j - 1]);
+					}
+					this.cache_instruction = instruction;
+					if (this.cache_offset == offset)
+					{
+						return new InstructionOffset(this.cache_instruction);
+					}
+					if (this.cache_offset > offset)
+					{
+						return new InstructionOffset((j == 0) ? this.items[0] : this.items[j - 1]);
+					}
+					num2 += instruction.GetSize();
+				}
+				return default(InstructionOffset);
+			}
+
+			private readonly Instruction[] items;
+
+			private readonly Instruction removed_instruction;
+
+			private readonly Instruction existing_instruction;
+
+			private int cache_offset;
+
+			private int cache_index;
+
+			private Instruction cache_instruction;
 		}
 	}
 }

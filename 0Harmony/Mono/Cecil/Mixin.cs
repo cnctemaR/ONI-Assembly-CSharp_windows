@@ -756,6 +756,11 @@ namespace Mono.Cecil
 			return header.GetEntry(ImageDebugType.EmbeddedPortablePdb);
 		}
 
+		public static ImageDebugHeaderEntry GetPdbChecksumEntry(this ImageDebugHeader header)
+		{
+			return header.GetEntry(ImageDebugType.PdbChecksum);
+		}
+
 		private static ImageDebugHeaderEntry GetEntry(this ImageDebugHeader header, ImageDebugType type)
 		{
 			if (!header.HasEntries)
@@ -810,6 +815,41 @@ namespace Mono.Cecil
 				stream.Position = position;
 			}
 			return flag;
+		}
+
+		public static bool GetHasCustomDebugInformations(this ICustomDebugInformationProvider self, ref Collection<CustomDebugInformation> collection, ModuleDefinition module)
+		{
+			if (module.HasImage())
+			{
+				module.Read<ICustomDebugInformationProvider, Collection<CustomDebugInformation>>(ref collection, self, delegate(ICustomDebugInformationProvider provider, MetadataReader reader)
+				{
+					ISymbolReader symbol_reader = reader.module.symbol_reader;
+					if (symbol_reader != null)
+					{
+						return symbol_reader.Read(provider);
+					}
+					return null;
+				});
+			}
+			return !collection.IsNullOrEmpty<CustomDebugInformation>();
+		}
+
+		public static Collection<CustomDebugInformation> GetCustomDebugInformations(this ICustomDebugInformationProvider self, ref Collection<CustomDebugInformation> collection, ModuleDefinition module)
+		{
+			if (module.HasImage())
+			{
+				module.Read<ICustomDebugInformationProvider, Collection<CustomDebugInformation>>(ref collection, self, delegate(ICustomDebugInformationProvider provider, MetadataReader reader)
+				{
+					ISymbolReader symbol_reader = reader.module.symbol_reader;
+					if (symbol_reader != null)
+					{
+						return symbol_reader.Read(provider);
+					}
+					return null;
+				});
+			}
+			Interlocked.CompareExchange<Collection<CustomDebugInformation>>(ref collection, new Collection<CustomDebugInformation>(), null);
+			return collection;
 		}
 
 		public static uint ReadCompressedUInt32(this byte[] data, ref int position)

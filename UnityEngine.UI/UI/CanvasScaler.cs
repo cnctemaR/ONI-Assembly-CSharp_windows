@@ -261,7 +261,7 @@ namespace UnityEngine.UI
 
 		protected void SetScaleFactor(float scaleFactor)
 		{
-			if (scaleFactor == this.m_PrevScaleFactor)
+			if (Mathf.Abs(scaleFactor - this.m_PrevScaleFactor) < 5E-06f)
 			{
 				return;
 			}

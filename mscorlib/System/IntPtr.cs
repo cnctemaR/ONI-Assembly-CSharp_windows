@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
@@ -100,12 +101,14 @@ namespace System
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator ==(IntPtr value1, IntPtr value2)
 		{
 			return value1.m_value == value2.m_value;
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool operator !=(IntPtr value1, IntPtr value2)
 		{
 			return value1.m_value != value2.m_value;

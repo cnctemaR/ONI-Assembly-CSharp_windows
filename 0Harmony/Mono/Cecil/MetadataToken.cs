@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public struct MetadataToken : IEquatable<MetadataToken>
+	internal struct MetadataToken : IEquatable<MetadataToken>
 	{
 		public uint RID
 		{

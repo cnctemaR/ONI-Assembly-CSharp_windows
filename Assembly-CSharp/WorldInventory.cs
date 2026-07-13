@@ -162,6 +162,11 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return ClusterUtil.GetPickupablesFromRelatedWorlds(this, tag);
 	}
 
+	public void GetPickupablesFromRelatedWorlds(Tag tag, ref List<Pickupable> pickupables)
+	{
+		ClusterUtil.GetPickupablesFromRelatedWorlds(this, tag, ref pickupables);
+	}
+
 	public List<Pickupable> CreatePickupablesList(Tag tag)
 	{
 		HashSet<Pickupable> hashSet = null;

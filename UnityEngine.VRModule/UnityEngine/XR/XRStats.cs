@@ -4,6 +4,7 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.XR
 {
+	[Obsolete("UnityEngine.VRModule is deprecated and will be removed in a future version. Please use the APIs in the UnityEngine.XRModule instead")]
 	[NativeConditional("ENABLE_VR")]
 	public static class XRStats
 	{

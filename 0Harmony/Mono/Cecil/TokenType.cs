@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum TokenType : uint
+	internal enum TokenType : uint
 	{
 		Module,
 		TypeRef = 16777216U,

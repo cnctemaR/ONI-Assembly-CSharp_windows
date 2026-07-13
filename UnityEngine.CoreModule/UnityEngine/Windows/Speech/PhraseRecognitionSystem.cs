@@ -23,8 +23,8 @@ namespace UnityEngine.Windows.Speech
 			get;
 		}
 
-		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[NativeThrows]
+		[NativeHeader("PlatformDependent/Win/Bindings/SpeechBindings.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Restart();
 

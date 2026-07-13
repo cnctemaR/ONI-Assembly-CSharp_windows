@@ -33,8 +33,15 @@ namespace UnityEngine
 		}
 
 		[FreeFunction("CullingGroup_Bindings::Dispose", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void DisposeInternal();
+		private void DisposeInternal()
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CullingGroup.DisposeInternal_Injected(intPtr);
+		}
 
 		public void Dispose()
 		{
@@ -54,30 +61,79 @@ namespace UnityEngine
 			}
 		}
 
-		public extern bool enabled
+		public bool enabled
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CullingGroup.get_enabled_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CullingGroup.set_enabled_Injected(intPtr, value);
+			}
 		}
 
-		public extern Camera targetCamera
+		public Camera targetCamera
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Camera>(CullingGroup.get_targetCamera_Injected(intPtr));
+			}
+			set
+			{
+				IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CullingGroup.set_targetCamera_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Camera>(value));
+			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBoundingSpheres([Unmarshalled] BoundingSphere[] array);
+		public void SetBoundingSpheres([UnityMarshalAs(NativeType.ScriptingObjectPtr)] BoundingSphere[] array)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CullingGroup.SetBoundingSpheres_Injected(intPtr, array);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBoundingSphereCount(int count);
+		public void SetBoundingSphereCount(int count)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CullingGroup.SetBoundingSphereCount_Injected(intPtr, count);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void EraseSwapBack(int index);
+		public void EraseSwapBack(int index)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CullingGroup.EraseSwapBack_Injected(intPtr, index);
+		}
 
 		public static void EraseSwapBack<T>(int index, T[] myArray, ref int size)
 		{
@@ -102,32 +158,84 @@ namespace UnityEngine
 
 		[NativeThrows]
 		[FreeFunction("CullingGroup_Bindings::QueryIndices", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, [Unmarshalled] int[] result, int firstIndex);
+		private unsafe int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, int[] result, int firstIndex)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<int> span = new Span<int>(result);
+			int num;
+			fixed (int* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				num = CullingGroup.QueryIndices_Injected(intPtr, visible, distanceIndex, options, ref managedSpanWrapper, firstIndex);
+			}
+			return num;
+		}
 
-		[NativeThrows]
 		[FreeFunction("CullingGroup_Bindings::IsVisible", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsVisible(int index);
+		[NativeThrows]
+		public bool IsVisible(int index)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CullingGroup.IsVisible_Injected(intPtr, index);
+		}
 
 		[NativeThrows]
 		[FreeFunction("CullingGroup_Bindings::GetDistance", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetDistance(int index);
+		public int GetDistance(int index)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CullingGroup.GetDistance_Injected(intPtr, index);
+		}
 
 		[FreeFunction("CullingGroup_Bindings::SetBoundingDistances", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetBoundingDistances([Unmarshalled] float[] distances);
+		public unsafe void SetBoundingDistances(float[] distances)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			Span<float> span = new Span<float>(distances);
+			fixed (float* pinnableReference = span.GetPinnableReference())
+			{
+				ManagedSpanWrapper managedSpanWrapper = new ManagedSpanWrapper((void*)pinnableReference, span.Length);
+				CullingGroup.SetBoundingDistances_Injected(intPtr, ref managedSpanWrapper);
+			}
+		}
 
 		[FreeFunction("CullingGroup_Bindings::SetDistanceReferencePoint", HasExplicitThis = true)]
 		private void SetDistanceReferencePoint_InternalVector3(Vector3 point)
 		{
-			this.SetDistanceReferencePoint_InternalVector3_Injected(ref point);
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CullingGroup.SetDistanceReferencePoint_InternalVector3_Injected(intPtr, ref point);
 		}
 
 		[NativeMethod("SetDistanceReferenceTransform")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetDistanceReferencePoint_InternalTransform(Transform transform);
+		private void SetDistanceReferencePoint_InternalTransform(Transform transform)
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CullingGroup.SetDistanceReferencePoint_InternalTransform_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Transform>(transform));
+		}
 
 		public void SetDistanceReferencePoint(Vector3 point)
 		{
@@ -159,16 +267,73 @@ namespace UnityEngine
 		private static extern IntPtr Init(object scripting);
 
 		[FreeFunction("CullingGroup_Bindings::FinalizerFailure", HasExplicitThis = true, IsThreadSafe = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void FinalizerFailure();
+		private void FinalizerFailure()
+		{
+			IntPtr intPtr = CullingGroup.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CullingGroup.FinalizerFailure_Injected(intPtr);
+		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetDistanceReferencePoint_InternalVector3_Injected(ref Vector3 point);
+		private static extern void DisposeInternal_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_enabled_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_enabled_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_targetCamera_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_targetCamera_Injected(IntPtr _unity_self, IntPtr value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBoundingSpheres_Injected(IntPtr _unity_self, BoundingSphere[] array);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBoundingSphereCount_Injected(IntPtr _unity_self, int count);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EraseSwapBack_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int QueryIndices_Injected(IntPtr _unity_self, bool visible, int distanceIndex, CullingQueryOptions options, ref ManagedSpanWrapper result, int firstIndex);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsVisible_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetDistance_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetBoundingDistances_Injected(IntPtr _unity_self, ref ManagedSpanWrapper distances);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetDistanceReferencePoint_InternalVector3_Injected(IntPtr _unity_self, [In] ref Vector3 point);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetDistanceReferencePoint_InternalTransform_Injected(IntPtr _unity_self, IntPtr transform);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FinalizerFailure_Injected(IntPtr _unity_self);
 
 		internal IntPtr m_Ptr;
 
 		private CullingGroup.StateChanged m_OnStateChanged = null;
 
 		public delegate void StateChanged(CullingGroupEvent sphere);
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(CullingGroup cullingGroup)
+			{
+				return cullingGroup.m_Ptr;
+			}
+		}
 	}
 }

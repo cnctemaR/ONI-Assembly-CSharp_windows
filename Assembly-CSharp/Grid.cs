@@ -845,8 +845,8 @@ public class Grid
 				return true;
 			}
 			float num3 = Grid.Mass[num];
-			float num4 = (float)((int)pos.y) - pos.y;
-			if (num3 / 1000f <= num4)
+			float num4 = pos.y - (float)((int)pos.y);
+			if (num3 / 1000f >= num4)
 			{
 				return true;
 			}

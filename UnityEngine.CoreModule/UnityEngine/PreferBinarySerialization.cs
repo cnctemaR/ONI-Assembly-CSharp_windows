@@ -3,8 +3,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Class)]
 	[RequiredByNativeCode]
+	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class PreferBinarySerialization : Attribute
 	{
 	}

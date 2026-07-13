@@ -24,7 +24,7 @@ namespace Klei.AI
 			SicknessInstance sicknessInstance = new SicknessInstance(base.gameObject, sickness);
 			this.Add(sicknessInstance);
 			base.Trigger(GameHashes.SicknessAdded, sicknessInstance);
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseAdded, 1f, base.gameObject.GetProperName(), null);
+			ReportManager.Instance.ReportValueWithGameObjectContext(ReportManager.ReportType.DiseaseAdded, 1f, base.gameObject, null);
 			return sicknessInstance;
 		}
 
@@ -53,7 +53,7 @@ namespace Klei.AI
 			{
 				this.Remove(sicknessInstance);
 				base.Trigger(GameHashes.SicknessCured, sicknessInstance);
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseAdded, -1f, base.gameObject.GetProperName(), null);
+				ReportManager.Instance.ReportValueWithGameObjectContext(ReportManager.ReportType.DiseaseAdded, -1f, base.gameObject, null);
 				return true;
 			}
 			return false;

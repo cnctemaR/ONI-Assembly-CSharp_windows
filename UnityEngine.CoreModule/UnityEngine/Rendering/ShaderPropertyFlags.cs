@@ -14,6 +14,8 @@ namespace UnityEngine.Rendering
 		Gamma = 32,
 		NonModifiableTextureData = 64,
 		MainTexture = 128,
-		MainColor = 256
+		MainColor = 256,
+		Vector2 = 512,
+		Vector3 = 1024
 	}
 }

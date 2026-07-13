@@ -2,25 +2,22 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Profiling.LowLevel;
 using Unity.Profiling.LowLevel.Unsafe;
+using UnityEngine;
 using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace Unity.Profiling
 {
-	[DebuggerDisplay("Count = {Count}")]
-	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerRecorder.bindings.h")]
 	[DebuggerTypeProxy(typeof(ProfilerRecorderDebugView))]
+	[DebuggerDisplay("Count = {Count}")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Profiler/ScriptBindings/ProfilerRecorder.bindings.h")]
 	public struct ProfilerRecorder : IDisposable
 	{
-		internal ProfilerRecorder(ProfilerRecorderOptions options)
-		{
-			this = ProfilerRecorder.Create(default(ProfilerRecorderHandle), 0, options);
-		}
-
 		public ProfilerRecorder(string statName, int capacity = 1, ProfilerRecorderOptions options = ProfilerRecorderOptions.Default)
 		{
 			this = new ProfilerRecorder(ProfilerCategory.Any, statName, capacity, options);
@@ -252,7 +249,7 @@ namespace Unity.Profiling
 			return profilerRecorder;
 		}
 
-		[NativeMethod(IsThreadSafe = true)]
+		[NativeMethod(IsThreadSafe = true, ThrowsException = true)]
 		private static void Control(ProfilerRecorder handle, ProfilerRecorder.ControlOptions options)
 		{
 			ProfilerRecorder.Control_Injected(ref handle, options);
@@ -327,9 +324,30 @@ namespace Unity.Profiling
 		}
 
 		[NativeMethod(IsThreadSafe = true)]
-		private static void CopyTo_List(ProfilerRecorder handle, List<ProfilerRecorderSample> outSamples, bool reset)
+		private unsafe static void CopyTo_List(ProfilerRecorder handle, List<ProfilerRecorderSample> outSamples, bool reset)
 		{
-			ProfilerRecorder.CopyTo_List_Injected(ref handle, outSamples, reset);
+			try
+			{
+				BlittableListWrapper blittableListWrapper;
+				if (outSamples != null)
+				{
+					fixed (ProfilerRecorderSample[] array = NoAllocHelpers.ExtractArrayFromList<ProfilerRecorderSample>(outSamples))
+					{
+						BlittableArrayWrapper blittableArrayWrapper;
+						if (array.Length != 0)
+						{
+							blittableArrayWrapper = new BlittableArrayWrapper((void*)(&array[0]), array.Length);
+						}
+						blittableListWrapper = new BlittableListWrapper(blittableArrayWrapper, outSamples.Count);
+					}
+				}
+				ProfilerRecorder.CopyTo_List_Injected(ref handle, ref blittableListWrapper, reset);
+			}
+			finally
+			{
+				BlittableListWrapper blittableListWrapper;
+				blittableListWrapper.Unmarshal<ProfilerRecorderSample>(outSamples);
+			}
 		}
 
 		[NativeMethod(IsThreadSafe = true)]
@@ -374,49 +392,49 @@ namespace Unity.Profiling
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Create_Injected(ref ProfilerRecorderHandle statHandle, int maxSampleCount, ProfilerRecorderOptions options, out ProfilerRecorder ret);
+		private static extern void Create_Injected([In] ref ProfilerRecorderHandle statHandle, int maxSampleCount, ProfilerRecorderOptions options, out ProfilerRecorder ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Control_Injected(ref ProfilerRecorder handle, ProfilerRecorder.ControlOptions options);
+		private static extern void Control_Injected([In] ref ProfilerRecorder handle, ProfilerRecorder.ControlOptions options);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ProfilerMarkerDataUnit GetValueUnitType_Injected(ref ProfilerRecorder handle);
+		private static extern ProfilerMarkerDataUnit GetValueUnitType_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern ProfilerMarkerDataType GetValueDataType_Injected(ref ProfilerRecorder handle);
+		private static extern ProfilerMarkerDataType GetValueDataType_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetCurrentValue_Injected(ref ProfilerRecorder handle);
+		private static extern long GetCurrentValue_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern double GetCurrentValueAsDouble_Injected(ref ProfilerRecorder handle);
+		private static extern double GetCurrentValueAsDouble_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetLastValue_Injected(ref ProfilerRecorder handle);
+		private static extern long GetLastValue_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern double GetLastValueAsDouble_Injected(ref ProfilerRecorder handle);
+		private static extern double GetLastValueAsDouble_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetCount_Injected(ref ProfilerRecorder handle, ProfilerRecorder.CountOptions countOptions);
+		private static extern int GetCount_Injected([In] ref ProfilerRecorder handle, ProfilerRecorder.CountOptions countOptions);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetValid_Injected(ref ProfilerRecorder handle);
+		private static extern bool GetValid_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetWrapped_Injected(ref ProfilerRecorder handle);
+		private static extern bool GetWrapped_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetRunning_Injected(ref ProfilerRecorder handle);
+		private static extern bool GetRunning_Injected([In] ref ProfilerRecorder handle);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetSampleInternal_Injected(ref ProfilerRecorder handle, int index, out ProfilerRecorderSample ret);
+		private static extern void GetSampleInternal_Injected([In] ref ProfilerRecorder handle, int index, out ProfilerRecorderSample ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void CopyTo_List_Injected(ref ProfilerRecorder handle, List<ProfilerRecorderSample> outSamples, bool reset);
+		private static extern void CopyTo_List_Injected([In] ref ProfilerRecorder handle, ref BlittableListWrapper outSamples, bool reset);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern int CopyTo_Pointer_Injected(ref ProfilerRecorder handle, ProfilerRecorderSample* outSamples, int outSamplesSize, bool reset);
+		private unsafe static extern int CopyTo_Pointer_Injected([In] ref ProfilerRecorder handle, ProfilerRecorderSample* outSamples, int outSamplesSize, bool reset);
 
 		internal ulong handle;
 

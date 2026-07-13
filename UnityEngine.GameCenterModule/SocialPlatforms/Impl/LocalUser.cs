@@ -2,6 +2,7 @@
 
 namespace UnityEngine.SocialPlatforms.Impl
 {
+	[Obsolete("LocalUser is deprecated and will be removed in a future release.", false)]
 	public class LocalUser : UserProfile, ILocalUser, IUserProfile
 	{
 		public LocalUser()

@@ -14,6 +14,7 @@ namespace UnityEngine
 			}
 		}
 
+		[Obsolete("The property 'SubsystemDescriptor' is deprecated. Use `subsystemDescriptor` instead. UnityUpgradeable -> subsystemDescriptor", false)]
 		public TSubsystemDescriptor SubsystemDescriptor
 		{
 			get

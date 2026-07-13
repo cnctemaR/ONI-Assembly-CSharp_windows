@@ -376,14 +376,15 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 				}
 			}
 			return false;
-		}
+		},
+		canExecuteOnAnyThread = false
 	};
 
 	public static readonly Chore.Precondition CanFetchDroneComplete = new Chore.Precondition
 	{
 		id = "CanFetchDroneComplete",
 		description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_FETCH_DRONE_COMPLETE_FETCH,
-		canExecuteOnAnyThread = true,
+		canExecuteOnAnyThread = false,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			if (!context.consumerState.worker.IsFetchDrone())
@@ -402,7 +403,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			{
 				flag2 = FetchManager.IsFetchablePickup(pickupable2, fetchChore2, context.consumerState.storage);
 			}
-			return flag2 && !((GameObject)data == context.consumerState.gameObject) && ((pickupable2.targetWorkable == null || pickupable2.targetWorkable as Pickupable != null) && context.consumerState.consumer.navigator.CanReach(pickupable2.cachedCell));
+			return flag2 && !((GameObject)data == context.consumerState.gameObject) && ((pickupable2.targetWorkable == null || pickupable2.targetWorkable as Pickupable != null) && context.consumerState.consumer.navigator.CanReach(pickupable2.cachedCell, pickupable2.GetOffsets()));
 		}
 	};
 

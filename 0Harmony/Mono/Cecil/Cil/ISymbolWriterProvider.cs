@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Mono.Cecil.Cil
 {
-	public interface ISymbolWriterProvider
+	internal interface ISymbolWriterProvider
 	{
 		ISymbolWriter GetSymbolWriter(ModuleDefinition module, string fileName);
 

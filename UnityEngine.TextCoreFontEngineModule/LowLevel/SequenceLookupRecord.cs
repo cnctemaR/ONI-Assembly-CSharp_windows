@@ -36,8 +36,8 @@ namespace UnityEngine.TextCore.LowLevel
 		[SerializeField]
 		private uint m_GlyphSequenceIndex;
 
-		[SerializeField]
 		[NativeName("lookupListIndex")]
+		[SerializeField]
 		private uint m_LookupListIndex;
 	}
 }

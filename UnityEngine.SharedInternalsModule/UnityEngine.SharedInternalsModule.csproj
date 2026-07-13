@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D458}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BDAF}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>UnityEngine</RootNamespace>
+    <RootNamespace>UnityEngine.SharedInternalsModule</RootNamespace>
     <AssemblyName>UnityEngine.SharedInternalsModule</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
@@ -14,56 +14,58 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="AssetFileNameExtensionAttribute.cs" />
-    <Compile Include="Bindings\CodegenOptions.cs" />
-    <Compile Include="Bindings\FreeFunctionAttribute.cs" />
-    <Compile Include="Bindings\IBindingsAttribute.cs" />
-    <Compile Include="Bindings\IBindingsGenerateMarshallingTypeAttribute.cs" />
-    <Compile Include="Bindings\IBindingsHeaderProviderAttribute.cs" />
-    <Compile Include="Bindings\IBindingsIsFreeFunctionProviderAttribute.cs" />
-    <Compile Include="Bindings\IBindingsIsThreadSafeProviderAttribute.cs" />
-    <Compile Include="Bindings\IBindingsMarshalAsSpan.cs" />
-    <Compile Include="Bindings\IBindingsNameProviderAttribute.cs" />
-    <Compile Include="Bindings\IBindingsPreventExecution.cs" />
-    <Compile Include="Bindings\IBindingsThrowsProviderAttribute.cs" />
-    <Compile Include="Bindings\IBindingsWritableSelfProviderAttribute.cs" />
-    <Compile Include="Bindings\IgnoreAttribute.cs" />
-    <Compile Include="Bindings\MarshalUnityObjectAs.cs" />
-    <Compile Include="Bindings\NativeAsStructAttribute.cs" />
-    <Compile Include="Bindings\NativeConditionalAttribute.cs" />
-    <Compile Include="Bindings\NativeHeaderAttribute.cs" />
-    <Compile Include="Bindings\NativeMethodAttribute.cs" />
-    <Compile Include="Bindings\NativeNameAttribute.cs" />
-    <Compile Include="Bindings\NativePropertyAttribute.cs" />
-    <Compile Include="Bindings\NativeThrowsAttribute.cs" />
-    <Compile Include="Bindings\NativeTypeAttribute.cs" />
-    <Compile Include="Bindings\NativeWritableSelfAttribute.cs" />
-    <Compile Include="Bindings\NotNullAttribute.cs" />
-    <Compile Include="Bindings\PreventExecutionInStateAttribute.cs" />
-    <Compile Include="Bindings\PreventExecutionSeverity.cs" />
-    <Compile Include="Bindings\PreventReadOnlyInstanceModificationAttribute.cs" />
-    <Compile Include="Bindings\SpanAttribute.cs" />
-    <Compile Include="Bindings\StaticAccessorAttribute.cs" />
-    <Compile Include="Bindings\StaticAccessorType.cs" />
-    <Compile Include="Bindings\TargetType.cs" />
-    <Compile Include="Bindings\ThreadSafeAttribute.cs" />
-    <Compile Include="Bindings\UnityTypeAttribute.cs" />
-    <Compile Include="Bindings\UnmarshalledAttribute.cs" />
-    <Compile Include="Bindings\VisibleToOtherModulesAttribute.cs" />
-    <Compile Include="IL2CPPStructAlignmentAttribute.cs" />
-    <Compile Include="NativeClassAttribute.cs" />
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RejectDragAndDropMaterial.cs" />
-    <Compile Include="Scripting\RequiredByNativeCodeAttribute.cs" />
-    <Compile Include="Scripting\UsedByNativeCodeAttribute.cs" />
-    <Compile Include="ThreadAndSerializationSafeAttribute.cs" />
-    <Compile Include="UnityEngineModuleAssembly.cs" />
-    <Compile Include="UnityString.cs" />
-    <Compile Include="WritableAttribute.cs" />
+    <Compile Include="System\Diagnostics\CodeAnalysis\DynamicDependencyAttribute.cs" />
+    <Compile Include="System\Runtime\CompilerServices\NullableAttribute.cs" />
+    <Compile Include="System\Runtime\CompilerServices\NullableContextAttribute.cs" />
+    <Compile Include="UnityEngine\AssetFileNameExtensionAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\CodegenOptions.cs" />
+    <Compile Include="UnityEngine\Bindings\FreeFunctionAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsGenerateMarshallingTypeAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsHeaderProviderAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsIsFreeFunctionProviderAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsIsThreadSafeProviderAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsMarshalAsSpan.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsNameProviderAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsPreventExecution.cs" />
+    <Compile Include="UnityEngine\Bindings\IBindingsThrowsProviderAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\IgnoreAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeAsStructAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeConditionalAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeHeaderAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeMethodAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeNameAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativePropertyAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeThrowsAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeType.cs" />
+    <Compile Include="UnityEngine\Bindings\NativeTypeAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\NotNullAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\PreventExecutionInStateAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\PreventExecutionSeverity.cs" />
+    <Compile Include="UnityEngine\Bindings\PreventReadOnlyInstanceModificationAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\StaticAccessorAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\StaticAccessorType.cs" />
+    <Compile Include="UnityEngine\Bindings\TargetType.cs" />
+    <Compile Include="UnityEngine\Bindings\ThreadSafeAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\UnityMarshalAsAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\UnityMarshalThisAsAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\UnmarshalledAttribute.cs" />
+    <Compile Include="UnityEngine\Bindings\VisibleToOtherModulesAttribute.cs" />
+    <Compile Include="UnityEngine\IL2CPPStructAlignmentAttribute.cs" />
+    <Compile Include="UnityEngine\NativeClassAttribute.cs" />
+    <Compile Include="UnityEngine\RejectDragAndDropMaterial.cs" />
+    <Compile Include="UnityEngine\Scripting\RequiredByNativeCodeAttribute.cs" />
+    <Compile Include="UnityEngine\Scripting\UsedByNativeCodeAttribute.cs" />
+    <Compile Include="UnityEngine\ThreadAndSerializationSafeAttribute.cs" />
+    <Compile Include="UnityEngine\UnityEngineModuleAssembly.cs" />
+    <Compile Include="UnityEngine\UnityString.cs" />
+    <Compile Include="UnityEngine\WritableAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D416}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
   </ItemGroup>

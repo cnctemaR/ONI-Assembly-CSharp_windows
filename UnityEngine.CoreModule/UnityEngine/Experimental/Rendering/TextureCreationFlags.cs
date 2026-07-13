@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Internal;
 
 namespace UnityEngine.Experimental.Rendering
 {
@@ -10,6 +11,8 @@ namespace UnityEngine.Experimental.Rendering
 		DontInitializePixels = 4,
 		Crunch = 64,
 		DontUploadUponCreate = 1024,
+		[Obsolete("IgnoreMipmapLimit flag is no longer used since this is now the default behavior for all Texture shapes. Please provide mipmap limit information using a MipmapLimitDescriptor argument.", false)]
+		[ExcludeFromDocs]
 		IgnoreMipmapLimit = 2048
 	}
 }

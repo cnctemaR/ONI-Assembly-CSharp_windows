@@ -4,8 +4,8 @@ using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
-	[Obsolete("use PerformanceCounter")]
 	[MonoTODO("not implemented")]
+	[Obsolete("use PerformanceCounter")]
 	[Guid("82840be1-d273-11d2-b94a-00600893b17a")]
 	[ComVisible(true)]
 	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]

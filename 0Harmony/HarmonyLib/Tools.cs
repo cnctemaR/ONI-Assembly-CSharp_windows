@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using MonoMod.Utils;
 
 namespace HarmonyLib
@@ -38,7 +39,12 @@ namespace HarmonyLib
 				Type underlyingType = Enum.GetUnderlyingType(fieldType);
 				if (typeFromHandle != underlyingType)
 				{
-					throw new ArgumentException("FieldRefAccess return type must be the same as FieldType or " + string.Format("FieldType's underlying integral type ({0}) for enum types", underlyingType));
+					string text = "FieldRefAccess return type must be the same as FieldType or ";
+					DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(54, 1);
+					defaultInterpolatedStringHandler.AppendLiteral("FieldType's underlying integral type (");
+					defaultInterpolatedStringHandler.AppendFormatted<Type>(underlyingType);
+					defaultInterpolatedStringHandler.AppendLiteral(") for enum types");
+					throw new ArgumentException(text + defaultInterpolatedStringHandler.ToStringAndClear());
 				}
 			}
 			else
@@ -75,7 +81,7 @@ namespace HarmonyLib
 				ilgenerator.Emit(OpCodes.Ldflda, fieldInfo);
 			}
 			ilgenerator.Emit(OpCodes.Ret);
-			return (AccessTools.FieldRef<T, F>)dynamicMethodDefinition.Generate().CreateDelegate(typeof(AccessTools.FieldRef<T, F>));
+			return dynamicMethodDefinition.Generate().CreateDelegate<AccessTools.FieldRef<T, F>>();
 		}
 
 		internal static AccessTools.StructFieldRef<T, F> StructFieldRefAccess<T, F>(FieldInfo fieldInfo) where T : struct
@@ -86,7 +92,7 @@ namespace HarmonyLib
 			ilgenerator.Emit(OpCodes.Ldarg_0);
 			ilgenerator.Emit(OpCodes.Ldflda, fieldInfo);
 			ilgenerator.Emit(OpCodes.Ret);
-			return (AccessTools.StructFieldRef<T, F>)dynamicMethodDefinition.Generate().CreateDelegate(typeof(AccessTools.StructFieldRef<T, F>));
+			return dynamicMethodDefinition.Generate().CreateDelegate<AccessTools.StructFieldRef<T, F>>();
 		}
 
 		internal static AccessTools.FieldRef<F> StaticFieldRefAccess<F>(FieldInfo fieldInfo)
@@ -98,11 +104,11 @@ namespace HarmonyLib
 			Tools.ValidateFieldType<F>(fieldInfo);
 			string text = "__refget_";
 			Type declaringType = fieldInfo.DeclaringType;
-			DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition(text + (((declaringType != null) ? declaringType.Name : null) ?? "null") + "_static_fi_" + fieldInfo.Name, typeof(F).MakeByRefType(), new Type[0]);
+			DynamicMethodDefinition dynamicMethodDefinition = new DynamicMethodDefinition(text + (((declaringType != null) ? declaringType.Name : null) ?? "null") + "_static_fi_" + fieldInfo.Name, typeof(F).MakeByRefType(), Array.Empty<Type>());
 			ILGenerator ilgenerator = dynamicMethodDefinition.GetILGenerator();
 			ilgenerator.Emit(OpCodes.Ldsflda, fieldInfo);
 			ilgenerator.Emit(OpCodes.Ret);
-			return (AccessTools.FieldRef<F>)dynamicMethodDefinition.Generate().CreateDelegate(typeof(AccessTools.FieldRef<F>));
+			return dynamicMethodDefinition.Generate().CreateDelegate<AccessTools.FieldRef<F>>();
 		}
 
 		internal static FieldInfo GetInstanceField(Type type, string fieldName)

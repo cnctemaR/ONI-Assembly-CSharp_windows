@@ -8,7 +8,7 @@ namespace UnityEngine.TextCore.LowLevel
 	[DebuggerDisplay("Script = {tag},  Language Count = {languages.Length}")]
 	internal struct OTL_Script
 	{
-		public string tag;
+		public OTL_Tag tag;
 
 		public OTL_Language[] languages;
 	}

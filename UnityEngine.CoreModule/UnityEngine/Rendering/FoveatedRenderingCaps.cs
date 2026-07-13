@@ -7,6 +7,7 @@ namespace UnityEngine.Rendering
 	{
 		None = 0,
 		FoveationImage = 1,
-		NonUniformRaster = 2
+		NonUniformRaster = 2,
+		ModeChangeOnlyBeforeRenderTargetSet = 4
 	}
 }

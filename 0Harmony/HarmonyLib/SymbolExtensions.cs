@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
@@ -48,7 +49,10 @@ namespace HarmonyLib
 			MethodInfo method = methodCallExpression.Method;
 			if (method == null)
 			{
-				throw new Exception(string.Format("Cannot find method for expression {0}", expression));
+				DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(34, 1);
+				defaultInterpolatedStringHandler.AppendLiteral("Cannot find method for expression ");
+				defaultInterpolatedStringHandler.AppendFormatted<LambdaExpression>(expression);
+				throw new Exception(defaultInterpolatedStringHandler.ToStringAndClear());
 			}
 			return method;
 		}

@@ -55,24 +55,28 @@ namespace KMod
 			return this.file_system;
 		}
 
-		public void CopyTo(string path, List<string> extensions = null)
+		public bool TryCopyTo(string path, List<string> extensions = null)
 		{
+			bool flag;
 			try
 			{
-				Directory.CopyDirectory(this.root, path, extensions);
+				flag = Directory.CopyDirectory(this.root, path, extensions).error == Directory.CopyDirectoryResult.Error.None;
 			}
 			catch (UnauthorizedAccessException)
 			{
 				FileUtil.ErrorDialog(FileUtil.ErrorType.UnauthorizedAccess, path, null, null);
+				flag = false;
 			}
 			catch (IOException)
 			{
 				FileUtil.ErrorDialog(FileUtil.ErrorType.IOError, path, null, null);
+				flag = false;
 			}
 			catch
 			{
 				throw;
 			}
+			return flag;
 		}
 
 		public string Read(string relative_path)
@@ -94,19 +98,31 @@ namespace KMod
 			return text;
 		}
 
-		private static int CopyDirectory(string sourceDirName, string destDirName, List<string> extensions)
+		private static Directory.CopyDirectoryResult CopyDirectory(string sourceDirName, string destDirName, List<string> extensions)
 		{
 			DirectoryInfo directoryInfo = new DirectoryInfo(sourceDirName);
 			if (!directoryInfo.Exists)
 			{
-				return 0;
+				return new Directory.CopyDirectoryResult
+				{
+					error = Directory.CopyDirectoryResult.Error.Read,
+					fileCount = 0
+				};
 			}
 			if (!FileUtil.CreateDirectory(destDirName, 0))
 			{
-				return 0;
+				return new Directory.CopyDirectoryResult
+				{
+					error = Directory.CopyDirectoryResult.Error.Write,
+					fileCount = 0
+				};
 			}
 			FileInfo[] files = directoryInfo.GetFiles();
-			int num = 0;
+			Directory.CopyDirectoryResult copyDirectoryResult = new Directory.CopyDirectoryResult
+			{
+				error = Directory.CopyDirectoryResult.Error.None,
+				fileCount = 0
+			};
 			foreach (FileInfo fileInfo in files)
 			{
 				bool flag = extensions == null || extensions.Count == 0;
@@ -127,20 +143,30 @@ namespace KMod
 				if (flag)
 				{
 					string text = Path.Combine(destDirName, fileInfo.Name);
-					fileInfo.CopyTo(text, false);
-					num++;
+					if (fileInfo.CopyTo(text, false) == null)
+					{
+						copyDirectoryResult.error = Directory.CopyDirectoryResult.Error.Write;
+						return copyDirectoryResult;
+					}
+					copyDirectoryResult.fileCount++;
 				}
 			}
 			foreach (DirectoryInfo directoryInfo2 in directoryInfo.GetDirectories())
 			{
 				string text2 = Path.Combine(destDirName, directoryInfo2.Name);
-				num += Directory.CopyDirectory(directoryInfo2.FullName, text2, extensions);
+				Directory.CopyDirectoryResult copyDirectoryResult2 = Directory.CopyDirectory(directoryInfo2.FullName, text2, extensions);
+				copyDirectoryResult.fileCount += copyDirectoryResult2.fileCount;
+				if (copyDirectoryResult2.error != Directory.CopyDirectoryResult.Error.None)
+				{
+					copyDirectoryResult.error = copyDirectoryResult2.error;
+					return copyDirectoryResult;
+				}
 			}
-			if (num == 0)
+			if (copyDirectoryResult.fileCount == 0)
 			{
 				FileUtil.DeleteDirectory(destDirName, 0);
 			}
-			return num;
+			return copyDirectoryResult;
 		}
 
 		public void Dispose()
@@ -150,5 +176,19 @@ namespace KMod
 		private AliasDirectory file_system;
 
 		private string root;
+
+		private struct CopyDirectoryResult
+		{
+			public Directory.CopyDirectoryResult.Error error;
+
+			public int fileCount;
+
+			public enum Error
+			{
+				None,
+				Read,
+				Write
+			}
+		}
 	}
 }

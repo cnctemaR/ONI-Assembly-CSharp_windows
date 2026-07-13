@@ -9,7 +9,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [AddComponentMenu("KMonoBehaviour/Workable/Storage")]
-public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescriptor, IStorage
+public class Storage : Workable, ISaveLoadableDetails, IStorage
 {
 	public bool ShouldOnlyTransferFromLowerPriority
 	{

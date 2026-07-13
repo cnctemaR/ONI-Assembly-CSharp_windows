@@ -122,12 +122,11 @@ public class SimulatedTemperatureAdjuster
 		{
 			return;
 		}
-		Pickupable component2 = gameObject.GetComponent<Pickupable>();
-		if (component2 == null)
+		if (gameObject.GetComponent<Pickupable>() == null)
 		{
 			return;
 		}
-		if (this.active && component2.storage == this.storage)
+		if (this.active && this.storage.items.Contains(gameObject))
 		{
 			this.Register(component);
 			return;

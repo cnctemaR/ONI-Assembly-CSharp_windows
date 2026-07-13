@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public struct CustomAttributeArgument
+	internal struct CustomAttributeArgument
 	{
 		public TypeReference Type
 		{

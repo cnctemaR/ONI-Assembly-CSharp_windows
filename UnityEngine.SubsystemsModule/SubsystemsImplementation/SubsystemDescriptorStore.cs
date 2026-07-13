@@ -26,8 +26,26 @@ namespace UnityEngine.SubsystemsImplementation
 			SubsystemDescriptorStore.s_IntegratedDescriptors.Clear();
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ReportSingleSubsystemAnalytics(string id);
+		private unsafe static void ReportSingleSubsystemAnalytics(string id)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(id, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = id.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				SubsystemDescriptorStore.ReportSingleSubsystemAnalytics_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		public static void RegisterDescriptor(SubsystemDescriptorWithProvider descriptor)
 		{
@@ -109,6 +127,9 @@ namespace UnityEngine.SubsystemsImplementation
 		{
 			SubsystemDescriptorStore.RegisterDescriptor<SubsystemDescriptor, SubsystemDescriptor>(descriptor, SubsystemDescriptorStore.s_DeprecatedDescriptors);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void ReportSingleSubsystemAnalytics_Injected(ref ManagedSpanWrapper id);
 
 		private static List<IntegratedSubsystemDescriptor> s_IntegratedDescriptors = new List<IntegratedSubsystemDescriptor>();
 

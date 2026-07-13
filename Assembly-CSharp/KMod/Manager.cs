@@ -14,6 +14,19 @@ namespace KMod
 {
 	public class Manager
 	{
+		public bool safe_mode_enabled { get; private set; }
+
+		public void SetModLoadingInProgress(bool mod_load_in_progress)
+		{
+			this.mod_load_in_progress = mod_load_in_progress;
+			this.Save();
+		}
+
+		public void ShowSafeModeDialog(GameObject parent)
+		{
+			Manager.Dialog(parent, UI.FRONTEND.MOD_DIALOGS.SAFE_MODE.TITLE, UI.FRONTEND.MOD_DIALOGS.SAFE_MODE.MESSAGE, null, null, null, null, null, null, null);
+		}
+
 		public static string GetDirectory()
 		{
 			return Path.Combine(Util.RootFolder(), "mods/");
@@ -28,6 +41,11 @@ namespace KMod
 				{
 					Manager.PersistentData persistentData = JsonConvert.DeserializeObject<Manager.PersistentData>(File.ReadAllText(filename));
 					this.mods = persistentData.mods;
+					if (KPlayerPrefs.GetInt("DisableAutoModSafeMode", 0) == 0 && persistentData.mod_load_in_progress)
+					{
+						global::Debug.LogWarning("Mod loading was interrupted on the previous boot. Entering mod safe mode.");
+						this.safe_mode_enabled = true;
+					}
 				}
 			}
 			catch (Exception)
@@ -46,36 +64,12 @@ namespace KMod
 			bool flag = false;
 			foreach (Mod mod2 in this.mods)
 			{
-				Mod.Status status = mod2.status;
-				if (status != Mod.Status.UninstallPending)
+				switch (mod2.status)
 				{
-					if (status == Mod.Status.ReinstallPending)
-					{
-						global::Debug.LogFormat("Latent reinstall of mod {0}", new object[] { mod2.title });
-						if (!string.IsNullOrEmpty(mod2.reinstall_path) && File.Exists(mod2.reinstall_path))
-						{
-							bool flag2 = mod2.IsEnabledForActiveDlc();
-							mod2.file_source = new ZipFile(mod2.reinstall_path);
-							mod2.SetEnabledForActiveDlc(false);
-							if (mod2.Uninstall())
-							{
-								mod2.Install();
-								if (mod2.status == Mod.Status.Installed)
-								{
-									mod2.SetEnabledForActiveDlc(flag2);
-								}
-							}
-							flag = true;
-						}
-						else if (mod2.IsEnabledForActiveDlc())
-						{
-							mod2.SetEnabledForActiveDlc(false);
-							flag = true;
-						}
-					}
-				}
-				else
-				{
+				case Mod.Status.NotInstalled:
+				case Mod.Status.Installed:
+					break;
+				case Mod.Status.UninstallPending:
 					global::Debug.LogFormat("Latent uninstall of mod {0} from {1}", new object[]
 					{
 						mod2.title,
@@ -94,6 +88,51 @@ namespace KMod
 					{
 						flag = true;
 					}
+					break;
+				case Mod.Status.ReinstallPending:
+					global::Debug.LogFormat("Latent reinstall of mod {0}", new object[] { mod2.title });
+					if (!string.IsNullOrEmpty(mod2.reinstall_path) && File.Exists(mod2.reinstall_path))
+					{
+						bool flag2 = mod2.IsEnabledForActiveDlc();
+						mod2.file_source = new ZipFile(mod2.reinstall_path);
+						mod2.SetEnabledForActiveDlc(false);
+						if (mod2.Uninstall())
+						{
+							mod2.Install();
+							if (mod2.status == Mod.Status.Installed)
+							{
+								mod2.SetEnabledForActiveDlc(flag2);
+								this.events.Add(new Event
+								{
+									event_type = EventType.Installed,
+									mod = mod2.label
+								});
+							}
+						}
+						if (mod2.status == Mod.Status.ReinstallPending)
+						{
+							global::Debug.LogFormat("\t...failed to reinstall mod {0}. Leaving it uninstalled to ensure we can boot.", new object[] { mod2.title });
+							mod2.status = Mod.Status.CannotInstall;
+							this.events.Add(new Event
+							{
+								event_type = EventType.CannotInstall,
+								mod = mod2.label
+							});
+						}
+						flag = true;
+					}
+					else if (mod2.IsEnabledForActiveDlc())
+					{
+						mod2.SetEnabledForActiveDlc(false);
+						flag = true;
+					}
+					break;
+				case Mod.Status.CannotInstall:
+					global::Debug.LogFormat("Leaving mod {0} uninstalled to ensure we can boot.", new object[] { mod2.title });
+					break;
+				default:
+					DebugUtil.DevAssert(false, "unhandled Mod.Status", null);
+					break;
 				}
 				if (!string.IsNullOrEmpty(mod2.reinstall_path))
 				{
@@ -108,6 +147,18 @@ namespace KMod
 			foreach (Mod mod4 in this.mods)
 			{
 				mod4.ScanContent();
+			}
+			if (this.safe_mode_enabled)
+			{
+				foreach (Mod mod5 in this.mods)
+				{
+					if (mod5.IsDev && mod5.IsEnabledForActiveDlc())
+					{
+						this.safe_mode_enabled = false;
+						global::Debug.Log("A dev mod is enabled, disabling safe mode.");
+						break;
+					}
+				}
 			}
 			if (flag)
 			{
@@ -178,14 +229,23 @@ namespace KMod
 
 		private void Install(Mod mod)
 		{
-			if (mod.status != Mod.Status.NotInstalled)
+			if (!mod.status.ShouldTryInstall())
 			{
 				return;
 			}
 			global::Debug.LogFormat("\tInstalling mod: {0}", new object[] { mod.title });
 			mod.Install();
-			if (mod.status == Mod.Status.Installed)
+			switch (mod.status)
 			{
+			case Mod.Status.NotInstalled:
+				global::Debug.Log("\tFailed install. Abandoning mod");
+				this.events.Add(new Event
+				{
+					event_type = EventType.InstallFailed,
+					mod = mod.label
+				});
+				return;
+			case Mod.Status.Installed:
 				global::Debug.Log("\tSuccessfully installed.");
 				this.events.Add(new Event
 				{
@@ -193,18 +253,27 @@ namespace KMod
 					mod = mod.label
 				});
 				return;
+			case Mod.Status.UninstallPending:
+			case Mod.Status.ReinstallPending:
+				global::Debug.Log("\tFailed install. Will install on restart.");
+				this.events.Add(new Event
+				{
+					event_type = EventType.InstallFailed,
+					mod = mod.label
+				});
+				this.events.Add(new Event
+				{
+					event_type = EventType.RestartRequested,
+					mod = mod.label
+				});
+				return;
+			case Mod.Status.CannotInstall:
+				global::Debug.Log("\tStill cannot install. Will continue re-trying on restarts.");
+				return;
+			default:
+				DebugUtil.DevAssert(false, "unhandled Mod.Status", null);
+				return;
 			}
-			global::Debug.Log("\tFailed install. Will install on restart.");
-			this.events.Add(new Event
-			{
-				event_type = EventType.InstallFailed,
-				mod = mod.label
-			});
-			this.events.Add(new Event
-			{
-				event_type = EventType.RestartRequested,
-				mod = mod.label
-			});
 		}
 
 		private void Uninstall(Mod mod)
@@ -215,13 +284,50 @@ namespace KMod
 			}
 			global::Debug.LogFormat("\tUninstalling mod {0}", new object[] { mod.title });
 			mod.Uninstall();
-			if (mod.status == Mod.Status.UninstallPending)
+			switch (mod.status)
 			{
-				global::Debug.Log("\tFailed. Will re-install on restart.");
-				mod.status = Mod.Status.ReinstallPending;
+			case Mod.Status.NotInstalled:
+				global::Debug.Log("\tSuccess.");
+				return;
+			case Mod.Status.Installed:
+				global::Debug.Log("\tFailed. Still installed after attempting to uninstall.");
+				return;
+			case Mod.Status.UninstallPending:
+				global::Debug.Log("\tFailed.");
 				this.events.Add(new Event
 				{
 					event_type = EventType.RestartRequested,
+					mod = mod.label
+				});
+				return;
+			case Mod.Status.ReinstallPending:
+				global::Debug.Log("\tSuccess. First part of re-install complete.");
+				return;
+			case Mod.Status.CannotInstall:
+				global::Debug.Log("\tFailed. Still cannot install.");
+				return;
+			default:
+				DebugUtil.DevAssert(false, "unhandled Mod.Status", null);
+				return;
+			}
+		}
+
+		private void Reinstall(Mod mod)
+		{
+			bool flag = mod.status == Mod.Status.ReinstallPending;
+			this.Uninstall(mod);
+			if (mod.status.ShouldTryInstall())
+			{
+				this.Install(mod);
+			}
+			if (flag && mod.status == Mod.Status.ReinstallPending)
+			{
+				global::Debug.LogFormat("\t...failed to reinstall mod {0}. Leaving it uninstalled to ensure we can boot.", new object[] { mod.title });
+				mod.SetEnabledForActiveDlc(false);
+				mod.status = Mod.Status.CannotInstall;
+				this.events.Add(new Event
+				{
+					event_type = EventType.CannotInstall,
 					mod = mod.label
 				});
 			}
@@ -239,6 +345,7 @@ namespace KMod
 			}
 			else
 			{
+				DebugUtil.DevAssert(mod2.status != Mod.Status.CannotInstall || !mod.IsEnabledForActiveDlc(), "A mod marked CannotInstall must not be enabled", null);
 				if (mod2.status == Mod.Status.UninstallPending)
 				{
 					mod2.status = Mod.Status.Installed;
@@ -250,7 +357,8 @@ namespace KMod
 				}
 				bool flag = mod2.label.version != mod.label.version;
 				bool flag2 = mod2.available_content != mod.available_content;
-				bool flag3 = flag || flag2 || mod2.status == Mod.Status.ReinstallPending;
+				bool flag3 = flag || flag2 || mod2.status == Mod.Status.ReinstallPending || mod2.status == Mod.Status.CannotInstall;
+				bool flag4 = mod2.status == Mod.Status.NotInstalled;
 				if (flag)
 				{
 					this.events.Add(new Event
@@ -284,9 +392,9 @@ namespace KMod
 				{
 					mod.title = mod2.title;
 				}
-				if (flag3 || mod.status == Mod.Status.NotInstalled)
+				if (flag3 || flag4)
 				{
-					if (mod.IsEnabledForActiveDlc())
+					if (mod.IsEnabledForActiveDlc() && mod2.status != Mod.Status.CannotInstall)
 					{
 						mod.reinstall_path = root;
 						mod.status = Mod.Status.ReinstallPending;
@@ -296,12 +404,12 @@ namespace KMod
 							mod = mod.label
 						});
 					}
+					else if (flag3)
+					{
+						this.Reinstall(mod);
+					}
 					else
 					{
-						if (flag3)
-						{
-							this.Uninstall(mod);
-						}
 						this.Install(mod);
 					}
 				}
@@ -347,8 +455,7 @@ namespace KMod
 			}
 			else
 			{
-				this.Uninstall(mod);
-				this.Install(mod);
+				this.Reinstall(mod);
 			}
 			mod.file_source.Dispose();
 			this.dirty = true;
@@ -423,6 +530,10 @@ namespace KMod
 
 		public void Load(Content content)
 		{
+			if (this.safe_mode_enabled && content != Content.Translation)
+			{
+				return;
+			}
 			if ((content & Content.DLL) != (Content)0 && this.load_user_mod_loader_dll)
 			{
 				if (!DLLLoader.LoadUserModLoaderDLL())
@@ -979,7 +1090,7 @@ namespace KMod
 					{
 						return false;
 					}
-					string text = JsonConvert.SerializeObject(new Manager.PersistentData(this.current_version, this.mods), Formatting.Indented);
+					string text = JsonConvert.SerializeObject(new Manager.PersistentData(this.current_version, this.mods, this.mod_load_in_progress), Formatting.Indented);
 					streamWriter.Write(text);
 				}
 			}
@@ -1103,6 +1214,10 @@ namespace KMod
 
 		private const int IO_OP_RETRY_COUNT = 5;
 
+		public const string DisableAutoModSafeModeKey = "DisableAutoModSafeMode";
+
+		private bool mod_load_in_progress;
+
 		private bool load_user_mod_loader_dll = true;
 
 		private const int MAX_DIALOG_ENTRIES = 30;
@@ -1117,15 +1232,18 @@ namespace KMod
 			{
 			}
 
-			public PersistentData(int version, List<Mod> mods)
+			public PersistentData(int version, List<Mod> mods, bool mod_load_in_progress)
 			{
 				this.version = version;
 				this.mods = mods;
+				this.mod_load_in_progress = mod_load_in_progress;
 			}
 
 			public int version;
 
 			public List<Mod> mods;
+
+			public bool mod_load_in_progress;
 		}
 	}
 }

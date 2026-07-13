@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -18,8 +19,10 @@ namespace UnityEngine
 	public sealed class GameObject : Object
 	{
 		[FreeFunction("GameObjectBindings::CreatePrimitive")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject CreatePrimitive(PrimitiveType type);
+		public static GameObject CreatePrimitive(PrimitiveType type)
+		{
+			return Unmarshal.UnmarshalUnityObject<GameObject>(GameObject.CreatePrimitive_Injected(type));
+		}
 
 		[SecuritySafeCritical]
 		public unsafe T GetComponent<T>()
@@ -29,33 +32,107 @@ namespace UnityEngine
 			return castHelper.t;
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[FreeFunction(Name = "GameObjectBindings::GetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Component GetComponent(Type type);
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		public Component GetComponent(Type type)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Component>(GameObject.GetComponent_Injected(intPtr, type));
+		}
 
 		[FreeFunction(Name = "GameObjectBindings::GetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
-		[NativeWritableSelf]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void GetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue);
+		internal void GetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GameObject.GetComponentFastPath_Injected(intPtr, type, oneFurtherThanResultValue);
+		}
 
 		[FreeFunction(Name = "Scripting::GetScriptingWrapperOfComponentOfGameObject", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Component GetComponentByName(string type);
+		internal unsafe Component GetComponentByName(string type)
+		{
+			Component component;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(type, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = type.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr componentByName_Injected = GameObject.GetComponentByName_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				IntPtr componentByName_Injected;
+				component = Unmarshal.UnmarshalUnityObject<Component>(componentByName_Injected);
+				char* ptr = null;
+			}
+			return component;
+		}
 
 		[FreeFunction(Name = "Scripting::GetScriptingWrapperOfComponentOfGameObjectWithCase", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Component GetComponentByNameWithCase(string type, bool caseSensitive);
+		internal unsafe Component GetComponentByNameWithCase(string type, bool caseSensitive)
+		{
+			Component component;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(type, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = type.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr componentByNameWithCase_Injected = GameObject.GetComponentByNameWithCase_Injected(intPtr, ref managedSpanWrapper, caseSensitive);
+			}
+			finally
+			{
+				IntPtr componentByNameWithCase_Injected;
+				component = Unmarshal.UnmarshalUnityObject<Component>(componentByNameWithCase_Injected);
+				char* ptr = null;
+			}
+			return component;
+		}
 
 		public Component GetComponent(string type)
 		{
 			return this.GetComponentByName(type);
 		}
 
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		[FreeFunction(Name = "GameObjectBindings::GetComponentInChildren", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Component GetComponentInChildren(Type type, bool includeInactive);
+		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		public Component GetComponentInChildren(Type type, bool includeInactive)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Component>(GameObject.GetComponentInChildren_Injected(intPtr, type, includeInactive));
+		}
 
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		public Component GetComponentInChildren(Type type)
@@ -75,10 +152,17 @@ namespace UnityEngine
 			return (T)((object)this.GetComponentInChildren(typeof(T), includeInactive));
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::GetComponentInParent", HasExplicitThis = true, ThrowsException = true)]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Component GetComponentInParent(Type type, bool includeInactive);
+		[FreeFunction(Name = "GameObjectBindings::GetComponentInParent", HasExplicitThis = true, ThrowsException = true)]
+		public Component GetComponentInParent(Type type, bool includeInactive)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Component>(GameObject.GetComponentInParent_Injected(intPtr, type, includeInactive));
+		}
 
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		public Component GetComponentInParent(Type type)
@@ -99,8 +183,15 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "GameObjectBindings::GetComponentsInternal", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Array GetComponentsInternal(Type type, bool useSearchTypeAsArrayReturnType, bool recursive, bool includeInactive, bool reverse, object resultList);
+		private Array GetComponentsInternal(Type type, bool useSearchTypeAsArrayReturnType, bool recursive, bool includeInactive, bool reverse, object resultList)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return GameObject.GetComponentsInternal_Injected(intPtr, type, useSearchTypeAsArrayReturnType, recursive, includeInactive, reverse, resultList);
+		}
 
 		public Component[] GetComponents(Type type)
 		{
@@ -196,19 +287,59 @@ namespace UnityEngine
 			return component != null;
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Component TryGetComponentInternal(Type type);
+		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFromType", HasExplicitThis = true, ThrowsException = true)]
+		internal Component TryGetComponentInternal(Type type)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Component>(GameObject.TryGetComponentInternal_Injected(intPtr, type));
+		}
 
-		[NativeWritableSelf]
 		[FreeFunction(Name = "GameObjectBindings::TryGetComponentFastPath", HasExplicitThis = true, ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void TryGetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue);
+		internal void TryGetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GameObject.TryGetComponentFastPath_Injected(intPtr, type, oneFurtherThanResultValue);
+		}
 
 		public static GameObject FindWithTag(string tag)
 		{
 			return GameObject.FindGameObjectWithTag(tag);
+		}
+
+		[FreeFunction(Name = "GameObjectBindings::FindGameObjectsWithTagForListInternal", ThrowsException = true)]
+		private unsafe static void FindGameObjectsWithTagForListInternal(string tag, object results)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(tag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = tag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GameObject.FindGameObjectsWithTagForListInternal_Injected(ref managedSpanWrapper, results);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
+
+		public static void FindGameObjectsWithTag(string tag, List<GameObject> results)
+		{
+			GameObject.FindGameObjectsWithTagForListInternal(tag, results);
 		}
 
 		public void SendMessageUpwards(string methodName, SendMessageOptions options)
@@ -227,12 +358,46 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "MonoAddComponent", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Component AddComponentInternal(string className);
+		internal unsafe Component AddComponentInternal(string className)
+		{
+			Component component;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(className, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = className.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr2 = GameObject.AddComponentInternal_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				IntPtr intPtr2;
+				component = Unmarshal.UnmarshalUnityObject<Component>(intPtr2);
+				char* ptr = null;
+			}
+			return component;
+		}
 
 		[FreeFunction(Name = "MonoAddComponentWithType", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Component Internal_AddComponentWithType(Type componentType);
+		private Component Internal_AddComponentWithType(Type componentType)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Component>(GameObject.Internal_AddComponentWithType_Injected(intPtr, componentType));
+		}
 
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
 		public Component AddComponent(Type componentType)
@@ -245,12 +410,26 @@ namespace UnityEngine
 			return this.AddComponent(typeof(T)) as T;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetComponentCount();
+		public int GetComponentCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return GameObject.GetComponentCount_Injected(intPtr);
+		}
 
 		[NativeName("QueryComponentAtIndex<Unity::Component>")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern Component QueryComponentAtIndex(int index);
+		internal Component QueryComponentAtIndex(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Component>(GameObject.QueryComponentAtIndex_Injected(intPtr, index));
+		}
 
 		public Component GetComponentAtIndex(int index)
 		{
@@ -273,100 +452,359 @@ namespace UnityEngine
 			return t;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetComponentIndex(Component component);
-
-		public extern Transform transform
+		public int GetComponentIndex(Component component)
 		{
-			[FreeFunction("GameObjectBindings::GetTransform", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return GameObject.GetComponentIndex_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Component>(component));
 		}
 
-		public extern int layer
+		public Transform transform
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			[FreeFunction("GameObjectBindings::GetTransform", HasExplicitThis = true)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return Unmarshal.UnmarshalUnityObject<Transform>(GameObject.get_transform_Injected(intPtr));
+			}
+		}
+
+		public TransformHandle transformHandle
+		{
+			[FreeFunction("GameObjectBindings::GetTransformHandle", HasExplicitThis = true)]
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				TransformHandle transformHandle;
+				GameObject.get_transformHandle_Injected(intPtr, out transformHandle);
+				return transformHandle;
+			}
+		}
+
+		public int layer
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GameObject.get_layer_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				GameObject.set_layer_Injected(intPtr, value);
+			}
 		}
 
 		[Obsolete("GameObject.active is obsolete. Use GameObject.SetActive(), GameObject.activeSelf or GameObject.activeInHierarchy.")]
-		public extern bool active
+		public bool active
 		{
 			[NativeMethod(Name = "IsActive")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GameObject.get_active_Injected(intPtr);
+			}
 			[NativeMethod(Name = "SetSelfActive")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				GameObject.set_active_Injected(intPtr, value);
+			}
 		}
 
 		[NativeMethod(Name = "SetSelfActive")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetActive(bool value);
+		public void SetActive(bool value)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GameObject.SetActive_Injected(intPtr, value);
+		}
 
-		public extern bool activeSelf
+		public bool activeSelf
 		{
 			[NativeMethod(Name = "IsSelfActive")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GameObject.get_activeSelf_Injected(intPtr);
+			}
 		}
 
-		public extern bool activeInHierarchy
+		public bool activeInHierarchy
 		{
 			[NativeMethod(Name = "IsActive")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GameObject.get_activeInHierarchy_Injected(intPtr);
+			}
 		}
 
-		[NativeMethod(Name = "SetActiveRecursivelyDeprecated")]
 		[Obsolete("gameObject.SetActiveRecursively() is obsolete. Use GameObject.SetActive(), which is now inherited by children.")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetActiveRecursively(bool state);
+		[NativeMethod(Name = "SetActiveRecursivelyDeprecated")]
+		public void SetActiveRecursively(bool state)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			GameObject.SetActiveRecursively_Injected(intPtr, state);
+		}
 
-		public extern bool isStatic
+		public bool isStatic
 		{
 			[NativeMethod(Name = "GetIsStaticDeprecated")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GameObject.get_isStatic_Injected(intPtr);
+			}
 			[NativeMethod(Name = "SetIsStaticDeprecated")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				GameObject.set_isStatic_Injected(intPtr, value);
+			}
 		}
 
-		internal extern bool isStaticBatchable
+		internal bool isStaticBatchable
 		{
 			[NativeMethod(Name = "IsStaticBatchable")]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GameObject.get_isStaticBatchable_Injected(intPtr);
+			}
 		}
 
-		public extern string tag
+		public unsafe string tag
 		{
 			[FreeFunction("GameObjectBindings::GetTag", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				string stringAndDispose;
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					GameObject.get_tag_Injected(intPtr, out managedSpanWrapper);
+				}
+				finally
+				{
+					ManagedSpanWrapper managedSpanWrapper;
+					stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+				}
+				return stringAndDispose;
+			}
 			[FreeFunction("GameObjectBindings::SetTag", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			set
+			{
+				try
+				{
+					IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+					if (intPtr == 0)
+					{
+						ThrowHelper.ThrowNullReferenceException(this);
+					}
+					ManagedSpanWrapper managedSpanWrapper;
+					if (!StringMarshaller.TryMarshalEmptyOrNullString(value, ref managedSpanWrapper))
+					{
+						ReadOnlySpan<char> readOnlySpan = value.AsSpan();
+						fixed (char* ptr = readOnlySpan.GetPinnableReference())
+						{
+							managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+						}
+					}
+					GameObject.set_tag_Injected(intPtr, ref managedSpanWrapper);
+				}
+				finally
+				{
+					char* ptr = null;
+				}
+			}
+		}
+
+		public bool CompareTag(string tag)
+		{
+			return this.CompareTag_Internal(tag);
+		}
+
+		public bool CompareTag(TagHandle tag)
+		{
+			return this.CompareTagHandle_Internal(tag);
 		}
 
 		[FreeFunction(Name = "GameObjectBindings::CompareTag", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool CompareTag(string tag);
+		private unsafe bool CompareTag_Internal(string tag)
+		{
+			bool flag;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(tag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = tag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				flag = GameObject.CompareTag_Internal_Injected(intPtr, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return flag;
+		}
+
+		[FreeFunction(Name = "GameObjectBindings::CompareTagHandle", HasExplicitThis = true)]
+		private bool CompareTagHandle_Internal(TagHandle tag)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return GameObject.CompareTagHandle_Internal_Injected(intPtr, ref tag);
+		}
 
 		[FreeFunction(Name = "GameObjectBindings::FindGameObjectWithTag", ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject FindGameObjectWithTag(string tag);
+		public unsafe static GameObject FindGameObjectWithTag(string tag)
+		{
+			GameObject gameObject;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(tag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = tag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr = GameObject.FindGameObjectWithTag_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				IntPtr intPtr;
+				gameObject = Unmarshal.UnmarshalUnityObject<GameObject>(intPtr);
+				char* ptr = null;
+			}
+			return gameObject;
+		}
 
 		[FreeFunction(Name = "GameObjectBindings::FindGameObjectsWithTag", ThrowsException = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject[] FindGameObjectsWithTag(string tag);
+		public unsafe static GameObject[] FindGameObjectsWithTag(string tag)
+		{
+			GameObject[] array;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(tag, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = tag.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				array = GameObject.FindGameObjectsWithTag_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+			return array;
+		}
 
 		[FreeFunction(Name = "Scripting::SendScriptingMessageUpwards", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SendMessageUpwards(string methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
+		public unsafe void SendMessageUpwards(string methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GameObject.SendMessageUpwards_Injected(intPtr, ref managedSpanWrapper, value, options);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[ExcludeFromDocs]
 		public void SendMessageUpwards(string methodName, object value)
@@ -384,8 +822,31 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Scripting::SendScriptingMessage", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SendMessage(string methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
+		public unsafe void SendMessage(string methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GameObject.SendMessage_Injected(intPtr, ref managedSpanWrapper, value, options);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[ExcludeFromDocs]
 		public void SendMessage(string methodName, object value)
@@ -403,8 +864,31 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "Scripting::BroadcastScriptingMessage", HasExplicitThis = true)]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void BroadcastMessage(string methodName, [DefaultValue("null")] object parameter, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
+		public unsafe void BroadcastMessage(string methodName, [DefaultValue("null")] object parameter, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(methodName, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = methodName.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GameObject.BroadcastMessage_Injected(intPtr, ref managedSpanWrapper, parameter, options);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[ExcludeFromDocs]
 		public void BroadcastMessage(string methodName, object parameter)
@@ -441,17 +925,58 @@ namespace UnityEngine
 		}
 
 		[FreeFunction(Name = "GameObjectBindings::Internal_CreateGameObject")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_CreateGameObject([Writable] GameObject self, string name);
+		private unsafe static void Internal_CreateGameObject([Writable] GameObject self, string name)
+		{
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				GameObject.Internal_CreateGameObject_Injected(self, ref managedSpanWrapper);
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
 
 		[FreeFunction(Name = "GameObjectBindings::Find")]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject Find(string name);
+		public unsafe static GameObject Find(string name)
+		{
+			GameObject gameObject;
+			try
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				IntPtr intPtr = GameObject.Find_Injected(ref managedSpanWrapper);
+			}
+			finally
+			{
+				IntPtr intPtr;
+				gameObject = Unmarshal.UnmarshalUnityObject<GameObject>(intPtr);
+				char* ptr = null;
+			}
+			return gameObject;
+		}
 
 		[FreeFunction(Name = "GameObjectBindings::SetGameObjectsActiveByInstanceID")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetGameObjectsActive(IntPtr instanceIds, int instanceCount, bool active);
 
+		[Obsolete("Obsolete. Please use GameObject.SetGameObjectsActive(NativeArray<EntityId>, bool) instead.")]
 		public static void SetGameObjectsActive(NativeArray<int> instanceIDs, bool active)
 		{
 			bool flag = !instanceIDs.IsCreated;
@@ -466,6 +991,22 @@ namespace UnityEngine
 			}
 		}
 
+		public unsafe static void SetGameObjectsActive(NativeArray<EntityId> entityIds, bool active)
+		{
+			Debug.Assert(sizeof(EntityId) == 4, "EntityId size mismatch. Please check the definition of EntityId.");
+			bool flag = !entityIds.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "entityIds");
+			}
+			bool flag2 = entityIds.Length == 0;
+			if (!flag2)
+			{
+				GameObject.SetGameObjectsActive((IntPtr)entityIds.GetUnsafeReadOnlyPtr<EntityId>(), entityIds.Length, active);
+			}
+		}
+
+		[Obsolete("Obsolete. Please use GameObject.SetGameObjectsActive(ReadOnlySpan<EntityId>, bool) instead.")]
 		public unsafe static void SetGameObjectsActive(ReadOnlySpan<int> instanceIDs, bool active)
 		{
 			bool flag = instanceIDs.Length == 0;
@@ -479,12 +1020,27 @@ namespace UnityEngine
 			}
 		}
 
-		[FreeFunction("GameObjectBindings::InstantiateGameObjectsByInstanceID")]
-		private static void InstantiateGameObjects(int sourceInstanceID, IntPtr newInstanceIDs, IntPtr newTransformInstanceIDs, int count, Scene destinationScene)
+		public unsafe static void SetGameObjectsActive(ReadOnlySpan<EntityId> entityIds, bool active)
 		{
-			GameObject.InstantiateGameObjects_Injected(sourceInstanceID, newInstanceIDs, newTransformInstanceIDs, count, ref destinationScene);
+			Debug.Assert(sizeof(EntityId) == 4, "EntityId size mismatch. Please check the definition of EntityId.");
+			bool flag = entityIds.Length == 0;
+			if (!flag)
+			{
+				fixed (EntityId* pinnableReference = entityIds.GetPinnableReference())
+				{
+					EntityId* ptr = pinnableReference;
+					GameObject.SetGameObjectsActive((IntPtr)((void*)ptr), entityIds.Length, active);
+				}
+			}
 		}
 
+		[FreeFunction("GameObjectBindings::InstantiateGameObjectsByInstanceID")]
+		private static void InstantiateGameObjects(EntityId sourceInstanceID, IntPtr newInstanceIDs, IntPtr newTransformInstanceIDs, int count, Scene destinationScene)
+		{
+			GameObject.InstantiateGameObjects_Injected(ref sourceInstanceID, newInstanceIDs, newTransformInstanceIDs, count, ref destinationScene);
+		}
+
+		[Obsolete("Obsolete. Please use GameObject.InstantiateGameObjects(EntityId, int, NativeArray<EntityId>, NativeArray<EntityId>, Scene) instead.")]
 		public static void InstantiateGameObjects(int sourceInstanceID, int count, NativeArray<int> newInstanceIDs, NativeArray<int> newTransformInstanceIDs, Scene destinationScene = default(Scene))
 		{
 			bool flag = !newInstanceIDs.IsCreated;
@@ -509,12 +1065,48 @@ namespace UnityEngine
 			}
 		}
 
-		[FreeFunction(Name = "GameObjectBindings::GetSceneByInstanceID")]
+		public unsafe static void InstantiateGameObjects(EntityId sourceEntityId, int count, NativeArray<EntityId> newEntityIds, NativeArray<EntityId> newTransformEntityIds, Scene destinationScene = default(Scene))
+		{
+			Debug.Assert(sizeof(EntityId) == 4, "EntityId size mismatch. Please check the definition of EntityId.");
+			bool flag = !newEntityIds.IsCreated;
+			if (flag)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "newEntityIds");
+			}
+			bool flag2 = !newTransformEntityIds.IsCreated;
+			if (flag2)
+			{
+				throw new ArgumentException("NativeArray is uninitialized", "newTransformEntityIds");
+			}
+			bool flag3 = count == 0;
+			if (!flag3)
+			{
+				bool flag4 = count != newEntityIds.Length || count != newTransformEntityIds.Length;
+				if (flag4)
+				{
+					throw new ArgumentException("Size mismatch! Both arrays must already be the size of count.");
+				}
+				GameObject.InstantiateGameObjects(sourceEntityId, (IntPtr)newEntityIds.GetUnsafeReadOnlyPtr<EntityId>(), (IntPtr)newTransformEntityIds.GetUnsafeReadOnlyPtr<EntityId>(), newEntityIds.Length, destinationScene);
+			}
+		}
+
+		[Obsolete("Obsolete. Please use GameObject.GetScene(EntityId entityId) instead.")]
 		public static Scene GetScene(int instanceID)
 		{
+			return GameObject.GetSceneInternal(instanceID);
+		}
+
+		[FreeFunction(Name = "GameObjectBindings::GetSceneByEntityId")]
+		private static Scene GetSceneInternal(EntityId entityId)
+		{
 			Scene scene;
-			GameObject.GetScene_Injected(instanceID, out scene);
+			GameObject.GetSceneInternal_Injected(ref entityId, out scene);
 			return scene;
+		}
+
+		public static Scene GetScene(EntityId entityId)
+		{
+			return GameObject.GetSceneInternal(entityId);
 		}
 
 		public Scene scene
@@ -522,17 +1114,29 @@ namespace UnityEngine
 			[FreeFunction("GameObjectBindings::GetScene", HasExplicitThis = true)]
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Scene scene;
-				this.get_scene_Injected(out scene);
+				GameObject.get_scene_Injected(intPtr, out scene);
 				return scene;
 			}
 		}
 
-		public extern ulong sceneCullingMask
+		public ulong sceneCullingMask
 		{
 			[FreeFunction(Name = "GameObjectBindings::GetSceneCullingMask", HasExplicitThis = true)]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<GameObject>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return GameObject.get_sceneCullingMask_Injected(intPtr);
+			}
 		}
 
 		public GameObject gameObject
@@ -544,12 +1148,135 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void InstantiateGameObjects_Injected(int sourceInstanceID, IntPtr newInstanceIDs, IntPtr newTransformInstanceIDs, int count, ref Scene destinationScene);
+		private static extern IntPtr CreatePrimitive_Injected(PrimitiveType type);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetScene_Injected(int instanceID, out Scene ret);
+		private static extern IntPtr GetComponent_Injected(IntPtr _unity_self, Type type);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_scene_Injected(out Scene ret);
+		private static extern void GetComponentFastPath_Injected(IntPtr _unity_self, Type type, IntPtr oneFurtherThanResultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetComponentByName_Injected(IntPtr _unity_self, ref ManagedSpanWrapper type);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetComponentByNameWithCase_Injected(IntPtr _unity_self, ref ManagedSpanWrapper type, bool caseSensitive);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetComponentInChildren_Injected(IntPtr _unity_self, Type type, bool includeInactive);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetComponentInParent_Injected(IntPtr _unity_self, Type type, bool includeInactive);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Array GetComponentsInternal_Injected(IntPtr _unity_self, Type type, bool useSearchTypeAsArrayReturnType, bool recursive, bool includeInactive, bool reverse, object resultList);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr TryGetComponentInternal_Injected(IntPtr _unity_self, Type type);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void TryGetComponentFastPath_Injected(IntPtr _unity_self, Type type, IntPtr oneFurtherThanResultValue);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void FindGameObjectsWithTagForListInternal_Injected(ref ManagedSpanWrapper tag, object results);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr AddComponentInternal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper className);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Internal_AddComponentWithType_Injected(IntPtr _unity_self, Type componentType);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetComponentCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr QueryComponentAtIndex_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetComponentIndex_Injected(IntPtr _unity_self, IntPtr component);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr get_transform_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_transformHandle_Injected(IntPtr _unity_self, out TransformHandle ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_layer_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_layer_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_active_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_active_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetActive_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_activeSelf_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_activeInHierarchy_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetActiveRecursively_Injected(IntPtr _unity_self, bool state);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isStatic_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_isStatic_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_isStaticBatchable_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_tag_Injected(IntPtr _unity_self, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_tag_Injected(IntPtr _unity_self, ref ManagedSpanWrapper value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CompareTag_Internal_Injected(IntPtr _unity_self, ref ManagedSpanWrapper tag);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CompareTagHandle_Internal_Injected(IntPtr _unity_self, [In] ref TagHandle tag);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr FindGameObjectWithTag_Injected(ref ManagedSpanWrapper tag);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern GameObject[] FindGameObjectsWithTag_Injected(ref ManagedSpanWrapper tag);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendMessageUpwards_Injected(IntPtr _unity_self, ref ManagedSpanWrapper methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SendMessage_Injected(IntPtr _unity_self, ref ManagedSpanWrapper methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void BroadcastMessage_Injected(IntPtr _unity_self, ref ManagedSpanWrapper methodName, [DefaultValue("null")] object parameter, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_CreateGameObject_Injected([Writable] GameObject self, ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr Find_Injected(ref ManagedSpanWrapper name);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void InstantiateGameObjects_Injected([In] ref EntityId sourceInstanceID, IntPtr newInstanceIDs, IntPtr newTransformInstanceIDs, int count, [In] ref Scene destinationScene);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSceneInternal_Injected([In] ref EntityId entityId, out Scene ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_scene_Injected(IntPtr _unity_self, out Scene ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern ulong get_sceneCullingMask_Injected(IntPtr _unity_self);
 	}
 }

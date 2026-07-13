@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum PropertyAttributes : ushort
+	internal enum PropertyAttributes : ushort
 	{
 		None = 0,
 		SpecialName = 512,

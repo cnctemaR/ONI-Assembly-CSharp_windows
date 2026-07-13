@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum FieldAttributes : ushort
+	internal enum FieldAttributes : ushort
 	{
 		FieldAccessMask = 7,
 		CompilerControlled = 0,

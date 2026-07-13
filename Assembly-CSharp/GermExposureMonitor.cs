@@ -449,7 +449,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 
 		private void UpdateReports()
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.GERMS, "{0}", base.master.name), base.master.gameObject.GetProperName());
+			ReportManager.Instance.ReportValueWithGameObjectContext(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, base.master.gameObject, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.GERMS, "{0}", base.master.name));
 		}
 
 		public void InfectImmediately(ExposureType exposure_type)

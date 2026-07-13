@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Mono.Cecil
 {
-	public class AssemblyNameReference : IMetadataScope, IMetadataTokenProvider
+	internal class AssemblyNameReference : IMetadataScope, IMetadataTokenProvider
 	{
 		public string Name
 		{

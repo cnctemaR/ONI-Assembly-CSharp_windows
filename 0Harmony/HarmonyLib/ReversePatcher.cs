@@ -28,7 +28,8 @@ namespace HarmonyLib
 		internal static MethodInfo GetTranspiler(MethodInfo method)
 		{
 			string methodName = method.Name;
-			IEnumerable<MethodInfo> declaredMethods = AccessTools.GetDeclaredMethods(method.DeclaringType);
+			Type declaringType = method.DeclaringType;
+			List<MethodInfo> declaredMethods = AccessTools.GetDeclaredMethods(declaringType);
 			Type ici = typeof(IEnumerable<CodeInstruction>);
 			return declaredMethods.FirstOrDefault<MethodInfo>((MethodInfo m) => !(m.ReturnType != ici) && m.Name.StartsWith("<" + methodName + ">"));
 		}

@@ -25,7 +25,7 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 			{
 				components[i].Pause(false, "replanted");
 			}
-			smi.UpdateIrrigation(0.033333335f);
+			smi.UpdateIrrigation(0.2f);
 		}).Target(this.resourceStorage).EventHandler(GameHashes.OnStorageChange, delegate(IrrigationMonitor.Instance smi)
 		{
 			smi.UpdateIrrigation(0.2f);
@@ -190,45 +190,44 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 			{
 				return;
 			}
+			if (consumed_infos == null)
+			{
+				return;
+			}
 			for (int i = storage.items.Count - 1; i >= 0; i--)
 			{
 				GameObject gameObject = storage.items[i];
-				if (!(gameObject == null))
+				PrimaryElement primaryElement;
+				ElementChunk elementChunk;
+				if (!(gameObject == null) && gameObject.TryGetComponent<PrimaryElement>(out primaryElement) && gameObject.TryGetComponent<ElementChunk>(out elementChunk))
 				{
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					if (!(component == null) && !(gameObject.GetComponent<ElementChunk>() == null))
+					if (validate_solids)
 					{
-						if (validate_solids)
+						if (!primaryElement.Element.IsSolid)
 						{
-							if (!component.Element.IsSolid)
-							{
-								goto IL_00C1;
-							}
-						}
-						else if (!component.Element.IsLiquid)
-						{
-							goto IL_00C1;
-						}
-						bool flag = false;
-						KPrefabID component2 = component.GetComponent<KPrefabID>();
-						if (consumed_infos != null)
-						{
-							foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in consumed_infos)
-							{
-								if (component2.HasTag(consumeInfo.tag))
-								{
-									flag = true;
-									break;
-								}
-							}
-						}
-						if (!flag)
-						{
-							storage.Drop(gameObject, true);
+							goto IL_00B5;
 						}
 					}
+					else if (!primaryElement.Element.IsLiquid)
+					{
+						goto IL_00B5;
+					}
+					bool flag = false;
+					KPrefabID component = primaryElement.GetComponent<KPrefabID>();
+					foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in consumed_infos)
+					{
+						if (component.HasTag(consumeInfo.tag))
+						{
+							flag = true;
+							break;
+						}
+					}
+					if (!flag)
+					{
+						storage.Drop(gameObject, true);
+					}
 				}
-				IL_00C1:;
+				IL_00B5:;
 			}
 		}
 

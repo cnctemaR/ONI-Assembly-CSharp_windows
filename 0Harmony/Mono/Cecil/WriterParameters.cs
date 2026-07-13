@@ -5,7 +5,7 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Cecil
 {
-	public sealed class WriterParameters
+	internal sealed class WriterParameters
 	{
 		public uint? Timestamp
 		{

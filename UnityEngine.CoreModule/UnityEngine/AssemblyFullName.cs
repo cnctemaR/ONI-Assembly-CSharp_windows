@@ -4,8 +4,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode(GenerateProxy = true)]
 	[NativeHeader("Runtime/Mono/AssemblyFullName.h")]
+	[RequiredByNativeCode(GenerateProxy = true)]
 	internal struct AssemblyFullName
 	{
 		public override bool Equals(object other)

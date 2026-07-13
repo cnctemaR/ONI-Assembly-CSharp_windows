@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Jobs;
 using UnityEngine.Bindings;
 
@@ -96,9 +97,9 @@ namespace Unity.Audio
 		private static extern void Internal_AllocateHandle_Injected(ref Handle graph, out Handle ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void Internal_ScheduleGraph_Injected(ref JobHandle inputDeps, void* nodes, int nodeCount, int* childTable, void* dependencies);
+		private unsafe static extern void Internal_ScheduleGraph_Injected([In] ref JobHandle inputDeps, void* nodes, int nodeCount, int* childTable, void* dependencies);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_SyncFenceNoWorkSteal_Injected(ref JobHandle handle);
+		private static extern void Internal_SyncFenceNoWorkSteal_Injected([In] ref JobHandle handle);
 	}
 }

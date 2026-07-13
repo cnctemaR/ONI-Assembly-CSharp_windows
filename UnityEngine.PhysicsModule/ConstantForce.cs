@@ -1,38 +1,35 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[RequireComponent(typeof(Rigidbody))]
 	[NativeHeader("Modules/Physics/ConstantForce.h")]
+	[RequireComponent(typeof(Rigidbody))]
 	public class ConstantForce : Behaviour
 	{
 		public Vector3 force
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_force_Injected(out vector);
+				ConstantForce.get_force_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_force_Injected(ref value);
-			}
-		}
-
-		public Vector3 relativeForce
-		{
-			get
-			{
-				Vector3 vector;
-				this.get_relativeForce_Injected(out vector);
-				return vector;
-			}
-			set
-			{
-				this.set_relativeForce_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConstantForce.set_force_Injected(intPtr, ref value);
 			}
 		}
 
@@ -40,13 +37,47 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_torque_Injected(out vector);
+				ConstantForce.get_torque_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_torque_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConstantForce.set_torque_Injected(intPtr, ref value);
+			}
+		}
+
+		public Vector3 relativeForce
+		{
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				Vector3 vector;
+				ConstantForce.get_relativeForce_Injected(intPtr, out vector);
+				return vector;
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConstantForce.set_relativeForce_Injected(intPtr, ref value);
 			}
 		}
 
@@ -54,38 +85,48 @@ namespace UnityEngine
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector3 vector;
-				this.get_relativeTorque_Injected(out vector);
+				ConstantForce.get_relativeTorque_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_relativeTorque_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<ConstantForce>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ConstantForce.set_relativeTorque_Injected(intPtr, ref value);
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_force_Injected(out Vector3 ret);
+		private static extern void get_force_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_force_Injected(ref Vector3 value);
+		private static extern void set_force_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_relativeForce_Injected(out Vector3 ret);
+		private static extern void get_torque_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_relativeForce_Injected(ref Vector3 value);
+		private static extern void set_torque_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_torque_Injected(out Vector3 ret);
+		private static extern void get_relativeForce_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_torque_Injected(ref Vector3 value);
+		private static extern void set_relativeForce_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_relativeTorque_Injected(out Vector3 ret);
+		private static extern void get_relativeTorque_Injected(IntPtr _unity_self, out Vector3 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_relativeTorque_Injected(ref Vector3 value);
+		private static extern void set_relativeTorque_Injected(IntPtr _unity_self, [In] ref Vector3 value);
 	}
 }

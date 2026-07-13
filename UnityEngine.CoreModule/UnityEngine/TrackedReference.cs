@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using UnityEngine.Bindings;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -63,6 +64,7 @@ namespace UnityEngine
 			return exists != null;
 		}
 
+		[VisibleToOtherModules(new string[] { "UnityEngine.AnimationModule" })]
 		internal IntPtr m_Ptr;
 	}
 }

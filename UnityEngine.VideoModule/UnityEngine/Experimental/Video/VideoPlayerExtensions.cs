@@ -45,7 +45,21 @@ namespace UnityEngine.Experimental.Video
 			return audioSampleProvider;
 		}
 
+		internal static uint InternalGetAudioSampleProviderId([NotNull] this VideoPlayer vp, ushort trackIndex)
+		{
+			if (vp == null)
+			{
+				ThrowHelper.ThrowArgumentNullException(vp, "vp");
+			}
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<VideoPlayer>(vp);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowArgumentNullException(vp, "vp");
+			}
+			return VideoPlayerExtensions.InternalGetAudioSampleProviderId_Injected(intPtr, trackIndex);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern uint InternalGetAudioSampleProviderId([NotNull("NullExceptionObject")] this VideoPlayer vp, ushort trackIndex);
+		private static extern uint InternalGetAudioSampleProviderId_Injected(IntPtr vp, ushort trackIndex);
 	}
 }

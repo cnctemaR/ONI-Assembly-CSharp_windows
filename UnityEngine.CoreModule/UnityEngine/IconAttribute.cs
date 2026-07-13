@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 namespace UnityEngine
 {
-	[Conditional("UNITY_EDITOR")]
 	[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+	[Conditional("UNITY_EDITOR")]
 	public class IconAttribute : Attribute
 	{
 		public string path

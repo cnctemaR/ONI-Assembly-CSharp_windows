@@ -2,10 +2,11 @@
 
 namespace UnityEngine
 {
-	[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
 	public class HeaderAttribute : PropertyAttribute
 	{
 		public HeaderAttribute(string header)
+			: base(true)
 		{
 			this.header = header;
 		}

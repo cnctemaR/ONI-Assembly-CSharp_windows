@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Events;
 
 namespace UnityEngine.Networking.PlayerConnection
@@ -8,15 +7,37 @@ namespace UnityEngine.Networking.PlayerConnection
 	[Serializable]
 	internal class PlayerEditorConnectionEvents
 	{
+		public IReadOnlyList<PlayerEditorConnectionEvents.MessageTypeSubscribers> messageTypeSubscribers
+		{
+			get
+			{
+				return this.m_MessageTypeSubscribers;
+			}
+		}
+
+		private void BuildLookup()
+		{
+			bool flag = this.m_SubscriberLookup == null;
+			if (flag)
+			{
+				this.m_SubscriberLookup = new Dictionary<Guid, PlayerEditorConnectionEvents.MessageTypeSubscribers>();
+				foreach (PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers in this.messageTypeSubscribers)
+				{
+					this.m_SubscriberLookup.Add(messageTypeSubscribers.MessageTypeId, messageTypeSubscribers);
+				}
+			}
+		}
+
 		public void InvokeMessageIdSubscribers(Guid messageId, byte[] data, int playerId)
 		{
-			IEnumerable<PlayerEditorConnectionEvents.MessageTypeSubscribers> enumerable = this.messageTypeSubscribers.Where<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
-			bool flag = !enumerable.Any<PlayerEditorConnectionEvents.MessageTypeSubscribers>();
+			this.BuildLookup();
+			PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers;
+			bool flag = !this.m_SubscriberLookup.TryGetValue(messageId, out messageTypeSubscribers);
 			if (flag)
 			{
 				string text = "No actions found for messageId: ";
-				Guid messageId2 = messageId;
-				Debug.LogError(text + messageId2.ToString());
+				Guid guid = messageId;
+				Debug.LogError(text + guid.ToString());
 			}
 			else
 			{
@@ -25,17 +46,15 @@ namespace UnityEngine.Networking.PlayerConnection
 					playerId = playerId,
 					data = data
 				};
-				foreach (PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers in enumerable)
-				{
-					messageTypeSubscribers.messageCallback.Invoke(e);
-				}
+				messageTypeSubscribers.messageCallback.Invoke(e);
 			}
 		}
 
 		public UnityEvent<MessageEventArgs> AddAndCreate(Guid messageId)
 		{
-			PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers = this.messageTypeSubscribers.SingleOrDefault<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
-			bool flag = messageTypeSubscribers == null;
+			this.BuildLookup();
+			PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers;
+			bool flag = !this.m_SubscriberLookup.TryGetValue(messageId, out messageTypeSubscribers);
 			if (flag)
 			{
 				messageTypeSubscribers = new PlayerEditorConnectionEvents.MessageTypeSubscribers
@@ -43,7 +62,8 @@ namespace UnityEngine.Networking.PlayerConnection
 					MessageTypeId = messageId,
 					messageCallback = new PlayerEditorConnectionEvents.MessageEvent()
 				};
-				this.messageTypeSubscribers.Add(messageTypeSubscribers);
+				this.m_MessageTypeSubscribers.Add(messageTypeSubscribers);
+				this.m_SubscriberLookup.Add(messageId, messageTypeSubscribers);
 			}
 			messageTypeSubscribers.subscriberCount++;
 			return messageTypeSubscribers.messageCallback;
@@ -51,8 +71,9 @@ namespace UnityEngine.Networking.PlayerConnection
 
 		public void UnregisterManagedCallback(Guid messageId, UnityAction<MessageEventArgs> callback)
 		{
-			PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers = this.messageTypeSubscribers.SingleOrDefault<PlayerEditorConnectionEvents.MessageTypeSubscribers>((PlayerEditorConnectionEvents.MessageTypeSubscribers x) => x.MessageTypeId == messageId);
-			bool flag = messageTypeSubscribers == null;
+			this.BuildLookup();
+			PlayerEditorConnectionEvents.MessageTypeSubscribers messageTypeSubscribers;
+			bool flag = !this.m_SubscriberLookup.TryGetValue(messageId, out messageTypeSubscribers);
 			if (!flag)
 			{
 				messageTypeSubscribers.subscriberCount--;
@@ -60,13 +81,26 @@ namespace UnityEngine.Networking.PlayerConnection
 				bool flag2 = messageTypeSubscribers.subscriberCount <= 0;
 				if (flag2)
 				{
-					this.messageTypeSubscribers.Remove(messageTypeSubscribers);
+					this.m_MessageTypeSubscribers.Remove(messageTypeSubscribers);
+					this.m_SubscriberLookup.Remove(messageId);
 				}
 			}
 		}
 
+		public void Clear()
+		{
+			bool flag = this.m_SubscriberLookup != null;
+			if (flag)
+			{
+				this.m_SubscriberLookup.Clear();
+			}
+			this.m_MessageTypeSubscribers.Clear();
+		}
+
 		[SerializeField]
-		public List<PlayerEditorConnectionEvents.MessageTypeSubscribers> messageTypeSubscribers = new List<PlayerEditorConnectionEvents.MessageTypeSubscribers>();
+		private List<PlayerEditorConnectionEvents.MessageTypeSubscribers> m_MessageTypeSubscribers = new List<PlayerEditorConnectionEvents.MessageTypeSubscribers>();
+
+		private Dictionary<Guid, PlayerEditorConnectionEvents.MessageTypeSubscribers> m_SubscriberLookup;
 
 		[SerializeField]
 		public PlayerEditorConnectionEvents.ConnectionChangeEvent connectionEvent = new PlayerEditorConnectionEvents.ConnectionChangeEvent();

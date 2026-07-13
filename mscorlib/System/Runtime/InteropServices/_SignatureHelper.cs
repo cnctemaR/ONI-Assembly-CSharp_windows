@@ -3,10 +3,10 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.InteropServices
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[ComVisible(true)]
-	[CLSCompliant(false)]
 	[Guid("7D13DD37-5A04-393C-BBCA-A5FEA802893D")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[CLSCompliant(false)]
+	[ComVisible(true)]
 	[TypeLibImportClass(typeof(SignatureHelper))]
 	public interface _SignatureHelper
 	{

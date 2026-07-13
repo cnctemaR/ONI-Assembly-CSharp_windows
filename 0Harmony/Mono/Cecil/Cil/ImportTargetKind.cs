@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil.Cil
 {
-	public enum ImportTargetKind : byte
+	internal enum ImportTargetKind : byte
 	{
 		ImportNamespace = 1,
 		ImportNamespaceInAssembly,

@@ -5,8 +5,8 @@ using System.Security;
 
 namespace System.Runtime.Remoting.Contexts
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class)]
+	[ComVisible(true)]
 	[Serializable]
 	public class ContextAttribute : Attribute, IContextAttribute, IContextProperty
 	{

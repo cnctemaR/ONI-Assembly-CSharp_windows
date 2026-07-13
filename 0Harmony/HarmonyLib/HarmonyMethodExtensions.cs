@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
@@ -16,7 +17,8 @@ namespace HarmonyLib
 			Traverse traverse = trv.Field(name);
 			if (name == "methodType" || name == "reversePatchType")
 			{
-				val = Enum.ToObject(Nullable.GetUnderlyingType(traverse.GetValueType()), (int)val);
+				Type underlyingType = Nullable.GetUnderlyingType(traverse.GetValueType());
+				val = Enum.ToObject(underlyingType, (int)val);
 			}
 			traverse.SetValue(val);
 		}
@@ -60,10 +62,23 @@ namespace HarmonyLib
 			{
 				object value = masterTrv.Field(f).GetValue();
 				object value2 = detailTrv.Field(f).GetValue();
-				if (f != "priority" || (int)value2 != -1)
+				if (f != "priority")
 				{
 					HarmonyMethodExtensions.SetValue(resultTrv, f, value2 ?? value);
+					return;
 				}
+				int num = (int)value;
+				int num2 = (int)value2;
+				int num3 = Math.Max(num, num2);
+				if (num == -1 && num2 != -1)
+				{
+					num3 = num2;
+				}
+				if (num != -1 && num2 == -1)
+				{
+					num3 = num;
+				}
+				HarmonyMethodExtensions.SetValue(resultTrv, f, num3);
 			});
 			return harmonyMethod;
 		}
@@ -75,17 +90,23 @@ namespace HarmonyLib
 			{
 				return null;
 			}
-			if (field.FieldType.FullName != typeof(HarmonyMethod).FullName)
+			if (field.FieldType.FullName != PatchTools.harmonyMethodFullName)
 			{
 				return null;
 			}
-			return AccessTools.MakeDeepCopy<HarmonyMethod>(field.GetValue(attribute));
+			object value = field.GetValue(attribute);
+			return AccessTools.MakeDeepCopy<HarmonyMethod>(value);
 		}
 
 		public static List<HarmonyMethod> GetFromType(Type type)
 		{
-			return (from attr in type.GetCustomAttributes(true)
-				select HarmonyMethodExtensions.GetHarmonyMethodInfo(attr) into info
+			IEnumerable<object> customAttributes = type.GetCustomAttributes(true);
+			Func<object, HarmonyMethod> func;
+			if ((func = HarmonyMethodExtensions.<>O.<0>__GetHarmonyMethodInfo) == null)
+			{
+				func = (HarmonyMethodExtensions.<>O.<0>__GetHarmonyMethodInfo = new Func<object, HarmonyMethod>(HarmonyMethodExtensions.GetHarmonyMethodInfo));
+			}
+			return (from info in customAttributes.Select<object, HarmonyMethod>(func)
 				where info != null
 				select info).ToList<HarmonyMethod>();
 		}
@@ -97,8 +118,13 @@ namespace HarmonyLib
 
 		public static List<HarmonyMethod> GetFromMethod(MethodBase method)
 		{
-			return (from attr in method.GetCustomAttributes(true)
-				select HarmonyMethodExtensions.GetHarmonyMethodInfo(attr) into info
+			IEnumerable<object> customAttributes = method.GetCustomAttributes(true);
+			Func<object, HarmonyMethod> func;
+			if ((func = HarmonyMethodExtensions.<>O.<0>__GetHarmonyMethodInfo) == null)
+			{
+				func = (HarmonyMethodExtensions.<>O.<0>__GetHarmonyMethodInfo = new Func<object, HarmonyMethod>(HarmonyMethodExtensions.GetHarmonyMethodInfo));
+			}
+			return (from info in customAttributes.Select<object, HarmonyMethod>(func)
 				where info != null
 				select info).ToList<HarmonyMethod>();
 		}
@@ -106,6 +132,12 @@ namespace HarmonyLib
 		public static HarmonyMethod GetMergedFromMethod(MethodBase method)
 		{
 			return HarmonyMethod.Merge(HarmonyMethodExtensions.GetFromMethod(method));
+		}
+
+		[CompilerGenerated]
+		private static class <>O
+		{
+			public static Func<object, HarmonyMethod> <0>__GetHarmonyMethodInfo;
 		}
 	}
 }

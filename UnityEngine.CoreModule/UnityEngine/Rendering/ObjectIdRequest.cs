@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace UnityEngine.Rendering
 {
 	public class ObjectIdRequest
 	{
-		public RenderTexture destination { get; set; }
+		public RenderTexture destination
+		{
+			[return: NotNull]
+			get;
+			set; }
 
 		public int mipLevel { get; set; }
 
@@ -12,9 +17,13 @@ namespace UnityEngine.Rendering
 
 		public int slice { get; set; }
 
-		public ObjectIdResult result { get; internal set; }
+		public ObjectIdResult result
+		{
+			[return: MaybeNull]
+			get;
+			internal set; }
 
-		public ObjectIdRequest(RenderTexture destination, int mipLevel = 0, CubemapFace face = CubemapFace.Unknown, int slice = 0)
+		public ObjectIdRequest([NotNull] RenderTexture destination, int mipLevel = 0, CubemapFace face = CubemapFace.Unknown, int slice = 0)
 		{
 			this.destination = destination;
 			this.mipLevel = mipLevel;

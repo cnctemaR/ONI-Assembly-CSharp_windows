@@ -1360,13 +1360,13 @@ namespace Database
 			this.MegaBrainTankActivationProgress.resolveStringCallback = delegate(string str, object data)
 			{
 				MegaBrainTank.StatesInstance statesInstance10 = (MegaBrainTank.StatesInstance)data;
-				return str.Replace("{ActivationProgress}", string.Format("{0}/{1}", statesInstance10.ActivationProgress, 25));
+				return str.Replace("{ActivationProgress}", string.Format("{0}/{1}", statesInstance10.JournalsStored, 25));
 			};
 			this.MegaBrainTankDreamAnalysis = this.CreateStatusItem("MegaBrainTankDreamAnalysis", BUILDING.STATUSITEMS.MEGABRAINTANK.PROGRESS.DREAMANALYSIS.NAME, BUILDING.STATUSITEMS.MEGABRAINTANK.PROGRESS.DREAMANALYSIS.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 			this.MegaBrainTankDreamAnalysis.resolveStringCallback = delegate(string str, object data)
 			{
 				MegaBrainTank.StatesInstance statesInstance11 = (MegaBrainTank.StatesInstance)data;
-				return str.Replace("{TimeToComplete}", statesInstance11.TimeTilDigested.ToString());
+				return str.Replace("{TimeToComplete}", statesInstance11.DigestionTimeRemaining.ToString());
 			};
 			this.MegaBrainTankComplete = this.CreateStatusItem("MegaBrainTankComplete", BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.NAME, BUILDING.STATUSITEMS.MEGABRAINTANK.COMPLETE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);
 			this.FossilHuntExcavationOrdered = this.CreateStatusItem("FossilHuntExcavationOrdered", BUILDING.STATUSITEMS.FOSSILHUNT.PENDING_EXCAVATION.NAME, BUILDING.STATUSITEMS.FOSSILHUNT.PENDING_EXCAVATION.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 129022);

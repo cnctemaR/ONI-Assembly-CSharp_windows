@@ -12,6 +12,12 @@ namespace UnityEngine
 			this.time = time;
 		}
 
+		public GradientColorKey(in Color col, float time)
+		{
+			this.color = col;
+			this.time = time;
+		}
+
 		public Color color;
 
 		public float time;

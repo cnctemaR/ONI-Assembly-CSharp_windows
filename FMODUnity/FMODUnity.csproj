@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{762A1267-4B76-4A44-9761-A3728714D40C}</ProjectGuid>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD51}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FMODUnity</RootNamespace>
     <AssemblyName>FMODUnity</AssemblyName>
@@ -75,10 +75,11 @@
     <Compile Include="FMOD\DSP_DFT_IFFTREAL_FUNC.cs" />
     <Compile Include="FMOD\DSP_DISTORTION.cs" />
     <Compile Include="FMOD\DSP_ECHO.cs" />
-    <Compile Include="FMOD\DSP_ENVELOPEFOLLOWER.cs" />
+    <Compile Include="FMOD\DSP_ECHO_DELAYCHANGEMODE_TYPE.cs" />
     <Compile Include="FMOD\DSP_FADER.cs" />
     <Compile Include="FMOD\DSP_FFT.cs" />
-    <Compile Include="FMOD\DSP_FFT_WINDOW.cs" />
+    <Compile Include="FMOD\DSP_FFT_DOWNMIX_TYPE.cs" />
+    <Compile Include="FMOD\DSP_FFT_WINDOW_TYPE.cs" />
     <Compile Include="FMOD\DSP_FLANGE.cs" />
     <Compile Include="FMOD\DSP_FREE_FUNC.cs" />
     <Compile Include="FMOD\DSP_GETBLOCKSIZE_FUNC.cs" />
@@ -104,6 +105,8 @@
     <Compile Include="FMOD\DSP_LOWPASS.cs" />
     <Compile Include="FMOD\DSP_LOWPASS_SIMPLE.cs" />
     <Compile Include="FMOD\DSP_METERING_INFO.cs" />
+    <Compile Include="FMOD\DSP_MULTIBAND_DYNAMICS.cs" />
+    <Compile Include="FMOD\DSP_MULTIBAND_DYNAMICS_MODE_TYPE.cs" />
     <Compile Include="FMOD\DSP_MULTIBAND_EQ.cs" />
     <Compile Include="FMOD\DSP_MULTIBAND_EQ_FILTER_TYPE.cs" />
     <Compile Include="FMOD\DSP_NORMALIZE.cs" />
@@ -132,7 +135,9 @@
     <Compile Include="FMOD\DSP_PARAMETER_DESC_FLOAT.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_DESC_INT.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_DESC_UNION.cs" />
+    <Compile Include="FMOD\DSP_PARAMETER_DYNAMIC_RESPONSE.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_FFT.cs" />
+    <Compile Include="FMOD\DSP_PARAMETER_FINITE_LENGTH.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_FLOAT_MAPPING.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_FLOAT_MAPPING_PIECEWISE_LINEAR.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_FLOAT_MAPPING_TYPE.cs" />
@@ -184,7 +189,6 @@
     <Compile Include="FMOD\GUID.cs" />
     <Compile Include="FMOD\IChannelControl.cs" />
     <Compile Include="FMOD\INITFLAGS.cs" />
-    <Compile Include="FMOD\MarshalHelper.cs" />
     <Compile Include="FMOD\Memory.cs" />
     <Compile Include="FMOD\MEMORY_ALLOC_CALLBACK.cs" />
     <Compile Include="FMOD\MEMORY_FREE_CALLBACK.cs" />
@@ -296,6 +300,7 @@
     <Compile Include="PlatformMobileHigh.cs" />
     <Compile Include="PlatformMobileLow.cs" />
     <Compile Include="PlatformPlayInEditor.cs" />
+    <Compile Include="PlatformVisionOS.cs" />
     <Compile Include="PlatformWebGL.cs" />
     <Compile Include="PlatformWindows.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -319,43 +324,43 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D415}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5B}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D41A}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD60}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D41D}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD63}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Timeline\Unity.Timeline.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D434}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD7E}</Project>
       <Name>Unity.Timeline</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D440}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.DirectorModule\UnityEngine.DirectorModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D442}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8E}</Project>
       <Name>UnityEngine.DirectorModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D44A}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD9A}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D452}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDA6}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D453}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDA8}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{762A1267-4B76-4A44-9761-A3728714D465}</Project>
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDBC}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

@@ -6,19 +6,40 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/Subsystems/Subsystem.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Modules/Subsystems/Subsystem.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class IntegratedSubsystem : ISubsystem
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern void SetHandle(IntegratedSubsystem subsystem);
+		internal void SetHandle([UnityMarshalAs(NativeType.ScriptingObjectPtr)] IntegratedSubsystem subsystem)
+		{
+			IntPtr intPtr = IntegratedSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntegratedSubsystem.SetHandle_Injected(intPtr, subsystem);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Start();
+		public void Start()
+		{
+			IntPtr intPtr = IntegratedSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntegratedSubsystem.Start_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Stop();
+		public void Stop()
+		{
+			IntPtr intPtr = IntegratedSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			IntegratedSubsystem.Stop_Injected(intPtr);
+		}
 
 		public void Destroy()
 		{
@@ -44,11 +65,39 @@ namespace UnityEngine
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern bool IsRunning();
+		internal bool IsRunning()
+		{
+			IntPtr intPtr = IntegratedSubsystem.BindingsMarshaller.ConvertToNative(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return IntegratedSubsystem.IsRunning_Injected(intPtr);
+		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetHandle_Injected(IntPtr _unity_self, IntegratedSubsystem subsystem);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Start_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Stop_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsRunning_Injected(IntPtr _unity_self);
+
+		[VisibleToOtherModules(new string[] { "UnityEngine.XRModule" })]
 		internal IntPtr m_Ptr;
 
 		internal ISubsystemDescriptor m_SubsystemDescriptor;
+
+		internal static class BindingsMarshaller
+		{
+			public static IntPtr ConvertToNative(IntegratedSubsystem integratedSubsystem)
+			{
+				return integratedSubsystem.m_Ptr;
+			}
+		}
 	}
 }

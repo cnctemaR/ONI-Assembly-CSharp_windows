@@ -20,8 +20,8 @@ namespace UnityEngine
 			}
 		}
 
-		[SecuritySafeCritical]
 		[RequiredByNativeCode]
+		[SecuritySafeCritical]
 		public unsafe static string ExtractStackTrace()
 		{
 			int num = 16384;
@@ -50,8 +50,8 @@ namespace UnityEngine
 			return text + "\n" + text2;
 		}
 
-		[SecuritySafeCritical]
 		[RequiredByNativeCode]
+		[SecuritySafeCritical]
 		internal static void ExtractStringFromExceptionInternal(object exceptiono, out string message, out string stackTrace)
 		{
 			bool flag = exceptiono == null;
@@ -63,7 +63,7 @@ namespace UnityEngine
 			bool flag2 = ex == null;
 			if (flag2)
 			{
-				throw new ArgumentException("ExtractStringFromExceptionInternal called with an exceptoin that was not of type System.Exception");
+				throw new ArgumentException("ExtractStringFromExceptionInternal called with an exception that was not of type System.Exception");
 			}
 			StringBuilder stringBuilder = new StringBuilder((ex.StackTrace == null) ? 512 : (ex.StackTrace.Length * 2));
 			message = "";
@@ -107,12 +107,12 @@ namespace UnityEngine
 		}
 
 		[SecuritySafeCritical]
-		internal static string ExtractFormattedStackTrace(StackTrace stackTrace)
+		internal static string ExtractFormattedStackTrace(StackTrace stackFrames)
 		{
 			StringBuilder stringBuilder = new StringBuilder(255);
-			for (int i = 0; i < stackTrace.FrameCount; i++)
+			for (int i = 0; i < stackFrames.FrameCount; i++)
 			{
-				StackFrame frame = stackTrace.GetFrame(i);
+				StackFrame frame = stackFrames.GetFrame(i);
 				MethodBase method = frame.GetMethod();
 				bool flag = method == null;
 				if (!flag)
@@ -154,7 +154,7 @@ namespace UnityEngine
 						bool flag6 = text != null;
 						if (flag6)
 						{
-							bool flag7 = (declaringType.Name == "Debug" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "Logger" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "DebugLogHandler" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "Assert" && declaringType.Namespace == "UnityEngine.Assertions") || (method.Name == "print" && declaringType.Name == "MonoBehaviour" && declaringType.Namespace == "UnityEngine");
+							bool flag7 = method.IsDefined(typeof(HideInCallstackAttribute), true) || (declaringType.Name == "Debug" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "Logger" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "DebugLogHandler" && declaringType.Namespace == "UnityEngine") || (declaringType.Name == "Assert" && declaringType.Namespace == "UnityEngine.Assertions") || (method.Name == "print" && declaringType.Name == "MonoBehaviour" && declaringType.Namespace == "UnityEngine");
 							bool flag8 = !flag7;
 							if (flag8)
 							{

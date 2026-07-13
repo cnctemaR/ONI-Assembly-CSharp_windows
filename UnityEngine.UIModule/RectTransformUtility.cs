@@ -1,33 +1,34 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
 	[NativeHeader("Runtime/Camera/Camera.h")]
-	[StaticAccessor("UI", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Transform/RectTransform.h")]
-	[NativeHeader("Modules/UI/RectTransformUtil.h")]
 	[NativeHeader("Modules/UI/Canvas.h")]
+	[NativeHeader("Modules/UI/RectTransformUtil.h")]
+	[NativeHeader("Runtime/Transform/RectTransform.h")]
+	[StaticAccessor("UI", StaticAccessorType.DoubleColon)]
 	public sealed class RectTransformUtility
 	{
 		public static Vector2 PixelAdjustPoint(Vector2 point, Transform elementTransform, Canvas canvas)
 		{
 			Vector2 vector;
-			RectTransformUtility.PixelAdjustPoint_Injected(ref point, elementTransform, canvas, out vector);
+			RectTransformUtility.PixelAdjustPoint_Injected(ref point, Object.MarshalledUnityObject.Marshal<Transform>(elementTransform), Object.MarshalledUnityObject.Marshal<Canvas>(canvas), out vector);
 			return vector;
 		}
 
 		public static Rect PixelAdjustRect(RectTransform rectTransform, Canvas canvas)
 		{
 			Rect rect;
-			RectTransformUtility.PixelAdjustRect_Injected(rectTransform, canvas, out rect);
+			RectTransformUtility.PixelAdjustRect_Injected(Object.MarshalledUnityObject.Marshal<RectTransform>(rectTransform), Object.MarshalledUnityObject.Marshal<Canvas>(canvas), out rect);
 			return rect;
 		}
 
 		private static bool PointInRectangle(Vector2 screenPoint, RectTransform rect, Camera cam, Vector4 offset)
 		{
-			return RectTransformUtility.PointInRectangle_Injected(ref screenPoint, rect, cam, ref offset);
+			return RectTransformUtility.PointInRectangle_Injected(ref screenPoint, Object.MarshalledUnityObject.Marshal<RectTransform>(rect), Object.MarshalledUnityObject.Marshal<Camera>(cam), ref offset);
 		}
 
 		private RectTransformUtility()
@@ -229,13 +230,13 @@ namespace UnityEngine
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PixelAdjustPoint_Injected(ref Vector2 point, Transform elementTransform, Canvas canvas, out Vector2 ret);
+		private static extern void PixelAdjustPoint_Injected([In] ref Vector2 point, IntPtr elementTransform, IntPtr canvas, out Vector2 ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void PixelAdjustRect_Injected(RectTransform rectTransform, Canvas canvas, out Rect ret);
+		private static extern void PixelAdjustRect_Injected(IntPtr rectTransform, IntPtr canvas, out Rect ret);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool PointInRectangle_Injected(ref Vector2 screenPoint, RectTransform rect, Camera cam, ref Vector4 offset);
+		private static extern bool PointInRectangle_Injected([In] ref Vector2 screenPoint, IntPtr rect, IntPtr cam, [In] ref Vector4 offset);
 
 		private static readonly Vector3[] s_Corners = new Vector3[4];
 	}

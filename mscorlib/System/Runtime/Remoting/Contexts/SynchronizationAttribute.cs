@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace System.Runtime.Remoting.Contexts
 {
-	[AttributeUsage(AttributeTargets.Class)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Class)]
 	[Serializable]
 	public class SynchronizationAttribute : ContextAttribute, IContributeClientContextSink, IContributeServerContextSink
 	{

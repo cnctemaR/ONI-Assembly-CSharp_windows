@@ -44,6 +44,11 @@ namespace UnityEngine.PlayerLoop
 		}
 
 		[RequiredByNativeCode]
+		public struct AccessibilityUpdate
+		{
+		}
+
+		[RequiredByNativeCode]
 		public struct UIElementsUpdatePanels
 		{
 		}

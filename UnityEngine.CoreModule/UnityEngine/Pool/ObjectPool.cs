@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace UnityEngine.Pool
 {
@@ -19,7 +20,7 @@ namespace UnityEngine.Pool
 		{
 			get
 			{
-				return this.m_List.Count;
+				return this.m_List.Count + ((this.m_FreshlyReleased != null) ? 1 : 0);
 			}
 		}
 
@@ -45,21 +46,31 @@ namespace UnityEngine.Pool
 			PoolManager.Register(this);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Get()
 		{
-			bool flag = this.m_List.Count == 0;
+			bool flag = this.m_FreshlyReleased != null;
 			T t;
 			if (flag)
 			{
-				t = this.m_CreateFunc();
-				int countAll = this.CountAll;
-				this.CountAll = countAll + 1;
+				t = this.m_FreshlyReleased;
+				this.m_FreshlyReleased = default(T);
 			}
 			else
 			{
-				int num = this.m_List.Count - 1;
-				t = this.m_List[num];
-				this.m_List.RemoveAt(num);
+				bool flag2 = this.m_List.Count == 0;
+				if (flag2)
+				{
+					t = this.m_CreateFunc();
+					int countAll = this.CountAll;
+					this.CountAll = countAll + 1;
+				}
+				else
+				{
+					int num = this.m_List.Count - 1;
+					t = this.m_List[num];
+					this.m_List.RemoveAt(num);
+				}
 			}
 			Action<T> actionOnGet = this.m_ActionOnGet;
 			if (actionOnGet != null)
@@ -74,6 +85,7 @@ namespace UnityEngine.Pool
 			return new PooledObject<T>(v = this.Get(), this);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Release(T element)
 		{
 			Action<T> actionOnRelease = this.m_ActionOnRelease;
@@ -81,19 +93,27 @@ namespace UnityEngine.Pool
 			{
 				actionOnRelease(element);
 			}
-			bool flag = this.CountInactive < this.m_MaxSize;
+			bool flag = this.m_FreshlyReleased == null;
 			if (flag)
 			{
-				this.m_List.Add(element);
+				this.m_FreshlyReleased = element;
 			}
 			else
 			{
-				int countAll = this.CountAll;
-				this.CountAll = countAll - 1;
-				Action<T> actionOnDestroy = this.m_ActionOnDestroy;
-				if (actionOnDestroy != null)
+				bool flag2 = this.CountInactive < this.m_MaxSize;
+				if (flag2)
 				{
-					actionOnDestroy(element);
+					this.m_List.Add(element);
+				}
+				else
+				{
+					int countAll = this.CountAll;
+					this.CountAll = countAll - 1;
+					Action<T> actionOnDestroy = this.m_ActionOnDestroy;
+					if (actionOnDestroy != null)
+					{
+						actionOnDestroy(element);
+					}
 				}
 			}
 		}
@@ -107,7 +127,13 @@ namespace UnityEngine.Pool
 				{
 					this.m_ActionOnDestroy(t);
 				}
+				bool flag2 = this.m_FreshlyReleased != null;
+				if (flag2)
+				{
+					this.m_ActionOnDestroy(this.m_FreshlyReleased);
+				}
 			}
+			this.m_FreshlyReleased = default(T);
 			this.m_List.Clear();
 			this.CountAll = 0;
 		}
@@ -115,6 +141,11 @@ namespace UnityEngine.Pool
 		public void Dispose()
 		{
 			this.Clear();
+		}
+
+		internal bool HasElement(T element)
+		{
+			return this.m_FreshlyReleased == element || this.m_List.Contains(element);
 		}
 
 		internal readonly List<T> m_List;
@@ -130,5 +161,7 @@ namespace UnityEngine.Pool
 		private readonly int m_MaxSize;
 
 		internal bool m_CollectionCheck;
+
+		private T m_FreshlyReleased;
 	}
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Unity.IntegerTime;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
@@ -20,6 +22,17 @@ namespace UnityEngine
 		{
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		[NativeProperty("CurTimeRational")]
+		public static RationalTime timeAsRational
+		{
+			get
+			{
+				RationalTime rationalTime;
+				Time.get_timeAsRational_Injected(out rationalTime);
+				return rationalTime;
+			}
 		}
 
 		[NativeProperty("TimeSinceSceneLoad")]
@@ -166,6 +179,20 @@ namespace UnityEngine
 			set;
 		}
 
+		public static RationalTime captureDeltaTimeRational
+		{
+			get
+			{
+				RationalTime rationalTime;
+				Time.get_captureDeltaTimeRational_Injected(out rationalTime);
+				return rationalTime;
+			}
+			set
+			{
+				Time.set_captureDeltaTimeRational_Injected(ref value);
+			}
+		}
+
 		public static int captureFramerate
 		{
 			get
@@ -184,5 +211,14 @@ namespace UnityEngine
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_timeAsRational_Injected(out RationalTime ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_captureDeltaTimeRational_Injected(out RationalTime ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_captureDeltaTimeRational_Injected([In] ref RationalTime value);
 	}
 }

@@ -1,79 +1,178 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine
 {
-	[NativeHeader("Modules/UI/CanvasRenderer.h")]
 	[NativeClass("UI::CanvasRenderer")]
+	[NativeHeader("Modules/UI/CanvasRenderer.h")]
 	public sealed class CanvasRenderer : Component
 	{
-		public extern bool hasPopInstruction
+		public bool hasPopInstruction
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_hasPopInstruction_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasRenderer.set_hasPopInstruction_Injected(intPtr, value);
+			}
 		}
 
-		public extern int materialCount
+		public int materialCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_materialCount_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasRenderer.set_materialCount_Injected(intPtr, value);
+			}
 		}
 
-		public extern int popMaterialCount
+		public int popMaterialCount
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_popMaterialCount_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasRenderer.set_popMaterialCount_Injected(intPtr, value);
+			}
 		}
 
-		public extern int absoluteDepth
+		public int absoluteDepth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_absoluteDepth_Injected(intPtr);
+			}
 		}
 
-		public extern bool hasMoved
+		public bool hasMoved
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_hasMoved_Injected(intPtr);
+			}
 		}
 
-		public extern bool cullTransparentMesh
+		public bool cullTransparentMesh
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_cullTransparentMesh_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasRenderer.set_cullTransparentMesh_Injected(intPtr, value);
+			}
 		}
 
 		[NativeProperty("RectClipping", false, TargetType.Function)]
-		public extern bool hasRectClipping
+		public bool hasRectClipping
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_hasRectClipping_Injected(intPtr);
+			}
 		}
 
 		[NativeProperty("Depth", false, TargetType.Function)]
-		public extern int relativeDepth
+		public int relativeDepth
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_relativeDepth_Injected(intPtr);
+			}
 		}
 
 		[NativeProperty("ShouldCull", false, TargetType.Function)]
-		public extern bool cull
+		public bool cull
 		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
+			get
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				return CanvasRenderer.get_cull_Injected(intPtr);
+			}
+			set
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasRenderer.set_cull_Injected(intPtr, value);
+			}
 		}
 
 		[Obsolete("isMask is no longer supported.See EnableClipping for vertex clipping configuration", false)]
@@ -81,64 +180,236 @@ namespace UnityEngine
 
 		public void SetColor(Color color)
 		{
-			this.SetColor_Injected(ref color);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.SetColor_Injected(intPtr, ref color);
 		}
 
 		public Color GetColor()
 		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
 			Color color;
-			this.GetColor_Injected(out color);
+			CanvasRenderer.GetColor_Injected(intPtr, out color);
 			return color;
 		}
 
 		public void EnableRectClipping(Rect rect)
 		{
-			this.EnableRectClipping_Injected(ref rect);
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.EnableRectClipping_Injected(intPtr, ref rect);
 		}
 
 		public Vector2 clippingSoftness
 		{
 			get
 			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
 				Vector2 vector;
-				this.get_clippingSoftness_Injected(out vector);
+				CanvasRenderer.get_clippingSoftness_Injected(intPtr, out vector);
 				return vector;
 			}
 			set
 			{
-				this.set_clippingSoftness_Injected(ref value);
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				CanvasRenderer.set_clippingSoftness_Injected(intPtr, ref value);
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void DisableRectClipping();
+		public void DisableRectClipping()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.DisableRectClipping_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetMaterial(Material material, int index);
+		public void SetMaterial(Material material, int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.SetMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material), index);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Material GetMaterial(int index);
+		public Material GetMaterial(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Material>(CanvasRenderer.GetMaterial_Injected(intPtr, index));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetPopMaterial(Material material, int index);
+		public void SetPopMaterial(Material material, int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.SetPopMaterial_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Material>(material), index);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Material GetPopMaterial(int index);
+		public Material GetPopMaterial(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Material>(CanvasRenderer.GetPopMaterial_Injected(intPtr, index));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetTexture(Texture texture);
+		public void SetTexture(Texture texture)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.SetTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(texture));
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetAlphaTexture(Texture texture);
+		public int GetSecondaryTextureCount()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CanvasRenderer.GetSecondaryTextureCount_Injected(intPtr);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetMesh(Mesh mesh);
+		public void SetSecondaryTextureCount(int size)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.SetSecondaryTextureCount_Injected(intPtr, size);
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Mesh GetMesh();
+		public string GetSecondaryTextureName(int index)
+		{
+			string stringAndDispose;
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				CanvasRenderer.GetSecondaryTextureName_Injected(intPtr, index, out managedSpanWrapper);
+			}
+			finally
+			{
+				ManagedSpanWrapper managedSpanWrapper;
+				stringAndDispose = OutStringMarshaller.GetStringAndDispose(managedSpanWrapper);
+			}
+			return stringAndDispose;
+		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Clear();
+		public Texture2D GetSecondaryTexture(int index)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Texture2D>(CanvasRenderer.GetSecondaryTexture_Injected(intPtr, index));
+		}
+
+		public unsafe void SetSecondaryTexture(int index, string name, Texture2D texture)
+		{
+			try
+			{
+				IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+				if (intPtr == 0)
+				{
+					ThrowHelper.ThrowNullReferenceException(this);
+				}
+				ManagedSpanWrapper managedSpanWrapper;
+				if (!StringMarshaller.TryMarshalEmptyOrNullString(name, ref managedSpanWrapper))
+				{
+					ReadOnlySpan<char> readOnlySpan = name.AsSpan();
+					fixed (char* ptr = readOnlySpan.GetPinnableReference())
+					{
+						managedSpanWrapper = new ManagedSpanWrapper((void*)ptr, readOnlySpan.Length);
+					}
+				}
+				CanvasRenderer.SetSecondaryTexture_Injected(intPtr, index, ref managedSpanWrapper, Object.MarshalledUnityObject.Marshal<Texture2D>(texture));
+			}
+			finally
+			{
+				char* ptr = null;
+			}
+		}
+
+		public void SetAlphaTexture(Texture texture)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.SetAlphaTexture_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Texture>(texture));
+		}
+
+		public void SetMesh(Mesh mesh)
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.SetMesh_Injected(intPtr, Object.MarshalledUnityObject.Marshal<Mesh>(mesh));
+		}
+
+		public Mesh GetMesh()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return Unmarshal.UnmarshalUnityObject<Mesh>(CanvasRenderer.GetMesh_Injected(intPtr));
+		}
+
+		public void Clear()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			CanvasRenderer.Clear_Injected(intPtr);
+		}
 
 		public float GetAlpha()
 		{
@@ -152,8 +423,15 @@ namespace UnityEngine
 			this.SetColor(color);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetInheritedAlpha();
+		public float GetInheritedAlpha()
+		{
+			IntPtr intPtr = Object.MarshalledUnityObject.MarshalNotNull<CanvasRenderer>(this);
+			if (intPtr == 0)
+			{
+				ThrowHelper.ThrowNullReferenceException(this);
+			}
+			return CanvasRenderer.GetInheritedAlpha_Injected(intPtr);
+		}
 
 		public void SetMaterial(Material material, Texture texture)
 		{
@@ -263,18 +541,108 @@ namespace UnityEngine
 		private static extern void CreateUIVertexStreamInternal(object verts, object positions, object colors, object uv0S, object uv1S, object uv2S, object uv3S, object normals, object tangents, object indices);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetColor_Injected(ref Color color);
+		private static extern bool get_hasPopInstruction_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void GetColor_Injected(out Color ret);
+		private static extern void set_hasPopInstruction_Injected(IntPtr _unity_self, bool value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void EnableRectClipping_Injected(ref Rect rect);
+		private static extern int get_materialCount_Injected(IntPtr _unity_self);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void get_clippingSoftness_Injected(out Vector2 ret);
+		private static extern void set_materialCount_Injected(IntPtr _unity_self, int value);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void set_clippingSoftness_Injected(ref Vector2 value);
+		private static extern int get_popMaterialCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_popMaterialCount_Injected(IntPtr _unity_self, int value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_absoluteDepth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_hasMoved_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_cullTransparentMesh_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cullTransparentMesh_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_hasRectClipping_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int get_relativeDepth_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool get_cull_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_cull_Injected(IntPtr _unity_self, bool value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetColor_Injected(IntPtr _unity_self, [In] ref Color color);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetColor_Injected(IntPtr _unity_self, out Color ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void EnableRectClipping_Injected(IntPtr _unity_self, [In] ref Rect rect);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_clippingSoftness_Injected(IntPtr _unity_self, out Vector2 ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void set_clippingSoftness_Injected(IntPtr _unity_self, [In] ref Vector2 value);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void DisableRectClipping_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMaterial_Injected(IntPtr _unity_self, IntPtr material, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetMaterial_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetPopMaterial_Injected(IntPtr _unity_self, IntPtr material, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetPopMaterial_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetTexture_Injected(IntPtr _unity_self, IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetSecondaryTextureCount_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSecondaryTextureCount_Injected(IntPtr _unity_self, int size);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetSecondaryTextureName_Injected(IntPtr _unity_self, int index, out ManagedSpanWrapper ret);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetSecondaryTexture_Injected(IntPtr _unity_self, int index);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetSecondaryTexture_Injected(IntPtr _unity_self, int index, ref ManagedSpanWrapper name, IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetAlphaTexture_Injected(IntPtr _unity_self, IntPtr texture);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetMesh_Injected(IntPtr _unity_self, IntPtr mesh);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetMesh_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Clear_Injected(IntPtr _unity_self);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float GetInheritedAlpha_Injected(IntPtr _unity_self);
 	}
 }

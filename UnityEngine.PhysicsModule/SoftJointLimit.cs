@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 
 namespace UnityEngine
 {
@@ -38,46 +37,6 @@ namespace UnityEngine
 			set
 			{
 				this.m_ContactDistance = value;
-			}
-		}
-
-		[Obsolete("Spring has been moved to SoftJointLimitSpring class in Unity 5", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public float spring
-		{
-			get
-			{
-				return 0f;
-			}
-			set
-			{
-			}
-		}
-
-		[Obsolete("Damper has been moved to SoftJointLimitSpring class in Unity 5", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public float damper
-		{
-			get
-			{
-				return 0f;
-			}
-			set
-			{
-			}
-		}
-
-		[Obsolete("Use SoftJointLimit.bounciness instead", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public float bouncyness
-		{
-			get
-			{
-				return this.m_Bounciness;
-			}
-			set
-			{
-				this.m_Bounciness = value;
 			}
 		}
 

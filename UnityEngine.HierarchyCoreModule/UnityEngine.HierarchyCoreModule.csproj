@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{666AADE5-FFF2-439B-916A-9429A220BD95}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>UnityEngine.HierarchyCoreModule</RootNamespace>
+    <AssemblyName>UnityEngine.HierarchyCoreModule</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IsUnmanagedAttribute.cs" />
+    <Compile Include="Unity\Hierarchy\DefaultHierarchySearchQueryParser.cs" />
+    <Compile Include="Unity\Hierarchy\Hierarchy.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyCommandList.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyFlattened.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyFlattenedChildrenEnumerable.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyFlattenedNode.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyFlattenedNodeChildren.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyLogging.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNode.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeChildren.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeChildrenAlloc.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeChildrenFixed.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeFlags.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeMapUnmanaged.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeType.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeTypeHandlerBase.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyNodeTypeHandlerBaseEnumerable.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyPropertyDescriptor.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyPropertyId.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyPropertyStorageType.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyPropertyString.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyPropertyUnmanaged.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchySearchFilter.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchySearchFilterOperator.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchySearchQueryDescriptor.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyTestsHelper.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyTraversalDirection.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyViewModel.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyViewModelFlagsChangeScope.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyViewModelNodesEnumerable.cs" />
+    <Compile Include="Unity\Hierarchy\HierarchyViewNodesEnumerable.cs" />
+    <Compile Include="Unity\Hierarchy\IHierarchyProperty.cs" />
+    <Compile Include="Unity\Hierarchy\IHierarchySearchQueryParser.cs" />
+    <Compile Include="Unity\Hierarchy\NativeSparseArray.cs" />
+    <Compile Include="Unity\Hierarchy\NativeSparseArrayResizePolicy.cs" />
+    <Compile Include="Unity\Hierarchy\ReadOnlyNativeVector.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD5C}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BD8C}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
+      <Project>{666AADE5-FFF2-439B-916A-9429A220BDAF}</Project>
+      <Name>UnityEngine.SharedInternalsModule</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

@@ -11,6 +11,10 @@ public class ClustercraftInteriorDoor : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		Components.ClusterCraftInteriorDoors.Remove(this);
+		foreach (int num in base.GetComponent<OccupyArea>().GetOccupiedGridCells())
+		{
+			Grid.HasDoor[num] = false;
+		}
 		base.OnCleanUp();
 	}
 }

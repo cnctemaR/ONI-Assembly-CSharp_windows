@@ -10,12 +10,6 @@ public class OperationalValve : ValveBase
 		base.Subscribe<OperationalValve>(-592767678, OperationalValve.OnOperationalChangedDelegate);
 	}
 
-	protected override void OnSpawn()
-	{
-		this.OnOperationalChanged(this.operational.IsOperational);
-		base.OnSpawn();
-	}
-
 	protected override void OnCleanUp()
 	{
 		base.Unsubscribe<OperationalValve>(-592767678, OperationalValve.OnOperationalChangedDelegate, false);
@@ -29,14 +23,7 @@ public class OperationalValve : ValveBase
 
 	private void OnOperationalChanged(bool isOperational)
 	{
-		if (isOperational)
-		{
-			base.CurrentFlow = base.MaxFlow;
-		}
-		else
-		{
-			base.CurrentFlow = 0f;
-		}
+		base.CurrentFlow = (isOperational ? base.MaxFlow : 0f);
 		this.operational.SetActive(isOperational, false);
 	}
 

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace HarmonyLib
 {
 	internal class CodeTranspiler
 	{
-		internal CodeTranspiler(List<ILInstruction> ilInstructions, bool argumentShift)
+		internal CodeTranspiler(List<ILInstruction> ilInstructions)
 		{
-			this.argumentShift = argumentShift;
 			this.codeInstructions = ilInstructions.Select<ILInstruction, CodeInstruction>((ILInstruction ilInstruction) => ilInstruction.GetCodeInstruction()).ToList<CodeInstruction>().AsEnumerable<CodeInstruction>();
 		}
 
@@ -59,7 +59,8 @@ namespace HarmonyLib
 				return false;
 			}
 			List<ExceptionBlock> blocks = blocksObject as List<ExceptionBlock>;
-			if (newInstructions.Count<object>((object instr) => instr == op) <= 1)
+			int num2 = newInstructions.Count<object>((object instr) => instr == op);
+			if (num2 <= 1)
 			{
 				return true;
 			}
@@ -78,13 +79,13 @@ namespace HarmonyLib
 						return false;
 					}
 					blocks = blocksObject as List<ExceptionBlock>;
-					return blocks.Any<ExceptionBlock>();
+					return blocks.Count > 0;
 				});
 				if (obj != null)
 				{
-					int num2 = num + 1;
-					int num3 = num2 + originalInstructions.Skip<object>(num2).ToList<object>().IndexOf(obj) - 1;
-					IEnumerable<object> enumerable = originalInstructions.GetRange(num2, num3 - num2).Intersect<object>(newInstructions);
+					int num3 = num + 1;
+					int num4 = num3 + originalInstructions.Skip<object>(num3).ToList<object>().IndexOf(obj) - 1;
+					IEnumerable<object> enumerable = originalInstructions.GetRange(num3, num4 - num3).Intersect<object>(newInstructions);
 					obj = newInstructions.Skip<object>(opIndex + 1).FirstOrDefault<object>(delegate(object instr)
 					{
 						if (!unassignedValues.TryGetValue(instr, out unassigned))
@@ -96,14 +97,15 @@ namespace HarmonyLib
 							return false;
 						}
 						blocks = blocksObject as List<ExceptionBlock>;
-						return blocks.Any<ExceptionBlock>();
+						return blocks.Count > 0;
 					});
 					if (obj != null)
 					{
-						num2 = opIndex + 1;
-						num3 = num2 + newInstructions.Skip<object>(opIndex + 1).ToList<object>().IndexOf(obj) - 1;
-						List<object> range = newInstructions.GetRange(num2, num3 - num2);
-						return !enumerable.Except<object>(range).ToList<object>().Any<object>();
+						num3 = opIndex + 1;
+						num4 = num3 + newInstructions.Skip<object>(opIndex + 1).ToList<object>().IndexOf(obj) - 1;
+						List<object> range = newInstructions.GetRange(num3, num4 - num3);
+						List<object> list = enumerable.Except<object>(range).ToList<object>();
+						return list.Count == 0;
 					}
 				}
 			}
@@ -120,13 +122,13 @@ namespace HarmonyLib
 						return false;
 					}
 					blocks = blocksObject as List<ExceptionBlock>;
-					return blocks.Any<ExceptionBlock>();
+					return blocks.Count > 0;
 				});
 				if (obj2 != null)
 				{
-					int num4 = originalInstructions.GetRange(0, num).LastIndexOf(obj2);
-					int num5 = num;
-					IEnumerable<object> enumerable2 = originalInstructions.GetRange(num4, num5 - num4).Intersect<object>(newInstructions);
+					int num5 = originalInstructions.GetRange(0, num).LastIndexOf(obj2);
+					int num6 = num;
+					IEnumerable<object> enumerable2 = originalInstructions.GetRange(num5, num6 - num5).Intersect<object>(newInstructions);
 					obj2 = newInstructions.GetRange(0, opIndex).LastOrDefault<object>(delegate(object instr)
 					{
 						if (!unassignedValues.TryGetValue(instr, out unassigned))
@@ -138,13 +140,14 @@ namespace HarmonyLib
 							return false;
 						}
 						blocks = blocksObject as List<ExceptionBlock>;
-						return blocks.Any<ExceptionBlock>();
+						return blocks.Count > 0;
 					});
 					if (obj2 != null)
 					{
-						num4 = newInstructions.GetRange(0, opIndex).LastIndexOf(obj2);
-						List<object> range2 = newInstructions.GetRange(num4, opIndex - num4);
-						return !enumerable2.Except<object>(range2).Any<object>();
+						num5 = newInstructions.GetRange(0, opIndex).LastIndexOf(obj2);
+						List<object> range2 = newInstructions.GetRange(num5, opIndex - num5);
+						IEnumerable<object> enumerable3 = enumerable2.Except<object>(range2);
+						return !enumerable3.Any<object>();
 					}
 				}
 			}
@@ -157,7 +160,8 @@ namespace HarmonyLib
 			Type type2 = assembly.GetType(typeof(List<>).FullName);
 			Type type3 = type.GetGenericArguments()[0];
 			Type type4 = type2.MakeGenericType(new Type[] { type3 });
-			object obj = Activator.CreateInstance(assembly.GetType(type4.FullName));
+			Type type5 = assembly.GetType(type4.FullName);
+			object obj = Activator.CreateInstance(type5);
 			MethodInfo method = obj.GetType().GetMethod("Add");
 			unassignedValues = new Dictionary<object, Dictionary<string, object>>();
 			foreach (object obj2 in enumerable)
@@ -172,31 +176,12 @@ namespace HarmonyLib
 
 		internal static IEnumerable ConvertToOurInstructions(IEnumerable instructions, Type codeInstructionType, List<object> originalInstructions, Dictionary<object, Dictionary<string, object>> unassignedValues)
 		{
-			List<object> newInstructions = instructions.Cast<object>().ToList<object>();
-			int index = -1;
-			foreach (object obj in newInstructions)
-			{
-				int num = index;
-				index = num + 1;
-				object obj2 = AccessTools.MakeDeepCopy(obj, codeInstructionType, null, "");
-				Dictionary<string, object> dictionary;
-				if (unassignedValues.TryGetValue(obj, out dictionary))
-				{
-					bool flag = CodeTranspiler.ShouldAddExceptionInfo(obj, index, originalInstructions, newInstructions, unassignedValues);
-					Traverse traverse = Traverse.Create(obj2);
-					foreach (KeyValuePair<string, object> keyValuePair in dictionary)
-					{
-						if (flag || keyValuePair.Key != "blocks")
-						{
-							traverse.Field(keyValuePair.Key).SetValue(keyValuePair.Value);
-						}
-					}
-				}
-				yield return obj2;
-			}
-			List<object>.Enumerator enumerator = default(List<object>.Enumerator);
-			yield break;
-			yield break;
+			CodeTranspiler.<ConvertToOurInstructions>d__7 <ConvertToOurInstructions>d__ = new CodeTranspiler.<ConvertToOurInstructions>d__7(-2);
+			<ConvertToOurInstructions>d__.<>3__instructions = instructions;
+			<ConvertToOurInstructions>d__.<>3__codeInstructionType = codeInstructionType;
+			<ConvertToOurInstructions>d__.<>3__originalInstructions = originalInstructions;
+			<ConvertToOurInstructions>d__.<>3__unassignedValues = unassignedValues;
+			return <ConvertToOurInstructions>d__;
 		}
 
 		private static bool IsCodeInstructionsParameter(Type type)
@@ -206,15 +191,23 @@ namespace HarmonyLib
 
 		internal static IEnumerable ConvertToGeneralInstructions(MethodInfo transpiler, IEnumerable enumerable, out Dictionary<object, Dictionary<string, object>> unassignedValues)
 		{
-			Type type = (from p in transpiler.GetParameters()
-				select p.ParameterType).FirstOrDefault<Type>((Type t) => CodeTranspiler.IsCodeInstructionsParameter(t));
+			IEnumerable<Type> enumerable2 = from p in transpiler.GetParameters()
+				select p.ParameterType;
+			Func<Type, bool> func;
+			if ((func = CodeTranspiler.<>O.<0>__IsCodeInstructionsParameter) == null)
+			{
+				func = (CodeTranspiler.<>O.<0>__IsCodeInstructionsParameter = new Func<Type, bool>(CodeTranspiler.IsCodeInstructionsParameter));
+			}
+			Type type = enumerable2.FirstOrDefault<Type>(func);
 			if (type == typeof(IEnumerable<CodeInstruction>))
 			{
 				unassignedValues = null;
 				IList<CodeInstruction> list;
 				if ((list = enumerable as IList<CodeInstruction>) == null)
 				{
-					list = ((enumerable as IEnumerable<CodeInstruction>) ?? enumerable.Cast<CodeInstruction>()).ToList<CodeInstruction>();
+					List<CodeInstruction> list2 = new List<CodeInstruction>();
+					list2.AddRange((enumerable as IEnumerable<CodeInstruction>) ?? enumerable.Cast<CodeInstruction>());
+					list = list2;
 				}
 				return list;
 			}
@@ -252,10 +245,10 @@ namespace HarmonyLib
 			{
 				Dictionary<object, Dictionary<string, object>> dictionary;
 				instructions = CodeTranspiler.ConvertToGeneralInstructions(transpiler, instructions, out dictionary);
-				List<object> list2 = null;
+				List<object> list = null;
 				if (dictionary != null)
 				{
-					list2 = instructions.Cast<object>().ToList<object>();
+					list = instructions.Cast<object>().ToList<object>();
 				}
 				List<object> transpilerCallParameters = CodeTranspiler.GetTranspilerCallParameters(generator, transpiler, method, instructions);
 				IEnumerable enumerable = transpiler.Invoke(null, transpilerCallParameters.ToArray()) as IEnumerable;
@@ -265,15 +258,10 @@ namespace HarmonyLib
 				}
 				if (dictionary != null)
 				{
-					instructions = CodeTranspiler.ConvertToOurInstructions(instructions, typeof(CodeInstruction), list2, dictionary);
+					instructions = CodeTranspiler.ConvertToOurInstructions(instructions, typeof(CodeInstruction), list, dictionary);
 				}
 			});
-			List<CodeInstruction> list = (instructions as List<CodeInstruction>) ?? instructions.Cast<CodeInstruction>().ToList<CodeInstruction>();
-			if (this.argumentShift)
-			{
-				StructReturnBuffer.ArgumentShifter(list, method.IsStatic && AccessTools.IsMonoRuntime);
-			}
-			return list;
+			return (instructions as List<CodeInstruction>) ?? instructions.Cast<CodeInstruction>().ToList<CodeInstruction>();
 		}
 
 		private static OpCode ReplaceShortJumps(OpCode opcode)
@@ -289,8 +277,6 @@ namespace HarmonyLib
 		}
 
 		private readonly IEnumerable<CodeInstruction> codeInstructions;
-
-		private readonly bool argumentShift;
 
 		private readonly List<MethodInfo> transpilers = new List<MethodInfo>();
 
@@ -353,5 +339,11 @@ namespace HarmonyLib
 				OpCodes.Leave
 			}
 		};
+
+		[CompilerGenerated]
+		private static class <>O
+		{
+			public static Func<Type, bool> <0>__IsCodeInstructionsParameter;
+		}
 	}
 }

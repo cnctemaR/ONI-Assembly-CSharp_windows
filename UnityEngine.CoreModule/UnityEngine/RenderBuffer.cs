@@ -9,34 +9,24 @@ namespace UnityEngine
 	public struct RenderBuffer
 	{
 		[FreeFunction(Name = "RenderBufferScripting::SetLoadAction", HasExplicitThis = true)]
-		internal void SetLoadAction(RenderBufferLoadAction action)
-		{
-			RenderBuffer.SetLoadAction_Injected(ref this, action);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetLoadAction(RenderBufferLoadAction action);
 
 		[FreeFunction(Name = "RenderBufferScripting::SetStoreAction", HasExplicitThis = true)]
-		internal void SetStoreAction(RenderBufferStoreAction action)
-		{
-			RenderBuffer.SetStoreAction_Injected(ref this, action);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void SetStoreAction(RenderBufferStoreAction action);
 
 		[FreeFunction(Name = "RenderBufferScripting::GetLoadAction", HasExplicitThis = true)]
-		internal RenderBufferLoadAction GetLoadAction()
-		{
-			return RenderBuffer.GetLoadAction_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern RenderBufferLoadAction GetLoadAction();
 
 		[FreeFunction(Name = "RenderBufferScripting::GetStoreAction", HasExplicitThis = true)]
-		internal RenderBufferStoreAction GetStoreAction()
-		{
-			return RenderBuffer.GetStoreAction_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern RenderBufferStoreAction GetStoreAction();
 
 		[FreeFunction(Name = "RenderBufferScripting::GetNativeRenderBufferPtr", HasExplicitThis = true)]
-		public IntPtr GetNativeRenderBufferPtr()
-		{
-			return RenderBuffer.GetNativeRenderBufferPtr_Injected(ref this);
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern IntPtr GetNativeRenderBufferPtr();
 
 		internal RenderBufferLoadAction loadAction
 		{
@@ -61,21 +51,6 @@ namespace UnityEngine
 				this.SetStoreAction(value);
 			}
 		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetLoadAction_Injected(ref RenderBuffer _unity_self, RenderBufferLoadAction action);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void SetStoreAction_Injected(ref RenderBuffer _unity_self, RenderBufferStoreAction action);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RenderBufferLoadAction GetLoadAction_Injected(ref RenderBuffer _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern RenderBufferStoreAction GetStoreAction_Injected(ref RenderBuffer _unity_self);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetNativeRenderBufferPtr_Injected(ref RenderBuffer _unity_self);
 
 		internal int m_RenderTextureInstanceID;
 

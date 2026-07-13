@@ -278,7 +278,7 @@ public class SelectModuleSideScreen : KScreen
 					LocText componentInChildren = gameObject2.GetComponentInChildren<LocText>();
 					componentInChildren.text = part.GetProperName();
 					componentInChildren.alignment = TextAlignmentOptions.Bottom;
-					componentInChildren.enableWordWrapping = true;
+					componentInChildren.textWrappingMode = TextWrappingModes.Normal;
 					MultiToggle component2 = gameObject2.GetComponent<MultiToggle>();
 					component2.onClick = (global::System.Action)Delegate.Combine(component2.onClick, new global::System.Action(delegate
 					{

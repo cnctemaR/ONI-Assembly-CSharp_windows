@@ -317,6 +317,7 @@ public class Global : MonoBehaviour
 		Localization.RegisterForTranslation(typeof(UI));
 		this.modManager = new global::KMod.Manager();
 		this.modManager.LoadModDBAndInitialize();
+		this.modManager.SetModLoadingInProgress(true);
 		this.modManager.Load(Content.DLL);
 		this.modManager.Load(Content.Strings);
 		global::KSerialization.Manager.Initialize();
@@ -639,7 +640,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 707956U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 719533U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

@@ -3,7 +3,7 @@
 namespace Mono.Cecil
 {
 	[Flags]
-	public enum EventAttributes : ushort
+	internal enum EventAttributes : ushort
 	{
 		None = 0,
 		SpecialName = 512,

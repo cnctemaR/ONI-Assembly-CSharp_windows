@@ -2,7 +2,7 @@
 
 namespace Mono.Cecil
 {
-	public enum ResourceType
+	internal enum ResourceType
 	{
 		Linked,
 		Embedded,

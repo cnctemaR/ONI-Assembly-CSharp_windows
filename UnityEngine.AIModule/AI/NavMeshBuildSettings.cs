@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine.Bindings;
 
 namespace UnityEngine.AI
@@ -204,15 +205,15 @@ namespace UnityEngine.AI
 			return NavMeshBuildSettings.InternalValidationReport(this, buildBounds);
 		}
 
-		[FreeFunction]
 		[NativeHeader("Modules/AI/Public/NavMeshBuildSettings.h")]
+		[FreeFunction]
 		private static string[] InternalValidationReport(NavMeshBuildSettings buildSettings, Bounds buildBounds)
 		{
 			return NavMeshBuildSettings.InternalValidationReport_Injected(ref buildSettings, ref buildBounds);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string[] InternalValidationReport_Injected(ref NavMeshBuildSettings buildSettings, ref Bounds buildBounds);
+		private static extern string[] InternalValidationReport_Injected([In] ref NavMeshBuildSettings buildSettings, [In] ref Bounds buildBounds);
 
 		private int m_AgentTypeID;
 

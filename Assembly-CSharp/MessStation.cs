@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/MessStation")]
-public class MessStation : Workable, IGameObjectEffectDescriptor, IDiningSeat
+public class MessStation : Workable, IDiningSeat
 {
 	protected override void OnPrefabInit()
 	{

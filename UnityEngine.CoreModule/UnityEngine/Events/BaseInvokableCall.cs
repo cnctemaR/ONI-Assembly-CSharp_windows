@@ -42,11 +42,7 @@ namespace UnityEngine.Events
 			bool flag = arg != null && !(arg is T);
 			if (flag)
 			{
-				throw new ArgumentException(UnityString.Format("Passed argument 'args[0]' is of the wrong type. Type:{0} Expected:{1}", new object[]
-				{
-					arg.GetType(),
-					typeof(T)
-				}));
+				throw new ArgumentException(string.Format("Passed argument 'args[0]' is of the wrong type. Type:{0} Expected:{1}", arg.GetType(), typeof(T)));
 			}
 		}
 

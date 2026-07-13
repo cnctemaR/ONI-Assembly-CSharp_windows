@@ -35,6 +35,10 @@ public class ScheduleBlockPainter : KMonoBehaviour, IPointerDownHandler, IEventS
 
 	private void PaintBlocksBelow(PointerEventData eventData)
 	{
+		if (eventData.button != PointerEventData.InputButton.Left)
+		{
+			return;
+		}
 		if (ScheduleScreen.Instance.SelectedPaint.IsNullOrWhiteSpace())
 		{
 			return;

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace Unity.IO.LowLevel.Unsafe
 {
-	[NativeConditional("ENABLE_PROFILER")]
 	[NativeAsStruct]
+	[NativeConditional("ENABLE_PROFILER")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AsyncReadManagerSummaryMetrics
 	{

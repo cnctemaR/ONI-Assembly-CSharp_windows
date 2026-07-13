@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil
 {
-	public sealed class MethodDefinition : MethodReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider, ISecurityDeclarationProvider, ICustomDebugInformationProvider
+	internal sealed class MethodDefinition : MethodReference, IMemberDefinition, ICustomAttributeProvider, IMetadataTokenProvider, ISecurityDeclarationProvider, ICustomDebugInformationProvider
 	{
 		public override string Name
 		{
@@ -716,6 +716,18 @@ namespace Mono.Cecil
 			set
 			{
 				this.impl_attributes = this.impl_attributes.SetAttributes(256, value);
+			}
+		}
+
+		public bool AggressiveOptimization
+		{
+			get
+			{
+				return this.impl_attributes.GetAttributes(512);
+			}
+			set
+			{
+				this.impl_attributes = this.impl_attributes.SetAttributes(512, value);
 			}
 		}
 

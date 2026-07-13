@@ -102,6 +102,22 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		return true;
 	}
 
+	public override PathFinderAbilities Clone()
+	{
+		return new MinionPathFinderAbilities(this.navigator)
+		{
+			prefabInstanceID = this.prefabInstanceID,
+			proxyID = this.proxyID,
+			accessControlDefaultKey = this.accessControlDefaultKey,
+			out_of_fuel = this.out_of_fuel,
+			idleNavMaskEnabled = this.idleNavMaskEnabled
+		};
+	}
+
+	public override void RecycleClone()
+	{
+	}
+
 	private CellOffset[][] transitionVoidOffsets;
 
 	private int proxyID;

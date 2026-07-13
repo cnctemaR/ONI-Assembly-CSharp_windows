@@ -138,12 +138,13 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 				GameObject gameObject = this.dupe.Get(smi);
 				smi.eatAnim = EatChore.StatesInstance.OnEnterMessStation(this.messstation.Get(smi), gameObject, this.pickedUpElectrobank.Get(smi), true, new float?(1800f));
 				ReloadElectrobankChore.SetZ(gameObject, Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
-			}).Exit(delegate(ReloadElectrobankChore.Instance smi)
-			{
-				GameObject gameObject2 = this.dupe.Get(smi);
-				EatChore.StatesInstance.OnExitMessStation(this.messstation.Get(smi), gameObject2, smi.eatAnim);
-				ReloadElectrobankChore.SetZ(gameObject2, Grid.GetLayerZ(Grid.SceneLayer.Move));
-			});
+			}).Transition(this.installAtSafeLocation, (ReloadElectrobankChore.Instance smi) => smi.eatAnim == null, UpdateRate.SIM_200ms)
+				.Exit(delegate(ReloadElectrobankChore.Instance smi)
+				{
+					GameObject gameObject2 = this.dupe.Get(smi);
+					EatChore.StatesInstance.OnExitMessStation(this.messstation.Get(smi), gameObject2, smi.eatAnim);
+					ReloadElectrobankChore.SetZ(gameObject2, Grid.GetLayerZ(Grid.SceneLayer.Move));
+				});
 			this.installAtSafeLocation.Enter("CreateSafeLocation", delegate(ReloadElectrobankChore.Instance smi)
 			{
 				ValueTuple<GameObject, int> valueTuple = EatChore.StatesInstance.CreateLocator(this.dupe.Get<Sensors>(smi), this.dupe.Get<Transform>(smi), "ReloadElectrobankLocator");

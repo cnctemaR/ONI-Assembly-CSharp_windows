@@ -24,5 +24,18 @@ public class CreaturePathFinderAbilities : PathFinderAbilities
 		return !submerged || this.canTraverseSubmered;
 	}
 
+	public override PathFinderAbilities Clone()
+	{
+		return new CreaturePathFinderAbilities(this.navigator)
+		{
+			prefabInstanceID = this.prefabInstanceID,
+			canTraverseSubmered = this.canTraverseSubmered
+		};
+	}
+
+	public override void RecycleClone()
+	{
+	}
+
 	public bool canTraverseSubmered;
 }

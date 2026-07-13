@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using ProcGen;
@@ -225,7 +226,8 @@ public class Grid
 	{
 		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
 		Grid.HasSuitMarker[cell] = false;
-		Grid.suitMarkers.Remove(cell);
+		Grid.SuitMarker suitMarker;
+		Grid.suitMarkers.TryRemove(cell, out suitMarker);
 	}
 
 	public static bool ReserveSuit(int cell, int minionInstanceID, bool reserve)
@@ -279,10 +281,11 @@ public class Grid
 
 	public static bool TryGetSuitMarkerFlags(int cell, out Grid.SuitMarker.Flags flags, out PathFinder.PotentialPath.Flags pathFlags)
 	{
-		if (Grid.HasSuitMarker[cell])
+		Grid.SuitMarker suitMarker;
+		if (Grid.HasSuitMarker[cell] && Grid.suitMarkers.TryGetValue(cell, out suitMarker))
 		{
-			flags = Grid.suitMarkers[cell].flags;
-			pathFlags = Grid.suitMarkers[cell].pathFlags;
+			flags = suitMarker.flags;
+			pathFlags = suitMarker.pathFlags;
 			return true;
 		}
 		flags = (Grid.SuitMarker.Flags)0;
@@ -1358,7 +1361,7 @@ public class Grid
 
 	private static Dictionary<int, Grid.TubeEntrance> tubeEntrances = new Dictionary<int, Grid.TubeEntrance>();
 
-	private static Dictionary<int, Grid.SuitMarker> suitMarkers = new Dictionary<int, Grid.SuitMarker>();
+	private static ConcurrentDictionary<int, Grid.SuitMarker> suitMarkers = new ConcurrentDictionary<int, Grid.SuitMarker>();
 
 	public unsafe static ushort* elementIdx;
 

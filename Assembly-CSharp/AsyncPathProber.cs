@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Threading;
+using UnityEngine.Pool;
 
 public static class AsyncPathProber
 {
@@ -19,138 +22,314 @@ public static class AsyncPathProber
 		AsyncPathProber.Instance = null;
 	}
 
-	public class PathProberResources
+	public const int kMaxProbersPerFrame = 4;
+
+	public struct WorkResult
 	{
-		public PathProberResources()
+		public Navigator navigator;
+
+		public PathGrid pathGrid;
+
+		public List<int> reachableCells;
+
+		public List<int> newlyReachableCells;
+
+		public List<int> noLongerReachableCells;
+	}
+
+	public struct WorkOrder
+	{
+		public void Cleanup()
 		{
-			this.path_grids = new Dictionary<ulong, PathGrid>();
-			this.potentials = new PathFinder.PotentialList();
-			this.scratch = new PathFinder.PotentialScratchPad(Pathfinding.Instance.MaxLinksPerCell());
-			this.found_cells = new List<int>();
+			this.abilities.RecycleClone();
 		}
 
-		public Dictionary<ulong, PathGrid> path_grids;
+		public void Execute(PathFinder.PotentialList potentials, PathFinder.PotentialScratchPad scratch, ref AsyncPathProber.WorkResult result)
+		{
+			if (result.pathGrid.SerialNo >= this.serialNo)
+			{
+				result.pathGrid.ResetProberCells();
+			}
+			PathProber.Run(this.originCell, this.abilities, this.navGrid, this.startingNavType, result.pathGrid, this.serialNo, scratch, potentials, this.startingFlags, result.reachableCells);
+			if (this.computeReachables)
+			{
+				result.reachableCells.Sort();
+				int i = 0;
+				int j = 0;
+				while (i < this.navigator.occupiedCells.Count)
+				{
+					if (j >= result.reachableCells.Count)
+					{
+						break;
+					}
+					if (this.navigator.occupiedCells[i] < result.reachableCells[j])
+					{
+						result.noLongerReachableCells.Add(this.navigator.occupiedCells[i]);
+						i++;
+					}
+					else if (result.reachableCells[j] < this.navigator.occupiedCells[i])
+					{
+						result.newlyReachableCells.Add(result.reachableCells[j]);
+						j++;
+					}
+					else
+					{
+						i++;
+						j++;
+					}
+				}
+				while (i < this.navigator.occupiedCells.Count)
+				{
+					result.noLongerReachableCells.Add(this.navigator.occupiedCells[i]);
+					i++;
+				}
+				while (j < result.reachableCells.Count)
+				{
+					result.newlyReachableCells.Add(result.reachableCells[j]);
+					j++;
+				}
+			}
+			this.Cleanup();
+		}
 
-		public PathFinder.PotentialList potentials;
+		public Navigator navigator;
 
-		public PathFinder.PotentialScratchPad scratch;
+		public NavGrid navGrid;
 
-		public List<int> found_cells;
+		public ulong gridClassification;
+
+		public PathFinderAbilities abilities;
+
+		public int originCell;
+
+		public NavType startingNavType;
+
+		public PathFinder.PotentialPath.Flags startingFlags;
+
+		public ushort serialNo;
+
+		public bool computeReachables;
 	}
 
 	private static class AsyncPathProbeWorker
 	{
 		public static void main(object _)
 		{
-			AsyncPathProber.PathProberResources pathProberResources = new AsyncPathProber.PathProberResources();
-			while (!AsyncPathProber.Instance.Halting())
+			PathFinder.PotentialList potentialList = new PathFinder.PotentialList();
+			PathFinder.PotentialScratchPad potentialScratchPad = new PathFinder.PotentialScratchPad(Pathfinding.Instance.MaxLinksPerCell());
+			try
 			{
-				Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry;
-				if (AsyncPathProber.Instance.NextTask(out asyncPathGridUpdaterEntry))
+				while (!AsyncPathProber.Instance.Halting())
 				{
-					ulong allocatedClassification = asyncPathGridUpdaterEntry.navigator.PathGrid.AllocatedClassification;
-					PathGrid pathGrid = null;
-					if (!pathProberResources.path_grids.TryGetValue(allocatedClassification, out pathGrid))
+					AsyncPathProber.WorkOrder workOrder;
+					AsyncPathProber.WorkResult workResult;
+					if (AsyncPathProber.Instance.NextTask(out workOrder, out workResult))
 					{
-						pathGrid = new PathGrid(asyncPathGridUpdaterEntry.navigator.PathGrid);
-						pathProberResources.path_grids[allocatedClassification] = pathGrid;
+						workOrder.Execute(potentialList, potentialScratchPad, ref workResult);
+						AsyncPathProber.Instance.WorkCompleted(workResult);
 					}
 					else
 					{
-						pathGrid.CloneNavTypes(asyncPathGridUpdaterEntry.navigator.PathGrid);
+						Thread.Sleep(1);
 					}
-					ushort serialNo = AsyncPathProber.Instance.SerialNo;
-					if (pathGrid.SerialNo > AsyncPathProber.Instance.SerialNo)
-					{
-						pathGrid.ResetProberCells();
-					}
-					PathProber.Run(asyncPathGridUpdaterEntry.originCell, asyncPathGridUpdaterEntry.abilities, asyncPathGridUpdaterEntry.navigator.NavGrid, asyncPathGridUpdaterEntry.startingNavType, pathGrid, AsyncPathProber.Instance.SerialNo, pathProberResources.scratch, pathProberResources.potentials, asyncPathGridUpdaterEntry.startingFlags, pathProberResources.found_cells);
-					if (asyncPathGridUpdaterEntry.navigator.reportOccupation)
-					{
-						pathProberResources.found_cells.Sort();
-					}
-					Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry2 = asyncPathGridUpdaterEntry;
-					lock (asyncPathGridUpdaterEntry2)
-					{
-						if (!asyncPathGridUpdaterEntry.toRemove)
-						{
-							pathProberResources.path_grids[allocatedClassification] = asyncPathGridUpdaterEntry.navigator.PathGrid;
-							asyncPathGridUpdaterEntry.navigator.PathGrid = pathGrid;
-							asyncPathGridUpdaterEntry.framesSinceLastUpdate = 0;
-							if (asyncPathGridUpdaterEntry.navigator.reportOccupation)
-							{
-								List<int> occupiedCells = asyncPathGridUpdaterEntry.navigator.occupiedCells;
-								int i = 0;
-								int j = 0;
-								while (i < occupiedCells.Count)
-								{
-									if (j >= pathProberResources.found_cells.Count)
-									{
-										break;
-									}
-									if (occupiedCells[i] < pathProberResources.found_cells[j])
-									{
-										MinionGroupProber.Get().Vacate(occupiedCells[i]);
-										i++;
-									}
-									else if (pathProberResources.found_cells[j] < occupiedCells[i])
-									{
-										MinionGroupProber.Get().Occupy(pathProberResources.found_cells[j]);
-										j++;
-									}
-									else
-									{
-										i++;
-										j++;
-									}
-								}
-								while (j < pathProberResources.found_cells.Count)
-								{
-									MinionGroupProber.Get().Occupy(pathProberResources.found_cells[j]);
-									j++;
-								}
-								while (i < occupiedCells.Count)
-								{
-									MinionGroupProber.Get().Vacate(occupiedCells[i]);
-									i++;
-								}
-								asyncPathGridUpdaterEntry.navigator.occupiedCells = pathProberResources.found_cells;
-								pathProberResources.found_cells = occupiedCells;
-							}
-						}
-					}
-					pathProberResources.found_cells.Clear();
-					AsyncPathProber.Instance.TaskComplete(asyncPathGridUpdaterEntry);
 				}
-				else
-				{
-					Thread.Sleep(1);
-				}
+			}
+			catch (Exception ex)
+			{
+				AsyncPathProber.Instance.SetException(ExceptionDispatchInfo.Capture(ex));
 			}
 		}
 	}
 
 	public class Manager
 	{
-		public ushort SerialNo
+		public bool Halting()
 		{
-			get
+			return this.halting;
+		}
+
+		public Manager()
+		{
+			this.navigatorOrderer = (Navigator lhs, Navigator rhs) => this.navigators.GetValueOrDefault(rhs, 0).CompareTo(this.navigators.GetValueOrDefault(lhs, 0));
+		}
+
+		public void SetException(ExceptionDispatchInfo ex)
+		{
+			lock (this)
 			{
-				return this.pathgridSerialNo;
+				this.agentException = ex;
 			}
 		}
 
-		public void Register(Navigator.AsyncPathGridUpdaterEntry nav)
+		public void Register(Navigator nav)
 		{
-			DebugUtil.Assert(Game.IsOnMainThread());
-			this.pendingAdds.Add(nav);
+			lock (this)
+			{
+				if (this.navigators.ContainsKey(nav))
+				{
+					Debug.LogWarning("Double registration of navigator to AsyncManager: " + nav.ToString());
+				}
+				if (!this.gridPool.ContainsKey(nav.PathGrid.AllocatedClassification))
+				{
+					bool flag2 = false;
+					try
+					{
+						Monitor.Enter(this, ref flag2);
+						int width = nav.PathGrid.widthInCells;
+						int height = nav.PathGrid.heightInCells;
+						bool applyOffset = nav.PathGrid.applyOffset;
+						NavType[] navTypes = new NavType[nav.PathGrid.ValidNavTypes.Length];
+						nav.PathGrid.ValidNavTypes.CopyTo(navTypes, 0);
+						this.gridPool[nav.PathGrid.AllocatedClassification] = new ObjectPool<PathGrid>(() => new PathGrid(width, height, applyOffset, navTypes), null, null, null, false, 4 + this.agents.Length, 4 + this.agents.Length);
+					}
+					finally
+					{
+						if (flag2)
+						{
+							Monitor.Exit(this);
+						}
+					}
+				}
+				this.navigators[nav] = 10000;
+			}
 		}
 
-		public void Unregister(Navigator.AsyncPathGridUpdaterEntry nav)
+		public void Unregister(Navigator nav)
 		{
-			lock (nav)
+			lock (this)
 			{
-				nav.toRemove = true;
+				if (!this.navigators.Remove(nav))
+				{
+					Debug.LogWarning("Unregister of unknown navigator from AsyncManager: " + nav.ToString());
+				}
+			}
+		}
+
+		public void WorkCompleted(AsyncPathProber.WorkResult result)
+		{
+			lock (this)
+			{
+				this.finishedWork.Add(result);
+			}
+		}
+
+		public bool NextTask(out AsyncPathProber.WorkOrder order, out AsyncPathProber.WorkResult result)
+		{
+			lock (this)
+			{
+				if (this.workQueue.Count > 0)
+				{
+					order = this.workQueue[this.workQueue.Count - 1];
+					this.workQueue.RemoveAt(this.workQueue.Count - 1);
+					if (this.navigators.ContainsKey(order.navigator))
+					{
+						result = new AsyncPathProber.WorkResult
+						{
+							navigator = order.navigator,
+							pathGrid = this.gridPool[order.gridClassification].Get(),
+							newlyReachableCells = this.indexListPool.Get(),
+							noLongerReachableCells = this.indexListPool.Get(),
+							reachableCells = this.indexListPool.Get()
+						};
+						this.navigators[order.navigator] = -1;
+						return true;
+					}
+				}
+			}
+			order = default(AsyncPathProber.WorkOrder);
+			result = default(AsyncPathProber.WorkResult);
+			return false;
+		}
+
+		private AsyncPathProber.WorkOrder makeWorkOrder(Navigator nav)
+		{
+			PathFinderAbilities currentAbilities = nav.GetCurrentAbilities();
+			return new AsyncPathProber.WorkOrder
+			{
+				navigator = nav,
+				navGrid = nav.NavGrid,
+				gridClassification = nav.PathGrid.AllocatedClassification,
+				abilities = currentAbilities.Clone(),
+				originCell = nav.cachedCell,
+				startingNavType = nav.CurrentNavType,
+				startingFlags = nav.flags,
+				serialNo = this.activeSerialNo,
+				computeReachables = nav.reportOccupation
+			};
+		}
+
+		public void TickFrame()
+		{
+			lock (this)
+			{
+				if (this.agentException != null)
+				{
+					this.agentException.Throw();
+				}
+				this.activeSerialNo += 1;
+				if (this.activeSerialNo == 0)
+				{
+					this.activeSerialNo += 1;
+				}
+				for (int i = 0; i < this.finishedWork.Count; i++)
+				{
+					AsyncPathProber.WorkResult workResult = this.finishedWork[i];
+					PathGrid pathGrid = workResult.pathGrid;
+					if (this.navigators.ContainsKey(workResult.navigator))
+					{
+						pathGrid = workResult.navigator.TakeResult(ref workResult);
+						this.navigators[workResult.navigator] = 0;
+					}
+					if (pathGrid != null)
+					{
+						this.gridPool[pathGrid.AllocatedClassification].Release(pathGrid);
+					}
+					this.indexListPool.Release(workResult.reachableCells);
+					this.indexListPool.Release(workResult.newlyReachableCells);
+					this.indexListPool.Release(workResult.noLongerReachableCells);
+				}
+				this.finishedWork.Clear();
+				foreach (KeyValuePair<Navigator, int> keyValuePair in this.navigators)
+				{
+					this.navigatorOrdering.Add(keyValuePair.Key);
+				}
+				for (int j = this.navigatorOrdering.Count - 1; j >= 0; j--)
+				{
+					Navigator navigator = this.navigatorOrdering[j];
+					int num = this.navigators[navigator];
+					if (num == -1)
+					{
+						this.navigatorOrdering.RemoveAtSwap<Navigator>(j);
+					}
+					else
+					{
+						this.navigators[navigator] = num + 1;
+					}
+				}
+				this.navigatorOrdering.Sort(this.navigatorOrderer);
+				for (int k = 0; k < this.workQueue.Count; k++)
+				{
+					this.workQueue[k].Cleanup();
+				}
+				this.workQueue.Clear();
+				for (int l = 0; l < Math.Min(this.navigatorOrdering.Count, 4); l++)
+				{
+					this.workQueue.Add(this.makeWorkOrder(this.navigatorOrdering[l]));
+				}
+				this.navigatorOrdering.Clear();
+			}
+		}
+
+		public void ApplyNavigationFailedPenalty(Navigator nav)
+		{
+			AsyncPathProber.Manager.NavFailures++;
+			lock (this)
+			{
+				int num;
+				if (this.navigators.TryGetValue(nav, out num) && num >= 0)
+				{
+					this.navigators[nav] = num + 10;
+				}
 			}
 		}
 
@@ -178,104 +357,37 @@ public static class AsyncPathProber
 			}
 		}
 
-		public bool NextTask(out Navigator.AsyncPathGridUpdaterEntry entry)
-		{
-			lock (this)
-			{
-				if (!this.halting && this.nextWorkItem < this.workQueue.Count)
-				{
-					entry = this.workQueue[this.nextWorkItem];
-					this.nextWorkItem++;
-					if (!entry.toRemove)
-					{
-						this.inFlight.Add(entry);
-					}
-					return !entry.toRemove;
-				}
-			}
-			entry = null;
-			return false;
-		}
+		private const int kNovelProberPenalty = 10000;
 
-		public void TaskComplete(Navigator.AsyncPathGridUpdaterEntry entry)
-		{
-			lock (this)
-			{
-				this.inFlight.Remove(entry);
-			}
-		}
+		private const int kFailedNavigationPenalty = 10;
 
-		public bool Halting()
-		{
-			return this.halting;
-		}
+		private const int kNavigatorInFlightValue = -1;
 
-		public void TickFrame()
-		{
-			lock (this)
-			{
-				this.pathgridSerialNo += 1;
-				if (this.pathgridSerialNo == 0)
-				{
-					this.pathgridSerialNo += 1;
-				}
-				for (int i = this.navigators.Count - 1; i >= 0; i--)
-				{
-					if (this.navigators[i].toRemove)
-					{
-						this.navigators[i] = this.navigators[this.navigators.Count - 1];
-						this.navigators.RemoveAt(this.navigators.Count - 1);
-					}
-					else
-					{
-						this.navigators[i].abilities.Refresh();
-						this.navigators[i].originCell = this.navigators[i].navigator.cachedCell;
-						this.navigators[i].startingNavType = this.navigators[i].navigator.CurrentNavType;
-						this.navigators[i].startingFlags = this.navigators[i].navigator.flags;
-						this.navigators[i].framesSinceLastUpdate++;
-					}
-				}
-				foreach (Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry in this.pendingAdds)
-				{
-					if (!asyncPathGridUpdaterEntry.toRemove)
-					{
-						asyncPathGridUpdaterEntry.originCell = Grid.PosToCell(asyncPathGridUpdaterEntry.navigator);
-						asyncPathGridUpdaterEntry.startingNavType = asyncPathGridUpdaterEntry.navigator.CurrentNavType;
-						asyncPathGridUpdaterEntry.abilities = asyncPathGridUpdaterEntry.navigator.GetCurrentAbilities();
-						asyncPathGridUpdaterEntry.framesSinceLastUpdate = 10000;
-						this.navigators.Add(asyncPathGridUpdaterEntry);
-					}
-				}
-				this.pendingAdds.Clear();
-				this.workQueue.Clear();
-				foreach (Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry2 in this.navigators)
-				{
-					if (!this.inFlight.Contains(asyncPathGridUpdaterEntry2))
-					{
-						this.workQueue.Add(asyncPathGridUpdaterEntry2);
-					}
-				}
-				this.workQueue.Sort(this.workQueuePrioritizer);
-				this.nextWorkItem = 0;
-			}
-		}
+		private Dictionary<Navigator, int> navigators = new Dictionary<Navigator, int>();
 
-		private List<Navigator.AsyncPathGridUpdaterEntry> navigators = new List<Navigator.AsyncPathGridUpdaterEntry>();
+		private List<Navigator> navigatorOrdering = new List<Navigator>();
 
-		private List<Navigator.AsyncPathGridUpdaterEntry> pendingAdds = new List<Navigator.AsyncPathGridUpdaterEntry>();
+		private Comparison<Navigator> navigatorOrderer;
 
-		private List<Navigator.AsyncPathGridUpdaterEntry> workQueue = new List<Navigator.AsyncPathGridUpdaterEntry>();
-
-		private HashSet<Navigator.AsyncPathGridUpdaterEntry> inFlight = new HashSet<Navigator.AsyncPathGridUpdaterEntry>();
-
-		private Comparison<Navigator.AsyncPathGridUpdaterEntry> workQueuePrioritizer = (Navigator.AsyncPathGridUpdaterEntry a, Navigator.AsyncPathGridUpdaterEntry b) => b.framesSinceLastUpdate - a.framesSinceLastUpdate;
+		private ushort activeSerialNo;
 
 		private Thread[] agents;
 
 		private bool halting;
 
-		private int nextWorkItem;
+		private ExceptionDispatchInfo agentException;
 
-		private ushort pathgridSerialNo;
+		private List<AsyncPathProber.WorkOrder> workQueue = new List<AsyncPathProber.WorkOrder>();
+
+		private List<AsyncPathProber.WorkResult> finishedWork = new List<AsyncPathProber.WorkResult>();
+
+		private ConcurrentDictionary<ulong, ObjectPool<PathGrid>> gridPool = new ConcurrentDictionary<ulong, ObjectPool<PathGrid>>();
+
+		private ObjectPool<List<int>> indexListPool = new ObjectPool<List<int>>(() => new List<int>(Grid.CellCount / 8), null, delegate(List<int> list)
+		{
+			list.Clear();
+		}, null, false, 12, 10000);
+
+		private static int NavFailures;
 	}
 }

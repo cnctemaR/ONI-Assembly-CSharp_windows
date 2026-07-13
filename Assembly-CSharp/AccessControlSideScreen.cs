@@ -175,7 +175,7 @@ public class AccessControlSideScreen : SideScreenContent
 				this.ConfigureRow(minionAssignablesProxy);
 			}
 		}
-		if (Game.IsDlcActiveForCurrentSave("DLC2_ID"))
+		if (Game.IsDlcActiveForCurrentSave("DLC3_ID"))
 		{
 			this.ConfigureRow(GameTags.Robots.Models.FetchDrone);
 		}

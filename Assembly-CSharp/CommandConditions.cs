@@ -10,8 +10,6 @@ public class CommandConditions : KMonoBehaviour
 
 	public ConditionAllModulesComplete allModulesComplete;
 
-	public ConditionHasCargoBayForNoseconeHarvest HasCargoBayForNoseconeHarvest;
-
 	public ConditionHasEngine hasEngine;
 
 	public ConditionHasNosecone hasNosecone;

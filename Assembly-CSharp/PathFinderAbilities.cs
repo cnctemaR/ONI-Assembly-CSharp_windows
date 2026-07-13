@@ -21,6 +21,10 @@ public abstract class PathFinderAbilities
 
 	protected abstract void Refresh(Navigator navigator);
 
+	public abstract PathFinderAbilities Clone();
+
+	public abstract void RecycleClone();
+
 	public abstract bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, bool submerged);
 
 	public virtual int GetSubmergedPathCostPenalty(PathFinder.PotentialPath path, NavGrid.Link link)

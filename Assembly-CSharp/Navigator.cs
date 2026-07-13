@@ -99,10 +99,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		}
 		if (this.executePathProbeTaskAsync)
 		{
-			DebugUtil.Assert(this.asyncUpdaterEntry == null);
-			this.asyncUpdaterEntry = new Navigator.AsyncPathGridUpdaterEntry();
-			this.asyncUpdaterEntry.navigator = this;
-			AsyncPathProber.Instance.Register(this.asyncUpdaterEntry);
+			AsyncPathProber.Instance.Register(this);
 		}
 		this.cachedCell = Grid.PosToCell(this);
 		this.SetCurrentNavType(this.CurrentNavType);
@@ -146,12 +143,27 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		if (this.executePathProbeTaskAsync)
 		{
-			AsyncPathProber.Instance.Unregister(this.asyncUpdaterEntry);
+			AsyncPathProber.Instance.Unregister(this);
 		}
 		if (this.reportOccupation)
 		{
 			MinionGroupProber.Get().Vacate(this.occupiedCells);
 		}
+	}
+
+	public PathGrid TakeResult(ref AsyncPathProber.WorkResult result)
+	{
+		PathGrid pathGrid = this.PathGrid;
+		this.PathGrid = result.pathGrid;
+		if (this.reportOccupation)
+		{
+			List<int> list = this.occupiedCells;
+			MinionGroupProber.Get().OccupyST(result.newlyReachableCells);
+			MinionGroupProber.Get().VacateST(result.noLongerReachableCells);
+			this.occupiedCells = result.reachableCells;
+			result.reachableCells = list;
+		}
+		return pathGrid;
 	}
 
 	public bool IsMoving()
@@ -233,20 +245,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	private bool TryBuildPathFromCache(int cachedCell, int reservedCell, ref PathFinder.Path path)
 	{
-		bool flag = false;
-		if (this.executePathProbeTaskAsync)
-		{
-			Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry = this.asyncUpdaterEntry;
-			lock (asyncPathGridUpdaterEntry)
-			{
-				flag = this.PathGrid.BuildPath(cachedCell, reservedCell, this.CurrentNavType, ref path);
-				goto IL_0051;
-			}
-		}
-		flag = this.PathGrid.BuildPath(cachedCell, reservedCell, this.CurrentNavType, ref path);
-		IL_0051:
-		bool flag3;
-		return flag && this.ValidatePath(ref path, out flag3);
+		bool flag;
+		return this.PathGrid.BuildPath(cachedCell, reservedCell, this.CurrentNavType, ref path) && this.ValidatePath(ref path, out flag);
 	}
 
 	public void AdvancePath(bool trigger_advance = true)
@@ -279,6 +279,10 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 				{
 					PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(this.cachedCell, this.CurrentNavType, this.flags);
 					PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(this.reservedCell), ref this.path);
+					if (this.executePathProbeTaskAsync)
+					{
+						AsyncPathProber.Instance.ApplyNavigationFailedPenalty(this);
+					}
 				}
 			}
 			else if (flag)
@@ -638,8 +642,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	private NavTactic tactic;
 
-	private Navigator.AsyncPathGridUpdaterEntry asyncUpdaterEntry;
-
 	public bool reportOccupation;
 
 	public List<int> occupiedCells = new List<int>();
@@ -672,23 +674,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	});
 
 	public bool executePathProbeTaskAsync;
-
-	public class AsyncPathGridUpdaterEntry
-	{
-		public int framesSinceLastUpdate;
-
-		public Navigator navigator;
-
-		public bool toRemove;
-
-		public PathFinderAbilities abilities;
-
-		public int originCell = Grid.InvalidCell;
-
-		public NavType startingNavType;
-
-		public PathFinder.PotentialPath.Flags startingFlags;
-	}
 
 	public class ActiveTransition
 	{

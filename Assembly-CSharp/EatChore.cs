@@ -359,10 +359,11 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			this.eatatmessstation.eat.Enter("OnEnterMessStation", delegate(EatChore.StatesInstance smi)
 			{
 				smi.eatAnim = EatChore.StatesInstance.OnEnterMessStation(this.messstation.Get(smi), this.eater.Get(smi), this.ediblechunk.Get(smi), false, null);
-			}).DoEat(this.ediblechunk, this.actualfoodunits, null, null).Exit(delegate(EatChore.StatesInstance smi)
-			{
-				EatChore.StatesInstance.OnExitMessStation(this.messstation.Get(smi), this.eater.Get(smi), smi.eatAnim);
-			});
+			}).Transition(this.eatonfloorstate, (EatChore.StatesInstance smi) => smi.eatAnim == null, UpdateRate.SIM_200ms).DoEat(this.ediblechunk, this.actualfoodunits, null, null)
+				.Exit(delegate(EatChore.StatesInstance smi)
+				{
+					EatChore.StatesInstance.OnExitMessStation(this.messstation.Get(smi), this.eater.Get(smi), smi.eatAnim);
+				});
 			this.eatonfloorstate.DefaultState(this.eatonfloorstate.moveto).Enter("CreateLocator", delegate(EatChore.StatesInstance smi)
 			{
 				smi.CreateLocator();

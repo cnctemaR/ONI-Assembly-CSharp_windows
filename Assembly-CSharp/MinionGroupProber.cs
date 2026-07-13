@@ -73,6 +73,14 @@ public class MinionGroupProber : KMonoBehaviour
 		}
 	}
 
+	public void OccupyST(List<int> cells)
+	{
+		foreach (int num in cells)
+		{
+			this.cells[num]++;
+		}
+	}
+
 	public void Occupy(int cell)
 	{
 		Interlocked.Increment(ref this.cells[cell]);
@@ -83,6 +91,14 @@ public class MinionGroupProber : KMonoBehaviour
 		foreach (int num in cells)
 		{
 			Interlocked.Decrement(ref this.cells[num]);
+		}
+	}
+
+	public void VacateST(List<int> cells)
+	{
+		foreach (int num in cells)
+		{
+			this.cells[num]--;
 		}
 	}
 

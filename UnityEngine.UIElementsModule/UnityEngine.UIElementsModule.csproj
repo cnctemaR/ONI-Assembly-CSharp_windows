@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{6FB18AAA-DD88-472E-9D62-69D86696BC38}</ProjectGuid>
+    <ProjectGuid>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC9A5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UIElementsModule</AssemblyName>
@@ -791,43 +791,43 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BBE8}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC955}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC12}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC97F}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC1C}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC989}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC1D}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC98A}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.JSONSerializeModule\UnityEngine.JSONSerializeModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC1F}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC98C}</Project>
       <Name>UnityEngine.JSONSerializeModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC2A}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC997}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextCoreFontEngineModule\UnityEngine.TextCoreFontEngineModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC32}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC99F}</Project>
       <Name>UnityEngine.TextCoreFontEngineModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextCoreTextEngineModule\UnityEngine.TextCoreTextEngineModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC33}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC9A0}</Project>
       <Name>UnityEngine.TextCoreTextEngineModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC34}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC9A1}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC39}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC9A6}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
   </ItemGroup>

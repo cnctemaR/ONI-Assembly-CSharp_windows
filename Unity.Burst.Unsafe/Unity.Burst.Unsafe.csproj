@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{6FB18AAA-DD88-472E-9D62-69D86696BBFF}</ProjectGuid>
+    <ProjectGuid>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC96C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Burst.Unsafe</RootNamespace>
     <AssemblyName>Unity.Burst.Unsafe</AssemblyName>

@@ -335,6 +335,20 @@ public class SimDebugView : KMonoBehaviour
 		return (Grid.Element[cell].state & Element.State.TemperatureInsulated) > Element.State.Vacuum;
 	}
 
+	private static Color GetMinionNavTableIsValid(SimDebugView instance, int cell)
+	{
+		if (Pathfinding.Instance.GetNavGrid("MinionNavGrid").NavTable.IsValid(cell, NavType.Floor))
+		{
+			return Color.green;
+		}
+		return Color.black;
+	}
+
+	private static Color GetMinionAsyncRenderDataColour(SimDebugView instance, int cell)
+	{
+		return Color.black;
+	}
+
 	private static Color GetDiseaseColour(SimDebugView instance, int cell)
 	{
 		Color color = Color.black;
@@ -1065,6 +1079,14 @@ public class SimDebugView : KMonoBehaviour
 			new Func<SimDebugView, int, Color>(SimDebugView.GetJoulesColour)
 		},
 		{
+			SimDebugView.OverlayModes.MinionNavTableIsValid,
+			new Func<SimDebugView, int, Color>(SimDebugView.GetMinionNavTableIsValid)
+		},
+		{
+			SimDebugView.OverlayModes.MinionAsyncRenderDelta,
+			new Func<SimDebugView, int, Color>(SimDebugView.GetMinionAsyncRenderDataColour)
+		},
+		{
 			SimDebugView.OverlayModes.ScenePartitioner,
 			new Func<SimDebugView, int, Color>(SimDebugView.GetScenePartitionerColour)
 		}
@@ -1140,6 +1162,10 @@ public class SimDebugView : KMonoBehaviour
 		public static readonly HashedString SolidLiquid = "SolidLiquid";
 
 		public static readonly HashedString Joules = "Joules";
+
+		public static readonly HashedString MinionNavTableIsValid = "MinionNavTableIsValid";
+
+		public static readonly HashedString MinionAsyncRenderDelta = "MinionAsyncRenderDelta";
 	}
 
 	public enum GameGridMode

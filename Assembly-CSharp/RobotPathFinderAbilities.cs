@@ -33,6 +33,20 @@ public class RobotPathFinderAbilities : PathFinderAbilities
 		return Grid.HasPermission(cell, tagId, tagId2, from_cell, from_nav_type);
 	}
 
+	public override PathFinderAbilities Clone()
+	{
+		return new RobotPathFinderAbilities(this.navigator)
+		{
+			prefabInstanceID = this.prefabInstanceID,
+			canTraverseSubmered = this.canTraverseSubmered,
+			prefabTag = this.prefabTag
+		};
+	}
+
+	public override void RecycleClone()
+	{
+	}
+
 	public bool canTraverseSubmered;
 
 	private Tag prefabTag;

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{6FB18AAA-DD88-472E-9D62-69D86696BC30}</ProjectGuid>
+    <ProjectGuid>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC99D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.TerrainModule</AssemblyName>
@@ -45,15 +45,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BBE8}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC955}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC12}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC97F}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{6FB18AAA-DD88-472E-9D62-69D86696BC2A}</Project>
+      <Project>{C05AD78C-F5A2-493F-A6CB-BF0ADB1DC997}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

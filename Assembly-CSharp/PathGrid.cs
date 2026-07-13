@@ -158,18 +158,16 @@ public class PathGrid
 		if (potential_path.navType != NavType.Tube)
 		{
 			PathGrid.ProberCell proberCell = this.ProberCells[num];
+			if (cell_data.queryId != proberCell.queryId && this.freshlyOccupiedCells != null)
+			{
+				this.freshlyOccupiedCells.Add(potential_path.cell);
+			}
 			if (cell_data.queryId != proberCell.queryId || cell_data.cost < proberCell.cost)
 			{
 				proberCell.queryId = cell_data.queryId;
 				proberCell.cost = cell_data.cost;
 				proberCell.navType = potential_path.navType;
 				this.ProberCells[num] = proberCell;
-				List<int> list = this.freshlyOccupiedCells;
-				if (list == null)
-				{
-					return;
-				}
-				list.Add(potential_path.cell);
 			}
 		}
 	}
@@ -231,10 +229,6 @@ public class PathGrid
 			path.nodes.Clear();
 		}
 		path.cost = -1;
-		if (this.GetCost(source_cell) == -1)
-		{
-			KCrashReporter.ReportDevNotification("Unreachable source cell", Environment.StackTrace, string.Format("{0}x{1} -> {2}", source_cell, current_nav_type, target_cell), false, null);
-		}
 		if (target_cell == PathFinder.InvalidCell || this.GetCost(target_cell) == -1 || this.GetCost(source_cell) == -1)
 		{
 			return false;
@@ -289,15 +283,15 @@ public class PathGrid
 
 	private List<int> freshlyOccupiedCells;
 
-	private NavType[] ValidNavTypes;
+	public NavType[] ValidNavTypes;
 
-	private int[] NavTypeTable;
+	public int[] NavTypeTable;
 
-	private int widthInCells;
+	public int widthInCells;
 
-	private int heightInCells;
+	public int heightInCells;
 
-	private bool applyOffset;
+	public bool applyOffset;
 
 	private int rootX;
 

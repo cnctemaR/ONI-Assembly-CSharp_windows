@@ -12,7 +12,7 @@ public class PerformanceCaptureMonitor
 	public static void WritePerformanceCaptureData()
 	{
 		PerformanceCaptureMonitor.Data.SWAverageFrameTimeMs = (float)(PerformanceCaptureMonitor.captureTimer.Elapsed.TotalMilliseconds / (double)GenericGameSettings.instance.scriptedProfile.frameCount);
-		PerformanceCaptureMonitor.Data.Revision = 701625U;
+		PerformanceCaptureMonitor.Data.Revision = 702577U;
 		PerformanceCaptureMonitor.Data.Branch = "release";
 		PerformanceCaptureMonitor.Data.IsBaseGame = !DlcManager.IsExpansion1Active();
 		PerformanceCaptureMonitor.Data.LoadedDlcs = DlcManager.GetActiveDLCIds();

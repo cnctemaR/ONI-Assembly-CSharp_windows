@@ -693,7 +693,7 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 	{
 		if (kanim_file == null)
 		{
-			global::Debug.LogError(string.Format("RemoveAnimOverrides tried to add a null override to {0} at position {1}", base.gameObject.name, base.transform.position));
+			global::Debug.LogError(string.Format("RemoveAnimOverrides tried to remove a null override to {0} at position {1}", base.gameObject.name, base.transform.position));
 		}
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length != 0)
 		{

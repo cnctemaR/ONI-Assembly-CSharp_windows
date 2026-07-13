@@ -333,7 +333,14 @@ public static class SearchUtil
 
 		public void Bind(string searchStringUpper)
 		{
-			this.FuzzyMatch = FuzzySearch.ScoreCanonicalCandidate(searchStringUpper, this.text, null);
+			try
+			{
+				this.FuzzyMatch = FuzzySearch.ScoreCanonicalCandidate(searchStringUpper, this.text, null);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("searchStringUpper: " + searchStringUpper + ", text: " + this.text, ex);
+			}
 		}
 
 		public void Reset()

@@ -7,4 +7,6 @@ public static class NavigationTactics
 	public static NavTactic Range_2_AvoidOverlaps = new NavTactic(2, 6, 12, 1);
 
 	public static NavTactic Range_3_ProhibitOverlap = new NavTactic(3, 6, 9999, 1);
+
+	public static NavTactic FetchDronePickup = new NavTactic(1, 0, 0, 0, 1, 0, 1, 1);
 }

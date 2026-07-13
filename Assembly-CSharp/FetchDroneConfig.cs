@@ -42,9 +42,7 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 		GridVisibility gridVisibility = gameObject.AddOrGet<GridVisibility>();
 		gridVisibility.radius = 30;
 		gridVisibility.innerRadius = 20f;
-		StandardWorker standardWorker = gameObject.AddOrGet<StandardWorker>();
-		standardWorker.isFetchDrone = true;
-		standardWorker.fetchOffsets = new CellOffset[] { CellOffset.up };
+		gameObject.AddOrGet<StandardWorker>().isFetchDrone = true;
 		gameObject.AddOrGet<Effects>();
 		gameObject.AddOrGet<Traits>();
 		gameObject.AddOrGet<AnimEventHandler>();
@@ -279,31 +277,22 @@ public class FetchDroneConfig : IEntityConfig, IHasDlcRestrictions
 
 	public void OnSpawn(GameObject inst)
 	{
-		StandardWorker component = inst.GetComponent<StandardWorker>();
-		component.fetchOffsets = new CellOffset[] { CellOffset.up };
-		component.deliveryOffsets = new CellOffset[]
+		Sensors component = inst.GetComponent<Sensors>();
+		component.Add(new PathProberSensor(component));
+		component.Add(new PickupableSensor(component));
+		PathProber component2 = inst.GetComponent<PathProber>();
+		if (component2 != null)
 		{
-			CellOffset.up,
-			CellOffset.leftdown,
-			CellOffset.down,
-			CellOffset.rightdown
-		};
-		Sensors component2 = inst.GetComponent<Sensors>();
-		component2.Add(new PathProberSensor(component2));
-		component2.Add(new PickupableSensor(component2));
-		PathProber component3 = inst.GetComponent<PathProber>();
-		if (component3 != null)
-		{
-			component3.SetGroupProber(MinionGroupProber.Get());
+			component2.SetGroupProber(MinionGroupProber.Get());
 		}
 		inst.GetComponent<LoopingSounds>().StartSound(GlobalAssets.GetSound("Flydo_flying_LP", false));
-		Movable component4 = inst.GetComponent<Movable>();
-		component4.tagRequiredForMove = GameTags.Robots.Behaviours.NoElectroBank;
-		component4.onDeliveryComplete = delegate(GameObject go)
+		Movable component3 = inst.GetComponent<Movable>();
+		component3.tagRequiredForMove = GameTags.Robots.Behaviours.NoElectroBank;
+		component3.onDeliveryComplete = delegate(GameObject go)
 		{
 			go.GetComponent<KBatchedAnimController>().Play("dead_battery", KAnim.PlayMode.Once, 1f, 0f);
 		};
-		component4.onPickupComplete = delegate(GameObject go)
+		component3.onPickupComplete = delegate(GameObject go)
 		{
 			go.GetComponent<KBatchedAnimController>().Play("in_storage", KAnim.PlayMode.Once, 1f, 0f);
 		};

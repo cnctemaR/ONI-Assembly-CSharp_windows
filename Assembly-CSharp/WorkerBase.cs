@@ -31,10 +31,6 @@ public abstract class WorkerBase : KMonoBehaviour
 
 	public abstract WorkerBase.WorkResult Work(float dt);
 
-	public abstract CellOffset[] GetFetchCellOffsets();
-
-	public abstract CellOffset[] GetDeliveryCellOffsets();
-
 	public abstract void SetWorkCompleteData(object data);
 
 	public class StartWorkInfo

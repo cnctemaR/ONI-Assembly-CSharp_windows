@@ -11,7 +11,7 @@ public class LogCatcher : ILogHandler
 	void ILogHandler.LogException(Exception exception, global::UnityEngine.Object context)
 	{
 		string text = exception.ToString();
-		string text2 = context.ToString();
+		string text2 = ((context != null) ? context.ToString() : null);
 		if (text == "False" || text2 == "False")
 		{
 			global::Debug.LogError("False only message!");

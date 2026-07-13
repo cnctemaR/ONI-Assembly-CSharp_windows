@@ -304,14 +304,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	{
 		if (this.navigator)
 		{
-			if (this.consumerState.worker != null && this.consumerState.worker.IsFetchDrone())
-			{
-				cost = this.navigator.GetNavigationCost(approachable.GetCell(), this.consumerState.worker.GetDeliveryCellOffsets());
-			}
-			else
-			{
-				cost = this.navigator.GetNavigationCost(approachable);
-			}
+			cost = this.navigator.GetNavigationCost(approachable);
 			if (cost != -1)
 			{
 				return true;

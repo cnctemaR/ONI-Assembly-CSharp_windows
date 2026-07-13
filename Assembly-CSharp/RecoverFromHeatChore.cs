@@ -44,7 +44,10 @@ public class RecoverFromHeatChore : Chore<RecoverFromHeatChore.Instance>
 				smi.GetComponent<KAnimControllerBase>().AddAnimOverrides(Assets.GetAnim(smi.cachedAnimName), 0f);
 			}).Exit(delegate(RecoverFromHeatChore.Instance smi)
 			{
-				smi.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(Assets.GetAnim(smi.cachedAnimName));
+				if (smi.cachedAnimName != HashedString.Invalid)
+				{
+					smi.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(Assets.GetAnim(smi.cachedAnimName));
+				}
 			})
 				.DefaultState(this.recover.pre)
 				.ToggleTag(GameTags.RecoveringFromHeat);

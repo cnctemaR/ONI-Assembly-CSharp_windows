@@ -2353,7 +2353,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo<ApproachableType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, Func<StateMachineInstanceType, CellOffset[]> override_offsets, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, NavTactic tactic = null) where ApproachableType : IApproachable
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State MoveTo<ApproachableType>(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_parameter, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, Func<StateMachineInstanceType, NavTactic> nav_tactic, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State fail_state = null, CellOffset[] override_offsets = null) where ApproachableType : IApproachable
 		{
 			this.EventTransition(GameHashes.DestinationReached, success_state, null);
 			this.EventTransition(GameHashes.NavigationFailed, fail_state, null);
@@ -2361,7 +2361,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			CellOffset[] offsets;
 			this.Enter("MoveTo(" + move_parameter.name + ")", delegate(StateMachineInstanceType smi)
 			{
-				offsets = override_offsets(smi);
+				offsets = override_offsets;
 				IApproachable approachable = move_parameter.Get<ApproachableType>(smi);
 				KMonoBehaviour kmonoBehaviour = move_parameter.Get<KMonoBehaviour>(smi);
 				if (kmonoBehaviour == null)
@@ -2374,7 +2374,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				{
 					offsets = approachable.GetOffsets();
 				}
-				component.GoTo(kmonoBehaviour, offsets, tactic);
+				NavTactic navTactic = nav_tactic(smi);
+				component.GoTo(kmonoBehaviour, offsets, navTactic);
 			});
 			this.Exit("StopMoving()", delegate(StateMachineInstanceType smi)
 			{
@@ -2776,9 +2777,9 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter mover, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_target, Func<StateMachineInstanceType, CellOffset[]> override_offsets, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state = null, NavTactic tactic = null)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(Func<StateMachineInstanceType, NavTactic> navTactic, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter mover, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter move_target, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state = null, CellOffset[] override_offsets = null)
 		{
-			base.root.Target(mover).OnTargetLost(move_target, failure_state).MoveTo<ApproachableType>(move_target, success_state, override_offsets, failure_state, (tactic == null) ? NavigationTactics.ReduceTravelDistance : tactic);
+			base.root.Target(mover).OnTargetLost(move_target, failure_state).MoveTo<ApproachableType>(move_target, success_state, navTactic, failure_state, override_offsets);
 			return this;
 		}
 	}

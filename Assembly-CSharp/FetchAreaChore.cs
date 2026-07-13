@@ -728,7 +728,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.SetupFetch();
 			});
-			this.fetching.movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, new Func<FetchAreaChore.StatesInstance, CellOffset[]>(this.GetFetchOffset), this.fetching.pickup, this.fetching.fetchfail, NavigationTactics.ReduceTravelDistance).Target(this.fetchTarget).EventHandlerTransition(GameHashes.TagsChanged, this.fetching.fetchfail, (FetchAreaChore.StatesInstance smi, object obj) => smi.RootChore_ValidateRequiredTagOnTagChange && smi.RootChore_RequiredTag.IsValid && !this.fetchTarget.Get(smi).HasTag(smi.RootChore_RequiredTag))
+			this.fetching.movetopickupable.InitializeStates(new Func<FetchAreaChore.StatesInstance, NavTactic>(this.GetNavTactic), this.fetcher, this.fetchTarget, this.fetching.pickup, this.fetching.fetchfail, null).Target(this.fetchTarget).EventHandlerTransition(GameHashes.TagsChanged, this.fetching.fetchfail, (FetchAreaChore.StatesInstance smi, object obj) => smi.RootChore_ValidateRequiredTagOnTagChange && smi.RootChore_RequiredTag.IsValid && !this.fetchTarget.Get(smi).HasTag(smi.RootChore_RequiredTag))
 				.Target(this.fetcher);
 			this.fetching.pickup.DoPickup(this.fetchTarget, this.fetchResultTarget, this.fetchAmount, this.fetching.fetchcomplete, this.fetching.fetchfail).Exit(delegate(FetchAreaChore.StatesInstance smi)
 			{
@@ -762,7 +762,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.SetupDelivery();
 			});
-			this.delivering.movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, new Func<FetchAreaChore.StatesInstance, CellOffset[]>(this.GetDeliveryOffset), this.delivering.storing, this.delivering.deliverfail, NavigationTactics.ReduceTravelDistance).Enter(delegate(FetchAreaChore.StatesInstance smi)
+			this.delivering.movetostorage.InitializeStates(new Func<FetchAreaChore.StatesInstance, NavTactic>(this.GetNavTactic), this.fetcher, this.deliveryDestination, this.delivering.storing, this.delivering.deliverfail, null).Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{
 				if (this.deliveryObject.Get(smi) != null && this.deliveryObject.Get(smi).GetComponent<MinionIdentity>() != null)
 				{
@@ -783,24 +783,14 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			});
 		}
 
-		private CellOffset[] GetFetchOffset(FetchAreaChore.StatesInstance smi)
+		private NavTactic GetNavTactic(FetchAreaChore.StatesInstance smi)
 		{
 			WorkerBase component = this.fetcher.Get(smi).GetComponent<WorkerBase>();
-			if (!(component != null))
+			if (component != null && component.IsFetchDrone())
 			{
-				return null;
+				return NavigationTactics.FetchDronePickup;
 			}
-			return component.GetFetchCellOffsets();
-		}
-
-		private CellOffset[] GetDeliveryOffset(FetchAreaChore.StatesInstance smi)
-		{
-			WorkerBase component = this.fetcher.Get(smi).GetComponent<WorkerBase>();
-			if (!(component != null))
-			{
-				return null;
-			}
-			return component.GetDeliveryCellOffsets();
+			return NavigationTactics.ReduceTravelDistance;
 		}
 
 		public FetchAreaChore.States.FetchStates fetching;

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DC4A168C-C791-4468-9667-FF34C831D9D2}</ProjectGuid>
+    <ProjectGuid>{10476A2F-2207-4841-8009-F4A9AC3C3445}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ImGuiObjectDrawer</RootNamespace>
     <AssemblyName>ImGui</AssemblyName>
@@ -32,27 +32,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj">
-      <Project>{DC4A168C-C791-4468-9667-FF34C831D9D3}</Project>
+      <Project>{10476A2F-2207-4841-8009-F4A9AC3C3446}</Project>
       <Name>ImGui.NET</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{DC4A168C-C791-4468-9667-FF34C831D9D7}</Project>
+      <Project>{10476A2F-2207-4841-8009-F4A9AC3C344A}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{DC4A168C-C791-4468-9667-FF34C831D9DF}</Project>
+      <Project>{10476A2F-2207-4841-8009-F4A9AC3C3452}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{DC4A168C-C791-4468-9667-FF34C831D9FB}</Project>
+      <Project>{10476A2F-2207-4841-8009-F4A9AC3C346E}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{DC4A168C-C791-4468-9667-FF34C831DA06}</Project>
+      <Project>{10476A2F-2207-4841-8009-F4A9AC3C3479}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{DC4A168C-C791-4468-9667-FF34C831DA20}</Project>
+      <Project>{10476A2F-2207-4841-8009-F4A9AC3C3493}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

@@ -131,9 +131,9 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 					}
 					gameObject.GetComponent<Navigator>().Stop(false, true);
 				}
-			}).MoveTo<Capturable>(this.pickupablesource, this.fetch.wrangle, null, null, null);
+			}).MoveTo<Capturable>(this.pickupablesource, this.fetch.wrangle, new Func<MovePickupableChore.StatesInstance, NavTactic>(this.GetNavTactic), null, null);
 			this.fetch.wrangle.EnterTransition(this.fetch.approach, (MovePickupableChore.StatesInstance smi) => this.pickupablesource.Get(smi).HasTag(GameTags.Creatures.Bagged)).ToggleWork<Capturable>(this.pickupablesource, this.fetch.approach, null, null);
-			this.fetch.approach.MoveTo<IApproachable>(this.pickupablesource, this.fetch.pickup, new Func<MovePickupableChore.StatesInstance, CellOffset[]>(this.GetFetcherOffset), null, null);
+			this.fetch.approach.MoveTo<IApproachable>(this.pickupablesource, this.fetch.pickup, new Func<MovePickupableChore.StatesInstance, NavTactic>(this.GetNavTactic), null, null);
 			this.fetch.pickup.DoPickup(this.pickupablesource, this.pickup, this.actualamount, this.approachstorage, this.delivering.deliverfail).Exit(delegate(MovePickupableChore.StatesInstance smi)
 			{
 				GameObject gameObject2 = this.pickup.Get(smi);
@@ -144,7 +144,7 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 				}
 			});
 			this.approachstorage.DefaultState(this.approachstorage.deliveryStorage);
-			this.approachstorage.deliveryStorage.InitializeStates(this.deliverer, this.deliverypoint, new Func<MovePickupableChore.StatesInstance, CellOffset[]>(this.GetFetcherOffset), this.delivering.storing, this.delivering.deliverfail, NavigationTactics.ReduceTravelDistance);
+			this.approachstorage.deliveryStorage.InitializeStates(new Func<MovePickupableChore.StatesInstance, NavTactic>(this.GetNavTactic), this.deliverer, this.deliverypoint, this.delivering.storing, this.delivering.deliverfail, null);
 			this.delivering.storing.Target(this.deliverer).DoDelivery(this.deliverer, this.deliverypoint, this.success, this.delivering.deliverfail);
 			this.delivering.deliverfail.ReturnFailure();
 			this.success.Enter(delegate(MovePickupableChore.StatesInstance smi)
@@ -177,9 +177,14 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 			}).ReturnSuccess();
 		}
 
-		private CellOffset[] GetFetcherOffset(MovePickupableChore.StatesInstance smi)
+		private NavTactic GetNavTactic(MovePickupableChore.StatesInstance smi)
 		{
-			return this.deliverer.Get(smi).GetComponent<WorkerBase>().GetFetchCellOffsets();
+			WorkerBase component = this.deliverer.Get(smi).GetComponent<WorkerBase>();
+			if (component != null && component.IsFetchDrone())
+			{
+				return NavigationTactics.FetchDronePickup;
+			}
+			return NavigationTactics.ReduceTravelDistance;
 		}
 
 		private void DropPickupable(Storage storage, GameObject delivered)

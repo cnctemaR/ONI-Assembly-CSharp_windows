@@ -64,24 +64,6 @@ public class StandardWorker : WorkerBase
 		return this.isFetchDrone;
 	}
 
-	public override CellOffset[] GetFetchCellOffsets()
-	{
-		if (this.fetchOffsets.Length == 0)
-		{
-			return null;
-		}
-		return this.fetchOffsets;
-	}
-
-	public override CellOffset[] GetDeliveryCellOffsets()
-	{
-		if (this.deliveryOffsets.Length == 0)
-		{
-			return null;
-		}
-		return this.deliveryOffsets;
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -611,10 +593,6 @@ public class StandardWorker : WorkerBase
 	public bool usesMultiTool = true;
 
 	public bool isFetchDrone;
-
-	public CellOffset[] fetchOffsets = new CellOffset[0];
-
-	public CellOffset[] deliveryOffsets = new CellOffset[0];
 
 	private static readonly EventSystem.IntraObjectHandler<StandardWorker> OnChoreInterruptDelegate = new EventSystem.IntraObjectHandler<StandardWorker>(delegate(StandardWorker component, object data)
 	{

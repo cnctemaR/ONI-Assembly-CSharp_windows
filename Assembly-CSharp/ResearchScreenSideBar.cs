@@ -255,16 +255,24 @@ public class ResearchScreenSideBar : KScreen
 				while (enumerator.MoveNext())
 				{
 					KeyValuePair<string, SearchUtil.TechCache> keyValuePair = enumerator.Current;
-					keyValuePair.Value.Bind(this.currentSearchStringUpper);
+					try
+					{
+						keyValuePair.Value.Bind(this.currentSearchStringUpper);
+					}
+					catch (Exception ex)
+					{
+						KCrashReporter.ReportDevNotification("Fuzzy score bind failed", Environment.StackTrace, ex.Message, false, null);
+						keyValuePair.Value.Reset();
+					}
 				}
-				goto IL_00B2;
+				goto IL_00DC;
 			}
 		}
 		foreach (KeyValuePair<string, SearchUtil.TechCache> keyValuePair2 in this.techCaches)
 		{
 			keyValuePair2.Value.Reset();
 		}
-		IL_00B2:
+		IL_00DC:
 		for (int num = 0; num != techs.Count; num++)
 		{
 			Tech tech = (Tech)techs.GetResource(num);

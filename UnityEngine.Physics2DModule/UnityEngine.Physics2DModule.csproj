@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7BA8928A-31B3-400C-AAEB-D1ED4B1C2803}</ProjectGuid>
+    <ProjectGuid>{D9B656D6-ED12-4FA1-B564-6406A71B4363}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.Physics2DModule</AssemblyName>
@@ -76,15 +76,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{7BA8928A-31B3-400C-AAEB-D1ED4B1C27CE}</Project>
+      <Project>{D9B656D6-ED12-4FA1-B564-6406A71B432E}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7BA8928A-31B3-400C-AAEB-D1ED4B1C27F1}</Project>
+      <Project>{D9B656D6-ED12-4FA1-B564-6406A71B4351}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7BA8928A-31B3-400C-AAEB-D1ED4B1C2809}</Project>
+      <Project>{D9B656D6-ED12-4FA1-B564-6406A71B4369}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

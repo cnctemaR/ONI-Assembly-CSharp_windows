@@ -107,12 +107,12 @@ public class ConditionRobotPilotReady : ProcessCondition
 
 	public override string GetStatusTooltip(ProcessCondition.Status status)
 	{
-		ClusterTraveler component = this.craftInterface.GetComponent<ClusterTraveler>();
 		LaunchableRocketRegisterType launchableRocketRegisterType = this.craftRegisterType;
 		if (launchableRocketRegisterType != LaunchableRocketRegisterType.Spacecraft)
 		{
 			if (launchableRocketRegisterType == LaunchableRocketRegisterType.Clustercraft)
 			{
+				ClusterTraveler component = this.craftInterface.GetComponent<ClusterTraveler>();
 				if (status == ProcessCondition.Status.Ready)
 				{
 					if (this.craftInterface.GetClusterDestinationSelector().IsAtDestination())
@@ -144,7 +144,7 @@ public class ConditionRobotPilotReady : ProcessCondition
 					}
 					if (this.module.IsFull())
 					{
-						return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY, this.module.GetDataBanksStored());
+						return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION, this.module.GetDataBanksStored());
 					}
 					return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
 				}
@@ -175,7 +175,7 @@ public class ConditionRobotPilotReady : ProcessCondition
 				}
 				if (this.module.IsFull())
 				{
-					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY, this.module.GetDataBanksStored());
+					return string.Format(UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.READY_NO_DESTINATION, this.module.GetDataBanksStored());
 				}
 				return UI.STARMAP.LAUNCHCHECKLIST.ROBOT_PILOT_DATA_REQUIREMENTS.TOOLTIP.FAILURE_NO_DESTINATION;
 			}

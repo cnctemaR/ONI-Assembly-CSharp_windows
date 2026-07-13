@@ -7,7 +7,7 @@ public class EffectConfigs : IMultiEntityConfig
 	public List<GameObject> CreatePrefabs()
 	{
 		List<GameObject> list = new List<GameObject>();
-		var anon = new <>f__AnonymousType2<string, string[], string, KAnim.PlayMode, bool>[]
+		var anon = new <>f__AnonymousType0<string, string[], string, KAnim.PlayMode, bool>[]
 		{
 			new
 			{

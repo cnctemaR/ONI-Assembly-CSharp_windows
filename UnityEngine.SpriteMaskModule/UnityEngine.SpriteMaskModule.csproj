@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{5E8843CC-784E-4235-BD65-5266CE510C53}</ProjectGuid>
+    <ProjectGuid>{1291A843-4827-4AA6-8FB2-415E167FC952}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.SpriteMaskModule</AssemblyName>
@@ -20,15 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{5E8843CC-784E-4235-BD65-5266CE510C17}</Project>
+      <Project>{1291A843-4827-4AA6-8FB2-415E167FC916}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{5E8843CC-784E-4235-BD65-5266CE510C3A}</Project>
+      <Project>{1291A843-4827-4AA6-8FB2-415E167FC939}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{5E8843CC-784E-4235-BD65-5266CE510C52}</Project>
+      <Project>{1291A843-4827-4AA6-8FB2-415E167FC951}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

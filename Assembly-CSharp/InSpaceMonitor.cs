@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 
 public class InSpaceMonitor : GameStateMachine<InSpaceMonitor, InSpaceMonitor.Instance>
 {
@@ -12,9 +13,18 @@ public class InSpaceMonitor : GameStateMachine<InSpaceMonitor, InSpaceMonitor.In
 				smi.GoTo(this.inSpace);
 			}
 		});
-		this.idle.EventTransition(GameHashes.MinionMigration, (InSpaceMonitor.Instance smi) => Game.Instance, this.inSpace, (InSpaceMonitor.Instance smi) => smi.IsInSpace());
+		this.idle.EventTransition(GameHashes.MinionMigration, (InSpaceMonitor.Instance smi) => Game.Instance, this.inSpace, (InSpaceMonitor.Instance smi) => smi.IsInSpace()).Enter(delegate(InSpaceMonitor.Instance smi)
+		{
+			Effects component = smi.master.gameObject.GetComponent<Effects>();
+			if (component != null && component.HasEffect("SpaceBuzz"))
+			{
+				component.Remove("SpaceBuzz");
+			}
+		});
 		this.inSpace.EventTransition(GameHashes.MinionMigration, (InSpaceMonitor.Instance smi) => Game.Instance, this.idle, (InSpaceMonitor.Instance smi) => !smi.IsInSpace()).ToggleEffect("SpaceBuzz");
 	}
+
+	private const string SPACE_EFFECT_NAME = "SpaceBuzz";
 
 	public GameStateMachine<InSpaceMonitor, InSpaceMonitor.Instance, IStateMachineTarget, object>.State idle;
 

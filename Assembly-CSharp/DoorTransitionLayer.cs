@@ -7,6 +7,8 @@ public class DoorTransitionLayer : TransitionDriver.InterruptOverrideLayer
 	public DoorTransitionLayer(Navigator navigator)
 		: base(navigator)
 	{
+		KBoxCollider2D component = navigator.GetComponent<KBoxCollider2D>();
+		this.checkCellAbove = component != null && component.size.y > 1f;
 	}
 
 	private bool AreAllDoorsOpen()
@@ -35,7 +37,7 @@ public class DoorTransitionLayer : TransitionDriver.InterruptOverrideLayer
 		int num = Grid.PosToCell(navigator);
 		int num2 = Grid.OffsetCell(num, transition.x, transition.y);
 		this.AddDoor(num2);
-		if (navigator.CurrentNavType != NavType.Tube)
+		if (navigator.CurrentNavType != NavType.Tube && this.checkCellAbove)
 		{
 			this.AddDoor(Grid.CellAbove(num2));
 		}
@@ -110,4 +112,6 @@ public class DoorTransitionLayer : TransitionDriver.InterruptOverrideLayer
 	}
 
 	private List<INavDoor> doors = new List<INavDoor>();
+
+	private bool checkCellAbove;
 }

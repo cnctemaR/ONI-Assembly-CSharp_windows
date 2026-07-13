@@ -223,7 +223,11 @@ public class PathGrid
 			path.nodes.Clear();
 		}
 		path.cost = -1;
-		if (target_cell == PathFinder.InvalidCell || this.GetCost(target_cell) == -1)
+		if (this.GetCost(source_cell) == -1)
+		{
+			KCrashReporter.ReportDevNotification("Unreachable source cell", Environment.StackTrace, string.Format("{0}x{1} -> {2}", source_cell, current_nav_type, target_cell), false, null);
+		}
+		if (target_cell == PathFinder.InvalidCell || this.GetCost(target_cell) == -1 || this.GetCost(source_cell) == -1)
 		{
 			return false;
 		}
@@ -232,6 +236,7 @@ public class PathGrid
 		PathFinder.Cell cell = this.GetCell(target_cell, proberCell.navType, out flag);
 		path.Clear();
 		path.cost = cell.cost;
+		int num = path.cost;
 		while (target_cell != PathFinder.InvalidCell)
 		{
 			path.AddNode(new PathFinder.Path.Node
@@ -250,6 +255,21 @@ public class PathGrid
 				target_cell = cell.parent;
 				cell = this.GetCell(target_cell, cell.parentNavType, out flag);
 			}
+			if (cell.cost >= num && target_cell != PathFinder.InvalidCell)
+			{
+				KCrashReporter.ReportDevNotification("Invalid Cost Progression", Environment.StackTrace, string.Format("{0}x{1} -> {2} via path of length {3} cell_data.cost: {4} previousCost: {5} cell_data.navType: {6}", new object[]
+				{
+					source_cell,
+					current_nav_type,
+					target_cell,
+					path.nodes.Count,
+					cell.cost,
+					num,
+					cell.navType
+				}), false, null);
+				break;
+			}
+			num = cell.cost;
 		}
 		path.Clear();
 		return false;

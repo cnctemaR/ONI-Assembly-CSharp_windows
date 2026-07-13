@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{099D810E-9BC9-4986-A2C6-BCB8ED7CE9D6}</ProjectGuid>
+    <ProjectGuid>{EC73C989-59CA-4D1A-8074-FF51E28B74FD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.ProfilerModule</RootNamespace>
     <AssemblyName>UnityEngine.ProfilerModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{099D810E-9BC9-4986-A2C6-BCB8ED7CE998}</Project>
+      <Project>{EC73C989-59CA-4D1A-8074-FF51E28B74BF}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{099D810E-9BC9-4986-A2C6-BCB8ED7CE9DA}</Project>
+      <Project>{EC73C989-59CA-4D1A-8074-FF51E28B7501}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -181,7 +181,8 @@ namespace Database
 				new CritterTypeExists(new List<Tag>
 				{
 					"DreckoPlasticBaby", "HatchHardBaby", "HatchMetalBaby", "HatchVeggieBaby", "LightBugBlackBaby", "LightBugBlueBaby", "LightBugCrystalBaby", "LightBugOrangeBaby", "LightBugPinkBaby", "LightBugPurpleBaby",
-					"OilfloaterDecorBaby", "OilfloaterHighTempBaby", "PacuCleanerBaby", "PacuTropicalBaby", "PuftBleachstoneBaby", "PuftOxyliteBaby", "SquirrelHugBaby", "CrabWoodBaby", "CrabFreshWaterBaby", "MoleDelicacyBaby"
+					"OilfloaterDecorBaby", "OilfloaterHighTempBaby", "PacuCleanerBaby", "PacuTropicalBaby", "PuftBleachstoneBaby", "PuftOxyliteBaby", "SquirrelHugBaby", "CrabWoodBaby", "CrabFreshWaterBaby", "MoleDelicacyBaby",
+					"GlassDeerBaby", "AlgaeStegoBaby"
 				})
 			}, "", "", "", "", null, default(EventReference), "good_egg", null, null, null, null));
 			this.CuredDisease = base.Add(new ColonyAchievement("CuredDisease", "CURED_DISEASE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE_DESCRIPTION, false, new List<ColonyAchievementRequirement>

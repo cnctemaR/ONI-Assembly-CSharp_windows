@@ -31,7 +31,8 @@ public static class PathProber
 		{
 			num += 1;
 		}
-		PathProber.Run(navigator.cachedCell, navigator.GetCurrentAbilities(), navigator.NavGrid, navigator.CurrentNavType, navigator.PathGrid, num, potentialScratchPad, potentialList, navigator.flags, null);
+		PathFinderAbilities currentAbilities = navigator.GetCurrentAbilities();
+		PathProber.Run(navigator.cachedCell, currentAbilities, navigator.NavGrid, navigator.CurrentNavType, navigator.PathGrid, num, potentialScratchPad, potentialList, navigator.flags, null);
 		PathProber.ScratchPadPool.Release(potentialScratchPad);
 		PathProber.PotentialListPool.Release(potentialList);
 	}

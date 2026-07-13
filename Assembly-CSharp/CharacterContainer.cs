@@ -33,7 +33,20 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			where outfit.OutfitType == ClothingOutfitUtility.OutfitType.Clothing
 			select outfit)
 		{
-			this.allAvailableClothingOutfits.Add(clothingOutfitTarget);
+			bool flag = false;
+			foreach (string text in clothingOutfitTarget.ReadItems())
+			{
+				ClothingItemResource clothingItemResource = Db.Get().Permits.ClothingItems.TryGet(text);
+				if (clothingItemResource != null && !clothingItemResource.IsUnlocked())
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				this.allAvailableClothingOutfits.Add(clothingOutfitTarget);
+			}
 		}
 		this.Initialize();
 		this.characterNameTitle.OnStartedEditing += this.OnStartedEditing;

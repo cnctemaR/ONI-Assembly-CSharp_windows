@@ -260,6 +260,15 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 				else if (!this.PathGrid.BuildPath(this.cachedCell, this.reservedCell, this.CurrentNavType, ref this.path))
 				{
 					PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(this.cachedCell, this.CurrentNavType, this.flags);
+					if (this.executePathProbeTaskAsync)
+					{
+						Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry = this.asyncUpdaterEntry;
+						lock (asyncPathGridUpdaterEntry)
+						{
+							PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(this.reservedCell), ref this.path);
+							goto IL_0188;
+						}
+					}
 					PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(this.reservedCell), ref this.path);
 				}
 			}
@@ -267,6 +276,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			{
 				this.path.nodes.RemoveAt(0);
 			}
+			IL_0188:
 			if (this.path.IsValid())
 			{
 				this.BeginTransition(this.NavGrid.transitions[(int)this.path.nodes[1].transitionId]);

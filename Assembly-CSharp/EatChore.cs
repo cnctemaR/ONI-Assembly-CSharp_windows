@@ -137,7 +137,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			diner.TryGetComponent<Navigator>(out navigator);
 			foreach (Assignable assignable in Game.Instance.assignmentManager.GetPreferredAssignables(soleOwner, navigator, Db.Get().AssignableSlots.MessStation))
 			{
-				if (EatChore.ResolveDiningSeat(assignable.gameObject) != null && assignable.GetComponent<Reservable>().IsReservableBy(assignable.gameObject))
+				if (EatChore.ResolveDiningSeat(assignable.gameObject) != null && assignable.GetComponent<Reservable>().IsReservableBy(diner))
 				{
 					return assignable;
 				}
@@ -154,7 +154,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			Assignable preferredMessStation = EatChore.StatesInstance.GetPreferredMessStation(diner);
 			if (preferredMessStation != null && !preferredMessStation.GetComponent<Reservable>().Reserve(diner))
 			{
-				global::Debug.LogWarning("Failed to reserve dining seat");
+				global::Debug.Log("Failed to reserve dining seat. We have likely already reserved it.");
 			}
 			return preferredMessStation;
 		}

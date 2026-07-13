@@ -138,16 +138,7 @@ public class HijackedHeadquarters : GameStateMachine<HijackedHeadquarters, Hijac
 			set
 			{
 				this.userMaxCapacity = value;
-				this.m_storage.capacityKg = this.userMaxCapacity;
-				this.m_storage.GetComponent<ManualDeliveryKG>().AbortDelivery("Switching to new delivery request");
-				this.m_storage.GetComponent<ManualDeliveryKG>().capacity = this.userMaxCapacity;
-				this.m_storage.GetComponent<ManualDeliveryKG>().refillMass = this.userMaxCapacity;
-				this.m_storage.GetComponent<ManualDeliveryKG>().FillToCapacity = true;
-				this.m_storage.Trigger(-945020481, this);
-				if (this.m_storage.MassStored() > this.userMaxCapacity)
-				{
-					this.m_storage.DropSome(DatabankHelper.ID, this.m_storage.MassStored() - this.userMaxCapacity, false, false, default(Vector3), true, false);
-				}
+				this.ApplyMaxCapacity();
 			}
 		}
 
@@ -194,6 +185,20 @@ public class HijackedHeadquarters : GameStateMachine<HijackedHeadquarters, Hijac
 		bool IUserControlledCapacity.ControlEnabled()
 		{
 			return base.smi.sm.passcodeUnlocked.Get(base.smi);
+		}
+
+		public void ApplyMaxCapacity()
+		{
+			this.m_storage.capacityKg = this.userMaxCapacity;
+			this.m_storage.GetComponent<ManualDeliveryKG>().AbortDelivery("Switching to new delivery request");
+			this.m_storage.GetComponent<ManualDeliveryKG>().capacity = this.userMaxCapacity;
+			this.m_storage.GetComponent<ManualDeliveryKG>().refillMass = this.userMaxCapacity;
+			this.m_storage.GetComponent<ManualDeliveryKG>().FillToCapacity = true;
+			this.m_storage.Trigger(-945020481, this);
+			if (this.m_storage.MassStored() > this.userMaxCapacity)
+			{
+				this.m_storage.DropSome(DatabankHelper.ID, this.m_storage.MassStored() - this.userMaxCapacity, false, false, default(Vector3), true, false);
+			}
 		}
 
 		public Instance(IStateMachineTarget master, HijackedHeadquarters.Def def)
@@ -272,6 +277,7 @@ public class HijackedHeadquarters : GameStateMachine<HijackedHeadquarters, Hijac
 				base.smi.AddLore();
 			}
 			this.m_storage.capacityKg = this.userMaxCapacity;
+			this.ApplyMaxCapacity();
 		}
 
 		public override void StopSM(string reason)

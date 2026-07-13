@@ -4832,50 +4832,73 @@ namespace STRINGS
 
 			public class SCALEGROWTH
 			{
-				// Note: this type is marked as 'beforefieldinit'.
-				static SCALEGROWTH()
+				public static Dictionary<Tag, LocString> GET_DISPLAYED_NAME()
 				{
+					if (CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME_CACHED != null)
+					{
+						return CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME_CACHED;
+					}
 					Dictionary<Tag, LocString> dictionary = new Dictionary<Tag, LocString>();
 					Tag tag = "Drecko";
-					dictionary[tag] = "Scale Growth";
+					dictionary[tag] = CREATURES.STATS.SCALEGROWTH.SCALE;
 					Tag tag2 = "DreckoPlastic";
-					dictionary[tag2] = "Scale Growth";
+					dictionary[tag2] = CREATURES.STATS.SCALEGROWTH.SCALE;
 					Tag tag3 = "WoodDeer";
-					dictionary[tag3] = "Antler Growth";
+					dictionary[tag3] = CREATURES.STATS.SCALEGROWTH.ANTLER;
 					Tag tag4 = "GlassDeer";
-					dictionary[tag4] = "Antler Growth";
+					dictionary[tag4] = CREATURES.STATS.SCALEGROWTH.ANTLER;
 					Tag tag5 = "IceBelly";
-					dictionary[tag5] = "Fur Growth";
+					dictionary[tag5] = CREATURES.STATS.SCALEGROWTH.FUR;
 					Tag tag6 = "GoldBelly";
-					dictionary[tag6] = "Crest Growth";
+					dictionary[tag6] = CREATURES.STATS.SCALEGROWTH.CROWN;
 					Tag tag7 = "Raptor";
-					dictionary[tag7] = "Feather Growth";
-					CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME = dictionary;
-					Dictionary<Tag, LocString> dictionary2 = new Dictionary<Tag, LocString>();
-					tag7 = "Drecko";
-					dictionary2[tag7] = ITEMS.INDUSTRIAL_PRODUCTS.BASIC_FABRIC.NAME;
-					tag6 = "DreckoPlastic";
-					dictionary2[tag6] = ELEMENTS.POLYPROPYLENE.NAME;
-					tag5 = "WoodDeer";
-					dictionary2[tag5] = ITEMS.INDUSTRIAL_PRODUCTS.WOOD.NAME;
-					tag4 = "GlassDeer";
-					dictionary2[tag4] = ELEMENTS.GLASS.NAME;
-					tag3 = "IceBelly";
-					dictionary2[tag3] = ITEMS.INDUSTRIAL_PRODUCTS.BASIC_FABRIC.NAME;
-					tag2 = "GoldBelly";
-					dictionary2[tag2] = ELEMENTS.GOLD.NAME;
-					tag = "Raptor";
-					dictionary2[tag] = ITEMS.INDUSTRIAL_PRODUCTS.FEATHER_FABRIC.NAME;
-					CREATURES.STATS.SCALEGROWTH.TOOLTIP_PREFIX = dictionary2;
+					dictionary[tag7] = CREATURES.STATS.SCALEGROWTH.FEATHER;
+					CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME_CACHED = dictionary;
+					return CREATURES.STATS.SCALEGROWTH.DISPLAYED_NAME_CACHED;
+				}
+
+				public static Dictionary<Tag, LocString> GET_TOOLTIP_PREFIX()
+				{
+					if (CREATURES.STATS.SCALEGROWTH.TOOLTIP_PREFIX_CACHED != null)
+					{
+						return CREATURES.STATS.SCALEGROWTH.TOOLTIP_PREFIX_CACHED;
+					}
+					Dictionary<Tag, LocString> dictionary = new Dictionary<Tag, LocString>();
+					Tag tag = "Drecko";
+					dictionary[tag] = ITEMS.INDUSTRIAL_PRODUCTS.BASIC_FABRIC.NAME;
+					Tag tag2 = "DreckoPlastic";
+					dictionary[tag2] = ELEMENTS.POLYPROPYLENE.NAME;
+					Tag tag3 = "WoodDeer";
+					dictionary[tag3] = ITEMS.INDUSTRIAL_PRODUCTS.WOOD.NAME;
+					Tag tag4 = "GlassDeer";
+					dictionary[tag4] = ELEMENTS.GLASS.NAME.text;
+					Tag tag5 = "IceBelly";
+					dictionary[tag5] = ITEMS.INDUSTRIAL_PRODUCTS.BASIC_FABRIC.NAME;
+					Tag tag6 = "GoldBelly";
+					dictionary[tag6] = ELEMENTS.GOLD.NAME;
+					Tag tag7 = "Raptor";
+					dictionary[tag7] = ITEMS.INDUSTRIAL_PRODUCTS.FEATHER_FABRIC.NAME;
+					CREATURES.STATS.SCALEGROWTH.TOOLTIP_PREFIX_CACHED = dictionary;
+					return CREATURES.STATS.SCALEGROWTH.TOOLTIP_PREFIX_CACHED;
 				}
 
 				public static LocString NAME = "Scale Growth";
 
 				public static LocString TOOLTIP = "When growth reaches 100%, this critter can be shorn for {0}";
 
-				public static Dictionary<Tag, LocString> DISPLAYED_NAME;
+				public static LocString SCALE = "Scale Growth";
 
-				public static Dictionary<Tag, LocString> TOOLTIP_PREFIX;
+				public static LocString ANTLER = "Antler Growth";
+
+				public static LocString FUR = "Fur Growth";
+
+				public static LocString CROWN = "Crest Growth";
+
+				public static LocString FEATHER = "Feather Growth";
+
+				private static Dictionary<Tag, LocString> DISPLAYED_NAME_CACHED = null;
+
+				private static Dictionary<Tag, LocString> TOOLTIP_PREFIX_CACHED = null;
 			}
 
 			public class MILKPRODUCTION

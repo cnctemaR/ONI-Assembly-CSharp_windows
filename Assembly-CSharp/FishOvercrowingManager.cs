@@ -23,7 +23,19 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 
 	public void Remove(KPrefabID aquaticEntity)
 	{
-		this.allAquaticEntities.Remove(aquaticEntity);
+		if (aquaticEntity.IsNullOrDestroyed())
+		{
+			return;
+		}
+		for (int i = this.allAquaticEntities.Count - 1; i >= 0; i--)
+		{
+			KPrefabID kprefabID = this.allAquaticEntities[i];
+			if (!kprefabID.IsNullOrDestroyed() && kprefabID.InstanceID == aquaticEntity.InstanceID)
+			{
+				this.allAquaticEntities.RemoveAt(i);
+				return;
+			}
+		}
 	}
 
 	public void Sim1000ms(float dt)

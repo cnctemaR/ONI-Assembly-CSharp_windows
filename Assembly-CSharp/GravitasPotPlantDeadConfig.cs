@@ -18,7 +18,6 @@ public class GravitasPotPlantDeadConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Ceramic, true);
 		component.Temperature = 294.15f;
-		LoreBearerUtil.AddLoreTo(gameObject, new LoreBearerAction(LoreBearerUtil.UnlockNextEmail));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

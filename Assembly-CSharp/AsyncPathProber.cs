@@ -265,6 +265,7 @@ public static class AsyncPathProber
 				if (this.agentException != null)
 				{
 					this.agentException.Throw();
+					this.agentException = null;
 				}
 				this.activeSerialNo += 1;
 				if (this.activeSerialNo == 0)
@@ -312,9 +313,19 @@ public static class AsyncPathProber
 					this.workQueue[k].Cleanup();
 				}
 				this.workQueue.Clear();
-				for (int l = 0; l < Math.Min(this.navigatorOrdering.Count, 4); l++)
+				int num2 = 0;
+				while (num2 < this.navigatorOrdering.Count && this.workQueue.Count < 4)
 				{
-					this.workQueue.Add(this.makeWorkOrder(this.navigatorOrdering[l]));
+					AsyncPathProber.WorkOrder workOrder = this.makeWorkOrder(this.navigatorOrdering[num2]);
+					if (Grid.IsValidCell(workOrder.originCell))
+					{
+						this.workQueue.Add(workOrder);
+					}
+					else
+					{
+						workOrder.Cleanup();
+					}
+					num2++;
 				}
 				this.navigatorOrdering.Clear();
 			}

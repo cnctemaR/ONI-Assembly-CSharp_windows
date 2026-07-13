@@ -14,6 +14,7 @@ public class MosquitoConfig : IEntityConfig, IHasDlcRestrictions
 		Trait trait = Db.Get().CreateTrait("MosquitoBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 5f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 10f, name, false, false, true));
+		gameObject.AddTag(GameTags.OriginalCreature);
 		return gameObject;
 	}
 
@@ -30,7 +31,7 @@ public class MosquitoConfig : IEntityConfig, IHasDlcRestrictions
 	public GameObject CreatePrefab()
 	{
 		CREATURES.SPECIES.MOSQUITO.NAME;
-		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(MosquitoConfig.CreateMosquito("Mosquito", CREATURES.SPECIES.MOSQUITO.NAME, CREATURES.SPECIES.MOSQUITO.DESC, "mosquito_kanim", false), this, "MosquitoEgg", CREATURES.SPECIES.MOSQUITO.EGG_NAME, CREATURES.SPECIES.MOSQUITO.DESC, "egg_mosquito_kanim", 1f, "MosquitoBaby", 4.5f, 2f, MosquitoTuning.EGG_CHANCES_BASE, MosquitoConfig.EGG_SORT_ORDER, false, false, 0.75f, false, true);
+		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(MosquitoConfig.CreateMosquito("Mosquito", CREATURES.SPECIES.MOSQUITO.NAME, CREATURES.SPECIES.MOSQUITO.DESC, "mosquito_kanim", false), this, "MosquitoEgg", CREATURES.SPECIES.MOSQUITO.EGG_NAME, CREATURES.SPECIES.MOSQUITO.DESC, "egg_mosquito_kanim", 1f, "MosquitoBaby", 4.5f, 2f, MosquitoTuning.EGG_CHANCES_BASE, MosquitoConfig.EGG_SORT_ORDER, false, false, 0.75f, false, true, 1f, false);
 		gameObject.AddTag(GameTags.OriginalCreature);
 		MosquitoHungerMonitor mosquitoHungerMonitor = gameObject.AddOrGet<MosquitoHungerMonitor>();
 		mosquitoHungerMonitor.AllowedTargetTags = new List<Tag>

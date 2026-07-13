@@ -196,27 +196,31 @@ public class PathFinder
 		int num = 0;
 		NavGrid.Link[] linksWithCorrectNavType = potential_scratch_pad.linksWithCorrectNavType;
 		int num2 = potential.cell * max_links_per_cell;
-		NavGrid.Link link = links[num2];
-		for (int num3 = link.link; num3 != PathFinder.InvalidHandle; num3 = link.link)
+		int num3 = num2 + max_links_per_cell;
+		for (int i = num2; i < num3; i++)
 		{
-			if (link.startNavType == potential.navType && (parent_cell != num3 || parent_nav_type != link.startNavType))
+			NavGrid.Link link = links[i];
+			int link2 = link.link;
+			if (link2 == PathFinder.InvalidHandle)
+			{
+				break;
+			}
+			if (link.startNavType == potential.navType && (parent_cell != link2 || parent_nav_type != link.startNavType))
 			{
 				linksWithCorrectNavType[num++] = link;
 			}
-			num2++;
-			link = links[num2];
 		}
 		int num4 = 0;
 		PathFinder.PotentialScratchPad.PathGridCellData[] linksInCellRange = potential_scratch_pad.linksInCellRange;
-		for (int i = 0; i < num; i++)
+		for (int j = 0; j < num; j++)
 		{
-			NavGrid.Link link2 = linksWithCorrectNavType[i];
-			int link3 = link2.link;
+			NavGrid.Link link3 = linksWithCorrectNavType[j];
+			int link4 = link3.link;
 			bool flag = false;
-			PathFinder.Cell cell = path_grid.GetCell(link3, link2.endNavType, out flag);
+			PathFinder.Cell cell = path_grid.GetCell(link4, link3.endNavType, out flag);
 			if (flag)
 			{
-				int num5 = cost + (int)link2.cost;
+				int num5 = cost + (int)link3.cost;
 				bool flag2 = cell.cost == -1;
 				bool flag3 = num5 < cell.cost;
 				if (flag2 || flag3)
@@ -224,39 +228,39 @@ public class PathFinder
 					linksInCellRange[num4++] = new PathFinder.PotentialScratchPad.PathGridCellData
 					{
 						pathGridCell = cell,
-						link = link2
+						link = link3
 					};
 				}
 			}
 		}
-		for (int j = 0; j < num4; j++)
-		{
-			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData = linksInCellRange[j];
-			int link4 = pathGridCellData.link.link;
-			pathGridCellData.isSubmerged = PathFinder.IsSubmerged(link4);
-			linksInCellRange[j] = pathGridCellData;
-		}
 		for (int k = 0; k < num4; k++)
 		{
-			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData2 = linksInCellRange[k];
-			NavGrid.Link link5 = pathGridCellData2.link;
-			int link6 = link5.link;
+			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData = linksInCellRange[k];
+			int link5 = pathGridCellData.link.link;
+			pathGridCellData.isSubmerged = PathFinder.IsSubmerged(link5);
+			linksInCellRange[k] = pathGridCellData;
+		}
+		for (int l = 0; l < num4; l++)
+		{
+			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData2 = linksInCellRange[l];
+			NavGrid.Link link6 = pathGridCellData2.link;
+			int link7 = link6.link;
 			PathFinder.Cell pathGridCell = pathGridCellData2.pathGridCell;
-			int num6 = cost + (int)link5.cost;
+			int num6 = cost + (int)link6.cost;
 			PathFinder.PotentialPath potentialPath = potential;
-			potentialPath.cell = link6;
-			potentialPath.navType = link5.endNavType;
+			potentialPath.cell = link7;
+			potentialPath.navType = link6.endNavType;
 			if (pathGridCellData2.isSubmerged)
 			{
-				int submergedPathCostPenalty = abilities.GetSubmergedPathCostPenalty(potentialPath, link5);
+				int submergedPathCostPenalty = abilities.GetSubmergedPathCostPenalty(potentialPath, link6);
 				num6 += submergedPathCostPenalty;
 			}
 			PathFinder.PotentialPath.Flags flags = potentialPath.flags;
-			bool flag4 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link5.transitionId, pathGridCellData2.isSubmerged);
+			bool flag4 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link6.transitionId, pathGridCellData2.isSubmerged);
 			PathFinder.PotentialPath.Flags flags2 = potentialPath.flags;
 			if (flag4)
 			{
-				PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, link5.transitionId, potentials, path_grid, ref pathGridCell);
+				PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, link6.transitionId, potentials, path_grid, ref pathGridCell);
 			}
 		}
 	}

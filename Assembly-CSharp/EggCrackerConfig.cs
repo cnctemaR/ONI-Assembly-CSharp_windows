@@ -14,7 +14,12 @@ public class EggCrackerConfig : IBuildingConfig
 
 	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, global::Tuple<Tag, float>[] customDrops)
 	{
-		EggCrackerConfig.EggData eggData = new EggCrackerConfig.EggData(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC);
+		EggCrackerConfig.RegisterEgg(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC, customDrops, true);
+	}
+
+	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, global::Tuple<Tag, float>[] customDrops, bool allowCrackerRecipeCreation = true)
+	{
+		EggCrackerConfig.EggData eggData = new EggCrackerConfig.EggData(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC, allowCrackerRecipeCreation);
 		eggData.customOutput = customDrops;
 		EggCrackerConfig.uncategorizedEggData.Add(eggData);
 	}
@@ -97,37 +102,40 @@ public class EggCrackerConfig : IBuildingConfig
 				array[i] = keyValuePair.Value[i].id;
 			}
 			EggCrackerConfig.EggData eggData = keyValuePair.Value[0];
-			string text = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RESULT_DESCRIPTION, eggData.name);
-			ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+			if (eggData.hasCrackerRecipe)
 			{
-				new ComplexRecipe.RecipeElement(array, 1f)
+				string text = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RESULT_DESCRIPTION, eggData.name);
+				ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 				{
-					material = array[0]
-				}
-			};
-			List<ComplexRecipe.RecipeElement> list = new List<ComplexRecipe.RecipeElement>
-			{
-				new ComplexRecipe.RecipeElement("RawEgg", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
-				new ComplexRecipe.RecipeElement("EggShell", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
-			};
-			if (eggData.customOutput != null)
-			{
-				foreach (global::Tuple<Tag, float> tuple in eggData.customOutput)
+					new ComplexRecipe.RecipeElement(array, 1f)
+					{
+						material = array[0]
+					}
+				};
+				List<ComplexRecipe.RecipeElement> list = new List<ComplexRecipe.RecipeElement>
 				{
-					list.Add(new ComplexRecipe.RecipeElement(tuple.first, tuple.second, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+					new ComplexRecipe.RecipeElement("RawEgg", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
+					new ComplexRecipe.RecipeElement("EggShell", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+				};
+				if (eggData.customOutput != null)
+				{
+					foreach (global::Tuple<Tag, float> tuple in eggData.customOutput)
+					{
+						list.Add(new ComplexRecipe.RecipeElement(tuple.first, tuple.second, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+					}
 				}
+				ComplexRecipe.RecipeElement[] array3 = list.ToArray();
+				string text2 = ComplexRecipeManager.MakeObsoleteRecipeID("EggCracker", "RawEgg");
+				string text3 = ComplexRecipeManager.MakeRecipeID("EggCracker", array2, array3);
+				ComplexRecipe complexRecipe = new ComplexRecipe(text3, array2, array3, eggData.requiredDlcIds, eggData.forbiddenDlcIds);
+				complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, eggData.name, text);
+				complexRecipe.fabricators = new List<Tag> { "EggCracker" };
+				complexRecipe.time = 5f;
+				complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom;
+				complexRecipe.customName = keyValuePair.Key.ProperName();
+				complexRecipe.customSpritePrefabID = ((array2[0].material != null) ? array2[0].material.Name : array2[0].possibleMaterials[0].Name);
+				ComplexRecipeManager.Get().AddObsoleteIDMapping(text2, text3);
 			}
-			ComplexRecipe.RecipeElement[] array3 = list.ToArray();
-			string text2 = ComplexRecipeManager.MakeObsoleteRecipeID("EggCracker", "RawEgg");
-			string text3 = ComplexRecipeManager.MakeRecipeID("EggCracker", array2, array3);
-			ComplexRecipe complexRecipe = new ComplexRecipe(text3, array2, array3, eggData.requiredDlcIds, eggData.forbiddenDlcIds);
-			complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, eggData.name, text);
-			complexRecipe.fabricators = new List<Tag> { "EggCracker" };
-			complexRecipe.time = 5f;
-			complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Custom;
-			complexRecipe.customName = keyValuePair.Key.ProperName();
-			complexRecipe.customSpritePrefabID = ((array2[0].material != null) ? array2[0].material.Name : array2[0].possibleMaterials[0].Name);
-			ComplexRecipeManager.Get().AddObsoleteIDMapping(text2, text3);
 		}
 	}
 
@@ -141,12 +149,23 @@ public class EggCrackerConfig : IBuildingConfig
 	{
 		public EggData(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC)
 		{
+			this.Config(id, name, description, mass, requiredDLC, forbiddenDLC, true);
+		}
+
+		public EggData(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, bool hasCrackerRecipe = true)
+		{
+			this.Config(id, name, description, mass, requiredDLC, forbiddenDLC, hasCrackerRecipe);
+		}
+
+		private void Config(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, bool hasCrackerRecipe = true)
+		{
 			this.id = id;
 			this.name = name;
 			this.description = description;
 			this.mass = mass;
 			this.requiredDlcIds = requiredDLC;
 			this.forbiddenDlcIds = forbiddenDLC;
+			this.hasCrackerRecipe = hasCrackerRecipe;
 		}
 
 		public string[] GetRequiredDlcIds()
@@ -170,6 +189,8 @@ public class EggCrackerConfig : IBuildingConfig
 		public string[] requiredDlcIds;
 
 		public string[] forbiddenDlcIds;
+
+		public bool hasCrackerRecipe;
 
 		public global::Tuple<Tag, float>[] customOutput;
 

@@ -295,13 +295,18 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts, float eggMassToDrop)
 	{
+		return EntityTemplates.ExtendEntityToFertileCreature(prefab, dlcRestrictions, eggId, eggName, eggDesc, eggAnim, eggMass, babyId, fertilityCycles, incubationCycles, eggChances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated, preventEggFromDroppingProducts, eggMassToDrop, true);
+	}
+
+	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts, float eggMassToDrop, bool allowEggCrackerRecipeCreation = true)
+	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
 		def.baseFertileCycles = fertilityCycles;
 		DebugUtil.DevAssert(eggSortOrder > -1, "Added a fertile creature without an egg sort order!", null);
 		float num = 100f / (600f * incubationCycles);
 		string[] requiredDlcsOrNull = DlcRestrictionsUtil.GetRequiredDlcsOrNull(dlcRestrictions);
 		string[] forbiddenDlcIdsOrNull = DlcRestrictionsUtil.GetForbiddenDlcIdsOrNull(dlcRestrictions);
-		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull, preventEggFromDroppingProducts, eggMassToDrop);
+		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull, preventEggFromDroppingProducts, eggMassToDrop, allowEggCrackerRecipeCreation);
 		def.eggPrefab = new Tag(eggId);
 		def.initialBreedingWeights = eggChances;
 		if (egg_anim_scale != 1f)

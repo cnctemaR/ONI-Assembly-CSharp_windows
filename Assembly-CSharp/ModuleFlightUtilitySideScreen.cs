@@ -93,7 +93,7 @@ public class ModuleFlightUtilitySideScreen : SideScreenContent
 				this.RefreshModulePanel(smi);
 			}
 		}
-		this.scrollRectLayout.preferredHeight = (this.scrollRectLayout.minHeight = Mathf.Min((float)this.modulePanels.Count, 2.25f) * this.modulePanelPrefab.GetComponent<RectTransform>().rect.height);
+		this.scrollRectLayout.preferredHeight = (this.scrollRectLayout.minHeight = Mathf.Min((float)this.modulePanels.Count, 2.5f) * this.modulePanelPrefab.GetComponent<RectTransform>().rect.height);
 	}
 
 	private void RefreshAll(object data = null)

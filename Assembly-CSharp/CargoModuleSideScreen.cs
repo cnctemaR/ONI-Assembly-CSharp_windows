@@ -59,6 +59,7 @@ public class CargoModuleSideScreen : SideScreenContent, ISimEveryTick
 			component.GetReference<LocText>("label").SetText(hexCellCollector.GetProperName());
 		}
 		this.RefreshProgressBars();
+		this.scrollRectLayout.preferredHeight = (this.scrollRectLayout.minHeight = Mathf.Min((float)this.modulePanels.Count, 2.5f) * this.modulePanelPrefab.GetComponent<RectTransform>().rect.height);
 	}
 
 	private void ClearModules()
@@ -124,4 +125,7 @@ public class CargoModuleSideScreen : SideScreenContent, ISimEveryTick
 	public GameObject moduleContentContainer;
 
 	public GameObject modulePanelPrefab;
+
+	[SerializeField]
+	private LayoutElement scrollRectLayout;
 }

@@ -23,6 +23,12 @@ public class PowerStationToolsConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
+		PrimaryElement component = inst.GetComponent<PrimaryElement>();
+		if (component.MassPerUnit > 1f && Math.Abs(component.Units - Mathf.Floor(component.Units)) > Mathf.Epsilon)
+		{
+			float num = Mathf.Ceil(component.Mass / component.MassPerUnit) * component.MassPerUnit;
+			component.Mass = num;
+		}
 	}
 
 	public const string ID = "PowerStationTools";

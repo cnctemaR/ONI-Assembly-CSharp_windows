@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance, IStateMachineTarget, RanchStation.Def>
 {
@@ -229,14 +230,16 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				return;
 			}
-			for (int i = this.targetRanchables.Count - 1; i >= 0; i--)
+			List<RanchableMonitor.Instance> list = CollectionPool<List<RanchableMonitor.Instance>, RanchableMonitor.Instance>.Get();
+			list.AddRange(this.targetRanchables);
+			foreach (RanchableMonitor.Instance instance in list)
 			{
-				RanchableMonitor.Instance instance = this.targetRanchables[i];
 				if (instance.States == null || !this.CanRanchableBeRanchedAtRanchStation(instance))
 				{
 					this.Abandon(instance);
 				}
 			}
+			CollectionPool<List<RanchableMonitor.Instance>, RanchableMonitor.Instance>.Release(list);
 		}
 
 		public void FindRanchable(object _ = null)

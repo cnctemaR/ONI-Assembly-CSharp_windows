@@ -234,8 +234,8 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			{
 				GameObject gameObject = (GameObject)obj;
 				int num3 = Grid.PosToCell(gameObject);
-				int cost = component.PathGrid.GetCost(num3);
-				if (cost != -1 && num > cost + 50 + 5)
+				int navigationCost = component.GetNavigationCost(num3);
+				if (navigationCost != -1 && num > navigationCost + 50 + 5)
 				{
 					AccessabilityManager accessabilityManager = ((gameObject != null) ? gameObject.GetComponent<AccessabilityManager>() : null);
 					if (accessabilityManager != null && accessabilityManager.CanAccess(destination.gameObject))
@@ -249,7 +249,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 								Pickupable component3 = component2.GetComponent<Pickupable>();
 								if (FetchManager.IsFetchablePickup_Exclude(component3.KPrefabID, component3.storage, component3.UnreservedFetchAmount, exclude_tags, required_tags, destination))
 								{
-									int num4 = cost + (5 - component2.FoodInfo.Quality + 1) * 50 + 5;
+									int num4 = navigationCost + (5 - component2.FoodInfo.Quality + 1) * 50 + 5;
 									if (num4 < num)
 									{
 										pickup.pickupable = component3;

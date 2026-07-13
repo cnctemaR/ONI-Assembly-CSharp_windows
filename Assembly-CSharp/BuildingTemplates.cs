@@ -216,6 +216,11 @@ public class BuildingTemplates
 
 	public static GameObject ExtendBuildingToClusterCargoBay(GameObject template, float capacity, List<Tag> storageFilters, CargoBay.CargoType cargoType)
 	{
+		return BuildingTemplates.ExtendBuildingToClusterCargoBay(template, capacity, storageFilters, null, cargoType);
+	}
+
+	public static GameObject ExtendBuildingToClusterCargoBay(GameObject template, float capacity, List<Tag> storageFilters, List<Tag> forbiddenTags, CargoBay.CargoType cargoType)
+	{
 		Storage storage = template.AddOrGet<Storage>();
 		storage.capacityKg = capacity;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
@@ -228,6 +233,7 @@ public class BuildingTemplates
 		RocketModuleHexCellCollector.Def def = template.AddOrGetDef<RocketModuleHexCellCollector.Def>();
 		float num = 3600f;
 		def.collectSpeed = capacity / num;
+		def.forbiddenTags = forbiddenTags;
 		TreeFilterable treeFilterable = template.AddOrGet<TreeFilterable>();
 		treeFilterable.dropIncorrectOnFilterChange = false;
 		treeFilterable.autoSelectStoredOnLoad = false;

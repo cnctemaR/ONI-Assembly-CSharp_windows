@@ -297,36 +297,32 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				this.StopSM("FetchAreaChoreComplete");
 				return;
 			}
-			FetchAreaChore.StatesInstance.Delivery nextDelivery = this.deliveries[0];
-			if (FetchAreaChore.StatesInstance.s_transientDeliveryTags.Contains(nextDelivery.chore.requiredTag))
+			FetchAreaChore.StatesInstance.Delivery delivery = this.deliveries[0];
+			if (FetchAreaChore.StatesInstance.s_transientDeliveryTags.Contains(delivery.chore.requiredTag))
 			{
-				nextDelivery.chore.requiredTag = Tag.Invalid;
+				delivery.chore.requiredTag = Tag.Invalid;
 			}
-			this.deliverables.RemoveAll(delegate(Pickupable x)
+			this.deliverables.ToArray();
+			for (int i = this.deliverables.Count - 1; i >= 0; i--)
 			{
-				if (x == null || x.FetchTotalAmount <= 0f)
+				if (this.deliverables[i] == null || this.deliverables[i].FetchTotalAmount <= 0f || this.deliverables[i].KPrefabID.HasTag(GameTags.MarkedForMove))
 				{
-					return true;
+					this.deliverables.RemoveAtSwap<Pickupable>(i);
 				}
-				if (x.KPrefabID.HasTag(GameTags.MarkedForMove))
+				else if (!FetchAreaChore.IsPickupableStillValidForChore(this.deliverables[i], delivery.chore))
 				{
-					return true;
+					global::Debug.LogWarning(string.Format("Removing deliverable {0} for a delivery to {1} which did not request it", this.deliverables[i], delivery.chore.destination));
+					this.deliverables.RemoveAtSwap<Pickupable>(i);
 				}
-				if (!FetchAreaChore.IsPickupableStillValidForChore(x, nextDelivery.chore))
-				{
-					global::Debug.LogWarning(string.Format("Removing deliverable {0} for a delivery to {1} which did not request it", x, nextDelivery.chore.destination));
-					return true;
-				}
-				return false;
-			});
+			}
 			if (this.deliverables.Count == 0)
 			{
 				this.StopSM("FetchAreaChoreComplete");
 				return;
 			}
-			base.sm.deliveryDestination.Set(nextDelivery.destination, base.smi);
+			base.sm.deliveryDestination.Set(delivery.destination, base.smi);
 			base.sm.deliveryObject.Set(this.deliverables[0], base.smi);
-			if (!(nextDelivery.destination != null))
+			if (!(delivery.destination != null))
 			{
 				base.smi.GoTo(base.sm.delivering.deliverfail);
 				return;

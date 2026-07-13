@@ -134,7 +134,7 @@ public class AccessControlSideScreen : SideScreenContent
 	private void RefreshContainerObjects()
 	{
 		this.<RefreshContainerObjects>g__RefreshContainer|29_0(this.standardMinionSectionHeader, GameTags.Minions.Models.Standard, true);
-		this.<RefreshContainerObjects>g__RefreshContainer|29_0(this.bionicMinionSectionHeader, GameTags.Minions.Models.Bionic, Game.IsDlcActiveForCurrentSave("DLC2_ID"));
+		this.<RefreshContainerObjects>g__RefreshContainer|29_0(this.bionicMinionSectionHeader, GameTags.Minions.Models.Bionic, Game.IsDlcActiveForCurrentSave("DLC3_ID"));
 		this.<RefreshContainerObjects>g__RefreshContainer|29_0(this.robotSectionHeader, GameTags.Robot, true);
 	}
 

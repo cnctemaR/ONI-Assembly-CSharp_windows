@@ -71,7 +71,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
 		if (this.maxProbeRadiusX != 0 || this.maxProbeRadiusY != 0)
 		{
-			this.PathGrid = new PathGrid(this.maxProbeRadiusX, this.maxProbeRadiusY, true, this.NavGrid.ValidNavTypes);
+			this.PathGrid = new PathGrid(this.maxProbeRadiusX * 2 + 1, this.maxProbeRadiusY * 2 + 1, true, this.NavGrid.ValidNavTypes);
 		}
 		else
 		{
@@ -144,13 +144,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	protected void OnQueueDestroy()
 	{
-		if (this.reportOccupation)
-		{
-			MinionGroupProber.Get().Vacate(this.occupiedCells);
-		}
 		if (this.executePathProbeTaskAsync)
 		{
 			AsyncPathProber.Instance.Unregister(this.asyncUpdaterEntry);
+		}
+		if (this.reportOccupation)
+		{
+			MinionGroupProber.Get().Vacate(this.occupiedCells);
 		}
 	}
 
@@ -231,6 +231,24 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		return PathFinder.ValidatePath(this.NavGrid, currentAbilities, ref path, this.flags);
 	}
 
+	private bool TryBuildPathFromCache(int cachedCell, int reservedCell, ref PathFinder.Path path)
+	{
+		bool flag = false;
+		if (this.executePathProbeTaskAsync)
+		{
+			Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry = this.asyncUpdaterEntry;
+			lock (asyncPathGridUpdaterEntry)
+			{
+				flag = this.PathGrid.BuildPath(cachedCell, reservedCell, this.CurrentNavType, ref path);
+				goto IL_0051;
+			}
+		}
+		flag = this.PathGrid.BuildPath(cachedCell, reservedCell, this.CurrentNavType, ref path);
+		IL_0051:
+		bool flag3;
+		return flag && this.ValidatePath(ref path, out flag3);
+	}
+
 	public void AdvancePath(bool trigger_advance = true)
 	{
 		this.cachedCell = Grid.PosToCell(this);
@@ -257,18 +275,9 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 				{
 					this.path.Clear();
 				}
-				else if (!this.PathGrid.BuildPath(this.cachedCell, this.reservedCell, this.CurrentNavType, ref this.path))
+				else if (!this.TryBuildPathFromCache(this.cachedCell, this.reservedCell, ref this.path))
 				{
 					PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(this.cachedCell, this.CurrentNavType, this.flags);
-					if (this.executePathProbeTaskAsync)
-					{
-						Navigator.AsyncPathGridUpdaterEntry asyncPathGridUpdaterEntry = this.asyncUpdaterEntry;
-						lock (asyncPathGridUpdaterEntry)
-						{
-							PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(this.reservedCell), ref this.path);
-							goto IL_0188;
-						}
-					}
 					PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellQuery.Reset(this.reservedCell), ref this.path);
 				}
 			}
@@ -276,7 +285,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			{
 				this.path.nodes.RemoveAt(0);
 			}
-			IL_0188:
 			if (this.path.IsValid())
 			{
 				this.BeginTransition(this.NavGrid.transitions[(int)this.path.nodes[1].transitionId]);
@@ -678,6 +686,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		public int originCell = Grid.InvalidCell;
 
 		public NavType startingNavType;
+
+		public PathFinder.PotentialPath.Flags startingFlags;
 	}
 
 	public class ActiveTransition

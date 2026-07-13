@@ -68,7 +68,7 @@ public static class BaseRaptorConfig
 				entersBuilding = false
 			}, !is_baby, -1)
 			.Add(new CritterEmoteStates.Def(Assets.GetAnim("raptor_emotes_kanim")), !is_baby, -1)
-			.Add(new CritterRoarStates.Def(Assets.GetAnim(is_baby ? "baby_raptor_kanim" : "raptor_kanim")), true, -1)
+			.Add(new CritterRoarStates.Def(), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.RaptorSpecies, symbolOverridePrefix);

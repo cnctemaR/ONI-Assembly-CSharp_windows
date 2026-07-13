@@ -52,7 +52,7 @@ public class CritterEmoteStates : GameStateMachine<CritterEmoteStates, CritterEm
 					smi.hasSetThoughtBubble = false;
 				}
 			});
-		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Behaviours.CritterEmoteBehaviour, false);
+		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.Behaviours.CritterEmoteBehaviour, false);
 	}
 
 	public GameStateMachine<CritterEmoteStates, CritterEmoteStates.Instance, IStateMachineTarget, CritterEmoteStates.Def>.State playing;

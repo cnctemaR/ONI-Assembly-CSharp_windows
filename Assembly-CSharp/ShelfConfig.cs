@@ -66,7 +66,6 @@ public class ShelfConfig : IBuildingConfig
 		go.AddOrGet<ItemPedestal>();
 		component.AddTag(GameTags.Decoration, false);
 		component.AddTag(GameTags.OrnamentDisplayer, false);
-		go.AddOrGetDef<RocketUsageRestriction.Def>();
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<AnimTilableSingleController>().tagsOfNeightboursThatICanTileWith = new Tag[] { "Shelf" };
 		component.prefabInitFn += ShelfConfig.OnPrefabInit;

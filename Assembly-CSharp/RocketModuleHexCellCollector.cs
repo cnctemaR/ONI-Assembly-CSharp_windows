@@ -192,6 +192,17 @@ public class RocketModuleHexCellCollector : GameStateMachine<RocketModuleHexCell
 			}
 			flag = component.HasAnyTags(smi.storage.storageFilters);
 			IL_008E:
+			if (flag && smi.def.forbiddenTags != null)
+			{
+				foreach (Tag tag2 in smi.def.forbiddenTags)
+				{
+					if (component.HasTag(tag2))
+					{
+						flag = false;
+						break;
+					}
+				}
+			}
 			if (flag)
 			{
 				Element element = ElementLoader.GetElement(component.PrefabID());
@@ -260,6 +271,8 @@ public class RocketModuleHexCellCollector : GameStateMachine<RocketModuleHexCell
 		public float collectSpeed;
 
 		public bool formatCapacityBarAsUnits;
+
+		public List<Tag> forbiddenTags;
 	}
 
 	public class InSpaceStates : GameStateMachine<RocketModuleHexCellCollector, RocketModuleHexCellCollector.Instance, IStateMachineTarget, RocketModuleHexCellCollector.Def>.State

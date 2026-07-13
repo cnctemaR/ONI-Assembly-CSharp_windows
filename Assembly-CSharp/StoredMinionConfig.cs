@@ -35,6 +35,7 @@ public class StoredMinionConfig : IEntityConfig
 
 	public void OnSpawn(GameObject go)
 	{
+		go.Trigger(1589886948, go);
 	}
 
 	public static string ID = "StoredMinion";

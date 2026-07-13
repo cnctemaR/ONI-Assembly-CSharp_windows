@@ -46,7 +46,6 @@ public class WoodStorageConfig : IBuildingConfig
 		storage.showCapacityAsMainStatus = true;
 		storage.capacityKg = 20000f;
 		go.AddOrGet<StorageMeter>();
-		go.AddOrGetDef<RocketUsageRestriction.Def>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.RequestedItemTag = "WoodLog".ToTag();

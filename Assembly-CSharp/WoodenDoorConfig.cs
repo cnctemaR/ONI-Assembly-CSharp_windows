@@ -47,7 +47,6 @@ public class WoodenDoorConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.GetComponent<KPrefabID>();
-		go.AddOrGetDef<RocketUsageRestriction.Def>();
 		go.AddOrGet<LoopingSounds>();
 	}
 

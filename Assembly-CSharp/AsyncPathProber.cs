@@ -59,7 +59,12 @@ public static class AsyncPathProber
 					{
 						pathGrid.CloneNavTypes(asyncPathGridUpdaterEntry.navigator.PathGrid);
 					}
-					PathProber.Run(asyncPathGridUpdaterEntry.originCell, asyncPathGridUpdaterEntry.abilities, asyncPathGridUpdaterEntry.navigator.NavGrid, asyncPathGridUpdaterEntry.startingNavType, pathGrid, AsyncPathProber.Instance.SerialNo, pathProberResources.scratch, pathProberResources.potentials, asyncPathGridUpdaterEntry.navigator.flags, pathProberResources.found_cells);
+					ushort serialNo = AsyncPathProber.Instance.SerialNo;
+					if (pathGrid.SerialNo > AsyncPathProber.Instance.SerialNo)
+					{
+						pathGrid.ResetProberCells();
+					}
+					PathProber.Run(asyncPathGridUpdaterEntry.originCell, asyncPathGridUpdaterEntry.abilities, asyncPathGridUpdaterEntry.navigator.NavGrid, asyncPathGridUpdaterEntry.startingNavType, pathGrid, AsyncPathProber.Instance.SerialNo, pathProberResources.scratch, pathProberResources.potentials, asyncPathGridUpdaterEntry.startingFlags, pathProberResources.found_cells);
 					if (asyncPathGridUpdaterEntry.navigator.reportOccupation)
 					{
 						pathProberResources.found_cells.Sort();
@@ -226,6 +231,7 @@ public static class AsyncPathProber
 						this.navigators[i].abilities.Refresh();
 						this.navigators[i].originCell = this.navigators[i].navigator.cachedCell;
 						this.navigators[i].startingNavType = this.navigators[i].navigator.CurrentNavType;
+						this.navigators[i].startingFlags = this.navigators[i].navigator.flags;
 						this.navigators[i].framesSinceLastUpdate++;
 					}
 				}

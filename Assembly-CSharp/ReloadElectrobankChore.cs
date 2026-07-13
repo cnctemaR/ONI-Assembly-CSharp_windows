@@ -333,7 +333,7 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 					}
 					smi.workerSnapshot = ReloadElectrobankChore.States.InstallBattery.Snapshot(smi);
 					smi.diningTimedOut = false;
-				}).ScheduleAction("Dining Timeout", 60f, delegate(ReloadElectrobankChore.Instance smi)
+				}).ScheduleAction("Dining Timeout", 15f, delegate(ReloadElectrobankChore.Instance smi)
 				{
 					smi.diningTimedOut = true;
 				})
@@ -391,7 +391,7 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 
 			private const float ANIMATION_TIMEOUT = 15f;
 
-			private const float DINING_DURATION_MAXIMUM = 60f;
+			private const float DINING_DURATION_MAXIMUM = 15f;
 		}
 
 		public class InstallAtMessStation : GameStateMachine<ReloadElectrobankChore.States, ReloadElectrobankChore.Instance, ReloadElectrobankChore, object>.State

@@ -71,6 +71,14 @@ public class PathGrid
 		}
 	}
 
+	public void ResetProberCells()
+	{
+		for (int i = 0; i < this.ProberCells.Length; i++)
+		{
+			this.ProberCells[i] = default(PathGrid.ProberCell);
+		}
+	}
+
 	public void OnCleanUp()
 	{
 	}

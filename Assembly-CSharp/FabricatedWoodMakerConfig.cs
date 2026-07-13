@@ -54,7 +54,6 @@ public class FabricatedWoodMakerConfig : IBuildingConfig
 		BuildingTemplates.CreateComplexFabricatorStorage(go, complexFabricator);
 		go.AddOrGet<FabricatorIngredientStatusManager>();
 		go.AddOrGet<CopyBuildingSettings>();
-		go.AddOrGetDef<RocketUsageRestriction.Def>();
 		go.AddOrGet<LoopingSounds>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.capacityTag = SimHashes.NaturalResin.CreateTag();

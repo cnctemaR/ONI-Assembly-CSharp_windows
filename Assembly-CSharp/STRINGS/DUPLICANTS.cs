@@ -3651,6 +3651,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = DUPLICANTS.STATUSITEMS.GENERIC_DELIVER.TOOLTIP;
 			}
 
+			public class WATCHROBODANCERWORKABLE
+			{
+				public static LocString NAME = "Watching Flash Mobber";
+
+				public static LocString STATUS = "Watching Flash Mobber";
+
+				public static LocString TOOLTIP = "This Duplicant is enjoying the show.";
+			}
+
 			public class WARMUPDELIVERSTATUS
 			{
 				public static LocString NAME = DUPLICANTS.STATUSITEMS.GENERIC_DELIVER.NAME;

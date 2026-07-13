@@ -74,6 +74,7 @@ public class FlushToiletConfig : IBuildingConfig
 		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
 		ownable.canBePublic = true;
 		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
+		Prioritizable.AddRef(go);
 		go.AddOrGetDef<RocketUsageRestriction.Def>();
 		component.prefabInitFn += this.OnInit;
 	}

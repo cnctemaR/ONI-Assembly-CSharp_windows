@@ -16,6 +16,7 @@ public class WatchRoboDancerWorkable : Workable, IWorkerPrioritizable
 		this.synchronizeAnims = false;
 		this.showProgressBar = true;
 		this.resetProgressOnStop = true;
+		this.workerStatusItem = Db.Get().DuplicantStatusItems.WatchRoboDancerWorkable;
 		base.SetWorkTime(30f);
 		this.showProgressBar = false;
 	}

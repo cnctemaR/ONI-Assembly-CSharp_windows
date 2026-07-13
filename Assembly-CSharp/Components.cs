@@ -305,7 +305,11 @@ public class Components
 			ICollection<int> collection = null;
 			if (checkChildWorlds)
 			{
-				collection = ClusterManager.Instance.GetWorld(worldId).GetChildWorldIds();
+				WorldContainer world = ClusterManager.Instance.GetWorld(worldId);
+				if (world != null)
+				{
+					collection = world.GetChildWorldIds();
+				}
 			}
 			return this.GetWorldItems(worldId, collection, null);
 		}
@@ -315,7 +319,11 @@ public class Components
 			ICollection<int> collection = null;
 			if (checkChildWorlds)
 			{
-				collection = ClusterManager.Instance.GetWorld(worldId).GetChildWorldIds();
+				WorldContainer world = ClusterManager.Instance.GetWorld(worldId);
+				if (world != null)
+				{
+					collection = world.GetChildWorldIds();
+				}
 			}
 			return this.GetWorldItems(worldId, collection, filter);
 		}

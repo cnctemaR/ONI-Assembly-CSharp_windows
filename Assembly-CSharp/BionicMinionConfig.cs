@@ -76,6 +76,7 @@ public class BionicMinionConfig : IEntityConfig
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		manualDeliveryKG.capacity = 0f;
 		manualDeliveryKG.refillMass = 0f;
+		manualDeliveryKG.handlePrioritizable = false;
 		gameObject.AddOrGet<ReanimateBionicWorkable>();
 		gameObject.AddOrGet<WarmBlooded>().complexity = WarmBlooded.ComplexityType.HomeostasisWithoutCaloriesImpact;
 		gameObject.AddOrGet<BionicMinionStorageExtension>();

@@ -82,7 +82,7 @@ namespace STRINGS
 
 			public static LocString UNREFINEDOIL = UI.FormatAsLink("Unrefined Oil", "UNREFINEDOIL");
 
-			public static LocString UNREFINEDOIL_DESC = "Oils in their raw, minimally processed forms. They can be refined at the " + UI.FormatAsLink("Oil Refinery", "OILREFINERY") + ".";
+			public static LocString UNREFINEDOIL_DESC = "Oils in their raw, minimally processed forms. They can be used as industrial lubricants or refined for other applications at designated buildings.";
 
 			public static LocString REFINEDMETAL = UI.FormatAsLink("Refined Metal", "REFINEDMETAL");
 

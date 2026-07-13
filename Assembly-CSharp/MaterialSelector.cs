@@ -266,7 +266,17 @@ public class MaterialSelector : KScreen
 		if (tag != null)
 		{
 			UISounds.PlaySound(UISounds.Sound.Object_AutoSelected);
-			string text = ((ElementLoader.GetElement(tag) == null) ? tag.ToString() : tag.Name);
+			Element element = ElementLoader.GetElement(tag);
+			string text;
+			if (element == null)
+			{
+				GameObject prefab = Assets.GetPrefab(tag);
+				text = ((prefab != null) ? prefab.GetProperName() : tag.Name);
+			}
+			else
+			{
+				text = element.name;
+			}
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(MISC.POPFX.RESOURCE_SELECTION_CHANGED, text), null, Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()), 1.5f, false, false);
 			this.OnSelectMaterial(tag, this.activeRecipe, true);
 			return true;

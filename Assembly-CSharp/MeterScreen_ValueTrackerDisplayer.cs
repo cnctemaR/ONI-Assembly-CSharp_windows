@@ -39,12 +39,21 @@ public abstract class MeterScreen_ValueTrackerDisplayer : KMonoBehaviour
 		{
 			this.RefreshWorldMinionIdentities();
 		}
+		if (this.minionListCustomSortOperation != null)
+		{
+			this.worldLiveMinionIdentities = this.minionListCustomSortOperation(this.worldLiveMinionIdentities);
+		}
 		return this.worldLiveMinionIdentities;
 	}
 
 	protected virtual List<MinionIdentity> GetAllMinionsFromAllWorlds()
 	{
-		return new List<MinionIdentity>(Components.LiveMinionIdentities.Items.Where<MinionIdentity>((MinionIdentity x) => !x.IsNullOrDestroyed()));
+		List<MinionIdentity> list = new List<MinionIdentity>(Components.LiveMinionIdentities.Items.Where<MinionIdentity>((MinionIdentity x) => !x.IsNullOrDestroyed()));
+		if (this.minionListCustomSortOperation != null)
+		{
+			this.worldLiveMinionIdentities = this.minionListCustomSortOperation(list);
+		}
+		return list;
 	}
 
 	public LocText Label;
@@ -56,6 +65,8 @@ public abstract class MeterScreen_ValueTrackerDisplayer : KMonoBehaviour
 	public TextStyleSetting ToolTipStyle_Header;
 
 	public TextStyleSetting ToolTipStyle_Property;
+
+	protected Func<List<MinionIdentity>, List<MinionIdentity>> minionListCustomSortOperation;
 
 	private List<MinionIdentity> worldLiveMinionIdentities;
 }

@@ -8,7 +8,7 @@ public class ElectrobankConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("Electrobank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK.DESC, 20f, true, Assets.GetAnim("electrobank_large_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.Aluminum, new List<Tag>
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("Electrobank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK.DESC, 20f, true, Assets.GetAnim("electrobank_large_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.Katairite, new List<Tag>
 		{
 			GameTags.ChargedPortableBattery,
 			GameTags.PedestalDisplayable

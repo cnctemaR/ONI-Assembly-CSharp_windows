@@ -52,7 +52,7 @@ public class GeoTunerConfig : IBuildingConfig
 		};
 		storage.SetDefaultStoredItemModifiers(list);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
 		manualDeliveryKG.capacity = 0f;
 		manualDeliveryKG.refillMass = 0f;
 		manualDeliveryKG.SetStorage(storage);

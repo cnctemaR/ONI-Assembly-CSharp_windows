@@ -180,25 +180,28 @@ public class CodexEntryGenerator_Elements
 		Func<ComplexRecipe.RecipeElement, bool> <>9__1;
 		foreach (ComplexRecipe complexRecipe in ComplexRecipeManager.Get().recipes)
 		{
-			IEnumerable<ComplexRecipe.RecipeElement> ingredients = complexRecipe.ingredients;
-			Func<ComplexRecipe.RecipeElement, bool> func;
-			if ((func = <>9__0) == null)
+			if (SaveLoader.Instance.IsAnyDlcActiveForCurrentSave(complexRecipe.GetDlcIds()))
 			{
-				func = (<>9__0 = (ComplexRecipe.RecipeElement i) => i.material == tag);
-			}
-			if (ingredients.Any<ComplexRecipe.RecipeElement>(func))
-			{
-				list.Add(new CodexRecipePanel(complexRecipe, false));
-			}
-			IEnumerable<ComplexRecipe.RecipeElement> results = complexRecipe.results;
-			Func<ComplexRecipe.RecipeElement, bool> func2;
-			if ((func2 = <>9__1) == null)
-			{
-				func2 = (<>9__1 = (ComplexRecipe.RecipeElement i) => i.material == tag);
-			}
-			if (results.Any<ComplexRecipe.RecipeElement>(func2))
-			{
-				list2.Add(new CodexRecipePanel(complexRecipe, true));
+				IEnumerable<ComplexRecipe.RecipeElement> ingredients = complexRecipe.ingredients;
+				Func<ComplexRecipe.RecipeElement, bool> func;
+				if ((func = <>9__0) == null)
+				{
+					func = (<>9__0 = (ComplexRecipe.RecipeElement i) => i.material == tag);
+				}
+				if (ingredients.Any<ComplexRecipe.RecipeElement>(func))
+				{
+					list.Add(new CodexRecipePanel(complexRecipe, false));
+				}
+				IEnumerable<ComplexRecipe.RecipeElement> results = complexRecipe.results;
+				Func<ComplexRecipe.RecipeElement, bool> func2;
+				if ((func2 = <>9__1) == null)
+				{
+					func2 = (<>9__1 = (ComplexRecipe.RecipeElement i) => i.material == tag);
+				}
+				if (results.Any<ComplexRecipe.RecipeElement>(func2))
+				{
+					list2.Add(new CodexRecipePanel(complexRecipe, true));
+				}
 			}
 		}
 		List<CodexEntryGenerator_Elements.ConversionEntry> list3;

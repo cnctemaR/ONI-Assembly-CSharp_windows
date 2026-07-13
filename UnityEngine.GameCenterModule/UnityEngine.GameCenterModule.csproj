@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D9B656D6-ED12-4FA1-B564-6406A71B4356}</ProjectGuid>
+    <ProjectGuid>{C23B42FD-5680-48E9-A242-49D85E596A00}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.GameCenterModule</AssemblyName>
@@ -38,15 +38,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{D9B656D6-ED12-4FA1-B564-6406A71B432E}</Project>
+      <Project>{C23B42FD-5680-48E9-A242-49D85E5969D8}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{D9B656D6-ED12-4FA1-B564-6406A71B4351}</Project>
+      <Project>{C23B42FD-5680-48E9-A242-49D85E5969FB}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{D9B656D6-ED12-4FA1-B564-6406A71B4369}</Project>
+      <Project>{C23B42FD-5680-48E9-A242-49D85E596A13}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -36,7 +36,7 @@ public class Breakable : Workable
 	public Notification CreateDamageNotification()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
-		return new Notification(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION, NotificationType.BadMinor, (List<Notification> notificationList, object data) => BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), component.GetProperName(), false, 0f, null, null, null, true, false, false);
+		return new Notification(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION, NotificationType.BadMinor, (List<Notification> notificationList, object data) => string.Format(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION_TOOLTIP, notificationList.ReduceMessages(false)), component.GetProperName(), false, 0f, null, null, null, true, false, false);
 	}
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)

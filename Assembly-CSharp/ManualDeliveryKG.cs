@@ -87,7 +87,10 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		{
 			this.SetStorage(this.storage);
 		}
-		Prioritizable.AddRef(base.gameObject);
+		if (this.handlePrioritizable)
+		{
+			Prioritizable.AddRef(base.gameObject);
+		}
 		if (this.userPaused && this.allowPause)
 		{
 			this.OnPause();
@@ -97,7 +100,10 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	protected override void OnCleanUp()
 	{
 		this.AbortDelivery("ManualDeliverKG destroyed");
-		Prioritizable.RemoveRef(base.gameObject);
+		if (this.handlePrioritizable)
+		{
+			Prioritizable.RemoveRef(base.gameObject);
+		}
 		base.OnCleanUp();
 	}
 
@@ -306,6 +312,8 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 
 	[Serialize]
 	private bool userPaused;
+
+	public bool handlePrioritizable = true;
 
 	public bool ShowStatusItem = true;
 

@@ -69,6 +69,11 @@ public class FetchDroneConfig : IEntityConfig
 		storage2.storageID = GameTags.ChargedPortableBattery;
 		storage2.showInUI = true;
 		storage2.storageFilters = new List<Tag> { GameTags.ChargedPortableBattery };
+		storage2.SetDefaultStoredItemModifiers(new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Insulate
+		});
 		TreeFilterable treeFilterable = gameObject.AddOrGet<TreeFilterable>();
 		treeFilterable.storageToFilterTag = storage2.storageID;
 		treeFilterable.dropIncorrectOnFilterChange = false;

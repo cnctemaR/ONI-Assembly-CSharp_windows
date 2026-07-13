@@ -16,6 +16,21 @@ namespace Klei.AI
 			this.PositiveTrait = positive_trait;
 			this.ValidStarterTrait = is_valid_starter_trait;
 			this.ignoredEffects = new string[0];
+			this.requiredDlcIds = null;
+			this.forbiddenDlcIds = null;
+		}
+
+		public Trait(string id, string name, string description, float rating, bool should_save, ChoreGroup[] disallowed_chore_groups, bool positive_trait, bool is_valid_starter_trait, string[] requiredDlcIds, string[] forbiddenDlcIds)
+			: base(id, name, description)
+		{
+			this.Rating = rating;
+			this.ShouldSave = should_save;
+			this.disabledChoreGroups = disallowed_chore_groups;
+			this.PositiveTrait = positive_trait;
+			this.ValidStarterTrait = is_valid_starter_trait;
+			this.ignoredEffects = new string[0];
+			this.requiredDlcIds = requiredDlcIds;
+			this.forbiddenDlcIds = forbiddenDlcIds;
 		}
 
 		public void AddIgnoredEffects(string[] effects)
@@ -176,5 +191,9 @@ namespace Klei.AI
 		public bool isTaskBeingRefused;
 
 		public string[] ignoredEffects;
+
+		public string[] requiredDlcIds;
+
+		public string[] forbiddenDlcIds;
 	}
 }

@@ -375,6 +375,10 @@ public class BionicMassOxygenAbsorbChore : Chore<BionicMassOxygenAbsorbChore.Ins
 			if (flag)
 			{
 				float num2 = DUPLICANTSTATS.STANDARD.Breath.BREATH_RATE * DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND;
+				if (mass_cb_info.mass == 0f)
+				{
+					mass_cb_info.temperature = DUPLICANTSTATS.BIONICS.Temperature.Internal.IDEAL;
+				}
 				mass_cb_info.mass += DUPLICANTSTATS.STANDARD.BaseStats.RECOVER_BREATH_DELTA * num2 * dt + DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * dt;
 			}
 			float num3 = this.oxygenTankMonitor.AddGas(mass_cb_info);

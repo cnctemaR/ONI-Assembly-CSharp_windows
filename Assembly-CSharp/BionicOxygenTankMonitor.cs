@@ -196,7 +196,7 @@ public class BionicOxygenTankMonitor : GameStateMachine<BionicOxygenTankMonitor,
 		{
 			get
 			{
-				return this.schedulable.IsAllowed(Db.Get().ScheduleBlockTypes.Eat);
+				return ScheduleManager.Instance.IsAllowed(this.schedulable, Db.Get().ScheduleBlockTypes.Eat);
 			}
 		}
 

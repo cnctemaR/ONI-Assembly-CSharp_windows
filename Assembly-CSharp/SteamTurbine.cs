@@ -172,6 +172,7 @@ public class SteamTurbine : Generator
 		this.operational.SetFlag(Generator.wireConnectedFlag, circuitID != ushort.MaxValue);
 		if (!this.operational.IsOperational)
 		{
+			this.meter.SetPositionPercent(0f);
 			return;
 		}
 		float num = 0f;

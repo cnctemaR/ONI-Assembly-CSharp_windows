@@ -10659,12 +10659,10 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Crushes ",
-					CREATURES.SPECIES.SEEDS.COLDWHEAT.NAME,
-					" or ",
-					ITEMS.FOOD.SPICENUT.NAME,
-					" to extract ",
+					"Crushes organic materials to extract liquids such as ",
 					ELEMENTS.MILK.NAME,
+					" or ",
+					ELEMENTS.PHYTOOIL.NAME,
 					".\n\n",
 					ELEMENTS.MILK.NAME,
 					" can be used to refill the ",

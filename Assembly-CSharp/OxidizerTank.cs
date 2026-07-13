@@ -112,7 +112,12 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 			KBatchedAnimTracker componentInChildren = base.gameObject.GetComponentInChildren<KBatchedAnimTracker>();
 			componentInChildren.forceAlwaysAlive = true;
 			componentInChildren.matchParentOffset = true;
+			return;
 		}
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		KBatchedAnimTracker component = this.meter.gameObject.GetComponent<KBatchedAnimTracker>();
+		component.matchParentOffset = true;
+		component.forceAlwaysAlive = true;
 	}
 
 	protected override void OnSpawn()
@@ -173,6 +178,10 @@ public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 		if (this.filteredStorage != null)
 		{
 			this.filteredStorage.FilterChanged();
+		}
+		if (this.meter != null)
+		{
+			this.meter.SetPositionPercent(this.storage.MassStored() / this.storage.capacityKg);
 		}
 	}
 

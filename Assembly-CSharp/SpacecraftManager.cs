@@ -349,6 +349,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 	{
 		Spacecraft spacecraftFromLaunchConditionManager = this.GetSpacecraftFromLaunchConditionManager(lcm);
 		this.savedSpacecraftDestinations[spacecraftFromLaunchConditionManager.id] = destination.id;
+		lcm.Trigger(929158128, destination);
 	}
 
 	public int GetSpacecraftID(ILaunchableRocket rocket)

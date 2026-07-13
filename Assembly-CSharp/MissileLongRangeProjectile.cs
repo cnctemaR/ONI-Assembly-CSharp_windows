@@ -110,6 +110,11 @@ public class MissileLongRangeProjectile : GameStateMachine<MissileLongRangeProje
 			this.animController.Rotation = launchAngle;
 			this.animController.Offset = Vector3.back;
 			this.animController.SetVisiblity(true);
+			FetchableMonitor.Instance smi = base.gameObject.GetSMI<FetchableMonitor.Instance>();
+			if (smi != null)
+			{
+				smi.SetForceUnfetchable(true);
+			}
 			base.sm.triggeroutofworld.Set(false, base.smi, false);
 			base.sm.asteroidTarget.Set(asteroid_target, base.smi, false);
 			this.launchedTarget = new Ref<KPrefabID>(asteroid_target.GetComponent<KPrefabID>());

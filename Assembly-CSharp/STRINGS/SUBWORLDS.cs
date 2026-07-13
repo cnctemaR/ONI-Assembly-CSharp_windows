@@ -364,7 +364,7 @@ namespace STRINGS
 
 		public static class SANDSTONE
 		{
-			public static LocString NAME = "Sandstone";
+			public static LocString NAME = "Sandstone Biome";
 
 			public static LocString DESC = "The Sandstone Biome is a temperate oasis with few inherent dangers. It's the perfect spot to get your colony up and running.";
 

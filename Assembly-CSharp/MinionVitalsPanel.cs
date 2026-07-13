@@ -126,17 +126,14 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 			if (string.IsNullOrEmpty(this.unpollinatedTooltip))
 			{
 				StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
-				DictionaryPool<Tag, GameObject, MinionVitalsPanel>.PooledDictionary pooledDictionary = DictionaryPool<Tag, GameObject, MinionVitalsPanel>.Allocate();
-				CodexEntryGenerator.CollectCritterTypes(pooledDictionary);
-				foreach (KeyValuePair<Tag, GameObject> keyValuePair in pooledDictionary)
+				foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.Creatures.Pollinator))
 				{
-					KPrefabID component = keyValuePair.Value.GetComponent<KPrefabID>();
-					if (component != null && component.HasTag(GameTags.Creatures.Pollinator))
+					KPrefabID component = gameObject.GetComponent<KPrefabID>();
+					if (!(component == null) && Game.IsCorrectDlcActiveForCurrentSave(component))
 					{
-						stringBuilder.AppendFormat("\n{0}{1}", "    • ", keyValuePair.Value.GetProperName());
+						stringBuilder.AppendFormat("\n{0}{1}", "    • ", gameObject.GetProperName());
 					}
 				}
-				pooledDictionary.Recycle();
 				this.unpollinatedTooltip = string.Format(UI.TOOLTIPS.VITALS_CHECKBOX_UNPOLLINATED, GlobalStringBuilderPool.ReturnAndFree(stringBuilder));
 			}
 			return this.unpollinatedTooltip;

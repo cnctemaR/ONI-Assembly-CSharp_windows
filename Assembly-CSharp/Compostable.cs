@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using STRINGS;
 using UnityEngine;
 
@@ -15,6 +16,15 @@ public class Compostable : KMonoBehaviour
 		}
 		base.Subscribe<Compostable>(493375141, Compostable.OnRefreshUserMenuDelegate);
 		base.Subscribe<Compostable>(856640610, Compostable.OnStoreDelegate);
+	}
+
+	[OnDeserialized]
+	internal void OnDeserializedMethod()
+	{
+		if (this.OnDeserializeCb != null)
+		{
+			this.OnDeserializeCb(this);
+		}
 	}
 
 	private void MarkForCompost(bool force = false)
@@ -92,6 +102,8 @@ public class Compostable : KMonoBehaviour
 	public GameObject originalPrefab;
 
 	public GameObject compostPrefab;
+
+	public Action<KMonoBehaviour> OnDeserializeCb;
 
 	private static readonly EventSystem.IntraObjectHandler<Compostable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Compostable>(delegate(Compostable component, object data)
 	{

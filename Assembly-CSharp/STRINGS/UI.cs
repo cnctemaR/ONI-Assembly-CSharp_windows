@@ -1884,7 +1884,7 @@ namespace STRINGS
 						UI.FormatAsLink("Gold", "GOLD"),
 						", and ",
 						UI.FormatAsLink("Granite", "GRANITE"),
-						", as well as a strangely familiar artifact.\n\nHarvesting resources requires a rocket equipped with a ",
+						".\n\nHarvesting resources requires a rocket equipped with a ",
 						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
 						"."
 					});
@@ -6452,7 +6452,7 @@ namespace STRINGS
 				{
 					public static LocString DESCRIPTION = string.Concat(new string[]
 					{
-						"Can produce artwork using:\n<indent=20px>• ",
+						"Can produce artwork using:\n<indent=30px>• ",
 						BUILDINGS.PREFABS.CANVAS.NAME,
 						"\n• ",
 						BUILDINGS.PREFABS.SMALLSCULPTURE.NAME,

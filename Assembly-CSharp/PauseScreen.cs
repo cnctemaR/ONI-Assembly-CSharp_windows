@@ -332,6 +332,8 @@ public class PauseScreen : KModalButtonMenu
 
 	private void RefreshDLCButton(string DLCID, MultiToggle button, bool userEditable)
 	{
+		button.GetComponent<MultiToggle>().states[0].sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(DLCID));
+		button.GetComponent<MultiToggle>().states[1].sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(DLCID));
 		button.ChangeState(Game.IsDlcActiveForCurrentSave(DLCID) ? 1 : 0);
 		button.GetComponent<Image>().material = (Game.IsDlcActiveForCurrentSave(DLCID) ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
 		ToolTip component = button.GetComponent<ToolTip>();

@@ -50,6 +50,7 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		list3.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.NickelOre).tag.ToString(), 2000f, () => Immigration.CycleCondition(12) && Immigration.DiscoveredCondition(ElementLoader.FindElementByHash(SimHashes.NickelOre).tag)));
 		list3.Add(new CarePackageInfo("GardenFoodPlantSeed", 1f, null));
 		list3.Add(new CarePackageInfo("GardenDecorPlantSeed", 1f, null));
+		list3.Add(new CarePackageInfo("ButterflyPlantSeed", 1f, null));
 		list3.Add(new CarePackageInfo("DinofernSeed", 1f, () => Immigration.CycleCondition(48)));
 		list3.Add(new CarePackageInfo("DewDripperPlantSeed", 1f, () => Immigration.CycleCondition(48)));
 		list3.Add(new CarePackageInfo("KelpPlantSeed", 1f, () => Immigration.CycleCondition(48)));

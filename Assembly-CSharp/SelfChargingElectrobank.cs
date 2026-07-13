@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
@@ -25,6 +26,16 @@ public class SelfChargingElectrobank : Electrobank
 		}
 	}
 
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		if (component != null)
+		{
+			component.Mass = 20f;
+		}
+	}
+
 	public override void Sim200ms(float dt)
 	{
 		base.Sim200ms(dt);
@@ -42,7 +53,7 @@ public class SelfChargingElectrobank : Electrobank
 		Game.Instance.SpawnFX(SpawnFXHashes.MeteorImpactMetal, base.gameObject.transform.position, 0f);
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("Battery_explode", false), base.gameObject.transform.position, 1f);
 		base.LaunchNearbyStuff();
-		SimMessages.AddRemoveSubstance(Grid.PosToCell(base.transform.position), SimHashes.NuclearWaste, CellEventLogger.Instance.ElementEmitted, 10f, 3000f, Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.RoundToInt(5000000f), true, -1);
+		SimMessages.AddRemoveSubstance(Grid.PosToCell(base.transform.position), SimHashes.NuclearWaste, CellEventLogger.Instance.ElementEmitted, 20f, 3000f, Db.Get().Diseases.GetIndex(Db.Get().Diseases.RadiationPoisoning.Id), Mathf.RoundToInt(10000000f), true, -1);
 		if (base.transform.parent != null)
 		{
 			Storage component = base.transform.parent.GetComponent<Storage>();

@@ -24,7 +24,7 @@ public class CrabConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = CrabConfig.CreateCrab("Crab", global::STRINGS.CREATURES.SPECIES.CRAB.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "pincher_kanim", false, "CrabShell", 1f);
+		GameObject gameObject = CrabConfig.CreateCrab("Crab", global::STRINGS.CREATURES.SPECIES.CRAB.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "pincher_kanim", false, "CrabShell", 10f);
 		gameObject = EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "CrabEgg", global::STRINGS.CREATURES.SPECIES.CRAB.EGG_NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "egg_pincher_kanim", CrabTuning.EGG_MASS, "CrabBaby", 60.000004f, 20f, CrabTuning.EGG_CHANCES_BASE, CrabConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		gameObject.AddOrGetDef<EggProtectionMonitor.Def>().allyTags = new Tag[] { GameTags.Creatures.CrabFriend };
 		return gameObject;

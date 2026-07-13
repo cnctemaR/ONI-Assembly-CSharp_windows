@@ -85,6 +85,10 @@ public class DlcManager
 		{
 			text = dlcInfo.smallLogo;
 		}
+		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.Name == "Rail")
+		{
+			text += "_cn";
+		}
 		return text;
 	}
 

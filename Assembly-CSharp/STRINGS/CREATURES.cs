@@ -279,9 +279,7 @@ namespace STRINGS
 				{
 					"Dartles are non-hostile critters who eat ",
 					UI.FormatAsLink("Dewdrips", "DEWDRIP"),
-					" right off the ",
-					UI.FormatAsLink("Dew Dripper", "DEWDRIPPERPLANT"),
-					" plant and excrete ",
+					" and excrete ",
 					UI.FormatAsLink("Bleach Stone", "BLEACHSTONE"),
 					" and ",
 					UI.FormatAsLink("Chlorine Gas", "CHLORINEGAS"),
@@ -2269,7 +2267,7 @@ namespace STRINGS
 						"The ",
 						UI.FormatAsLink("Seed", "PLANTS"),
 						" of a ",
-						UI.FormatAsLink("Ovagro Node Seed", "VINEMOTHER"),
+						UI.FormatAsLink("Ovagro Node", "VINEMOTHER"),
 						".\n\nDigging up Buried Objects may uncover an Ovagro Node Seed."
 					});
 				}

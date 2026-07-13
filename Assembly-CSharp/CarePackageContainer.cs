@@ -126,7 +126,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			num = 1;
 		}
-		else if (foodInfo != null)
+		else if (foodInfo != null && foodInfo.CaloriesPerUnit > 0f)
 		{
 			num = (int)Mathf.Max(1f, this.info.quantity % foodInfo.CaloriesPerUnit);
 		}

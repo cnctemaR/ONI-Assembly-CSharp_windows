@@ -1195,9 +1195,9 @@ namespace STRINGS
 
 			public class JETPACKS
 			{
-				public static LocString NAME = UI.FormatAsLink("Jetpacks", "JETPACKS");
+				public static LocString NAME = UI.FormatAsLink("Projectiles", "JETPACKS");
 
-				public static LocString DESC = "Objectively the most stylish way for Duplicants to get around.";
+				public static LocString DESC = "Things that get Duplicants and explosives off the ground.";
 			}
 
 			public class BASICROCKETRY

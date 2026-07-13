@@ -38,6 +38,14 @@ namespace STRINGS
 
 			public static LocString WINCONDITION_GEOTHERMAL_DESCRIPTION = "Secure your colony's industrial future by fulfilling the Power Imperative.";
 
+			public static LocString WINCONDITION_DEMOLIOR = "Blast Line of Defense";
+
+			public static LocString WINCONDITION_DEMOLIOR_DESCRIPTION = "Escape extinction by fulfilling the requirements of the Defense Imperative.";
+
+			public static LocString STAYCONDITION_DEMOLIOR = "The Lab: Life Found A Way";
+
+			public static LocString STAYCONDITION_DEMOLIOR_DESCRIPTION = "Survive 100 cycles after Demolior collides with your colony.";
+
 			public static LocString NO_PLANTERBOX = "Locavore";
 
 			public static LocString NO_PLANTERBOX_DESCRIPTION = "Have Duplicants consume 400,000kcal of food without planting any seeds in Planter Boxes, Farm Tiles, or Hydroponic Farms.";

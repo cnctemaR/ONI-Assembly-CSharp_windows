@@ -112,7 +112,7 @@ public class RockCrusherConfig : IBuildingConfig
 		Element element3 = ElementLoader.FindElementByHash(SimHashes.Lime);
 		ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("CrabShell", 1f)
+			new ComplexRecipe.RecipeElement("CrabShell", 10f)
 		};
 		ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
 		{
@@ -127,7 +127,7 @@ public class RockCrusherConfig : IBuildingConfig
 		float num = 5f;
 		ComplexRecipe.RecipeElement[] array10 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("CrabWoodShell", num)
+			new ComplexRecipe.RecipeElement("CrabWoodShell", 100f * num)
 		};
 		ComplexRecipe.RecipeElement[] array11 = new ComplexRecipe.RecipeElement[]
 		{

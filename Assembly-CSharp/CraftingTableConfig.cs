@@ -114,7 +114,7 @@ public class CraftingTableConfig : IBuildingConfig
 		};
 		ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array, array2), array, array2, DlcManager.DLC3);
 		complexRecipe.time = INDUSTRIAL.RECIPES.STANDARD_FABRICATION_TIME * 2f;
-		complexRecipe.description = global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.RECIPE_DESCRIPTION;
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.RECIPE_DESCRIPTION, MISC.TAGS.METAL, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_METAL_ORE.NAME);
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.fabricators = new List<Tag> { "CraftingTable" };
 		complexRecipe.sortOrder = 0;

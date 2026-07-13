@@ -181,7 +181,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
-			this.fetchChore = new FetchChore(this.choreType, this.storage, FetchChore.GetMinimumFetchAmount(entityTag, 1f), new HashSet<Tag> { entityTag }, FetchChore.MatchCriteria.MatchID, (additionalRequiredTag.IsValid && additionalRequiredTag != GameTags.Empty) ? additionalRequiredTag : Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
+			this.fetchChore = new FetchChore(this.choreType, this.storage, this.GetPrefabFetchMass(entityTag), new HashSet<Tag> { entityTag }, FetchChore.MatchCriteria.MatchID, (additionalRequiredTag.IsValid && additionalRequiredTag != GameTags.Empty) ? additionalRequiredTag : Tag.Invalid, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
 			{
 				this.UpdateStatusItem();
 			}, delegate(Chore chore)
@@ -191,6 +191,21 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			MaterialNeeds.UpdateNeed(this.requestedEntityTag, 1f, base.gameObject.GetMyWorldId());
 			this.UpdateStatusItem();
 		}
+	}
+
+	private float GetPrefabFetchMass(Tag entityTag)
+	{
+		GameObject prefab = Assets.GetPrefab(entityTag);
+		if (prefab != null)
+		{
+			PrimaryElement component = prefab.GetComponent<PrimaryElement>();
+			if (component != null)
+			{
+				return component.MassPerUnit;
+			}
+		}
+		KCrashReporter.ReportDevNotification(string.Concat(new string[] { "SingleEntityReceptacle ", base.name, " is requesting ", entityTag.Name, " which is not an entity" }), Environment.StackTrace, "", false, null);
+		return 1f;
 	}
 
 	public virtual void OrderRemoveOccupant()

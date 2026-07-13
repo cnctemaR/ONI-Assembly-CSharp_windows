@@ -100,6 +100,17 @@ public class DiscoveredResources : KMonoBehaviour, ISaveLoadable, ISim4000ms
 				}
 			}
 		}
+		if (this.DiscoveredCategories.ContainsKey(GameTags.IndustrialIngredient))
+		{
+			foreach (string text2 in new List<string> { "CrabShell", "CrabWoodShell" })
+			{
+				if (this.DiscoveredCategories[GameTags.IndustrialIngredient].Contains(text2))
+				{
+					this.DiscoveredCategories[GameTags.IndustrialIngredient].Remove(text2);
+					this.DiscoverCategory(GameTags.Organics, text2);
+				}
+			}
+		}
 	}
 
 	public bool CheckAllDiscoveredAreNew()

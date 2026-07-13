@@ -102,6 +102,7 @@ public class Blueprints_DlcPack2 : BlueprintProvider
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_top_hockey_10", new string[] { "permit_gloves_hockey_10", "permit_top_jersey_10" });
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_top_hockey_11", new string[] { "permit_gloves_hockey_11", "permit_top_jersey_11" });
 		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_top_hockey_12", new string[] { "permit_gloves_hockey_12", "permit_top_jersey_12" });
+		base.AddOutfit(BlueprintProvider.OutfitType.AtmoSuit, "outfit_atmo_suit_80s", new string[] { "permit_atmo_helmet_80s", "permit_atmo_gloves_80s", "permit_atmo_shoes_80s", "permit_atmosuit_80s", "permit_atmo_belt_80s" });
 		base.AddMonumentPart(BlueprintProvider.MonumentPart.Bottom, PermitRarity.Universal, "permit_monument_base_a_frosty", "monument_base_a_frosty_kanim");
 		base.AddMonumentPart(BlueprintProvider.MonumentPart.Bottom, PermitRarity.Universal, "permit_monument_base_b_frosty", "monument_base_b_frosty_kanim");
 		base.AddMonumentPart(BlueprintProvider.MonumentPart.Bottom, PermitRarity.Universal, "permit_monument_base_c_frosty", "monument_base_c_frosty_kanim");

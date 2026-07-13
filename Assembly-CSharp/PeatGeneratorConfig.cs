@@ -55,7 +55,7 @@ public class PeatGeneratorConfig : IBuildingConfig
 			outputs = new EnergyGenerator.OutputItem[]
 			{
 				new EnergyGenerator.OutputItem(SimHashes.CarbonDioxide, 0.04f, false, new CellOffset(0, 1), 383.15f),
-				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 0.2f, false, new CellOffset(1, 1), 383.15f)
+				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 0.2f, false, new CellOffset(1, 1), 313.15f)
 			}
 		};
 		energyGenerator.meterOffset = Meter.Offset.Infront;

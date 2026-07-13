@@ -312,7 +312,7 @@ public static class InventoryOrganization
 		InventoryOrganization.AddSubcategory("ATMOSUIT_BODIES_BASIC", Assets.GetSprite("icon_inventory_atmosuit_body"), 100, new string[]
 		{
 			"AtmoSuitBasicYellow", "AtmoSuitSparkleRed", "AtmoSuitSparkleGreen", "AtmoSuitSparkleBlue", "AtmoSuitSparkleLavender", "AtmoSuitPuft", "AtmoSuitConfetti", "AtmoSuitCrispEggplant", "AtmoSuitBasicNeonPink", "AtmoSuitMultiRedBlack",
-			"AtmoSuitRocketmelon", "AtmoSuitMultiBlueGreyBlack", "AtmoSuitMultiBlueYellowRed", "permit_atmosuit_80s", "permit_atmosuit_basic_purple_wildberry", "permit_atmosuit_raptor", "permit_atmosuit_stego", "permit_atmosuit_chameleo", "permit_atmosuit_paculacanth"
+			"AtmoSuitRocketmelon", "AtmoSuitMultiBlueGreyBlack", "AtmoSuitMultiBlueYellowRed", "permit_atmosuit_80s", "permit_atmosuit_basic_purple_wildberry", "permit_atmosuit_basic_orange", "permit_atmosuit_raptor", "permit_atmosuit_stego", "permit_atmosuit_chameleo", "permit_atmosuit_paculacanth"
 		});
 		InventoryOrganization.AddSubcategory("ATMOSUIT_HELMETS_BASIC", Assets.GetSprite("icon_inventory_atmosuit_helmet"), 300, new string[]
 		{
@@ -331,8 +331,8 @@ public static class InventoryOrganization
 		});
 		InventoryOrganization.AddSubcategory("ATMOSUIT_SHOES_BASIC", Assets.GetSprite("icon_inventory_atmosuit_boots"), 900, new string[]
 		{
-			"AtmoShoesBasicYellow", "AtmoShoesSparkleBlack", "AtmoShoesPuft", "AtmoShoesStealth", "AtmoShoesEggplant", "AtmoShoesBasicLavender", "AtmoBootsRocketmelon", "permit_atmo_shoes_80s", "permit_atmo_shoes_biocircuit", "permit_atmo_shoes_raptor",
-			"permit_atmo_shoes_stego", "permit_atmo_shoes_chameleo", "permit_atmo_shoes_paculacanth"
+			"AtmoShoesBasicYellow", "AtmoShoesSparkleBlack", "AtmoShoesPuft", "AtmoShoesStealth", "AtmoShoesEggplant", "AtmoShoesBasicLavender", "AtmoBootsRocketmelon", "permit_atmo_shoes_80s", "permit_atmo_shoes_basic_green", "permit_atmo_shoes_biocircuit",
+			"permit_atmo_shoes_raptor", "permit_atmo_shoes_stego", "permit_atmo_shoes_chameleo", "permit_atmo_shoes_paculacanth"
 		});
 	}
 

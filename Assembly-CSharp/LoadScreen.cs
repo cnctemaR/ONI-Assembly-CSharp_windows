@@ -845,8 +845,8 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					674504U,
-					35
+					675474U,
+					36
 				});
 			}
 			return false;
@@ -861,7 +861,7 @@ public class LoadScreen : KModalScreen
 					save.FileInfo.saveMajorVersion,
 					save.FileInfo.saveMinorVersion,
 					7,
-					35
+					36
 				});
 			}
 			return false;
@@ -1002,11 +1002,14 @@ public class LoadScreen : KModalScreen
 			component3.GetReference<RectTransform>("DateText").GetComponent<LocText>().text = string.Format("{0:H:mm:ss} - " + Localization.GetFileDateFormat(0), save.FileDate.ToLocalTime());
 			component3.GetReference<RectTransform>("NewestLabel").gameObject.SetActive(j == 0);
 			RectTransform reference2 = component3.GetReference<RectTransform>("DLCIconPrefab");
-			foreach (string text in save.FileInfo.dlcIds)
+			foreach (string text in DlcManager.RELEASED_VERSIONS)
 			{
-				GameObject gameObject3 = global::Util.KInstantiateUI(reference2.gameObject, reference2.transform.parent.gameObject, true);
-				gameObject3.GetComponent<Image>().sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(text));
-				gameObject3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, DlcManager.GetDlcTitle(text)));
+				if (save.FileInfo.dlcIds.Contains(text))
+				{
+					GameObject gameObject3 = global::Util.KInstantiateUI(reference2.gameObject, reference2.transform.parent.gameObject, true);
+					gameObject3.GetComponent<Image>().sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(text));
+					gameObject3.GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.FRONTEND.LOADSCREEN.TOOLTIP_SAVE_USES_DLC, DlcManager.GetDlcTitle(text)));
+				}
 			}
 			object obj = this.CheckSaveVersion(save, null) && this.CheckSaveDLCsCompatable(save);
 			KButton button = rectTransform.GetComponent<KButton>();
@@ -1211,7 +1214,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 35) || header.buildVersion > 674504U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 36) || header.buildVersion > 675474U;
 	}
 
 	private void UpdateSelected(KButton button, string filename, List<string> dlcIds)
@@ -1266,15 +1269,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 674504U)
+		if (header.buildVersion > 675474U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 674504U.ToString();
+			text2 = 675474U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 35);
+			text2 = string.Format("v{0}.{1}", 7, 36);
 		}
 		if (!flag)
 		{

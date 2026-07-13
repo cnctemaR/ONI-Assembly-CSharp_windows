@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{180E6767-5FC8-4782-BC8F-5B55DFCBBD3A}</ProjectGuid>
+    <ProjectGuid>{A081CAED-200E-4A81-899E-DFD00EC9CE37}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.TilemapModule</AssemblyName>
@@ -32,23 +32,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{180E6767-5FC8-4782-BC8F-5B55DFCBBCF4}</Project>
+      <Project>{A081CAED-200E-4A81-899E-DFD00EC9CDF1}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{180E6767-5FC8-4782-BC8F-5B55DFCBBD17}</Project>
+      <Project>{A081CAED-200E-4A81-899E-DFD00EC9CE14}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.GridModule\UnityEngine.GridModule.csproj">
-      <Project>{180E6767-5FC8-4782-BC8F-5B55DFCBBD1E}</Project>
+      <Project>{A081CAED-200E-4A81-899E-DFD00EC9CE1B}</Project>
       <Name>UnityEngine.GridModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{180E6767-5FC8-4782-BC8F-5B55DFCBBD29}</Project>
+      <Project>{A081CAED-200E-4A81-899E-DFD00EC9CE26}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{180E6767-5FC8-4782-BC8F-5B55DFCBBD2F}</Project>
+      <Project>{A081CAED-200E-4A81-899E-DFD00EC9CE2C}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

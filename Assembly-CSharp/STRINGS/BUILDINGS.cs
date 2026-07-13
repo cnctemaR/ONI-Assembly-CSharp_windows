@@ -10293,7 +10293,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Explosives Locker";
 
-				public static LocString DESC = "A locker that once belonged to an explosives engineer.\n\nThere's an " + UI.FormatAsLink("Intracosmic Blastshot", "MISSILELAUNCHER") + " in it.";
+				public static LocString DESC = "A locker that once belonged to an explosives engineer.\n\nIt holds one " + UI.FormatAsLink("Intracosmic Blastshot", "MISSILELAUNCHER") + ".";
 			}
 
 			public class PROPGRAVITASSMALLSEEDLOCKER

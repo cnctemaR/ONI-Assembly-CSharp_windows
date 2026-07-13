@@ -32,10 +32,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 			global::Debug.LogError("The object selected doesn't have a ComplexFabricator!");
 			return;
 		}
-		if (this.targetOrdersUpdatedSubHandle != -1)
-		{
-			base.Unsubscribe(this.targetOrdersUpdatedSubHandle);
-		}
+		this.UnsubscribeTarget();
 		this.Initialize(component);
 		this.targetOrdersUpdatedSubHandle = this.targetFab.Subscribe(1721324763, new Action<object>(this.UpdateQueueCountLabels));
 		this.UpdateQueueCountLabels(null);
@@ -557,6 +554,21 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 	private void Update()
 	{
 		this.RefreshIngredientAvailabilityVis();
+	}
+
+	private void UnsubscribeTarget()
+	{
+		if (this.targetOrdersUpdatedSubHandle != -1 && this.targetFab != null)
+		{
+			this.targetFab.Unsubscribe(this.targetOrdersUpdatedSubHandle);
+			this.targetOrdersUpdatedSubHandle = -1;
+		}
+	}
+
+	public override void ClearTarget()
+	{
+		base.ClearTarget();
+		this.UnsubscribeTarget();
 	}
 
 	private void RefreshIngredientAvailabilityVis()

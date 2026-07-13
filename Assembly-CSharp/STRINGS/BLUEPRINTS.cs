@@ -699,6 +699,11 @@ namespace STRINGS
 			public static LocString DESC = "A giant Resting Ewwww Face topper.";
 		}
 
+		public class OUTFIT_ATMO_SUIT_80S
+		{
+			public static LocString NAME = "Radical Atmo Outfit";
+		}
+
 		public class PERMIT_ATMO_BELT_3TONE_PURPLE
 		{
 			public static LocString NAME = "Tricolor Atmo Belt";
@@ -720,11 +725,25 @@ namespace STRINGS
 			public static LocString DESC = "The shoulders are as purple as a paleontologist's prose.";
 		}
 
+		public class PERMIT_ATMOSUIT_BASIC_ORANGE
+		{
+			public static LocString NAME = "Crisp Cadmium Atmo Suit";
+
+			public static LocString DESC = "Dyed with gorgeously saturated toxic pigments!";
+		}
+
 		public class PERMIT_ATMO_SHOES_BIOCIRCUIT
 		{
 			public static LocString NAME = "Bionic Atmo Boots";
 
 			public static LocString DESC = "Standard-issue footwear for...augmented...employees.";
+		}
+
+		public class PERMIT_ATMO_SHOES_BASIC_GREEN
+		{
+			public static LocString NAME = "Swampy Atmo Boots";
+
+			public static LocString DESC = "They leave a trail of moist bootprints for others to follow.";
 		}
 
 		public class PERMIT_ATMO_GLOVES_PLUM
@@ -1362,6 +1381,51 @@ namespace STRINGS
 			public static LocString NAME = "Bubblegum Conductive Wire Bridge";
 
 			public static LocString DESC = "Color-coded wire bridges make it easy to see how things are connected.";
+		}
+
+		public class OUTFIT_SCULPTED_STEEL
+		{
+			public static LocString NAME = "Sculpted Steel Outfit";
+		}
+
+		public class OUTFIT_STARCHED_BLAZER
+		{
+			public static LocString NAME = "Starched Blazer Outfit";
+		}
+
+		public class OUTFIT_AERODYNAMIC_FLIGHTSUIT
+		{
+			public static LocString NAME = "Aerodynamic Outfit";
+		}
+
+		public class OUTFIT_ALL_METAL_JACKET
+		{
+			public static LocString NAME = "All-Metal Jacket Outfit";
+		}
+
+		public class OUTFIT_SPACE_EXPO
+		{
+			public static LocString NAME = "Space Expo Outfit";
+		}
+
+		public class OUTFIT_BIOCIRCUIT
+		{
+			public static LocString NAME = "Bionic Jammies Outfit";
+		}
+
+		public class OUTFIT_CADMIUM_VEST
+		{
+			public static LocString NAME = "Cadmium Vest Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_BIONIC
+		{
+			public static LocString NAME = "Bionic Atmo Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_GAUDY
+		{
+			public static LocString NAME = "Gaudy Atmo Outfit";
 		}
 
 		public class PERMIT_ATMO_BELT_RAPTOR

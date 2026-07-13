@@ -18,7 +18,7 @@ public class SelfChargingElectrobankConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("SelfChargingElectrobank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.DESC, 10f, true, Assets.GetAnim("electrobank_large_uranium_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.EnrichedUranium, new List<Tag>
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("SelfChargingElectrobank", global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.ELECTROBANK_SELFCHARGING.DESC, 20f, true, Assets.GetAnim("electrobank_large_uranium_kanim"), "idle1", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.8f, true, 0, SimHashes.EnrichedUranium, new List<Tag>
 		{
 			GameTags.ChargedPortableBattery,
 			GameTags.PedestalDisplayable
@@ -55,7 +55,7 @@ public class SelfChargingElectrobankConfig : IEntityConfig, IHasDlcRestrictions
 
 	public const string ID = "SelfChargingElectrobank";
 
-	public const float MASS = 10f;
+	public const float MASS = 20f;
 
 	public const float POWER_DURATION = 90000f;
 

@@ -25,6 +25,9 @@ public class FeatherFabricConfig : IEntityConfig, IHasDlcRestrictions
 			GameTags.BuildingFiber
 		});
 		gameObject.AddOrGet<EntitySplitter>();
+		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
+		kboxCollider2D.offset = new Vector2f(0f, 0.3f);
+		kboxCollider2D.size = new Vector2f(0.8f, 0.8f);
 		gameObject.AddOrGet<PrefabAttributeModifiers>().AddAttributeDescriptor(this.decorModifier);
 		return gameObject;
 	}

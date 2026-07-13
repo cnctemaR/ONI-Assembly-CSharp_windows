@@ -233,7 +233,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		this.destinations.AddRange(list5);
 	}
 
-	public void AddDestination(string id, SpacecraftManager.DestinationLocationSelectionType selection)
+	public void AddDestination(string id, SpacecraftManager.DestinationLocationSelectionType selection, int minRandomDistance = 0, int maxRandomDistance = 2147483647)
 	{
 		List<int> list = new List<int>();
 		int num = 0;
@@ -241,7 +241,8 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 		{
 			num = Math.Max(num, spaceDestination.distance);
 		}
-		for (int i = 0; i <= num; i++)
+		num = Math.Min(num, maxRandomDistance);
+		for (int i = minRandomDistance; i <= num; i++)
 		{
 			int num2 = 0;
 			using (List<SpaceDestination>.Enumerator enumerator = this.destinations.GetEnumerator())

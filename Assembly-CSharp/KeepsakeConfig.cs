@@ -20,6 +20,7 @@ public class KeepsakeConfig : IMultiEntityConfig
 		GameObject gameObject2 = KeepsakeConfig.CreateKeepsake("LargeImpactor", UI.KEEPSAKES.VIEWMASTER.NAME, UI.KEEPSAKES.VIEWMASTER.DESCRIPTION, "keepsake_demolior_kanim", "idle", "ui", DlcManager.DLC4, null, null, SimHashes.Creature);
 		if (gameObject2 != null)
 		{
+			gameObject2.GetComponent<KBoxCollider2D>().size = new Vector2(1f, 0.7f);
 			gameObject2.AddOrGetDef<LargeImpactorKeepsake.Def>();
 			list.Add(gameObject2);
 		}

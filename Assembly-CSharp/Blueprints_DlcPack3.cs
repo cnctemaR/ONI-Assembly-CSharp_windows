@@ -13,7 +13,9 @@ public class Blueprints_DlcPack3 : BlueprintProvider
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitBelt, PermitRarity.Universal, "permit_atmo_belt_3tone_purple", "atmo_belt_3tone_purple_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitBelt, PermitRarity.Universal, "permit_atmo_belt_circuit", "atmo_belt_biocircuit_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitBody, PermitRarity.Universal, "permit_atmosuit_basic_purple_wildberry", "atmosuit_basic_purple_wildberry_kanim");
+		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitBody, PermitRarity.Universal, "permit_atmosuit_basic_orange", "atmosuit_basic_orange_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitShoes, PermitRarity.Universal, "permit_atmo_shoes_biocircuit", "atmo_shoes_biocircuit_kanim");
+		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitShoes, PermitRarity.Universal, "permit_atmo_shoes_basic_green", "atmo_shoes_basic_green_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitGloves, PermitRarity.Universal, "permit_atmo_gloves_plum", "atmo_gloves_plum_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitGloves, PermitRarity.Universal, "permit_atmo_gloves_biocircuit", "atmo_gloves_biocircuit_kanim");
 		base.AddClothing(BlueprintProvider.ClothingType.AtmoSuitHelmet, PermitRarity.Universal, "permit_atmo_helmet_gaudysweater_purple", "atmo_helmet_gaudysweater_purple_kanim");
@@ -105,5 +107,14 @@ public class Blueprints_DlcPack3 : BlueprintProvider
 		base.AddBuilding("WireRefinedBridge", PermitRarity.Universal, "permit_utilityelectricbridgeconductive_net_pink", "utilityelectricbridgeconductive_net_pink_kanim");
 		base.AddBuilding("WireRefinedBridge", PermitRarity.Universal, "permit_utilityelectricbridgeconductive_diamond_orchid", "utilityelectricbridgeconductive_diamond_orchid_kanim");
 		base.AddBuilding("CraftingTable", PermitRarity.Universal, "permit_craftingstation_cyberpunk", "craftingstation_cyberpunk_kanim");
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_sculpted_steel", new string[] { "permit_dress_futurespace_blue", "permit_gloves_futurespace_blue", "permit_shoes_futurespace_blue" });
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_starched_blazer", new string[] { "permit_top_snapjacket_brine", "permit_pants_snapjacket_brine", "permit_gloves_snapjacket_brine" });
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_aerodynamic_flightsuit", new string[] { "permit_jumpsuit_vsuit_stellar", "permit_gloves_vsuit_stellar", "permit_shoes_vsuit_stellar" });
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_all_metal_jacket", new string[] { "permit_top_metal_grey", "permit_gloves_metal_grey" });
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_space_expo", new string[] { "permit_top_spacetop_white", "permit_pants_extendedwaist_blue_wheezewort", "permit_gloves_basic_blue_wheezewort", "permit_shoes_basic_blue_wheezy" });
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_biocircuit", new string[] { "permit_pj_biocircuit_wildberry" });
+		base.AddOutfit(BlueprintProvider.OutfitType.Clothing, "outfit_cadmium_vest", new string[] { "permit_top_vest_puffer_orange", "permit_gloves_puffer_orange" });
+		base.AddOutfit(BlueprintProvider.OutfitType.AtmoSuit, "outfit_atmosuit_bionic", new string[] { "permit_atmosuit_basic_purple_wildberry", "permit_atmo_helmet_biocircuit", "permit_atmo_belt_circuit", "permit_atmo_gloves_biocircuit", "permit_atmo_shoes_biocircuit" });
+		base.AddOutfit(BlueprintProvider.OutfitType.AtmoSuit, "outfit_atmosuit_gaudy", new string[] { "permit_atmo_helmet_gaudysweater_purple", "permit_atmo_belt_3tone_purple", "permit_atmo_gloves_plum", "permit_atmo_shoes_basic_green", "permit_atmosuit_basic_orange" });
 	}
 }

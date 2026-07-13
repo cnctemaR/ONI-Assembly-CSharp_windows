@@ -77,7 +77,8 @@ public class Grid
 
 	public static void UnregisterRestriction(int cell)
 	{
-		Grid.restrictions.Remove(cell);
+		Grid.Restriction restriction;
+		Grid.restrictions.TryRemove(cell, out restriction);
 		Grid.HasAccessDoor[cell] = false;
 	}
 
@@ -93,11 +94,11 @@ public class Grid
 
 	public static bool HasPermission(int cell, int minionInstanceID, int tagID, int fromCell, NavType fromNavType)
 	{
-		if (!Grid.HasAccessDoor[cell])
+		Grid.Restriction restriction;
+		if (!Grid.HasAccessDoor[cell] || !Grid.restrictions.TryGetValue(cell, out restriction))
 		{
 			return true;
 		}
-		Grid.Restriction restriction = Grid.restrictions[cell];
 		Vector2I vector2I = Grid.CellToXY(cell);
 		Vector2I vector2I2 = Grid.CellToXY(fromCell);
 		Grid.Restriction.Directions directions = (Grid.Restriction.Directions)0;
@@ -151,7 +152,8 @@ public class Grid
 	{
 		DebugUtil.Assert(Grid.tubeEntrances.ContainsKey(cell));
 		Grid.HasTubeEntrance[cell] = false;
-		Grid.tubeEntrances.Remove(cell);
+		Grid.TubeEntrance tubeEntrance;
+		Grid.tubeEntrances.TryRemove(cell, out tubeEntrance);
 	}
 
 	public static bool ReserveTubeEntrance(int cell, int minionInstanceID, bool reserve)
@@ -181,11 +183,11 @@ public class Grid
 
 	public static bool HasUsableTubeEntrance(int cell, int minionInstanceID)
 	{
-		if (!Grid.HasTubeEntrance[cell])
+		Grid.TubeEntrance tubeEntrance;
+		if (!Grid.HasTubeEntrance[cell] || !Grid.tubeEntrances.TryGetValue(cell, out tubeEntrance))
 		{
 			return false;
 		}
-		Grid.TubeEntrance tubeEntrance = Grid.tubeEntrances[cell];
 		if (!tubeEntrance.operational)
 		{
 			return false;
@@ -306,11 +308,11 @@ public class Grid
 
 	public static bool HasEmptyLocker(int cell, int minionInstanceID)
 	{
-		if (!Grid.HasSuitMarker[cell])
+		Grid.SuitMarker suitMarker;
+		if (!Grid.HasSuitMarker[cell] || !Grid.suitMarkers.TryGetValue(cell, out suitMarker))
 		{
 			return false;
 		}
-		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
 		HashSet<int> minionIDsWithEmptyLockerReservations = suitMarker.minionIDsWithEmptyLockerReservations;
 		return minionIDsWithEmptyLockerReservations.Count < suitMarker.emptyLockerCount || minionIDsWithEmptyLockerReservations.Contains(minionInstanceID);
 	}
@@ -1357,9 +1359,9 @@ public class Grid
 
 	public static Grid.NavFlagsSuitMarkerIndexer HasSuitMarker;
 
-	private static Dictionary<int, Grid.Restriction> restrictions = new Dictionary<int, Grid.Restriction>();
+	private static ConcurrentDictionary<int, Grid.Restriction> restrictions = new ConcurrentDictionary<int, Grid.Restriction>();
 
-	private static Dictionary<int, Grid.TubeEntrance> tubeEntrances = new Dictionary<int, Grid.TubeEntrance>();
+	private static ConcurrentDictionary<int, Grid.TubeEntrance> tubeEntrances = new ConcurrentDictionary<int, Grid.TubeEntrance>();
 
 	private static ConcurrentDictionary<int, Grid.SuitMarker> suitMarkers = new ConcurrentDictionary<int, Grid.SuitMarker>();
 

@@ -158,6 +158,10 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		{
 			"store",
 			new string[] { "deposit", "deposit", "deposit" }
+		},
+		{
+			"build",
+			new string[] { "build_pre", "build_loop", "build_pst" }
 		}
 	};
 

@@ -1274,7 +1274,7 @@ public class PlanScreen : KIconToggleMenu
 
 	private void AddResearchedBuildingCategory(BuildingDef def)
 	{
-		if (def != null)
+		if (def != null && def.IsValidDLC())
 		{
 			this.UpdateDefResearched(def);
 			if (this.tagCategoryMap.ContainsKey(def.Tag))

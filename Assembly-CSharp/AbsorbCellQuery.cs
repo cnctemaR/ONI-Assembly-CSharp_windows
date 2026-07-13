@@ -9,7 +9,7 @@ public class AbsorbCellQuery : PathFinderQuery
 		this.checker = Game.Instance.safetyConditions.AbsorbCellCellChecker;
 	}
 
-	public AbsorbCellQuery Reset(MinionBrain brain, bool criticalMode, float currentOxygenTankMass)
+	public AbsorbCellQuery Reset(MinionBrain brain, bool criticalMode, float currentOxygenTankMass, float breathPercentage, int allowCellEvenIfReserved, bool isRecoveringFromSuffocation)
 	{
 		this.brain = brain;
 		this.targetCell = PathFinder.InvalidCell;
@@ -19,13 +19,16 @@ public class AbsorbCellQuery : PathFinderQuery
 		this.targetBreathableMassAvailable = 0f;
 		this.criticalMode = criticalMode;
 		this.bionicOxygenRemaining = currentOxygenTankMass;
+		this.breathPercentage = breathPercentage;
+		this.allowCellEvenIfReserved = allowCellEvenIfReserved;
 		this.context = new SafetyChecker.Context(brain);
 		ScaldingMonitor.Instance instance = ((brain == null) ? null : brain.GetSMI<ScaldingMonitor.Instance>());
 		this.scaldingTreshold = ((instance == null) ? (-1f) : instance.GetScaldingThreshold());
+		this.isRecoveringFromSuffocation = isRecoveringFromSuffocation;
 		return this;
 	}
 
-	public static AbsorbCellQuery.AbsorbOxygenSafeCellFlags GetAbsorbOxygenFlags(int cell, MinionBrain brain, float scaldingTreshold, out float totalBreathableMassAroundCell, out float breathableCellRatioInSample)
+	public static AbsorbCellQuery.AbsorbOxygenSafeCellFlags GetAbsorbOxygenFlags(int cell, MinionBrain brain, float scaldingTreshold, out float totalBreathableMassAroundCell, out float breathableCellRatioInSample, int allowCellEvenIfReserved)
 	{
 		totalBreathableMassAroundCell = 0f;
 		breathableCellRatioInSample = 0f;
@@ -42,7 +45,7 @@ public class AbsorbCellQuery : PathFinderQuery
 		{
 			return (AbsorbCellQuery.AbsorbOxygenSafeCellFlags)0;
 		}
-		bool flag = true;
+		bool flag = cell == allowCellEvenIfReserved || brain.IsCellClear(cell);
 		bool flag2 = !Grid.Element[cell].IsLiquid;
 		bool flag3 = !Grid.Element[num].IsLiquid;
 		bool flag4 = scaldingTreshold < 0f || Grid.Temperature[cell] < scaldingTreshold;
@@ -95,38 +98,51 @@ public class AbsorbCellQuery : PathFinderQuery
 
 	public override bool IsMatch(int cell, int parent_cell, int cost)
 	{
-		float num = 2.5f * (float)GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length;
-		float num2 = (float)(54 / GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length);
-		float num3 = (float)cost;
+		float num = 0.1f * (float)GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length;
+		float num2 = 2.5f * (float)GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length;
+		float num3 = (float)(54 / GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS.Length);
+		float num4 = num3 / 2.8f;
+		float num5 = (float)cost;
 		bool flag;
 		this.checker.GetSafetyConditions(cell, cost, this.context, out flag);
 		if (flag)
 		{
-			float num4 = 0.03f;
-			float num5 = num3 / 10f;
-			float num6 = num4 * num5;
-			float num7 = 0f;
-			float num8 = 0f;
-			AbsorbCellQuery.AbsorbOxygenSafeCellFlags absorbOxygenFlags = AbsorbCellQuery.GetAbsorbOxygenFlags(cell, this.brain, this.scaldingTreshold, out num7, out num8);
-			num7 = Mathf.Clamp(num7, 0f, num2);
-			float num9 = (float)absorbOxygenFlags;
-			float num10 = 10f * num8;
-			float num11 = num7 * num10 - num6;
+			float num6 = 0.03f;
+			float num7 = num5 / 10f;
+			float num8 = num6 * num7;
+			float num9 = 0f;
+			float num10 = 0f;
+			AbsorbCellQuery.AbsorbOxygenSafeCellFlags absorbOxygenFlags = AbsorbCellQuery.GetAbsorbOxygenFlags(cell, this.brain, this.scaldingTreshold, out num9, out num10, this.allowCellEvenIfReserved);
+			num9 = Mathf.Clamp(num9, 0f, num3);
+			if (this.criticalMode)
+			{
+				if (!this.isRecoveringFromSuffocation && this.breathPercentage > DUPLICANTSTATS.BIONICS.Breath.SUFFOCATE_AMOUNT && num9 < num)
+				{
+					num9 = 0f;
+				}
+			}
+			else if (num9 < num4)
+			{
+				num9 = 0f;
+			}
+			float num11 = (float)absorbOxygenFlags;
+			float num12 = 10f * num10;
+			float num13 = num9 * num12 - num8;
 			bool flag2 = false;
 			if (this.targetCell == Grid.InvalidCell)
 			{
 				flag2 = true;
 			}
 			bool flag3 = this.targetBreathableMassAvailable > 0f;
-			bool flag4 = num3 < (float)this.targetCost;
-			bool flag5 = this.targetOxygenScore >= num;
-			bool flag6 = num9 >= (float)this.targetCellSafetyFlags || !flag3;
-			float num12 = this.targetOxygenScore;
+			bool flag4 = num5 < (float)this.targetCost;
+			bool flag5 = this.targetOxygenScore >= num2;
+			bool flag6 = num11 >= (float)this.targetCellSafetyFlags || !flag3;
+			float num14 = this.targetOxygenScore;
 			if (this.criticalMode)
 			{
-				num12 = Mathf.Min(num, num12);
+				num14 = Mathf.Min(num2, num14);
 			}
-			if (num11 >= num12 && flag6)
+			if (num13 >= num14 && flag6)
 			{
 				if (this.criticalMode)
 				{
@@ -140,14 +156,14 @@ public class AbsorbCellQuery : PathFinderQuery
 					flag2 = true;
 				}
 			}
-			flag2 = flag2 && num7 > DUPLICANTSTATS.BIONICS.BaseStats.NO_OXYGEN_THRESHOLD;
+			flag2 = flag2 && num9 > DUPLICANTSTATS.BIONICS.BaseStats.NO_OXYGEN_THRESHOLD;
 			if (flag2)
 			{
-				this.targetBreathableMassAvailable = num7;
+				this.targetBreathableMassAvailable = num9;
 				this.targetCellSafetyFlags = absorbOxygenFlags;
 				this.targetCost = cost;
 				this.targetCell = cell;
-				this.targetOxygenScore = num11;
+				this.targetOxygenScore = num13;
 			}
 		}
 		return false;
@@ -172,15 +188,21 @@ public class AbsorbCellQuery : PathFinderQuery
 
 	private float bionicOxygenRemaining;
 
+	private float breathPercentage;
+
 	private float targetBreathableMassAvailable;
 
 	public AbsorbCellQuery.AbsorbOxygenSafeCellFlags targetCellSafetyFlags;
 
 	public float targetCellBreathabilityScore;
 
+	private int allowCellEvenIfReserved = -1;
+
 	private SafetyChecker checker;
 
 	private SafetyChecker.Context context;
+
+	private bool isRecoveringFromSuffocation;
 
 	public enum AbsorbOxygenSafeCellFlags
 	{

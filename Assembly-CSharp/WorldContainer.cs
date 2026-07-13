@@ -1024,7 +1024,7 @@ public class WorldContainer : KMonoBehaviour
 						Storage storage = debrisObjects[debrisObjects.Count - 1];
 						while (pickupable.PrimaryElement.Mass > storage.RemainingCapacity())
 						{
-							Pickupable pickupable2 = pickupable.Take(storage.RemainingCapacity());
+							Pickupable pickupable2 = pickupable.Take(storage.RemainingCapacity() / pickupable.PrimaryElement.MassPerUnit);
 							storage.Store(pickupable2.gameObject, false, false, true, false);
 							storage = CraftModuleInterface.SpawnRocketDebris(" from World Objects", debrisContainerElement);
 							debrisObjects.Add(storage);

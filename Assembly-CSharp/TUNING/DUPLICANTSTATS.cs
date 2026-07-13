@@ -1075,7 +1075,6 @@ namespace TUNING
 		{
 			BaseStats = new DUPLICANTSTATS.BASESTATS
 			{
-				NO_OXYGEN_THRESHOLD = 0.1f,
 				MAX_CALORIES = 0f
 			}
 		};

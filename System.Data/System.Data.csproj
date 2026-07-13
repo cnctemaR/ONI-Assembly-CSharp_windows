@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CDA888E5-14A7-4EC1-B977-77138A381818}</ProjectGuid>
+    <ProjectGuid>{DC4A168C-C791-4468-9667-FF34C831D9DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data</RootNamespace>
     <AssemblyName>System.Data</AssemblyName>
@@ -727,39 +727,39 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A381811}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9D7}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A381815}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9DB}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A381816}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9DC}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Drawing\System.Drawing.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A38181A}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9E0}</Project>
       <Name>System.Drawing</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.EnterpriseServices\System.EnterpriseServices.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A38181B}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9E1}</Project>
       <Name>System.EnterpriseServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Numerics\System.Numerics.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A38181F}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9E5}</Project>
       <Name>System.Numerics</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Transactions\System.Transactions.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A381824}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9EA}</Project>
       <Name>System.Transactions</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A381825}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9EB}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{CDA888E5-14A7-4EC1-B977-77138A381819}</Project>
+      <Project>{DC4A168C-C791-4468-9667-FF34C831D9DF}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

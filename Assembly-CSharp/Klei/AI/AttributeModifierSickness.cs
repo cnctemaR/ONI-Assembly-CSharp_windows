@@ -41,10 +41,19 @@ namespace Klei.AI
 		public override void OnCure(GameObject go, object instance_data)
 		{
 			Attributes attributes = go.GetAttributes();
-			for (int i = 0; i < this.attributeModifiers.Length; i++)
+			Tag tag = go.PrefabID();
+			if (this.GetAttributeModifierForMinionModel.ContainsKey(tag))
 			{
-				AttributeModifier attributeModifier = this.attributeModifiers[i];
-				attributes.Remove(attributeModifier);
+				for (int i = 0; i < this.GetAttributeModifierForMinionModel[tag].Length; i++)
+				{
+					AttributeModifier attributeModifier = this.GetAttributeModifierForMinionModel[tag][i];
+					attributes.Remove(attributeModifier);
+				}
+			}
+			for (int j = 0; j < this.attributeModifiers.Length; j++)
+			{
+				AttributeModifier attributeModifier2 = this.attributeModifiers[j];
+				attributes.Remove(attributeModifier2);
 			}
 		}
 

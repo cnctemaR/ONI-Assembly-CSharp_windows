@@ -26,7 +26,7 @@ public class BuildWatermark : KScreen
 		}
 		else
 		{
-			text += 720580U.ToString();
+			text += 720697U.ToString();
 		}
 		if (DistributionPlatform.Initialized)
 		{

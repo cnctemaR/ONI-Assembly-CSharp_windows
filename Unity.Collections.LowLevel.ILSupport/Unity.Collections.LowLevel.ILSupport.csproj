@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9F6}</ProjectGuid>
+    <ProjectGuid>{4DFFE9AA-8C53-4727-8051-F20D3BB4D914}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Collections.LowLevel.Unsafe</RootNamespace>
     <AssemblyName>Unity.Collections.LowLevel.ILSupport</AssemblyName>
@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9DB}</Project>
+      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D8F9}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
   </ItemGroup>

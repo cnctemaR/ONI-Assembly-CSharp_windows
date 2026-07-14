@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9E9}</ProjectGuid>
+    <ProjectGuid>{4DFFE9AA-8C53-4727-8051-F20D3BB4D907}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Net.Http</RootNamespace>
     <AssemblyName>System.Net.Http</AssemblyName>
@@ -82,19 +82,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Security\Mono.Security.csproj">
-      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9D9}</Project>
+      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D8F7}</Project>
       <Name>Mono.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9DA}</Project>
+      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D8F8}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9DF}</Project>
+      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D8FD}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{F81D2BFE-81C9-4B8C-8B4E-DCB90FF9B9E2}</Project>
+      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D900}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

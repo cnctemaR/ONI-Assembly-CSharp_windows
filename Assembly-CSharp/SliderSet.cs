@@ -57,6 +57,7 @@ public class SliderSet
 		this.valueSlider.maxValue = target.GetSliderMax(index);
 		this.valueSlider.value = target.GetSliderValue(index);
 		this.SetValue(target.GetSliderValue(index));
+		this.numberInput.SetIsEditing(false);
 		if (index == 0)
 		{
 			this.numberInput.Activate();

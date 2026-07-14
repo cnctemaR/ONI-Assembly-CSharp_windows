@@ -56,7 +56,7 @@ public class ClamPoopStation : KMonoBehaviour, IPoopStation
 
 	public bool IsPoopStationOperational()
 	{
-		return this.harvestable == null || !this.harvestable.CanBeHarvested;
+		return this.harvestable == null || (!this.harvestable.CanBeHarvested && (this.IsWild || this.CanAcceptMorePoop()));
 	}
 
 	public string[] GetPoopingAnimNames()
@@ -83,6 +83,16 @@ public class ClamPoopStation : KMonoBehaviour, IPoopStation
 		return new PoopData(true, null, CREATURES.POOP.PLANT_POOP_STATION_WILD, Def.GetUISprite(base.gameObject, "ui", false).first);
 	}
 
+	public float GetPoopCapacity()
+	{
+		return 70f;
+	}
+
+	public float GetAvailablePoopCapacityPercentage()
+	{
+		return this.GetAvailablePoopCapacity() / this.GetPoopCapacity();
+	}
+
 	public float GetAvailablePoopCapacity()
 	{
 		if (this.IsWild)
@@ -90,7 +100,15 @@ public class ClamPoopStation : KMonoBehaviour, IPoopStation
 			return 0f;
 		}
 		Storage component = this.receptacleMonitor.smi.ReceptacleObject.GetComponent<Storage>();
-		return component.RemainingCapacity() / component.capacityKg;
+		float poopCapacity = this.GetPoopCapacity();
+		float num = poopCapacity - component.GetMassAvailable(SimHashes.Sand);
+		num = Mathf.Min(component.capacityKg, num);
+		return Mathf.Clamp(num, 0f, poopCapacity);
+	}
+
+	private bool CanAcceptMorePoop()
+	{
+		return this.GetAvailablePoopCapacity() > 0f;
 	}
 
 	public void PlayPoopStationAnim(string animName, KAnim.PlayMode playMode)

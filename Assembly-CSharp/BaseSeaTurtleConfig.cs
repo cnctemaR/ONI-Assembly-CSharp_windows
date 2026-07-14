@@ -47,7 +47,9 @@ public static class BaseSeaTurtleConfig
 			.Add(new DebugGoToStates.Def(), true, -1)
 			.Add(new FlopStates.Def
 			{
-				flipFacing = true
+				flipFacing = true,
+				frameToFlopStart = (is_baby ? 6 : 23),
+				frameToFlopEnd = (is_baby ? 16 : 40)
 			}, true, -1)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true, -1)

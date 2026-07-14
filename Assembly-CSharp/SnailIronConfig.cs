@@ -22,7 +22,7 @@ public class SnailIronConfig : IEntityConfig, IHasDlcRestrictions
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(SnailIronConfig.CreateSnail("SnailIron", CREATURES.SPECIES.SNAIL.VARIANT_IRON.NAME, CREATURES.SPECIES.SNAIL.VARIANT_IRON.DESC, "snail_kanim", false), this, "SnailIronEgg", CREATURES.SPECIES.SNAIL.VARIANT_IRON.EGG_NAME, CREATURES.SPECIES.SNAIL.VARIANT_IRON.DESC, "egg_snail_iron_kanim", SnailTuning.EGG_MASS, "SnailIronBaby", 15.000001f, 5f, SnailTuning.EGG_CHANCES_IRON, 700, true, false, 1f, false);
+		GameObject gameObject = EntityTemplates.ExtendEntityToFertileCreature(SnailIronConfig.CreateSnail("SnailIron", CREATURES.SPECIES.SNAIL.VARIANT_IRON.NAME, CREATURES.SPECIES.SNAIL.VARIANT_IRON.DESC, "snail_kanim", false), this, "SnailIronEgg", CREATURES.SPECIES.SNAIL.VARIANT_IRON.EGG_NAME, CREATURES.SPECIES.SNAIL.VARIANT_IRON.DESC, "egg_snail_kanim", SnailTuning.EGG_MASS, "SnailIronBaby", 15.000001f, 5f, SnailTuning.EGG_CHANCES_IRON, 700, true, false, 1f, false);
 		Diet diet = new Diet(BaseSnailConfig.SulfurToObsidianDiet());
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;

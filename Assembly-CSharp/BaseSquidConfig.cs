@@ -57,7 +57,11 @@ public static class BaseSquidConfig
 				getLandAnim = new Func<FallStates.Instance, string>(BaseSquidConfig.GetLandAnim)
 			}, true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
-			.Add(new FlopStates.Def(), true, -1)
+			.Add(new FlopStates.Def
+			{
+				frameToFlopStart = (is_baby ? 16 : 6),
+				frameToFlopEnd = (is_baby ? 31 : 27)
+			}, true, -1)
 			.Add(new DefendStates.Def
 			{
 				preAnim = "attack_pre",

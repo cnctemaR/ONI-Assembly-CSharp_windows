@@ -52,7 +52,12 @@ public class BaseParrotFish
 				getLandAnim = new Func<FallStates.Instance, string>(BaseParrotFish.GetLandAnim)
 			}, true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
-			.Add(new FlopStates.Def(), true, -1)
+			.Add(new FlopStates.Def
+			{
+				flipFacing = false,
+				frameToFlopStart = (is_baby ? 5 : 5),
+				frameToFlopEnd = (is_baby ? 29 : 23)
+			}, true, -1)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true, -1)
 			.Add(new RanchedStates.Def(), !is_baby, -1)

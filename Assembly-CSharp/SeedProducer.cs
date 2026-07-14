@@ -94,16 +94,29 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest || this.seedInfo.productionType == SeedProducer.ProductionType.HarvestOnly)
 		{
 			WorkerBase completed_by = base.GetComponent<Harvestable>().completed_by;
+			this.CropPickedInternal(completed_by);
+		}
+	}
+
+	public void SimulateCropPicked(WorkerBase worker)
+	{
+		this.CropPickedInternal(worker);
+	}
+
+	private void CropPickedInternal(WorkerBase worker)
+	{
+		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest || this.seedInfo.productionType == SeedProducer.ProductionType.HarvestOnly)
+		{
 			float num = this.seedDropChances;
-			if (completed_by != null)
+			if (worker != null)
 			{
-				num += completed_by.GetComponent<AttributeConverters>().Get(Db.Get().AttributeConverters.SeedHarvestChance).Evaluate();
+				num += worker.GetComponent<AttributeConverters>().Get(Db.Get().AttributeConverters.SeedHarvestChance).Evaluate();
 			}
 			num *= this.seedDropChanceMultiplier;
 			int num2 = ((global::UnityEngine.Random.Range(0f, 1f) <= num) ? 1 : 0);
 			if (num2 > 0)
 			{
-				this.ProduceSeed(this.seedInfo.seedId, num2, true).Trigger(580035959, completed_by);
+				this.ProduceSeed(this.seedInfo.seedId, num2, true).Trigger(580035959, worker);
 			}
 		}
 	}

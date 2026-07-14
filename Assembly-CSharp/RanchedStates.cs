@@ -157,7 +157,11 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 			Vector2I vector2I = Grid.CellToXY(num);
 			if (ptr.x > vector2I.x)
 			{
-				num = Grid.CellLeft(num);
+				int num2 = Grid.CellLeft(num);
+				if (smi.GetComponent<Navigator>().GetNavigationCost(num2) != -1)
+				{
+					num = num2;
+				}
 			}
 		}
 		else if (smi.HasTag(GameTags.Creatures.Swimmer))

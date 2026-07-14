@@ -45,7 +45,12 @@ public static class BasePrehistoricPacuConfig
 				getLandAnim = new Func<FallStates.Instance, string>(BasePrehistoricPacuConfig.GetLandAnim)
 			}, true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
-			.Add(new FlopStates.Def(), true, -1)
+			.Add(new FlopStates.Def
+			{
+				flipFacing = true,
+				frameToFlopStart = (is_baby ? 15 : 23),
+				frameToFlopEnd = (is_baby ? 26 : 36)
+			}, true, -1)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true, -1)
 			.Add(new RanchedStates.Def(), !is_baby, -1)

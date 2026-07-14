@@ -74,47 +74,16 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 				{
 					int num4 = num3;
 					bool flag2 = false;
+					int num5;
 					if (num2 != num3)
 					{
 						num4 = num2;
 						flag2 = true;
 					}
-					else
+					else if (CO2Manager.TryFindBreathableSpawnCell(num3, out num5))
 					{
-						bool flag3 = false;
-						int num5 = -1;
-						int num6 = -1;
-						foreach (CellOffset cellOffset in GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS)
-						{
-							int num7 = Grid.OffsetCell(num3, cellOffset);
-							if (Grid.IsValidCell(num7))
-							{
-								Element element2 = Grid.Element[num7];
-								if (element2.id == SimHashes.CarbonDioxide || element2.HasTag(GameTags.Breathable))
-								{
-									num5 = num7;
-									flag3 = true;
-									flag2 = true;
-									break;
-								}
-								if (element2.IsGas)
-								{
-									num6 = num7;
-									flag2 = true;
-								}
-							}
-						}
-						if (flag2)
-						{
-							if (flag3)
-							{
-								num4 = num5;
-							}
-							else
-							{
-								num4 = num6;
-							}
-						}
+						flag2 = true;
+						num4 = num5;
 					}
 					if (flag2)
 					{
@@ -129,6 +98,36 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 				num2 = num3;
 			}
 		}
+	}
+
+	private static bool TryFindBreathableSpawnCell(int cell, out int spawnCell)
+	{
+		bool flag = false;
+		int num = -1;
+		int num2 = -1;
+		bool flag2 = false;
+		foreach (CellOffset cellOffset in GasBreatherFromWorldProvider.DEFAULT_BREATHABLE_OFFSETS)
+		{
+			int num3 = Grid.OffsetCell(cell, cellOffset);
+			if (Grid.IsValidCell(num3))
+			{
+				Element element = Grid.Element[num3];
+				if (element.id == SimHashes.CarbonDioxide || element.HasTag(GameTags.Breathable))
+				{
+					num = num3;
+					flag = true;
+					flag2 = true;
+					break;
+				}
+				if (element.IsGas)
+				{
+					num2 = num3;
+					flag2 = true;
+				}
+			}
+		}
+		spawnCell = (flag ? num : num2);
+		return flag2;
 	}
 
 	public CO2 SpawnCO2(Vector3 position, float mass, float temperature, bool flip)
@@ -158,7 +157,8 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 
 	public void SpawnBreath(Vector3 position, float mass, float temperature, bool flip)
 	{
-		if (Grid.IsVisiblyInLiquid(position))
+		int num;
+		if (Grid.IsVisiblyInLiquid(position) && !CO2Manager.TryFindBreathableSpawnCell(Grid.PosToCell(position), out num))
 		{
 			BubbleManager.instance.SpawnBubble(SimHashes.CarbonDioxide, position, mass, temperature, BubbleManager.Disease.None, null);
 			return;

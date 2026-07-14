@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{4D5D5702-2E81-4A45-8ED4-5E181835F19A}</ProjectGuid>
+    <ProjectGuid>{988625B3-5C38-4734-AD2A-A71A66A7C91A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.TextCoreTextEngineModule</RootNamespace>
     <AssemblyName>UnityEngine.TextCoreTextEngineModule</AssemblyName>
@@ -116,23 +116,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F13E}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C8BE}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F16E}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C8EE}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F191}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C911}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextCoreFontEngineModule\UnityEngine.TextCoreFontEngineModule.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F199}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C919}</Project>
       <Name>UnityEngine.TextCoreFontEngineModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F19B}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C91B}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
   </ItemGroup>

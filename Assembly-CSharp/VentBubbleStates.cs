@@ -238,7 +238,7 @@ public class VentBubbleStates : GameStateMachine<VentBubbleStates, VentBubbleSta
 			Facing component2 = base.GetComponent<Facing>();
 			if (component2 != null)
 			{
-				position.x += (component2.GetFacing() ? (-0.5f) : 0.5f);
+				position.x += (component2.GetFacing() ? (-0.45f) : 0.45f);
 			}
 			position.y += y_offset;
 			BubbleManager.instance.SpawnBubble(base.def.element, position, num, component.Temperature, BubbleManager.Disease.None, null);

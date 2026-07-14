@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{4D5D5702-2E81-4A45-8ED4-5E181835F15B}</ProjectGuid>
+    <ProjectGuid>{988625B3-5C38-4734-AD2A-A71A66A7C8DB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity</RootNamespace>
     <AssemblyName>Unity.Mathematics</AssemblyName>
@@ -96,15 +96,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F13D}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C8BD}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F145}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C8C5}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{4D5D5702-2E81-4A45-8ED4-5E181835F16E}</Project>
+      <Project>{988625B3-5C38-4734-AD2A-A71A66A7C8EE}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
   </ItemGroup>

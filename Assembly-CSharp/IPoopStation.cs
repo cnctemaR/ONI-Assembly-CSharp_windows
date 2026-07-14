@@ -9,6 +9,10 @@ public interface IPoopStation
 
 	GameObject GetCurrentPoopStationUser();
 
+	float GetPoopCapacity();
+
+	float GetAvailablePoopCapacityPercentage();
+
 	float GetAvailablePoopCapacity();
 
 	string[] GetPoopingAnimNames();

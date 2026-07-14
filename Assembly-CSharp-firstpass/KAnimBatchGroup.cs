@@ -341,13 +341,12 @@ public class KAnimBatchGroup
 			if (this.inuse.TryGetValue(vector2I, out list))
 			{
 				int num = list.Count - 1;
+				list.RemoveAtSwap<KAnimBatchGroup.KAnimBatchTextureCache.Entry>(cacheIndex);
 				if (num != cacheIndex)
 				{
-					KAnimBatchGroup.KAnimBatchTextureCache.Entry entry2 = list[num];
+					KAnimBatchGroup.KAnimBatchTextureCache.Entry entry2 = list[cacheIndex];
 					entry2.cacheIndex = cacheIndex;
 					list[cacheIndex] = entry2;
-					list[num] = null;
-					list.RemoveAt(num);
 				}
 			}
 			List<KAnimBatchGroup.KAnimBatchTextureCache.Entry> list2 = null;

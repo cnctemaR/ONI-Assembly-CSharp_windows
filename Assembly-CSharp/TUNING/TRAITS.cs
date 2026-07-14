@@ -217,6 +217,8 @@ namespace TUNING
 
 		private const string MINNOW_ID = "Minnow";
 
+		public const float MINNOW_SWIMMING_ATTRIBUTE_BONUS = 4f;
+
 		public static readonly List<global::System.Action> TRAIT_CREATORS = new List<global::System.Action>
 		{
 			TraitUtil.CreateAttributeEffectTrait("None", DUPLICANTS.CONGENITALTRAITS.NONE.NAME, DUPLICANTS.CONGENITALTRAITS.NONE.DESC, "", (float)TRAITS.NO_ATTRIBUTE_BONUS, false, null, true),
@@ -240,6 +242,7 @@ namespace TUNING
 						amountInstance.SetValue(amountInstance.GetMax());
 					}
 				}
+				go.AddOrGet<MinnowSwimmer>();
 				Effects effects;
 				if (go.TryGetComponent<Effects>(out effects))
 				{

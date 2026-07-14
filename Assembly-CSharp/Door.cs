@@ -108,7 +108,15 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		base.Subscribe<Door>(-592767678, Door.OnOperationalChangedDelegate);
 		base.Subscribe<Door>(824508782, Door.OnOperationalChangedDelegate);
 		base.Subscribe<Door>(-801688580, Door.OnLogicValueChangedDelegate);
-		this.ApplyControlState(false);
+		this.ApplyControlState();
+		if (this.controlState == Door.ControlState.Opened)
+		{
+			this.Open();
+		}
+		else
+		{
+			this.Close();
+		}
 		bool flag = SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 38);
 		bool flag2 = this.doorType == Door.DoorType.Sealed && this.hasBeenUnsealed && this.controlState == Door.ControlState.Opened;
 		if (flag && flag2)
@@ -414,12 +422,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		}
 		if (DebugHandler.InstantBuildMode)
 		{
-			this.controlState = this.requestedState;
-			this.RefreshControlState();
-			this.OnOperationalChanged(null);
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
-			this.Open();
-			this.Close();
+			this.ApplyRequestedControlState();
 			return;
 		}
 		if (this.changeStateChore != null)
@@ -458,7 +461,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 	{
 		base.OnCompleteWork(worker);
 		this.changeStateChore = null;
-		this.ApplyRequestedControlState(false);
+		this.ApplyRequestedControlState();
 	}
 
 	public void Open()
@@ -504,27 +507,24 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		return this.controller.IsInsideState(this.controller.sm.open) || this.controller.IsInsideState(this.controller.sm.closedelay) || this.controller.IsInsideState(this.controller.sm.closeblocked);
 	}
 
-	private void ApplyControlState(bool force = false)
+	private void ApplyControlState()
 	{
 		this.RefreshControlState();
 		this.OnOperationalChanged(null);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
 		base.Trigger(1734268753, this);
-		if (!force)
-		{
-			this.Open();
-			this.Close();
-		}
 	}
 
-	private void ApplyRequestedControlState(bool force = false)
+	private void ApplyRequestedControlState()
 	{
-		if (this.requestedState == this.controlState && !force)
+		if (this.requestedState == this.controlState)
 		{
 			return;
 		}
 		this.controlState = this.requestedState;
-		this.ApplyControlState(force);
+		this.ApplyControlState();
+		this.Open();
+		this.Close();
 	}
 
 	public void OnLogicValueChanged(object data)
@@ -565,7 +565,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		if (this.applyLogicChange)
 		{
 			this.applyLogicChange = false;
-			this.ApplyRequestedControlState(false);
+			this.ApplyRequestedControlState();
 		}
 		if (this.do_melt_check)
 		{

@@ -86,7 +86,7 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 		}
 		KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
 		int currentFrame = component.currentFrame;
-		if (component.IsVisible() && (currentFrame < 23 || currentFrame > 36))
+		if (component.IsVisible() && (currentFrame < smi.def.frameToFlopStart || currentFrame > smi.def.frameToFlopEnd))
 		{
 			return;
 		}
@@ -134,6 +134,10 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 	public class Def : StateMachine.BaseDef
 	{
 		public bool flipFacing;
+
+		public int frameToFlopStart = 23;
+
+		public int frameToFlopEnd = 36;
 	}
 
 	public new class Instance : GameStateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.GameInstance

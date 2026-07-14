@@ -379,9 +379,9 @@ public class PoopStates : GameStateMachine<PoopStates, PoopStates.Instance, ISta
 						int navigationCost = this.navigator.GetNavigationCost(num5);
 						if (navigationCost != -1)
 						{
-							float availablePoopCapacity = poopStation2.GetAvailablePoopCapacity();
-							bool flag3 = availablePoopCapacity > num4;
-							if (num3 == -1 || flag3 || (navigationCost < num3 && availablePoopCapacity == num4))
+							float availablePoopCapacityPercentage = poopStation2.GetAvailablePoopCapacityPercentage();
+							bool flag3 = availablePoopCapacityPercentage > num4;
+							if (num3 == -1 || flag3 || (navigationCost < num3 && availablePoopCapacityPercentage == num4))
 							{
 								GameObject currentPoopStationUser = poopStation2.GetCurrentPoopStationUser();
 								bool flag4 = currentPoopStationUser == null || currentPoopStationUser == base.gameObject;
@@ -389,7 +389,7 @@ public class PoopStates : GameStateMachine<PoopStates, PoopStates.Instance, ISta
 								{
 									num3 = navigationCost;
 									poopStation = poopStation2;
-									num4 = availablePoopCapacity;
+									num4 = availablePoopCapacityPercentage;
 									flag = flag4;
 								}
 							}

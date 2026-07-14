@@ -99,14 +99,28 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 		}
 	}
 
-	public void RefreshHeatingAnim()
+	public static void RefreshTepidizerAnim(SpaceHeater.StatesInstance smi)
 	{
-		if (this.IsTurboModeActive)
+		if (!smi.master.heatLiquid)
 		{
-			this.animController.Play("working_loop_turbo", KAnim.PlayMode.Loop, 1f, 0f);
 			return;
 		}
-		this.animController.Play("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
+		if (smi.IsInsideState(smi.sm.offline) || smi.IsInsideState(smi.sm.online.undermassliquid) || smi.IsInsideState(smi.sm.online.undermassgas) || smi.IsInsideState(smi.sm.online.overtemp))
+		{
+			smi.master.animController.Play("off", KAnim.PlayMode.Once, 1f, 0f);
+			return;
+		}
+		if (!smi.IsInsideState(smi.sm.online.heating))
+		{
+			smi.master.animController.Play("on", KAnim.PlayMode.Once, 1f, 0f);
+			return;
+		}
+		if (smi.master.IsTurboModeActive)
+		{
+			smi.master.animController.Play("working_loop_turbo", KAnim.PlayMode.Loop, 1f, 0f);
+			return;
+		}
+		smi.master.animController.Play("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void SetUserSpecifiedPowerConsumptionValue(float value)
@@ -121,9 +135,9 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 			{
 				base.smi.GoTo(base.smi.sm.online.heating);
 			}
-			if (this.heatLiquid && base.smi.IsInsideState(base.smi.sm.online.heating))
+			if (base.smi.IsInsideState(base.smi.sm.online.heating))
 			{
-				this.RefreshHeatingAnim();
+				SpaceHeater.RefreshTepidizerAnim(base.smi);
 			}
 		}
 	}
@@ -387,20 +401,8 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 				float num = (statesInstance.master.heatLiquid ? 358.15f : statesInstance.master.TargetTemperature);
 				return string.Format(str, GameUtil.GetFormattedTemperature(num, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 			};
-			this.offline.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect)).Enter(delegate(SpaceHeater.StatesInstance smi)
-			{
-				if (smi.master.heatLiquid)
-				{
-					smi.master.animController.Play("off", KAnim.PlayMode.Once, 1f, 0f);
-				}
-			}).EventTransition(GameHashes.OperationalChanged, this.online, (SpaceHeater.StatesInstance smi) => smi.master.operational.IsOperational);
-			this.online.EventTransition(GameHashes.OperationalChanged, this.offline, (SpaceHeater.StatesInstance smi) => !smi.master.operational.IsOperational).Enter(delegate(SpaceHeater.StatesInstance smi)
-			{
-				if (smi.master.heatLiquid)
-				{
-					smi.master.animController.Play("on", KAnim.PlayMode.Once, 1f, 0f);
-				}
-			}).DefaultState(this.online.heating)
+			this.offline.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect)).Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshTepidizerAnim)).EventTransition(GameHashes.OperationalChanged, this.online, (SpaceHeater.StatesInstance smi) => smi.master.operational.IsOperational);
+			this.online.EventTransition(GameHashes.OperationalChanged, this.offline, (SpaceHeater.StatesInstance smi) => !smi.master.operational.IsOperational).Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshTepidizerAnim)).Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect))
 				.Update("spaceheater_online", delegate(SpaceHeater.StatesInstance smi, float dt)
 				{
 					switch (smi.master.MonitorHeating(dt))
@@ -420,16 +422,10 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 					default:
 						return;
 					}
-				}, UpdateRate.SIM_4000ms, false);
-			this.online.heating.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect)).Enter(delegate(SpaceHeater.StatesInstance smi)
+				}, UpdateRate.SIM_1000ms, false);
+			this.online.heating.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect)).Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshTepidizerAnim)).Enter(delegate(SpaceHeater.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
-			}).Enter(delegate(SpaceHeater.StatesInstance smi)
-			{
-				if (smi.master.heatLiquid)
-				{
-					smi.master.RefreshHeatingAnim();
-				}
 			})
 				.ToggleStatusItem((SpaceHeater.StatesInstance smi) => smi.master.heatStatusItem, (SpaceHeater.StatesInstance smi) => smi)
 				.Update(new Action<SpaceHeater.StatesInstance, float>(SpaceHeater.GenerateHeat), UpdateRate.SIM_200ms, false)
@@ -438,9 +434,9 @@ public class SpaceHeater : StateMachineComponent<SpaceHeater.StatesInstance>, IG
 					smi.master.operational.SetActive(false, false);
 				})
 				.Exit(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshHeatEffect));
-			this.online.undermassliquid.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemUnderMassLiquid, null);
-			this.online.undermassgas.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemUnderMassGas, null);
-			this.online.overtemp.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemOverTemp, null);
+			this.online.undermassliquid.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshTepidizerAnim)).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemUnderMassLiquid, null);
+			this.online.undermassgas.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshTepidizerAnim)).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemUnderMassGas, null);
+			this.online.overtemp.Enter(new StateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State.Callback(SpaceHeater.RefreshTepidizerAnim)).ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Heat, this.statusItemOverTemp, null);
 		}
 
 		public GameStateMachine<SpaceHeater.States, SpaceHeater.StatesInstance, SpaceHeater, object>.State offline;

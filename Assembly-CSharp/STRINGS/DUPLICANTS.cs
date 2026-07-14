@@ -7615,7 +7615,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Freediver";
 
-				public static LocString DESC = "This Duplicant is practically amphibious";
+				public static LocString DESC = "This Duplicant is practically amphibious\n\n• +4 to all attributes when swimming";
 			}
 		}
 

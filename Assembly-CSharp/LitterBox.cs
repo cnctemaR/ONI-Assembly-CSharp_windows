@@ -124,9 +124,24 @@ public class LitterBox : GameStateMachine<LitterBox, LitterBox.Instance, IStateM
 			}
 		}
 
+		public float GetPoopCapacity()
+		{
+			return this.storage.capacityKg;
+		}
+
+		public float GetAvailablePoopCapacityPercentage()
+		{
+			return this.storage.RemainingCapacity() / this.GetPoopCapacity();
+		}
+
 		public float GetAvailablePoopCapacity()
 		{
-			return this.storage.RemainingCapacity() / this.storage.capacityKg;
+			return this.storage.RemainingCapacity();
+		}
+
+		private bool CanAcceptMorePoop()
+		{
+			return this.GetAvailablePoopCapacity() > 0f;
 		}
 
 		public bool IsUserCompatibleWithPoopStation(KPrefabID userPrefabID)
@@ -146,7 +161,7 @@ public class LitterBox : GameStateMachine<LitterBox, LitterBox.Instance, IStateM
 
 		public bool IsPoopStationOperational()
 		{
-			return this.IsCritterOperational;
+			return this.IsCritterOperational && this.CanAcceptMorePoop();
 		}
 
 		public string[] GetPoopingAnimNames()

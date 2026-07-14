@@ -596,7 +596,7 @@ public class GameNavGrids
 			new GameNavGrids.TeleporterValidator(),
 			new GameNavGrids.FlyingValidator(true, true, true),
 			new GameNavGrids.DupeSwimValidator()
-		}, 2, 3, 47);
+		}, 2, 3, 55);
 		this.DuplicantGrid.updateEveryFrame = true;
 		pathfinding.AddNavGrid(this.DuplicantGrid);
 		NavGrid.Transition[] array7 = new NavGrid.Transition[]
@@ -1299,6 +1299,7 @@ public class GameNavGrids
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
 			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, -1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[]
 			{
+				new CellOffset(0, -1),
 				new CellOffset(1, 0),
 				new CellOffset(1, -1),
 				new CellOffset(2, 0),

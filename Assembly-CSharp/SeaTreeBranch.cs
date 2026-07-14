@@ -79,16 +79,16 @@ public class SeaTreeBranch : PlantBranchGrowerBase<SeaTreeBranch, SeaTreeBranch.
 			.ToggleAttributeModifier("GetOld", (SeaTreeBranch.Instance smi) => smi.getOldRate, null)
 			.UpdateTransition(this.mature.healthy.selfHarvestFromOld, new Func<SeaTreeBranch.Instance, float, bool>(SeaTreeBranch.ShouldSelfHarvestFromOldAge), UpdateRate.SIM_4000ms, false)
 			.Exit(new StateMachine<SeaTreeBranch, SeaTreeBranch.Instance, IStateMachineTarget, SeaTreeBranch.Def>.State.Callback(SeaTreeBranch.ResetOldAge));
-		this.mature.healthy.harvest.Target(this.Fruit).OnAnimQueueComplete(this.mature.healthy.growing).Target(this.masterTarget)
+		this.mature.healthy.harvest.Target(this.Fruit).OnAnimQueueComplete(this.mature.healthy.spawnCritter).Target(this.masterTarget)
 			.Enter(delegate(SeaTreeBranch.Instance smi)
 			{
 				SeaTreeBranch.PlayAnimsOnFruit(smi, "bulb_meter_birth", KAnim.PlayMode.Once);
 			})
-			.Enter(new StateMachine<SeaTreeBranch, SeaTreeBranch.Instance, IStateMachineTarget, SeaTreeBranch.Def>.State.Callback(SeaTreeBranch.SpawnCritterHarvested))
+			.Enter(new StateMachine<SeaTreeBranch, SeaTreeBranch.Instance, IStateMachineTarget, SeaTreeBranch.Def>.State.Callback(SeaTreeBranch.CacheHarvesterWorker))
 			.Enter(new StateMachine<SeaTreeBranch, SeaTreeBranch.Instance, IStateMachineTarget, SeaTreeBranch.Def>.State.Callback(SeaTreeBranch.MakeItNotHarvestable))
 			.Enter(new StateMachine<SeaTreeBranch, SeaTreeBranch.Instance, IStateMachineTarget, SeaTreeBranch.Def>.State.Callback(SeaTreeBranch.ResetFruitGrowProgress))
 			.TriggerOnExit(GameHashes.HarvestComplete, null)
-			.ScheduleGoTo(3f, this.mature.healthy.growing);
+			.ScheduleGoTo(3f, this.mature.healthy.spawnCritter);
 		this.mature.healthy.selfHarvestFromOld.Target(this.Fruit).OnAnimQueueComplete(this.mature.healthy.spawnCritter).Target(this.masterTarget)
 			.Enter(delegate(SeaTreeBranch.Instance smi)
 			{
@@ -196,14 +196,9 @@ public class SeaTreeBranch : PlantBranchGrowerBase<SeaTreeBranch, SeaTreeBranch.
 		smi.ResetOldAge();
 	}
 
-	private static void SpawnCritterHarvested(SeaTreeBranch.Instance smi)
-	{
-		smi.SpawnCritter(true);
-	}
-
 	private static void SpawnCritter(SeaTreeBranch.Instance smi)
 	{
-		smi.SpawnCritter(false);
+		smi.SpawnCritter();
 	}
 
 	private static void OnRootRecovered(SeaTreeBranch.Instance smi)
@@ -219,6 +214,11 @@ public class SeaTreeBranch : PlantBranchGrowerBase<SeaTreeBranch, SeaTreeBranch.
 	public static string GetAnimName(SeaTreeBranch.Instance smi, string animName)
 	{
 		return SeaTreeBranch.GET_ANIM_NAME(smi.MaxBranchNumberReached, animName);
+	}
+
+	public static void CacheHarvesterWorker(SeaTreeBranch.Instance smi)
+	{
+		smi.CacheHarvesterWorker();
 	}
 
 	private static void SpawnBrancheIfSpawnedByDiscovery(SeaTreeBranch.Instance smi)
@@ -572,20 +572,35 @@ public class SeaTreeBranch : PlantBranchGrowerBase<SeaTreeBranch, SeaTreeBranch.
 			}
 		}
 
-		public void SpawnCritter(bool wasHarvestedByDupe)
+		public void CacheHarvesterWorker()
 		{
-			GameObject gameObject = base.GetComponent<Crop>().SpawnAndGetConfiguredFruit(null, wasHarvestedByDupe);
-			bool flag;
-			Vector3 vector = this.animController.GetSymbolTransform("bulb_meter_target", out flag).GetColumn(3);
+			this.lastHarvesterWorker = this.harvestable.GetWorker();
+		}
+
+		public void SpawnCritter()
+		{
+			bool flag = this.lastHarvesterWorker != null;
+			Crop component = base.GetComponent<Crop>();
+			SeedProducer component2 = base.GetComponent<SeedProducer>();
+			GameObject gameObject = component.SpawnAndGetConfiguredFruit(null, false);
+			if (flag && component2 != null)
+			{
+				component2.SimulateCropPicked(this.lastHarvesterWorker);
+			}
+			bool flag2;
+			Vector3 vector = this.animController.GetSymbolTransform("bulb_meter_target", out flag2).GetColumn(3);
 			vector.z = Grid.GetLayerZ(Grid.SceneLayer.Creatures);
 			if (gameObject != null)
 			{
 				gameObject.transform.position = vector;
 				gameObject.SetActive(true);
 				gameObject.GetComponent<PrimaryElement>().Temperature = base.gameObject.GetComponent<PrimaryElement>().Temperature;
-				return;
 			}
-			DebugUtil.LogErrorArgs(base.gameObject, new object[] { "failed at spawning critter for sea tree branch" });
+			else
+			{
+				DebugUtil.LogErrorArgs(base.gameObject, new object[] { "failed at spawning critter for sea tree branch" });
+			}
+			this.lastHarvesterWorker = null;
 		}
 
 		public void ResetFruitGrowProgress()
@@ -816,6 +831,8 @@ public class SeaTreeBranch : PlantBranchGrowerBase<SeaTreeBranch, SeaTreeBranch.
 		private Harvestable harvestable;
 
 		private MeterController fruitMeter;
+
+		private WorkerBase lastHarvesterWorker;
 
 		private bool wasMarkedForDeadBeforeStartSM;
 	}

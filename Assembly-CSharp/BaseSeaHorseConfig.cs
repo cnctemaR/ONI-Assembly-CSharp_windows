@@ -115,5 +115,5 @@ public static class BaseSeaHorseConfig
 
 	public static float OUTPUT_EFFICIENCY = 12f / BaseSeaHorseConfig.KG_PEARL_EATEN_PER_CYCLE;
 
-	private static float MIN_POOP_SIZE_IN_KG = 25f;
+	private static float MIN_POOP_SIZE_IN_KG = BaseSeaHorseConfig.KG_PEARL_EATEN_PER_CYCLE;
 }

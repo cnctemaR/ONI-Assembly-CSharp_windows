@@ -314,23 +314,26 @@ public class Deconstructable : Workable
 		while (num < this.constructionElements.Length && array.Length > num)
 		{
 			GameObject gameObject = this.SpawnItem(base.transform.GetPosition(), this.constructionElements[num], array[num], temperature, disease_idx, disease_count, construction_worker);
-			int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
-			int num3 = Grid.CellAbove(num2);
-			Vector2 zero;
-			if ((Grid.IsValidCell(num2) && Grid.Solid[num2]) || (Grid.IsValidCell(num3) && Grid.Solid[num3]))
+			if (!(gameObject == null))
 			{
-				zero = Vector2.zero;
+				int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
+				int num3 = Grid.CellAbove(num2);
+				Vector2 zero;
+				if ((Grid.IsValidCell(num2) && Grid.Solid[num2]) || (Grid.IsValidCell(num3) && Grid.Solid[num3]))
+				{
+					zero = Vector2.zero;
+				}
+				else
+				{
+					zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
+				}
+				if (GameComps.Fallers.Has(gameObject))
+				{
+					GameComps.Fallers.Remove(gameObject);
+				}
+				GameComps.Fallers.Add(gameObject, zero);
+				list.Add(gameObject);
 			}
-			else
-			{
-				zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
-			}
-			if (GameComps.Fallers.Has(gameObject))
-			{
-				GameComps.Fallers.Remove(gameObject);
-			}
-			GameComps.Fallers.Add(gameObject, zero);
-			list.Add(gameObject);
 			num++;
 		}
 		return list;
@@ -368,9 +371,13 @@ public class Deconstructable : Workable
 			{
 				int num8 = num7 % placementOffsets.Length;
 				int num9 = Grid.OffsetCell(num, placementOffsets[num8]);
-				gameObject = GameUtil.KInstantiate(Assets.GetPrefab(src_element), Grid.CellToPosCBC(num9, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
-				gameObject.SetActive(true);
-				gameObject.Trigger(580035959, chore_worker);
+				GameObject prefab = Assets.GetPrefab(src_element);
+				if (prefab != null)
+				{
+					gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num9, Grid.SceneLayer.Ore), Grid.SceneLayer.Ore, null, 0);
+					gameObject.SetActive(true);
+					gameObject.Trigger(580035959, chore_worker);
+				}
 				num7++;
 			}
 		}

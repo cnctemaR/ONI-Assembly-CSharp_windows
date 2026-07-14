@@ -623,7 +623,7 @@ namespace STRINGS
 					"."
 				});
 
-				public static LocString RECIPEDESC = "A gourmet loaf of ground seeds, specially formulated for Pacus.";
+				public static LocString RECIPEDESC = "A gourmet loaf of ground seeds, specially formulated for " + UI.FormatAsLink("Pacus", "PACUSPECIES") + ".";
 			}
 
 			public class MEAT
@@ -1671,7 +1671,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Phosphorite", "PHOSPHORITE");
 
-				public static LocString DESC = "A chunk of hardened mineral.\n\nIt can be eaten by " + CREATURES.FAMILY_PLURAL.PARROTFISHSPECIES + ".";
+				public static LocString DESC = "A chunk of hardened mineral.\n\nIt can be eaten by " + CREATURES.FAMILY_PLURAL.PARROTFISHSPECIES + ", or processed into various useful items.";
 			}
 
 			public class FEATHER_FABRIC

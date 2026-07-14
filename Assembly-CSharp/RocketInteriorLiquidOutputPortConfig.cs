@@ -62,6 +62,7 @@ public class RocketInteriorLiquidOutputPortConfig : IBuildingConfig
 		{
 			new CellOffset(0, 0)
 		};
+		go.GetComponent<KBatchedAnimController>().initialBlendParameters = 4;
 		go.AddOrGet<BuildingCellVisualizer>();
 		go.GetComponent<Deconstructable>().allowDeconstruction = false;
 	}

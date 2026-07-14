@@ -67,6 +67,11 @@ public class Movable : Workable
 		}
 		if (Movable.IsCritterPickupable(base.gameObject))
 		{
+			if (this.skillsUpdateHandle != -1)
+			{
+				KCrashReporter.ReportDevNotification("Critter movable - double status item handler", Environment.StackTrace, "", false, null);
+				Game.Instance.Unsubscribe(ref this.skillsUpdateHandle);
+			}
 			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, Workable.UpdateStatusItemDispatcher, this);
 			this.shouldShowSkillPerkStatusItem = this.isMarkedForMove;
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanWrangleCreatures.Id;

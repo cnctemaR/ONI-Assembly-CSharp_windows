@@ -108,6 +108,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable, IGameObjec
 		this.readyForSkillWorkStatusItem = Db.Get().BuildingStatusItems.RequiresSkillPerk;
 		this.workTime = this.GetWorkTime();
 		this.workTimeRemaining = Mathf.Min(this.workTimeRemaining, this.workTime);
+		base.Subscribe(1502190696, Workable.OnQueuedForDestruction, this);
 	}
 
 	protected override void OnSpawn()
@@ -532,16 +533,21 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable, IGameObjec
 		{
 			this.offsetTracker.Clear();
 		}
+		base.OnCleanUp();
+		this.UnsubscribeFromExternalEvents();
+		this.OnWorkableEventCB = null;
+	}
+
+	private void UnsubscribeFromExternalEvents()
+	{
 		if (this.skillsUpdateHandle != -1)
 		{
-			Game.Instance.Unsubscribe(this.skillsUpdateHandle);
+			Game.Instance.Unsubscribe(ref this.skillsUpdateHandle);
 		}
 		if (this.minionUpdateHandle != -1)
 		{
-			Game.Instance.Unsubscribe(this.minionUpdateHandle);
+			Game.Instance.Unsubscribe(ref this.minionUpdateHandle);
 		}
-		base.OnCleanUp();
-		this.OnWorkableEventCB = null;
 	}
 
 	public virtual Vector3 GetTargetPoint()
@@ -781,11 +787,17 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable, IGameObjec
 		component.OnUpdateRoom(data);
 	});
 
+	private static readonly Action<object, object> OnQueuedForDestruction = delegate(object context, object data)
+	{
+		((Workable)context).UnsubscribeFromExternalEvents();
+	};
+
 	protected static Action<object, object> UpdateStatusItemDispatcher = delegate(object context, object data)
 	{
-		if (context == null || Unsafe.As<Workable>(context).gameObject.IsNullOrDestroyed())
+		if (context == null || context.IsNullOrDestroyed() || ((Workable)context).gameObject.IsNullOrDestroyed())
 		{
-			GameObject gameObject = ((context != null) ? Unsafe.As<Workable>(context).gameObject : null);
+			Workable workable = (Workable)context;
+			GameObject gameObject = ((workable != null && !workable.IsNullOrDestroyed()) ? workable.gameObject : null);
 			string text = ((gameObject != null) ? gameObject.ToString() : "null");
 			KCrashReporter.ReportDevNotification("WorkableDestroyingCrash", Environment.StackTrace, text, false, null);
 			return;

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class MinnowImperativePOIStates : GameStateMachine<MinnowImperativePOIStates, MinnowImperativePOIStates.Instance, IStateMachineTarget, MinnowImperativePOIStates.Def>
@@ -138,6 +139,10 @@ public class MinnowImperativePOIStates : GameStateMachine<MinnowImperativePOISta
 
 	public const int TOTALPOICOUNT = 3;
 
+	private const int STARTING_ATTRIBUTE_LEVEL = 4;
+
+	private const int STARTING_SKILL_POINTS = 3;
+
 	public GameStateMachine<MinnowImperativePOIStates, MinnowImperativePOIStates.Instance, IStateMachineTarget, MinnowImperativePOIStates.Def>.State off;
 
 	public MinnowImperativePOIStates.OnStates on;
@@ -191,7 +196,7 @@ public class MinnowImperativePOIStates : GameStateMachine<MinnowImperativePOISta
 		{
 			get
 			{
-				return BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_HEADER;
+				return global::STRINGS.BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_HEADER;
 			}
 		}
 
@@ -536,7 +541,14 @@ public class MinnowImperativePOIStates : GameStateMachine<MinnowImperativePOISta
 
 		private void SpawnMinnow()
 		{
-			MinionStartingStats minionStartingStats = new MinionStartingStats(Db.Get().Personalities.Get("MINNOW"), null, null, false);
+			MinionStartingStats minionStartingStats = new MinionStartingStats(Db.Get().Personalities.Get("MINNOW"), null, "AncientKnowledge", false);
+			string[] all_ATTRIBUTES = DUPLICANTSTATS.ALL_ATTRIBUTES;
+			for (int i = 0; i < all_ATTRIBUTES.Length; i++)
+			{
+				Dictionary<string, int> startingLevels = minionStartingStats.StartingLevels;
+				string text = all_ATTRIBUTES[i];
+				startingLevels[text] += 4;
+			}
 			GameObject prefab = Assets.GetPrefab(BaseMinionConfig.GetMinionIDForModel(minionStartingStats.personality.model));
 			GameObject gameObject = Util.KInstantiate(prefab, null, null);
 			gameObject.name = prefab.name;
@@ -544,6 +556,11 @@ public class MinnowImperativePOIStates : GameStateMachine<MinnowImperativePOISta
 			Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(base.gameObject), Grid.SceneLayer.Move);
 			gameObject.transform.SetLocalPosition(vector);
 			gameObject.SetActive(true);
+			MinionResume component = gameObject.GetComponent<MinionResume>();
+			for (int j = 0; j < 3; j++)
+			{
+				component.ForceAddSkillPoint();
+			}
 			minionStartingStats.Apply(gameObject);
 			gameObject.GetComponent<MinionIdentity>().arrivalTime = (float)(-1 * global::UnityEngine.Random.Range(2050, 2180));
 			gameObject.GetMyWorld().SetDupeVisited();
@@ -567,9 +584,9 @@ public class MinnowImperativePOIStates : GameStateMachine<MinnowImperativePOISta
 				ManualDeliveryKG component = base.gameObject.GetComponent<ManualDeliveryKG>();
 				if (component != null && component.enabled)
 				{
-					return BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_DISABLE;
+					return global::STRINGS.BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_DISABLE;
 				}
-				return BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_ENABLE;
+				return global::STRINGS.BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_ENABLE;
 			}
 		}
 
@@ -580,9 +597,9 @@ public class MinnowImperativePOIStates : GameStateMachine<MinnowImperativePOISta
 				ManualDeliveryKG component = base.gameObject.GetComponent<ManualDeliveryKG>();
 				if (component != null && component.enabled)
 				{
-					return BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_DISABLE_TOOLTIP;
+					return global::STRINGS.BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_DISABLE_TOOLTIP;
 				}
-				return BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_ENABLE_TOOLTIP;
+				return global::STRINGS.BUILDINGS.PREFABS.MINNOW_IMPERATIVE_POI_A.UI_BUTTON_ENABLE_TOOLTIP;
 			}
 		}
 

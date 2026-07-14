@@ -178,6 +178,11 @@ public class OxyCoral : GameStateMachine<OxyCoral, OxyCoral.Instance, IStateMach
 			base.OnCleanUp();
 		}
 
+		public float GetPoopCapacity()
+		{
+			return 10.000001f;
+		}
+
 		public bool IsUserCompatibleWithPoopStation(KPrefabID userPrefabID)
 		{
 			return userPrefabID.HasTag("ParrotFish");
@@ -193,6 +198,11 @@ public class OxyCoral : GameStateMachine<OxyCoral, OxyCoral.Instance, IStateMach
 			return this.poopUser;
 		}
 
+		public float GetAvailablePoopCapacityPercentage()
+		{
+			return this.GetAvailablePoopCapacity() / this.GetPoopCapacity();
+		}
+
 		public float GetAvailablePoopCapacity()
 		{
 			if (this.IsWild)
@@ -200,12 +210,20 @@ public class OxyCoral : GameStateMachine<OxyCoral, OxyCoral.Instance, IStateMach
 				return 0f;
 			}
 			Storage component = this.receptacleMonitor.smi.ReceptacleObject.GetComponent<Storage>();
-			return component.RemainingCapacity() / component.capacityKg;
+			float poopCapacity = this.GetPoopCapacity();
+			float num = poopCapacity - component.GetMassAvailable(SimHashes.Lime);
+			num = Mathf.Min(component.capacityKg, num);
+			return Mathf.Clamp(num, 0f, poopCapacity);
+		}
+
+		private bool CanAcceptMorePoop()
+		{
+			return this.GetAvailablePoopCapacity() > 0f;
 		}
 
 		public bool IsPoopStationOperational()
 		{
-			return !base.smi.IsInsideState(base.smi.sm.noProducing.dead);
+			return !base.smi.IsInsideState(base.smi.sm.noProducing.dead) && (this.IsWild || this.CanAcceptMorePoop());
 		}
 
 		public string[] GetPoopingAnimNames()

@@ -137,6 +137,37 @@ namespace Klei.AI
 			};
 		}
 
+		public static global::System.Action CreateSkillGrantingTrait(string id, string name, string desc, string[] skillIds)
+		{
+			return delegate
+			{
+				Trait trait = Db.Get().CreateTrait(id, name, desc, null, true, null, true, true);
+				trait.TooltipCB = delegate
+				{
+					string text = "";
+					text += DUPLICANTS.TRAITS.GRANTED_SKILL_NO_MORALE_COST;
+					foreach (string text2 in skillIds)
+					{
+						text += "\n\n";
+						text = text + GameUtil.ApplyBoldString(Db.Get().Skills.Get(text2).Name) + ":\n";
+						text += SkillWidget.SkillPerksString(Db.Get().Skills.Get(text2));
+					}
+					return text;
+				};
+				trait.OnAddTrait = delegate(GameObject go)
+				{
+					MinionResume component = go.GetComponent<MinionResume>();
+					if (component != null)
+					{
+						foreach (string text3 in skillIds)
+						{
+							component.GrantSkill(text3);
+						}
+					}
+				};
+			};
+		}
+
 		public static string GetSkillGrantingTraitNameById(string id)
 		{
 			string text = "";

@@ -766,7 +766,7 @@ public class DlcManager
 		},
 		{
 			"DLC5_ID",
-			new DlcManager.DlcInfo("DLC5_ID", "A", new Color(0.09803922f, 0.63529414f, 0.5803922f), "https://store.steampowered.com/app/4310080/Oxygen_Not_Included_The_Aquatic_Planet_Pack/", "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-aquatic-planet-pack-cd3a3b", "https://www.wegame.com.cn/store/2002763", false, null, 210, true, true, false)
+			new DlcManager.DlcInfo("DLC5_ID", "A", new Color(0.09803922f, 0.63529414f, 0.5803922f), "https://store.steampowered.com/app/4310080/Oxygen_Not_Included_The_Aquatic_Planet_Pack/", "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-aquatic-planet-pack-cd3a3b", "https://www.wegame.com.cn/store/2002763", false, null, 210, true, true, true)
 		},
 		{
 			"COSMETIC1_ID",

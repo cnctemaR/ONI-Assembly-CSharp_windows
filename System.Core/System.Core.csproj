@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1D119CA1-935B-4071-9DB4-19566E492FCF}</ProjectGuid>
+    <ProjectGuid>{9D7F3A87-68C3-415E-8798-92DEDEEC09B7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Core</RootNamespace>
     <AssemblyName>System.Core</AssemblyName>
@@ -625,11 +625,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCA}</Project>
+      <Project>{9D7F3A87-68C3-415E-8798-92DEDEEC09B2}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{1D119CA1-935B-4071-9DB4-19566E492FD2}</Project>
+      <Project>{9D7F3A87-68C3-415E-8798-92DEDEEC09BA}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

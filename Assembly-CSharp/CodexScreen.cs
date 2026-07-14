@@ -280,6 +280,10 @@ public class CodexScreen : KScreen
 			UIGameObjectPool uigameObjectPool = new UIGameObjectPool(keyValuePair.Value);
 			uigameObjectPool.disabledElementParent = this.widgetPool;
 			this.ContentUIPools[keyValuePair.Key] = uigameObjectPool;
+			if (!this.contentPoolsByName.TryAdd(keyValuePair.Value.name, uigameObjectPool))
+			{
+				DebugUtil.DevLogError("Duplicate Codex content prefab name '" + keyValuePair.Value.name + "'; recycle-by-name will mis-route widgets.");
+			}
 		}
 	}
 
@@ -443,48 +447,45 @@ public class CodexScreen : KScreen
 		ICodexWidget codexWidget = null;
 		CodexCache.entries[id].GetFirstWidget();
 		RectTransform rectTransform = null;
-		if (subEntry != null)
+		if (subEntry == null)
 		{
-			foreach (ContentContainer contentContainer in CodexCache.entries[id].contentContainers)
+			goto IL_01E8;
+		}
+		using (List<ContentContainer>.Enumerator enumerator = CodexCache.entries[id].contentContainers.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
 			{
+				ContentContainer contentContainer = enumerator.Current;
 				if (contentContainer == subEntry.contentContainers[0])
 				{
 					codexWidget = contentContainer.content[0];
 					break;
 				}
 			}
+			goto IL_01E8;
 		}
-		int num = 0;
-		string text2 = "";
-		while (this.contentContainers.transform.childCount > 0)
+		IL_0148:
+		GameObject gameObject = this.contentContainers.transform.GetChild(0).gameObject;
+		while (gameObject.transform.childCount > 0)
 		{
-			while (!string.IsNullOrEmpty(text2) && CodexCache.entries[this.activeEntryID].contentContainers[num].lockID == text2)
+			GameObject gameObject2 = gameObject.transform.GetChild(0).gameObject;
+			UIGameObjectPool uigameObjectPool;
+			if (this.contentPoolsByName.TryGetValue(gameObject2.name, out uigameObjectPool))
 			{
-				num++;
+				uigameObjectPool.ClearElement(gameObject2);
 			}
-			GameObject gameObject = this.contentContainers.transform.GetChild(0).gameObject;
-			int num2 = 0;
-			while (gameObject.transform.childCount > 0)
+			else
 			{
-				if (DlcManager.IsCorrectDlcSubscribed(CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2] as IHasDlcRestrictions))
-				{
-					GameObject gameObject2 = gameObject.transform.GetChild(0).gameObject;
-					Type type;
-					if (gameObject2.name == "PrefabContentLocked")
-					{
-						text2 = CodexCache.entries[this.activeEntryID].contentContainers[num].lockID;
-						type = typeof(CodexContentLockedIndicator);
-					}
-					else
-					{
-						type = CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2].GetType();
-					}
-					this.ContentUIPools[type].ClearElement(gameObject2);
-				}
-				num2++;
+				DebugUtil.DevLogError("Codex content widget '" + gameObject2.name + "' has no matching pool and is leaking; its instantiated name likely differs from its prefab name.");
+				gameObject2.SetActive(false);
+				gameObject2.transform.SetParent(this.widgetPool);
 			}
-			this.contentContainerPool.ClearElement(this.contentContainers.transform.GetChild(0).gameObject);
-			num++;
+		}
+		this.contentContainerPool.ClearElement(gameObject);
+		IL_01E8:
+		if (this.contentContainers.transform.childCount > 0)
+		{
+			goto IL_0148;
 		}
 		bool flag = CodexCache.entries[id] is CategoryEntry;
 		this.activeEntryID = id;
@@ -493,7 +494,7 @@ public class CodexScreen : KScreen
 			CodexCache.entries[id].CreateContentContainerCollection();
 		}
 		bool flag2 = false;
-		string text3 = "";
+		string text2 = "";
 		for (int i = 0; i < CodexCache.entries[id].contentContainers.Count; i++)
 		{
 			ContentContainer contentContainer2 = CodexCache.entries[id].contentContainers[i];
@@ -501,11 +502,11 @@ public class CodexScreen : KScreen
 			{
 				if (!string.IsNullOrEmpty(contentContainer2.lockID) && !Game.Instance.unlocks.IsUnlocked(contentContainer2.lockID))
 				{
-					if (text3 != contentContainer2.lockID)
+					if (text2 != contentContainer2.lockID)
 					{
 						GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
 						this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
-						text3 = contentContainer2.lockID;
+						text2 = contentContainer2.lockID;
 						GameObject gameObject4 = this.ContentUIPools[typeof(CodexContentLockedIndicator)].GetFreeElement(gameObject3, true).gameObject;
 					}
 				}
@@ -532,31 +533,31 @@ public class CodexScreen : KScreen
 				}
 			}
 		}
-		string text4 = "";
-		string text5 = id;
-		int num3 = 0;
-		while (text5 != CodexCache.FormatLinkID("HOME") && num3 < 10)
+		string text3 = "";
+		string text4 = id;
+		int num = 0;
+		while (text4 != CodexCache.FormatLinkID("HOME") && num < 10)
 		{
-			num3++;
-			if (text5 != null)
+			num++;
+			if (text4 != null)
 			{
-				if (text5 != id)
+				if (text4 != id)
 				{
-					text4 = text4.Insert(0, CodexCache.entries[text5].name + " > ");
+					text3 = text3.Insert(0, CodexCache.entries[text4].name + " > ");
 				}
 				else
 				{
-					text4 = text4.Insert(0, CodexCache.entries[text5].name);
+					text3 = text3.Insert(0, CodexCache.entries[text4].name);
 				}
-				text5 = CodexCache.entries[text5].parentId;
+				text4 = CodexCache.entries[text4].parentId;
 			}
 			else
 			{
-				text5 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
-				text4 = text4.Insert(0, CodexCache.entries[text5].name + " > ");
+				text4 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
+				text3 = text3.Insert(0, CodexCache.entries[text4].name + " > ");
 			}
 		}
-		this.currentLocationText.text = ((text4 == "") ? ("<b>" + UI.StripLinkFormatting(CodexCache.entries["HOME"].name) + "</b>") : text4);
+		this.currentLocationText.text = ((text3 == "") ? ("<b>" + UI.StripLinkFormatting(CodexCache.entries["HOME"].name) + "</b>") : text3);
 		if (this.history.Count == 0)
 		{
 			this.history.Add(new CodexScreen.HistoryEntry(id, Vector3.zero, text));
@@ -754,6 +755,8 @@ public class CodexScreen : KScreen
 	private Dictionary<Type, UIGameObjectPool> ContentUIPools = new Dictionary<Type, UIGameObjectPool>();
 
 	private Dictionary<Type, GameObject> ContentPrefabs = new Dictionary<Type, GameObject>();
+
+	private Dictionary<string, UIGameObjectPool> contentPoolsByName = new Dictionary<string, UIGameObjectPool>();
 
 	private List<GameObject> categoryHeaders = new List<GameObject>();
 

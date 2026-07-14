@@ -7646,14 +7646,16 @@ namespace STRINGS
 
 			public static LocString GRANTED_SKILL_SHARED_NAME = "Skilled: ";
 
-			public static LocString GRANTED_SKILL_SHARED_DESC = string.Concat(new string[]
+			public static LocString GRANTED_SKILL_NO_MORALE_COST = string.Concat(new string[]
 			{
 				"This Duplicant begins with a pre-learned ",
 				UI.FormatAsKeyWord("Skill"),
 				", but does not have increased ",
 				UI.FormatAsKeyWord(DUPLICANTS.NEEDS.QUALITYOFLIFE.NAME),
-				".\n\n{0}\n{1}"
+				"."
 			});
+
+			public static LocString GRANTED_SKILL_SHARED_DESC = DUPLICANTS.TRAITS.GRANTED_SKILL_NO_MORALE_COST + "\n\n{0}\n{1}";
 
 			public static LocString GRANTED_SKILL_SHARED_SHORT_DESC_TOOLTIP = "This Duplicant receives a free " + UI.FormatAsKeyWord("Skill") + " without the drawback of increased " + UI.FormatAsKeyWord(DUPLICANTS.NEEDS.QUALITYOFLIFE.NAME);
 

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{4DFFE9AA-8C53-4727-8051-F20D3BB4D927}</ProjectGuid>
+    <ProjectGuid>{9658BD80-0462-4503-ADB4-10AC98627118}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.ClusterRendererModule</AssemblyName>
@@ -20,15 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D8F9}</Project>
+      <Project>{9658BD80-0462-4503-ADB4-10AC986270EA}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D929}</Project>
+      <Project>{9658BD80-0462-4503-ADB4-10AC9862711A}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{4DFFE9AA-8C53-4727-8051-F20D3BB4D94C}</Project>
+      <Project>{9658BD80-0462-4503-ADB4-10AC9862713D}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

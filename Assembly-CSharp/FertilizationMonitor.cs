@@ -19,7 +19,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 			{
 				components[i].Pause(false, "replanted");
 			}
-			smi.UpdateFertilization(0.033333335f);
+			smi.UpdateFertilization(0.2f);
 		}).ParamTransition<bool>(this.isFertilized, this.replanted.fertilized, (FertilizationMonitor.Instance _, bool status) => status).ParamTransition<bool>(this.isFertilized, this.replanted.starved, (FertilizationMonitor.Instance _, bool status) => !status)
 			.Target(this.fertilizerStorage)
 			.EventHandler(GameHashes.OnStorageChange, delegate(FertilizationMonitor.Instance smi)
@@ -49,8 +49,6 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 	public GameStateMachine<FertilizationMonitor, FertilizationMonitor.Instance, IStateMachineTarget, FertilizationMonitor.Def>.State unfertilizable;
 
 	public FertilizationMonitor.ReplantedStates replanted;
-
-	private const float DELTA_TIME = 0.033333335f;
 
 	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{

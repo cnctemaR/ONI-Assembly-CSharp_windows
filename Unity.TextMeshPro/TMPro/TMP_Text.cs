@@ -5750,7 +5750,7 @@ namespace TMPro
 								{
 									if (markupTag != MarkupTag.NAME)
 									{
-										goto IL_2EBF;
+										goto IL_2F35;
 									}
 									this.m_currentSpriteAsset = TMP_SpriteAsset.SearchForSpriteByHashCode(this.m_currentSpriteAsset, TMP_Text.m_xmlAttribute[num15].valueHashCode, true, out num16);
 									if (num16 == -1)
@@ -5778,7 +5778,7 @@ namespace TMPro
 								{
 									if (markupTag != MarkupTag.INDEX)
 									{
-										goto IL_2EBF;
+										goto IL_2F35;
 									}
 									num16 = (int)this.ConvertToFloat(TMP_Text.m_htmlTag, TMP_Text.m_xmlAttribute[1].valueStartIndex, TMP_Text.m_xmlAttribute[1].valueLength);
 									if (num16 == -32768)
@@ -5800,15 +5800,15 @@ namespace TMPro
 							{
 								this.m_tintSprite = this.ConvertToFloat(TMP_Text.m_htmlTag, TMP_Text.m_xmlAttribute[num15].valueStartIndex, TMP_Text.m_xmlAttribute[num15].valueLength) != 0f;
 							}
-							IL_2ECA:
+							IL_2F40:
 							num15++;
 							continue;
-							IL_2EBF:
+							IL_2F35:
 							if (nameHashCode2 != -991527447)
 							{
 								return false;
 							}
-							goto IL_2ECA;
+							goto IL_2F40;
 						}
 						if (this.m_spriteIndex == -1)
 						{
@@ -5851,6 +5851,10 @@ namespace TMPro
 										break;
 									case TagUnitType.Percentage:
 									{
+										if (this.m_currentFontAsset == null || this.m_fontAsset == null)
+										{
+											return false;
+										}
 										float num17 = this.m_currentFontSize / this.m_currentFontAsset.faceInfo.pointSize * this.m_currentFontAsset.faceInfo.scale * (this.m_isOrthographic ? 1f : 0.1f);
 										this.m_lineHeight = this.m_fontAsset.faceInfo.lineHeight * num11 / 100f * num17;
 										break;
@@ -5926,7 +5930,7 @@ namespace TMPro
 							}
 							if (nameHashCode == MarkupTag.UPPERCASE)
 							{
-								goto IL_2F72;
+								goto IL_2FE8;
 							}
 							if (nameHashCode != MarkupTag.MARGIN_LEFT)
 							{
@@ -6006,7 +6010,7 @@ namespace TMPro
 										return false;
 									}
 								}
-								else
+								else if (this.m_currentFontAsset != null)
 								{
 									this.m_ItalicAngle = (int)this.m_currentFontAsset.italicStyle;
 								}
@@ -6121,6 +6125,10 @@ namespace TMPro
 								{
 									return false;
 								}
+								if (this.m_currentFontAsset == null)
+								{
+									return false;
+								}
 								this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.faceInfo.subscriptSize > 0f) ? this.m_currentFontAsset.faceInfo.subscriptSize : 1f);
 								this.m_baselineOffsetStack.Push(this.m_baselineOffset);
 								TMP_Text.m_materialReferenceStack.Push(TMP_Text.m_materialReferences[this.m_currentMaterialIndex]);
@@ -6153,28 +6161,21 @@ namespace TMPro
 								}
 							}
 						}
-						else
+						else if (nameHashCode != MarkupTag.SUPERSCRIPT)
 						{
-							if (nameHashCode == MarkupTag.SUPERSCRIPT)
-							{
-								this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.faceInfo.superscriptSize > 0f) ? this.m_currentFontAsset.faceInfo.superscriptSize : 1f);
-								this.m_baselineOffsetStack.Push(this.m_baselineOffset);
-								TMP_Text.m_materialReferenceStack.Push(TMP_Text.m_materialReferences[this.m_currentMaterialIndex]);
-								float num17 = this.m_currentFontSize / this.m_currentFontAsset.faceInfo.pointSize * this.m_currentFontAsset.faceInfo.scale * (this.m_isOrthographic ? 1f : 0.1f);
-								this.m_baselineOffset += this.m_currentFontAsset.faceInfo.superscriptOffset * num17 * this.m_fontScaleMultiplier;
-								this.m_fontStyleStack.Add(FontStyles.Superscript);
-								this.m_FontStyleInternal |= FontStyles.Superscript;
-								return true;
-							}
 							if (nameHashCode == MarkupTag.SLASH_SUBSCRIPT)
 							{
 								if ((this.m_FontStyleInternal & FontStyles.Subscript) == FontStyles.Subscript)
 								{
-									TMP_FontAsset fontAsset = TMP_Text.m_materialReferenceStack.Pop().fontAsset;
-									if (this.m_fontScaleMultiplier < 1f)
+									TMP_FontAsset tmp_FontAsset = TMP_Text.m_materialReferenceStack.Pop().fontAsset;
+									if (tmp_FontAsset == null)
+									{
+										tmp_FontAsset = this.m_currentFontAsset;
+									}
+									if (this.m_fontScaleMultiplier < 1f && tmp_FontAsset != null)
 									{
 										this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
-										this.m_fontScaleMultiplier /= ((fontAsset.faceInfo.subscriptSize > 0f) ? fontAsset.faceInfo.subscriptSize : 1f);
+										this.m_fontScaleMultiplier /= ((tmp_FontAsset.faceInfo.subscriptSize > 0f) ? tmp_FontAsset.faceInfo.subscriptSize : 1f);
 									}
 									if (this.m_fontStyleStack.Remove(FontStyles.Subscript) == 0)
 									{
@@ -6189,17 +6190,36 @@ namespace TMPro
 							}
 							if ((this.m_FontStyleInternal & FontStyles.Superscript) == FontStyles.Superscript)
 							{
-								TMP_FontAsset fontAsset2 = TMP_Text.m_materialReferenceStack.Pop().fontAsset;
-								if (this.m_fontScaleMultiplier < 1f)
+								TMP_FontAsset tmp_FontAsset2 = TMP_Text.m_materialReferenceStack.Pop().fontAsset;
+								if (tmp_FontAsset2 == null)
+								{
+									tmp_FontAsset2 = this.m_currentFontAsset;
+								}
+								if (this.m_fontScaleMultiplier < 1f && tmp_FontAsset2 != null)
 								{
 									this.m_baselineOffset = this.m_baselineOffsetStack.Pop();
-									this.m_fontScaleMultiplier /= ((fontAsset2.faceInfo.superscriptSize > 0f) ? fontAsset2.faceInfo.superscriptSize : 1f);
+									this.m_fontScaleMultiplier /= ((tmp_FontAsset2.faceInfo.superscriptSize > 0f) ? tmp_FontAsset2.faceInfo.superscriptSize : 1f);
 								}
 								if (this.m_fontStyleStack.Remove(FontStyles.Superscript) == 0)
 								{
 									this.m_FontStyleInternal &= ~FontStyles.Superscript;
 								}
 							}
+							return true;
+						}
+						else
+						{
+							if (this.m_currentFontAsset == null)
+							{
+								return false;
+							}
+							this.m_fontScaleMultiplier *= ((this.m_currentFontAsset.faceInfo.superscriptSize > 0f) ? this.m_currentFontAsset.faceInfo.superscriptSize : 1f);
+							this.m_baselineOffsetStack.Push(this.m_baselineOffset);
+							TMP_Text.m_materialReferenceStack.Push(TMP_Text.m_materialReferences[this.m_currentMaterialIndex]);
+							float num17 = this.m_currentFontSize / this.m_currentFontAsset.faceInfo.pointSize * this.m_currentFontAsset.faceInfo.scale * (this.m_isOrthographic ? 1f : 0.1f);
+							this.m_baselineOffset += this.m_currentFontAsset.faceInfo.superscriptOffset * num17 * this.m_fontScaleMultiplier;
+							this.m_fontStyleStack.Add(FontStyles.Superscript);
+							this.m_FontStyleInternal |= FontStyles.Superscript;
 							return true;
 						}
 					}
@@ -6225,26 +6245,26 @@ namespace TMPro
 							TMP_Text.m_materialReferenceStack.Add(TMP_Text.m_materialReferences[0]);
 							return true;
 						}
-						TMP_FontAsset tmp_FontAsset;
-						MaterialReferenceManager.TryGetFontAsset(valueHashCode4, out tmp_FontAsset);
-						if (tmp_FontAsset == null)
+						TMP_FontAsset tmp_FontAsset3;
+						MaterialReferenceManager.TryGetFontAsset(valueHashCode4, out tmp_FontAsset3);
+						if (tmp_FontAsset3 == null)
 						{
 							Func<int, string, TMP_FontAsset> onFontAssetRequest = TMP_Text.OnFontAssetRequest;
-							tmp_FontAsset = ((onFontAssetRequest != null) ? onFontAssetRequest(valueHashCode4, new string(TMP_Text.m_htmlTag, TMP_Text.m_xmlAttribute[0].valueStartIndex, TMP_Text.m_xmlAttribute[0].valueLength)) : null);
-							if (tmp_FontAsset == null)
+							tmp_FontAsset3 = ((onFontAssetRequest != null) ? onFontAssetRequest(valueHashCode4, new string(TMP_Text.m_htmlTag, TMP_Text.m_xmlAttribute[0].valueStartIndex, TMP_Text.m_xmlAttribute[0].valueLength)) : null);
+							if (tmp_FontAsset3 == null)
 							{
-								tmp_FontAsset = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(TMP_Text.m_htmlTag, TMP_Text.m_xmlAttribute[0].valueStartIndex, TMP_Text.m_xmlAttribute[0].valueLength));
+								tmp_FontAsset3 = Resources.Load<TMP_FontAsset>(TMP_Settings.defaultFontAssetPath + new string(TMP_Text.m_htmlTag, TMP_Text.m_xmlAttribute[0].valueStartIndex, TMP_Text.m_xmlAttribute[0].valueLength));
 							}
-							if (tmp_FontAsset == null)
+							if (tmp_FontAsset3 == null)
 							{
 								return false;
 							}
-							MaterialReferenceManager.AddFontAsset(tmp_FontAsset);
+							MaterialReferenceManager.AddFontAsset(tmp_FontAsset3);
 						}
 						if (nameHashCode3 == 0 && num18 == 0)
 						{
-							this.m_currentMaterial = tmp_FontAsset.material;
-							this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, ref TMP_Text.m_materialReferences, TMP_Text.m_materialReferenceIndexLookup);
+							this.m_currentMaterial = tmp_FontAsset3.material;
+							this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset3, ref TMP_Text.m_materialReferences, TMP_Text.m_materialReferenceIndexLookup);
 							TMP_Text.m_materialReferenceStack.Add(TMP_Text.m_materialReferences[this.m_currentMaterialIndex]);
 						}
 						else
@@ -6257,7 +6277,7 @@ namespace TMPro
 							if (MaterialReferenceManager.TryGetMaterial(num18, out material))
 							{
 								this.m_currentMaterial = material;
-								this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, ref TMP_Text.m_materialReferences, TMP_Text.m_materialReferenceIndexLookup);
+								this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset3, ref TMP_Text.m_materialReferences, TMP_Text.m_materialReferenceIndexLookup);
 								TMP_Text.m_materialReferenceStack.Add(TMP_Text.m_materialReferences[this.m_currentMaterialIndex]);
 							}
 							else
@@ -6269,11 +6289,11 @@ namespace TMPro
 								}
 								MaterialReferenceManager.AddFontMaterial(num18, material);
 								this.m_currentMaterial = material;
-								this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset, ref TMP_Text.m_materialReferences, TMP_Text.m_materialReferenceIndexLookup);
+								this.m_currentMaterialIndex = MaterialReference.AddMaterialReference(this.m_currentMaterial, tmp_FontAsset3, ref TMP_Text.m_materialReferences, TMP_Text.m_materialReferenceIndexLookup);
 								TMP_Text.m_materialReferenceStack.Add(TMP_Text.m_materialReferences[this.m_currentMaterialIndex]);
 							}
 						}
-						this.m_currentFontAsset = tmp_FontAsset;
+						this.m_currentFontAsset = tmp_FontAsset3;
 						return true;
 					}
 					else
@@ -6772,6 +6792,10 @@ namespace TMPro
 						TMP_Text.m_materialReferenceStack.Add(TMP_Text.m_materialReferences[0]);
 						return true;
 					}
+					if (this.m_currentFontAsset == null)
+					{
+						return false;
+					}
 					Material material;
 					if (MaterialReferenceManager.TryGetMaterial(num18, out material))
 					{
@@ -6829,7 +6853,7 @@ namespace TMPro
 					return false;
 				}
 			}
-			IL_2F72:
+			IL_2FE8:
 			this.m_FontStyleInternal |= FontStyles.UpperCase;
 			this.m_fontStyleStack.Add(FontStyles.UpperCase);
 			return true;

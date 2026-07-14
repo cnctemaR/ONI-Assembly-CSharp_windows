@@ -52,4 +52,6 @@ public class UnderwaterBreathingLocation : KMonoBehaviour
 
 	[MyCmpAdd]
 	private Reservable reservable;
+
+	public bool allowLandUse;
 }

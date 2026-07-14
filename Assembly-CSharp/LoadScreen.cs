@@ -845,8 +845,8 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					737195U,
-					37
+					737790U,
+					38
 				});
 			}
 			return false;
@@ -861,7 +861,7 @@ public class LoadScreen : KModalScreen
 					save.FileInfo.saveMajorVersion,
 					save.FileInfo.saveMinorVersion,
 					7,
-					37
+					38
 				});
 			}
 			return false;
@@ -1230,7 +1230,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 37) || header.buildVersion > 737195U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 38) || header.buildVersion > 737790U;
 	}
 
 	private void UpdateSelected(KButton button, string filename, List<string> dlcIds)
@@ -1285,15 +1285,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 737195U)
+		if (header.buildVersion > 737790U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 737195U.ToString();
+			text2 = 737790U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 37);
+			text2 = string.Format("v{0}.{1}", 7, 38);
 		}
 		if (!flag)
 		{

@@ -612,14 +612,14 @@ namespace STRINGS
 
 			public class FISHFOOD
 			{
-				public static LocString NAME = UI.FormatAsLink("Pacu Treat", "PACUSPECIES");
+				public static LocString NAME = UI.FormatAsLink("Pacu Treat", "PACUTREAT");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
 					"A gourmet loaf of ground seeds and ",
 					UI.FormatAsLink("Water", "WATER"),
 					", formulated to delight ",
-					UI.FormatAsLink("Pacus", "PACU"),
+					UI.FormatAsLink("Pacus", "PACUSPECIES"),
 					"."
 				});
 

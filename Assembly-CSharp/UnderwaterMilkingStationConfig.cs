@@ -85,7 +85,7 @@ public class UnderwaterMilkingStationConfig : IBuildingConfig
 			int num = Grid.InvalidCell;
 			if (!smi.IsNullOrStopped())
 			{
-				num = Grid.PosToCell(smi.transform.GetPosition());
+				num = Grid.CellLeft(Grid.PosToCell(smi.transform.GetPosition()));
 			}
 			return num;
 		};

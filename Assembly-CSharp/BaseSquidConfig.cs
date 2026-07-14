@@ -80,18 +80,16 @@ public static class BaseSquidConfig
 			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def3 = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def3.canSwim = true;
-		def3.checkHead = true;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.SquidSpecies, symbol_prefix);
-		CritterCondoInteractMontior.Def def4 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
-		def4.requireCavity = false;
-		def4.condoPrefabTag = "UnderwaterCritterCondo";
+		CritterCondoInteractMontior.Def def3 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def3.requireCavity = false;
+		def3.condoPrefabTag = "UnderwaterCritterCondo";
 		Tag poop_ELEMENT = SquidTuning.POOP_ELEMENT;
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add("TubeWorm");
@@ -99,9 +97,9 @@ public static class BaseSquidConfig
 		{
 			new Diet.Info(hashSet, poop_ELEMENT, SquidTuning.CALORIES_PER_GROWTH_EATEN, SquidTuning.GROWTH_TO_PRODUCT_EFFICIENCY, null, 0f, false, Diet.Info.FoodType.EatPlantDirectly, false, null)
 		}.ToArray());
-		CreatureCalorieMonitor.Def def5 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def5.diet = diet;
-		def5.minConsumedCaloriesBeforePooping = SquidTuning.STANDARD_CALORIES_PER_CYCLE;
+		CreatureCalorieMonitor.Def def4 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def4.diet = diet;
+		def4.minConsumedCaloriesBeforePooping = SquidTuning.STANDARD_CALORIES_PER_CYCLE;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num6 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Squid"];

@@ -16,7 +16,7 @@ public class FallStates : GameStateMachine<FallStates, FallStates.Instance, ISta
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		root.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main);
 		this.loop.PlayAnim((FallStates.Instance smi) => smi.GetSMI<CreatureFallMonitor.Instance>().anim, KAnim.PlayMode.Loop).ToggleGravity().EventTransition(GameHashes.Landed, this.snaptoground, null)
-			.Transition(this.pst, (FallStates.Instance smi) => smi.GetSMI<CreatureFallMonitor.Instance>().CanSwimAtCurrentLocation(), UpdateRate.SIM_33ms);
+			.Transition(this.snaptoground, (FallStates.Instance smi) => smi.GetSMI<CreatureFallMonitor.Instance>().ShouldSettleIntoSwim(), UpdateRate.SIM_33ms);
 		this.snaptoground.Enter(delegate(FallStates.Instance smi)
 		{
 			smi.GetSMI<CreatureFallMonitor.Instance>().SnapToGround();

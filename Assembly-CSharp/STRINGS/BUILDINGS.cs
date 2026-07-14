@@ -2693,13 +2693,13 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Breathing Station", "UNDERWATERBREATHINGSTATION");
 
-				public static LocString DESC = "Duplicants catch their breath faster by using a breathing station than by surfacing for air.";
+				public static LocString DESC = "Submerged Duplicants recover their breath faster by using a breathing station than by surfacing for air.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
 					"Provides breathable ",
 					UI.FormatAsLink("Oxygen", "OXYGEN"),
-					" to submerged Duplicants via a connected ",
+					" to Duplicants in suffocating environments via a connected ",
 					UI.FormatAsLink("Gas Pipe", "GASPIPING"),
 					" input."
 				});
@@ -3826,7 +3826,7 @@ namespace STRINGS
 					UI.FormatAsLink("Plant", "PLANTS"),
 					" from a ",
 					UI.FormatAsLink("Seed", "PLANTS"),
-					".\n\nCan be used as floor tile and rotated before construction.\n\nMust be irrigated through ",
+					".\n\nCan be used as floor tile and rotated before construction.\n\nSome plants must be irrigated through ",
 					UI.FormatAsLink("Liquid Piping", "LIQUIDPIPING"),
 					"."
 				});
@@ -3844,8 +3844,9 @@ namespace STRINGS
 					UI.FormatAsLink("Plant", "PLANTS"),
 					" from a ",
 					UI.FormatAsLink("Seed", "PLANTS"),
-					".\n\nCan be used as floor tile.\n\nMust be irrigated through ",
-					UI.FormatAsLink("Liquid Piping", "LIQUIDPIPING")
+					".\n\nCan be used as floor tile.\n\nSome plants must be irrigated through ",
+					UI.FormatAsLink("Liquid Piping", "LIQUIDPIPING"),
+					"."
 				});
 			}
 

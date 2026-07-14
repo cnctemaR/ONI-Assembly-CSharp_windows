@@ -46,17 +46,20 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 			UnderwaterBreathingLocationWorkable component = underwaterBreathingLocation.GetComponent<UnderwaterBreathingLocationWorkable>();
 			if (component != null)
 			{
-				if (smi.swimMonitor.CanSwim() && Grid.IsLiquid(underwaterBreathingLocation.breathableCell))
+				if (underwaterBreathingLocation.allowLandUse)
 				{
-					component.workAnims = BreathMonitor.swimmingWorkAnims;
-					component.workingPstComplete = BreathMonitor.swimmingWorkingPstAnims;
-					component.workingPstFailed = BreathMonitor.swimmingWorkingPstAnims;
-				}
-				else
-				{
-					component.workAnims = BreathMonitor.landWorkAnims;
-					component.workingPstComplete = BreathMonitor.landWorkingPstCompleteAnims;
-					component.workingPstFailed = BreathMonitor.landWorkingPstCompleteAnims;
+					if (smi.swimMonitor.CanSwim() && Grid.IsLiquid(underwaterBreathingLocation.breathableCell))
+					{
+						component.workAnims = BreathMonitor.swimmingWorkAnims;
+						component.workingPstComplete = BreathMonitor.swimmingWorkingPstAnims;
+						component.workingPstFailed = BreathMonitor.swimmingWorkingPstAnims;
+					}
+					else
+					{
+						component.workAnims = BreathMonitor.landWorkAnims;
+						component.workingPstComplete = BreathMonitor.landWorkingPstCompleteAnims;
+						component.workingPstFailed = BreathMonitor.landWorkingPstCompleteAnims;
+					}
 				}
 				return new WorkChore<UnderwaterBreathingLocationWorkable>(Db.Get().ChoreTypes.RecoverBreath, component, null, true, null, new Action<Chore>(BreathMonitor.ReserveBreathLocation), new Action<Chore>(BreathMonitor.UnReserveBreathLocation), true, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.compulsory, 5, false, true);
 			}

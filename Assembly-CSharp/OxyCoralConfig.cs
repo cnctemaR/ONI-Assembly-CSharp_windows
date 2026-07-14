@@ -37,7 +37,8 @@ public class OxyCoralConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.Water,
 			SimHashes.SaltWater,
 			SimHashes.DirtyWater,
-			SimHashes.Brine
+			SimHashes.Brine,
+			SimHashes.MurkyBrine
 		}, false, 0f, 0.15f, null, false, false, true, false, true, 2400f, 0f, 2200f, "OxyCoralOriginal", global::STRINGS.CREATURES.SPECIES.OXYCORAL.NAME);
 		gameObject.AddOrGet<LoopingSounds>();
 		GameObject gameObject2 = gameObject;

@@ -71,21 +71,19 @@ public class BaseParrotFish
 			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def.canSwim = true;
-		def.checkHead = false;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.ParrotFishSpecies, symbol_prefix);
-		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
-		def2.requireCavity = false;
-		def2.condoPrefabTag = "UnderwaterCritterCondo";
-		SurfaceAirConsumerMonitor.Def def3 = gameObject.AddOrGetDef<SurfaceAirConsumerMonitor.Def>();
-		def3.element = SimHashes.Oxygen;
-		def3.minimumMassThreshold = 2f;
-		def3.cooldown = 600f;
+		CritterCondoInteractMontior.Def def = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def.requireCavity = false;
+		def.condoPrefabTag = "UnderwaterCritterCondo";
+		SurfaceAirConsumerMonitor.Def def2 = gameObject.AddOrGetDef<SurfaceAirConsumerMonitor.Def>();
+		def2.element = SimHashes.Oxygen;
+		def2.minimumMassThreshold = 2f;
+		def2.cooldown = 600f;
 		Effect effect = new Effect("SurfaceAirConsumed", global::STRINGS.CREATURES.MODIFIERS.SURFACEAIRCONSUMED.NAME, global::STRINGS.CREATURES.MODIFIERS.SURFACEAIRCONSUMED.TOOLTIP, 600f, true, true, false, null, -1f, 0f, null, "");
 		effect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 2f, global::STRINGS.CREATURES.MODIFIERS.SURFACEAIRCONSUMED.NAME, false, false, true));
 		Db.Get().effects.Add(effect);
@@ -100,9 +98,9 @@ public class BaseParrotFish
 			new Diet.Info(hashSet, tag, BaseParrotFish.CALORIES_PER_KG_OF_CORAL_PICKUPABLE, BaseParrotFish.CORAL_PICKUPABLE_TO_PRODUCT_EFFICIENCY, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null),
 			new Diet.Info(hashSet2, tag, BaseParrotFish.CALORIES_PER_GROWTH_EATEN, BaseParrotFish.GROWTH_TO_PRODUCT_EFFICIENCY, null, 0f, false, Diet.Info.FoodType.EatPlantDirectly, false, null)
 		}.ToArray());
-		CreatureCalorieMonitor.Def def4 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def4.diet = diet;
-		def4.minConsumedCaloriesBeforePooping = BaseParrotFish.CALORIES_PER_KG_OF_ORE * BaseParrotFish.MIN_POOP_SIZE_IN_KG;
+		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def3.diet = diet;
+		def3.minConsumedCaloriesBeforePooping = BaseParrotFish.CALORIES_PER_KG_OF_ORE * BaseParrotFish.MIN_POOP_SIZE_IN_KG;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))

@@ -775,7 +775,7 @@ namespace Database
 			this.ElementConsumer.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementConsumer elementConsumer = (ElementConsumer)data;
-				if (elementConsumer.overrideStatusItemString != null)
+				if (!string.IsNullOrEmpty(elementConsumer.overrideStatusItemString))
 				{
 					str = elementConsumer.overrideStatusItemString;
 				}

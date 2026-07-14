@@ -1564,7 +1564,7 @@ namespace STRINGS
 					"Orehulls are shy aquatic critters that eat ",
 					CREATURES.FAMILY_PLURAL.SEAFAIRYSPECIES,
 					" and excrete ",
-					UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
+					UI.FormatAsLink("Polluted Mud", "TOXICMUD"),
 					".\n\nThey can be sheared for ",
 					ELEMENTS.IRONORE.NAME,
 					"."
@@ -5653,6 +5653,23 @@ namespace STRINGS
 				public static LocString NAME = "Illumination";
 			}
 
+			public class PHOTOSYNTHESIS
+			{
+				public static LocString NAME = "Light\n    • Minimum: {LUX}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This plant requires at least {LUX} of ",
+					UI.PRE_KEYWORD,
+					"Light",
+					UI.PST_KEYWORD,
+					" to produce ",
+					UI.PRE_KEYWORD,
+					"Oxygen",
+					UI.PST_KEYWORD
+				});
+			}
+
 			public class THERMALCONDUCTIVITYBARRIER
 			{
 				public static LocString NAME = "Thermal Conductivity Barrier";
@@ -6086,6 +6103,20 @@ namespace STRINGS
 					"Pacu Treat",
 					UI.PST_KEYWORD,
 					"\n\nDelicious!"
+				});
+			}
+
+			public class JAWBOFOOD
+			{
+				public static LocString NAME = "Ate Cooked Seafood";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter recently ate ",
+					UI.PRE_KEYWORD,
+					"Cooked Seafood",
+					UI.PST_KEYWORD,
+					"\n\nNom nom nom!"
 				});
 			}
 

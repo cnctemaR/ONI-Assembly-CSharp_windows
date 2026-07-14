@@ -174,6 +174,13 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					component6.SpawnItemsFromConstruction(workerForGameplayEvent);
 				}
+				Boxed<Constructable.ReplaceCallbackParameters> boxed = Boxed<Constructable.ReplaceCallbackParameters>.Get(new Constructable.ReplaceCallbackParameters
+				{
+					TileLayer = this.building.Def.TileLayer,
+					Worker = workerForGameplayEvent
+				});
+				replacementCandidate.Trigger(1606648047, boxed);
+				Boxed<Constructable.ReplaceCallbackParameters>.Release(boxed);
 				replacementCandidate.DeleteObject();
 			});
 		}

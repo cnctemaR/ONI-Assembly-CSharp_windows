@@ -185,13 +185,13 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 			int num2 = Grid.XYToCell(Mathf.FloorToInt(position.x) + 2, Mathf.FloorToInt(position.y) + i);
 			if (set)
 			{
-				SimMessages.SetCellProperties(num, (byte)properties);
-				SimMessages.SetCellProperties(num2, (byte)properties);
+				SimMessages.SetCellProperties(num, (byte)properties, -1);
+				SimMessages.SetCellProperties(num2, (byte)properties, -1);
 			}
 			else
 			{
-				SimMessages.ClearCellProperties(num, (byte)properties);
-				SimMessages.ClearCellProperties(num2, (byte)properties);
+				SimMessages.ClearCellProperties(num, (byte)properties, -1);
+				SimMessages.ClearCellProperties(num2, (byte)properties, -1);
 			}
 		}
 	}

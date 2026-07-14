@@ -97,8 +97,8 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 		bool flag6 = this.conduitConsumer != null && this.conduitConsumer.conduitType == ConduitType.Liquid;
 		bool flag7 = flag6 && this.conduitConsumer.IsConnected;
 		bool flag8 = flag6 && this.conduitConsumer.IsSatisfied;
-		bool flag9 = flag6 && this.conduitConsumer.enabled && this.requireConduitHasMass && this.requireConduit;
-		bool flag10 = flag6 && this.conduitConsumer.enabled && this.requireConduit;
+		bool flag9 = flag6 && this.conduitConsumer.enabled && this.requireConduitHasMass && this.requireConduit && this.VisualizeRequirement(RequireInputs.Requirements.ConduitEmpty);
+		bool flag10 = flag6 && this.conduitConsumer.enabled && this.requireConduit && this.VisualizeRequirement(RequireInputs.Requirements.ConduitConnected);
 		flag &= !flag9 || flag8;
 		flag &= !flag10 || flag7;
 		this.liquidConduitEmptyStatusGuid = this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.LiquidPipeEmpty, this.liquidConduitEmptyStatusGuid, this.VisualizeRequirement(RequireInputs.Requirements.ConduitEmpty) && flag9 && !flag8, this);
@@ -121,8 +121,8 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 		bool flag13 = this.conduitConsumer != null && this.conduitConsumer.conduitType == ConduitType.Gas;
 		bool flag14 = flag13 && this.conduitConsumer.IsConnected;
 		bool flag15 = flag13 && this.conduitConsumer.IsSatisfied;
-		bool flag16 = flag13 && this.conduitConsumer.enabled && this.requireConduitHasMass && this.requireConduit;
-		bool flag17 = flag13 && this.conduitConsumer.enabled && this.requireConduit;
+		bool flag16 = flag13 && this.conduitConsumer.enabled && this.requireConduitHasMass && this.requireConduit && this.VisualizeRequirement(RequireInputs.Requirements.ConduitEmpty);
+		bool flag17 = flag13 && this.conduitConsumer.enabled && this.requireConduit && this.VisualizeRequirement(RequireInputs.Requirements.ConduitConnected);
 		flag &= !flag16 || flag15;
 		flag &= !flag17 || flag14;
 		this.gasConduitEmptyStatusGuid = this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.GasPipeEmpty, this.gasConduitEmptyStatusGuid, this.VisualizeRequirement(RequireInputs.Requirements.ConduitEmpty) && flag16 && !flag15, this);

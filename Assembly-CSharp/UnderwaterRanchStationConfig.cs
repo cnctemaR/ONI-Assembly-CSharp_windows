@@ -73,7 +73,7 @@ public class UnderwaterRanchStationConfig : IBuildingConfig
 			int num3 = Grid.InvalidCell;
 			if (!smi.IsNullOrStopped())
 			{
-				num3 = Grid.CellRight(Grid.PosToCell(smi.transform.GetPosition()));
+				num3 = Grid.PosToCell(smi.transform.GetPosition());
 			}
 			return num3;
 		};

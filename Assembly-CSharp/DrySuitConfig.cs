@@ -34,17 +34,13 @@ public class DrySuitConfig : IEquipmentConfig, IHasDlcRestrictions
 		{
 			equipmentDef.additionalDescriptors.Add(descriptor2);
 		}
-		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
-		{
-			ClothingWearer.ClothingInfo.OnEquipVest(eq, clothingInfo);
-		};
-		equipmentDef.OnUnequipCallBack = new Action<Equippable>(ClothingWearer.ClothingInfo.OnUnequipVest);
 		equipmentDef.RecipeDescription = (DlcManager.IsContentSubscribed("DLC3_ID") ? global::STRINGS.EQUIPMENT.PREFABS.DRYSUIT.RECIPE_DESC_DLC3 : global::STRINGS.EQUIPMENT.PREFABS.DRYSUIT.RECIPE_DESC);
 		ResourceSet<Effect> effects = Db.Get().effects;
 		equipmentDef.EffectImmunites.Add(effects.Get("WetFeet"));
 		equipmentDef.EffectImmunites.Add(effects.Get("SoakingWet"));
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
+			ClothingWearer.ClothingInfo.OnEquipVest(eq, clothingInfo);
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
 			if (soleOwner != null)
 			{
@@ -57,6 +53,7 @@ public class DrySuitConfig : IEquipmentConfig, IHasDlcRestrictions
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)
 		{
+			ClothingWearer.ClothingInfo.OnUnequipVest(eq);
 			if (eq.assignee != null)
 			{
 				Ownables soleOwner2 = eq.assignee.GetSoleOwner();

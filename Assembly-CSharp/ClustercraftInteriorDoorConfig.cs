@@ -61,11 +61,11 @@ public class ClustercraftInteriorDoorConfig : IEntityConfig, IHasDlcRestrictions
 		foreach (int num3 in array)
 		{
 			Grid.HasDoor[num3] = true;
-			SimMessages.SetCellProperties(num3, 8);
+			SimMessages.SetCellProperties(num3, 8, -1);
 			Grid.RenderedByWorld[num3] = false;
 			World.Instance.groundRenderer.MarkDirty(num3);
 			SimMessages.ReplaceAndDisplaceElement(num3, component.ElementID, CellEventLogger.Instance.DoorClose, component.Mass / 2f, component.Temperature, byte.MaxValue, 0, -1);
-			SimMessages.SetCellProperties(num3, 4);
+			SimMessages.SetCellProperties(num3, 4, -1);
 		}
 	}
 

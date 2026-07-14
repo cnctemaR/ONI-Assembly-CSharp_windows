@@ -1,4 +1,5 @@
 ﻿using System;
+using Rendering;
 using TUNING;
 using UnityEngine;
 
@@ -33,6 +34,7 @@ public class RocketEnvelopeWindowTileConfig : IBuildingConfig
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.isKAnimTile = true;
 		buildingDef.BlockTileIsTransparent = true;
+		buildingDef.BlockTileBlendOptions = TilesBlendActiveOptions.Transparent;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_glass");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_glass_place");
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");

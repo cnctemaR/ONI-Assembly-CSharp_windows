@@ -109,6 +109,12 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		base.Subscribe<Door>(824508782, Door.OnOperationalChangedDelegate);
 		base.Subscribe<Door>(-801688580, Door.OnLogicValueChangedDelegate);
 		this.ApplyControlState(false);
+		bool flag = SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 38);
+		bool flag2 = this.doorType == Door.DoorType.Sealed && this.hasBeenUnsealed && this.controlState == Door.ControlState.Opened;
+		if (flag && flag2)
+		{
+			this.requestedState = this.controlState;
+		}
 		if (this.requestedState != Door.ControlState.NumStates && this.requestedState != this.controlState)
 		{
 			Door.ControlState controlState = this.requestedState;
@@ -130,7 +136,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		foreach (int num5 in this.building.PlacementCells)
 		{
 			Grid.HasDoor[num5] = true;
-			SimMessages.SetCellProperties(num5, 8);
+			SimMessages.SetCellProperties(num5, 8, -1);
 			if (Door.DisplacesGas(this.doorType))
 			{
 				Grid.RenderedByWorld[num5] = false;
@@ -147,7 +153,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			{
 				SimMessages.SetInsulation(num, 1f);
 			}
-			SimMessages.ClearCellProperties(num, 12);
+			SimMessages.ClearCellProperties(num, 12, -1);
 			Grid.RenderedByWorld[num] = Grid.Element[num].substance.renderedByWorld;
 			Grid.FakeFloor.Remove(num);
 			if (Grid.Element[num].IsSolid)
@@ -329,11 +335,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 						SimMessages.Dig(num4, handle2.index, true, false);
 						if (this.ShouldBlockFallingSand)
 						{
-							SimMessages.ClearCellProperties(num4, 4);
+							SimMessages.ClearCellProperties(num4, 4, -1);
 						}
 						else
 						{
-							SimMessages.SetCellProperties(num4, 4);
+							SimMessages.SetCellProperties(num4, 4, -1);
 						}
 						World.Instance.groundRenderer.MarkDirty(num4);
 					}
@@ -357,7 +363,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 						num6 = component.Temperature;
 					}
 					SimMessages.ReplaceAndDisplaceElement(num5, component.ElementID, CellEventLogger.Instance.DoorClose, num, num6, byte.MaxValue, 0, handle3.index);
-					SimMessages.SetCellProperties(num5, 4);
+					SimMessages.SetCellProperties(num5, 4, -1);
 					if (this.insulationModifier != 1f)
 					{
 						SimMessages.SetInsulation(num5, this.insulationModifier);
@@ -800,6 +806,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 					smi.sm.isLocked.Set(false, smi, false);
 					smi.master.GetComponent<AccessControl>().controlEnabled = true;
 					smi.master.controlState = Door.ControlState.Opened;
+					smi.master.requestedState = Door.ControlState.Opened;
 					smi.master.RefreshControlState();
 					smi.sm.isOpen.Set(true, smi, false);
 					smi.sm.isLocked.Set(false, smi, false);

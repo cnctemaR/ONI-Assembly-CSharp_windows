@@ -98,7 +98,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Confined";
 
-					public static LocString CONTAINER1 = "Each species has its own space requirements. Critters who find themselves in a room that they consider too small will feel confined. They will feel the same way if they become stuck in a door or tile. Critters will not reproduce while they are in this state.\n\nShove Voles are the exception to this rule: their tunneling instincts make them quite comfortable in snug spaces, and they never feel confined.";
+					public static LocString CONTAINER1 = "Each species has its own space requirements. Critters who find themselves in a room or pool that they consider too small will feel confined. They will feel the same way if they become stuck in a door or tile. Critters will not reproduce while they are in this state.\n\nShove Voles are the exception to this rule: their tunneling instincts make them quite comfortable in snug spaces, and they never feel confined.";
 
 					public static LocString SUBTITLE = "<b>Effects</b>";
 
@@ -111,7 +111,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Crowded";
 
-					public static LocString CONTAINER1 = "This occurs when a critter is in a room that's appropriately sized for its needs but feels that there are too many other critters sharing the same space. Because each species has its own space requirements, this state can vary among occupants of the same room.\n\nThis emotional state intensifies in response to the number of excess critters: adding new critters to an already crowded room will undermine a critter's happiness even further.";
+					public static LocString CONTAINER1 = "This occurs when a critter is in a room or pool that's appropriately sized for its needs but feels that there are too many other critters sharing the same space. Because each species has its own space requirements, this state can vary among occupants of the same room.\n\nThis emotional state intensifies in response to the number of excess critters: adding new critters to an already crowded room will undermine a critter's happiness even further.";
 
 					public static LocString SUBTITLE = "<b>Effects</b>";
 
@@ -245,7 +245,7 @@ namespace STRINGS
 
 				public class BODY
 				{
-					public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nA216: Commencing exploratory reprint of donor number 890, \"Anemone,\" adult female,  103 centimeters, 30 kilgrams.\n\nTech: Copy that.\n\n(sound of a machine powering up)\n\nA216: Printing subject in three... two...\n\n(sound of a machine whining to a halt)\n\nA216: Ugh, can you <i>please</i> clean out the secondary tank? There are still traces from yesterday's reprint.\n\nTech: Sorry, Doctor. I thought I got it all.\n\n(sound of a machine powering up)\n\n(sound of electricity crackling)\n\nA216: Printing subject in three... two... one... Stand back, please.\n\nTech: Reprint complete. Subject number is 2988, \"Anemone-93.\" Adult female, 103 centimeters, 30 kilgrams. Subject is conscious and appears fully formed. No observable physical abnormalities noted. A216: Initiate vitals scan.\n\nTech: Scan complete. Pupil size, skin temperature, limb formation and distribution are all typical, except... huh. The respiration rate... it's... there doesn't really seem to be one.\n\nA216: I swear, this equipment gets less and less reliable by the day. Recalibrate the printing pod and run it again.\n\nTech: But that will take the rest of the night, Doctor.\n\nA216: The sooner you start, the sooner it will be done. Bring me the updated results when they're ready.\n\n[LOG ENDS]\n\n----------------------\n\n[LOG BEGINS]\n\nTech: Doctor Surahashi? Oh! I'm sorry to interrupt, Doctor Broussard.\n\nOlivia: It's quite all right. I invited myself when I saw last night's anomaly on my feed. \n\nA216: It may be nothing, again. We've had a few inconsistencies since the earthquakes started.\n\nTech: Um... actually...\n\nA216: Well?\n\nTech: I... well, look.\n\nOlivia: My god. It's true.\n\nA216: Hmm. Flood the tank.\n\nTech: Yes, Doctor.\n\nOlivia: What? No! She'll drown!\n\nA216: With all due respect, Dr. Broussard, further testing is crucial. This isn't just another vestigial ear. If this anomaly can be confirmed and replicated-Olivia: -We've just given humanity a whole new category of possible colony sites. I am aware.\n\nA216: Correct. For what it's worth, I am reasonably confident that Anemone-93's oxygen consumption is so low as to make fatality extremely unlikely. But I understand if you would prefer to step out of the room for a moment.\n\nOlivia: No, I-I'll stay.\n\nTech: Tank filling in three...two...\n\n(sound of rushing water)\n\nTech: Tank maximum volume has been reached.\n\nA216: Subject appears unaffected by the change in environment.\n\nOlivia: Incredible.\n\nA216: Indeed.\n\nA216: Maintain liquid levels and monitor subject's response. I want to know exactly how long vitals remain steady.\n\nTech: Yes, Doctor.\n\n[LOG ENDS]\n\n";
+					public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nA216: Commencing exploratory reprint of donor number 890, \"Anemone,\" adult female,  103 centimeters, 30 kilgrams.\n\nTech: Copy that.\n\n(sound of a machine powering up)\n\nA216: Printing subject in three... two...\n\n(sound of a machine whining to a halt)\n\nA216: Ugh, can you <i>please</i> clean out the secondary tank? There are still traces from yesterday's reprint.\n\nTech: Sorry, Doctor. I thought I got it all.\n\n(sound of a machine powering up)\n\n(sound of electricity crackling)\n\nA216: Printing subject in three... two... one... Stand back, please.\n\nTech: Reprint complete. Subject number is 2988, \"Anemone-93.\" Adult female, 103 centimeters, 30 kilograms. Subject is conscious and appears fully formed. No observable physical abnormalities noted.\n\nA216: Initiate vitals scan.\n\nTech: Scan complete. Pupil size, skin temperature, limb formation and distribution are all typical, except... huh. The respiration rate... it's... there doesn't really seem to be one.\n\nA216: I swear, this equipment gets less and less reliable by the day. Recalibrate the printing pod and run it again.\n\nTech: But that will take the rest of the night, Doctor.\n\nA216: The sooner you start, the sooner it will be done. Bring me the updated results when they're ready.\n\n[LOG ENDS]\n\n----------------------\n\n[LOG BEGINS]\n\nTech: Doctor Saruhashi? Oh! I'm sorry to interrupt, Doctor Broussard.\n\nOlivia: It's quite all right. I invited myself when I saw last night's anomaly on my feed. \n\nA216: It may be nothing, again. We've had a few inconsistencies since the earthquakes started.\n\nTech: Um... actually...\n\nA216: Well?\n\nTech: I... well, look.\n\nOlivia: My god. It's true.\n\nA216: Hmm. Flood the tank.\n\nTech: Yes, Doctor.\n\nOlivia: What? No! She'll drown!\n\nA216: With all due respect, Dr. Broussard, further testing is crucial. This isn't just another vestigial ear. If this anomaly can be confirmed and replicated-Olivia: -We've just given humanity a whole new category of possible colony sites. I am aware.\n\nA216: Correct. For what it's worth, I am reasonably confident that Anemone-93's oxygen consumption is so low as to make fatality extremely unlikely. But I understand if you would prefer to step out of the room for a moment.\n\nOlivia: No, I-I'll stay.\n\nTech: Tank filling in three...two...\n\n(sound of rushing water)\n\nTech: Tank maximum volume has been reached.\n\nA216: Subject appears unaffected by the change in environment.\n\nOlivia: Incredible.\n\nA216: Indeed.\n\nA216: Maintain liquid levels and monitor subject's response. I want to know exactly how long vitals remain steady.\n\nTech: Yes, Doctor.\n\n[LOG ENDS]\n\n";
 				}
 			}
 
@@ -759,6 +759,8 @@ namespace STRINGS
 
 					public static LocString PREHISTORICPACU = "This critter attacked the transducer. Review data for more information.";
 
+					public static LocString BUTTERFLY = "This critter tucked its wings tightly around itself during scanning. Review data for more information.";
+
 					public static LocString PARROTFISH = "This critter's body is coated in millions of dinoflagellates. Review data for more information.";
 
 					public static LocString SQUID = "Camera view was obscured during scanning. Review data for more information.";
@@ -823,6 +825,8 @@ namespace STRINGS
 					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nResidual markings left by specimen's tongue ridges and grooves are a 72% match to a set of unmarked fingerprints from the Gravitas personnel database.";
 
 					public static LocString PREHISTORICPACU = "This critter attacked the transducer.\n\nWhen the swallowed component was regurgitated, it was coated in microorganisms that predate this colony by at least several millenia.\n\nUnfortunately, it was reingested before analysis was completed.";
+
+					public static LocString BUTTERFLY = "This critter tucked its wings tightly around itself during scanning, and used its antennae to roll its body around the chamber.\n\nIt seems that these sensory organs possess more musculature than those of similar species, despite their unassuming appearance. Of particular note: the critter's refusal to engage in this behavior outside of this contained environment.";
 
 					public static LocString PARROTFISH = "This critter's body is coated in millions of dinoflagellates trapped within a microscopic layer of muscilaginous gel.";
 
@@ -1809,6 +1813,10 @@ namespace STRINGS
 
 			public static LocString CONFINED = UI.FormatAsLink("Confined", "CREATURES::GUIDE::MOOD") + " when a room is smaller than <b>{0} cells</b>.";
 
+			public static LocString OVERCROWDING_AQUATIC = UI.FormatAsLink("Crowded", "CREATURES::GUIDE::MOOD") + " when a pool has less than <b>{0} cells</b> of space for each critter.";
+
+			public static LocString CONFINED_AQUATIC = UI.FormatAsLink("Confined", "CREATURES::GUIDE::MOOD") + " when a pool is smaller than <b>{0} cells</b>.";
+
 			public static LocString NON_LETHAL_RANGE = "Livable range: <b>{0}</b> to <b>{1}</b>";
 
 			public class TEMPERATURE
@@ -2512,6 +2520,8 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Pacu fish is often interpreted as possessing a vacant stare due to its large and unblinking eyes, yet they are remarkably bright and friendly creatures.";
+
+				public static LocString CONTAINER2 = "Feeding a Pacu its favorite " + UI.FormatAsLink("Pacu Treat", "PACUTREAT") + " helps tame it and keep it content.";
 			}
 		}
 
@@ -2558,7 +2568,7 @@ namespace STRINGS
 					"A gourmet loaf of ground seeds and ",
 					UI.FormatAsLink("Water", "WATER"),
 					", formulated to delight ",
-					UI.FormatAsLink("Pacus", "PACU"),
+					UI.FormatAsLink("Pacus", "PACUSPECIES"),
 					"."
 				});
 			}
@@ -3998,7 +4008,7 @@ namespace STRINGS
 
 		public class SNAIL_IRON_SHELL
 		{
-			public static LocString TITLE = "Ferrgo Molt";
+			public static LocString TITLE = "Gildgo Molt";
 
 			public static LocString SUBTITLE = "Critter Byproduct";
 

@@ -68,18 +68,16 @@ public static class BaseSeaTurtleConfig
 			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def.canSwim = true;
-		def.checkHead = true;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.SeaTurtleSpecies, symbol_prefix);
-		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
-		def2.requireCavity = false;
-		def2.condoPrefabTag = "UnderwaterCritterCondo";
+		CritterCondoInteractMontior.Def def = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def.requireCavity = false;
+		def.condoPrefabTag = "UnderwaterCritterCondo";
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add("SeaFairy");
 		HashSet<Tag> hashSet2 = new HashSet<Tag>();
@@ -89,12 +87,12 @@ public static class BaseSeaTurtleConfig
 			new Diet.Info(hashSet, SeaTurtleTuning.POOP_ELEMENT, 80000f, SeaTurtleTuning.POOP_KG_PER_CYCLE / 2f / 5f, null, 0f, false, Diet.Info.FoodType.EatPrey, false, null),
 			new Diet.Info(hashSet2, SeaTurtleTuning.POOP_ELEMENT, 40000f, SeaTurtleTuning.POOP_KG_PER_CYCLE / 2f / 10f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null)
 		}.ToArray());
-		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def2.diet = diet;
+		def2.minConsumedCaloriesBeforePooping = SeaTurtleTuning.STANDARD_CALORIES_PER_CYCLE;
+		SolidConsumerMonitor.Def def3 = gameObject.AddOrGetDef<SolidConsumerMonitor.Def>();
 		def3.diet = diet;
-		def3.minConsumedCaloriesBeforePooping = SeaTurtleTuning.STANDARD_CALORIES_PER_CYCLE;
-		SolidConsumerMonitor.Def def4 = gameObject.AddOrGetDef<SolidConsumerMonitor.Def>();
-		def4.diet = diet;
-		def4.sportHuntWhenOvercrowded = true;
+		def3.sportHuntWhenOvercrowded = true;
 		if (!string.IsNullOrEmpty(symbol_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_prefix, null, 0);

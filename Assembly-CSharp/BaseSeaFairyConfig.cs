@@ -20,9 +20,7 @@ public static class BaseSeaFairyConfig
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.SwimmingCreature, false);
 		component.AddTag(GameTags.Creatures.Swimmer, false);
-		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def.canSwim = true;
-		def.checkHead = false;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Trappable>();

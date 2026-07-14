@@ -29,7 +29,6 @@ public class WideFarmTileConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.Unrotatable;
 		buildingDef.DragBuild = false;
 		buildingDef.Replaceable = true;
-		buildingDef.PreventBuildOverPlants = true;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.UseStructureTemperature = true;

@@ -128,7 +128,7 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 		{
 			get
 			{
-				return this.operationComp != null || this.operationComp.IsOperational;
+				return this.operationComp != null && this.operationComp.IsOperational;
 			}
 		}
 

@@ -232,12 +232,15 @@ public class CodexEntryGenerator_Creatures
 		OvercrowdingMonitor.Def def3 = creature.GetDef<OvercrowdingMonitor.Def>();
 		if (def3 != null && def3.spaceRequiredPerCreature > 0)
 		{
+			bool flag = creature.GetDef<FishOvercrowdingMonitor.Def>() != null;
+			LocString locString = (flag ? CODEX.CREATURE_DESCRIPTORS.OVERCROWDING_AQUATIC : CODEX.CREATURE_DESCRIPTORS.OVERCROWDING);
+			LocString locString2 = (flag ? CODEX.CREATURE_DESCRIPTORS.CONFINED_AQUATIC : CODEX.CREATURE_DESCRIPTORS.CONFINED);
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
 				new CodexSpacer(),
 				new CodexText(CODEX.HEADERS.CRITTEROVERCROWDING, CodexTextStyle.Subtitle, null),
-				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.OVERCROWDING, def3.spaceRequiredPerCreature), CodexTextStyle.Body, null),
-				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.CONFINED, def3.spaceRequiredPerCreature), CodexTextStyle.Body, null)
+				new CodexText("    • " + string.Format(locString, def3.spaceRequiredPerCreature), CodexTextStyle.Body, null),
+				new CodexText("    • " + string.Format(locString2, def3.spaceRequiredPerCreature), CodexTextStyle.Body, null)
 			}, ContentContainer.ContentLayout.Vertical));
 		}
 		string text2 = null;
@@ -297,10 +300,10 @@ public class CodexEntryGenerator_Creatures
 							Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag2));
 							if ((element.id != SimHashes.Vacuum && element.id != SimHashes.Void) || !(Assets.GetPrefab(tag2) == null))
 							{
-								bool flag = prefabDiet.IsConsumedTagAbleToBeEatenDirectly(tag2);
+								bool flag2 = prefabDiet.IsConsumedTagAbleToBeEatenDirectly(tag2);
 								float num3 = -num2 / info.caloriesPerKg;
 								float num4 = num3 * info.producedConversionRate;
-								if (flag)
+								if (flag2)
 								{
 									if (info.foodType == Diet.Info.FoodType.EatPlantDirectly)
 									{

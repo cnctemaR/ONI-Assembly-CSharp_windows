@@ -696,7 +696,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(1593243982, sizeof(SimMessages.SetCellFloatValueMessage), (byte*)ptr);
 	}
 
-	public unsafe static void SetCellProperties(int gameCell, byte properties)
+	public unsafe static void SetCellProperties(int gameCell, byte properties, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -706,13 +706,14 @@ public static class SimMessages
 		{
 			SimMessages.CellPropertiesMessage* ptr = stackalloc SimMessages.CellPropertiesMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.CellPropertiesMessage)];
 			ptr->cellIdx = gameCell;
+			ptr->callbackIdx = callbackIdx;
 			ptr->properties = properties;
 			ptr->set = 1;
 			Sim.SIM_HandleMessage(-469311643, sizeof(SimMessages.CellPropertiesMessage), (byte*)ptr);
 		}
 	}
 
-	public unsafe static void ClearCellProperties(int gameCell, byte properties)
+	public unsafe static void ClearCellProperties(int gameCell, byte properties, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -722,6 +723,7 @@ public static class SimMessages
 		{
 			SimMessages.CellPropertiesMessage* ptr = stackalloc SimMessages.CellPropertiesMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.CellPropertiesMessage)];
 			ptr->cellIdx = gameCell;
+			ptr->callbackIdx = callbackIdx;
 			ptr->properties = properties;
 			ptr->set = 0;
 			Sim.SIM_HandleMessage(-469311643, sizeof(SimMessages.CellPropertiesMessage), (byte*)ptr);
@@ -1472,6 +1474,8 @@ public static class SimMessages
 	private struct CellPropertiesMessage
 	{
 		public int cellIdx;
+
+		public int callbackIdx;
 
 		public byte properties;
 

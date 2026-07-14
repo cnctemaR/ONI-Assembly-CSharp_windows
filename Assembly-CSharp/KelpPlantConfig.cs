@@ -64,7 +64,7 @@ public class KelpPlantConfig : IEntityConfig, IHasDlcRestrictions
 		string text9 = "object";
 		int num8 = 1;
 		List<Tag> list2 = new List<Tag>();
-		list2.Add(GameTags.CropSeed);
+		list2.Add(GameTags.WaterSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Bottom;
 		text5 = global::STRINGS.CREATURES.SPECIES.KELPPLANT.DOMESTICATEDDESC;
 		EntityTemplates.MakeHangingOffsets(EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject3, this, productionType, text6, text7, text8, anim2, text9, num8, list2, receptacleDirection, default(Tag), 4, text5, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "KelpPlant_preview", Assets.GetAnim("kelp_kanim"), "place", 1, 2), 1, 2);
@@ -95,6 +95,7 @@ public class KelpPlantConfig : IEntityConfig, IHasDlcRestrictions
 		SimHashes.DirtyWater,
 		SimHashes.SaltWater,
 		SimHashes.Brine,
+		SimHashes.MurkyBrine,
 		SimHashes.PhytoOil,
 		SimHashes.NaturalResin
 	};

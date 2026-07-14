@@ -53,17 +53,15 @@ public static class BaseSeaHorseConfig
 			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def.canSwim = true;
-		def.checkHead = false;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.SeaHorseSpecies, symbol_prefix);
-		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
-		def2.requireCavity = false;
-		def2.condoPrefabTag = "UnderwaterCritterCondo";
+		CritterCondoInteractMontior.Def def = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def.requireCavity = false;
+		def.condoPrefabTag = "UnderwaterCritterCondo";
 		Tag tag = SimHashes.SlimeMold.CreateTag();
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add(SimHashes.Pearl.CreateTag());
@@ -71,9 +69,9 @@ public static class BaseSeaHorseConfig
 		{
 			new Diet.Info(hashSet, tag, BaseSeaHorseConfig.CALORIES_PER_KG_OF_PEARL, BaseSeaHorseConfig.OUTPUT_EFFICIENCY, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null)
 		}.ToArray());
-		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def3.diet = diet;
-		def3.minConsumedCaloriesBeforePooping = BaseSeaHorseConfig.CALORIES_PER_KG_OF_PEARL * BaseSeaHorseConfig.MIN_POOP_SIZE_IN_KG;
+		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def2.diet = diet;
+		def2.minConsumedCaloriesBeforePooping = BaseSeaHorseConfig.CALORIES_PER_KG_OF_PEARL * BaseSeaHorseConfig.MIN_POOP_SIZE_IN_KG;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))
@@ -85,13 +83,13 @@ public static class BaseSeaHorseConfig
 		pickupable.sortOrder = num5;
 		if (!is_baby)
 		{
-			FertilityShearable.Def def4 = gameObject.AddOrGetDef<FertilityShearable.Def>();
-			def4.dropMass = 100f;
-			def4.milkElement = SimHashes.FishMilk;
-			def4.minimumFertility = 75f;
-			def4.percentFertilityConsumedPerMilking = 0.5f;
-			def4.requiresHappy = true;
-			def4.suppressedByElderly = true;
+			FertilityShearable.Def def3 = gameObject.AddOrGetDef<FertilityShearable.Def>();
+			def3.dropMass = 100f;
+			def3.milkElement = SimHashes.FishMilk;
+			def3.minimumFertility = 75f;
+			def3.percentFertilityConsumedPerMilking = 0.5f;
+			def3.requiresHappy = true;
+			def3.suppressedByElderly = true;
 		}
 		return gameObject;
 	}

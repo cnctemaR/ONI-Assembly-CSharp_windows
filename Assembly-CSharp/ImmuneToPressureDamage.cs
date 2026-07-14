@@ -6,7 +6,7 @@ public class ImmuneToPressureDamage : KMonoBehaviour
 	{
 		foreach (CellOffset cellOffset in this.Cells)
 		{
-			SimMessages.SetCellProperties(Grid.OffsetCell(Grid.PosToCell(this), cellOffset), 8);
+			SimMessages.SetCellProperties(Grid.OffsetCell(Grid.PosToCell(this), cellOffset), 8, -1);
 		}
 		base.OnPrefabInit();
 	}
@@ -15,7 +15,7 @@ public class ImmuneToPressureDamage : KMonoBehaviour
 	{
 		foreach (CellOffset cellOffset in this.Cells)
 		{
-			SimMessages.ClearCellProperties(Grid.OffsetCell(Grid.PosToCell(this), cellOffset), 8);
+			SimMessages.ClearCellProperties(Grid.OffsetCell(Grid.PosToCell(this), cellOffset), 8, -1);
 		}
 	}
 

@@ -153,19 +153,16 @@ public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Insta
 		int num = smi.ModifyNavTargetForCritter(ranchStation.GetRanchNavTarget());
 		if (smi.HasTag(GameTags.LargeCreature))
 		{
-			if (smi.HasTag(GameTags.Creatures.Swimmer))
+			ref Vector2I ptr = Grid.PosToXY(smi.gameObject.transform.position);
+			Vector2I vector2I = Grid.CellToXY(num);
+			if (ptr.x > vector2I.x)
 			{
 				num = Grid.CellLeft(num);
 			}
-			else
-			{
-				ref Vector2I ptr = Grid.PosToXY(smi.gameObject.transform.position);
-				Vector2I vector2I = Grid.CellToXY(num);
-				if (ptr.x > vector2I.x)
-				{
-					num = Grid.CellLeft(num);
-				}
-			}
+		}
+		else if (smi.HasTag(GameTags.Creatures.Swimmer))
+		{
+			num = Grid.CellRight(num);
 		}
 		return num;
 	}

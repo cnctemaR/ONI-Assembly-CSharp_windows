@@ -82,9 +82,7 @@ public static class BaseMosquitoConfig
 			.Add(new CritterEmoteStates.Def(anim), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def3 = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def3.canSwim = isBaby;
-		def3.checkHead = !isBaby;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = isBaby;
 		gameObject.AddOrGetDef<FixedCapturableMonitor.Def>();
 		if (isBaby)
 		{

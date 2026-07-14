@@ -52,17 +52,15 @@ public static class BasePacuConfig
 			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def.canSwim = true;
-		def.checkHead = false;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
-		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
-		def2.requireCavity = false;
-		def2.condoPrefabTag = "UnderwaterCritterCondo";
+		CritterCondoInteractMontior.Def def = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def.requireCavity = false;
+		def.condoPrefabTag = "UnderwaterCritterCondo";
 		Tag tag = SimHashes.ToxicSand.CreateTag();
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add(SimHashes.Algae.CreateTag());
@@ -85,9 +83,9 @@ public static class BasePacuConfig
 		list.AddRange(BasePacuConfig.SeedDiet(tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, 3f));
 		list.Add(new Diet.Info(new HashSet<Tag> { "FishFood".ToTag() }, tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, 6f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null));
 		Diet diet = new Diet(list.ToArray());
-		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def3.diet = diet;
-		def3.minConsumedCaloriesBeforePooping = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
+		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def2.diet = diet;
+		def2.minConsumedCaloriesBeforePooping = BasePacuConfig.CALORIES_PER_KG_OF_ORE * BasePacuConfig.MIN_POOP_SIZE_IN_KG;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))

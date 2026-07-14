@@ -65,17 +65,15 @@ public static class BasePrehistoricPacuConfig
 			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def.canSwim = true;
-		def.checkHead = true;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PrehistoricPacuSpecies, symbol_prefix);
-		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
-		def2.requireCavity = false;
-		def2.condoPrefabTag = "UnderwaterCritterCondo";
+		CritterCondoInteractMontior.Def def = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def.requireCavity = false;
+		def.condoPrefabTag = "UnderwaterCritterCondo";
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add("Pacu");
 		hashSet.Add("PacuCleaner");
@@ -87,14 +85,17 @@ public static class BasePrehistoricPacuConfig
 		}
 		HashSet<Tag> hashSet2 = new HashSet<Tag>();
 		hashSet2.Add("FishMeat");
+		HashSet<Tag> hashSet3 = new HashSet<Tag>();
+		hashSet3.Add("CookedFish".ToTag());
 		Diet diet = new Diet(new List<Diet.Info>
 		{
 			new Diet.Info(hashSet, PrehistoricPacuTuning.POOP_ELEMENT, BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU, 60f / PacuTuning.MASS, null, 0f, false, Diet.Info.FoodType.EatPrey, false, null),
-			new Diet.Info(hashSet2, PrehistoricPacuTuning.POOP_ELEMENT, BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU_MEAT, 60f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null)
+			new Diet.Info(hashSet2, PrehistoricPacuTuning.POOP_ELEMENT, BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU_MEAT, 60f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null),
+			new Diet.Info(hashSet3, PrehistoricPacuTuning.POOP_ELEMENT, BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU_MEAT, 60f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null)
 		}.ToArray());
-		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def3.diet = diet;
-		def3.minConsumedCaloriesBeforePooping = BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU * 60f;
+		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def2.diet = diet;
+		def2.minConsumedCaloriesBeforePooping = BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU * 60f;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))
@@ -104,7 +105,14 @@ public static class BasePrehistoricPacuConfig
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num7 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["PrehistoricPacu"];
 		pickupable.sortOrder = num7;
+		component.prefabSpawnFn += BasePrehistoricPacuConfig.SubscribeCookedSeafoodEffect;
 		return gameObject;
+	}
+
+	public static void SubscribeCookedSeafoodEffect(GameObject jawboGameObject)
+	{
+		Effects component = jawboGameObject.GetComponent<Effects>();
+		jawboGameObject.Subscribe(-2038961714, BasePrehistoricPacuConfig.OnCaloriesConsumed, component);
 	}
 
 	private static string GetLandAnim(FallStates.Instance smi)
@@ -121,4 +129,14 @@ public static class BasePrehistoricPacuConfig
 	private static float CALORIES_PER_KG_OF_PACU = PrehistoricPacuTuning.STANDARD_CALORIES_PER_CYCLE / 1f / PacuTuning.MASS;
 
 	private static float CALORIES_PER_KG_OF_PACU_MEAT = PrehistoricPacuTuning.STANDARD_CALORIES_PER_CYCLE / 1f;
+
+	public const string JAWBO_FOOD_EFFECT_ID = "AteWellPreparedJawboFood";
+
+	public static Action<object, object> OnCaloriesConsumed = delegate(object context, object data)
+	{
+		if (Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>.Unbox(data).tag == "CookedFish".ToTag())
+		{
+			((Effects)context).Add("AteWellPreparedJawboFood", true);
+		}
+	};
 }

@@ -37,6 +37,8 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 				callbackHandle = HandleVector<Game.CallbackInfo>.InvalidHandle;
 				SimMessages.SetStrength(offset_cell, 0, this.strengthMultiplier);
 				Game.Instance.RemoveSolidChangedFilter(offset_cell);
+				Sim.Cell.Properties simCellProperties = this.GetSimCellProperties();
+				SimMessages.SetCellProperties(offset_cell, (byte)simCellProperties, -1);
 			}
 			else
 			{
@@ -46,9 +48,11 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 				}
 				this.ForceSetGameCellData(offset_cell);
 				Game.Instance.AddSolidChangedFilter(offset_cell);
+				this.runSimCallback = true;
+				Sim.Cell.Properties simCellProperties2 = this.GetSimCellProperties();
+				HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnCellPropertiesChanged), false));
+				SimMessages.SetCellProperties(offset_cell, (byte)simCellProperties2, handle.index);
 			}
-			Sim.Cell.Properties simCellProperties = this.GetSimCellProperties();
-			SimMessages.SetCellProperties(offset_cell, (byte)simCellProperties);
 			Grid.RenderedByWorld[offset_cell] = false;
 			Game.Instance.GetComponent<EntombedItemVisualizer>().ForceClear(offset_cell);
 		});
@@ -107,7 +111,7 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 			int num = this.building.PlacementCells[i];
 			Game.Instance.RemoveSolidChangedFilter(num);
 			Sim.Cell.Properties simCellProperties = this.GetSimCellProperties();
-			SimMessages.ClearCellProperties(num, (byte)simCellProperties);
+			SimMessages.ClearCellProperties(num, (byte)simCellProperties, -1);
 			if (this.doReplaceElement && Grid.Element[num].id == this.primaryElement.ElementID)
 			{
 				HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(base.gameObject);
@@ -154,6 +158,19 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 		base.GetComponent<PrimaryElement>().SetUseSimDiseaseInfo(true);
 		Vector2I vector2I = Grid.PosToXY(base.transform.GetPosition());
 		GameScenePartitioner.Instance.TriggerEvent(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.solidChangedLayer, null);
+	}
+
+	private void OnCellPropertiesChanged()
+	{
+		if (this == null || base.gameObject == null || !this.runSimCallback)
+		{
+			return;
+		}
+		this.building.RunOnArea(delegate(int offset_cell)
+		{
+			GameScenePartitioner.Instance.TriggerEvent(offset_cell, GameScenePartitioner.Instance.solidChangedLayer, null);
+		});
+		this.runSimCallback = false;
 	}
 
 	private void ForceSetGameCellData(int cell)
@@ -224,6 +241,8 @@ public class SimCellOccupier : KMonoBehaviour, IGameObjectEffectDescriptor
 	private bool isReady;
 
 	private bool callDestroy = true;
+
+	private bool runSimCallback;
 
 	private static readonly EventSystem.IntraObjectHandler<SimCellOccupier> OnBuildingRepairedDelegate = new EventSystem.IntraObjectHandler<SimCellOccupier>(delegate(SimCellOccupier component, object data)
 	{

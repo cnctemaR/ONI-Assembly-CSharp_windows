@@ -1150,7 +1150,7 @@ public class GameNavGrids
 		this.FloaterGrid = new NavGrid("FloaterNavGrid", array3, array4, array, new NavTableValidator[]
 		{
 			new GameNavGrids.HoverValidator(),
-			new GameNavGrids.SwimValidator(true)
+			new GameNavGrids.SwimValidator(true, false)
 		}, 2, 3, 22);
 		pathfinding.AddNavGrid(this.FloaterGrid);
 	}
@@ -1203,7 +1203,7 @@ public class GameNavGrids
 		NavGrid navGrid = new NavGrid(id, array2, array3, bounding_offsets, new NavTableValidator[]
 		{
 			new GameNavGrids.FlyingValidator(false, false, allow_door_traversal),
-			new GameNavGrids.SwimValidator(true)
+			new GameNavGrids.SwimValidator(true, false)
 		}, 2, 2, 16);
 		pathfinding.AddNavGrid(navGrid);
 		return navGrid;
@@ -1238,7 +1238,7 @@ public class GameNavGrids
 		};
 		NavGrid navGrid = new NavGrid(id, array2, array3, bounding_offsets, new NavTableValidator[]
 		{
-			new GameNavGrids.SwimValidator(false)
+			new GameNavGrids.SwimValidator(false, false)
 		}, 1, 2, array2.Length);
 		pathfinding.AddNavGrid(navGrid);
 		return navGrid;
@@ -1273,7 +1273,7 @@ public class GameNavGrids
 		};
 		NavGrid navGrid = new NavGrid(id, array2, array3, bounding_offsets, new NavTableValidator[]
 		{
-			new GameNavGrids.SwimValidator(true)
+			new GameNavGrids.SwimValidator(true, false)
 		}, 1, 2, array2.Length);
 		pathfinding.AddNavGrid(navGrid);
 		return navGrid;
@@ -1283,21 +1283,53 @@ public class GameNavGrids
 	{
 		NavGrid.Transition[] array = new NavGrid.Transition[]
 		{
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 0, NavAxis.NA, true, true, true, 2, "", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f, false),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 0, NavAxis.NA, true, true, true, 2, "", new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1),
+				new CellOffset(2, 0),
+				new CellOffset(2, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
 			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, 1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[]
 			{
-				new CellOffset(1, 0)
+				new CellOffset(1, 1),
+				new CellOffset(1, 2),
+				new CellOffset(2, 1),
+				new CellOffset(2, 2)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
 			new NavGrid.Transition(NavType.Swim, NavType.Swim, 1, -1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[]
 			{
 				new CellOffset(1, 0),
-				new CellOffset(0, -1)
+				new CellOffset(1, -1),
+				new CellOffset(2, 0),
+				new CellOffset(2, -1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, NavAxis.NA, true, true, true, 3, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f, false),
-			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, -1, NavAxis.NA, true, true, true, 3, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], false, 1f, false)
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, -1, 0, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, -1, 1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[]
+			{
+				new CellOffset(0, 1),
+				new CellOffset(-1, 1),
+				new CellOffset(0, 2),
+				new CellOffset(-1, 2)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, -1, -1, NavAxis.NA, true, true, true, 2, "swim_swim_1_0", new CellOffset[]
+			{
+				new CellOffset(-1, 0),
+				new CellOffset(0, -1),
+				new CellOffset(-1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, NavAxis.NA, true, true, true, 3, "swim_swim_1_0", new CellOffset[]
+			{
+				new CellOffset(1, 1),
+				new CellOffset(1, 2)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, -1, NavAxis.NA, true, true, true, 3, "swim_swim_1_0", new CellOffset[]
+			{
+				new CellOffset(1, -1),
+				new CellOffset(1, 0)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0], true, 1f, false)
 		};
-		NavGrid.Transition[] array2 = this.MirrorTransitions(array);
-		NavGrid.NavTypeData[] array3 = new NavGrid.NavTypeData[]
+		NavGrid.NavTypeData[] array2 = new NavGrid.NavTypeData[]
 		{
 			new NavGrid.NavTypeData
 			{
@@ -1305,9 +1337,9 @@ public class GameNavGrids
 				idleAnim = "idle_loop"
 			}
 		};
-		NavGrid navGrid = new NavGrid(id, array2, array3, bounding_offsets, new NavTableValidator[]
+		NavGrid navGrid = new NavGrid(id, array, array2, bounding_offsets, new NavTableValidator[]
 		{
-			new GameNavGrids.SwimValidator(true)
+			new GameNavGrids.SwimValidator(true, true)
 		}, 2, 2, 16);
 		pathfinding.AddNavGrid(navGrid);
 		return navGrid;
@@ -1634,9 +1666,10 @@ public class GameNavGrids
 
 	public class SwimValidator : NavTableValidator
 	{
-		public SwimValidator(bool requireSubstantialLiquidAbove)
+		public SwimValidator(bool requireSubstantialLiquidAbove, bool large_swimmer = false)
 		{
 			this.requireSubstantialLiquidAbove = requireSubstantialLiquidAbove;
+			this.largeSwimmer = large_swimmer;
 			World instance = World.Instance;
 			instance.OnLiquidChanged = (Action<int>)Delegate.Combine(instance.OnLiquidChanged, new Action<int>(this.OnLiquidChanged));
 			GameScenePartitioner.Instance.AddGlobalLayerListener(GameScenePartitioner.Instance.objectLayers[9], new Action<int, object>(this.OnFoundationTileChanged));
@@ -1658,8 +1691,29 @@ public class GameNavGrids
 			{
 				flag = (this.requireSubstantialLiquidAbove ? Grid.IsSubstantialLiquid(num, 0.35f) : Grid.IsLiquid(num));
 			}
-			bool flag2 = Grid.IsWorldValidCell(cell) && flag && base.IsClear(cell, bounding_offsets, false);
+			bool flag2 = Grid.IsWorldValidCell(cell) && flag && this.IsSwimClear(cell, bounding_offsets);
 			nav_table.SetValid(cell, NavType.Swim, flag2);
+		}
+
+		private bool IsSwimClear(int cell, CellOffset[] bounding_offsets)
+		{
+			if (!this.largeSwimmer)
+			{
+				return base.IsClear(cell, bounding_offsets, false);
+			}
+			foreach (CellOffset cellOffset in bounding_offsets)
+			{
+				int num = Grid.OffsetCell(cell, cellOffset);
+				if (!Grid.IsWorldValidCell(num))
+				{
+					return false;
+				}
+				if (cellOffset.x == 0 && !NavTableValidator.IsCellPassable(num, false))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		private void OnLiquidChanged(int cell)
@@ -1671,6 +1725,8 @@ public class GameNavGrids
 		}
 
 		private bool requireSubstantialLiquidAbove;
+
+		private bool largeSwimmer;
 	}
 
 	public class DupeSwimValidator : NavTableValidator

@@ -54,7 +54,7 @@ public class DewPalmConfig : IEntityConfig, IHasDlcRestrictions
 		list.Add(GameTags.LargeSeed);
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		string text7 = global::STRINGS.CREATURES.SPECIES.DEWPALM.DOMESTICATEDDESC;
-		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, seed_ID, text4, text5, anim2, text6, num4, list, receptacleDirection, default(Tag), 3, text7, EntityTemplates.CollisionShape.CIRCLE, 0.45f, 0.33f, null, "", false), DewPalmConfig.PREVIEW_ID, Assets.GetAnim("rubber_tree_kanim"), "place", 3, 4);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, hasDlcRestrictions, productionType, seed_ID, text4, text5, anim2, text6, num4, list, receptacleDirection, default(Tag), 3, text7, EntityTemplates.CollisionShape.CIRCLE, 0.33f, 0.33f, null, "", false), DewPalmConfig.PREVIEW_ID, Assets.GetAnim("rubber_tree_kanim"), "place", 3, 4);
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddTag(GameTags.BlockBuildOverPlantFeature);
 		return gameObject;

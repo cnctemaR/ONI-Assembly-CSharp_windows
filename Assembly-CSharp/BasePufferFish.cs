@@ -58,17 +58,15 @@ public class BasePufferFish
 			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
-		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
-		def.canSwim = true;
-		def.checkHead = false;
+		gameObject.AddOrGetDef<CreatureFallMonitor.Def>().canSwim = true;
 		gameObject.AddOrGetDef<FlopMonitor.Def>();
 		gameObject.AddOrGetDef<FishOvercrowdingMonitor.Def>();
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<LoopingSounds>();
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.PufferFishSpecies, symbol_prefix);
-		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
-		def2.requireCavity = false;
-		def2.condoPrefabTag = "UnderwaterCritterCondo";
+		CritterCondoInteractMontior.Def def = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
+		def.requireCavity = false;
+		def.condoPrefabTag = "UnderwaterCritterCondo";
 		new HashSet<Tag>();
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		hashSet.Add("Lettuce");
@@ -80,15 +78,15 @@ public class BasePufferFish
 			new Diet.Info(hashSet, PufferFishTuning.POOP_ELEMENT, 400000f, 15f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, array),
 			new Diet.Info(hashSet2, PufferFishTuning.POOP_ELEMENT, 400000f, 15f, null, 0f, false, Diet.Info.FoodType.EatPlantDirectly, false, array)
 		}.ToArray());
-		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
-		def3.diet = diet;
-		def3.minConsumedCaloriesBeforePooping = 200000f;
-		def3.minimumTimeBeforePooping = 0f;
+		CreatureCalorieMonitor.Def def2 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
+		def2.diet = diet;
+		def2.minConsumedCaloriesBeforePooping = 200000f;
+		def2.minimumTimeBeforePooping = 0f;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.capacityKg = PufferFishTuning.OXYGEN_STORAGE_CAPACITY;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
-		gameObject.AddOrGet<UnderwaterBreathingLocation>();
+		gameObject.AddOrGet<UnderwaterBreathingLocation>().allowLandUse = false;
 		gameObject.AddOrGet<UnderwaterBreathingLocationWorkable>();
 		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))

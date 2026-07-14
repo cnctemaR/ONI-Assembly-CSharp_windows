@@ -21,7 +21,7 @@ public class PartialLightBlocking : KMonoBehaviour
 		int[] placementCells = base.GetComponent<Building>().PlacementCells;
 		for (int i = 0; i < placementCells.Length; i++)
 		{
-			SimMessages.SetCellProperties(placementCells[i], 48);
+			SimMessages.SetCellProperties(placementCells[i], 48, -1);
 		}
 	}
 
@@ -30,7 +30,7 @@ public class PartialLightBlocking : KMonoBehaviour
 		int[] placementCells = base.GetComponent<Building>().PlacementCells;
 		for (int i = 0; i < placementCells.Length; i++)
 		{
-			SimMessages.ClearCellProperties(placementCells[i], 48);
+			SimMessages.ClearCellProperties(placementCells[i], 48, -1);
 		}
 	}
 

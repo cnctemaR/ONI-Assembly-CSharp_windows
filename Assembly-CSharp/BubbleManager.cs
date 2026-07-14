@@ -161,13 +161,25 @@ public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 					bool flag = BubbleManager.ShouldPop(vector2, archetype.element, out num);
 					if (!subscript.Visible || flag)
 					{
-						SimMessages.AddRemoveSubstance((Grid.Solid[num] && Grid.Element[num].IsSolid) ? Grid.PosToCell(subscript.Position) : num, archetype.element, CellEventLogger.Instance.FallingWaterAddToSim, subscript.Mass, subscript.Temperature, subscript.Disease.Idx, subscript.Disease.Count, true, -1);
+						if (Grid.Solid[num] && Grid.Element[num].IsSolid)
+						{
+							num = Grid.PosToCell(subscript.Position);
+						}
+						else if (Grid.Element[num].IsLiquid && Grid.Element[num].id != archetype.element)
+						{
+							int num2 = Grid.CellAbove(num);
+							if (Grid.IsValidCell(num2) && (Grid.IsGas(num2) || Grid.Element[num2].IsVacuum))
+							{
+								num = num2;
+							}
+						}
+						SimMessages.AddRemoveSubstance(num, archetype.element, CellEventLogger.Instance.FallingWaterAddToSim, subscript.Mass, subscript.Temperature, subscript.Disease.Idx, subscript.Disease.Count, true, -1);
 						pooledList.Add(subscript.Index);
 					}
 					if (!subscript.FadingOut)
 					{
-						int num2;
-						if (BubbleManager.ShouldPop(vector2 + vector * 2f, archetype.element, out num2))
+						int num3;
+						if (BubbleManager.ShouldPop(vector2 + vector * 2f, archetype.element, out num3))
 						{
 							subscript.FadingOut = true;
 						}

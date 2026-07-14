@@ -88,7 +88,7 @@ public class BaseSnailConfig
 			.Add(new StunnedStates.Def(), true, -1)
 			.Add(new DebugGoToStates.Def(), true, -1)
 			.Add(new FleeStates.Def(), true, -1)
-			.Add(new AttackStates.Def("eat_pre", "eat_pst", null), true, -1)
+			.Add(new AttackStates.Def("eat_pre", "eat_pst", null), !isBaby, -1)
 			.PushInterruptGroup()
 			.Add(new MucusSecretionStates.Def(), true, -1)
 			.Add(new FixedCaptureStates.Def(), true, -1)

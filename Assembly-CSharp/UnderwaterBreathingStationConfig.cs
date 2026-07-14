@@ -56,7 +56,7 @@ public class UnderwaterBreathingStationConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGetDef<UnderwaterBreathingStation.Def>();
-		go.AddOrGet<UnderwaterBreathingLocation>();
+		go.AddOrGet<UnderwaterBreathingLocation>().allowLandUse = true;
 		go.AddOrGet<UnderwaterBreathingLocationWorkable>();
 	}
 

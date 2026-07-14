@@ -783,6 +783,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable, IGameObjec
 
 	protected static Action<object, object> UpdateStatusItemDispatcher = delegate(object context, object data)
 	{
+		if (context == null || Unsafe.As<Workable>(context).gameObject.IsNullOrDestroyed())
+		{
+			GameObject gameObject = ((context != null) ? Unsafe.As<Workable>(context).gameObject : null);
+			string text = ((gameObject != null) ? gameObject.ToString() : "null");
+			KCrashReporter.ReportDevNotification("WorkableDestroyingCrash", Environment.StackTrace, text, false, null);
+			return;
+		}
 		Unsafe.As<Workable>(context).UpdateStatusItem(data);
 	};
 

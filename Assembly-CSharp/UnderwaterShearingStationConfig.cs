@@ -78,7 +78,7 @@ public class UnderwaterShearingStationConfig : IBuildingConfig
 			int num = Grid.InvalidCell;
 			if (!smi.IsNullOrStopped())
 			{
-				num = Grid.CellRight(Grid.PosToCell(smi.transform.GetPosition()));
+				num = Grid.PosToCell(smi.transform.GetPosition());
 			}
 			return num;
 		};

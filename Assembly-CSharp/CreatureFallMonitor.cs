@@ -11,6 +11,24 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 	public static float FLOOR_DISTANCE = -0.065f;
 
+	private const float SWIM_SETTLE_EPSILON = 0.1f;
+
+	private const float SWIM_MAX_FALL_SPEED = 2f;
+
+	private static readonly NavType[] SNAP_NAV_TYPES = new NavType[]
+	{
+		NavType.Floor,
+		NavType.Hover,
+		NavType.Swim
+	};
+
+	private static readonly NavType[] WALL_CRAWLER_NAV_TYPES = new NavType[]
+	{
+		NavType.Ceiling,
+		NavType.LeftWall,
+		NavType.RightWall
+	};
+
 	public GameStateMachine<CreatureFallMonitor, CreatureFallMonitor.Instance, IStateMachineTarget, CreatureFallMonitor.Def>.State grounded;
 
 	public GameStateMachine<CreatureFallMonitor, CreatureFallMonitor.Instance, IStateMachineTarget, CreatureFallMonitor.Def>.State falling;
@@ -18,8 +36,6 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 	public class Def : StateMachine.BaseDef
 	{
 		public bool canSwim;
-
-		public bool checkHead = true;
 	}
 
 	public new class Instance : GameStateMachine<CreatureFallMonitor, CreatureFallMonitor.Instance, IStateMachineTarget, CreatureFallMonitor.Def>.GameInstance
@@ -27,25 +43,27 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 		public Instance(IStateMachineTarget master, CreatureFallMonitor.Def def)
 			: base(master, def)
 		{
-			this.largeCritter = this.collider.size.y > 1f;
+		}
+
+		private Vector3 GetNavAnchor(Vector3 pos)
+		{
+			Vector3 vector = this.navigator.NavGrid.GetNavTypeData(this.navigator.CurrentNavType).animControllerOffset;
+			return pos - vector;
 		}
 
 		public void SnapToGround()
 		{
-			Vector3 vector = base.smi.transform.GetPosition();
-			Vector3 vector2 = this.navigator.NavGrid.GetNavTypeData(this.navigator.CurrentNavType).animControllerOffset;
-			vector -= vector2;
-			Vector3 vector3 = Grid.CellToPosCBC(Grid.PosToCell(vector), Grid.SceneLayer.Creatures);
-			vector3.x = vector.x;
-			base.smi.transform.SetPosition(vector3);
-			if (this.navigator.IsValidNavType(NavType.Floor))
+			Vector3 navAnchor = this.GetNavAnchor(base.smi.transform.GetPosition());
+			Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(navAnchor), Grid.SceneLayer.Creatures);
+			vector.x = navAnchor.x;
+			base.smi.transform.SetPosition(vector);
+			foreach (NavType navType in CreatureFallMonitor.SNAP_NAV_TYPES)
 			{
-				this.navigator.SetCurrentNavType(NavType.Floor);
-				return;
-			}
-			if (this.navigator.IsValidNavType(NavType.Hover))
-			{
-				this.navigator.SetCurrentNavType(NavType.Hover);
+				if (this.navigator.IsValidNavType(navType))
+				{
+					this.navigator.SetCurrentNavType(navType);
+					return;
+				}
 			}
 		}
 
@@ -65,7 +83,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			{
 				return false;
 			}
-			if (this.CanSwimAtCurrentLocation())
+			if (this.ShouldSettleIntoSwim(position))
 			{
 				return false;
 			}
@@ -75,17 +93,12 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 				{
 					return false;
 				}
-				if (this.navigator.CurrentNavType == NavType.Ceiling)
+				foreach (NavType navType in CreatureFallMonitor.WALL_CRAWLER_NAV_TYPES)
 				{
-					return true;
-				}
-				if (this.navigator.CurrentNavType == NavType.LeftWall)
-				{
-					return true;
-				}
-				if (this.navigator.CurrentNavType == NavType.RightWall)
-				{
-					return true;
+					if (this.navigator.CurrentNavType == navType)
+					{
+						return true;
+					}
 				}
 			}
 			Vector3 vector = position;
@@ -96,32 +109,29 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 		public bool CanSwimAtCurrentLocation()
 		{
-			if (base.def.canSwim)
+			return this.CanSwimAtCell(Grid.PosToCell(base.transform.GetPosition()));
+		}
+
+		private bool CanSwimAtCell(int cell)
+		{
+			return base.def.canSwim && this.navigator.NavGrid.NavTable.IsValid(cell, NavType.Swim) && (!GameComps.Gravities.Has(base.gameObject) || GameComps.Gravities.GetData(GameComps.Gravities.GetHandle(base.gameObject)).velocity.magnitude < 2f);
+		}
+
+		public bool ShouldSettleIntoSwim()
+		{
+			return this.ShouldSettleIntoSwim(base.transform.GetPosition());
+		}
+
+		private bool ShouldSettleIntoSwim(Vector3 pos)
+		{
+			Vector3 navAnchor = this.GetNavAnchor(pos);
+			int num = Grid.PosToCell(navAnchor);
+			if (!this.CanSwimAtCell(num))
 			{
-				Vector3 position = base.transform.GetPosition();
-				float num = 1f;
-				if (!base.def.checkHead)
-				{
-					num = 0.5f;
-				}
-				else if (this.largeCritter)
-				{
-					num = 0.25f;
-				}
-				position.y += this.collider.size.y * num;
-				if (Grid.IsSubstantialLiquid(Grid.PosToCell(position), 0.35f))
-				{
-					if (!GameComps.Gravities.Has(base.gameObject))
-					{
-						return true;
-					}
-					if (GameComps.Gravities.GetData(GameComps.Gravities.GetHandle(base.gameObject)).velocity.magnitude < 2f)
-					{
-						return true;
-					}
-				}
+				return false;
 			}
-			return false;
+			float y = Grid.CellToPosCBC(num, Grid.SceneLayer.Creatures).y;
+			return navAnchor.y <= y + 0.1f;
 		}
 
 		public string anim = "fall";
@@ -131,10 +141,5 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 		[MyCmpReq]
 		private Navigator navigator;
-
-		[MyCmpReq]
-		private KBoxCollider2D collider;
-
-		private bool largeCritter;
 	}
 }

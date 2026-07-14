@@ -81,7 +81,7 @@ public class World : KMonoBehaviour
 			}
 			else
 			{
-				Grid.RenderedByWorld[cellIdx2] = Grid.Element[cellIdx2].substance.renderedByWorld && Grid.Objects[cellIdx2, 9] == null;
+				Grid.RenderedByWorld[cellIdx2] = Grid.Element[cellIdx2].substance.renderedByWorld && (Grid.Objects[cellIdx2, 9] == null || Grid.IsTileUnderConstruction[cellIdx2]);
 				this.groundRenderer.MarkDirty(cellIdx2);
 			}
 		}

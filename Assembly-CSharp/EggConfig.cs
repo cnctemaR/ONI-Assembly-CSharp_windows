@@ -33,10 +33,10 @@ public class EggConfig
 
 	public static GameObject CreateEgg(string id, string name, string desc, Tag creature_id, string anim, float mass, int egg_sort_order, float base_incubation_rate, string[] requiredDlcIds, string[] forbiddenDlcIds, bool preventEggDrops, float eggMassToDrop)
 	{
-		return EggConfig.CreateEgg(id, name, desc, creature_id, anim, mass, egg_sort_order, base_incubation_rate, requiredDlcIds, forbiddenDlcIds, preventEggDrops, eggMassToDrop, true);
+		return EggConfig.CreateEgg(id, name, desc, creature_id, anim, mass, egg_sort_order, base_incubation_rate, requiredDlcIds, forbiddenDlcIds, preventEggDrops, eggMassToDrop, 0.5f, true);
 	}
 
-	public static GameObject CreateEgg(string id, string name, string desc, Tag creature_id, string anim, float mass, int egg_sort_order, float base_incubation_rate, string[] requiredDlcIds, string[] forbiddenDlcIds, bool preventEggDrops, float eggMassToDrop, bool allowCrackerRecipeCreation = true)
+	public static GameObject CreateEgg(string id, string name, string desc, Tag creature_id, string anim, float mass, int egg_sort_order, float base_incubation_rate, string[] requiredDlcIds, string[] forbiddenDlcIds, bool preventEggDrops, float eggMassToDrop, float customEggShellRatio, bool allowCrackerRecipeCreation = true)
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, desc, mass, true, Assets.GetAnim(anim), "idle", Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.8f, true, 0, SimHashes.Creature, null);
 		gameObject.AddOrGet<KBoxCollider2D>().offset = new Vector2f(0f, 0.36f);
@@ -50,12 +50,13 @@ public class EggConfig
 		kprefabID.forbiddenDlcIds = forbiddenDlcIds;
 		IncubationMonitor.Def def = gameObject.AddOrGetDef<IncubationMonitor.Def>();
 		def.preventEggDrops = preventEggDrops;
+		def.eggShellRatio = customEggShellRatio;
 		def.spawnedCreature = creature_id;
 		def.baseIncubationRate = base_incubation_rate;
 		gameObject.AddOrGetDef<OvercrowdingMonitor.Def>().spaceRequiredPerCreature = 0;
 		global::UnityEngine.Object.Destroy(gameObject.GetComponent<EntitySplitter>());
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
-		EggCrackerConfig.RegisterEgg(id, name, desc, eggMassToDrop, requiredDlcIds, forbiddenDlcIds, EggConfig.CUSTOM_EGG_OUTPUTS.ContainsKey(creature_id) ? EggConfig.CUSTOM_EGG_OUTPUTS[creature_id].ToArray() : null, allowCrackerRecipeCreation);
+		EggCrackerConfig.RegisterEgg(id, name, desc, eggMassToDrop, requiredDlcIds, forbiddenDlcIds, EggConfig.CUSTOM_EGG_OUTPUTS.ContainsKey(creature_id) ? EggConfig.CUSTOM_EGG_OUTPUTS[creature_id].ToArray() : null, customEggShellRatio, allowCrackerRecipeCreation);
 		return gameObject;
 	}
 

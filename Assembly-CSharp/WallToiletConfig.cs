@@ -18,12 +18,16 @@ public class WallToiletConfig : IBuildingConfig
 		string text2 = "toilet_wall_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
-		string[] plastics = MATERIALS.PLASTICS;
+		float[] array = new float[]
+		{
+			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
+			2f
+		};
+		string[] array2 = new string[] { "Metal", "BuildingGasket" };
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.WallFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, plastics, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
 		buildingDef.Overheatable = false;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;

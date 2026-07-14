@@ -383,6 +383,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return actions;
 		}
 
+		[Obsolete("Prefer explicit Target(sm.masterTarget) to avoid hidden modification.")]
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State master
 		{
 			get
@@ -535,6 +536,38 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Enter("AddEffect(" + effect_name + ")", delegate(StateMachineInstanceType smi)
 			{
 				state_target.Get<Effects>(smi).Add(effect_name, true);
+			});
+			return this;
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleAnims(Func<StateMachineInstanceType, KAnimFile[]> chooser_callback)
+		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
+			this.Enter("EnableAnims()", delegate(StateMachineInstanceType smi)
+			{
+				KAnimFile[] array = chooser_callback(smi);
+				if (array == null)
+				{
+					return;
+				}
+				KAnimControllerBase kanimControllerBase = state_target.Get<KAnimControllerBase>(smi);
+				foreach (KAnimFile kanimFile in array)
+				{
+					kanimControllerBase.AddAnimOverrides(kanimFile, 0f);
+				}
+			});
+			this.Exit("Disableanims()", delegate(StateMachineInstanceType smi)
+			{
+				KAnimFile[] array2 = chooser_callback(smi);
+				if (array2 == null)
+				{
+					return;
+				}
+				KAnimControllerBase kanimControllerBase2 = state_target.Get<KAnimControllerBase>(smi);
+				foreach (KAnimFile kanimFile2 in array2)
+				{
+					kanimControllerBase2.RemoveAnimOverrides(kanimFile2);
+				}
 			});
 			return this;
 		}

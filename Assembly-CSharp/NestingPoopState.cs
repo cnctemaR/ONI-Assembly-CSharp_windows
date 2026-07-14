@@ -29,7 +29,8 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 		this.behaviourcomplete.Enter(delegate(NestingPoopState.Instance smi)
 		{
 			smi.SetLastPoopCell();
-		}).PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.Poop, false);
+		}).PlayAnim("idle_loop", KAnim.PlayMode.Loop).TriggerOnEnter(GameHashes.PoopStatesCompleted, (NestingPoopState.Instance smi) => null)
+			.BehaviourComplete(GameTags.Creatures.Poop, false);
 	}
 
 	public GameStateMachine<NestingPoopState, NestingPoopState.Instance, IStateMachineTarget, NestingPoopState.Def>.State goingtopoop;
@@ -56,11 +57,6 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 			: base(chore, def)
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.Poop);
-		}
-
-		private static bool IsValidNestingCell(int cell, object arg)
-		{
-			return Grid.IsValidCell(cell) && !Grid.Solid[cell] && Grid.IsValidCell(Grid.CellBelow(cell)) && Grid.Solid[Grid.CellBelow(cell)] && (NestingPoopState.Instance.IsValidPoopFromCell(cell, true) || NestingPoopState.Instance.IsValidPoopFromCell(cell, false));
 		}
 
 		private static bool IsValidPoopFromCell(int cell, bool look_left)
@@ -121,7 +117,7 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 			{
 				num = Grid.PosToCell(this);
 			}
-			int num2 = GameUtil.FloodFillFind<object>(new Func<int, object, bool>(NestingPoopState.Instance.IsValidNestingCell), null, num, 8, false, true);
+			int num2 = FloodFill.Find<FloodFill.MaxDepth>(NestingPoopState.Instance.isValidNestingCell, num, new FloodFill.MaxDepth(8), false, true);
 			if (num2 == -1)
 			{
 				CellOffset[] array = new CellOffset[]
@@ -157,5 +153,7 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 		public int targetPoopCell = -1;
 
 		private Tag currentlyPoopingElement = Tag.Invalid;
+
+		private static readonly Func<int, bool> isValidNestingCell = (int cell) => Grid.IsValidCell(cell) && !Grid.Solid[cell] && Grid.IsValidCell(Grid.CellBelow(cell)) && Grid.Solid[Grid.CellBelow(cell)] && (NestingPoopState.Instance.IsValidPoopFromCell(cell, true) || NestingPoopState.Instance.IsValidPoopFromCell(cell, false));
 	}
 }

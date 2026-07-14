@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{9658BD80-0462-4503-ADB4-10AC986270FB}</ProjectGuid>
+    <ProjectGuid>{1D119CA1-935B-4071-9DB4-19566E492FDC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Runtime</RootNamespace>
     <AssemblyName>System.Runtime</AssemblyName>
@@ -17,19 +17,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270E9}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCA}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.ComponentModel.Composition\System.ComponentModel.Composition.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270EC}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCD}</Project>
       <Name>System.ComponentModel.Composition</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270EE}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCF}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270F1}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FD2}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

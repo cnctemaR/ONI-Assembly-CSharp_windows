@@ -31,12 +31,14 @@ public class PlanterBoxConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.FarmBuilding, false);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.CodexCategories.FarmBuilding, false);
 		Storage storage = go.AddOrGet<Storage>();
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.IsOffGround = true;
 		plantablePlot.tagOnPlanted = GameTags.PlantedOnFloorVessel;
 		plantablePlot.AddDepositTag(GameTags.CropSeed);
+		plantablePlot.AddAdditionalCriteria(new Func<GameObject, bool>(FarmTileConfig.ForbiddenTags));
 		plantablePlot.SetFertilizationFlags(true, false);
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Farm;
 		BuildingTemplates.CreateDefaultStorage(go, false);
@@ -45,6 +47,12 @@ public class PlanterBoxConfig : IBuildingConfig
 		go.AddOrGet<PlanterBox>();
 		go.AddOrGet<AnimTileable>();
 		Prioritizable.AddRef(go);
+		component.prefabInitFn += this.OnPrefabInit;
+	}
+
+	private void OnPrefabInit(GameObject instance)
+	{
+		instance.AddOrGet<PlantablePlot>().AddAdditionalCriteria(new Func<GameObject, bool>(FarmTileConfig.ForbiddenTags));
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

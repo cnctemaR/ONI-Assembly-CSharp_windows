@@ -19,7 +19,7 @@ public class CrewRationsEntry : CrewListEntry
 		{
 			return;
 		}
-		foreach (AmountInstance amountInstance in this.identity.GetAmounts())
+		foreach (AmountInstance amountInstance in this.identity.GetAmounts().ModifierList)
 		{
 			float min = amountInstance.GetMin();
 			float max = amountInstance.GetMax();

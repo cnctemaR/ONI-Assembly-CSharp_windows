@@ -31,7 +31,7 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 
 	public static bool ShouldProduceLight(CreatureLightToggleController.Instance smi, object obj)
 	{
-		return !smi.prefabID.HasTag(GameTags.Creatures.Overcrowded) && !smi.prefabID.HasTag(GameTags.Creatures.TrappedInCargoBay);
+		return !smi.prefabID.HasTag(GameTags.Creatures.Overcrowded) && !smi.prefabID.HasTag(GameTags.Creatures.TrappedInCargoBay) && !smi.prefabID.HasTag(GameTags.Creatures.Unhappy);
 	}
 
 	private GameStateMachine<CreatureLightToggleController, CreatureLightToggleController.Instance, IStateMachineTarget, CreatureLightToggleController.Def>.State light_off;
@@ -97,9 +97,9 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 			return this.light.Lux >= this.originalLux;
 		}
 
-		private const float DIM_TIME = 25f;
+		private const float DIM_TIME = 5f;
 
-		private const float GLOW_TIME = 15f;
+		private const float GLOW_TIME = 2f;
 
 		private int originalLux;
 
@@ -113,13 +113,13 @@ public class CreatureLightToggleController : GameStateMachine<CreatureLightToggl
 
 		public static CreatureLightToggleController.Instance.ModifyLuxDelegate dim = delegate(CreatureLightToggleController.Instance instance, float time_delta)
 		{
-			float num = (float)instance.originalLux / 25f;
+			float num = (float)instance.originalLux / 5f;
 			instance.light.Lux = Mathf.FloorToInt(Mathf.Max(0f, (float)instance.light.Lux - num * time_delta));
 		};
 
 		public static CreatureLightToggleController.Instance.ModifyLuxDelegate brighten = delegate(CreatureLightToggleController.Instance instance, float time_delta)
 		{
-			float num2 = (float)instance.originalLux / 15f;
+			float num2 = (float)instance.originalLux / 2f;
 			instance.light.Lux = Mathf.CeilToInt(Mathf.Min((float)instance.originalLux, (float)instance.light.Lux + num2 * time_delta));
 		};
 

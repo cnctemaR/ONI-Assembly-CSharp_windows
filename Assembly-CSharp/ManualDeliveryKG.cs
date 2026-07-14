@@ -101,7 +101,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	protected override void OnCleanUp()
 	{
 		this.AbortDelivery("ManualDeliverKG destroyed");
-		if (this.handlePrioritizable)
+		if (this.handlePrioritizable && base.isSpawned)
 		{
 			Prioritizable.RemoveRef(base.gameObject);
 		}

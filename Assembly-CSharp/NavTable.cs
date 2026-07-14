@@ -2,10 +2,11 @@
 
 public class NavTable
 {
-	public NavTable(int cell_count)
+	public NavTable(int cell_count, string nav_grid_id = null)
 	{
 		this.ValidCells = new short[cell_count];
 		this.NavTypeMasks = new short[11];
+		this.NavGridId = nav_grid_id;
 		for (short num = 0; num < 11; num += 1)
 		{
 			this.NavTypeMasks[(int)num] = (short)(1 << (int)num);
@@ -41,6 +42,8 @@ public class NavTable
 	public Action<int, NavType> OnValidCellChanged;
 
 	private short[] NavTypeMasks;
+
+	public string NavGridId;
 
 	private short[] ValidCells;
 }

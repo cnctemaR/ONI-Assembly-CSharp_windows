@@ -115,6 +115,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable, IConduitDispenser
 					primaryElement.ModifyDiseaseCount(-num2, "ConduitDispenser.ConduitUpdate");
 					primaryElement.Mass -= num;
 					this.storage.Trigger(-1697596308, primaryElement.gameObject);
+					this.storage.Trigger(2051543657, primaryElement);
 					return;
 				}
 				this.blocked = true;

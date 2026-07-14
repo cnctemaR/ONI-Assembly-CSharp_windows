@@ -73,6 +73,7 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		this.FabricatorProduceMelted = base.AddEvent(new CellAddRemoveSubstanceEvent("FabricatorProduceMelted", "Fabricator Produce Melted", false)) as CellAddRemoveSubstanceEvent;
 		this.PumpSimUpdate = base.AddEvent(new CellAddRemoveSubstanceEvent("PumpSimUpdate", "Pump SimUpdate", false)) as CellAddRemoveSubstanceEvent;
 		this.WallPumpSimUpdate = base.AddEvent(new CellAddRemoveSubstanceEvent("WallPumpSimUpdate", "Wall Pump SimUpdate", false)) as CellAddRemoveSubstanceEvent;
+		this.Photosynthesis = base.AddEvent(new CellAddRemoveSubstanceEvent("Photosynthesis", "Photosynthesis", false)) as CellAddRemoveSubstanceEvent;
 		this.Vomit = base.AddEvent(new CellAddRemoveSubstanceEvent("Vomit", "Vomit", false)) as CellAddRemoveSubstanceEvent;
 		this.Tears = base.AddEvent(new CellAddRemoveSubstanceEvent("Tears", "Tears", false)) as CellAddRemoveSubstanceEvent;
 		this.Pee = base.AddEvent(new CellAddRemoveSubstanceEvent("Pee", "Pee", false)) as CellAddRemoveSubstanceEvent;
@@ -90,6 +91,7 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		this.DebugToolModifyMass = base.AddEvent(new CellModifyMassEvent("DebugToolModifyMass", "DebugTool ModifyMass", false)) as CellModifyMassEvent;
 		this.EnergyGeneratorModifyMass = base.AddEvent(new CellModifyMassEvent("EnergyGeneratorModifyMass", "EnergyGenerator ModifyMass", false)) as CellModifyMassEvent;
 		this.SolidFilterEvent = base.AddEvent(new CellSolidFilterEvent("SolidFilterEvent", true)) as CellSolidFilterEvent;
+		this.BreathingGeyser = base.AddEvent(new CellAddRemoveSubstanceEvent("BreathingGeyser", "Breathing Geyser ExhaleUpdate", false)) as CellAddRemoveSubstanceEvent;
 	}
 
 	public static CellEventLogger Instance;
@@ -197,6 +199,10 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 	public CellAddRemoveSubstanceEvent Cough;
 
 	public CellAddRemoveSubstanceEvent Meteor;
+
+	public CellAddRemoveSubstanceEvent Photosynthesis;
+
+	public CellAddRemoveSubstanceEvent BreathingGeyser;
 
 	public CellModifyMassEvent CO2ManagerFixedUpdate;
 

@@ -25,9 +25,9 @@ namespace TUNING
 
 		public const string REFINED_METAL = "RefinedMetal";
 
-		public const string GLASS = "Glass";
+		public const string ALL_GLASSES = "Glasses";
 
-		public const string TRANSPARENT = "Transparent";
+		public const string GLASS = "Glass";
 
 		public const string PLASTIC = "Plastic";
 
@@ -39,11 +39,15 @@ namespace TUNING
 
 		public const string BUILDINGFIBER = "BuildingFiber";
 
+		public const string GASKET = "BuildingGasket";
+
 		public const string LEAD = "Lead";
 
 		public const string INSULATOR = "Insulator";
 
 		public const string FOSSILS_TAG = "Fossils";
+
+		public const string RUBBER_OR_PLASTIC = "Rubber&Plastic";
 
 		public static readonly string[] ALL_METALS = new string[] { "Metal" };
 
@@ -79,9 +83,7 @@ namespace TUNING
 
 		public static readonly string[] PLASTICS = new string[] { "Plastic" };
 
-		public static readonly string[] GLASSES = new string[] { "Glass" };
-
-		public static readonly string[] TRANSPARENTS = new string[] { "Transparent" };
+		public static readonly string[] GLASSES = new string[] { "Glasses" };
 
 		public static readonly string[] BUILDING_FIBER = new string[] { "BuildingFiber" };
 

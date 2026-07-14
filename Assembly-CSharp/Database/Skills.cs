@@ -32,7 +32,26 @@ namespace Database
 				Db.Get().SkillPerks.IncreaseConstructionLarge,
 				Db.Get().SkillPerks.CanDemolish
 			}, new List<string> { this.Building2.Id }, "Minion", null, null));
-			this.Farming1 = this.AddSkill(new Skill("Farming1", DUPLICANTS.ROLES.JUNIOR_FARMER.NAME, DUPLICANTS.ROLES.JUNIOR_FARMER.DESCRIPTION, 0, "hat_role_farming1", "skillbadge_role_farming1", Db.Get().SkillGroups.Farming.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseBotanySmall }, null, "Minion", null, null));
+			string text = "Farming1";
+			string text2 = DUPLICANTS.ROLES.JUNIOR_FARMER.NAME;
+			string text3 = DUPLICANTS.ROLES.JUNIOR_FARMER.DESCRIPTION;
+			int num = 0;
+			string text4 = "hat_role_farming1";
+			string text5 = "skillbadge_role_farming1";
+			string id = Db.Get().SkillGroups.Farming.Id;
+			List<SkillPerk> list;
+			if (!DlcManager.IsContentSubscribed("DLC5_ID"))
+			{
+				(list = new List<SkillPerk>()).Add(Db.Get().SkillPerks.IncreaseBotanySmall);
+			}
+			else
+			{
+				List<SkillPerk> list2 = new List<SkillPerk>();
+				list2.Add(Db.Get().SkillPerks.IncreaseBotanySmall);
+				list = list2;
+				list2.Add(Db.Get().SkillPerks.CanFarmClams);
+			}
+			this.Farming1 = this.AddSkill(new Skill(text, text2, text3, num, text4, text5, id, list, null, "Minion", null, null));
 			this.Farming2 = this.AddSkill(new Skill("Farming2", DUPLICANTS.ROLES.FARMER.NAME, DUPLICANTS.ROLES.FARMER.DESCRIPTION, 1, "hat_role_farming2", "skillbadge_role_farming2", Db.Get().SkillGroups.Farming.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseBotanyMedium,
@@ -112,15 +131,17 @@ namespace Database
 			this.Cooking1 = this.AddSkill(new Skill("Cooking1", DUPLICANTS.ROLES.JUNIOR_COOK.NAME, DUPLICANTS.ROLES.JUNIOR_COOK.DESCRIPTION, 0, "hat_role_cooking1", "skillbadge_role_cooking1", Db.Get().SkillGroups.Cooking.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseCookingSmall,
-				Db.Get().SkillPerks.CanElectricGrill,
-				Db.Get().SkillPerks.CanGasRange,
-				Db.Get().SkillPerks.CanDeepFry
+				Db.Get().SkillPerks.CanElectricGrill
 			}, null, "Minion", null, null));
 			this.Cooking2 = this.AddSkill(new Skill("Cooking2", DUPLICANTS.ROLES.COOK.NAME, DUPLICANTS.ROLES.COOK.DESCRIPTION, 1, "hat_role_cooking2", "skillbadge_role_cooking2", Db.Get().SkillGroups.Cooking.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseCookingMedium,
+				Db.Get().SkillPerks.CanGasRange,
+				Db.Get().SkillPerks.CanDeepFry,
+				Db.Get().SkillPerks.CanSushiBar,
 				Db.Get().SkillPerks.CanSpiceGrinder
 			}, new List<string> { this.Cooking1.Id }, "Minion", null, null));
+			this.Cooking3 = this.AddSkill(new Skill("Cooking3", DUPLICANTS.ROLES.SENIOR_COOK.NAME, DUPLICANTS.ROLES.SENIOR_COOK.DESCRIPTION, 2, "hat_role_cooking3", "skillbadge_role_cooking2", Db.Get().SkillGroups.Cooking.Id, new List<SkillPerk> { Db.Get().SkillPerks.IncreaseCookingLarge }, new List<string> { this.Cooking2.Id }, "Minion", null, null));
 			this.Arting1 = this.AddSkill(new Skill("Arting1", DUPLICANTS.ROLES.JUNIOR_ARTIST.NAME, DUPLICANTS.ROLES.JUNIOR_ARTIST.DESCRIPTION, 0, "hat_role_art1", "skillbadge_role_art1", Db.Get().SkillGroups.Art.Id, new List<SkillPerk>
 			{
 				Db.Get().SkillPerks.IncreaseArtSmall,
@@ -236,6 +257,18 @@ namespace Database
 				Db.Get().SkillPerks.IncreaseCaringLarge,
 				Db.Get().SkillPerks.CanAdvancedMedicine
 			}, new List<string> { this.Medicine2.Id }, "Minion", null, null));
+			this.Swimming1 = this.AddSkill(new Skill("Swimming", DUPLICANTS.ROLES.SWIMMER.NAME, DUPLICANTS.ROLES.SWIMMER.DESCRIPTION, 0, "hat_role_swimming", "skillbadge_role_swimming", Db.Get().SkillGroups.SwimmingSkills.Id, new List<SkillPerk>
+			{
+				Db.Get().SkillPerks.CanSwim,
+				Db.Get().SkillPerks.IncreasedLungCapacity,
+				Db.Get().SkillPerks.ImprovedLiquidTemperatureTolerance,
+				Db.Get().SkillPerks.ReduceSaltWaterSwimmingEyeIrritation
+			}, null, "Minion", new string[] { "DLC5_ID" }, null));
+			this.Swimming2 = this.AddSkill(new Skill("Swimming2", DUPLICANTS.ROLES.EXPERT_SWIMMER.NAME, DUPLICANTS.ROLES.EXPERT_SWIMMER.DESCRIPTION, 1, "hat_role_swimming2", "skillbadge_role_swimming2", Db.Get().SkillGroups.SwimmingSkills.Id, new List<SkillPerk>
+			{
+				Db.Get().SkillPerks.IncreaseSwimmerStaminaInLiquid,
+				Db.Get().SkillPerks.IncreaseSwimmerAthleticsInLiquid
+			}, new List<string> { this.Swimming1.Id }, "Minion", new string[] { "DLC5_ID" }, null));
 			if (DlcManager.IsContentSubscribed("DLC3_ID"))
 			{
 				this.BionicsA1 = this.AddSkill(new Skill("BionicsA1", DUPLICANTS.ROLES.BIONICS_A1.NAME, DUPLICANTS.ROLES.BIONICS_A1.DESCRIPTION, 0, "hat_role_gainingboosters1", "skillbadge_bionic_booster1", Db.Get().SkillGroups.BionicSkills.Id, new List<SkillPerk> { Db.Get().SkillPerks.ExtraBionicBooster1 }, new List<string>(), GameTags.Minions.Models.Bionic.Name, DlcManager.DLC3, null));
@@ -270,13 +303,13 @@ namespace Database
 					this.BionicsB2.Id,
 					this.BionicsC2.Id
 				}, GameTags.Minions.Models.Bionic.Name, DlcManager.DLC3, null));
-				this.BionicsD1 = this.AddSkill(new Skill("BionicsD1", DUPLICANTS.ROLES.BIONICS_D1.NAME, DUPLICANTS.ROLES.BIONICS_D1.DESCRIPTION, 0, "hat_role_gainingboosters1", "skillbadge_bionic_booster1", Db.Get().SkillGroups.BionicSkills.Id, new List<SkillPerk>
+				this.BionicsD1 = this.AddSkill(new Skill("BionicsD1", DUPLICANTS.ROLES.BIONICS_D1.NAME, DUPLICANTS.ROLES.BIONICS_D1.DESCRIPTION, 0, "hat_role_gainingboosters1", "skillbadge_role_hardware", Db.Get().SkillGroups.BionicSkills.Id, new List<SkillPerk>
 				{
 					Db.Get().SkillPerks.BionicEardrumsDefense,
 					Db.Get().SkillPerks.BionicMinorEyeIrritationDefense,
 					Db.Get().SkillPerks.BionicMajorEyeIrritationDefense
 				}, new List<string>(), GameTags.Minions.Models.Bionic.Name, DlcManager.DLC3, null));
-				this.BionicsD2 = this.AddSkill(new Skill("BionicsD2", DUPLICANTS.ROLES.BIONICS_D2.NAME, DUPLICANTS.ROLES.BIONICS_D2.DESCRIPTION, 1, "hat_role_gainingboosters1", "skillbadge_bionic_booster1", Db.Get().SkillGroups.BionicSkills.Id, new List<SkillPerk>
+				this.BionicsD2 = this.AddSkill(new Skill("BionicsD2", DUPLICANTS.ROLES.BIONICS_D2.NAME, DUPLICANTS.ROLES.BIONICS_D2.DESCRIPTION, 1, "hat_role_gainingboosters1", "skillbadge_role_hardware_2", Db.Get().SkillGroups.BionicSkills.Id, new List<SkillPerk>
 				{
 					Db.Get().SkillPerks.BionicToastySurroundingsDefense,
 					Db.Get().SkillPerks.BionicChillySurroundingsDefense
@@ -402,6 +435,8 @@ namespace Database
 
 		public Skill Cooking2;
 
+		public Skill Cooking3;
+
 		public Skill Arting1;
 
 		public Skill Arting2;
@@ -437,6 +472,10 @@ namespace Database
 		public Skill Medicine2;
 
 		public Skill Medicine3;
+
+		public Skill Swimming1;
+
+		public Skill Swimming2;
 
 		public Skill BionicsA1;
 

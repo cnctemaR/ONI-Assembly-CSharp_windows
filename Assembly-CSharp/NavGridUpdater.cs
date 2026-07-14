@@ -15,9 +15,9 @@ public class NavGridUpdater
 		NavGridUpdater.UpdateLinks(dirty_nav_cells, nav_table, max_links_per_cell, links, transitions_by_nav_type, teleport_transitions);
 	}
 
-	private static void UpdateValidCells(List<int> dirty_solid_cells, NavTable nav_table, NavTableValidator[] validators, CellOffset[] bounding_offsets)
+	private static void UpdateValidCells(List<int> dirty_cells, NavTable nav_table, NavTableValidator[] validators, CellOffset[] bounding_offsets)
 	{
-		foreach (int num in dirty_solid_cells)
+		foreach (int num in dirty_cells)
 		{
 			for (int i = 0; i < validators.Length; i++)
 			{
@@ -88,7 +88,14 @@ public class NavGridUpdater
 		}
 		if (num2 >= max_links_per_cell)
 		{
-			Debug.LogError("Out of nav links. Need to increase maxLinksPerCell:" + max_links_per_cell.ToString());
+			Debug.LogError(string.Format("Out of nav links on grid '{0}' at cell {1}. Needed {2} links but maxLinksPerCell is {3}. Increase maxLinksPerCell to at least {4}.", new object[]
+			{
+				nav_table.NavGridId,
+				cell,
+				num2,
+				max_links_per_cell,
+				num2 + 1
+			}));
 		}
 		links[num].link = Grid.InvalidCell;
 	}

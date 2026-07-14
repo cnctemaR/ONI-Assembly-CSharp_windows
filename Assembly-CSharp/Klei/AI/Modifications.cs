@@ -17,6 +17,7 @@ namespace Klei.AI
 			}
 		}
 
+		[Obsolete("Abstract enumerator instances returned by this can produce excess garbage collection work, iterate the ModifierList directly.")]
 		public IEnumerator<InstanceType> GetEnumerator()
 		{
 			return this.ModifierList.GetEnumerator();

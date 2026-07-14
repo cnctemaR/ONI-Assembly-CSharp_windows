@@ -46,6 +46,8 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public HashedString RancherInteractAnim = "anim_interacts_rancherstation_kanim";
 
+		public HashedString RancherCallingAndWipeBrowAnim = "anim_interacts_rancherstation_kanim";
+
 		public bool RancherWipesBrowAnim;
 
 		public StatusItem RanchingStatusItem = Db.Get().DuplicantStatusItems.Ranching;
@@ -53,6 +55,8 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 		public StatusItem CreatureRanchingStatusItem = Db.Get().CreatureStatusItems.GettingRanched;
 
 		public float WorkTime = 12f;
+
+		public bool RequiresRoom = true;
 
 		public Func<RanchStation.Instance, int> GetTargetRanchCell = (RanchStation.Instance smi) => Grid.PosToCell(smi);
 	}
@@ -117,6 +121,19 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			return base.def.GetTargetRanchCell(this);
 		}
 
+		private CavityInfo GetStationCavity()
+		{
+			if (!base.def.RequiresRoom)
+			{
+				return Game.Instance.roomProber.GetCavityForCell(this.GetRanchNavTarget());
+			}
+			if (this.ranch != null)
+			{
+				return this.ranch.cavity;
+			}
+			return null;
+		}
+
 		public Instance(IStateMachineTarget master, RanchStation.Def def)
 			: base(master, def)
 		{
@@ -158,12 +175,12 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		private void OnRoomUpdated(object data)
 		{
-			if (data == null)
+			this.ranch = data as Room;
+			if (this.ranch == null)
 			{
 				return;
 			}
-			this.ranch = data as Room;
-			if (this.ranch.roomType != Db.Get().RoomTypes.CreaturePen)
+			if (base.def.RequiresRoom && this.ranch.roomType != Db.Get().RoomTypes.CreaturePen)
 			{
 				this.TriggerRanchStationNoLongerAvailable();
 				this.ranch = null;
@@ -207,7 +224,8 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				int num = Grid.PosToCell(ranchable.transform.GetPosition());
 				CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
-				if (cavityForCell == null || this.ranch == null || cavityForCell != this.ranch.cavity)
+				CavityInfo stationCavity = this.GetStationCavity();
+				if (cavityForCell == null || stationCavity == null || cavityForCell != stationCavity)
 				{
 					flag = false;
 				}
@@ -244,7 +262,8 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public void FindRanchable(object _ = null)
 		{
-			if (this.ranch == null)
+			CavityInfo stationCavity = this.GetStationCavity();
+			if (stationCavity == null)
 			{
 				return;
 			}
@@ -253,7 +272,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				return;
 			}
-			List<KPrefabID> creatures = this.ranch.cavity.creatures;
+			List<KPrefabID> creatures = stationCavity.creatures;
 			if (this.HasRancher && !this.isCritterAvailableForRanching && creatures.Count == 0)
 			{
 				this.TryNotifyEmptyRanch();
@@ -276,11 +295,12 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public Option<CavityInfo> GetCavityInfo()
 		{
-			if (this.ranch.IsNullOrDestroyed())
+			CavityInfo stationCavity = this.GetStationCavity();
+			if (stationCavity == null)
 			{
 				return Option.None;
 			}
-			return this.ranch.cavity;
+			return stationCavity;
 		}
 
 		public void RanchCreature()
@@ -307,6 +327,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 				RanchableMonitor.Instance instance = this.targetRanchables[i];
 				if (instance.IsNullOrStopped() || instance.States.IsNullOrStopped())
 				{
+					instance.TargetRanchStation = null;
 					this.targetRanchables.RemoveAt(i);
 				}
 				else

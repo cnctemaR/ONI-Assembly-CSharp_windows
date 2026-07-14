@@ -105,6 +105,7 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 					DemoTimer.Instance.EndDemo();
 					return;
 				}
+				OniMetrics.SendEventImmediate("GameOver", null);
 				GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.GameOverScreen, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<KScreen>().Show(true);
 			});
 		}

@@ -24,6 +24,22 @@ public class ButtonMenuSideScreen : SideScreenContent
 		return this.targets[0].ButtonSideScreenSortOrder();
 	}
 
+	public override string GetTitle()
+	{
+		if (this.targets != null)
+		{
+			foreach (ISidescreenButtonControl sidescreenButtonControl in this.targets)
+			{
+				string sidescreenTitle = sidescreenButtonControl.SidescreenTitle;
+				if (sidescreenTitle != null)
+				{
+					return sidescreenTitle;
+				}
+			}
+		}
+		return base.GetTitle();
+	}
+
 	public override void SetTarget(GameObject new_target)
 	{
 		if (new_target == null)

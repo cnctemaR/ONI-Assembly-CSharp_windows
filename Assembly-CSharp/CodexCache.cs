@@ -83,67 +83,85 @@ public static class CodexCache
 		CodexCache.CollectYAMLSubEntries(list);
 		CodexCache.CheckUnlockableContent();
 		list.Add(categoryEntry);
+		Comparison<SubEntry> comparison = (SubEntry a, SubEntry b) => a.layoutPriority.CompareTo(b.layoutPriority);
+		List<ContentContainer> list2 = new List<ContentContainer>();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair2 in CodexCache.entries)
 		{
-			if (keyValuePair2.Value.contentMadeAndUsed.Count > 0)
+			CodexEntry value = keyValuePair2.Value;
+			list2.Clear();
+			list2.AddRange(value.contentContainers);
+			foreach (CodexEntry_MadeAndUsed codexEntry_MadeAndUsed in value.contentMadeAndUsed)
 			{
-				foreach (CodexEntry_MadeAndUsed codexEntry_MadeAndUsed in keyValuePair2.Value.contentMadeAndUsed)
+				Element element = ElementLoader.GetElement(codexEntry_MadeAndUsed.tag);
+				if (element != null)
 				{
-					List<ContentContainer> list2 = new List<ContentContainer>();
-					Element element = ElementLoader.GetElement(codexEntry_MadeAndUsed.tag);
-					if (element != null)
-					{
-						CodexEntryGenerator_Elements.GenerateElementDescriptionContainers(element, list2);
-					}
-					else
-					{
-						CodexEntryGenerator_Elements.GenerateMadeAndUsedContainers(codexEntry_MadeAndUsed.tag, list2);
-					}
-					keyValuePair2.Value.contentContainers.InsertRange(keyValuePair2.Value.contentContainers.Count, list2);
+					CodexEntryGenerator_Elements.GenerateElementDescriptionContainers(element, list2);
+				}
+				else
+				{
+					CodexEntryGenerator_Elements.GenerateMadeAndUsedContainers(codexEntry_MadeAndUsed.tag, list2);
 				}
 			}
-			if (keyValuePair2.Value.subEntries.Count > 0)
+			value.subEntries.Sort(comparison);
+			if (value.icon == null)
 			{
-				keyValuePair2.Value.subEntries.Sort((SubEntry a, SubEntry b) => a.layoutPriority.CompareTo(b.layoutPriority));
-				if (keyValuePair2.Value.icon == null)
+				foreach (SubEntry subEntry in value.subEntries)
 				{
-					keyValuePair2.Value.icon = keyValuePair2.Value.subEntries[0].icon;
-					keyValuePair2.Value.iconColor = keyValuePair2.Value.subEntries[0].iconColor;
+					if (subEntry.icon != null)
+					{
+						value.icon = subEntry.icon;
+						value.iconColor = subEntry.iconColor;
+						break;
+					}
 				}
+			}
+			if (value.subEntries.Count > 1)
+			{
 				int num = 0;
-				foreach (SubEntry subEntry in keyValuePair2.Value.subEntries)
+				foreach (SubEntry subEntry2 in value.subEntries)
 				{
-					if (subEntry.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry.lockID))
+					if (subEntry2.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry2.lockID))
 					{
 						num++;
 					}
 				}
-				if (keyValuePair2.Value.subEntries.Count > 1)
+				List<ICodexWidget> list3 = new List<ICodexWidget>();
+				list3.Add(new CodexSpacer());
+				list3.Add(new CodexText(string.Format(CODEX.HEADERS.SUBENTRIES, value.subEntries.Count - num, value.subEntries.Count), CodexTextStyle.Subtitle, null));
+				foreach (SubEntry subEntry3 in value.subEntries)
 				{
-					List<ICodexWidget> list3 = new List<ICodexWidget>();
-					list3.Add(new CodexSpacer());
-					list3.Add(new CodexText(string.Format(CODEX.HEADERS.SUBENTRIES, keyValuePair2.Value.subEntries.Count - num, keyValuePair2.Value.subEntries.Count), CodexTextStyle.Subtitle, null));
-					foreach (SubEntry subEntry2 in keyValuePair2.Value.subEntries)
+					if (subEntry3.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry3.lockID))
 					{
-						if (subEntry2.lockID != null && !Game.Instance.unlocks.IsUnlocked(subEntry2.lockID))
-						{
-							list3.Add(new CodexText(UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name)), CodexTextStyle.Body, null));
-						}
-						else
-						{
-							string text2 = UI.StripLinkFormatting((subEntry2.name == null) ? Strings.Get(subEntry2.title) : subEntry2.name);
-							text2 = UI.FormatAsLink(text2, subEntry2.id);
-							list3.Add(new CodexText(text2, CodexTextStyle.Body, null));
-						}
+						list3.Add(new CodexText(UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry3.name)), CodexTextStyle.Body, null));
 					}
-					list3.Add(new CodexSpacer());
-					keyValuePair2.Value.contentContainers.Insert(keyValuePair2.Value.customContentLength, new ContentContainer(list3, ContentContainer.ContentLayout.Vertical));
+					else
+					{
+						string text2 = UI.StripLinkFormatting((subEntry3.name == null) ? Strings.Get(subEntry3.title) : subEntry3.name);
+						text2 = UI.FormatAsLink(text2, subEntry3.id);
+						list3.Add(new CodexText(text2, CodexTextStyle.Body, null));
+					}
+				}
+				list3.Add(new CodexSpacer());
+				list2.Add(new ContentContainer(list3, ContentContainer.ContentLayout.Vertical));
+			}
+			foreach (SubEntry subEntry4 in value.subEntries)
+			{
+				list2.AddRange(subEntry4.contentContainers);
+				foreach (CodexEntry_MadeAndUsed codexEntry_MadeAndUsed2 in subEntry4.contentMadeAndUsed)
+				{
+					Element element2 = ElementLoader.GetElement(codexEntry_MadeAndUsed2.tag);
+					if (element2 != null)
+					{
+						CodexEntryGenerator_Elements.GenerateElementDescriptionContainers(element2, list2);
+					}
+					else
+					{
+						CodexEntryGenerator_Elements.GenerateMadeAndUsedContainers(codexEntry_MadeAndUsed2.tag, list2);
+					}
 				}
 			}
-			for (int i = 0; i < keyValuePair2.Value.subEntries.Count; i++)
-			{
-				keyValuePair2.Value.AddContentContainerRange(keyValuePair2.Value.subEntries[i].contentContainers);
-			}
+			value.contentContainers.Clear();
+			value.AddContentContainerRange(list2);
 		}
 		CodexEntryGenerator.PopulateCategoryEntries(list, delegate(CodexEntry a, CodexEntry b)
 		{
@@ -299,6 +317,10 @@ public static class CodexCache
 								new CodexLargeSpacer()
 							}, ContentContainer.ContentLayout.Vertical));
 							subEntry.layoutPriority = v.layoutPriority;
+							if (v.contentMadeAndUsed.Count > 0)
+							{
+								subEntry.contentMadeAndUsed.AddRange(v.contentMadeAndUsed);
+							}
 						}
 						else
 						{
@@ -457,6 +479,10 @@ public static class CodexCache
 			{
 				CodexCache.AddLockLookup(contentContainer.lockID, entry.id);
 			}
+		}
+		if (entry.contentMadeAndUsed.Count > 0)
+		{
+			codexEntry.contentMadeAndUsed.AddRange(entry.contentMadeAndUsed);
 		}
 	}
 

@@ -20,7 +20,9 @@ public class JetSuitConfig : IEquipmentConfig
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Jet_Suit", global::TUNING.EQUIPMENT.SUITS.SLOT, SimHashes.Steel, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS, "suit_jetpack_kanim", "", "body_jetpack_kanim", 6, list, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, new Tag[]
 		{
 			GameTags.Suit,
-			GameTags.Clothes
+			GameTags.Clothes,
+			GameTags.PedestalDisplayable,
+			GameTags.AirtightSuit
 		}, "JetSuit");
 		equipmentDef.wornID = "Worn_Jet_Suit";
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.JET_SUIT.RECIPE_DESC;
@@ -105,10 +107,6 @@ public class JetSuitConfig : IEquipmentConfig
 		suitTank.SafeCellFlagsToIgnoreOnEquipped = (SafeCellQuery.SafeFlags)464;
 		go.AddComponent<JetSuitTank>();
 		go.AddComponent<HelmetController>().has_jets = true;
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Clothes, false);
-		component.AddTag(GameTags.PedestalDisplayable, false);
-		component.AddTag(GameTags.AirtightSuit, false);
 		Durability durability = go.AddComponent<Durability>();
 		durability.wornEquipmentPrefabID = "Worn_Jet_Suit";
 		durability.durabilityLossPerCycle = global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DECAY;

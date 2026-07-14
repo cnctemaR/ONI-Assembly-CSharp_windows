@@ -62,6 +62,8 @@ namespace ProcGen
 
 		public List<string> clusterTags { get; private set; }
 
+		public string[] startingMinions { get; private set; }
+
 		public ClusterLayout()
 		{
 			this.numRings = 12;
@@ -70,6 +72,7 @@ namespace ProcGen
 			this.clusterAudio = new ClusterLayout.ClusterAudioSettings();
 			this.clusterTags = new List<string>();
 			this.clusterUnlocks = new List<LoreCollectionOverride>();
+			this.startingMinions = null;
 		}
 
 		public static string GetName(string path, string addPrefix)
@@ -150,6 +153,8 @@ namespace ProcGen
 
 			public string musicFirst { get; set; }
 
+			public List<string> musicPlaylist { get; set; }
+
 			public string stingerDay { get; set; }
 
 			public string stingerNight { get; set; }
@@ -158,6 +163,7 @@ namespace ProcGen
 			{
 				this.musicWelcome = "Music_WattsonMessage";
 				this.musicFirst = null;
+				this.musicPlaylist = null;
 				this.stingerDay = "Stinger_Day";
 				this.stingerNight = "Stinger_Loop_Night";
 			}

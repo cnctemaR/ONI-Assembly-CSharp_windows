@@ -19,6 +19,8 @@ namespace ProcGen
 
 		public string densityNoise { get; protected set; }
 
+		public string backwallNoise { get; protected set; }
+
 		public string borderOverride { get; protected set; }
 
 		public int borderOverridePriority { get; protected set; }
@@ -118,7 +120,11 @@ namespace ProcGen
 			SugarWoods,
 			PrehistoricGarden,
 			PrehistoricRaptor,
-			PrehistoricWetlands
+			PrehistoricWetlands,
+			KelpForest,
+			Reef,
+			Abyss,
+			Beach
 		}
 	}
 }

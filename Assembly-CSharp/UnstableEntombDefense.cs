@@ -156,7 +156,7 @@ public class UnstableEntombDefense : GameStateMachine<UnstableEntombDefense, Uns
 				int num2 = Grid.OffsetCell(num, occupiedCellsOffsets[i]);
 				if (Grid.IsValidCell(num2) && Grid.Solid[num2] && Grid.Element[num2].IsUnstable)
 				{
-					SimMessages.Dig(num2, -1, false);
+					SimMessages.Dig(num2, -1, false, false);
 				}
 			}
 		}

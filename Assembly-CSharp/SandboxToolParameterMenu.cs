@@ -62,12 +62,18 @@ public class SandboxToolParameterMenu : KScreen
 			}
 		}));
 		SandboxSettings sandboxSettings2 = this.settings;
-		sandboxSettings2.OnChangeMass = (global::System.Action)Delegate.Combine(sandboxSettings2.OnChangeMass, new global::System.Action(delegate
+		sandboxSettings2.OnChangeTargetLayer = (global::System.Action)Delegate.Combine(sandboxSettings2.OnChangeTargetLayer, new global::System.Action(delegate
+		{
+			string text = ((this.settings.GetIntSetting("SandboxTools.SelectedTargetLayer") == 1) ? UI.SANDBOXTOOLS.SETTINGS.TARGET_LAYER.BACKGROUND : UI.SANDBOXTOOLS.SETTINGS.TARGET_LAYER.FOREGROUND);
+			this.targetLayerSelector.button.GetComponentInChildren<LocText>().text = text;
+		}));
+		SandboxSettings sandboxSettings3 = this.settings;
+		sandboxSettings3.OnChangeMass = (global::System.Action)Delegate.Combine(sandboxSettings3.OnChangeMass, new global::System.Action(delegate
 		{
 			this.massSlider.SetValue(this.settings.GetFloatSetting("SandboxTools.Mass"), false);
 		}));
-		SandboxSettings sandboxSettings3 = this.settings;
-		sandboxSettings3.OnChangeDisease = (global::System.Action)Delegate.Combine(sandboxSettings3.OnChangeDisease, new global::System.Action(delegate
+		SandboxSettings sandboxSettings4 = this.settings;
+		sandboxSettings4.OnChangeDisease = (global::System.Action)Delegate.Combine(sandboxSettings4.OnChangeDisease, new global::System.Action(delegate
 		{
 			Disease disease = Db.Get().Diseases.TryGet(SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedDisease"));
 			if (disease == null)
@@ -78,13 +84,13 @@ public class SandboxToolParameterMenu : KScreen
 			this.diseaseSelector.button.GetComponentsInChildren<Image>()[1].sprite = Assets.GetSprite("germ");
 			this.diseaseCountSlider.SetRange(0f, 1000000f, false);
 		}));
-		SandboxSettings sandboxSettings4 = this.settings;
-		sandboxSettings4.OnChangeDiseaseCount = (global::System.Action)Delegate.Combine(sandboxSettings4.OnChangeDiseaseCount, new global::System.Action(delegate
+		SandboxSettings sandboxSettings5 = this.settings;
+		sandboxSettings5.OnChangeDiseaseCount = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeDiseaseCount, new global::System.Action(delegate
 		{
 			this.diseaseCountSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.DiseaseCount"), false);
 		}));
-		SandboxSettings sandboxSettings5 = this.settings;
-		sandboxSettings5.OnChangeStory = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeStory, new global::System.Action(delegate
+		SandboxSettings sandboxSettings6 = this.settings;
+		sandboxSettings6.OnChangeStory = (global::System.Action)Delegate.Combine(sandboxSettings6.OnChangeStory, new global::System.Action(delegate
 		{
 			string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedStory");
 			Story story = Db.Get().Stories.TryGet(stringSetting);
@@ -96,8 +102,8 @@ public class SandboxToolParameterMenu : KScreen
 			this.storySelector.button.GetComponentInChildren<LocText>().text = Strings.Get(story.StoryTrait.name);
 			this.storySelector.button.GetComponentsInChildren<Image>()[1].sprite = Assets.GetSprite(story.StoryTrait.icon);
 		}));
-		SandboxSettings sandboxSettings6 = this.settings;
-		sandboxSettings6.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings6.OnChangeEntity, new global::System.Action(delegate
+		SandboxSettings sandboxSettings7 = this.settings;
+		sandboxSettings7.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings7.OnChangeEntity, new global::System.Action(delegate
 		{
 			string stringSetting2 = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
 			GameObject gameObject = Assets.TryGetPrefab(stringSetting2);
@@ -122,24 +128,16 @@ public class SandboxToolParameterMenu : KScreen
 				this.entitySelector.button.GetComponentsInChildren<Image>()[1].color = tuple.second;
 			}
 		}));
-		SandboxSettings sandboxSettings7 = this.settings;
-		sandboxSettings7.OnChangeBrushSize = (global::System.Action)Delegate.Combine(sandboxSettings7.OnChangeBrushSize, new global::System.Action(delegate
+		SandboxSettings sandboxSettings8 = this.settings;
+		sandboxSettings8.OnChangeBrushSize = (global::System.Action)Delegate.Combine(sandboxSettings8.OnChangeBrushSize, new global::System.Action(delegate
 		{
 			if (PlayerController.Instance.ActiveTool is BrushTool)
 			{
 				(PlayerController.Instance.ActiveTool as BrushTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
 			}
 		}));
-		SandboxSettings sandboxSettings8 = this.settings;
-		sandboxSettings8.OnChangeNoiseScale = (global::System.Action)Delegate.Combine(sandboxSettings8.OnChangeNoiseScale, new global::System.Action(delegate
-		{
-			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
-			{
-				(PlayerController.Instance.ActiveTool as SandboxSprinkleTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
-			}
-		}));
 		SandboxSettings sandboxSettings9 = this.settings;
-		sandboxSettings9.OnChangeNoiseDensity = (global::System.Action)Delegate.Combine(sandboxSettings9.OnChangeNoiseDensity, new global::System.Action(delegate
+		sandboxSettings9.OnChangeNoiseScale = (global::System.Action)Delegate.Combine(sandboxSettings9.OnChangeNoiseScale, new global::System.Action(delegate
 		{
 			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
 			{
@@ -147,23 +145,31 @@ public class SandboxToolParameterMenu : KScreen
 			}
 		}));
 		SandboxSettings sandboxSettings10 = this.settings;
-		sandboxSettings10.OnChangeTemperature = (global::System.Action)Delegate.Combine(sandboxSettings10.OnChangeTemperature, new global::System.Action(delegate
+		sandboxSettings10.OnChangeNoiseDensity = (global::System.Action)Delegate.Combine(sandboxSettings10.OnChangeNoiseDensity, new global::System.Action(delegate
+		{
+			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
+			{
+				(PlayerController.Instance.ActiveTool as SandboxSprinkleTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
+			}
+		}));
+		SandboxSettings sandboxSettings11 = this.settings;
+		sandboxSettings11.OnChangeTemperature = (global::System.Action)Delegate.Combine(sandboxSettings11.OnChangeTemperature, new global::System.Action(delegate
 		{
 			this.temperatureSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.Temperature"), false), false);
 		}));
-		SandboxSettings sandboxSettings11 = this.settings;
-		sandboxSettings11.OnChangeAdditiveTemperature = (global::System.Action)Delegate.Combine(sandboxSettings11.OnChangeAdditiveTemperature, new global::System.Action(delegate
+		SandboxSettings sandboxSettings12 = this.settings;
+		sandboxSettings12.OnChangeAdditiveTemperature = (global::System.Action)Delegate.Combine(sandboxSettings12.OnChangeAdditiveTemperature, new global::System.Action(delegate
 		{
 			this.temperatureAdditiveSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.TemperatureAdditive"), true), false);
 		}));
 		Game.Instance.Subscribe(999382396, new Action<object>(this.OnTemperatureUnitChanged));
-		SandboxSettings sandboxSettings12 = this.settings;
-		sandboxSettings12.OnChangeAdditiveStress = (global::System.Action)Delegate.Combine(sandboxSettings12.OnChangeAdditiveStress, new global::System.Action(delegate
+		SandboxSettings sandboxSettings13 = this.settings;
+		sandboxSettings13.OnChangeAdditiveStress = (global::System.Action)Delegate.Combine(sandboxSettings13.OnChangeAdditiveStress, new global::System.Action(delegate
 		{
 			this.stressAdditiveSlider.SetValue(this.settings.GetFloatSetting("SandbosTools.StressAdditive"), false);
 		}));
-		SandboxSettings sandboxSettings13 = this.settings;
-		sandboxSettings13.OnChangeMoraleAdjustment = (global::System.Action)Delegate.Combine(sandboxSettings13.OnChangeMoraleAdjustment, new global::System.Action(delegate
+		SandboxSettings sandboxSettings14 = this.settings;
+		sandboxSettings14.OnChangeMoraleAdjustment = (global::System.Action)Delegate.Combine(sandboxSettings14.OnChangeMoraleAdjustment, new global::System.Action(delegate
 		{
 			this.moraleSlider.SetValue((float)this.settings.GetIntSetting("SandbosTools.MoraleAdjustment"), false);
 		}));
@@ -172,6 +178,7 @@ public class SandboxToolParameterMenu : KScreen
 	public void DisableParameters()
 	{
 		this.elementSelector.row.SetActive(false);
+		this.targetLayerSelector.row.SetActive(false);
 		this.entitySelector.row.SetActive(false);
 		this.brushRadiusSlider.row.SetActive(false);
 		this.noiseScaleSlider.row.SetActive(false);
@@ -193,6 +200,7 @@ public class SandboxToolParameterMenu : KScreen
 		this.ConfigureDiseaseSelector();
 		this.ConfigureEntitySelector();
 		this.ConfigureStoryTraitSelector();
+		this.ConfigureTargetLayerSelector();
 		this.SpawnSelector(this.entitySelector);
 		this.SpawnSelector(this.elementSelector);
 		this.SpawnSelector(this.storySelector);
@@ -201,6 +209,7 @@ public class SandboxToolParameterMenu : KScreen
 		this.SpawnSlider(this.noiseDensitySlider);
 		this.SpawnSlider(this.massSlider);
 		this.SpawnSlider(this.temperatureSlider);
+		this.SpawnSelector(this.targetLayerSelector);
 		this.SpawnSlider(this.temperatureAdditiveSlider);
 		this.SpawnSlider(this.stressAdditiveSlider);
 		this.SpawnSelector(this.diseaseSelector);
@@ -307,7 +316,8 @@ public class SandboxToolParameterMenu : KScreen
 		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.CreatureBrain))
 		{
 			CreatureBrain brain = gameObject.GetComponent<CreatureBrain>();
-			if (!list2.Contains(brain.species) && Game.IsCorrectDlcActiveForCurrentSave(brain.GetComponent<KPrefabID>()))
+			KPrefabID component = brain.GetComponent<KPrefabID>();
+			if (!component.HasTag(GameTags.HideFromSpawnTool) && !list2.Contains(brain.species) && Game.IsCorrectDlcActiveForCurrentSave(component))
 			{
 				global::Tuple<Sprite, Color> tuple = null;
 				CodexEntry codexEntry;
@@ -318,8 +328,8 @@ public class SandboxToolParameterMenu : KScreen
 				list2.Add(brain.species);
 				SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter6 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(Strings.Get("STRINGS.CREATURES.FAMILY_PLURAL." + brain.species.ToString().ToUpper()), delegate(object entity)
 				{
-					CreatureBrain component = Assets.GetPrefab((entity as KPrefabID).PrefabID()).GetComponent<CreatureBrain>();
-					return (entity as KPrefabID).HasTag(GameTags.CreatureBrain) && component.species == brain.species;
+					CreatureBrain component2 = Assets.GetPrefab((entity as KPrefabID).PrefabID()).GetComponent<CreatureBrain>();
+					return (entity as KPrefabID).HasTag(GameTags.CreatureBrain) && component2.species == brain.species;
 				}, searchFilter5, tuple);
 				list.Add(searchFilter6);
 			}
@@ -355,7 +365,7 @@ public class SandboxToolParameterMenu : KScreen
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter11 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.INDUSTRIAL_PRODUCTS, delegate(object entity)
 		{
 			KPrefabID kprefabID7 = entity as KPrefabID;
-			return !(kprefabID7 == null) && !(kprefabID7.gameObject == null) && !kprefabID7.HasTag(GameTags.DeprecatedContent) && Game.IsCorrectDlcActiveForCurrentSave(kprefabID7) && (kprefabID7.HasTag(GameTags.IndustrialIngredient) || kprefabID7.HasTag(GameTags.TechComponents) || kprefabID7.HasTag(GameTags.IndustrialProduct) || kprefabID7.HasTag(GameTags.Medicine) || kprefabID7.HasTag(GameTags.MedicalSupplies) || kprefabID7.HasTag(GameTags.ChargedPortableBattery));
+			return !(kprefabID7 == null) && !(kprefabID7.gameObject == null) && !kprefabID7.HasTag(GameTags.DeprecatedContent) && Game.IsCorrectDlcActiveForCurrentSave(kprefabID7) && (kprefabID7.HasTag(GameTags.IndustrialIngredient) || kprefabID7.HasTag(GameTags.TechComponents) || kprefabID7.HasTag(GameTags.IndustrialProduct) || kprefabID7.HasTag(GameTags.Medicine) || kprefabID7.HasTag(GameTags.MedicalSupplies) || kprefabID7.HasTag(GameTags.ChargedPortableBattery) || kprefabID7.HasTag(TableSaltConfig.TAG) || kprefabID7.HasTag(GameTags.MoltShell));
 		}, null, Def.GetUISprite(Assets.GetPrefab("BasicCure"), "ui", false));
 		list.Add(searchFilter11);
 		SandboxToolParameterMenu.SelectorValue.SearchFilter searchFilter12 = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.ENTITIES.ORE_CHUNKS, delegate(object entity)
@@ -401,15 +411,15 @@ public class SandboxToolParameterMenu : KScreen
 		}, (object entity) => (entity as KPrefabID).GetProperName(), null, delegate(object entity)
 		{
 			GameObject prefab = Assets.GetPrefab((entity as KPrefabID).PrefabTag);
-			KPrefabID component2 = prefab.GetComponent<KPrefabID>();
+			KPrefabID component3 = prefab.GetComponent<KPrefabID>();
 			if (prefab != null)
 			{
-				if (component2.HasTag(GameTags.BaseMinion))
+				if (component3.HasTag(GameTags.BaseMinion))
 				{
 					return new global::Tuple<Sprite, Color>(BaseMinionConfig.GetSpriteForMinionModel((entity as KPrefabID).PrefabID()), Color.white);
 				}
-				KBatchedAnimController component3 = prefab.GetComponent<KBatchedAnimController>();
-				if (component3 != null && component3.AnimFiles.Length != 0 && component3.AnimFiles[0] != null)
+				KBatchedAnimController component4 = prefab.GetComponent<KBatchedAnimController>();
+				if (component4 != null && component4.AnimFiles.Length != 0 && component4.AnimFiles[0] != null)
 				{
 					return Def.GetUISprite(prefab, "ui", false);
 				}
@@ -425,6 +435,15 @@ public class SandboxToolParameterMenu : KScreen
 		{
 			this.settings.SetStringSetting("SandboxTools.SelectedStory", ((Story)story).Id);
 		}, (object story) => Strings.Get((story as Story).StoryTrait.name), null, (object story) => new global::Tuple<Sprite, Color>(Assets.GetSprite(((Story)story).StoryTrait.icon), Color.white), UI.SANDBOXTOOLS.SETTINGS.SPAWN_STORY_TRAIT.NAME, null);
+	}
+
+	private void ConfigureTargetLayerSelector()
+	{
+		object[] array = new object[] { 0, 1 };
+		this.targetLayerSelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object layer)
+		{
+			this.settings.SetIntSetting("SandboxTools.SelectedTargetLayer", (int)layer);
+		}, (object layer) => ((int)layer == 1) ? UI.SANDBOXTOOLS.SETTINGS.TARGET_LAYER.BACKGROUND : UI.SANDBOXTOOLS.SETTINGS.TARGET_LAYER.FOREGROUND, null, (object layer) => new global::Tuple<Sprite, Color>(Assets.GetSprite("dash"), Color.white), UI.SANDBOXTOOLS.SETTINGS.TARGET_LAYER.NAME, null);
 	}
 
 	private void ConfigureDiseaseSelector()
@@ -831,6 +850,8 @@ public class SandboxToolParameterMenu : KScreen
 	{
 		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.Temperature", Mathf.Clamp(GameUtil.GetTemperatureConvertedToKelvin(value), 1f, 9999f));
 	}, 0);
+
+	public SandboxToolParameterMenu.SelectorValue targetLayerSelector;
 
 	public SandboxToolParameterMenu.SliderValue temperatureAdditiveSlider = new SandboxToolParameterMenu.SliderValue(-15f, 15f, "cold", "hot", GameUtil.GetTemperatureUnitSuffix(), UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.NAME, delegate(float value)
 	{

@@ -71,5 +71,7 @@ public static class PacuTuning
 
 	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER2;
 
-	public static float EGG_MASS = 4f;
+	public static float EGG_MASS = 0.75f;
+
+	public static float EGG_SHELL_RATIO = 0f;
 }

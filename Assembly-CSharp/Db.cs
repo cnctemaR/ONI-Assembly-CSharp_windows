@@ -71,6 +71,8 @@ public class Db : EntityModifierSet
 		this.Shirts = new Shirts();
 		this.Expressions = new Expressions(this.Root);
 		this.Emotes = new Emotes(this.Root);
+		Effect effect = this.effects.Get("SoreBack");
+		effect.SetEmote(this.Emotes.Minion.SoreBack, effect.emoteCooldown);
 		this.Thoughts = new Thoughts(this.Root);
 		this.CritterEmotions = new CritterEmotions(this.Root);
 		this.Dreams = new Dreams(this.Root);
@@ -113,9 +115,9 @@ public class Db : EntityModifierSet
 		this.OrbitalTypeCategories = new OrbitalTypeCategories(this.Root);
 		this.ArtableStatuses = new ArtableStatuses(this.Root);
 		this.Permits = new PermitResources(this.Root);
-		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
-		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
-		this.effects.Add(effect);
+		Effect effect2 = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, -1f, 0f, null, "");
+		effect2.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
+		this.effects.Add(effect2);
 		this.Spices = new Spices(this.Root);
 		this.CollectResources(this.Root, this.ResourceTable);
 	}

@@ -18,7 +18,6 @@ public class GravitasClockSquareConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Glass, true);
 		component.Temperature = 294.15f;
-		LoreBearerUtil.AddLoreTo(gameObject, new LoreBearerAction(LoreBearerUtil.UnlockNextEmail));
 		gameObject.AddOrGet<Demolishable>();
 		return gameObject;
 	}

@@ -250,7 +250,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = "- Critter taming and mood bonus";
 
-				public static LocString TOOLTIP = "A stable enables Grooming Station, Critter Condo, Critter Fountain, Shearing Station and Milking Station use";
+				public static LocString TOOLTIP = "A stable enables both land-based and aquatic Grooming Station, Critter Condo, Critter Fountain, Shearing Station and Milking Station use";
 			}
 
 			public class REC_ROOM
@@ -551,13 +551,13 @@ namespace STRINGS
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.COOKTOP.NAME;
 			}
 
-			public class REFRIGERATOR
+			public class KITCHENREFRIGERATOR
 			{
-				public static LocString NAME = UI.FormatAsLink("Refrigerator", "REFRIGERATOR");
+				public static LocString NAME = UI.FormatAsLink("Refrigerator", "KITCHENREFRIGERATOR");
 
-				public static LocString DESCRIPTION = "Requires a single Refrigerator";
+				public static LocString DESCRIPTION = "Requires a single Refrigerator or Mini Fridge";
 
-				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.REFRIGERATOR.NAME;
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.KITCHENREFRIGERATOR.NAME;
 			}
 
 			public class RECBUILDING
@@ -829,6 +829,15 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Raises the ambient temperature";
 
 				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.WARMINGSTATION.NAME;
+			}
+
+			public class SUBMERGIBLE
+			{
+				public static LocString NAME = UI.FormatAsLink("Submergible", "REQUIREMENTCLASSSUBMERGIBLE");
+
+				public static LocString DESCRIPTION = "Can operate while submerged in liquid";
+
+				public static LocString CONFLICT_DESCRIPTION = ROOMS.CRITERIA.SUBMERGIBLE.NAME;
 			}
 
 			public class GENERATORTYPE

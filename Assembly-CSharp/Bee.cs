@@ -74,24 +74,20 @@ public class Bee : KMonoBehaviour
 
 	public KPrefabID FindHiveInRoom()
 	{
-		List<BeeHive.StatesInstance> list = new List<BeeHive.StatesInstance>();
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
+		Navigator component = base.gameObject.GetComponent<Navigator>();
+		int num = int.MaxValue;
+		KPrefabID kprefabID = null;
 		foreach (BeeHive.StatesInstance statesInstance in Components.BeeHives.Items)
 		{
 			if (Game.Instance.roomProber.GetRoomOfGameObject(statesInstance.gameObject) == roomOfGameObject)
 			{
-				list.Add(statesInstance);
-			}
-		}
-		int num = int.MaxValue;
-		KPrefabID kprefabID = null;
-		foreach (BeeHive.StatesInstance statesInstance2 in list)
-		{
-			int navigationCost = base.gameObject.GetComponent<Navigator>().GetNavigationCost(Grid.PosToCell(statesInstance2.transform.GetLocalPosition()));
-			if (navigationCost < num)
-			{
-				num = navigationCost;
-				kprefabID = statesInstance2.GetComponent<KPrefabID>();
+				int navigationCost = component.GetNavigationCost(Grid.PosToCell(statesInstance.transform.GetLocalPosition()));
+				if (navigationCost < num)
+				{
+					num = navigationCost;
+					kprefabID = statesInstance.GetComponent<KPrefabID>();
+				}
 			}
 		}
 		return kprefabID;

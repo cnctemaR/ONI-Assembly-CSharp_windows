@@ -440,6 +440,36 @@ namespace Database
 					}
 				}, null, Db.Get().ArtifactDropRates.None, 384000000, 383980000, 60, true));
 			}
+			if (DlcManager.IsContentSubscribed("DLC5_ID"))
+			{
+				this.DLC5AquaticSpaceDestination = base.Add(new SpaceDestinationType("DLC5AquaticSpaceDestination", parent, UI.SPACEDESTINATIONS.PLANETS.DLC5AQUATICSPACEDESCRIPTION.NAME, UI.SPACEDESTINATIONS.PLANETS.DLC5AQUATICSPACEDESCRIPTION.DESCRIPTION, 96, "aquatic_base", new Dictionary<SimHashes, MathUtil.MinMax>
+				{
+					{
+						SimHashes.ZincOre,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Corallium,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.SiltStone,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Basalt,
+						new MathUtil.MinMax(100f, 200f)
+					},
+					{
+						SimHashes.Coquina,
+						new MathUtil.MinMax(100f, 200f)
+					}
+				}, new Dictionary<string, int>
+				{
+					{ "WoodDeer", 3 },
+					{ "UrchinPlantSeed", 4 }
+				}, Db.Get().ArtifactDropRates.Good, 384000000, 383980000, 60, true));
+			}
 		}
 
 		public SpaceDestinationType Satellite;
@@ -497,6 +527,8 @@ namespace Database
 		public SpaceDestinationType DLC4PrehistoricDemoliorSpaceDestination2;
 
 		public SpaceDestinationType DLC4PrehistoricDemoliorSpaceDestination3;
+
+		public SpaceDestinationType DLC5AquaticSpaceDestination;
 
 		public static Dictionary<SimHashes, MathUtil.MinMax> extendedElementTable = new Dictionary<SimHashes, MathUtil.MinMax>
 		{

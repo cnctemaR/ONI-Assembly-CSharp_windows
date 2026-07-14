@@ -348,6 +348,8 @@ namespace STRINGS
 
 		public static LocString PRODUCTINFO_MISSINGRESOURCES_TITLE = "Requires {0}: {1}";
 
+		public static LocString PRODUCTINFO_INSUFFICIENTRESOURCES_TITLE = "Insufficient {0} available";
+
 		public static LocString PRODUCTINFO_MISSINGRESOURCES_HOVER = "Missing resources";
 
 		public static LocString PRODUCTINFO_MISSINGRESOURCES_DESC = "{0} has yet to be discovered";
@@ -458,6 +460,8 @@ namespace STRINGS
 
 		public static LocString WELCOMEMESSAGEBODY_DLC4_PREHISTORIC_SHATTERED = "Impactor asteroid collision in 10 cycles!\n\nMy scans indicate that the impact will trigger the eruption of all geysers that surround our landing site. There are...so many.\n\nInitiate survival procedures immediately.";
 
+		public static LocString WELCOMEMESSAGEBODY_DLC5_AQUATIC = "This asteroid has suffered extensive flooding. My scans show traces of a previous party of explorers, but... only one remains.\n\nIt's imperative that I find and recruit the survivor to my colony. Their adaptations may well be the key to plumbing the depths of this waterlogged world.";
+
 		public static LocString WELCOMEMESSAGEBEGIN = "BEGIN";
 
 		public static LocString VIEWDUPLICANTS = "Choose a Blueprint";
@@ -552,11 +556,11 @@ namespace STRINGS
 			public static LocString NAME_ITAL = "<i>" + UI.VANILLA.NAME + "</i>";
 		}
 
-		public class DLC1
+		public class EXPANSION1
 		{
 			public static LocString NAME = "Spaced Out!";
 
-			public static LocString NAME_ITAL = "<i>" + UI.DLC1.NAME + "</i>";
+			public static LocString NAME_ITAL = "<i>" + UI.EXPANSION1.NAME + "</i>";
 		}
 
 		public class DLC2
@@ -584,6 +588,15 @@ namespace STRINGS
 			public static LocString NAME_ITAL = "<i>" + UI.DLC4.NAME + "</i>";
 
 			public static LocString MIXING_TOOLTIP = UI.DLC4.NAME_ITAL + " features carnivorous flora and fauna, biodiesel, and a focus on time-sensitive surface defense";
+		}
+
+		public class DLC5
+		{
+			public static LocString NAME = "The Aquatic Planet Pack";
+
+			public static LocString NAME_ITAL = "<i>" + UI.DLC5.NAME + "</i>";
+
+			public static LocString MIXING_TOOLTIP = UI.DLC5.NAME_ITAL + " features underwater flora and fauna, diving deep for resources, and a splashy new survivor";
 		}
 
 		public class COSMETIC1
@@ -1999,7 +2012,7 @@ namespace STRINGS
 						UI.FormatAsLink("Peat", "PEAT"),
 						", ",
 						UI.FormatAsLink("Amber", "AMBER"),
-						" and ",
+						", and ",
 						UI.FormatAsLink("Shale", "SHALE"),
 						".\n\n",
 						UI.FormatAsLink("Space mining", "EXOBASESDLC1"),
@@ -2021,7 +2034,7 @@ namespace STRINGS
 						UI.FormatAsLink("Peat", "PEAT"),
 						", ",
 						UI.FormatAsLink("Amber", "AMBER"),
-						" and ",
+						", and ",
 						UI.FormatAsLink("Shale", "SHALE"),
 						".\n\n",
 						UI.FormatAsLink("Space mining", "EXOBASESDLC1"),
@@ -2087,6 +2100,54 @@ namespace STRINGS
 						UI.FormatAsLink("Liquid Oxygen", "LIQUIDOXYGEN"),
 						", and ",
 						UI.FormatAsLink("Liquid Hydrogen", "LIQUIDHYDROGEN"),
+						".\n\n",
+						UI.FormatAsLink("Space mining", "EXOBASESDLC1"),
+						" requires a rocket equipped with a ",
+						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+						" and a cargo module."
+					});
+				}
+
+				public class DLC5AQUATICMIXINGFIELD
+				{
+					public static LocString NAME = "Zinc Ore Field";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The harvestable remains of a planet containing ",
+						UI.FormatAsLink("Zinc Ore", "ZINCORE"),
+						", ",
+						UI.FormatAsLink("Silt Stone", "SILTSTONE"),
+						", ",
+						UI.FormatAsLink("Coquina", "COQUINA"),
+						", ",
+						UI.FormatAsLink("Corallium", "CORALLIUM"),
+						", and ",
+						UI.FormatAsLink("Basalt", "BASALT"),
+						".\n\n",
+						UI.FormatAsLink("Space mining", "EXOBASESDLC1"),
+						" requires a rocket equipped with a ",
+						UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+						" and a cargo module."
+					});
+				}
+
+				public class DLC5AQUATICOREFIELD
+				{
+					public static LocString NAME = "Zinc Ore Field";
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The harvestable remains of a planet containing ",
+						UI.FormatAsLink("Zinc Ore", "ZINCORE"),
+						", ",
+						UI.FormatAsLink("Siltstone", "SILTSTONE"),
+						", ",
+						UI.FormatAsLink("Coquina", "COQUINA"),
+						", ",
+						UI.FormatAsLink("Corallium", "CORALLIUM"),
+						", and ",
+						UI.FormatAsLink("Basalt", "BASALT"),
 						".\n\n",
 						UI.FormatAsLink("Space mining", "EXOBASESDLC1"),
 						" requires a rocket equipped with a ",
@@ -2524,6 +2585,13 @@ namespace STRINGS
 
 					public static LocString DESCRIPTION = "The hot metallic remains of an obliterated asteroid containing a renewable source of iridium.";
 				}
+
+				public class DLC5AQUATICSPACEDESCRIPTION
+				{
+					public static LocString NAME = "Extinct Ocean";
+
+					public static LocString DESCRIPTION = "The remains of an aquatic world primarily composed of harvestable corallium, coquina, and zinc ore.";
+				}
 			}
 
 			public class GIANTS
@@ -2738,7 +2806,7 @@ namespace STRINGS
 
 				public static LocString DESCRIPTION = "No space colony is complete without one.";
 
-				public static LocString ARTIFACT = "The bottom of this lamp contains the words 'Property of the Atmospheric Sciences Department'.\n\nIt's worth noting that the Gravitas Atmospheric Sciences Department once simulated an experiment testing the feasibility of survival in an environment filled with noble gasses, similar to the ones contained within this device.";
+				public static LocString ARTIFACT = "The bottom of this lamp contains the words 'Property of the Atmospheric Sciences Department'.\n\nIt's worth noting that the Gravitas Atmospheric Sciences Department once simulated an experiment testing the feasibility of survival in an environment filled with noble gases, similar to the ones contained within this device.";
 			}
 
 			public class MOLDAVITE
@@ -3054,6 +3122,17 @@ namespace STRINGS
 					public static LocString TOOLTIP = "Adjust type of element";
 				}
 
+				public class TARGET_LAYER
+				{
+					public static LocString NAME = "Target Layer";
+
+					public static LocString TOOLTIP = "Adjust which layer the brush tools will affect\n\nL- Backwall\nR- Far backwall";
+
+					public static LocString FOREGROUND = "Foreground";
+
+					public static LocString BACKGROUND = "Background";
+				}
+
 				public class SPRINKLE
 				{
 					public static LocString NAME = "Sprinkle";
@@ -3366,9 +3445,9 @@ namespace STRINGS
 
 					public class EXPANSION1ACTIVE
 					{
-						public static LocString NAME = UI.DLC1.NAME_ITAL + " Content Enabled";
+						public static LocString NAME = UI.EXPANSION1.NAME_ITAL + " Content Enabled";
 
-						public static LocString TOOLTIP = "If checked, content from the " + UI.DLC1.NAME_ITAL + " Expansion will be available";
+						public static LocString TOOLTIP = "If checked, content from the " + UI.EXPANSION1.NAME_ITAL + " Expansion will be available";
 
 						public static class LEVELS
 						{
@@ -3376,14 +3455,14 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Disabled";
 
-								public static LocString TOOLTIP = "Unchecked: " + UI.DLC1.NAME_ITAL + " Content is turned off (Default)";
+								public static LocString TOOLTIP = "Unchecked: " + UI.EXPANSION1.NAME_ITAL + " Content is turned off (Default)";
 							}
 
 							public static class ENABLED
 							{
 								public static LocString NAME = "Enabled";
 
-								public static LocString TOOLTIP = "Checked: " + UI.DLC1.NAME_ITAL + " Content is turned on";
+								public static LocString TOOLTIP = "Checked: " + UI.EXPANSION1.NAME_ITAL + " Content is turned on";
 							}
 						}
 					}
@@ -4124,10 +4203,6 @@ namespace STRINGS
 
 				public static LocString SAVEANDQUITDESKTOP = "SAVE AND QUIT";
 
-				public static LocString WISHLIST_AD = "Available now";
-
-				public static LocString WISHLIST_AD_TOOLTIP = "<color=#ffff00ff><b>Click to view it in the store</b></color>";
-
 				public class DLC
 				{
 					public static LocString ACTIVATE_EXPANSION1 = "ENABLE DLC";
@@ -4152,15 +4227,19 @@ namespace STRINGS
 
 					public static LocString CONTENT_ACTIVE_TOOLTIP = "<b>This DLC is enabled</b>\n\nFind it in the destination selection screen when starting a new game, or in the Load Game screen for existing DLC-enabled saves";
 
-					public static LocString COSMETIC_CONTENT_ACTIVE_TOOLTIP = "<b>This DLC is enabled</b>\n\nFind it in the supply closet screen.";
+					public static LocString COSMETIC_CONTENT_ACTIVE_TOOLTIP = "Filter cosmetic blueprints by DLC using the dropdown menu in the All screen";
 
 					public static LocString CONTENT_OWNED_NOTINSTALLED_LABEL = "";
 
 					public static LocString CONTENT_OWNED_NOTINSTALLED_TOOLTIP = "This DLC is owned but not currently installed";
 
-					public static LocString CONTENT_NOTOWNED_LABEL = "Available Now";
+					public static LocString CONTENT_NOTOWNED_PURCHASE_LABEL = "Available Now";
 
-					public static LocString CONTENT_NOTOWNED_TOOLTIP = "This DLC is available now!";
+					public static LocString CONTENT_NOTOWNED_PURCHASE_TOOLTIP = "<color=#ffff00ff><b>Click to view this DLC in the store</b></color>";
+
+					public static LocString CONTENT_NOTOWNED_WISHLIST_LABEL = "Wishlist Now";
+
+					public static LocString CONTENT_NOTOWNED_WISHLIST_TOOLTIP = "<color=#ffff00ff><b>Click to view this DLC in the store</b></color>";
 				}
 			}
 
@@ -4371,17 +4450,17 @@ namespace STRINGS
 
 				public static LocString LOAD_MORE_COLONIES_BUTTON = "Load more...";
 
-				public static LocString VANILLA_RESTART = "Loading this colony will require restarting the game with " + UI.DLC1.NAME_ITAL + " content disabled";
+				public static LocString VANILLA_RESTART = "Loading this colony will require restarting the game with " + UI.EXPANSION1.NAME_ITAL + " content disabled";
 
-				public static LocString EXPANSION1_RESTART = "Loading this colony will require restarting the game with " + UI.DLC1.NAME_ITAL + " content enabled";
+				public static LocString EXPANSION1_RESTART = "Loading this colony will require restarting the game with " + UI.EXPANSION1.NAME_ITAL + " content enabled";
 
-				public static LocString UNSUPPORTED_VANILLA_TEMP = "<b><color=#F44A47FF>This save file is from the base version of the game and currently cannot be loaded while " + UI.DLC1.NAME_ITAL + " is installed.</color></b>";
+				public static LocString UNSUPPORTED_VANILLA_TEMP = "<b><color=#F44A47FF>This save file is from the base version of the game and currently cannot be loaded while " + UI.EXPANSION1.NAME_ITAL + " is installed.</color></b>";
 
 				public static LocString CONTENT = "Content";
 
 				public static LocString VANILLA_CONTENT = "Vanilla FIXME";
 
-				public static LocString EXPANSION1_CONTENT = UI.DLC1.NAME_ITAL + " Expansion FIXME";
+				public static LocString EXPANSION1_CONTENT = UI.EXPANSION1.NAME_ITAL + " Expansion FIXME";
 
 				public static LocString SAVE_INFO = "{0} saves  {1} autosaves  {2}";
 
@@ -4725,7 +4804,7 @@ namespace STRINGS
 
 				public static LocString UNINSTALLED = "UNINSTALLED";
 
-				public static LocString CANNOT_INSTALL = "FAILED INSTALL";
+				public static LocString CANNOT_INSTALL = "INSTALL FAILED";
 
 				public static LocString REQUIRES_RESTART = "RESTART REQUIRED";
 
@@ -4763,13 +4842,13 @@ namespace STRINGS
 
 					public static LocString UNINSTALLED = "Uninstalled";
 
-					public static LocString CANNOT_INSTALL = "Install failed due to disk i/o errors";
+					public static LocString CANNOT_INSTALL = "Encountered an error while reading/writing to disk";
 
 					public static LocString BAD_WORLD_GEN = "Encountered an error while loading file";
 
 					public static LocString DEACTIVATED = "Deactivated due to errors";
 
-					public static LocString ALL_MODS_DISABLED_EARLY_ACCESS = "Deactivated due to Early Access for " + UI.DLC1.NAME_ITAL;
+					public static LocString ALL_MODS_DISABLED_EARLY_ACCESS = "Deactivated due to Early Access for " + UI.EXPANSION1.NAME_ITAL;
 				}
 			}
 
@@ -4816,7 +4895,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "ALL MODS DISABLED";
 
-					public static LocString MESSAGE = "Mod support is temporarily suspended for the initial launch of " + UI.DLC1.NAME_ITAL + " into Early Access:\n{0}";
+					public static LocString MESSAGE = "Mod support is temporarily suspended for the initial launch of " + UI.EXPANSION1.NAME_ITAL + " into Early Access:\n{0}";
 				}
 
 				public class LOAD_FAILURE
@@ -5348,7 +5427,7 @@ namespace STRINGS
 
 				public static LocString MERGEDOWNCHANGES_FOOD = "•<indent=20px>Fridges are more effective for early-game food storage</indent>\n•<indent=20px><b>Both</b> freezing temperatures and a sterile gas are needed for <b>total food preservation</b>.</indent>";
 
-				public static LocString MERGEDOWNCHANGES_AIRFILTER = "•<indent=20px>" + BUILDINGS.PREFABS.AIRFILTER.NAME + " now requires <b>5w Power</b>.</indent>\n•<indent=20px>Duplicants will get <b>Stinging Eyes</b> from gasses such as chlorine and hydrogen.</indent>";
+				public static LocString MERGEDOWNCHANGES_AIRFILTER = "•<indent=20px>" + BUILDINGS.PREFABS.AIRFILTER.NAME + " now requires <b>5w Power</b>.</indent>\n•<indent=20px>Duplicants will get <b>Stinging Eyes</b> from gases such as chlorine and hydrogen.</indent>";
 
 				public static LocString MERGEDOWNCHANGES_SIMULATION = "•<indent=20px>Many <b>simulation bugs</b> have been fixed.</indent>\n•<indent=20px>This may <b>change the effectiveness</b> of certain contraptions and " + BUILDINGS.PREFABS.STEAMTURBINE2.NAME + " setups.</indent>";
 
@@ -6716,6 +6795,55 @@ namespace STRINGS
 					public static LocString DESCRIPTION = UI.FormatAsLink("Neutronium", "UNOBTANIUM") + " Mining";
 				}
 
+				public class CAN_SWIM
+				{
+					public static LocString DESCRIPTION = UI.PRE_KEYWORD + "Novice" + UI.PST_KEYWORD + " swimming ability";
+				}
+
+				public class INCREASE_SWIMMER_STAMINA_IN_LIQUID
+				{
+					public static LocString DESCRIPTION = string.Concat(new string[]
+					{
+						"Reduced ",
+						UI.PRE_KEYWORD,
+						"Stamina",
+						UI.PST_KEYWORD,
+						" consumption when swimming"
+					});
+				}
+
+				public class INCREASE_SWIMMER_ATHLETICS_IN_LIQUID
+				{
+					public static LocString DESCRIPTION = "Increased swimming speed";
+				}
+
+				public class REDUCE_SALTWATER_SWIMMER_EYE_IRRITATION
+				{
+					public static LocString DESCRIPTION = string.Concat(new string[]
+					{
+						"Increased resistance to ",
+						UI.PRE_KEYWORD,
+						"Eye Irritation",
+						UI.PST_KEYWORD,
+						" caused by ",
+						UI.PRE_KEYWORD,
+						"Salt Water",
+						UI.PST_KEYWORD
+					});
+				}
+
+				public class IMPROVED_LIQUID_TEMPERATURE_TOLERANCE
+				{
+					public static LocString DESCRIPTION = string.Concat(new string[]
+					{
+						"Increased resistance to ",
+						UI.PRE_KEYWORD,
+						"Chilly Surroundings",
+						UI.PST_KEYWORD,
+						" when in liquid"
+					});
+				}
+
 				public class CAN_ART
 				{
 					public static LocString DESCRIPTION = string.Concat(new string[]
@@ -6825,6 +6953,11 @@ namespace STRINGS
 				public class CAN_DEEP_FRYER
 				{
 					public static LocString DESCRIPTION = BUILDINGS.PREFABS.DEEPFRYER.NAME + " Usage";
+				}
+
+				public class CAN_SUSHI_BAR
+				{
+					public static LocString DESCRIPTION = BUILDINGS.PREFABS.SUSHIBAR.NAME + " Usage";
 				}
 
 				public class CAN_SPICE_GRINDER
@@ -6970,6 +7103,11 @@ namespace STRINGS
 				public class EFFICIENT_BIONIC_GEARS
 				{
 					public static LocString DESCRIPTION = "50% Grinding Gears penalty reduction";
+				}
+
+				public class CAN_FARM_CLAMS
+				{
+					public static LocString DESCRIPTION = UI.FormatAsLink("Clampum", "CLAM") + " farming";
 				}
 			}
 
@@ -7291,6 +7429,8 @@ namespace STRINGS
 
 				public static LocString BASE_GAME_FOLDER_NAME = "Base Game";
 
+				public static LocString LORE_OVERRIDE_WARNING = "The new template has fewer lore overrides ({newCount}) than the existing one ({oldCount}). Save anyway?";
+
 				public class SELECTION_INFO_PANEL
 				{
 					public static LocString TOTAL_MASS = "Total mass: {0}";
@@ -7306,6 +7446,10 @@ namespace STRINGS
 					public static LocString TOTAL_RADS = "Total rads: {0}";
 
 					public static LocString AVERAGE_RADS = "Average rads: {0}";
+
+					public static LocString AVERAGE_GERMS = "Average germs: {0}";
+
+					public static LocString TOTAL_GERMS = "Total germs: {0}";
 				}
 			}
 		}
@@ -7952,6 +8096,10 @@ namespace STRINGS
 				UI.PST_KEYWORD,
 				"{0}"
 			});
+
+			public static LocString VITALS_CHECKBOX_GERM_PRESENCE = "This plant is currently exposed to {0}\n\nThis is essential for growth";
+
+			public static LocString VITALS_CHECKBOX_GERM_ABSENT = "This plant requires exposure to {0}";
 		}
 
 		public class CLUSTERMAP
@@ -9027,7 +9175,7 @@ namespace STRINGS
 							UI.PRE_KEYWORD,
 							"Robo-Pilot",
 							UI.PST_KEYWORD,
-							" has insufficient  ",
+							" has insufficient ",
 							UI.PRE_KEYWORD,
 							"Power",
 							UI.PST_KEYWORD,
@@ -9231,7 +9379,7 @@ namespace STRINGS
 
 			public class GEYSERS
 			{
-				public static LocString DESC = "Geysers and Fumaroles emit elements at variable intervals. They provide a sustainable source of material, albeit in typically low volumes.\n\nThe variable factors of a geyser are:\n\n    • Emission element \n    • Emission temperature \n    • Emission mass \n    • Cycle length \n    • Dormancy duration \n    • Disease emitted";
+				public static LocString DESC = "Geysers and Fumaroles emit elements at variable intervals. They provide a sustainable source of material or kinetic energy, albeit typically in low volumes.\n\nThe variable factors of a geyser are:\n\n    • Emission element \n    • Emission temperature \n    • Emission mass \n    • Cycle length \n    • Dormancy duration \n    • Disease emitted";
 			}
 
 			public class EQUIPMENT
@@ -9403,7 +9551,7 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "<b>Welcome to Oxygen Not Included</b>";
 
-				public static LocString BODY = "You're about to opt in to the beta for <b>The Bionic Booster Pack</b> DLC.\nThis free beta is a work in progress, and will be discontinued before the paid DLC is released. \n\nAre you sure you want to opt in?";
+				public static LocString BODY = "You're about to opt in to the beta for <b>The Aquatic Planet Pack</b> DLC.\nThis free beta is a work in progress, and will be discontinued before the paid DLC is released. \n\nAre you sure you want to opt in?";
 
 				public static LocString CONTINUEBUTTON = "Play Beta";
 
@@ -9796,6 +9944,17 @@ namespace STRINGS
 					public static LocString DESC = "Enclose this space with walls and doors to make a room";
 
 					public static LocString TOO_BIG = "<color=#F44A47FF>    • Size: {0} Tiles\n    • Maximum room size: {1} Tiles</color>";
+				}
+
+				public static class POND
+				{
+					public static LocString HEADER = "<b>Pool Size</b>";
+
+					public static LocString SIZE = "    • Pool Size: {0} Tiles";
+
+					public static LocString CRITTER_COUNT = "    • Aquatic Critters: {0}";
+
+					public static LocString NOFISH = "    • No aquatic critters found";
 				}
 
 				public class TOOLTIPS
@@ -10593,6 +10752,8 @@ namespace STRINGS
 
 			public static LocString POLLINATION = "Pollination";
 
+			public static LocString GERMPRESENCE = "Germ Exposure";
+
 			public class CONDITIONS_GROWING
 			{
 				public class WILD
@@ -10650,6 +10811,8 @@ namespace STRINGS
 			public static LocString SCHEDULE_NAME_FORMAT = "Schedule {0}";
 
 			public static LocString SCHEDULE_NAME_DEFAULT_BIONIC = "Default Bionic Schedule";
+
+			public static LocString SCHEDULE_NAME_COPY_PREFIX = "Copy of ";
 
 			public static LocString SCHEDULE_DROPDOWN_ASSIGNED = "{0} (Assigned)";
 
@@ -11060,7 +11223,7 @@ namespace STRINGS
 
 			public class LOREBEARERSIDESCREEN
 			{
-				public static LocString TITLE = "Lore Drop";
+				public static LocString TITLE = "Lore Unlock";
 
 				public static LocString BUTTON = "Read Files";
 			}
@@ -12637,7 +12800,7 @@ namespace STRINGS
 
 					public static LocString HEADER_PERKS = "<b>Enables:</b>";
 
-					public static LocString HEADER_ATTRIBUTES = "<b>Boosts:</b>";
+					public static LocString HEADER_ATTRIBUTES = "<b>Modifiers:</b>";
 				}
 			}
 
@@ -13455,6 +13618,15 @@ namespace STRINGS
 				public static LocString ALLOWMANUALBUTTONTOOLTIP = "Allow Duplicants to manually manage these storage materials";
 			}
 
+			public class TURBOMODE_SIDE_SCREEN
+			{
+				public static LocString TITLE = "Power Settings";
+
+				public static LocString LABEL = "TURBO MODE";
+
+				public static LocString TOGGLE_TOOLTIP = "Toggle Turbo Mode";
+			}
+
 			public class STUDYABLE_SIDE_SCREEN
 			{
 				public static LocString TITLE = "Analyze Natural Feature";
@@ -13931,6 +14103,8 @@ namespace STRINGS
 				public static LocString SEARCH_CRYO_TANK = "There are some safety instructions included in the operating instructions of this Cryotank. I add them to my database.\n\nNew Database Entry discovered.";
 
 				public static LocString SEARCH_PROPGRAVITASCREATUREPOSTER = "There's a handwritten note taped to the back of this poster. I add it to my database.\n\nNew Database Entry discovered.";
+
+				public static LocString SEARCH_DLC5MINIFRIDGE = "There's a note taped to an empty jar on the top shelf. I add it to my database.\n\nNew Database Entry discovered.";
 
 				public class SEARCH_COMPUTER_PODIUM
 				{
@@ -14545,6 +14719,15 @@ namespace STRINGS
 				public static LocString NAME = "Purification";
 
 				public static LocString BUILDMENUTITLE = "Purification";
+
+				public static LocString TOOLTIP = "";
+			}
+
+			public static class DISTRIBUTORS
+			{
+				public static LocString NAME = "Distribution";
+
+				public static LocString BUILDMENUTITLE = "Distribution";
 
 				public static LocString TOOLTIP = "";
 			}
@@ -15236,6 +15419,12 @@ namespace STRINGS
 				public static LocString LOGIC_MULTI_INPUT_HOVER_FMT = "{Port}    <style=\"hovercard_element\">({Name})</style>";
 
 				public static LocString LOGIC_MULTI_OUTPUT_HOVER_FMT = "{Port}    <style=\"hovercard_element\">({Name})</style>";
+
+				public static LocString NATURAL_BACKWALL_LABEL = "BACKWALL";
+
+				public static LocString NATURAL_BACKWALL_LABEL_TITLECASE = "Backwall";
+
+				public static LocString BUBBLE_LABEL = "Bubble";
 			}
 
 			public class ATTACK
@@ -15503,6 +15692,20 @@ namespace STRINGS
 					public static LocString NAME = "Background Buildings";
 
 					public static LocString TOOLTIP = "Background buildings only";
+				}
+
+				public class NATURALBACKWALL
+				{
+					public static LocString NAME = "Natural Backwall";
+
+					public static LocString TOOLTIP = "Natural backwall tiles only";
+				}
+
+				public class UPROOTPLANTS
+				{
+					public static LocString NAME = "Plants";
+
+					public static LocString TOOLTIP = "Uproot plants only";
 				}
 
 				public class LIQUIDPIPES
@@ -16320,6 +16523,8 @@ namespace STRINGS
 		{
 			public static LocString OPERATIONREQUIREMENTS = "<b>Requirements:</b>";
 
+			public static LocString OPERATIONINPUTS = "Inputs:";
+
 			public static LocString REQUIRESPOWER = UI.FormatAsLink("Power", "POWER") + ": {0}";
 
 			public static LocString REQUIRESELEMENT = "Supply of {0}";
@@ -16526,7 +16731,22 @@ namespace STRINGS
 
 			public static LocString SCALE_GROWTH_TEMP = "Shearable {Item}: {Amount} per {Time} ({TempMin} - {TempMax})";
 
+			public static LocString SCALE_GROWTH_FERTILITY = string.Concat(new string[]
+			{
+				"Milkable {Item}: {Amount} when ",
+				UI.PRE_KEYWORD,
+				"Reproduction",
+				UI.PST_KEYWORD,
+				" reaches {Percent}"
+			});
+
+			public static LocString MUCUS_SECRETION = "Secretes {Item}: {Rate}";
+
+			public static LocString MOLT_DROP = "Drops {Item}: {Rate} when happy";
+
 			public static LocString ACCESS_CONTROL = "Duplicant Access Permissions";
+
+			public static LocString MOISTURE = "Moisture Loss: {Percent}";
 
 			public static LocString ROCKETRESTRICTION_HEADER = "Restriction Control:";
 
@@ -16546,9 +16766,13 @@ namespace STRINGS
 
 			public static LocString MESS_TABLE_SALT = "Table Salt: +{0}";
 
+			public static LocString MESS_CAVIAR = UI.FormatAsLink("Caviar", "CAVIAR") + ": +{0} Morale, -{1}% Stress";
+
 			public static LocString COMMUNAL_DINING = "Communal Dining: +{0}";
 
 			public static LocString ACTIVE_PARTICLE_CONSUMPTION = "Radbolts: {Rate}";
+
+			public static LocString UNDERWATER_DRILL_DIAMOND_CONSUMPTION = UI.FormatAsLink("Diamond", "DIAMOND") + ": {Rate}";
 
 			public static LocString PARTICLE_PORT_INPUT = "Radbolt Input Port";
 
@@ -16557,6 +16781,8 @@ namespace STRINGS
 			public static LocString IN_ORBIT_REQUIRED = "Active In Space";
 
 			public static LocString KETTLE_MELT_RATE = "Melting Rate: {0}";
+
+			public static LocString UNDERWATERVENT_SHEARING = UI.FormatAsLink("Sulfur", "SULFUR") + " Build-up: {0}";
 
 			public static LocString FOOD_DEHYDRATOR_WATER_OUTPUT = "Wet Floor";
 
@@ -17418,6 +17644,46 @@ namespace STRINGS
 					UI.PST_KEYWORD
 				});
 
+				public static LocString SCALE_GROWTH_FERTILE = string.Concat(new string[]
+				{
+					"This critter can be milked to produce ",
+					UI.FormatAsPositiveModifier("{Amount}"),
+					" of ",
+					UI.PRE_KEYWORD,
+					"{Item}",
+					UI.PST_KEYWORD,
+					" once tamed\n\n",
+					UI.PRE_KEYWORD,
+					"Reproduction",
+					UI.PST_KEYWORD,
+					" must be 75% or higher before milking\n\nElderly critters cannot be milked"
+				});
+
+				public static LocString MUCUS_SECRETION = string.Concat(new string[]
+				{
+					"This critter secretes ",
+					UI.PRE_KEYWORD,
+					"{Item}",
+					UI.PST_KEYWORD,
+					" at a rate of ",
+					UI.FormatAsPositiveRate("{Rate}")
+				});
+
+				public static LocString MOLT_DROP = string.Concat(new string[]
+				{
+					"This critter drops ",
+					UI.PRE_KEYWORD,
+					"{Item}",
+					UI.PST_KEYWORD,
+					" at a rate of ",
+					UI.FormatAsPositiveRate("{Rate}"),
+					" when it is happy\n\nIt must be in a good ",
+					UI.PRE_KEYWORD,
+					"Mood",
+					UI.PST_KEYWORD,
+					" in order to molt"
+				});
+
 				public static LocString MESS_TABLE_SALT = string.Concat(new string[]
 				{
 					"Duplicants gain ",
@@ -17431,6 +17697,28 @@ namespace STRINGS
 					"Table Salt",
 					UI.PST_KEYWORD,
 					" with their food at a ",
+					STRINGS.ROOMS.CRITERIA.DININGTABLETYPE.NAME
+				});
+
+				public static LocString MESS_CAVIAR = string.Concat(new string[]
+				{
+					"Duplicants gain ",
+					UI.FormatAsPositiveModifier("+{0}"),
+					" ",
+					UI.PRE_KEYWORD,
+					"Morale",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.FormatAsNegativeModifier("-{1}%"),
+					" ",
+					UI.PRE_KEYWORD,
+					"Stress",
+					UI.PST_KEYWORD,
+					" when topping their food with ",
+					UI.PRE_KEYWORD,
+					"Caviar",
+					UI.PST_KEYWORD,
+					" at a ",
 					STRINGS.ROOMS.CRITERIA.DININGTABLETYPE.NAME
 				});
 
@@ -17489,6 +17777,15 @@ namespace STRINGS
 					" to function, consuming them at a rate of {Rate} while in use"
 				});
 
+				public static LocString UNDERWATER_DRILL_DIAMOND_CONSUMPTION = string.Concat(new string[]
+				{
+					"This building requires ",
+					UI.PRE_KEYWORD,
+					"Diamond",
+					UI.PST_KEYWORD,
+					" to operate, consuming it at a rate of {Rate} while in use"
+				});
+
 				public static LocString PARTICLE_PORT_INPUT = "A Radbolt Port on this building allows it to receive " + UI.PRE_KEYWORD + "Radbolts" + UI.PST_KEYWORD;
 
 				public static LocString PARTICLE_PORT_OUTPUT = string.Concat(new string[]
@@ -17534,6 +17831,8 @@ namespace STRINGS
 				public static LocString PRODUCESDATABANKS = "This building produces {0} " + UI.FormatAsLink(DatabankHelper.NAME_PLURAL, "Databank") + " each time a Starmap hex is revealed";
 
 				public static LocString PRODUCESMEDICINE = "This building produces medical supplies";
+
+				public static LocString UNDERWATERVENT_SHEARING = "This vent produces {0} which can be harvested using a " + UI.FormatAsLink("Marine Drill", "UNDERWATERVENTDRILL");
 			}
 		}
 
@@ -17670,11 +17969,11 @@ namespace STRINGS
 
 			public static LocString ROTTEN = "Rotten";
 
-			public static LocString REQUIRES_ATMOSPHERE = UI.FormatAsLink("Atmosphere", "ATMOSPHERE") + ": {0}";
+			public static LocString REQUIRES_ATMOSPHERE = "Atmosphere: {0}";
 
-			public static LocString REQUIRES_PRESSURE = UI.FormatAsLink("Air", "ATMOSPHERE") + " Pressure: {0} minimum";
+			public static LocString REQUIRES_PRESSURE = "Air Pressure: {0} minimum";
 
-			public static LocString IDEAL_PRESSURE = UI.FormatAsLink("Air", "ATMOSPHERE") + " Pressure: {0}";
+			public static LocString IDEAL_PRESSURE = "Air Pressure: {0}";
 
 			public static LocString REQUIRES_TEMPERATURE = UI.FormatAsLink("Temperature", "HEAT") + ": {0} to {1}";
 
@@ -17699,6 +17998,8 @@ namespace STRINGS
 			public static LocString REQUIRES_RADIATION = UI.FormatAsLink("Radiation", "RADIATION") + ": {MinRads} to {MaxRads}";
 
 			public static LocString MUTANT_STERILE = "Doesn't Drop " + UI.FormatAsLink("Seeds", "PLANTS");
+
+			public static LocString REQUIREMETS_OR = " or ";
 
 			public static LocString DARKNESS = "Darkness";
 

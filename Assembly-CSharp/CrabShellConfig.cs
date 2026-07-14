@@ -30,7 +30,7 @@ public class CrabShellConfig : IEntityConfig
 				if (component != null)
 				{
 					component.MassPerUnit = 1f;
-					component.Mass = component.Units * 10f;
+					component.Mass = component.Units * 60f;
 				}
 				KPrefabID component2 = inst.GetComponent<KPrefabID>();
 				if (component2 != null)
@@ -49,5 +49,5 @@ public class CrabShellConfig : IEntityConfig
 
 	public static readonly Tag TAG = TagManager.Create("CrabShell");
 
-	public const float ADULT_MASS = 10f;
+	public const float ADULT_MASS = 60f;
 }

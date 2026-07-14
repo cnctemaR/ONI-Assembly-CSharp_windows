@@ -15,9 +15,14 @@ public class RoomProber : ISim1000ms
 		{
 			cavityInfo.cells.Add(i);
 		}
-		this.CellCavityID = new HandleVector<int>.Handle[Grid.CellCount];
-		Array.Fill<HandleVector<int>.Handle>(this.CellCavityID, cavityInfo.handle);
-		this.solidChanges.Add(0);
+		this.grid = new RoomProber.Cell[Grid.CellCount];
+		Array.Fill<RoomProber.Cell>(this.grid, new RoomProber.Cell
+		{
+			cavityID = cavityInfo.handle,
+			generation = 0U
+		});
+		this.generation = new RoomProber.Generation(this.grid);
+		this.solidChanges.Add(Grid.XYToCell(1, 1));
 		this.refresh = new RoomProber.RefreshModule(this);
 		this.refresh.Initialize();
 		this.Refresh();
@@ -240,12 +245,11 @@ public class RoomProber : ISim1000ms
 
 	private CavityInfo GetCavityInfo(HandleVector<int>.Handle id)
 	{
-		CavityInfo cavityInfo = null;
-		if (id.IsValid())
+		if (!id.IsValid())
 		{
-			cavityInfo = this.cavityInfos.GetData(id);
+			return null;
 		}
-		return cavityInfo;
+		return this.cavityInfos.GetData(id);
 	}
 
 	public CavityInfo GetCavityForCell(int cell)
@@ -254,15 +258,17 @@ public class RoomProber : ISim1000ms
 		{
 			return null;
 		}
-		HandleVector<int>.Handle handle = this.CellCavityID[cell];
-		return this.GetCavityInfo(handle);
+		HandleVector<int>.Handle cavityID = this.grid[cell].cavityID;
+		return this.GetCavityInfo(cavityID);
 	}
+
+	private RoomProber.Generation generation;
 
 	public List<Room> rooms = new List<Room>();
 
 	private readonly KCompactedVector<CavityInfo> cavityInfos = new KCompactedVector<CavityInfo>(1024);
 
-	private readonly HandleVector<int>.Handle[] CellCavityID;
+	private readonly RoomProber.Cell[] grid;
 
 	private readonly RoomProber.RefreshModule refresh;
 
@@ -275,6 +281,47 @@ public class RoomProber : ISim1000ms
 		public int maxRoomSize;
 	}
 
+	private struct Cell
+	{
+		public HandleVector<int>.Handle cavityID;
+
+		public uint generation;
+
+		public static RoomProber.Cell INVALID = new RoomProber.Cell
+		{
+			cavityID = HandleVector<int>.InvalidHandle,
+			generation = 0U
+		};
+	}
+
+	private struct Generation
+	{
+		public Generation(RoomProber.Cell[] grid)
+		{
+			this.grid = grid;
+			this.value = 1U;
+		}
+
+		public uint Next()
+		{
+			uint num = this.value;
+			this.value = num + 1U;
+			uint num2 = num;
+			if (num2 == 0U)
+			{
+				Array.Fill<RoomProber.Cell>(this.grid, RoomProber.Cell.INVALID);
+				num = this.value;
+				this.value = num + 1U;
+				num2 = num;
+			}
+			return num2;
+		}
+
+		private uint value;
+
+		private readonly RoomProber.Cell[] grid;
+	}
+
 	private struct RefreshModule
 	{
 		public RefreshModule(RoomProber roomProber)
@@ -285,15 +332,21 @@ public class RoomProber : ISim1000ms
 			this.condemnedCavities = new List<HandleVector<int>.Handle>();
 			this.newCavities = new List<CavityInfo>();
 			this.dirtyEntities = new List<KPrefabID>();
-			this.visitedCells = new HashSet<int>();
 			this.visitedCavities = new HashSet<HandleVector<int>.Handle>();
 			this.visitedBuildings = new HashSet<RoomProber.RefreshModule.BuildingId>();
-			this.addCellToGrid = null;
+			this.cavityBoundary = null;
 		}
 
 		public void Initialize()
 		{
-			this.addCellToGrid = new Func<int, bool>(this.AddCellToGrid);
+			this.cavityBoundary = delegate(int cell)
+			{
+				if (!RoomProber.IsCavityBoundary(cell))
+				{
+					return FloodFill.BoundaryCheckResult.Continue;
+				}
+				return FloodFill.BoundaryCheckResult.Halt;
+			};
 		}
 
 		public void Run()
@@ -332,18 +385,6 @@ public class RoomProber : ISim1000ms
 			this.dirtyEntities.Clear();
 		}
 
-		private readonly bool AddCellToGrid(int flood_cell)
-		{
-			if (RoomProber.IsCavityBoundary(flood_cell))
-			{
-				this.roomProber.CellCavityID[flood_cell] = HandleVector<int>.InvalidHandle;
-				return false;
-			}
-			this.cavityBuilder.AddCell(flood_cell);
-			this.roomProber.CellCavityID[flood_cell] = this.cavityBuilder.CavityID;
-			return true;
-		}
-
 		private unsafe readonly void CollectDirtyCells()
 		{
 			int* ptr = stackalloc int[(UIntPtr)20];
@@ -352,49 +393,56 @@ public class RoomProber : ISim1000ms
 			ptr[2] = -1;
 			ptr[3] = 1;
 			ptr[4] = Grid.WidthInCells;
-			foreach (int num in this.roomProber.solidChanges)
+			uint num = this.roomProber.generation.Next();
+			foreach (int num2 in this.roomProber.solidChanges)
 			{
 				for (int i = 0; i < 5; i++)
 				{
-					int num2 = num + ptr[i];
-					if (Grid.IsValidCell(num2) && this.visitedCells.Add(num2))
+					int num3 = num2 + ptr[i];
+					if (Grid.IsValidCell(num3))
 					{
-						this.dirtyCells.Add(num2);
+						RoomProber.Cell cell = this.roomProber.grid[num3];
+						if (cell.generation != num)
+						{
+							this.roomProber.grid[num3] = new RoomProber.Cell
+							{
+								cavityID = cell.cavityID,
+								generation = num
+							};
+							this.dirtyCells.Add(num3);
+						}
 					}
 				}
 			}
-			this.visitedCells.Clear();
 			this.roomProber.solidChanges.Clear();
 		}
 
 		private readonly void CollectCondemnedCavities()
 		{
-			foreach (int num in this.dirtyCells)
+			uint num = this.roomProber.generation.Next();
+			foreach (int num2 in this.dirtyCells)
 			{
-				if (!this.visitedCells.Contains(num))
+				RoomProber.Cell cell = this.roomProber.grid[num2];
+				if (cell.generation != num)
 				{
-					HandleVector<int>.Handle handle = this.roomProber.CellCavityID[num];
-					if (!handle.IsValid())
+					this.roomProber.grid[num2] = new RoomProber.Cell
 					{
-						this.visitedCells.Add(num);
-					}
-					else
+						cavityID = cell.cavityID,
+						generation = num
+					};
+					if (cell.cavityID.IsValid())
 					{
-						if (this.visitedCavities.Add(handle))
+						if (this.visitedCavities.Add(cell.cavityID))
 						{
-							this.condemnedCavities.Add(handle);
+							this.condemnedCavities.Add(cell.cavityID);
 						}
-						CavityInfo data = this.roomProber.cavityInfos.GetData(handle);
-						this.visitedCells.EnsureCapacity(this.visitedCells.Count + data.cells.Count);
-						foreach (int num2 in data.cells)
+						foreach (int num3 in this.roomProber.cavityInfos.GetData(cell.cavityID).cells)
 						{
-							this.roomProber.CellCavityID[num2] = HandleVector<int>.InvalidHandle;
-							this.visitedCells.Add(num2);
+							this.roomProber.grid[num3] = RoomProber.Cell.INVALID;
 						}
 					}
 				}
 			}
-			this.visitedCells.Clear();
 			this.visitedCavities.Clear();
 		}
 
@@ -414,50 +462,49 @@ public class RoomProber : ISim1000ms
 				}
 			}
 			int num3 = ((this.condemnedCavities.Count > 0) ? 0 : (-1));
+			RoomProber.RefreshModule.VisitTracker visitTracker = new RoomProber.RefreshModule.VisitTracker(this.roomProber.grid, this.roomProber.generation.Next());
 			foreach (int num4 in this.dirtyCells)
 			{
-				if (!this.visitedCells.Contains(num4))
+				if (this.roomProber.grid[num4].generation != visitTracker.Generation)
 				{
-					HandleVector<int>.Handle handle3 = this.roomProber.CellCavityID[num4];
-					if (!handle3.IsValid())
+					if (RoomProber.IsCavityBoundary(num4))
 					{
-						if (RoomProber.IsCavityBoundary(num4))
+						this.roomProber.grid[num4] = new RoomProber.Cell
 						{
-							this.visitedCells.Add(num4);
-							this.roomProber.CellCavityID[num4] = HandleVector<int>.InvalidHandle;
+							cavityID = HandleVector<int>.InvalidHandle,
+							generation = visitTracker.Generation
+						};
+					}
+					else
+					{
+						CavityInfo cavityInfo = this.roomProber.CreateNewCavity();
+						if (num3 >= 0)
+						{
+							CavityInfo data = this.roomProber.cavityInfos.GetData(this.condemnedCavities[num3]);
+							cavityInfo.cells = data.cells;
+							cavityInfo.cells.Clear();
+							data.cells = null;
+							num3++;
+							if (num3 >= this.condemnedCavities.Count)
+							{
+								num3 = -1;
+							}
 						}
 						else
 						{
-							CavityInfo cavityInfo = this.roomProber.CreateNewCavity();
-							if (num3 >= 0)
-							{
-								CavityInfo data = this.roomProber.cavityInfos.GetData(this.condemnedCavities[num3]);
-								cavityInfo.cells = data.cells;
-								cavityInfo.cells.Clear();
-								data.cells = null;
-								num3++;
-								if (num3 >= this.condemnedCavities.Count)
-								{
-									num3 = -1;
-								}
-							}
-							else
-							{
-								cavityInfo.cells = new List<int>();
-							}
-							this.cavityBuilder.Reset(cavityInfo.handle);
-							GameUtil.FloodFillConditional(num4, this.addCellToGrid, this.visitedCells, cavityInfo.cells);
-							DebugUtil.DevAssert(this.cavityBuilder.NumCells > 0, "Degenerate cavities should have been detected and rejected prior to this point", null);
-							cavityInfo.minX = this.cavityBuilder.MinX;
-							cavityInfo.minY = this.cavityBuilder.MinY;
-							cavityInfo.maxX = this.cavityBuilder.MaxX;
-							cavityInfo.maxY = this.cavityBuilder.MaxY;
-							this.newCavities.Add(cavityInfo);
+							cavityInfo.cells = new List<int>();
 						}
+						this.cavityBuilder.Reset(cavityInfo.handle);
+						FloodFill.DepthTraverse<FloodFill.PredicateCondition, RoomProber.RefreshModule.VisitTracker, FloodFill.NoMaxDepth, RoomProber.RefreshModule.Visitor>(num4, new FloodFill.PredicateCondition(this.cavityBoundary), visitTracker, default(FloodFill.NoMaxDepth), new RoomProber.RefreshModule.Visitor(this.roomProber.grid, cavityInfo.cells, cavityInfo.handle, this.cavityBuilder));
+						DebugUtil.DevAssert(this.cavityBuilder.NumCells > 0, "Degenerate cavities should have been detected and rejected prior to this point", null);
+						cavityInfo.minX = this.cavityBuilder.MinX;
+						cavityInfo.minY = this.cavityBuilder.MinY;
+						cavityInfo.maxX = this.cavityBuilder.MaxX;
+						cavityInfo.maxY = this.cavityBuilder.MaxY;
+						this.newCavities.Add(cavityInfo);
 					}
 				}
 			}
-			this.visitedCells.Clear();
 		}
 
 		private void AddRoomContentsToCavities()
@@ -470,6 +517,10 @@ public class RoomProber : ISim1000ms
 					foreach (int num in cavityInfo.cells)
 					{
 						GameObject gameObject = Grid.Objects[num, 1];
+						if (gameObject == null)
+						{
+							gameObject = Grid.Objects[num, 38];
+						}
 						if (!(gameObject == null))
 						{
 							KPrefabID component = gameObject.GetComponent<KPrefabID>();
@@ -508,13 +559,11 @@ public class RoomProber : ISim1000ms
 
 		private readonly List<KPrefabID> dirtyEntities;
 
-		private readonly HashSet<int> visitedCells;
-
 		private readonly HashSet<HandleVector<int>.Handle> visitedCavities;
 
 		private readonly HashSet<RoomProber.RefreshModule.BuildingId> visitedBuildings;
 
-		private Func<int, bool> addCellToGrid;
+		private Func<int, FloodFill.BoundaryCheckResult> cavityBoundary;
 
 		private class CavityBuilder
 		{
@@ -559,6 +608,88 @@ public class RoomProber : ISim1000ms
 			public int prefab;
 
 			public int instance;
+		}
+
+		private struct VisitTracker : FloodFill.IVisitTracker
+		{
+			public uint Generation { readonly get; private set; }
+
+			public VisitTracker(RoomProber.Cell[] grid, uint generation)
+			{
+				this.grid = grid;
+				this.Generation = generation;
+			}
+
+			public bool Add(int cell)
+			{
+				RoomProber.Cell cell2 = this.grid[cell];
+				if (cell2.generation != this.Generation)
+				{
+					this.grid[cell] = new RoomProber.Cell
+					{
+						cavityID = cell2.cavityID,
+						generation = this.Generation
+					};
+					return true;
+				}
+				return false;
+			}
+
+			public readonly bool Contains(int cell)
+			{
+				return this.grid[cell].generation == this.Generation;
+			}
+
+			private readonly RoomProber.Cell[] grid;
+		}
+
+		private struct Visitor : FloodFill.IVisitor
+		{
+			public Visitor(RoomProber.Cell[] grid, List<int> cavityCells, HandleVector<int>.Handle cavityID, RoomProber.RefreshModule.CavityBuilder cavityBuilder)
+			{
+				this.grid = grid;
+				this.cavityCells = cavityCells;
+				this.cavityID = cavityID;
+				this.cavityBuilder = cavityBuilder;
+			}
+
+			public readonly bool EarlyOut
+			{
+				get
+				{
+					return false;
+				}
+			}
+
+			public void VisitBoundary(int cell)
+			{
+				RoomProber.Cell cell2 = this.grid[cell];
+				this.grid[cell] = new RoomProber.Cell
+				{
+					cavityID = HandleVector<int>.InvalidHandle,
+					generation = cell2.generation
+				};
+			}
+
+			public void VisitCell(int cell)
+			{
+				RoomProber.Cell cell2 = this.grid[cell];
+				this.grid[cell] = new RoomProber.Cell
+				{
+					cavityID = this.cavityID,
+					generation = cell2.generation
+				};
+				this.cavityCells.Add(cell);
+				this.cavityBuilder.AddCell(cell);
+			}
+
+			private readonly RoomProber.Cell[] grid;
+
+			private readonly List<int> cavityCells;
+
+			private HandleVector<int>.Handle cavityID;
+
+			private readonly RoomProber.RefreshModule.CavityBuilder cavityBuilder;
 		}
 	}
 }

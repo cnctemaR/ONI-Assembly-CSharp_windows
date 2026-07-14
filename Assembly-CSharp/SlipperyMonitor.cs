@@ -29,9 +29,14 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 
 	private static bool IsStandingOnASlipperyCell(SlipperyMonitor.Instance smi)
 	{
+		if (!smi.IsWalking)
+		{
+			return false;
+		}
 		int num = Grid.PosToCell(smi);
 		int num2 = Grid.OffsetCell(num, 0, -1);
-		return (Grid.IsValidCell(num) && Grid.Element[num].IsSlippery) || (Grid.IsValidCell(num2) && Grid.Element[num2].IsSolid && Grid.Element[num2].IsSlippery);
+		GameObject gameObject = Grid.Objects[num2, 9];
+		return (!(gameObject != null) || !gameObject.GetComponent<KPrefabID>().HasTag(GameTags.PreventsSlipping)) && ((Grid.IsValidCell(num) && Grid.Element[num].IsSlippery) || (Grid.IsValidCell(num2) && Grid.Element[num2].IsSolid && Grid.Element[num2].IsSlippery));
 	}
 
 	private static bool RollDTwenty(SlipperyMonitor.Instance smi, object o)
@@ -79,11 +84,20 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 			}
 		}
 
+		public bool IsWalking
+		{
+			get
+			{
+				return this.navigator != null && this.navigator.CurrentNavType == NavType.Floor;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, SlipperyMonitor.Def def)
 			: base(master, def)
 		{
 			this.effects = base.GetComponent<Effects>();
 			this.effect = Db.Get().effects.Get("RecentlySlippedTracker");
+			this.navigator = base.GetComponent<Navigator>();
 		}
 
 		public SlipperyMonitor.SlipReactable CreateReactable()
@@ -94,6 +108,8 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 		private Effect effect;
 
 		public Effects effects;
+
+		private Navigator navigator;
 	}
 
 	public class SlipReactable : Reactable
@@ -123,7 +139,7 @@ public class SlipperyMonitor : GameStateMachine<SlipperyMonitor, SlipperyMonitor
 				return false;
 			}
 			Navigator component = new_reactor.GetComponent<Navigator>();
-			return !(component == null) && component.CurrentNavType != NavType.Tube && component.CurrentNavType != NavType.Ladder && component.CurrentNavType != NavType.Pole;
+			return !(component == null) && component.CurrentNavType == NavType.Floor;
 		}
 
 		protected override void InternalBegin()

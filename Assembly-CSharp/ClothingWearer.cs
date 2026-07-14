@@ -180,5 +180,7 @@ public class ClothingWearer : KMonoBehaviour
 		public static readonly ClothingWearer.ClothingInfo CUSTOM_CLOTHING = new ClothingWearer.ClothingInfo(EQUIPMENT.PREFABS.CUSTOMCLOTHING.NAME, 40, 0.0025f, -1.25f);
 
 		public static readonly ClothingWearer.ClothingInfo SLEEP_CLINIC_PAJAMAS = new ClothingWearer.ClothingInfo(EQUIPMENT.PREFABS.CUSTOMCLOTHING.NAME, 40, 0.0025f, -1.25f);
+
+		public static readonly ClothingWearer.ClothingInfo DRY_SUIT = new ClothingWearer.ClothingInfo(EQUIPMENT.PREFABS.DRYSUIT.NAME, 0, 0.008f, -1.25f);
 	}
 }

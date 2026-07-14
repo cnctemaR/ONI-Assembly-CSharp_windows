@@ -5,6 +5,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class RustDeoxidizer : StateMachineComponent<RustDeoxidizer.StatesInstance>
 {
+	public RustDeoxidizer()
+	{
+		this.overPressure = (int cell) => Grid.Mass[cell] > this.maxMass;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.smi.StartSM();
@@ -23,13 +28,8 @@ public class RustDeoxidizer : StateMachineComponent<RustDeoxidizer.StatesInstanc
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			num = Grid.CellAbove(num);
-			return !GameUtil.FloodFillCheck<RustDeoxidizer>(new Func<int, RustDeoxidizer, bool>(RustDeoxidizer.OverPressure), this, num, 3, true, true);
+			return !FloodFill.Any<FloodFill.MaxDepth>(this.overPressure, num, new FloodFill.MaxDepth(3), true, true);
 		}
-	}
-
-	private static bool OverPressure(int cell, RustDeoxidizer rustDeoxidizer)
-	{
-		return Grid.Mass[cell] > rustDeoxidizer.maxMass;
 	}
 
 	[SerializeField]
@@ -45,6 +45,8 @@ public class RustDeoxidizer : StateMachineComponent<RustDeoxidizer.StatesInstanc
 	private Operational operational;
 
 	private MeterController meter;
+
+	private readonly Func<int, bool> overPressure;
 
 	public class StatesInstance : GameStateMachine<RustDeoxidizer.States, RustDeoxidizer.StatesInstance, RustDeoxidizer, object>.GameInstance
 	{

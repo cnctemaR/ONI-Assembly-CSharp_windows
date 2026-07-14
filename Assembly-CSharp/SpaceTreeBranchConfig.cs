@@ -39,7 +39,7 @@ public class SpaceTreeBranchConfig : IEntityConfig, IHasDlcRestrictions
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 255f);
 		string text5 = "SpaceTreeBranchOriginal";
 		string text6 = global::STRINGS.CREATURES.SPECIES.SPACETREE.NAME;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 173.15f, 198.15f, 258.15f, 293.15f, null, false, 0f, 0.15f, null, true, true, false, true, 12000f, 0f, 12200f, text5, text6);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 173.15f, 198.15f, 258.15f, 293.15f, null, false, 0f, 0.15f, null, true, true, false, false, true, 12000f, 0f, 12200f, text5, text6);
 		WiltCondition component = gameObject.GetComponent<WiltCondition>();
 		component.WiltDelay = 0f;
 		component.RecoveryDelay = 0f;

@@ -75,7 +75,7 @@ public class MedicinalPillWorkable : Workable, IConsumableUIItem
 		{
 			return true;
 		}
-		foreach (SicknessInstance sicknessInstance in sicknesses)
+		foreach (SicknessInstance sicknessInstance in sicknesses.ModifierList)
 		{
 			if (this.pill.info.curedSicknesses.Contains(sicknessInstance.modifier.Id))
 			{

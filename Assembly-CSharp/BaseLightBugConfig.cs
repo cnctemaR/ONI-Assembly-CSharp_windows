@@ -8,7 +8,7 @@ public static class BaseLightBugConfig
 {
 	public static GameObject BaseLightBug(string id, string name, string desc, string anim_file, string traitId, Color lightColor, EffectorValues decor, bool is_baby, string symbolOverridePrefix = null, string onDeathDropID = "", float onDeathDropCount = 0f)
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, 5f, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, decor, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, 5f, Assets.GetAnim(is_baby ? anim_file : "lightbug_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, decor, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "lightbug_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, onDeathDropID, onDeathDropCount, true, true, 283.15f, 313.15f, 173.15f, 373.15f);
 		EggConfig.CUSTOM_EGG_OUTPUTS.Add(id + "Baby", new List<global::Tuple<Tag, float>>
 		{
@@ -59,9 +59,11 @@ public static class BaseLightBugConfig
 			light2D.shape = global::LightShape.Circle;
 			light2D.drawOverlay = true;
 			light2D.Lux = 1800;
+			light2D.IntensityAnimation = 0.2f;
 			gameObject.AddOrGet<LightSymbolTracker>().targetSymbol = "snapTo_light_locator";
 			gameObject.AddOrGetDef<CreatureLightToggleController.Def>();
 		}
+		KAnimFile anim = Assets.GetAnim("lightbug_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
@@ -85,7 +87,7 @@ public static class BaseLightBugConfig
 			{
 				working_anim = "cc_working_shinebug"
 			}, !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("lightbug_emotes_kanim")), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(anim), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.LightBugSpecies, symbolOverridePrefix);
@@ -108,4 +110,6 @@ public static class BaseLightBugConfig
 	{
 		inst.GetComponent<LoopingSounds>().StartSound(GlobalAssets.GetSound("ShineBug_wings_LP", false));
 	}
+
+	public const string EMOTION_FILE_NAME = "lightbug_emotes_kanim";
 }

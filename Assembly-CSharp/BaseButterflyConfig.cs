@@ -36,6 +36,7 @@ public static class BaseButterflyConfig
 			GameTags.Creatures.FlyersLure
 		};
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
+		KAnimFile anim = Assets.GetAnim("pollinator_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new TrappedStates.Def(), true, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
@@ -51,10 +52,12 @@ public static class BaseButterflyConfig
 				loopAnim = "pollinate_loop",
 				pstAnim = "pollinate_pst"
 			}, true, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("pollinator_emotes_kanim")), true, -1)
+			.Add(new CritterEmoteStates.Def(anim), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.ButterflySpecies, symbolOverridePrefix);
 		return gameObject;
 	}
+
+	public const string EMOTION_FILE_NAME = "pollinator_emotes_kanim";
 }

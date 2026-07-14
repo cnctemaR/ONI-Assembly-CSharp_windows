@@ -9,7 +9,7 @@ public class FossilDigsiteLampLight : Light2D
 	protected override void OnPrefabInit()
 	{
 		base.Subscribe<FossilDigsiteLampLight>(-592767678, FossilDigsiteLampLight.OnOperationalChangedDelegate);
-		base.IntensityAnimation = 1f;
+		this.IntensityAnimation = 1f;
 	}
 
 	public void SetIndependentState(bool isIndependent, bool checkOperational = true)

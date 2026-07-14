@@ -34,6 +34,22 @@ public class HierarchyReferences : KMonoBehaviour
 		return default(SpecifiedType);
 	}
 
+	public SpecifiedType TryGetReference<SpecifiedType>(string name) where SpecifiedType : Component
+	{
+		foreach (ElementReference elementReference in this.references)
+		{
+			if (elementReference.Name == name)
+			{
+				if (elementReference.behaviour is SpecifiedType)
+				{
+					return (SpecifiedType)((object)elementReference.behaviour);
+				}
+				global::Debug.LogError(string.Format("Behavior is not specified type", Array.Empty<object>()));
+			}
+		}
+		return default(SpecifiedType);
+	}
+
 	public Component GetReference(string name)
 	{
 		foreach (ElementReference elementReference in this.references)

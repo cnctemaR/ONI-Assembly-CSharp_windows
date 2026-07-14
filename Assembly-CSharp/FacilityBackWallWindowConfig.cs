@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -26,6 +27,12 @@ public class FacilityBackWallWindowConfig : IBuildingConfig
 		buildingDef.DefaultAnimState = "off";
 		buildingDef.ObjectLayer = ObjectLayer.Backwall;
 		buildingDef.SceneLayer = Grid.SceneLayer.Backwall;
+		buildingDef.ReplacementLayer = ObjectLayer.ReplacementBackwall;
+		buildingDef.ReplacementCandidateLayers = new List<ObjectLayer>
+		{
+			ObjectLayer.FoundationTile,
+			ObjectLayer.Backwall
+		};
 		buildingDef.ShowInBuildMenu = false;
 		return buildingDef;
 	}
@@ -42,6 +49,7 @@ public class FacilityBackWallWindowConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Backwall, false);
 	}
 
 	public const string ID = "FacilityBackWallWindow";

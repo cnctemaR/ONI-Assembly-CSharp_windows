@@ -4,7 +4,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
-[DebuggerDisplay("{Name}")]
+[DebuggerDisplay("{name}")]
 public class SoundEvent : AnimEvent
 {
 	public string sound { get; private set; }

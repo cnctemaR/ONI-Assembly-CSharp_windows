@@ -99,7 +99,7 @@ public class DoctorStation : Workable
 		if (sicknesses != null)
 		{
 			bool flag = false;
-			foreach (SicknessInstance sicknessInstance in sicknesses)
+			foreach (SicknessInstance sicknessInstance in sicknesses.ModifierList)
 			{
 				Tag tag;
 				if (this.treatments_available.TryGetValue(sicknessInstance.Sickness.id, out tag))
@@ -136,7 +136,7 @@ public class DoctorStation : Workable
 		Sicknesses sicknesses = target.GetSicknesses();
 		if (sicknesses != null)
 		{
-			foreach (SicknessInstance sicknessInstance in sicknesses)
+			foreach (SicknessInstance sicknessInstance in sicknesses.ModifierList)
 			{
 				Tag tag;
 				if (this.treatments_available.TryGetValue(sicknessInstance.Sickness.id, out tag))

@@ -30,7 +30,7 @@ public class ButterflyPlantConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide,
 			SimHashes.ChlorineGas
-		}, true, 0f, 0.15f, "Butterfly", true, true, true, true, 2400f, 0f, 7400f, "ButterflyPlantOriginal", global::STRINGS.CREATURES.SPECIES.BUTTERFLYPLANT.NAME);
+		}, true, 0f, 0.15f, "Butterfly", true, true, true, false, true, 2400f, 0f, 7400f, "ButterflyPlantOriginal", global::STRINGS.CREATURES.SPECIES.BUTTERFLYPLANT.NAME);
 		global::UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<MutantPlant>());
 		global::UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<HarvestDesignatable>());
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]

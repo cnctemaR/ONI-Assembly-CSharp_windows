@@ -223,6 +223,11 @@ public static class CreatureHelpers
 		return true;
 	}
 
+	private static float FleeCellRater(int cell, CreatureHelpers.fleeThreatInfo threat)
+	{
+		return (float)Grid.GetCellDistance(cell, threat.threatCell) + (CreatureHelpers.isInFavoredFleeDirection(cell, threat.threatCell, threat.selfCell) ? 2f : 0f);
+	}
+
 	public static GameObject GetFleeTargetLocatorObject(GameObject self, GameObject threat)
 	{
 		if (threat == null)
@@ -230,16 +235,23 @@ public static class CreatureHelpers
 			global::Debug.LogWarning(self.name + " is trying to flee, bus has no threats");
 			return null;
 		}
-		CreatureHelpers.fleeThreatInfo fleeThreatInfo;
-		fleeThreatInfo.threatCell = Grid.PosToCell(threat);
-		fleeThreatInfo.selfCell = Grid.PosToCell(self);
-		fleeThreatInfo.nav = self.GetComponent<Navigator>();
-		if (fleeThreatInfo.nav == null)
+		CreatureHelpers.fleeThreatInfo threatInfo;
+		threatInfo.threatCell = Grid.PosToCell(threat);
+		threatInfo.selfCell = Grid.PosToCell(self);
+		threatInfo.nav = self.GetComponent<Navigator>();
+		if (threatInfo.nav == null)
 		{
 			global::Debug.LogWarning(self.name + " is trying to flee, bus has no navigator component attached.");
 			return null;
 		}
-		int num = GameUtil.FloodFillFindBest<CreatureHelpers.fleeThreatInfo>(CreatureHelpers.fleeCellRater, fleeThreatInfo, CreatureHelpers.fleeCellVaidator, Grid.PosToCell(self), 300);
+		int num = FloodFill.FindBest((int cell) => CreatureHelpers.FleeCellRater(cell, threatInfo), delegate(int cell)
+		{
+			if (!CreatureHelpers.CanFleeTo(cell, threatInfo.nav))
+			{
+				return FloodFill.BoundaryCheckResult.Halt;
+			}
+			return FloodFill.BoundaryCheckResult.Continue;
+		}, Grid.PosToCell(self), 300);
 		if (num != -1)
 		{
 			return ChoreHelpers.CreateLocator("GoToLocator", Grid.CellToPos(num));
@@ -258,10 +270,6 @@ public static class CreatureHelpers
 	{
 		return nav.GetNavigationCost(cell, OffsetGroups.Use) != -1;
 	}
-
-	private static Func<int, CreatureHelpers.fleeThreatInfo, float> fleeCellRater = (int cell, CreatureHelpers.fleeThreatInfo threat) => (float)Grid.GetCellDistance(cell, threat.threatCell) + (CreatureHelpers.isInFavoredFleeDirection(cell, threat.threatCell, threat.selfCell) ? 2f : 0f);
-
-	private static Func<int, CreatureHelpers.fleeThreatInfo, bool> fleeCellVaidator = (int cell, CreatureHelpers.fleeThreatInfo info) => CreatureHelpers.CanFleeTo(cell, info.nav);
 
 	private struct fleeThreatInfo
 	{

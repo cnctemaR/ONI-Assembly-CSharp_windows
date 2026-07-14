@@ -21,6 +21,7 @@ public class SweepBotConfig : IEntityConfig
 		kprefabID.AddTag(GameTags.Creature, false);
 		kprefabID.AddTag(GameTags.Robot, false);
 		kprefabID.AddTag(GameTags.OrnamentDisplayer, false);
+		kprefabID.AddTag(GameTags.HideFromSpawnTool, false);
 		gameObject.AddComponent<Pickupable>();
 		gameObject.AddOrGet<Clearable>().isClearable = false;
 		Trait trait = Db.Get().CreateTrait("SweepBotBaseTrait", this.name, this.name, null, false, null, true, true);

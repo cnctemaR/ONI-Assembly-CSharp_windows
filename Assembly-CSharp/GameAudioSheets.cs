@@ -137,6 +137,10 @@ public class GameAudioSheets : AudioSheets
 		{
 			soundEvent = new CreatureVariationSoundEvent(file_name, sound_name, frame, true, type == "CreatureVariationLoopingSoundEvent", min_interval, false);
 		}
+		else if (type == "UnderwaterSoundEvent" || type == "UnderwaterLoopingSoundEvent")
+		{
+			soundEvent = new UnderwaterSoundEvent(file_name, sound_name, frame, true, type == "UnderwaterLoopingSoundEvent", min_interval, false);
+		}
 		else if (type == "CountedSoundEvent")
 		{
 			soundEvent = new CountedSoundEvent(file_name, sound_name, frame, true, false, min_interval, false);

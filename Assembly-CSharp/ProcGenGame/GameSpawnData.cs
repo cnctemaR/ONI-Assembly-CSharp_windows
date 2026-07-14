@@ -57,13 +57,23 @@ namespace ProcGenGame
 					}
 				}
 			}
-			if (template.otherEntities != null)
+			if (template.backwallEntities != null)
 			{
-				foreach (Prefab prefab4 in template.otherEntities)
+				foreach (Prefab prefab4 in template.backwallEntities)
 				{
 					if (!claimedCells.ContainsKey(Grid.OffsetCell(num, prefab4.location_x, prefab4.location_y)) && (flag || !this.IsWarpTeleporter(prefab4)))
 					{
-						this.otherEntities.Add(prefab4.Clone(position));
+						this.backwallEntities.Add(prefab4.Clone(position));
+					}
+				}
+			}
+			if (template.otherEntities != null)
+			{
+				foreach (Prefab prefab5 in template.otherEntities)
+				{
+					if (!claimedCells.ContainsKey(Grid.OffsetCell(num, prefab5.location_x, prefab5.location_y)) && (flag || !this.IsWarpTeleporter(prefab5)))
+					{
+						this.otherEntities.Add(prefab5.Clone(position));
 					}
 				}
 			}
@@ -106,6 +116,8 @@ namespace ProcGenGame
 		public List<Prefab> pickupables = new List<Prefab>();
 
 		public List<Prefab> elementalOres = new List<Prefab>();
+
+		public List<Prefab> backwallEntities = new List<Prefab>();
 
 		public List<Prefab> otherEntities = new List<Prefab>();
 

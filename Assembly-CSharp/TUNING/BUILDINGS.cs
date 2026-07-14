@@ -53,523 +53,1606 @@ namespace TUNING
 
 		public static Dictionary<string, string> PLANSUBCATEGORYSORTING = new Dictionary<string, string>
 		{
-			{ "Ladder", "ladders" },
-			{ "FirePole", "ladders" },
-			{ "LadderFast", "ladders" },
-			{ "Tile", "tiles" },
-			{ "SnowTile", "tiles" },
-			{ "WoodTile", "tiles" },
-			{ "GasPermeableMembrane", "tiles" },
-			{ "MeshTile", "tiles" },
-			{ "InsulationTile", "tiles" },
-			{ "PlasticTile", "tiles" },
-			{ "MetalTile", "tiles" },
-			{ "GlassTile", "tiles" },
-			{ "StorageTile", "tiles" },
-			{ "BunkerTile", "tiles" },
-			{ "ExteriorWall", "tiles" },
-			{ "CarpetTile", "tiles" },
-			{ "ExobaseHeadquarters", "printingpods" },
-			{ "Door", "doors" },
-			{ "WoodenDoor", "doors" },
-			{ "ManualPressureDoor", "doors" },
-			{ "InsulatedDoor", "doors" },
-			{ "PressureDoor", "doors" },
-			{ "BunkerDoor", "doors" },
-			{ "StorageLocker", "storage" },
-			{ "StorageLockerSmart", "storage" },
-			{ "LiquidReservoir", "storage" },
-			{ "GasReservoir", "storage" },
-			{ "ObjectDispenser", "storage" },
-			{ "TravelTube", "transport" },
-			{ "TravelTubeEntrance", "transport" },
-			{ "TravelTubeWallBridge", "transport" },
+			{
+				"Ladder",
+				BUILDINGS.PlanSubcategoryName.ladders.ToString()
+			},
+			{
+				"FirePole",
+				BUILDINGS.PlanSubcategoryName.ladders.ToString()
+			},
+			{
+				"LadderFast",
+				BUILDINGS.PlanSubcategoryName.ladders.ToString()
+			},
+			{
+				"Tile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"SnowTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"WoodTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"GasPermeableMembrane",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"MeshTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"RubberTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"InsulationTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"PlasticTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"MetalTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"GlassTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"StorageTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"BunkerTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"ExteriorWall",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"GlassExteriorWall",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"CarpetTile",
+				BUILDINGS.PlanSubcategoryName.tiles.ToString()
+			},
+			{
+				"ExobaseHeadquarters",
+				BUILDINGS.PlanSubcategoryName.printingpods.ToString()
+			},
+			{
+				"Door",
+				BUILDINGS.PlanSubcategoryName.doors.ToString()
+			},
+			{
+				"WoodenDoor",
+				BUILDINGS.PlanSubcategoryName.doors.ToString()
+			},
+			{
+				"ManualPressureDoor",
+				BUILDINGS.PlanSubcategoryName.doors.ToString()
+			},
+			{
+				"InsulatedDoor",
+				BUILDINGS.PlanSubcategoryName.doors.ToString()
+			},
+			{
+				"PressureDoor",
+				BUILDINGS.PlanSubcategoryName.doors.ToString()
+			},
+			{
+				"BunkerDoor",
+				BUILDINGS.PlanSubcategoryName.doors.ToString()
+			},
+			{
+				"StorageLocker",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"StorageLockerSmart",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"LiquidReservoir",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"GasReservoir",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"ObjectDispenser",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"TravelTube",
+				BUILDINGS.PlanSubcategoryName.transport.ToString()
+			},
+			{
+				"TravelTubeEntrance",
+				BUILDINGS.PlanSubcategoryName.transport.ToString()
+			},
+			{
+				"TravelTubeWallBridge",
+				BUILDINGS.PlanSubcategoryName.transport.ToString()
+			},
 			{
 				RemoteWorkerDockConfig.ID,
-				"operations"
+				BUILDINGS.PlanSubcategoryName.operations.ToString()
 			},
 			{
 				RemoteWorkTerminalConfig.ID,
-				"operations"
+				BUILDINGS.PlanSubcategoryName.operations.ToString()
 			},
-			{ "MineralDeoxidizer", "producers" },
-			{ "SublimationStation", "producers" },
-			{ "Oxysconce", "producers" },
-			{ "Electrolyzer", "producers" },
-			{ "RustDeoxidizer", "producers" },
-			{ "AirFilter", "scrubbers" },
-			{ "CO2Scrubber", "scrubbers" },
-			{ "AlgaeHabitat", "scrubbers" },
-			{ "DevGenerator", "generators" },
-			{ "ManualGenerator", "generators" },
-			{ "Generator", "generators" },
-			{ "WoodGasGenerator", "generators" },
-			{ "PeatGenerator", "generators" },
-			{ "HydrogenGenerator", "generators" },
-			{ "MethaneGenerator", "generators" },
-			{ "PetroleumGenerator", "generators" },
-			{ "SteamTurbine", "generators" },
-			{ "SteamTurbine2", "generators" },
-			{ "SolarPanel", "generators" },
-			{ "Wire", "wires" },
-			{ "WireBridge", "wires" },
-			{ "HighWattageWire", "wires" },
-			{ "WireBridgeHighWattage", "wires" },
-			{ "WireRefined", "wires" },
-			{ "WireRefinedBridge", "wires" },
-			{ "WireRefinedHighWattage", "wires" },
-			{ "WireRefinedBridgeHighWattage", "wires" },
-			{ "Battery", "batteries" },
-			{ "BatteryMedium", "batteries" },
-			{ "BatterySmart", "batteries" },
-			{ "ElectrobankCharger", "electrobankbuildings" },
-			{ "SmallElectrobankDischarger", "electrobankbuildings" },
-			{ "LargeElectrobankDischarger", "electrobankbuildings" },
-			{ "PowerTransformerSmall", "powercontrol" },
-			{ "PowerTransformer", "powercontrol" },
+			{
+				"MineralDeoxidizer",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"SublimationStation",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"Oxysconce",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"Electrolyzer",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"RustDeoxidizer",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"AirFilter",
+				BUILDINGS.PlanSubcategoryName.scrubbers.ToString()
+			},
+			{
+				"CO2Scrubber",
+				BUILDINGS.PlanSubcategoryName.scrubbers.ToString()
+			},
+			{
+				"AlgaeHabitat",
+				BUILDINGS.PlanSubcategoryName.scrubbers.ToString()
+			},
+			{
+				"UnderwaterBreathingStation",
+				BUILDINGS.PlanSubcategoryName.distributors.ToString()
+			},
+			{
+				"DevGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"ManualGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"Generator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"WoodGasGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"PeatGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"ReefGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"HydrogenGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"MethaneGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"PetroleumGenerator",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"SteamTurbine",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"SteamTurbine2",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"SolarPanel",
+				BUILDINGS.PlanSubcategoryName.generators.ToString()
+			},
+			{
+				"Wire",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireBridge",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"HighWattageWire",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireBridgeHighWattage",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireRefined",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireRefinedBridge",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireRefinedHighWattage",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireRefinedBridgeHighWattage",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireRubber",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"WireRubberBridge",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"Battery",
+				BUILDINGS.PlanSubcategoryName.batteries.ToString()
+			},
+			{
+				"BatteryMedium",
+				BUILDINGS.PlanSubcategoryName.batteries.ToString()
+			},
+			{
+				"BatterySmart",
+				BUILDINGS.PlanSubcategoryName.batteries.ToString()
+			},
+			{
+				"ElectrobankCharger",
+				BUILDINGS.PlanSubcategoryName.electrobankbuildings.ToString()
+			},
+			{
+				"SmallElectrobankDischarger",
+				BUILDINGS.PlanSubcategoryName.electrobankbuildings.ToString()
+			},
+			{
+				"LargeElectrobankDischarger",
+				BUILDINGS.PlanSubcategoryName.electrobankbuildings.ToString()
+			},
+			{
+				"PowerTransformerSmall",
+				BUILDINGS.PlanSubcategoryName.powercontrol.ToString()
+			},
+			{
+				"PowerTransformer",
+				BUILDINGS.PlanSubcategoryName.powercontrol.ToString()
+			},
 			{
 				SwitchConfig.ID,
-				"switches"
+				BUILDINGS.PlanSubcategoryName.switches.ToString()
 			},
 			{
 				LogicPowerRelayConfig.ID,
-				"switches"
+				BUILDINGS.PlanSubcategoryName.switches.ToString()
 			},
 			{
 				TemperatureControlledSwitchConfig.ID,
-				"switches"
+				BUILDINGS.PlanSubcategoryName.switches.ToString()
 			},
 			{
 				PressureSwitchLiquidConfig.ID,
-				"switches"
+				BUILDINGS.PlanSubcategoryName.switches.ToString()
 			},
 			{
 				PressureSwitchGasConfig.ID,
-				"switches"
+				BUILDINGS.PlanSubcategoryName.switches.ToString()
 			},
-			{ "MicrobeMusher", "cooking" },
-			{ "CookingStation", "cooking" },
-			{ "Deepfryer", "cooking" },
-			{ "GourmetCookingStation", "cooking" },
-			{ "SpiceGrinder", "cooking" },
-			{ "FoodDehydrator", "cooking" },
-			{ "FoodRehydrator", "cooking" },
-			{ "Smoker", "cooking" },
-			{ "PlanterBox", "farming" },
-			{ "FarmTile", "farming" },
-			{ "HydroponicFarm", "farming" },
-			{ "RationBox", "storage" },
-			{ "Refrigerator", "storage" },
-			{ "CreatureDeliveryPoint", "ranching" },
-			{ "CritterDropOff", "ranching" },
-			{ "CritterPickUp", "ranching" },
-			{ "FishDeliveryPoint", "ranching" },
-			{ "CreatureFeeder", "ranching" },
-			{ "FishFeeder", "ranching" },
-			{ "MilkFeeder", "ranching" },
-			{ "EggIncubator", "ranching" },
-			{ "EggCracker", "ranching" },
-			{ "CreatureGroundTrap", "ranching" },
-			{ "CreatureAirTrap", "ranching" },
-			{ "WaterTrap", "ranching" },
-			{ "CritterCondo", "ranching" },
-			{ "UnderwaterCritterCondo", "ranching" },
-			{ "AirBorneCritterCondo", "ranching" },
-			{ "Outhouse", "washroom" },
-			{ "FlushToilet", "washroom" },
-			{ "WallToilet", "washroom" },
+			{
+				"MicrobeMusher",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"CookingStation",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"Deepfryer",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"GourmetCookingStation",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"SpiceGrinder",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"FoodDehydrator",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"FoodRehydrator",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"Smoker",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"SushiBar",
+				BUILDINGS.PlanSubcategoryName.cooking.ToString()
+			},
+			{
+				"PlanterBox",
+				BUILDINGS.PlanSubcategoryName.farming.ToString()
+			},
+			{
+				"FarmTile",
+				BUILDINGS.PlanSubcategoryName.farming.ToString()
+			},
+			{
+				"HydroponicFarm",
+				BUILDINGS.PlanSubcategoryName.farming.ToString()
+			},
+			{
+				"WideFarmTile",
+				BUILDINGS.PlanSubcategoryName.farming.ToString()
+			},
+			{
+				"LargeBackwallFarm",
+				BUILDINGS.PlanSubcategoryName.farming.ToString()
+			},
+			{
+				"RationBox",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"Refrigerator",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"MiniFridge",
+				BUILDINGS.PlanSubcategoryName.storage.ToString()
+			},
+			{
+				"CreatureDeliveryPoint",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"UnderwaterMilkFeeder",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"CritterDropOff",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"CritterPickUp",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"FishDeliveryPoint",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"FishPickUp",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"CreatureFeeder",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"FishFeeder",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"MilkFeeder",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"EggIncubator",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"EggCracker",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"CreatureGroundTrap",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"CreatureAirTrap",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"WaterTrap",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"CritterCondo",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"UnderwaterCritterCondo",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"AirBorneCritterCondo",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"Outhouse",
+				BUILDINGS.PlanSubcategoryName.washroom.ToString()
+			},
+			{
+				"FlushToilet",
+				BUILDINGS.PlanSubcategoryName.washroom.ToString()
+			},
+			{
+				"WallToilet",
+				BUILDINGS.PlanSubcategoryName.washroom.ToString()
+			},
 			{
 				ShowerConfig.ID,
-				"washroom"
+				BUILDINGS.PlanSubcategoryName.washroom.ToString()
 			},
-			{ "GunkEmptier", "washroom" },
-			{ "LiquidConduit", "pipes" },
-			{ "InsulatedLiquidConduit", "pipes" },
-			{ "LiquidConduitRadiant", "pipes" },
-			{ "LiquidConduitBridge", "pipes" },
-			{ "ContactConductivePipeBridge", "pipes" },
-			{ "LiquidVent", "pipes" },
-			{ "LiquidPump", "pumps" },
-			{ "LiquidMiniPump", "pumps" },
-			{ "LiquidPumpingStation", "pumps" },
-			{ "DevPumpLiquid", "pumps" },
-			{ "BottleEmptier", "valves" },
-			{ "LiquidFilter", "valves" },
-			{ "LiquidConduitPreferentialFlow", "valves" },
-			{ "LiquidConduitOverflow", "valves" },
-			{ "LiquidValve", "valves" },
-			{ "LiquidLogicValve", "valves" },
-			{ "LiquidLimitValve", "valves" },
-			{ "LiquidBottler", "valves" },
-			{ "BottleEmptierConduitLiquid", "valves" },
+			{
+				"GunkEmptier",
+				BUILDINGS.PlanSubcategoryName.washroom.ToString()
+			},
+			{
+				"LiquidConduit",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"InsulatedLiquidConduit",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"LiquidConduitRadiant",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"LiquidConduitBridge",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"ContactConductivePipeBridge",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"LiquidVent",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"LiquidPump",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"LiquidMiniPump",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"LiquidPumpingStation",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"DevPumpLiquid",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"BottleEmptier",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"LiquidFilter",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"LiquidConduitPreferentialFlow",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"LiquidConduitOverflow",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"LiquidValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"LiquidLogicValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"LiquidLimitValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"LiquidBottler",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"BottleEmptierConduitLiquid",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
 			{
 				LiquidConduitElementSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LiquidConduitDiseaseSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LiquidConduitTemperatureSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
-			{ "ModularLaunchpadPortLiquid", "buildmenuports" },
-			{ "ModularLaunchpadPortLiquidUnloader", "buildmenuports" },
-			{ "GasConduit", "pipes" },
-			{ "InsulatedGasConduit", "pipes" },
-			{ "GasConduitRadiant", "pipes" },
-			{ "GasConduitBridge", "pipes" },
-			{ "GasVent", "pipes" },
-			{ "GasVentHighPressure", "pipes" },
-			{ "GasPump", "pumps" },
-			{ "GasMiniPump", "pumps" },
-			{ "DevPumpGas", "pumps" },
-			{ "GasBottler", "valves" },
-			{ "BottleEmptierGas", "valves" },
-			{ "BottleEmptierConduitGas", "valves" },
-			{ "GasFilter", "valves" },
-			{ "GasConduitPreferentialFlow", "valves" },
-			{ "GasConduitOverflow", "valves" },
-			{ "GasValve", "valves" },
-			{ "GasLogicValve", "valves" },
-			{ "GasLimitValve", "valves" },
+			{
+				"ModularLaunchpadPortLiquid",
+				BUILDINGS.PlanSubcategoryName.buildmenuports.ToString()
+			},
+			{
+				"ModularLaunchpadPortLiquidUnloader",
+				BUILDINGS.PlanSubcategoryName.buildmenuports.ToString()
+			},
+			{
+				"GasConduit",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"InsulatedGasConduit",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"GasConduitRadiant",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"GasConduitBridge",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"GasVent",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"GasVentHighPressure",
+				BUILDINGS.PlanSubcategoryName.pipes.ToString()
+			},
+			{
+				"GasPump",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"GasMiniPump",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"DevPumpGas",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"GasBottler",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"BottleEmptierGas",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"BottleEmptierConduitGas",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"GasFilter",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"GasConduitPreferentialFlow",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"GasConduitOverflow",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"GasValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"GasLogicValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"GasLimitValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
 			{
 				GasConduitElementSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				GasConduitDiseaseSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				GasConduitTemperatureSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
-			{ "ModularLaunchpadPortGas", "buildmenuports" },
-			{ "ModularLaunchpadPortGasUnloader", "buildmenuports" },
-			{ "Compost", "organic" },
-			{ "FertilizerMaker", "organic" },
-			{ "AlgaeDistillery", "organic" },
-			{ "EthanolDistillery", "organic" },
-			{ "SludgePress", "organic" },
-			{ "MilkFatSeparator", "organic" },
-			{ "MilkPress", "organic" },
-			{ "IceKettle", "materials" },
-			{ "WaterPurifier", "materials" },
-			{ "Desalinator", "materials" },
-			{ "RockCrusher", "materials" },
-			{ "Kiln", "materials" },
-			{ "FabricatedWoodMaker", "materials" },
-			{ "MetalRefinery", "materials" },
-			{ "GlassForge", "materials" },
-			{ "OilRefinery", "oil" },
-			{ "Polymerizer", "oil" },
-			{ "OxyliteRefinery", "advanced" },
-			{ "ChemicalRefinery", "advanced" },
-			{ "SupermaterialRefinery", "advanced" },
-			{ "DiamondPress", "advanced" },
-			{ "Chlorinator", "advanced" },
-			{ "WashBasin", "hygiene" },
-			{ "WashSink", "hygiene" },
-			{ "HandSanitizer", "hygiene" },
-			{ "DecontaminationShower", "hygiene" },
-			{ "Apothecary", "medical" },
-			{ "DoctorStation", "medical" },
-			{ "AdvancedDoctorStation", "medical" },
-			{ "MedicalCot", "medical" },
-			{ "DevLifeSupport", "medical" },
-			{ "MassageTable", "wellness" },
-			{ "Grave", "wellness" },
-			{ "OilChanger", "wellness" },
-			{ "Bed", "beds" },
-			{ "LuxuryBed", "beds" },
+			{
+				"ModularLaunchpadPortGas",
+				BUILDINGS.PlanSubcategoryName.buildmenuports.ToString()
+			},
+			{
+				"ModularLaunchpadPortGasUnloader",
+				BUILDINGS.PlanSubcategoryName.buildmenuports.ToString()
+			},
+			{
+				"Compost",
+				BUILDINGS.PlanSubcategoryName.organic.ToString()
+			},
+			{
+				"FertilizerMaker",
+				BUILDINGS.PlanSubcategoryName.organic.ToString()
+			},
+			{
+				"AlgaeDistillery",
+				BUILDINGS.PlanSubcategoryName.organic.ToString()
+			},
+			{
+				"EthanolDistillery",
+				BUILDINGS.PlanSubcategoryName.organic.ToString()
+			},
+			{
+				"SludgePress",
+				BUILDINGS.PlanSubcategoryName.organic.ToString()
+			},
+			{
+				"MilkFatSeparator",
+				BUILDINGS.PlanSubcategoryName.organic.ToString()
+			},
+			{
+				"MilkPress",
+				BUILDINGS.PlanSubcategoryName.organic.ToString()
+			},
+			{
+				"IceKettle",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"WaterPurifier",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"Desalinator",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"RockCrusher",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"Kiln",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"FabricatedWoodMaker",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"MetalRefinery",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"GlassForge",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"RubberMaker",
+				BUILDINGS.PlanSubcategoryName.materials.ToString()
+			},
+			{
+				"OilRefinery",
+				BUILDINGS.PlanSubcategoryName.oil.ToString()
+			},
+			{
+				"Polymerizer",
+				BUILDINGS.PlanSubcategoryName.oil.ToString()
+			},
+			{
+				"OxyliteRefinery",
+				BUILDINGS.PlanSubcategoryName.advanced.ToString()
+			},
+			{
+				"ChemicalRefinery",
+				BUILDINGS.PlanSubcategoryName.advanced.ToString()
+			},
+			{
+				"SupermaterialRefinery",
+				BUILDINGS.PlanSubcategoryName.advanced.ToString()
+			},
+			{
+				"DiamondPress",
+				BUILDINGS.PlanSubcategoryName.advanced.ToString()
+			},
+			{
+				"Chlorinator",
+				BUILDINGS.PlanSubcategoryName.advanced.ToString()
+			},
+			{
+				"WashBasin",
+				BUILDINGS.PlanSubcategoryName.hygiene.ToString()
+			},
+			{
+				"WashSink",
+				BUILDINGS.PlanSubcategoryName.hygiene.ToString()
+			},
+			{
+				"HandSanitizer",
+				BUILDINGS.PlanSubcategoryName.hygiene.ToString()
+			},
+			{
+				"DecontaminationShower",
+				BUILDINGS.PlanSubcategoryName.hygiene.ToString()
+			},
+			{
+				"Apothecary",
+				BUILDINGS.PlanSubcategoryName.medical.ToString()
+			},
+			{
+				"DoctorStation",
+				BUILDINGS.PlanSubcategoryName.medical.ToString()
+			},
+			{
+				"AdvancedDoctorStation",
+				BUILDINGS.PlanSubcategoryName.medical.ToString()
+			},
+			{
+				"MedicalCot",
+				BUILDINGS.PlanSubcategoryName.medical.ToString()
+			},
+			{
+				"DevLifeSupport",
+				BUILDINGS.PlanSubcategoryName.medical.ToString()
+			},
+			{
+				"MassageTable",
+				BUILDINGS.PlanSubcategoryName.wellness.ToString()
+			},
+			{
+				"Grave",
+				BUILDINGS.PlanSubcategoryName.wellness.ToString()
+			},
+			{
+				"OilChanger",
+				BUILDINGS.PlanSubcategoryName.wellness.ToString()
+			},
+			{
+				"Bed",
+				BUILDINGS.PlanSubcategoryName.beds.ToString()
+			},
+			{
+				"LuxuryBed",
+				BUILDINGS.PlanSubcategoryName.beds.ToString()
+			},
 			{
 				LadderBedConfig.ID,
-				"beds"
+				BUILDINGS.PlanSubcategoryName.beds.ToString()
 			},
-			{ "FloorLamp", "lights" },
-			{ "CeilingLight", "lights" },
-			{ "SunLamp", "lights" },
-			{ "DevLightGenerator", "lights" },
-			{ "MercuryCeilingLight", "lights" },
-			{ "DiningTable", "dining" },
-			{ "MultiMinionDiningTable", "dining" },
-			{ "WaterCooler", "recreation" },
-			{ "Phonobox", "recreation" },
-			{ "ArcadeMachine", "recreation" },
-			{ "EspressoMachine", "recreation" },
-			{ "HotTub", "recreation" },
-			{ "MechanicalSurfboard", "recreation" },
-			{ "Sauna", "recreation" },
-			{ "Juicer", "recreation" },
-			{ "SodaFountain", "recreation" },
-			{ "BeachChair", "recreation" },
-			{ "VerticalWindTunnel", "recreation" },
-			{ "Telephone", "recreation" },
-			{ "FlowerVase", "decor" },
-			{ "FlowerVaseWall", "decor" },
-			{ "FlowerVaseHanging", "decor" },
-			{ "FlowerVaseHangingFancy", "decor" },
+			{
+				"FloorLamp",
+				BUILDINGS.PlanSubcategoryName.lights.ToString()
+			},
+			{
+				"CeilingLight",
+				BUILDINGS.PlanSubcategoryName.lights.ToString()
+			},
+			{
+				"GlassCeilingLight",
+				BUILDINGS.PlanSubcategoryName.lights.ToString()
+			},
+			{
+				"SunLamp",
+				BUILDINGS.PlanSubcategoryName.lights.ToString()
+			},
+			{
+				"DevLightGenerator",
+				BUILDINGS.PlanSubcategoryName.lights.ToString()
+			},
+			{
+				"MercuryCeilingLight",
+				BUILDINGS.PlanSubcategoryName.lights.ToString()
+			},
+			{
+				"DiningTable",
+				BUILDINGS.PlanSubcategoryName.dining.ToString()
+			},
+			{
+				"MultiMinionDiningTable",
+				BUILDINGS.PlanSubcategoryName.dining.ToString()
+			},
+			{
+				"WaterCooler",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"Phonobox",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"ArcadeMachine",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"EspressoMachine",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"HotTub",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"MechanicalSurfboard",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"Sauna",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"Juicer",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"SodaFountain",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"BeachChair",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"VerticalWindTunnel",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"Telephone",
+				BUILDINGS.PlanSubcategoryName.recreation.ToString()
+			},
+			{
+				"FlowerVase",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"FlowerVaseWall",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"FlowerVaseHanging",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"FlowerVaseHangingFancy",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
 			{
 				PixelPackConfig.ID,
-				"decor"
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
 			},
-			{ "SmallSculpture", "decor" },
-			{ "Sculpture", "decor" },
-			{ "IceSculpture", "decor" },
-			{ "MarbleSculpture", "decor" },
-			{ "MetalSculpture", "decor" },
-			{ "WoodSculpture", "decor" },
-			{ "FossilSculpture", "decor" },
-			{ "CeilingFossilSculpture", "decor" },
-			{ "CrownMoulding", "decor" },
-			{ "CornerMoulding", "decor" },
-			{ "Canvas", "decor" },
-			{ "CanvasWide", "decor" },
-			{ "CanvasTall", "decor" },
-			{ "ItemPedestal", "decor" },
-			{ "Shelf", "decor" },
-			{ "ParkSign", "decor" },
-			{ "MonumentBottom", "decor" },
-			{ "MonumentMiddle", "decor" },
-			{ "MonumentTop", "decor" },
-			{ "ResearchCenter", "research" },
-			{ "AdvancedResearchCenter", "research" },
-			{ "GeoTuner", "research" },
-			{ "NuclearResearchCenter", "research" },
-			{ "OrbitalResearchCenter", "research" },
-			{ "CosmicResearchCenter", "research" },
-			{ "DLC1CosmicResearchCenter", "research" },
-			{ "DataMiner", "research" },
-			{ "ArtifactAnalysisStation", "archaeology" },
-			{ "MissileFabricator", "meteordefense" },
-			{ "AstronautTrainingCenter", "exploration" },
-			{ "PowerControlStation", "industrialstation" },
-			{ "ResetSkillsStation", "industrialstation" },
-			{ "RoleStation", "workstations" },
-			{ "RanchStation", "ranching" },
-			{ "ShearingStation", "ranching" },
-			{ "MilkingStation", "ranching" },
-			{ "FarmStation", "farming" },
-			{ "GeneticAnalysisStation", "farming" },
-			{ "CraftingTable", "manufacturing" },
-			{ "AdvancedCraftingTable", "manufacturing" },
-			{ "ClothingFabricator", "manufacturing" },
-			{ "ClothingAlterationStation", "manufacturing" },
-			{ "SuitFabricator", "manufacturing" },
-			{ "OxygenMaskMarker", "equipment" },
-			{ "OxygenMaskLocker", "equipment" },
-			{ "SuitMarker", "equipment" },
-			{ "SuitLocker", "equipment" },
-			{ "JetSuitMarker", "equipment" },
-			{ "JetSuitLocker", "equipment" },
-			{ "MissileLauncher", "missiles" },
-			{ "LeadSuitMarker", "equipment" },
-			{ "LeadSuitLocker", "equipment" },
-			{ "Campfire", "temperature" },
-			{ "DevHeater", "temperature" },
-			{ "SpaceHeater", "temperature" },
-			{ "LiquidHeater", "temperature" },
-			{ "LiquidConditioner", "temperature" },
-			{ "LiquidCooledFan", "temperature" },
-			{ "IceCooledFan", "temperature" },
-			{ "IceMachine", "temperature" },
-			{ "AirConditioner", "temperature" },
-			{ "ThermalBlock", "temperature" },
-			{ "OreScrubber", "sanitation" },
-			{ "OilWellCap", "oil" },
-			{ "SweepBotStation", "sanitation" },
-			{ "LogicWire", "wires" },
-			{ "LogicWireBridge", "wires" },
-			{ "LogicRibbon", "wires" },
-			{ "LogicRibbonBridge", "wires" },
+			{
+				"SmallSculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"Sculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"IceSculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"MarbleSculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"MetalSculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"WoodSculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"FossilSculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"CeilingFossilSculpture",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"CrownMoulding",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"CornerMoulding",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"Canvas",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"CanvasWide",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"CanvasTall",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"ItemPedestal",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"Shelf",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"ParkSign",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"MonumentBottom",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"MonumentMiddle",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"MonumentTop",
+				BUILDINGS.PlanSubcategoryName.decor.ToString()
+			},
+			{
+				"ResearchCenter",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"AdvancedResearchCenter",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"GeoTuner",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"NuclearResearchCenter",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"OrbitalResearchCenter",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"CosmicResearchCenter",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"DLC1CosmicResearchCenter",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"DataMiner",
+				BUILDINGS.PlanSubcategoryName.research.ToString()
+			},
+			{
+				"ArtifactAnalysisStation",
+				BUILDINGS.PlanSubcategoryName.archaeology.ToString()
+			},
+			{
+				"MissileFabricator",
+				BUILDINGS.PlanSubcategoryName.meteordefense.ToString()
+			},
+			{
+				"AstronautTrainingCenter",
+				BUILDINGS.PlanSubcategoryName.exploration.ToString()
+			},
+			{
+				"PowerControlStation",
+				BUILDINGS.PlanSubcategoryName.industrialstation.ToString()
+			},
+			{
+				"ResetSkillsStation",
+				BUILDINGS.PlanSubcategoryName.industrialstation.ToString()
+			},
+			{
+				"RoleStation",
+				BUILDINGS.PlanSubcategoryName.workstations.ToString()
+			},
+			{
+				"RanchStation",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"ShearingStation",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"MilkingStation",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"UnderwaterRanchStation",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"UnderwaterShearingStation",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"UnderwaterMilkingStation",
+				BUILDINGS.PlanSubcategoryName.ranching.ToString()
+			},
+			{
+				"FarmStation",
+				BUILDINGS.PlanSubcategoryName.farming.ToString()
+			},
+			{
+				"GeneticAnalysisStation",
+				BUILDINGS.PlanSubcategoryName.farming.ToString()
+			},
+			{
+				"CraftingTable",
+				BUILDINGS.PlanSubcategoryName.manufacturing.ToString()
+			},
+			{
+				"AdvancedCraftingTable",
+				BUILDINGS.PlanSubcategoryName.manufacturing.ToString()
+			},
+			{
+				"ClothingFabricator",
+				BUILDINGS.PlanSubcategoryName.manufacturing.ToString()
+			},
+			{
+				"ClothingAlterationStation",
+				BUILDINGS.PlanSubcategoryName.manufacturing.ToString()
+			},
+			{
+				"SuitFabricator",
+				BUILDINGS.PlanSubcategoryName.manufacturing.ToString()
+			},
+			{
+				"OxygenMaskMarker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"OxygenMaskLocker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"SuitMarker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"SuitLocker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"JetSuitMarker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"JetSuitLocker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"MissileLauncher",
+				BUILDINGS.PlanSubcategoryName.missiles.ToString()
+			},
+			{
+				"LeadSuitMarker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"LeadSuitLocker",
+				BUILDINGS.PlanSubcategoryName.equipment.ToString()
+			},
+			{
+				"Campfire",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"DevHeater",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"SpaceHeater",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"LiquidHeater",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"LiquidConditioner",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"LiquidCooledFan",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"IceCooledFan",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"IceMachine",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"AirConditioner",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"ThermalBlock",
+				BUILDINGS.PlanSubcategoryName.temperature.ToString()
+			},
+			{
+				"OreScrubber",
+				BUILDINGS.PlanSubcategoryName.sanitation.ToString()
+			},
+			{
+				"OilWellCap",
+				BUILDINGS.PlanSubcategoryName.oil.ToString()
+			},
+			{
+				"SweepBotStation",
+				BUILDINGS.PlanSubcategoryName.sanitation.ToString()
+			},
+			{
+				"LogicWire",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"LogicWireBridge",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"LogicRibbon",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
+			{
+				"LogicRibbonBridge",
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
+			},
 			{
 				LogicRibbonReaderConfig.ID,
-				"wires"
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
 			},
 			{
 				LogicRibbonWriterConfig.ID,
-				"wires"
+				BUILDINGS.PlanSubcategoryName.wires.ToString()
 			},
-			{ "LogicDuplicantSensor", "sensors" },
+			{
+				"LogicDuplicantSensor",
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
+			},
 			{
 				LogicPressureSensorGasConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicPressureSensorLiquidConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicTemperatureSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicLightSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicWattageSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicTimeOfDaySensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicTimerSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicDiseaseSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicElementSensorGasConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicElementSensorLiquidConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicCritterCountSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicRadiationSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicHEPSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				CometDetectorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				LogicCounterConfig.ID,
-				"logicmanager"
+				BUILDINGS.PlanSubcategoryName.logicmanager.ToString()
 			},
-			{ "Checkpoint", "logicmanager" },
+			{
+				"Checkpoint",
+				BUILDINGS.PlanSubcategoryName.logicmanager.ToString()
+			},
 			{
 				LogicAlarmConfig.ID,
-				"logicmanager"
+				BUILDINGS.PlanSubcategoryName.logicmanager.ToString()
 			},
 			{
 				LogicHammerConfig.ID,
-				"logicaudio"
+				BUILDINGS.PlanSubcategoryName.logicaudio.ToString()
 			},
 			{
 				LogicSwitchConfig.ID,
-				"switches"
+				BUILDINGS.PlanSubcategoryName.switches.ToString()
 			},
-			{ "FloorSwitch", "switches" },
-			{ "LogicGateNOT", "logicgates" },
-			{ "LogicGateAND", "logicgates" },
-			{ "LogicGateOR", "logicgates" },
-			{ "LogicGateBUFFER", "logicgates" },
-			{ "LogicGateFILTER", "logicgates" },
-			{ "LogicGateXOR", "logicgates" },
+			{
+				"FloorSwitch",
+				BUILDINGS.PlanSubcategoryName.switches.ToString()
+			},
+			{
+				"LogicGateNOT",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
+			{
+				"LogicGateAND",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
+			{
+				"LogicGateOR",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
+			{
+				"LogicGateBUFFER",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
+			{
+				"LogicGateFILTER",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
+			{
+				"LogicGateXOR",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
 			{
 				LogicMemoryConfig.ID,
-				"logicgates"
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
 			},
-			{ "LogicGateMultiplexer", "logicgates" },
-			{ "LogicGateDemultiplexer", "logicgates" },
-			{ "LogicInterasteroidSender", "transmissions" },
-			{ "LogicInterasteroidReceiver", "transmissions" },
-			{ "SolidConduit", "conveyancestructures" },
-			{ "SolidConduitBridge", "conveyancestructures" },
-			{ "SolidConduitInbox", "conveyancestructures" },
-			{ "SolidConduitOutbox", "conveyancestructures" },
-			{ "SolidFilter", "conveyancestructures" },
-			{ "SolidVent", "conveyancestructures" },
-			{ "DevPumpSolid", "pumps" },
-			{ "SolidLogicValve", "valves" },
-			{ "SolidLimitValve", "valves" },
+			{
+				"LogicGateMultiplexer",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
+			{
+				"LogicGateDemultiplexer",
+				BUILDINGS.PlanSubcategoryName.logicgates.ToString()
+			},
+			{
+				"LogicInterasteroidSender",
+				BUILDINGS.PlanSubcategoryName.transmissions.ToString()
+			},
+			{
+				"LogicInterasteroidReceiver",
+				BUILDINGS.PlanSubcategoryName.transmissions.ToString()
+			},
+			{
+				"SolidConduit",
+				BUILDINGS.PlanSubcategoryName.conveyancestructures.ToString()
+			},
+			{
+				"UnderwaterVentDrill",
+				BUILDINGS.PlanSubcategoryName.conveyancestructures.ToString()
+			},
+			{
+				"SolidConduitBridge",
+				BUILDINGS.PlanSubcategoryName.conveyancestructures.ToString()
+			},
+			{
+				"SolidConduitInbox",
+				BUILDINGS.PlanSubcategoryName.conveyancestructures.ToString()
+			},
+			{
+				"SolidConduitOutbox",
+				BUILDINGS.PlanSubcategoryName.conveyancestructures.ToString()
+			},
+			{
+				"SolidFilter",
+				BUILDINGS.PlanSubcategoryName.conveyancestructures.ToString()
+			},
+			{
+				"SolidVent",
+				BUILDINGS.PlanSubcategoryName.conveyancestructures.ToString()
+			},
+			{
+				"DevPumpSolid",
+				BUILDINGS.PlanSubcategoryName.pumps.ToString()
+			},
+			{
+				"SolidLogicValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
+			{
+				"SolidLimitValve",
+				BUILDINGS.PlanSubcategoryName.valves.ToString()
+			},
 			{
 				SolidConduitDiseaseSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				SolidConduitElementSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
 			{
 				SolidConduitTemperatureSensorConfig.ID,
-				"sensors"
+				BUILDINGS.PlanSubcategoryName.sensors.ToString()
 			},
-			{ "AutoMiner", "automated" },
-			{ "SolidTransferArm", "automated" },
-			{ "ModularLaunchpadPortSolid", "buildmenuports" },
-			{ "ModularLaunchpadPortSolidUnloader", "buildmenuports" },
-			{ "Telescope", "telescopes" },
-			{ "ClusterTelescope", "telescopes" },
-			{ "ClusterTelescopeEnclosed", "telescopes" },
-			{ "LaunchPad", "rocketstructures" },
-			{ "Gantry", "rocketstructures" },
-			{ "ModularLaunchpadPortBridge", "rocketstructures" },
-			{ "RailGun", "fittings" },
-			{ "RailGunPayloadOpener", "fittings" },
-			{ "LandingBeacon", "rocketnav" },
-			{ "SteamEngine", "engines" },
-			{ "KeroseneEngine", "engines" },
-			{ "BiodieselEngine", "engines" },
-			{ "HydrogenEngine", "engines" },
-			{ "SolidBooster", "engines" },
-			{ "LiquidFuelTank", "tanks" },
-			{ "OxidizerTank", "tanks" },
-			{ "OxidizerTankLiquid", "tanks" },
-			{ "CargoBay", "cargo" },
-			{ "GasCargoBay", "cargo" },
-			{ "LiquidCargoBay", "cargo" },
-			{ "SpecialCargoBay", "cargo" },
-			{ "CommandModule", "rocketnav" },
+			{
+				"AutoMiner",
+				BUILDINGS.PlanSubcategoryName.automated.ToString()
+			},
+			{
+				"SolidTransferArm",
+				BUILDINGS.PlanSubcategoryName.automated.ToString()
+			},
+			{
+				"ModularLaunchpadPortSolid",
+				BUILDINGS.PlanSubcategoryName.buildmenuports.ToString()
+			},
+			{
+				"ModularLaunchpadPortSolidUnloader",
+				BUILDINGS.PlanSubcategoryName.buildmenuports.ToString()
+			},
+			{
+				"Telescope",
+				BUILDINGS.PlanSubcategoryName.telescopes.ToString()
+			},
+			{
+				"ClusterTelescope",
+				BUILDINGS.PlanSubcategoryName.telescopes.ToString()
+			},
+			{
+				"ClusterTelescopeEnclosed",
+				BUILDINGS.PlanSubcategoryName.telescopes.ToString()
+			},
+			{
+				"LaunchPad",
+				BUILDINGS.PlanSubcategoryName.rocketstructures.ToString()
+			},
+			{
+				"Gantry",
+				BUILDINGS.PlanSubcategoryName.rocketstructures.ToString()
+			},
+			{
+				"ModularLaunchpadPortBridge",
+				BUILDINGS.PlanSubcategoryName.rocketstructures.ToString()
+			},
+			{
+				"RailGun",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"RailGunPayloadOpener",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"LandingBeacon",
+				BUILDINGS.PlanSubcategoryName.rocketnav.ToString()
+			},
+			{
+				"SteamEngine",
+				BUILDINGS.PlanSubcategoryName.engines.ToString()
+			},
+			{
+				"KeroseneEngine",
+				BUILDINGS.PlanSubcategoryName.engines.ToString()
+			},
+			{
+				"BiodieselEngine",
+				BUILDINGS.PlanSubcategoryName.engines.ToString()
+			},
+			{
+				"HydrogenEngine",
+				BUILDINGS.PlanSubcategoryName.engines.ToString()
+			},
+			{
+				"SolidBooster",
+				BUILDINGS.PlanSubcategoryName.engines.ToString()
+			},
+			{
+				"LiquidFuelTank",
+				BUILDINGS.PlanSubcategoryName.tanks.ToString()
+			},
+			{
+				"OxidizerTank",
+				BUILDINGS.PlanSubcategoryName.tanks.ToString()
+			},
+			{
+				"OxidizerTankLiquid",
+				BUILDINGS.PlanSubcategoryName.tanks.ToString()
+			},
+			{
+				"CargoBay",
+				BUILDINGS.PlanSubcategoryName.cargo.ToString()
+			},
+			{
+				"GasCargoBay",
+				BUILDINGS.PlanSubcategoryName.cargo.ToString()
+			},
+			{
+				"LiquidCargoBay",
+				BUILDINGS.PlanSubcategoryName.cargo.ToString()
+			},
+			{
+				"SpecialCargoBay",
+				BUILDINGS.PlanSubcategoryName.cargo.ToString()
+			},
+			{
+				"CommandModule",
+				BUILDINGS.PlanSubcategoryName.rocketnav.ToString()
+			},
 			{
 				RocketControlStationConfig.ID,
-				"rocketnav"
+				BUILDINGS.PlanSubcategoryName.rocketnav.ToString()
 			},
 			{
 				LogicClusterLocationSensorConfig.ID,
-				"rocketnav"
+				BUILDINGS.PlanSubcategoryName.rocketnav.ToString()
 			},
-			{ "MissionControl", "rocketnav" },
-			{ "MissionControlCluster", "rocketnav" },
-			{ "RoboPilotCommandModule", "rocketnav" },
-			{ "TouristModule", "module" },
-			{ "ResearchModule", "module" },
-			{ "RocketInteriorPowerPlug", "fittings" },
-			{ "RocketInteriorLiquidInput", "fittings" },
-			{ "RocketInteriorLiquidOutput", "fittings" },
-			{ "RocketInteriorGasInput", "fittings" },
-			{ "RocketInteriorGasOutput", "fittings" },
-			{ "RocketInteriorSolidInput", "fittings" },
-			{ "RocketInteriorSolidOutput", "fittings" },
-			{ "ManualHighEnergyParticleSpawner", "producers" },
-			{ "HighEnergyParticleSpawner", "producers" },
-			{ "DevHEPSpawner", "producers" },
-			{ "HighEnergyParticleRedirector", "transmissions" },
-			{ "HEPBattery", "batteries" },
-			{ "HEPBridgeTile", "transmissions" },
-			{ "NuclearReactor", "producers" },
-			{ "UraniumCentrifuge", "producers" },
-			{ "RadiationLight", "producers" },
-			{ "DevRadiationGenerator", "producers" }
+			{
+				"MissionControl",
+				BUILDINGS.PlanSubcategoryName.rocketnav.ToString()
+			},
+			{
+				"MissionControlCluster",
+				BUILDINGS.PlanSubcategoryName.rocketnav.ToString()
+			},
+			{
+				"RoboPilotCommandModule",
+				BUILDINGS.PlanSubcategoryName.rocketnav.ToString()
+			},
+			{
+				"TouristModule",
+				BUILDINGS.PlanSubcategoryName.module.ToString()
+			},
+			{
+				"ResearchModule",
+				BUILDINGS.PlanSubcategoryName.module.ToString()
+			},
+			{
+				"RocketInteriorPowerPlug",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"RocketInteriorLiquidInput",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"RocketInteriorLiquidOutput",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"RocketInteriorGasInput",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"RocketInteriorGasOutput",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"RocketInteriorSolidInput",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"RocketInteriorSolidOutput",
+				BUILDINGS.PlanSubcategoryName.fittings.ToString()
+			},
+			{
+				"ManualHighEnergyParticleSpawner",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"HighEnergyParticleSpawner",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"DevHEPSpawner",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"HighEnergyParticleRedirector",
+				BUILDINGS.PlanSubcategoryName.transmissions.ToString()
+			},
+			{
+				"HEPBattery",
+				BUILDINGS.PlanSubcategoryName.batteries.ToString()
+			},
+			{
+				"HEPBridgeTile",
+				BUILDINGS.PlanSubcategoryName.transmissions.ToString()
+			},
+			{
+				"NuclearReactor",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"UraniumCentrifuge",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"RadiationLight",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			},
+			{
+				"DevRadiationGenerator",
+				BUILDINGS.PlanSubcategoryName.producers.ToString()
+			}
 		};
 
 		public static List<PlanScreen.PlanInfo> PLANORDER = new List<PlanScreen.PlanInfo>
 		{
 			new PlanScreen.PlanInfo(new HashedString("Base"), false, new List<string>
 			{
-				"Ladder", "FirePole", "LadderFast", "Tile", "SnowTile", "WoodTile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile",
-				"MetalTile", "GlassTile", "StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "ExobaseHeadquarters", "Door", "WoodenDoor", "ManualPressureDoor",
-				"InsulatedDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser", "TravelTube", "TravelTubeEntrance",
-				"TravelTubeWallBridge"
+				"Ladder", "FirePole", "LadderFast", "Tile", "SnowTile", "WoodTile", "GasPermeableMembrane", "MeshTile", "RubberTile", "InsulationTile",
+				"PlasticTile", "MetalTile", "GlassTile", "StorageTile", "BunkerTile", "CarpetTile", "ExteriorWall", "GlassExteriorWall", "ExobaseHeadquarters", "Door",
+				"WoodenDoor", "ManualPressureDoor", "InsulatedDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "ObjectDispenser",
+				"TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}, null, null),
-			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "Oxysconce", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }, null, null),
+			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "SublimationStation", "Oxysconce", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer", "UnderwaterBreathingStation" }, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
 			{
 				"DevGenerator",
@@ -577,6 +1660,7 @@ namespace TUNING
 				"Generator",
 				"WoodGasGenerator",
 				"PeatGenerator",
+				"ReefGenerator",
 				"HydrogenGenerator",
 				"MethaneGenerator",
 				"PetroleumGenerator",
@@ -591,6 +1675,8 @@ namespace TUNING
 				"WireRefinedBridge",
 				"WireRefinedHighWattage",
 				"WireRefinedBridgeHighWattage",
+				"WireRubber",
+				"WireRubberBridge",
 				"Battery",
 				"BatteryMedium",
 				"BatterySmart",
@@ -607,9 +1693,10 @@ namespace TUNING
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
-				"MicrobeMusher", "CookingStation", "Deepfryer", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "Smoker", "PlanterBox", "FarmTile",
-				"HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "CritterPickUp", "CritterDropOff", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder",
-				"EggIncubator", "EggCracker", "CreatureGroundTrap", "WaterTrap", "CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
+				"UnderwaterMilkFeeder", "MicrobeMusher", "CookingStation", "Deepfryer", "GourmetCookingStation", "SpiceGrinder", "FoodDehydrator", "FoodRehydrator", "Smoker", "SushiBar",
+				"PlanterBox", "FarmTile", "HydroponicFarm", "WideFarmTile", "LargeBackwallFarm", "RationBox", "Refrigerator", "MiniFridge", "CreatureDeliveryPoint", "CritterPickUp",
+				"CritterDropOff", "FishPickUp", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "MilkFeeder", "EggIncubator", "EggCracker", "CreatureGroundTrap", "WaterTrap",
+				"CreatureAirTrap", "CritterCondo", "UnderwaterCritterCondo", "AirBorneCritterCondo"
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
@@ -672,10 +1759,10 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
 				"FabricatedWoodMaker", "Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "SludgePress",
-				"MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer", "OxyliteRefinery", "Chlorinator", "ChemicalRefinery", "SupermaterialRefinery", "DiamondPress", "MilkFatSeparator",
-				"MilkPress"
+				"MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer", "RubberMaker", "OxyliteRefinery", "Chlorinator", "ChemicalRefinery", "SupermaterialRefinery", "DiamondPress",
+				"MilkFatSeparator", "MilkPress"
 			}, null, null),
-			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string>
+			new PlanScreen.PlanInfo(new HashedString(BUILDINGS.PlanSubcategoryName.medical.ToString()), false, new List<string>
 			{
 				"DevLifeSupport", "WashBasin", "WashSink", "HandSanitizer", "DecontaminationShower", "OilChanger", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot",
 				"MassageTable", "Grave"
@@ -688,6 +1775,7 @@ namespace TUNING
 				LadderBedConfig.ID,
 				"FloorLamp",
 				"CeilingLight",
+				"GlassCeilingLight",
 				"SunLamp",
 				"DevLightGenerator",
 				"MercuryCeilingLight",
@@ -746,6 +1834,9 @@ namespace TUNING
 				"RanchStation",
 				"ShearingStation",
 				"MilkingStation",
+				"UnderwaterRanchStation",
+				"UnderwaterShearingStation",
+				"UnderwaterMilkingStation",
 				"RoleStation",
 				"ResetSkillsStation",
 				"ArtifactAnalysisStation",
@@ -769,8 +1860,8 @@ namespace TUNING
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
-				"Campfire", "DevHeater", "IceKettle", "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner",
-				"OreScrubber", "OilWellCap", "ThermalBlock", "SweepBotStation"
+				"UnderwaterVentDrill", "Campfire", "DevHeater", "IceKettle", "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner",
+				"LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "SweepBotStation"
 			}, null, null),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
@@ -1064,6 +2155,8 @@ namespace TUNING
 		public class CONSTRUCTION_MASS_KG
 		{
 			public static readonly float[] TIER_TINY = new float[] { 5f };
+
+			public static readonly float[] TIER_SMALL = new float[] { 10f };
 
 			public static readonly float[] TIER0 = new float[] { 25f };
 
@@ -1465,6 +2558,72 @@ namespace TUNING
 
 				public const float SMELTER_HEATGENERATION = 0.7f;
 			}
+		}
+
+		public enum PlanSubcategoryName
+		{
+			ladders,
+			tiles,
+			printingpods,
+			doors,
+			storage,
+			transport,
+			operations,
+			producers,
+			scrubbers,
+			distributors,
+			generators,
+			wires,
+			batteries,
+			electrobankbuildings,
+			powercontrol,
+			switches,
+			cooking,
+			farming,
+			ranching,
+			washroom,
+			pipes,
+			pumps,
+			valves,
+			sensors,
+			buildmenuports,
+			organic,
+			materials,
+			oil,
+			advanced,
+			hygiene,
+			medical,
+			wellness,
+			beds,
+			lights,
+			dining,
+			recreation,
+			decor,
+			research,
+			archaeology,
+			meteordefense,
+			exploration,
+			industrialstation,
+			workstations,
+			manufacturing,
+			equipment,
+			missiles,
+			temperature,
+			sanitation,
+			logicmanager,
+			logicaudio,
+			logicgates,
+			transmissions,
+			conveyancestructures,
+			automated,
+			telescopes,
+			rocketstructures,
+			fittings,
+			rocketnav,
+			module,
+			cargo,
+			engines,
+			tanks
 		}
 	}
 }

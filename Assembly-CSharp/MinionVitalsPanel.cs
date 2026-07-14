@@ -35,6 +35,7 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, null);
 		this.AddAmountLine(Db.Get().Amounts.MilkProduction, null);
 		this.AddAmountLine(Db.Get().Amounts.ElementGrowth, null);
+		this.AddAmountLine(Db.Get().Amounts.Moisture, null);
 		this.AddAmountLine(Db.Get().Amounts.Temperature, null);
 		this.AddAmountLine(Db.Get().Amounts.CritterTemperature, null);
 		this.AddAmountLine(Db.Get().Amounts.Decor, null);
@@ -161,7 +162,6 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 	private void AddAmountLine(Amount amount, Func<AmountInstance, string> tooltip_func = null)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, this.Content.gameObject, false);
-		gameObject.GetComponentInChildren<Image>().sprite = Assets.GetSprite(amount.uiSprite);
 		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
 		MinionVitalsPanel.AmountLine amountLine = default(MinionVitalsPanel.AmountLine);
@@ -171,6 +171,14 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		amountLine.toolTip = gameObject.GetComponentInChildren<ToolTip>();
 		amountLine.imageToggle = gameObject.GetComponentInChildren<ValueTrendImageToggle>();
 		amountLine.toolTipFunc = ((tooltip_func != null) ? tooltip_func : new Func<AmountInstance, string>(amount.GetTooltip));
+		if (!amount.CanDisplayerDisplayCustomIcons)
+		{
+			gameObject.GetComponentInChildren<Image>().sprite = Assets.GetSprite(amount.uiSprite);
+		}
+		else
+		{
+			amountLine.spriteFunc = new Func<AmountInstance, Sprite>(amount.GetSprite);
+		}
 		this.amountsLines.Add(amountLine);
 	}
 
@@ -710,13 +718,18 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 	{
 		public bool TryUpdate(Amounts amounts)
 		{
-			foreach (AmountInstance amountInstance in amounts)
+			foreach (AmountInstance amountInstance in amounts.ModifierList)
 			{
 				if (this.amount == amountInstance.amount && !amountInstance.hide)
 				{
 					this.locText.SetText(this.amount.GetDescription(amountInstance));
 					this.toolTip.toolTip = this.toolTipFunc(amountInstance);
 					this.imageToggle.SetValue(amountInstance);
+					Sprite sprite = ((this.spriteFunc == null) ? null : this.spriteFunc(amountInstance));
+					if (sprite != null)
+					{
+						this.go.GetComponentInChildren<Image>().sprite = sprite;
+					}
 					return true;
 				}
 			}
@@ -734,6 +747,8 @@ public class MinionVitalsPanel : CollapsibleDetailContentPanel
 		public ToolTip toolTip;
 
 		public Func<AmountInstance, string> toolTipFunc;
+
+		public Func<AmountInstance, Sprite> spriteFunc;
 	}
 
 	[DebuggerDisplay("{attribute.Name}")]

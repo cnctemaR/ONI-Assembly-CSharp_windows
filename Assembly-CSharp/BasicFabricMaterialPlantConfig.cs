@@ -27,7 +27,7 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 			SimHashes.CarbonDioxide,
 			SimHashes.DirtyWater,
 			SimHashes.Water
-		}, false, 0f, 0.15f, text3, false, true, true, true, 2400f, 0f, 4600f, BasicFabricMaterialPlantConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.BASICFABRICMATERIALPLANT.NAME);
+		}, false, 0f, 0.15f, text3, false, true, true, false, true, 2400f, 0f, 4600f, BasicFabricMaterialPlantConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.BASICFABRICMATERIALPLANT.NAME);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

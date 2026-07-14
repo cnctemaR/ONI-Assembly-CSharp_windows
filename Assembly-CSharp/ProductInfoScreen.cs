@@ -282,56 +282,60 @@ public class ProductInfoScreen : KScreen
 		{
 			this.productDescriptionText.text = string.Format("{0}", def.Effect);
 		}
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def.BuildingComplete, false);
-		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
-		List<Descriptor> list = new List<Descriptor>();
-		if (requirementDescriptors.Count > 0)
+		ListPool<ValueTuple<ElementConverter, List<Descriptor>>, ProductInfoScreen>.PooledList pooledList = ListPool<ValueTuple<ElementConverter, List<Descriptor>>, ProductInfoScreen>.Allocate();
+		ListPool<Descriptor, ProductInfoScreen>.PooledList pooledList2 = ListPool<Descriptor, ProductInfoScreen>.Allocate();
+		ListPool<Descriptor, ProductInfoScreen>.PooledList pooledList3 = ListPool<Descriptor, ProductInfoScreen>.Allocate();
+		List<Descriptor> list;
+		bool flag;
+		GameUtil.PartitionBuildingDescriptors(def.BuildingComplete, false, out list, pooledList, pooledList2, pooledList3, out flag);
+		bool flag2 = pooledList2.Count > 0 || pooledList.Count > 0;
+		List<Descriptor> list2 = new List<Descriptor>();
+		if (flag2)
 		{
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.OPERATIONREQUIREMENTS, UI.BUILDINGEFFECTS.TOOLTIPS.OPERATIONREQUIREMENTS, Descriptor.DescriptorType.Effect);
-			requirementDescriptors.Insert(0, descriptor);
-			this.ProductRequirementsPane.gameObject.SetActive(true);
+			list2.Add(descriptor);
+			GameUtil.BuildPartitionedRequirements(list2, pooledList2, pooledList, flag);
 		}
-		else
-		{
-			this.ProductRequirementsPane.gameObject.SetActive(false);
-		}
-		this.ProductRequirementsPane.SetDescriptors(requirementDescriptors);
-		List<Descriptor> effectDescriptors = GameUtil.GetEffectDescriptors(allDescriptors);
-		if (effectDescriptors.Count > 0)
+		this.ProductRequirementsPane.gameObject.SetActive(flag2);
+		this.ProductRequirementsPane.SetDescriptors(list2);
+		bool flag3 = pooledList3.Count > 0 || pooledList.Count > 0;
+		List<Descriptor> list3 = new List<Descriptor>();
+		if (flag3)
 		{
 			Descriptor descriptor2 = default(Descriptor);
 			descriptor2.SetupDescriptor(UI.BUILDINGEFFECTS.OPERATIONEFFECTS, UI.BUILDINGEFFECTS.TOOLTIPS.OPERATIONEFFECTS, Descriptor.DescriptorType.Effect);
-			effectDescriptors.Insert(0, descriptor2);
-			this.ProductEffectsPane.gameObject.SetActive(true);
+			list3.Add(descriptor2);
+			GameUtil.BuildPartitionedEffects(list3, pooledList3, pooledList);
 		}
-		else
-		{
-			this.ProductEffectsPane.gameObject.SetActive(false);
-		}
-		this.ProductEffectsPane.SetDescriptors(effectDescriptors);
+		this.ProductEffectsPane.gameObject.SetActive(flag3);
+		this.ProductEffectsPane.SetDescriptors(list3);
+		pooledList2.Recycle();
+		pooledList3.Recycle();
+		pooledList.Recycle();
+		List<Descriptor> list4 = new List<Descriptor>();
 		foreach (Tag tag in def.BuildingComplete.GetComponent<KPrefabID>().Tags)
 		{
 			if (RoomConstraints.ConstraintTags.AllTags.Contains(tag) && !this.HiddenRoomConstrainTags.Contains(tag))
 			{
 				Descriptor descriptor3 = default(Descriptor);
 				descriptor3.SetupDescriptor(RoomConstraints.ConstraintTags.GetRoomConstraintLabelText(tag), null, Descriptor.DescriptorType.Effect);
-				list.Add(descriptor3);
+				list4.Add(descriptor3);
 			}
 		}
-		if (list.Count > 0)
+		if (list4.Count > 0)
 		{
-			list = GameUtil.GetEffectDescriptors(list);
+			list4 = GameUtil.GetEffectDescriptors(list4);
 			Descriptor descriptor4 = default(Descriptor);
 			descriptor4.SetupDescriptor(CODEX.HEADERS.BUILDINGTYPE, UI.BUILDINGEFFECTS.TOOLTIPS.BUILDINGROOMREQUIREMENTCLASS, Descriptor.DescriptorType.Effect);
-			list.Insert(0, descriptor4);
+			list4.Insert(0, descriptor4);
 			this.RoomConstrainsPanel.gameObject.SetActive(true);
 		}
 		else
 		{
 			this.RoomConstrainsPanel.gameObject.SetActive(false);
 		}
-		this.RoomConstrainsPanel.SetDescriptors(list);
+		this.RoomConstrainsPanel.SetDescriptors(list4);
 	}
 
 	public void ClearLabels()
@@ -463,7 +467,7 @@ public class ProductInfoScreen : KScreen
 
 	private List<Tag> HiddenRoomConstrainTags = new List<Tag>
 	{
-		RoomConstraints.ConstraintTags.Refrigerator,
+		RoomConstraints.ConstraintTags.KitchenRefrigerator,
 		RoomConstraints.ConstraintTags.FarmStationType,
 		RoomConstraints.ConstraintTags.LuxuryBedType,
 		RoomConstraints.ConstraintTags.MassageTable,

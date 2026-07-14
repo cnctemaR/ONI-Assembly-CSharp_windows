@@ -44,6 +44,7 @@ public class CodexScreen : KScreen
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
 			this.editingSearch = true;
+			UISounds.PlaySound(UISounds.Sound.Find);
 		}));
 		this.searchInputField.onEndEdit.AddListener(delegate(string value)
 		{

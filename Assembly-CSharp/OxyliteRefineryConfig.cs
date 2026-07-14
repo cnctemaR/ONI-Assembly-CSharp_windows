@@ -12,11 +12,11 @@ public class OxyliteRefineryConfig : IBuildingConfig
 		string text2 = "oxylite_refinery_kanim";
 		int num3 = 100;
 		float num4 = 480f;
-		string[] array = new string[] { "RefinedMetal", "Plastic" };
+		string[] array = new string[] { "RefinedMetal", "BuildingGasket" };
 		float[] array2 = new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
+			2f
 		};
 		string[] array3 = array;
 		float num5 = 2400f;

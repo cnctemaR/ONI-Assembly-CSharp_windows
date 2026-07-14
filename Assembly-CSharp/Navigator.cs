@@ -171,6 +171,11 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		return base.smi.IsInsideState(base.smi.sm.normal.moving);
 	}
 
+	public bool IsSwimming()
+	{
+		return this.CurrentNavType == NavType.Swim;
+	}
+
 	public bool GoTo(int cell, CellOffset[] offsets = null)
 	{
 		if (offsets == null)
@@ -722,8 +727,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		public float speed;
 
 		public float animSpeed = 1f;
-
-		public Func<bool> isCompleteCB;
 
 		public NavGrid.Transition navGridTransition;
 	}

@@ -133,16 +133,33 @@ public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, ISta
 
 	public class Def : StateMachine.BaseDef
 	{
+		public bool flipFacing;
 	}
 
 	public new class Instance : GameStateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.GameInstance
 	{
+		public float currentDir
+		{
+			get
+			{
+				return this.currentDirection;
+			}
+			set
+			{
+				this.currentDirection = value;
+				if (base.def.flipFacing)
+				{
+					base.GetComponent<Facing>().SetFacing(this.currentDir < 0f);
+				}
+			}
+		}
+
 		public Instance(Chore<FlopStates.Instance> chore, FlopStates.Def def)
 			: base(chore, def)
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.CheckBehaviourPrecondition, GameTags.Creatures.Flopping);
 		}
 
-		public float currentDir = 1f;
+		private float currentDirection;
 	}
 }

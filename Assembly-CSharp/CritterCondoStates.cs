@@ -85,15 +85,25 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 		if (smi.isLargeCritter)
 		{
 			bool isRotated = instance.Get<Rotatable>().IsRotated;
-			Vector2I vector2I = Grid.PosToXY(smi.gameObject.transform.position);
-			Vector2I vector2I2 = Grid.CellToXY(num);
-			if (vector2I.x > vector2I2.x && !isRotated)
+			if (instance.def.condoTag == "UnderwaterCritterCondo")
 			{
-				num = Grid.CellLeft(num);
+				if (!isRotated)
+				{
+					num = Grid.CellLeft(num);
+				}
 			}
-			else if (vector2I.x < vector2I2.x && isRotated)
+			else
 			{
-				num = Grid.CellRight(num);
+				Vector2I vector2I = Grid.PosToXY(smi.gameObject.transform.position);
+				Vector2I vector2I2 = Grid.CellToXY(num);
+				if (vector2I.x > vector2I2.x && !isRotated)
+				{
+					num = Grid.CellLeft(num);
+				}
+				else if (vector2I.x < vector2I2.x && isRotated)
+				{
+					num = Grid.CellRight(num);
+				}
 			}
 		}
 		return num;
@@ -109,7 +119,7 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 		CritterCondo.Instance smi2 = smi.sm.targetCondo.GetSMI<CritterCondo.Instance>(smi);
 		if (smi2 != null)
 		{
-			smi2.UpdateCritterAnims(anim_name, smi.def.entersBuilding, smi.isLargeCritter);
+			smi2.UpdateCritterAnims(anim_name, smi.def.entersBuilding, smi.def.fgLayer);
 		}
 	}
 
@@ -126,6 +136,8 @@ public class CritterCondoStates : GameStateMachine<CritterCondoStates, CritterCo
 		public bool entersBuilding = true;
 
 		public string working_anim = "cc_working";
+
+		public CritterCondo.CreatureFGLayerType fgLayer;
 	}
 
 	public new class Instance : GameStateMachine<CritterCondoStates, CritterCondoStates.Instance, IStateMachineTarget, CritterCondoStates.Def>.GameInstance

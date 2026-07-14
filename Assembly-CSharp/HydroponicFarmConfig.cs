@@ -39,7 +39,8 @@ public class HydroponicFarmConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.FarmBuilding, false);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.CodexCategories.FarmBuilding, false);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.notifyOnMelt = true;
@@ -54,6 +55,7 @@ public class HydroponicFarmConfig : IBuildingConfig
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.AddDepositTag(GameTags.CropSeed);
 		plantablePlot.AddDepositTag(GameTags.WaterSeed);
+		plantablePlot.AddAdditionalCriteria(new Func<GameObject, bool>(FarmTileConfig.ForbiddenTags));
 		plantablePlot.occupyingObjectRelativePosition.y = 1f;
 		plantablePlot.SetFertilizationFlags(true, true);
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Farm;
@@ -62,6 +64,15 @@ public class HydroponicFarmConfig : IBuildingConfig
 		go.AddOrGet<AnimTileable>();
 		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);
+		component.prefabInitFn += this.OnPrefabInit;
+	}
+
+	private void OnPrefabInit(GameObject instance)
+	{
+		instance.AddOrGet<PlantablePlot>().AddAdditionalCriteria(new Func<GameObject, bool>(FarmTileConfig.ForbiddenTags));
+		KBatchedAnimController component = instance.GetComponent<KBatchedAnimController>();
+		component.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+		component.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

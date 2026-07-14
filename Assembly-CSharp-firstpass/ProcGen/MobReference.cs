@@ -8,5 +8,7 @@ namespace ProcGen
 		public string type { get; private set; }
 
 		public MinMax count { get; private set; }
+
+		public int spawnOrder { get; private set; }
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
-using STRINGS;
 using UnityEngine;
 
 public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>
@@ -15,9 +14,17 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 		}).EventHandler(GameHashes.OnStorageChange, delegate(MilkFeeder.Instance smi)
 		{
 			smi.UpdateStorageMeter();
-		});
-		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (MilkFeeder.Instance smi) => smi.GetComponent<Operational>().IsOperational);
-		this.on.DefaultState(this.on.pre).EventTransition(GameHashes.OperationalChanged, this.on.pst, (MilkFeeder.Instance smi) => !smi.GetComponent<Operational>().IsOperational && smi.GetCurrentState() != this.on.pre).EventTransition(GameHashes.OperationalChanged, this.off, (MilkFeeder.Instance smi) => !smi.GetComponent<Operational>().IsOperational && smi.GetCurrentState() == this.on.pre);
+		}).EventHandler(GameHashes.OnStorageChange, new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State.Callback(MilkFeeder.RefreshLiquidColor));
+		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.Transition.ConditionCallback(MilkFeeder.ShouldBeOn)).EventTransition(GameHashes.BuildingStrawChange, this.on, new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.Transition.ConditionCallback(MilkFeeder.ShouldBeOn))
+			.Enter(new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State.Callback(MilkFeeder.RefreshLiquidColor))
+			.DefaultState(this.off.noOperational);
+		this.off.noOperational.EventTransition(GameHashes.OperationalChanged, this.off.strawBlocked, (MilkFeeder.Instance smi) => MilkFeeder.IsOperational(smi) && MilkFeeder.IsStrawBlocked(smi)).EventTransition(GameHashes.OperationalChanged, this.off.noLiquidOnStraw, (MilkFeeder.Instance smi) => MilkFeeder.IsOperational(smi) && MilkFeeder.IsStrawOutsideLiquid(smi));
+		this.off.strawBlocked.ToggleStatusItem(Db.Get().BuildingStatusItems.OutputTileBlocked, null).EventTransition(GameHashes.OperationalChanged, this.off.noOperational, GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.Not(new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.Transition.ConditionCallback(MilkFeeder.IsOperational))).EventTransition(GameHashes.BuildingStrawChange, this.off.noLiquidOnStraw, (MilkFeeder.Instance smi) => !MilkFeeder.IsStrawBlocked(smi) && MilkFeeder.IsStrawOutsideLiquid(smi));
+		this.off.noLiquidOnStraw.ToggleStatusItem(Db.Get().BuildingStatusItems.NotSubmerged, null).EventTransition(GameHashes.OperationalChanged, this.off.noOperational, GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.Not(new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.Transition.ConditionCallback(MilkFeeder.IsOperational))).EventTransition(GameHashes.BuildingStrawChange, this.off.strawBlocked, new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.Transition.ConditionCallback(MilkFeeder.IsStrawBlocked));
+		this.on.DefaultState(this.on.pre).EventTransition(GameHashes.BuildingStrawChange, this.on.pst, (MilkFeeder.Instance smi) => !MilkFeeder.ShouldBeOn(smi) && smi.GetCurrentState() != this.on.pre).EventTransition(GameHashes.BuildingStrawChange, this.off, (MilkFeeder.Instance smi) => !MilkFeeder.ShouldBeOn(smi) && smi.GetCurrentState() == this.on.pre)
+			.EventTransition(GameHashes.OperationalChanged, this.on.pst, (MilkFeeder.Instance smi) => !MilkFeeder.ShouldBeOn(smi) && smi.GetCurrentState() != this.on.pre)
+			.EventTransition(GameHashes.OperationalChanged, this.off, (MilkFeeder.Instance smi) => !MilkFeeder.ShouldBeOn(smi) && smi.GetCurrentState() == this.on.pre)
+			.Enter(new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State.Callback(MilkFeeder.RefreshLiquidColor));
 		this.on.pre.PlayAnim("working_pre").OnAnimQueueComplete(this.on.working);
 		this.on.working.PlayAnim("on").DefaultState(this.on.working.empty);
 		this.on.working.empty.PlayAnim("empty").EnterTransition(this.on.working.refilling, (MilkFeeder.Instance smi) => smi.HasEnoughMilkForOneFeeding()).EventHandler(GameHashes.OnStorageChange, delegate(MilkFeeder.Instance smi)
@@ -27,7 +34,7 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 				smi.GoTo(this.on.working.refilling);
 			}
 		});
-		this.on.working.refilling.PlayAnim("fill").OnAnimQueueComplete(this.on.working.full);
+		this.on.working.refilling.Enter(new StateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State.Callback(MilkFeeder.RefreshLiquidColor)).PlayAnim("fill").OnAnimQueueComplete(this.on.working.full);
 		this.on.working.full.PlayAnim("full").Enter(delegate(MilkFeeder.Instance smi)
 		{
 			this.isReadyToStartFeeding.Set(true, smi, false);
@@ -48,7 +55,38 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 		this.on.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.off);
 	}
 
-	private GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State off;
+	public static bool ShouldBeOn(MilkFeeder.Instance smi)
+	{
+		return MilkFeeder.IsOperational(smi) && !MilkFeeder.IsStrawBlocked(smi) && !MilkFeeder.IsStrawOutsideLiquid(smi);
+	}
+
+	public static bool IsOperational(MilkFeeder.Instance smi)
+	{
+		return smi.IsOperational;
+	}
+
+	public static bool IsStrawBlocked(MilkFeeder.Instance smi)
+	{
+		return smi.IsStrawBlocked;
+	}
+
+	public static bool IsStrawOutsideLiquid(MilkFeeder.Instance smi)
+	{
+		return smi.IsStrawOutsideLiquid;
+	}
+
+	public static void RefreshLiquidColor(MilkFeeder.Instance smi)
+	{
+		smi.RefreshLiquidColor();
+	}
+
+	private const string TINT_METER_SYMBOL_NAME = "meter_fill";
+
+	private const string TINT_SYMBOL_NAME = "Milk_fg";
+
+	private const string TINT_SYMBOL2_NAME = "Milk_fill_fg";
+
+	private MilkFeeder.OffState off;
 
 	private MilkFeeder.OnState on;
 
@@ -62,12 +100,34 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 		{
 			List<Descriptor> list = new List<Descriptor>();
 			go.GetSMI<MilkFeeder.Instance>();
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(CREATURES.MODIFIERS.GOTMILK.NAME, "", Descriptor.DescriptorType.Effect);
-			list.Add(descriptor);
-			Effect.AddModifierDescriptions(list, "HadMilk", true, "STRINGS.CREATURES.STATS.");
+			for (int i = 0; i < MilkFeederConfig.EffectsPerDrinkableLiquid.Length; i++)
+			{
+				Tag first = MilkFeederConfig.EffectsPerDrinkableLiquid[i].first;
+				string second = MilkFeederConfig.EffectsPerDrinkableLiquid[i].second;
+				Descriptor descriptor = default(Descriptor);
+				descriptor.SetupDescriptor(Strings.Get("STRINGS.CREATURES.MODIFIERS." + second.ToUpper() + ".NAME"), "", Descriptor.DescriptorType.Effect);
+				list.Add(descriptor);
+				Effect.AddModifierDescriptions(list, second, true, "STRINGS.CREATURES.STATS.");
+			}
 			return list;
 		}
+
+		public CellOffset drinkCellOffset;
+
+		public Tag elementProducedTag;
+
+		public float unitsProducedPerFeeding;
+
+		public bool tintMeter;
+	}
+
+	public class OffState : GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State
+	{
+		public GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State noOperational;
+
+		public GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State strawBlocked;
+
+		public GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State noLiquidOnStraw;
 	}
 
 	public class OnState : GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.State
@@ -92,17 +152,59 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 
 	public new class Instance : GameStateMachine<MilkFeeder, MilkFeeder.Instance, IStateMachineTarget, MilkFeeder.Def>.GameInstance
 	{
+		public bool IsOperational
+		{
+			get
+			{
+				return this.operational != null && this.operational.IsOperational;
+			}
+		}
+
+		public bool IsStrawInstalled
+		{
+			get
+			{
+				return this.straw != null;
+			}
+		}
+
+		public bool IsStrawOutsideLiquid
+		{
+			get
+			{
+				return this.IsStrawInstalled && !this.straw.isInLiquid;
+			}
+		}
+
+		public bool IsStrawBlocked
+		{
+			get
+			{
+				return this.IsStrawInstalled && this.straw.currentDepth <= 0;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, MilkFeeder.Def def)
 			: base(master, def)
 		{
 			this.milkStorage = base.GetComponent<Storage>();
+			this.operational = base.GetComponent<Operational>();
+			this.straw = base.GetComponent<BuildingPointStraw>();
 			this.storageMeter = new MeterController(base.smi.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
+			base.Subscribe(360192579, new Action<object>(this.OnStrawChanged));
+		}
+
+		private void OnStrawChanged(object o)
+		{
+			CellOffset bottomCellOffset = ((BuildingPointStraw)o).GetBottomCellOffset();
+			this.strawCellOffset = bottomCellOffset;
 		}
 
 		public override void StartSM()
 		{
 			base.StartSM();
 			Components.MilkFeeders.Add(base.smi.GetMyWorldId(), this);
+			this.RefreshLiquidColor();
 		}
 
 		protected override void OnCleanUp()
@@ -111,14 +213,14 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 			Components.MilkFeeders.Remove(base.smi.GetMyWorldId(), this);
 		}
 
+		public CellOffset GetDrinkCellOffset()
+		{
+			return base.def.drinkCellOffset + this.strawCellOffset;
+		}
+
 		public void UpdateStorageMeter()
 		{
 			this.storageMeter.SetPositionPercent(1f - Mathf.Clamp01(this.milkStorage.RemainingCapacity() / this.milkStorage.capacityKg));
-		}
-
-		public bool IsOperational()
-		{
-			return base.GetComponent<Operational>().IsOperational;
 		}
 
 		public bool IsReserved()
@@ -142,9 +244,37 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 			global::Debug.LogWarningFormat(base.smi.gameObject, "Tried to unreserve a MilkFeeder that wasn't reserved", Array.Empty<object>());
 		}
 
+		public void RefreshLiquidColor()
+		{
+			PrimaryElement primaryElement = this.milkStorage.FindFirstWithMass(base.def.elementProducedTag, base.def.unitsProducedPerFeeding);
+			if (primaryElement == null)
+			{
+				return;
+			}
+			Element element = ElementLoader.FindElementByTag(primaryElement.PrefabID());
+			if (base.def.tintMeter && this.milkStorage != null)
+			{
+				KBatchedAnimController meterController = this.storageMeter.meterController;
+				if (meterController != null)
+				{
+					GameUtil.TintLiquidSymbolOnBuilding("meter_fill", meterController, element);
+				}
+			}
+			KBatchedAnimController[] componentsInChildren = base.gameObject.GetComponentsInChildren<KBatchedAnimController>();
+			if (componentsInChildren == null || componentsInChildren.Length == 0)
+			{
+				return;
+			}
+			foreach (KBatchedAnimController kbatchedAnimController in componentsInChildren)
+			{
+				GameUtil.TintLiquidSymbolOnBuilding("Milk_fg", kbatchedAnimController, element);
+				GameUtil.TintLiquidSymbolOnBuilding("Milk_fill_fg", kbatchedAnimController, element);
+			}
+		}
+
 		public bool IsReadyToStartFeeding()
 		{
-			return this.IsOperational() && base.sm.isReadyToStartFeeding.Get(base.smi);
+			return base.sm.isReadyToStartFeeding.Get(base.smi);
 		}
 
 		public void RequestToStartFeeding(DrinkMilkStates.Instance feedingCritter)
@@ -164,12 +294,14 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 
 		public bool HasEnoughMilkForOneFeeding()
 		{
-			return this.milkStorage.GetAmountAvailable(MilkFeederConfig.MILK_TAG) >= 5f;
+			return this.milkStorage.FindFirstWithMass(base.def.elementProducedTag, base.def.unitsProducedPerFeeding) != null;
 		}
 
-		public void ConsumeMilkForOneFeeding()
+		public Tag ConsumeMilkForOneFeeding()
 		{
-			this.milkStorage.ConsumeIgnoringDisease(MilkFeederConfig.MILK_TAG, 5f);
+			Tag tag = this.milkStorage.FindFirstWithMass(base.def.elementProducedTag, base.def.unitsProducedPerFeeding).PrefabID();
+			this.milkStorage.ConsumeIgnoringDisease(tag, base.def.unitsProducedPerFeeding);
+			return tag;
 		}
 
 		public bool IsInCreaturePenRoom()
@@ -181,5 +313,11 @@ public class MilkFeeder : GameStateMachine<MilkFeeder, MilkFeeder.Instance, ISta
 		public Storage milkStorage;
 
 		public MeterController storageMeter;
+
+		private CellOffset strawCellOffset = new CellOffset(0, 0);
+
+		private Operational operational;
+
+		private BuildingPointStraw straw;
 	}
 }

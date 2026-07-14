@@ -182,6 +182,13 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 			GameTags.StartingRefinedMetals[j] = list2[j].tag;
 		}
 		GameTags.BasicRefinedMetals = GameTags.StartingRefinedMetals.Append<Tag>(GameTags.BasicRefinedMetals);
+		List<Element> list3 = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.AnyWater));
+		PLANTS.SAFE_ELEMENTS.AllWaters = new SimHashes[list3.Count];
+		for (int k = 0; k < list3.Count; k++)
+		{
+			PLANTS.SAFE_ELEMENTS.AllWaters[k] = list3[k].id;
+		}
+		PLANTS.SAFE_ELEMENTS.MurkyWaters = PLANTS.SAFE_ELEMENTS.AllWaters.Append<SimHashes>(new SimHashes[] { SimHashes.Ink });
 	}
 
 	public static string GetSimpleSoundEventName(EventReference event_ref)
@@ -561,6 +568,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public Sprite LegendColourBox;
 
 	public Texture2D invalidAreaTex;
+
+	public List<GameObject> vistasPrefabs = new List<GameObject>();
 
 	public Assets.UIPrefabData UIPrefabAssets;
 

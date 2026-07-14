@@ -1,5 +1,6 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
 public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates.Instance>
 {
@@ -14,10 +15,11 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 		};
 		this.IsCreatureAvailableForFixedCapture = precondition;
 		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
-		this.AddPrecondition(this.IsCreatureAvailableForFixedCapture, capture_point.GetSMI<FixedCapturePoint.Instance>());
+		FixedCapturePoint.Instance smi = capture_point.GetSMI<FixedCapturePoint.Instance>();
+		this.AddPrecondition(this.IsCreatureAvailableForFixedCapture, smi);
 		this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanWrangleCreatures.Id);
 		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
-		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, capture_point.GetComponent<Building>());
+		this.AddPrecondition(ChorePreconditions.instance.CanMoveToCell, smi.GetRancherInteractCell());
 		Operational component = capture_point.GetComponent<Operational>();
 		this.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
 		Deconstructable component2 = capture_point.GetComponent<Deconstructable>();
@@ -45,9 +47,10 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 			base.Target(this.rancher);
 			this.root.Exit("ResetCapturePoint", delegate(FixedCaptureChore.FixedCaptureChoreStates.Instance smi)
 			{
+				smi.fixedCapturePoint.isCurrentlyCapturingCreature = false;
 				smi.fixedCapturePoint.ResetCapturePoint();
 			});
-			this.movetopoint.MoveTo((FixedCaptureChore.FixedCaptureChoreStates.Instance smi) => Grid.PosToCell(smi.transform.GetPosition()), this.waitforcreature_pre, null, false).Target(this.masterTarget).EventTransition(GameHashes.CreatureAbandonedCapturePoint, this.failed, null);
+			this.movetopoint.MoveTo((FixedCaptureChore.FixedCaptureChoreStates.Instance smi) => smi.fixedCapturePoint.GetRancherInteractCell(), this.waitforcreature_pre, null, false).Target(this.masterTarget).EventTransition(GameHashes.CreatureAbandonedCapturePoint, this.failed, null);
 			this.waitforcreature_pre.EnterTransition(null, (FixedCaptureChore.FixedCaptureChoreStates.Instance smi) => smi.fixedCapturePoint.IsNullOrStopped()).EnterTransition(this.failed, new StateMachine<FixedCaptureChore.FixedCaptureChoreStates, FixedCaptureChore.FixedCaptureChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(FixedCaptureChore.FixedCaptureChoreStates.HasCreatureLeft)).EnterTransition(this.waitforcreature, (FixedCaptureChore.FixedCaptureChoreStates.Instance smi) => true);
 			this.waitforcreature.ToggleAnims("anim_interacts_rancherstation_kanim", 0f).PlayAnim("calling_loop", KAnim.PlayMode.Loop).Transition(this.failed, new StateMachine<FixedCaptureChore.FixedCaptureChoreStates, FixedCaptureChore.FixedCaptureChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(FixedCaptureChore.FixedCaptureChoreStates.HasCreatureLeft), UpdateRate.SIM_200ms)
 				.Face(this.creature, 0f)
@@ -60,10 +63,73 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 					smi.fixedCapturePoint.ClearRancherIsAvailableForCapturing();
 				})
 				.Target(this.masterTarget)
-				.EventTransition(GameHashes.CreatureArrivedAtCapturePoint, this.capturecreature, null);
+				.EventTransition(GameHashes.CreatureArrivedAtCapturePoint, this.precaptureanim, null);
+			this.precaptureanim.EnterTransition(this.capturecreature, (FixedCaptureChore.FixedCaptureChoreStates.Instance smi) => smi.fixedCapturePoint.def.preCaptureAnimName == null).Enter("LockCaptureTarget", delegate(FixedCaptureChore.FixedCaptureChoreStates.Instance smi)
+			{
+				smi.fixedCapturePoint.isCurrentlyCapturingCreature = true;
+			}).Enter("StoreCreature", delegate(FixedCaptureChore.FixedCaptureChoreStates.Instance smi)
+			{
+				GameObject gameObject = smi.sm.creature.Get(smi);
+				if (gameObject != null)
+				{
+					smi.GetComponent<Storage>().Store(gameObject, true, true, true, false);
+				}
+			})
+				.Exit("DropAndWrangleCreature", delegate(FixedCaptureChore.FixedCaptureChoreStates.Instance smi)
+				{
+					GameObject gameObject2 = smi.sm.creature.Get(smi);
+					if (gameObject2 != null)
+					{
+						Storage component = smi.GetComponent<Storage>();
+						if (component.items.Contains(gameObject2))
+						{
+							component.Drop(gameObject2, false);
+							CellOffset? postCaptureOffset = smi.fixedCapturePoint.def.postCaptureOffset;
+							if (postCaptureOffset != null)
+							{
+								int num = Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), postCaptureOffset.Value);
+								gameObject2.transform.SetPosition(Grid.CellToPosCCC(num, Grid.SceneLayer.Creatures));
+							}
+							Capturable component2 = gameObject2.GetComponent<Capturable>();
+							if (component2 != null)
+							{
+								component2.MarkForCapture(false);
+							}
+							Baggable component3 = gameObject2.GetComponent<Baggable>();
+							if (component3 != null)
+							{
+								component3.SetWrangled();
+							}
+						}
+					}
+				})
+				.Target(this.masterTarget)
+				.PlayAnim(delegate(FixedCaptureChore.FixedCaptureChoreStates.Instance smi)
+				{
+					string text = smi.fixedCapturePoint.def.preCaptureAnimName;
+					Func<FixedCapturePoint.Instance, string> getPreCaptureAnimSuffix = smi.fixedCapturePoint.def.getPreCaptureAnimSuffix;
+					if (getPreCaptureAnimSuffix != null)
+					{
+						text += getPreCaptureAnimSuffix(smi.fixedCapturePoint);
+					}
+					return text;
+				}, KAnim.PlayMode.Once)
+				.OnAnimQueueComplete(this.success);
 			this.capturecreature.EventTransition(GameHashes.CreatureAbandonedCapturePoint, this.failed, null).EnterTransition(this.failed, (FixedCaptureChore.FixedCaptureChoreStates.Instance smi) => smi.fixedCapturePoint.targetCapturable.IsNullOrStopped()).ToggleWork<Capturable>(this.creature, this.success, this.failed, null);
 			this.failed.GoTo(null);
-			this.success.ReturnSuccess();
+			this.success.Enter("PostCaptureRelocate", delegate(FixedCaptureChore.FixedCaptureChoreStates.Instance smi)
+			{
+				CellOffset? postCaptureOffset2 = smi.fixedCapturePoint.def.postCaptureOffset;
+				if (postCaptureOffset2 != null)
+				{
+					GameObject gameObject3 = smi.sm.creature.Get(smi);
+					if (gameObject3 != null)
+					{
+						int num2 = Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), postCaptureOffset2.Value);
+						gameObject3.transform.SetPosition(Grid.CellToPosCCC(num2, Grid.SceneLayer.Ore));
+					}
+				}
+			}).ReturnSuccess();
 		}
 
 		private static bool HasCreatureLeft(FixedCaptureChore.FixedCaptureChoreStates.Instance smi)
@@ -80,6 +146,8 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 		private GameStateMachine<FixedCaptureChore.FixedCaptureChoreStates, FixedCaptureChore.FixedCaptureChoreStates.Instance, IStateMachineTarget, object>.State waitforcreature_pre;
 
 		private GameStateMachine<FixedCaptureChore.FixedCaptureChoreStates, FixedCaptureChore.FixedCaptureChoreStates.Instance, IStateMachineTarget, object>.State waitforcreature;
+
+		private GameStateMachine<FixedCaptureChore.FixedCaptureChoreStates, FixedCaptureChore.FixedCaptureChoreStates.Instance, IStateMachineTarget, object>.State precaptureanim;
 
 		private GameStateMachine<FixedCaptureChore.FixedCaptureChoreStates, FixedCaptureChore.FixedCaptureChoreStates.Instance, IStateMachineTarget, object>.State capturecreature;
 

@@ -605,7 +605,14 @@ public class NameDisplayScreen : KScreen
 
 	private NameDisplayScreen.Entry GetEntry(GameObject worldObject)
 	{
-		return this.entries.Find((NameDisplayScreen.Entry entry) => entry.world_go == worldObject);
+		foreach (NameDisplayScreen.Entry entry in this.entries)
+		{
+			if (entry.world_go == worldObject)
+			{
+				return entry;
+			}
+		}
+		return null;
 	}
 
 	[SerializeField]

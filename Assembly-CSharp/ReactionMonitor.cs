@@ -88,11 +88,6 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			this.oneshotReactables = new List<Reactable>();
 		}
 
-		public bool CanReact(Emote e)
-		{
-			return this.animController != null && e.IsValidForController(this.animController);
-		}
-
 		public bool TryReact(Reactable reactable, float clockTime, Navigator.ActiveTransition transition = null)
 		{
 			if (reactable == null)
@@ -172,9 +167,9 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			return base.smi.IsInsideState(base.sm.reacting);
 		}
 
-		public SelfEmoteReactable AddSelfEmoteReactable(GameObject target, HashedString reactionId, Emote emote, bool isOneShot, ChoreType choreType, float globalCooldown = 0f, float localCooldown = 20f, float lifeSpan = float.NegativeInfinity, float maxInitialDelay = 0f, List<Reactable.ReactablePrecondition> emotePreconditions = null)
+		public SelfEmoteReactable AddSelfEmoteReactable(GameObject target, HashedString reactionId, Emote emote, bool isOneShot, ChoreType choreType, float globalCooldown = 0f, float localCooldown = 20f, float lifeSpan = float.PositiveInfinity, float maxInitialDelay = 0f, List<Reactable.ReactablePrecondition> emotePreconditions = null)
 		{
-			if (!this.CanReact(emote))
+			if (!emote.IsValid)
 			{
 				return null;
 			}
@@ -193,7 +188,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			return selfEmoteReactable;
 		}
 
-		public SelfEmoteReactable AddSelfEmoteReactable(GameObject target, string reactionId, string emoteAnim, bool isOneShot, ChoreType choreType, float globalCooldown = 0f, float localCooldown = 20f, float maxTriggerTime = float.NegativeInfinity, float maxInitialDelay = 0f, List<Reactable.ReactablePrecondition> emotePreconditions = null)
+		public SelfEmoteReactable AddSelfEmoteReactable(GameObject target, string reactionId, string emoteAnim, bool isOneShot, ChoreType choreType, float globalCooldown = 0f, float localCooldown = 20f, float maxTriggerTime = float.PositiveInfinity, float maxInitialDelay = 0f, List<Reactable.ReactablePrecondition> emotePreconditions = null)
 		{
 			Emote emote = new Emote(null, reactionId, new EmoteStep[]
 			{
@@ -201,7 +196,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 				{
 					anim = "react"
 				}
-			}, emoteAnim);
+			}, emoteAnim, null);
 			return this.AddSelfEmoteReactable(target, reactionId, emote, isOneShot, choreType, globalCooldown, localCooldown, maxTriggerTime, maxInitialDelay, emotePreconditions);
 		}
 

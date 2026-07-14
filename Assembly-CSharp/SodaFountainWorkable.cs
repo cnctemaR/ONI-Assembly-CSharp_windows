@@ -63,6 +63,7 @@ public class SodaFountainWorkable : Workable, IWorkerPrioritizable
 		{
 			component2.Add(this.sodaFountain.trackingEffect, true);
 		}
+		component2.Remove("Thirsty");
 	}
 
 	protected override void OnStopWork(WorkerBase worker)

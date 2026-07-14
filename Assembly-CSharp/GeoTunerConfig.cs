@@ -249,6 +249,10 @@ public class GeoTunerConfig : IBuildingConfig
 				GeoTunerConfig.CategorySettings[GeoTunerConfig.Category.WATER_CATEGORY]
 			},
 			{
+				"murky_brine",
+				GeoTunerConfig.CategorySettings[GeoTunerConfig.Category.WATER_CATEGORY]
+			},
+			{
 				"liquid_sulfur",
 				GeoTunerConfig.CategorySettings[GeoTunerConfig.Category.HYDROCARBON_CATEGORY]
 			},

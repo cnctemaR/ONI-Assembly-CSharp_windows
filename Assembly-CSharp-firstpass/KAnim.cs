@@ -16,7 +16,8 @@ public class KAnim
 		Bloom = 1,
 		OnLight,
 		SnapTo = 4,
-		FG = 8
+		FG = 8,
+		SH = 16
 	}
 
 	[DebuggerDisplay("{id} {animFile}")]

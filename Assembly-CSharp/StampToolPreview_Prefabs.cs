@@ -21,18 +21,25 @@ public class StampToolPreview_Prefabs : IStampToolPreviewPlugin
 				StampToolPreview_Prefabs.SpawnPrefab(context, prefab2);
 			}
 		}
-		if (!context.stampTemplate.buildings.IsNullOrDestroyed())
+		if (!context.stampTemplate.backwallEntities.IsNullOrDestroyed())
 		{
-			foreach (Prefab prefab3 in context.stampTemplate.buildings)
+			foreach (Prefab prefab3 in context.stampTemplate.backwallEntities)
 			{
 				StampToolPreview_Prefabs.SpawnPrefab(context, prefab3);
 			}
 		}
-		if (!context.stampTemplate.elementalOres.IsNullOrDestroyed())
+		if (!context.stampTemplate.buildings.IsNullOrDestroyed())
 		{
-			foreach (Prefab prefab4 in context.stampTemplate.elementalOres)
+			foreach (Prefab prefab4 in context.stampTemplate.buildings)
 			{
 				StampToolPreview_Prefabs.SpawnPrefab(context, prefab4);
+			}
+		}
+		if (!context.stampTemplate.elementalOres.IsNullOrDestroyed())
+		{
+			foreach (Prefab prefab5 in context.stampTemplate.elementalOres)
+			{
+				StampToolPreview_Prefabs.SpawnPrefab(context, prefab5);
 			}
 		}
 	}

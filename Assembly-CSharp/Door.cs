@@ -108,7 +108,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 		base.Subscribe<Door>(-592767678, Door.OnOperationalChangedDelegate);
 		base.Subscribe<Door>(824508782, Door.OnOperationalChangedDelegate);
 		base.Subscribe<Door>(-801688580, Door.OnLogicValueChangedDelegate);
-		this.ApplyControlState(true);
+		this.ApplyControlState(false);
 		if (this.requestedState != Door.ControlState.NumStates && this.requestedState != this.controlState)
 		{
 			Door.ControlState controlState = this.requestedState;
@@ -303,44 +303,73 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 	{
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		float num = component.Mass / (float)cells.Count;
-		for (int i = 0; i < cells.Count; i++)
+		Door.DoorType doorType = this.doorType;
+		if (doorType <= Door.DoorType.ManualPressure || doorType == Door.DoorType.Sealed)
 		{
-			int num2 = cells[i];
-			Door.DoorType doorType = this.doorType;
-			if (doorType <= Door.DoorType.ManualPressure || doorType == Door.DoorType.Sealed)
+			if (is_door_open)
 			{
-				World.Instance.groundRenderer.MarkDirty(num2);
-				if (is_door_open)
+				StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+				HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+				if (handle.IsValid() && structureTemperatures.IsBypassed(handle))
 				{
-					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
-					if (this.insulationModifier != 1f)
+					float num2 = 0f;
+					int num3 = 0;
+					foreach (int num4 in cells)
 					{
-						SimMessages.SetInsulation(num2, 1f);
+						if (Grid.Mass[num4] > 0f)
+						{
+							num3++;
+							num2 += Grid.Temperature[num4];
+						}
+						HandleVector<Game.CallbackInfo>.Handle handle2 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
+						if (this.insulationModifier != 1f)
+						{
+							SimMessages.SetInsulation(num4, 1f);
+						}
+						SimMessages.Dig(num4, handle2.index, true, false);
+						if (this.ShouldBlockFallingSand)
+						{
+							SimMessages.ClearCellProperties(num4, 4);
+						}
+						else
+						{
+							SimMessages.SetCellProperties(num4, 4);
+						}
+						World.Instance.groundRenderer.MarkDirty(num4);
 					}
-					SimMessages.Dig(num2, handle.index, true);
-					if (this.ShouldBlockFallingSand)
+					if (num3 > 0)
 					{
-						SimMessages.ClearCellProperties(num2, 4);
-					}
-					else
-					{
-						SimMessages.SetCellProperties(num2, 4);
+						num2 /= (float)cells.Count;
+						KCrashReporter.Assert(num2 > 0f, "Door has calculated an invalid temperature", null);
+						component.Temperature = num2;
+						return;
 					}
 				}
-				else
+			}
+			else
+			{
+				foreach (int num5 in cells)
 				{
-					HandleVector<Game.CallbackInfo>.Handle handle2 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false));
-					float num3 = component.Temperature;
-					if (num3 <= 0f)
+					HandleVector<Game.CallbackInfo>.Handle handle3 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false));
+					float num6 = component.Temperature;
+					if (num6 <= 0f)
 					{
-						num3 = component.Temperature;
+						num6 = component.Temperature;
 					}
-					SimMessages.ReplaceAndDisplaceElement(num2, component.ElementID, CellEventLogger.Instance.DoorClose, num, num3, byte.MaxValue, 0, handle2.index);
-					SimMessages.SetCellProperties(num2, 4);
+					SimMessages.ReplaceAndDisplaceElement(num5, component.ElementID, CellEventLogger.Instance.DoorClose, num, num6, byte.MaxValue, 0, handle3.index);
+					SimMessages.SetCellProperties(num5, 4);
 					if (this.insulationModifier != 1f)
 					{
-						SimMessages.SetInsulation(num2, this.insulationModifier);
+						SimMessages.SetInsulation(num5, this.insulationModifier);
 					}
+					World.Instance.groundRenderer.MarkDirty(num5);
+				}
+				StructureTemperatureComponents structureTemperatures2 = GameComps.StructureTemperatures;
+				HandleVector<int>.Handle handle4 = structureTemperatures2.GetHandle(base.gameObject);
+				if (handle4.IsValid() && !structureTemperatures2.IsBypassed(handle4))
+				{
+					float temperature = structureTemperatures2.GetPayload(handle4).Temperature;
+					component.Temperature = temperature;
 				}
 			}
 		}
@@ -428,32 +457,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 
 	public void Open()
 	{
-		if (this.openCount == 0 && Door.DisplacesGas(this.doorType))
-		{
-			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
-			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-			if (handle.IsValid() && structureTemperatures.IsBypassed(handle))
-			{
-				int[] placementCells = this.building.PlacementCells;
-				float num = 0f;
-				int num2 = 0;
-				foreach (int num3 in placementCells)
-				{
-					if (Grid.Mass[num3] > 0f)
-					{
-						num2++;
-						num += Grid.Temperature[num3];
-					}
-				}
-				if (num2 > 0)
-				{
-					num /= (float)placementCells.Length;
-					PrimaryElement component = base.GetComponent<PrimaryElement>();
-					KCrashReporter.Assert(num > 0f, "Door has calculated an invalid temperature", null);
-					component.Temperature = num;
-				}
-			}
-		}
 		this.openCount++;
 		Door.ControlState controlState = this.controlState;
 		if (controlState > Door.ControlState.Opened)
@@ -466,17 +469,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 	public void Close()
 	{
 		this.openCount = Mathf.Max(0, this.openCount - 1);
-		if (this.openCount == 0 && Door.DisplacesGas(this.doorType))
-		{
-			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
-			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-			PrimaryElement component = base.GetComponent<PrimaryElement>();
-			if (handle.IsValid() && !structureTemperatures.IsBypassed(handle))
-			{
-				float temperature = structureTemperatures.GetPayload(handle).Temperature;
-				component.Temperature = temperature;
-			}
-		}
 		switch (this.controlState)
 		{
 		case Door.ControlState.Auto:
@@ -635,6 +627,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 
 	public float insulationModifier = 1f;
 
+	public bool waterProofAffectsFGLayers;
+
 	private string doorClosingSound;
 
 	private string doorOpeningSound;
@@ -747,20 +741,20 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 			this.open.PlayAnim("open").ParamTransition<bool>(this.isOpen, this.closeblocked, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsFalse).Enter("SetWorldStateOpen", delegate(Door.Controller.Instance smi)
 			{
 				smi.master.SetWorldState(true);
-			});
-			this.closed.PlayAnim("closed").ParamTransition<bool>(this.isOpen, this.opening, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue).ParamTransition<bool>(this.isLocked, this.locking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue)
+			})
+				.Enter(new StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State.Callback(this.RemoveWaterproof));
+			this.closed.Enter(new StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State.Callback(this.SetWaterproof)).PlayAnim("closed").ParamTransition<bool>(this.isOpen, this.opening, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue)
+				.ParamTransition<bool>(this.isLocked, this.locking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsTrue)
 				.Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 				{
-					if (!this.isLocked.Get(smi))
-					{
-						smi.master.SetWorldState(true);
-					}
+					smi.master.SetWorldState(true);
 				});
 			this.locking.PlayAnim("locked_pre").OnAnimQueueComplete(this.locked);
-			this.locked.PlayAnim("locked").ParamTransition<bool>(this.isLocked, this.unlocking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsFalse).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
-			{
-				smi.master.SetWorldState(true);
-			});
+			this.locked.Enter(new StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State.Callback(this.SetWaterproof)).PlayAnim("locked").ParamTransition<bool>(this.isLocked, this.unlocking, GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.IsFalse)
+				.Enter("SetWorldStateLocked", delegate(Door.Controller.Instance smi)
+				{
+					smi.master.SetWorldState(true);
+				});
 			this.unlocking.PlayAnim("locked_pst").OnAnimQueueComplete(this.closed);
 			this.opening.ToggleTag(GameTags.Transition).ToggleLoopingSound("Opening loop", (Door.Controller.Instance smi) => smi.master.doorOpeningSound, (Door.Controller.Instance smi) => !string.IsNullOrEmpty(smi.master.doorOpeningSound)).Enter("SetParams", delegate(Door.Controller.Instance smi)
 			{
@@ -797,19 +791,21 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				{
 					smi.master.GetComponent<KBatchedAnimController>().FlipX = true;
 				}
-			}).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
+			}).Enter(new StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State.Callback(this.SetWaterproof)).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 			{
 				smi.master.SetWorldState(true);
-			}).Exit(delegate(Door.Controller.Instance smi)
-			{
-				smi.sm.isLocked.Set(false, smi, false);
-				smi.master.GetComponent<AccessControl>().controlEnabled = true;
-				smi.master.controlState = Door.ControlState.Opened;
-				smi.master.RefreshControlState();
-				smi.sm.isOpen.Set(true, smi, false);
-				smi.sm.isLocked.Set(false, smi, false);
-				smi.sm.isSealed.Set(false, smi, false);
-			});
+			})
+				.Exit(delegate(Door.Controller.Instance smi)
+				{
+					smi.sm.isLocked.Set(false, smi, false);
+					smi.master.GetComponent<AccessControl>().controlEnabled = true;
+					smi.master.controlState = Door.ControlState.Opened;
+					smi.master.RefreshControlState();
+					smi.sm.isOpen.Set(true, smi, false);
+					smi.sm.isLocked.Set(false, smi, false);
+					smi.sm.isSealed.Set(false, smi, false);
+				})
+				.Exit(new StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State.Callback(this.RemoveWaterproof));
 			this.Sealed.closed.PlayAnim("sealed", KAnim.PlayMode.Once);
 			this.Sealed.awaiting_unlock.ToggleChore((Door.Controller.Instance smi) => this.CreateUnsealChore(smi, true), this.Sealed.chore_pst);
 			this.Sealed.chore_pst.Enter(delegate(Door.Controller.Instance smi)
@@ -824,6 +820,39 @@ public class Door : Workable, ISaveLoadable, ISim200ms, INavDoor
 				}
 				smi.GoTo(this.Sealed.closed);
 			});
+		}
+
+		private void SetWaterproof(Door.Controller.Instance smi)
+		{
+			if (Door.DisplacesGas(smi.master.doorType))
+			{
+				smi.master.animController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+				if (smi.master.waterProofAffectsFGLayers)
+				{
+					foreach (KBatchedAnimController kbatchedAnimController in smi.master.gameObject.GetComponentsInChildrenOnly<KBatchedAnimController>())
+					{
+						if (kbatchedAnimController.name.Contains("_fg"))
+						{
+							kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+						}
+					}
+				}
+			}
+		}
+
+		private void RemoveWaterproof(Door.Controller.Instance smi)
+		{
+			smi.master.animController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, false);
+			if (smi.master.waterProofAffectsFGLayers)
+			{
+				foreach (KBatchedAnimController kbatchedAnimController in smi.master.gameObject.GetComponentsInChildrenOnly<KBatchedAnimController>())
+				{
+					if (kbatchedAnimController.name.Contains("_fg"))
+					{
+						kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, false);
+					}
+				}
+			}
 		}
 
 		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)

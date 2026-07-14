@@ -13,7 +13,7 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 	protected override void OnPrefabInit()
 	{
 		FishOvercrowingManager.Instance = this;
-		this.cells = new FishOvercrowingManager.Cell[Grid.CellCount];
+		this.grid = new FishOvercrowingManager.Cell[Grid.CellCount];
 	}
 
 	public void Add(KPrefabID aquaticEntity)
@@ -40,9 +40,16 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 
 	public void Sim1000ms(float dt)
 	{
-		int num = this.versionCounter;
-		this.versionCounter = num + 1;
+		int num = this.nextGeneration;
+		this.nextGeneration = num + 1;
 		int num2 = num;
+		if (num2 == 0)
+		{
+			Array.Fill<FishOvercrowingManager.Cell>(this.grid, new FishOvercrowingManager.Cell(0, -1));
+			num = this.nextGeneration;
+			this.nextGeneration = num + 1;
+			num2 = num;
+		}
 		for (int num3 = 0; num3 != this.ponds.Count; num3++)
 		{
 			FishOvercrowingManager.Pond pond = this.ponds[num3];
@@ -52,7 +59,6 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 			pond.occupancy.dirty = true;
 		}
 		int num4 = ((this.ponds.Count == 0) ? (-1) : 0);
-		QueuePool<int, FishOvercrowingManager>.PooledQueue pooledQueue = QueuePool<int, FishOvercrowingManager>.Allocate();
 		foreach (KPrefabID kprefabID in this.allAquaticEntities)
 		{
 			if (!kprefabID.IsNullOrDestroyed())
@@ -60,11 +66,10 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 				int num5 = Grid.PosToCell(kprefabID);
 				if (Grid.IsValidCell(num5))
 				{
-					pooledQueue.Clear();
-					pooledQueue.Enqueue(num5);
-					FishOvercrowingManager.Cell cell = this.cells[num5];
+					FishOvercrowingManager.Cell cell = this.grid[num5];
+					bool flag = cell.Generation != num2;
 					int num6;
-					if (cell.Version == num2)
+					if (!flag)
 					{
 						num6 = cell.PondIndex;
 					}
@@ -96,29 +101,19 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 					{
 						pond3.fishes.Add(kprefabID);
 					}
-					int num7;
-					while (pooledQueue.TryDequeue(out num7))
+					if (flag)
 					{
-						if (Grid.IsValidCell(num7) && this.cells[num7].Version != num2 && Grid.IsNavigatableLiquid(num7))
-						{
-							this.cells[num7] = new FishOvercrowingManager.Cell(num2, num6);
-							pond3.cellCount++;
-							pooledQueue.Enqueue(Grid.CellLeft(num7));
-							pooledQueue.Enqueue(Grid.CellRight(num7));
-							pooledQueue.Enqueue(Grid.CellAbove(num7));
-							pooledQueue.Enqueue(Grid.CellBelow(num7));
-						}
+						FloodFill.DepthTraverse<FloodFill.PredicateCondition, FishOvercrowingManager.VisitTracker, FloodFill.NoMaxDepth, FishOvercrowingManager.Visitor>(num5, new FloodFill.PredicateCondition(FishOvercrowingManager.isLiquidCell), new FishOvercrowingManager.VisitTracker(this.grid, new FishOvercrowingManager.Cell(num2, num6)), default(FloodFill.NoMaxDepth), new FishOvercrowingManager.Visitor(pond3));
 					}
 				}
 			}
 		}
-		pooledQueue.Recycle();
 		if (num4 != -1)
 		{
-			int num8 = this.ponds.Count - num4;
-			if (num8 > 0)
+			int num7 = this.ponds.Count - num4;
+			if (num7 > 0)
 			{
-				this.ponds.RemoveRange(num4, num8);
+				this.ponds.RemoveRange(num4, num7);
 			}
 		}
 		this.allAquaticEntities.RemoveAll(new Predicate<KPrefabID>(Util.IsNullOrDestroyed));
@@ -130,8 +125,8 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 		{
 			return null;
 		}
-		FishOvercrowingManager.Cell cell2 = this.cells[cell];
-		if (cell2.Version != this.versionCounter - 1)
+		FishOvercrowingManager.Cell cell2 = this.grid[cell];
+		if (cell2.Generation != this.nextGeneration - 1)
 		{
 			return null;
 		}
@@ -162,17 +157,26 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 
 	private readonly List<FishOvercrowingManager.Pond> ponds = new List<FishOvercrowingManager.Pond>();
 
-	private FishOvercrowingManager.Cell[] cells;
+	private FishOvercrowingManager.Cell[] grid;
 
-	private int versionCounter = 2;
+	private int nextGeneration = 2;
+
+	private static readonly Func<int, FloodFill.BoundaryCheckResult> isLiquidCell = delegate(int cell)
+	{
+		if (!Grid.IsNavigatableLiquidUnsafe(cell))
+		{
+			return FloodFill.BoundaryCheckResult.Halt;
+		}
+		return FloodFill.BoundaryCheckResult.Continue;
+	};
 
 	private readonly struct Cell
 	{
-		public int Version
+		public int Generation
 		{
 			get
 			{
-				return this.version;
+				return this.generation;
 			}
 		}
 
@@ -184,13 +188,13 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 			}
 		}
 
-		public Cell(int version, int pondIndex)
+		public Cell(int generation, int pondIndex)
 		{
-			this.version = version;
+			this.generation = generation;
 			this.pondIndex = pondIndex;
 		}
 
-		private readonly int version;
+		private readonly int generation;
 
 		private readonly int pondIndex;
 	}
@@ -220,5 +224,60 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 		public int cellCount;
 
 		public OvercrowdingMonitor.Occupancy occupancy = new OvercrowdingMonitor.Occupancy();
+	}
+
+	private readonly struct VisitTracker : FloodFill.IVisitTracker
+	{
+		public VisitTracker(FishOvercrowingManager.Cell[] grid, FishOvercrowingManager.Cell cell)
+		{
+			this.grid = grid;
+			this.cell = cell;
+		}
+
+		public bool Add(int cellIndex)
+		{
+			if (!this.Contains(cellIndex))
+			{
+				this.grid[cellIndex] = this.cell;
+				return true;
+			}
+			return false;
+		}
+
+		public bool Contains(int cellIndex)
+		{
+			return this.grid[cellIndex].Generation == this.cell.Generation;
+		}
+
+		private readonly FishOvercrowingManager.Cell[] grid;
+
+		private readonly FishOvercrowingManager.Cell cell;
+	}
+
+	private readonly struct Visitor : FloodFill.IVisitor
+	{
+		public Visitor(FishOvercrowingManager.Pond pond)
+		{
+			this.pond = pond;
+		}
+
+		public bool EarlyOut
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public void VisitCell(int _)
+		{
+			this.pond.cellCount++;
+		}
+
+		public void VisitBoundary(int cell)
+		{
+		}
+
+		private readonly FishOvercrowingManager.Pond pond;
 	}
 }

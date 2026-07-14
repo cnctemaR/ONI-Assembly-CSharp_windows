@@ -54,14 +54,15 @@ public class FloorSoundEvent : SoundEvent
 		}
 		bool isLiquid = Grid.Element[num].IsLiquid;
 		float num3 = 0f;
+		bool flag = Grid.IsSubstantialLiquid(Grid.CellAbove(num), 0.35f);
 		if (isLiquid)
 		{
 			num3 = SoundUtil.GetLiquidDepth(num);
-			string sound = GlobalAssets.GetSound("Liquid_footstep", true);
+			string sound = GlobalAssets.GetSound(flag ? "uw_footstep" : "Liquid_footstep", false);
 			if (sound != null && (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, sound, base.looping, this.isDynamic)))
 			{
 				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
-				if (num3 > 0f)
+				if (num3 > 0f && !flag)
 				{
 					eventInstance.setParameterByName("liquidDepth", num3, false);
 				}
@@ -144,6 +145,10 @@ public class FloorSoundEvent : SoundEvent
 				else if (prefabID == "WoodTile")
 				{
 					text = "TileWood";
+				}
+				else if (prefabID == "RubberTile")
+				{
+					text = "TileRubber";
 				}
 				else
 				{

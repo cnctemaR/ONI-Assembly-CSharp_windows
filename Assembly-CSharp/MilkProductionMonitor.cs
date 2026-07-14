@@ -14,7 +14,7 @@ public class MilkProductionMonitor : GameStateMachine<MilkProductionMonitor, Mil
 		});
 		this.producing.paused.Transition(this.producing.full, new StateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Transition.ConditionCallback(MilkProductionMonitor.IsFull), UpdateRate.SIM_1000ms).Transition(this.producing.producing, new StateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Transition.ConditionCallback(MilkProductionMonitor.IsProducing), UpdateRate.SIM_1000ms);
 		this.producing.producing.Transition(this.producing.full, new StateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Transition.ConditionCallback(MilkProductionMonitor.IsFull), UpdateRate.SIM_1000ms).Transition(this.producing.paused, GameStateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Not(new StateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Transition.ConditionCallback(MilkProductionMonitor.IsProducing)), UpdateRate.SIM_1000ms).ToggleCritterEmotion(Db.Get().CritterEmotions.WellFed, null);
-		this.producing.full.ToggleStatusItem(Db.Get().CreatureStatusItems.MilkFull, null).Transition(this.producing.paused, GameStateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Not(new StateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Transition.ConditionCallback(MilkProductionMonitor.IsFull)), UpdateRate.SIM_1000ms).Enter(delegate(MilkProductionMonitor.Instance smi)
+		this.producing.full.ToggleStatusItem((MilkProductionMonitor.Instance smi) => smi.def.fullStatusItem, null).Transition(this.producing.paused, GameStateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Not(new StateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.Transition.ConditionCallback(MilkProductionMonitor.IsFull)), UpdateRate.SIM_1000ms).Enter(delegate(MilkProductionMonitor.Instance smi)
 		{
 			smi.gameObject.AddTag(GameTags.Creatures.RequiresMilking);
 		});
@@ -42,6 +42,10 @@ public class MilkProductionMonitor : GameStateMachine<MilkProductionMonitor, Mil
 		public override void Configure(GameObject prefab)
 		{
 			prefab.GetComponent<Modifiers>().initialAmounts.Add(Db.Get().Amounts.MilkProduction.Id);
+			if (this.fullStatusItem == null)
+			{
+				this.fullStatusItem = Db.Get().CreatureStatusItems.MilkFull;
+			}
 		}
 
 		public SimHashes element = SimHashes.Milk;
@@ -55,6 +59,8 @@ public class MilkProductionMonitor : GameStateMachine<MilkProductionMonitor, Mil
 		public float CaloriesPerCycle = 1000f;
 
 		public float HappinessRequired;
+
+		public StatusItem fullStatusItem;
 	}
 
 	public class ProducingStates : GameStateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.State
@@ -66,7 +72,7 @@ public class MilkProductionMonitor : GameStateMachine<MilkProductionMonitor, Mil
 		public GameStateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.State full;
 	}
 
-	public new class Instance : GameStateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.GameInstance
+	public new class Instance : GameStateMachine<MilkProductionMonitor, MilkProductionMonitor.Instance, IStateMachineTarget, MilkProductionMonitor.Def>.GameInstance, IMilkable
 	{
 		public float MilkAmount
 		{
@@ -134,13 +140,41 @@ public class MilkProductionMonitor : GameStateMachine<MilkProductionMonitor, Mil
 			this.effectInstance.timeRemaining += value.calories / base.smi.def.CaloriesPerCycle * 600f;
 		}
 
+		public bool IsReadyToBeMilked()
+		{
+			return base.GetComponent<KPrefabID>().HasTag(GameTags.Creatures.RequiresMilking);
+		}
+
+		public SimHashes GetMilkElement()
+		{
+			return base.def.element;
+		}
+
+		public void MilkingComplete(Storage storage)
+		{
+			AmountInstance amountInstance = base.gameObject.GetAmounts().Get(Db.Get().Amounts.MilkProduction.Id);
+			if (amountInstance.value > 0f)
+			{
+				float num = amountInstance.value * (base.def.Capacity / amountInstance.GetMax());
+				storage.GetComponent<Storage>().AddLiquid(base.def.element, num, 310.15f, byte.MaxValue, 0, false, true);
+				amountInstance.SetValue(0f);
+			}
+			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Creatures.RequiresMilking);
+		}
+
 		private void RemoveMilk(float amount)
 		{
 			if (this.milkAmountInstance != null)
 			{
-				float num = Mathf.Min(this.milkAmountInstance.GetMin(), this.MilkPercentage - amount);
+				float num = Mathf.Max(this.milkAmountInstance.GetMin(), this.MilkPercentage - amount);
 				this.milkAmountInstance.SetValue(num);
 			}
+		}
+
+		public void RemoveMilkFromAmount(float amountKG)
+		{
+			float num = amountKG / base.def.Capacity * 100f;
+			this.RemoveMilk(num);
 		}
 
 		public PrimaryElement ExtractMilk(float desiredAmount)

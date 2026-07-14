@@ -25,9 +25,12 @@ namespace Klei.AI
 			if (this.modifier != null)
 			{
 				attributes.Remove(this.modifier);
-				this.modifier = null;
+				this.modifier.Reconstruct(this.attribute.Id, (float)this.GetLevel(), DUPLICANTS.MODIFIERS.SKILLLEVEL.NAME, false, false, true);
 			}
-			this.modifier = new AttributeModifier(this.attribute.Id, (float)this.GetLevel(), DUPLICANTS.MODIFIERS.SKILLLEVEL.NAME, false, false, true);
+			else
+			{
+				this.modifier = new AttributeModifier(this.attribute.Id, (float)this.GetLevel(), DUPLICANTS.MODIFIERS.SKILLLEVEL.NAME, false, false, true);
+			}
 			attributes.Add(this.modifier);
 		}
 

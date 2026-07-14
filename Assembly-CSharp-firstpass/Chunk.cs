@@ -13,6 +13,7 @@ public class Chunk
 		this.density = null;
 		this.heatOffset = null;
 		this.defaultTemp = null;
+		this.backwallNoise = null;
 	}
 
 	public Chunk(int x, int y, int width, int height)
@@ -31,6 +32,7 @@ public class Chunk
 		this.density = new float[x * y];
 		this.heatOffset = new float[x * y];
 		this.defaultTemp = new float[x * y];
+		this.backwallNoise = new float[x * y];
 		this.state = Chunk.State.Loaded;
 	}
 
@@ -51,6 +53,8 @@ public class Chunk
 	public float[] heatOffset;
 
 	public float[] defaultTemp;
+
+	public float[] backwallNoise;
 
 	public enum State
 	{

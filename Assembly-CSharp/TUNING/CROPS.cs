@@ -58,7 +58,14 @@ namespace TUNING
 			new Crop.CropVal(SimHashes.Water.ToString(), 6000f, 350, true),
 			new Crop.CropVal(SimHashes.Amber.ToString(), 7200f, 264, true),
 			new Crop.CropVal("GardenFoodPlantFood", 1800f, 1, true),
-			new Crop.CropVal("Butterfly", 3000f, 1, true)
+			new Crop.CropVal("Butterfly", 3000f, 1, true),
+			new Crop.CropVal(SimHashes.Phosphorite.ToString(), 2400f, 80, true),
+			new Crop.CropVal(SimHashes.Pearl.ToString(), 4800f, 50, true),
+			new Crop.CropVal(SimHashes.Polypropylene.ToString(), 4800f, 200, true),
+			new Crop.CropVal("SeaFairy", 1800f, 1, true),
+			new Crop.CropVal("Urchin", 9600f, 1, true),
+			new Crop.CropVal("SaltySticksFood", 2400f, 1, true),
+			new Crop.CropVal(SimHashes.PalmWood.ToString(), 6000f, 700, true)
 		};
 	}
 }

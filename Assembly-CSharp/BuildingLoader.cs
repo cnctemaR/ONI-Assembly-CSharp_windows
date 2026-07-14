@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/BuildingLoader")]
@@ -15,6 +16,7 @@ public class BuildingLoader : KMonoBehaviour
 		this.previewTemplate = this.CreatePreviewTemplate();
 		this.constructionTemplate = this.CreateConstructionTemplate();
 		global::UnityEngine.Object.DontDestroyOnLoad(this.previewTemplate);
+		this.RegisterStandardItemMassOverrides();
 	}
 
 	private GameObject CreateTemplate()
@@ -152,7 +154,7 @@ public class BuildingLoader : KMonoBehaviour
 		gameObject.GetComponent<KSelectable>().SetName(def.Name);
 		for (int i = 0; i < def.Mass.Length; i++)
 		{
-			gameObject.GetComponent<PrimaryElement>().MassPerUnit += def.Mass[i];
+			gameObject.GetComponent<PrimaryElement>().MassPerUnit += BuildingLoader.GetEffectiveMass(def, i);
 		}
 		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "UnderConstruction");
 		kprefabID.AddTag(GameTags.UnderConstruction, false);
@@ -195,7 +197,7 @@ public class BuildingLoader : KMonoBehaviour
 		component.MassPerUnit = 0f;
 		for (int i = 0; i < def.Mass.Length; i++)
 		{
-			component.MassPerUnit += def.Mass[i];
+			component.MassPerUnit += BuildingLoader.GetEffectiveMass(def, i);
 		}
 		component.Temperature = 273.15f;
 		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
@@ -326,9 +328,31 @@ public class BuildingLoader : KMonoBehaviour
 		return gameObject;
 	}
 
+	private void RegisterStandardItemMassOverrides()
+	{
+		BuildingLoader.RegisterMassPerUnitOverride("BuildingGasket", 50f);
+	}
+
+	public static void RegisterMassPerUnitOverride(string materialCategory, float massPerUnit)
+	{
+		BuildingLoader.postConstructionMassPerUnitOverrides[materialCategory] = massPerUnit;
+	}
+
+	private static float GetEffectiveMass(BuildingDef def, int i)
+	{
+		float num;
+		if (BuildingLoader.postConstructionMassPerUnitOverrides.TryGetValue(def.MaterialCategory[i], out num))
+		{
+			return def.Mass[i] * num;
+		}
+		return def.Mass[i];
+	}
+
 	private GameObject previewTemplate;
 
 	private GameObject constructionTemplate;
 
 	public static BuildingLoader Instance;
+
+	private static Dictionary<string, float> postConstructionMassPerUnitOverrides = new Dictionary<string, float>();
 }

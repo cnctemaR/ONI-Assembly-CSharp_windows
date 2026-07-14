@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Database;
 using STRINGS;
-using UnityEngine;
 
 public static class RoomConstraints
 {
@@ -295,7 +294,7 @@ public static class RoomConstraints
 
 	public static RoomConstraints.Constraint COOK_TOP = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.CookTop), null, 1, ROOMS.CRITERIA.COOKTOP.NAME, ROOMS.CRITERIA.COOKTOP.DESCRIPTION, null, null);
 
-	public static RoomConstraints.Constraint REFRIGERATOR = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.Refrigerator), null, 1, ROOMS.CRITERIA.REFRIGERATOR.NAME, ROOMS.CRITERIA.REFRIGERATOR.DESCRIPTION, null, null);
+	public static RoomConstraints.Constraint KITCHENREFRIGERATOR = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.KitchenRefrigerator), null, 1, ROOMS.CRITERIA.KITCHENREFRIGERATOR.NAME, ROOMS.CRITERIA.KITCHENREFRIGERATOR.DESCRIPTION, null, null);
 
 	public static RoomConstraints.Constraint REC_BUILDING = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasTag(RoomConstraints.ConstraintTags.RecBuilding), null, 1, ROOMS.CRITERIA.RECBUILDING.NAME, ROOMS.CRITERIA.RECBUILDING.DESCRIPTION, null, null);
 
@@ -368,13 +367,13 @@ public static class RoomConstraints
 				int num14 = Grid.XYToCell(num11, num12);
 				if (Game.Instance.roomProber.GetCavityForCell(num13) == room.cavity)
 				{
-					GameObject gameObject = Grid.Objects[num13, 2];
-					flag4 &= gameObject != null && !gameObject.HasTag(GameTags.UnderConstruction);
+					bool flag5 = BackwallManager.HasBackwall(num13) || (Grid.Objects[num13, 2] != null && !Grid.Objects[num13, 2].HasTag(GameTags.UnderConstruction));
+					flag4 = flag4 && flag5;
 				}
 				if (Game.Instance.roomProber.GetCavityForCell(num14) == room.cavity)
 				{
-					GameObject gameObject2 = Grid.Objects[num14, 2];
-					flag4 &= gameObject2 != null && !gameObject2.HasTag(GameTags.UnderConstruction);
+					bool flag6 = BackwallManager.HasBackwall(num14) || (Grid.Objects[num14, 2] != null && !Grid.Objects[num14, 2].HasTag(GameTags.UnderConstruction));
+					flag4 = flag4 && flag6;
 				}
 				if (!flag4)
 				{
@@ -512,6 +511,8 @@ public static class RoomConstraints
 
 		public static Tag Refrigerator = RoomConstraints.ConstraintTags.AllTags.AddAndReturn("Refrigerator".ToTag());
 
+		public static Tag KitchenRefrigerator = RoomConstraints.ConstraintTags.AllTags.AddAndReturn("KitchenRefrigerator".ToTag());
+
 		public static Tag RecBuilding = RoomConstraints.ConstraintTags.AllTags.AddAndReturn("RecBuilding".ToTag());
 
 		public static Tag MachineShopType = RoomConstraints.ConstraintTags.AllTags.AddAndReturn("MachineShopType".ToTag());
@@ -527,6 +528,8 @@ public static class RoomConstraints
 		public static Tag Ornament = RoomConstraints.ConstraintTags.AllTags.AddAndReturn("Ornament".ToTag());
 
 		public static Tag WarmingStation = RoomConstraints.ConstraintTags.AllTags.AddAndReturn("WarmingStation".ToTag());
+
+		public static Tag Submergible = RoomConstraints.ConstraintTags.AllTags.AddAndReturn("Submergible".ToTag());
 
 		[Obsolete("The light requirement constraint in rooms has been removed. Please update any references of RoomConstraints.LightSource to GameTags.Lightsource")]
 		public static Tag LightSource = "LightSource".ToTag();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PrioritizeTool : FilteredDragTool
@@ -51,13 +50,16 @@ public class PrioritizeTool : FilteredDragTool
 		return ToolParameterMenu.FILTERLAYERS.OPERATE;
 	}
 
-	protected override void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
+	protected override void GetDefaultFilters(out ToolParameterMenu.ToggleData[] filters)
 	{
-		filters.Add(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.CONSTRUCTION, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.DIG, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.CLEAN, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.OPERATE, ToolParameterMenu.ToggleState.Off);
+		filters = new ToolParameterMenu.ToggleData[]
+		{
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.CONSTRUCTION, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.DIG, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.CLEAN, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.OPERATE, ToolParameterMenu.ToggleState.Off, false)
+		};
 	}
 
 	private bool TryPrioritizeGameObject(GameObject target, PrioritySetting priority)
@@ -107,6 +109,15 @@ public class PrioritizeTool : FilteredDragTool
 		{
 			PriorityScreen.PlayPriorityConfirmSound(lastSelectedPriority);
 		}
+	}
+
+	protected override void OnOverlayChanged(HashedString overlay)
+	{
+		if (!base.IsActive)
+		{
+			return;
+		}
+		ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.currentFilters);
 	}
 
 	protected override void OnActivateTool()

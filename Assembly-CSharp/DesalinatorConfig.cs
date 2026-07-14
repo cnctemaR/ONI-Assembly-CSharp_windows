@@ -62,6 +62,16 @@ public class DesalinatorConfig : IBuildingConfig
 			new ElementConverter.OutputElement(3.5f, SimHashes.Water, 0f, false, true, 0f, 0.5f, 0.75f, byte.MaxValue, 0, true),
 			new ElementConverter.OutputElement(1.5f, SimHashes.Salt, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0, true)
 		};
+		ElementConverter elementConverter3 = go.AddComponent<ElementConverter>();
+		elementConverter3.consumedElements = new ElementConverter.ConsumedElement[]
+		{
+			new ElementConverter.ConsumedElement(new Tag("MurkyBrine"), 5f, true)
+		};
+		elementConverter3.outputElements = new ElementConverter.OutputElement[]
+		{
+			new ElementConverter.OutputElement(3.5f, SimHashes.DirtyWater, 0f, false, true, 0f, 0.5f, 0.75f, byte.MaxValue, 0, true),
+			new ElementConverter.OutputElement(1.5f, SimHashes.Salt, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0, true)
+		};
 		DesalinatorWorkableEmpty desalinatorWorkableEmpty = go.AddOrGet<DesalinatorWorkableEmpty>();
 		desalinatorWorkableEmpty.workTime = 90f;
 		desalinatorWorkableEmpty.workLayer = Grid.SceneLayer.BuildingFront;
@@ -78,7 +88,8 @@ public class DesalinatorConfig : IBuildingConfig
 		conduitDispenser.elementFilter = new SimHashes[]
 		{
 			SimHashes.SaltWater,
-			SimHashes.Brine
+			SimHashes.Brine,
+			SimHashes.MurkyBrine
 		};
 		Prioritizable.AddRef(go);
 	}
@@ -111,4 +122,8 @@ public class DesalinatorConfig : IBuildingConfig
 	private const float BRINE_TO_SALT_OUTPUT_RATE = 1.5f;
 
 	private const float BRINE_TO_CLEAN_WATER_OUTPUT_RATE = 3.5f;
+
+	private const float MURKYBRINE_TO_SALT_OUTPUT_RATE = 1.5f;
+
+	private const float MURKYBRINE_TO_CLEAN_WATER_OUTPUT_RATE = 3.5f;
 }

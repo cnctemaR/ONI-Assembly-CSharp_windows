@@ -45,14 +45,14 @@ public class NavPathDrawer : KMonoBehaviour
 		this.navigator = null;
 	}
 
-	private void DrawPath(PathFinder.Path path, Vector3 navigator_pos, Color color)
+	private void DrawPath(PathFinder.Path path, Vector3 navigator_pos, Color color, bool color_by_type = false)
 	{
 		if (path.nodes != null && path.nodes.Count > 1)
 		{
 			GL.PushMatrix();
 			this.material.SetPass(0);
 			GL.Begin(1);
-			GL.Color(color);
+			GL.Color((!color_by_type) ? color : NavGrid.NavTypeColor(path.nodes[0].navType));
 			GL.Vertex(navigator_pos);
 			GL.Vertex(NavTypeHelper.GetNavPos(path.nodes[1].cell, path.nodes[1].navType));
 			for (int i = 1; i < path.nodes.Count - 1; i++)
@@ -61,6 +61,10 @@ public class NavPathDrawer : KMonoBehaviour
 				{
 					Vector3 navPos = NavTypeHelper.GetNavPos(path.nodes[i].cell, path.nodes[i].navType);
 					Vector3 navPos2 = NavTypeHelper.GetNavPos(path.nodes[i + 1].cell, path.nodes[i + 1].navType);
+					if (color_by_type)
+					{
+						GL.Color(NavGrid.NavTypeColor(path.nodes[i].navType));
+					}
 					GL.Vertex(navPos);
 					GL.Vertex(navPos2);
 				}
@@ -72,7 +76,7 @@ public class NavPathDrawer : KMonoBehaviour
 
 	private void OnPostRender()
 	{
-		this.DrawPath(this.path, this.navigatorPos, Color.white);
+		this.DrawPath(this.path, this.navigatorPos, Color.white, false);
 		this.path = default(PathFinder.Path);
 		this.DebugDrawSelectedNavigator();
 		if (this.navigator != null)
@@ -119,7 +123,11 @@ public class NavPathDrawer : KMonoBehaviour
 			text = text + "Source: " + Grid.PosToCell(component).ToString() + "\n";
 			text = text + "Dest: " + mouseCell.ToString() + "\n";
 			text = text + "Cost: " + path.cost.ToString();
-			this.DrawPath(path, component.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), Color.green);
+			if (component.GetComponent<MinionBrain>() != null)
+			{
+				text = text + "\nSafeFlags: " + Convert.ToString((int)SafeCellQuery.GetFlags(mouseCell, component.GetComponent<MinionBrain>(), false, (SafeCellQuery.SafeFlags)0), 2);
+			}
+			this.DrawPath(path, component.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), Color.green, true);
 			DebugText.Instance.Draw(text, Grid.CellToPosCCC(mouseCell, Grid.SceneLayer.Move), Color.white);
 		}
 	}

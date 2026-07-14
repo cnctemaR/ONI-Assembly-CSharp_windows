@@ -366,12 +366,21 @@ namespace Database
 				str = str.Replace("{CauseOfIncapacitation}", instance4.GetCauseOfIncapacitation().Name);
 				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedTime(bleedLifeTime, "F0"));
 			};
+			this.SuffocatingIncapacitated = this.CreateStatusItem("SuffocatingIncapacitated", "DUPLICANTS", "status_item_broken", StatusItem.IconType.Custom, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
+			this.SuffocatingIncapacitated.AddNotification(null, null, null);
+			this.SuffocatingIncapacitated.resolveStringCallback = delegate(string str, object data)
+			{
+				SuffocationMonitor.Instance instance5 = (SuffocationMonitor.Instance)data;
+				float timeUntilDeath = instance5.GetTimeUntilDeath(instance5);
+				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedTime(timeUntilDeath, "F0"));
+			};
 			this.Relocating = this.CreateStatusItem("Relocating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Relocating.resolveStringCallback = func;
 			this.Fighting = this.CreateStatusItem("Fighting", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
 			this.Fighting.AddNotification(null, null, null);
-			this.Fleeing = this.CreateStatusItem("Fleeing", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
+			this.Fleeing = this.CreateStatusItem("Fleeing", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.DuplicantThreatening, false, OverlayModes.None.ID, true, 2);
 			this.Fleeing.AddNotification(null, null, null);
+			this.Fleeing.shouldNotify = false;
 			this.Stressed = this.CreateStatusItem("Stressed", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Stressed.AddNotification(null, null, null);
 			this.LashingOut = this.CreateStatusItem("LashingOut", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 2);
@@ -385,8 +394,8 @@ namespace Database
 			this.BionicExplorerBooster = this.CreateStatusItem("BionicExplorerBooster", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 2);
 			this.BionicExplorerBooster.resolveStringCallback = delegate(string str, object data)
 			{
-				BionicUpgrade_ExplorerBoosterMonitor.Instance instance5 = (BionicUpgrade_ExplorerBoosterMonitor.Instance)data;
-				str = string.Format(str, GameUtil.GetFormattedPercent(instance5.CurrentProgress * 100f, GameUtil.TimeSlice.None));
+				BionicUpgrade_ExplorerBoosterMonitor.Instance instance6 = (BionicUpgrade_ExplorerBoosterMonitor.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedPercent(instance6.CurrentProgress * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.ContactWithGerms = this.CreateStatusItem("ContactWithGerms", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.Disease.ID, true, 2);
@@ -464,16 +473,16 @@ namespace Database
 			this.GasLiquidIrritation.resolveStringCallback = (string str, object data) => ((GasLiquidExposureMonitor.Instance)data).IsMajorIrritation() ? DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MAJOR : DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.NAME_MINOR;
 			this.GasLiquidIrritation.resolveTooltipCallback = delegate(string str, object data)
 			{
-				GasLiquidExposureMonitor.Instance instance6 = (GasLiquidExposureMonitor.Instance)data;
+				GasLiquidExposureMonitor.Instance instance7 = (GasLiquidExposureMonitor.Instance)data;
 				string text6 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP;
 				string text7 = "";
-				Effect appliedEffect = instance6.sm.GetAppliedEffect(instance6);
+				Effect appliedEffect = instance7.sm.GetAppliedEffect(instance7);
 				if (appliedEffect != null)
 				{
 					text7 = Effect.CreateTooltip(appliedEffect, false, "\n    • ", true);
 				}
-				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance6.CurrentlyExposedToElement().name);
-				float currentExposure = instance6.sm.GetCurrentExposure(instance6);
+				string text8 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSED.Replace("{element}", instance7.CurrentlyExposedToElement().name);
+				float currentExposure = instance7.sm.GetCurrentExposure(instance7);
 				if (currentExposure < 0f)
 				{
 					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_DECREASE);
@@ -486,13 +495,14 @@ namespace Database
 				{
 					text8 = text8.Replace("{rate}", DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_RATE_STAYS);
 				}
-				float num11 = (instance6.exposure - instance6.minorIrritationThreshold) / Math.Abs(instance6.exposureRate);
+				float num11 = (instance7.exposure - instance7.minorIrritationThreshold) / Math.Abs(instance7.exposureRate);
 				string text9 = DUPLICANTS.STATUSITEMS.GASLIQUIDEXPOSURE.TOOLTIP_EXPOSURE_LEVEL.Replace("{time}", GameUtil.GetFormattedTime(num11, "F0"));
 				return string.Concat(new string[] { text6, "\n\n", text7, "\n\n", text8, "\n\n", text9 });
 			};
 			this.ExpellingRads = this.CreateStatusItem("ExpellingRads", "DUPLICANTS", "", StatusItem.IconType.Exclamation, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.AnalyzingGenes = this.CreateStatusItem("AnalyzingGenes", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.AnalyzingArtifact = this.CreateStatusItem("AnalyzingArtifact", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
+			this.EmptyingLitterBox = this.CreateStatusItem("EmptyingLitterBox", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.MegaBrainTank_Pajamas_Wearing = this.CreateStatusItem("MegaBrainTank_Pajamas_Wearing", DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.NAME, DUPLICANTS.STATUSITEMS.WEARING_PAJAMAS.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback_shouldStillCallIfDataIsNull = true;
 			this.MegaBrainTank_Pajamas_Wearing.resolveTooltipCallback = delegate(string str, object data)
@@ -535,8 +545,8 @@ namespace Database
 			this.JoyResponse_HeardJoySinger = this.CreateStatusItem("JoyResponse_HeardJoySinger", DUPLICANTS.MODIFIERS.HEARDJOYSINGER.NAME, DUPLICANTS.MODIFIERS.HEARDJOYSINGER.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.JoyResponse_HeardJoySinger.resolveTooltipCallback = delegate(string str, object data)
 			{
-				InspirationEffectMonitor.Instance instance7 = (InspirationEffectMonitor.Instance)data;
-				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance7.sm.inspirationTimeRemaining.Get(instance7), "F1", false));
+				InspirationEffectMonitor.Instance instance8 = (InspirationEffectMonitor.Instance)data;
+				return str + "\n\n" + DUPLICANTS.MODIFIERS.TIME_REMAINING.Replace("{0}", GameUtil.GetFormattedCycles(instance8.sm.inspirationTimeRemaining.Get(instance8), "F1", false));
 			};
 			this.JoyResponse_StickerBombing = this.CreateStatusItem("JoyResponse_StickerBombing", DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.NAME, DUPLICANTS.MODIFIERS.ISSTICKERBOMBING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, 2);
 			this.Meteorphile = this.CreateStatusItem("Meteorphile", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -755,6 +765,8 @@ namespace Database
 
 		public StatusItem Incapacitated;
 
+		public StatusItem SuffocatingIncapacitated;
+
 		public StatusItem BionicOfflineIncapacitated;
 
 		public StatusItem BionicWaitingForReboot;
@@ -820,6 +832,8 @@ namespace Database
 		public StatusItem JoyResponse_StickerBombing;
 
 		public StatusItem Meteorphile;
+
+		public StatusItem EmptyingLitterBox;
 
 		public StatusItem FossilHunt_WorkerExcavating;
 

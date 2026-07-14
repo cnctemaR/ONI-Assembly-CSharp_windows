@@ -66,10 +66,10 @@ public class TransitionDriver
 		}
 		int num = Grid.OffsetCell(Grid.PosToCell(navigator), transition.x, transition.y);
 		this.targetPos = this.GetTargetPosition(transition.navGridTransition, num, sceneLayer);
+		KAnimControllerBase animController = navigator.animController;
+		animController.PlaySpeedMultiplier = transition.animSpeed;
 		if (transition.isLooping)
 		{
-			KAnimControllerBase animController = navigator.animController;
-			animController.PlaySpeedMultiplier = transition.animSpeed;
 			bool flag2 = transition.preAnim != "";
 			bool flag3 = animController.CurrentAnim != null && animController.CurrentAnim.name == transition.anim;
 			if (flag2 && animController.CurrentAnim != null && animController.CurrentAnim.name == transition.preAnim)
@@ -97,9 +97,15 @@ public class TransitionDriver
 		}
 		else if (transition.anim != null)
 		{
-			KBatchedAnimController animController2 = navigator.animController;
-			animController2.PlaySpeedMultiplier = transition.animSpeed;
-			animController2.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
+			if (transition.preAnim != null)
+			{
+				animController.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
+				animController.Queue(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
+			}
+			else
+			{
+				animController.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
+			}
 			navigator.Unsubscribe(this.onAnimCompleteHandle);
 			this.onAnimCompleteHandle = navigator.Subscribe(-1061186183, this.onAnimCompleteBinding);
 		}
@@ -158,10 +164,6 @@ public class TransitionDriver
 			{
 				overrideLayer.UpdateTransition(this.navigator, this.transition);
 			}
-		}
-		if (!this.isComplete && this.transition.isCompleteCB != null)
-		{
-			this.isComplete = this.transition.isCompleteCB();
 		}
 		if (this.brain != null)
 		{

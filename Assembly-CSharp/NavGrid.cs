@@ -63,7 +63,7 @@ public class NavGrid
 			this.GetNavTypeData(navType);
 		}
 		this.Links = new NavGrid.Link[this.maxLinksPerCell * Grid.CellCount];
-		this.NavTable = new NavTable(Grid.CellCount);
+		this.NavTable = new NavTable(Grid.CellCount, id);
 		this.transitions = transitions;
 		this.transitionsByNavType = new NavGrid.Transition[11][];
 		for (int k = 0; k < 11; k++)
@@ -142,12 +142,15 @@ public class NavGrid
 				}
 			}
 		}
-		this.UpdateGraph(this.DirtyCells);
-		foreach (int num7 in this.DirtyCells)
+		List<int> list = NavGrid.dirtyCellsSwapBuffer;
+		NavGrid.dirtyCellsSwapBuffer = this.DirtyCells;
+		this.DirtyCells = list;
+		this.UpdateGraph(NavGrid.dirtyCellsSwapBuffer);
+		foreach (int num7 in NavGrid.dirtyCellsSwapBuffer)
 		{
 			this.DirtyBitFlags[num7 / 8] = 0;
 		}
-		this.DirtyCells.Clear();
+		NavGrid.dirtyCellsSwapBuffer.Clear();
 	}
 
 	public void UpdateGraph(List<int> dirty_nav_cells)
@@ -213,7 +216,7 @@ public class NavGrid
 
 	private bool DrawNavTypeLink(NavType nav_type, ref Color color)
 	{
-		color = this.NavTypeColor(nav_type);
+		color = NavGrid.NavTypeColor(nav_type);
 		if (this.DebugViewLinksAll)
 		{
 			return true;
@@ -230,7 +233,7 @@ public class NavGrid
 
 	private bool DrawNavTypeCell(NavType nav_type, ref Color color)
 	{
-		color = this.NavTypeColor(nav_type);
+		color = NavGrid.NavTypeColor(nav_type);
 		if (this.DebugViewValidCellsAll)
 		{
 			return true;
@@ -277,7 +280,7 @@ public class NavGrid
 		}
 	}
 
-	public Color NavTypeColor(NavType navType)
+	public static Color NavTypeColor(NavType navType)
 	{
 		return NavGrid.debugColorLookup[(int)navType];
 	}
@@ -326,6 +329,8 @@ public class NavGrid
 
 	public NavGrid.NavTypeData[] navTypeData;
 
+	private static List<int> dirtyCellsSwapBuffer = new List<int>();
+
 	private static Color[] debugColorLookup = new Color[]
 	{
 		new Color(0.918f, 0f, 0.394f, 1f),
@@ -339,6 +344,7 @@ public class NavGrid
 		new Color(0.256f, 0.411f, 1f, 1f),
 		new Color(0.782f, 0f, 0.937f, 1f),
 		new Color(0.865f, 0f, 0.686f, 1f),
+		new Color(0.02f, 0.6f, 0.15f, 1f),
 		Color.red
 	};
 

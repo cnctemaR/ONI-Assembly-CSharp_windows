@@ -29,7 +29,7 @@ public class MeterScreen_Sickness : MeterScreen_VTD_DuplicantIterator
 				{
 					text += " (";
 					int num2 = 0;
-					foreach (SicknessInstance sicknessInstance in sicknesses)
+					foreach (SicknessInstance sicknessInstance in sicknesses.ModifierList)
 					{
 						text = text + ((num2 > 0) ? ", " : "") + sicknessInstance.modifier.Name;
 						num2++;

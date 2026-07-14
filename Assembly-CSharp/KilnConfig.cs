@@ -79,7 +79,7 @@ public class KilnConfig : IBuildingConfig
 		Tag tag5 = SimHashes.RefinedCarbon.CreateTag();
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(GameTags.BasicWoods.Append<Tag>(new Tag[] { tag3, tag4 }), new float[] { 200f, 200f, 125f, 300f })
+			new ComplexRecipe.RecipeElement(GameTags.BasicWoods.Append<Tag>(new Tag[] { tag3, tag4 }), new float[] { 200f, 200f, 200f, 125f, 300f })
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{

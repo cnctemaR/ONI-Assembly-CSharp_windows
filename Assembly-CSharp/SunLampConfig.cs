@@ -13,7 +13,7 @@ public class SunLampConfig : IBuildingConfig
 		int num3 = 10;
 		float num4 = 60f;
 		float[] array = new float[] { 200f, 50f };
-		string[] array2 = new string[] { "RefinedMetal", "Glass" };
+		string[] array2 = new string[] { "RefinedMetal", "Glasses" };
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;

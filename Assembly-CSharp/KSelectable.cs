@@ -31,6 +31,10 @@ public class KSelectable : KMonoBehaviour
 		{
 			return this.disableSelectMarker;
 		}
+		set
+		{
+			this.disableSelectMarker = value;
+		}
 	}
 
 	protected override void OnPrefabInit()
@@ -181,7 +185,7 @@ public class KSelectable : KMonoBehaviour
 
 	private void PlayHoverSound()
 	{
-		if (CellSelectionObject.IsSelectionObject(base.gameObject))
+		if (ICellSelectionProxy.IsSelectionProxy(base.gameObject))
 		{
 			return;
 		}

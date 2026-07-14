@@ -31,9 +31,17 @@ public class StandardAmountDisplayer : IAmountDisplayer
 		if (formatter != null)
 		{
 			this.formatter = formatter;
-			return;
 		}
-		this.formatter = new StandardAttributeFormatter(unitClass, deltaTimeSlice);
+		else
+		{
+			this.formatter = new StandardAttributeFormatter(unitClass, deltaTimeSlice);
+		}
+		this.deltaFormatter = this.formatter;
+	}
+
+	public void SetDeltaFormatter(StandardAttributeFormatter deltaFormatter)
+	{
+		this.deltaFormatter = deltaFormatter;
 	}
 
 	public virtual string GetValueString(Amount master, AmountInstance instance)
@@ -64,17 +72,17 @@ public class StandardAmountDisplayer : IAmountDisplayer
 		stringBuilder.Append("\n\n");
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
-			stringBuilder.AppendFormat(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle));
+			stringBuilder.AppendFormat(UI.CHANGEPERCYCLE, this.deltaFormatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle));
 		}
 		else if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerSecond)
 		{
-			stringBuilder.AppendFormat(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond));
+			stringBuilder.AppendFormat(UI.CHANGEPERSECOND, this.deltaFormatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond));
 		}
 		for (int num = 0; num != instance.deltaAttribute.Modifiers.Count; num++)
 		{
 			AttributeModifier attributeModifier = instance.deltaAttribute.Modifiers[num];
 			stringBuilder.Append("\n");
-			stringBuilder.AppendFormat(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifier));
+			stringBuilder.AppendFormat(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.deltaFormatter.GetFormattedModifier(attributeModifier));
 		}
 		return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 	}
@@ -95,6 +103,8 @@ public class StandardAmountDisplayer : IAmountDisplayer
 	}
 
 	protected StandardAttributeFormatter formatter;
+
+	protected StandardAttributeFormatter deltaFormatter;
 
 	public GameUtil.IdentityDescriptorTense tense;
 }

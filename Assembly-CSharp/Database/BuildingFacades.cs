@@ -11,14 +11,20 @@ namespace Database
 			base.Initialize();
 			foreach (BuildingFacadeInfo buildingFacadeInfo in Blueprints.Get().all.buildingFacades)
 			{
-				this.Add(buildingFacadeInfo.id, buildingFacadeInfo.name, buildingFacadeInfo.desc, buildingFacadeInfo.rarity, buildingFacadeInfo.prefabId, buildingFacadeInfo.animFile, buildingFacadeInfo.workables, buildingFacadeInfo.GetRequiredDlcIds(), buildingFacadeInfo.GetForbiddenDlcIds());
+				this.Add(buildingFacadeInfo.id, buildingFacadeInfo.name, buildingFacadeInfo.desc, buildingFacadeInfo.rarity, buildingFacadeInfo.prefabId, buildingFacadeInfo.animFile, buildingFacadeInfo.workables, buildingFacadeInfo.GetRequiredDlcIds(), buildingFacadeInfo.GetForbiddenDlcIds(), buildingFacadeInfo.data);
 			}
 		}
 
+		public void Add(string id, LocString Name, LocString Desc, PermitRarity rarity, string prefabId, string animFile, Dictionary<string, string> workables = null, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null, Dictionary<string, string> data = null)
+		{
+			BuildingFacadeResource buildingFacadeResource = new BuildingFacadeResource(id, Name, Desc, rarity, prefabId, animFile, workables, requiredDlcIds, forbiddenDlcIds, data);
+			this.resources.Add(buildingFacadeResource);
+		}
+
+		[Obsolete("Use overload with data parameter")]
 		public void Add(string id, LocString Name, LocString Desc, PermitRarity rarity, string prefabId, string animFile, Dictionary<string, string> workables = null, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
 		{
-			BuildingFacadeResource buildingFacadeResource = new BuildingFacadeResource(id, Name, Desc, rarity, prefabId, animFile, workables, requiredDlcIds, forbiddenDlcIds);
-			this.resources.Add(buildingFacadeResource);
+			this.Add(id, Name, Desc, rarity, prefabId, animFile, workables, requiredDlcIds, forbiddenDlcIds, null);
 		}
 
 		public void PostProcess()

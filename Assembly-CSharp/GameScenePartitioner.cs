@@ -29,8 +29,9 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		global::Debug.Assert(GameScenePartitioner.instance == null);
 		GameScenePartitioner.instance = this;
-		this.partitioner = new ScenePartitioner(16, 67, Grid.WidthInCells, Grid.HeightInCells);
+		this.partitioner = new ScenePartitioner(16, 68, Grid.WidthInCells, Grid.HeightInCells);
 		this.solidChangedLayer = this.partitioner.CreateMask("SolidChanged");
+		this.backwallChangedLayer = this.partitioner.CreateMask("BackwallChanged");
 		this.liquidChangedLayer = this.partitioner.CreateMask("LiquidChanged");
 		this.digDestroyedLayer = this.partitioner.CreateMask("DigDestroyed");
 		this.fogOfWarChangedLayer = this.partitioner.CreateMask("FogOfWarChanged");
@@ -71,6 +72,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.partitioner.FreeResources();
 		this.partitioner = null;
 		this.solidChangedLayer = null;
+		this.backwallChangedLayer = null;
 		this.liquidChangedLayer = null;
 		this.digDestroyedLayer = null;
 		this.fogOfWarChangedLayer = null;
@@ -264,6 +266,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	}
 
 	public ScenePartitionerLayer solidChangedLayer;
+
+	public ScenePartitionerLayer backwallChangedLayer;
 
 	public ScenePartitionerLayer liquidChangedLayer;
 

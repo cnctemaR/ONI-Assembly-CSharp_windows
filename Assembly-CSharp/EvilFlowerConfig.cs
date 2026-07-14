@@ -14,7 +14,7 @@ public class EvilFlowerConfig : IEntityConfig
 		float num = 1f;
 		EffectorValues positive_DECOR_EFFECT = this.POSITIVE_DECOR_EFFECT;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("potted_evilflower_kanim"), "grow_seed", Grid.SceneLayer.BuildingFront, 1, 1, positive_DECOR_EFFECT, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 168.15f, 258.15f, 513.15f, 563.15f, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 12200f, "EvilFlowerOriginal", global::STRINGS.CREATURES.SPECIES.EVILFLOWER.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 168.15f, 258.15f, 513.15f, 563.15f, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.15f, null, true, false, true, false, true, 2400f, 0f, 12200f, "EvilFlowerOriginal", global::STRINGS.CREATURES.SPECIES.EVILFLOWER.NAME);
 		EvilFlower evilFlower = gameObject.AddOrGet<EvilFlower>();
 		evilFlower.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;
 		evilFlower.negative_decor_effect = this.NEGATIVE_DECOR_EFFECT;

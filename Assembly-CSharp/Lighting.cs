@@ -34,6 +34,7 @@ public class Lighting : MonoBehaviour
 		Shader.SetGlobalInt(Lighting._liquidZ, -28);
 		Shader.SetGlobalVector(Lighting._DigMapMapParameters, new Vector4(this.Settings.DigMapColour.r, this.Settings.DigMapColour.g, this.Settings.DigMapColour.b, this.Settings.DigMapScale));
 		Shader.SetGlobalTexture(Lighting._DigDamageMap, this.Settings.DigDamageMap);
+		Shader.SetGlobalTexture(Lighting._GenericNormalNoise, this.Settings.GenericNormalNoise);
 		Shader.SetGlobalTexture(Lighting._StateTransitionMap, this.Settings.StateTransitionMap);
 		Shader.SetGlobalColor(Lighting._StateTransitionColor, this.Settings.StateTransitionColor);
 		Shader.SetGlobalVector(Lighting._StateTransitionParameters, new Vector4(1f / this.Settings.StateTransitionUVScale, this.Settings.StateTransitionUVOffsetRate.x, this.Settings.StateTransitionUVOffsetRate.y, 0f));
@@ -137,6 +138,8 @@ public class Lighting : MonoBehaviour
 	private static int _DigDamageMap = Shader.PropertyToID("_DigDamageMap");
 
 	private static int _StateTransitionMap = Shader.PropertyToID("_StateTransitionMap");
+
+	private static int _GenericNormalNoise = Shader.PropertyToID("_GenericNormalNoise");
 
 	private static int _StateTransitionColor = Shader.PropertyToID("_StateTransitionColor");
 

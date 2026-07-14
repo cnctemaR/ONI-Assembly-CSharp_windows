@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -13,12 +15,12 @@ public class CreatureFeederConfig : IBuildingConfig
 		string text2 = "feeder_kanim";
 		int num3 = 100;
 		float num4 = 120f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, none, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
 	}
@@ -41,7 +43,10 @@ public class CreatureFeederConfig : IBuildingConfig
 		go.AddOrGet<StorageLocker>().choreTypeID = Db.Get().ChoreTypes.RanchingFetch.Id;
 		go.AddOrGet<UserNameable>();
 		go.AddOrGet<TreeFilterable>();
-		go.AddOrGet<CreatureFeeder>();
+		Effect effect = new Effect("AteFromFeeder", global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.TOOLTIP, 1200f, true, false, false, null, -1f, 0f, null, "");
+		effect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.016666668f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));
+		Db.Get().effects.Add(effect);
+		go.AddOrGet<CreatureFeeder>().effectId = effect.Id;
 		go.GetComponent<KPrefabID>().prefabInitFn += this.OnPrefabInit;
 	}
 
@@ -67,7 +72,8 @@ public class CreatureFeederConfig : IBuildingConfig
 			GameTags.Creatures.Species.StegoSpecies,
 			GameTags.Creatures.Species.RaptorSpecies,
 			GameTags.Creatures.Species.ChameleonSpecies,
-			GameTags.Creatures.Species.MooSpecies
+			GameTags.Creatures.Species.MooSpecies,
+			GameTags.Creatures.Species.SnailSpecies
 		}))
 		{
 			Diet value = keyValuePair.Value;

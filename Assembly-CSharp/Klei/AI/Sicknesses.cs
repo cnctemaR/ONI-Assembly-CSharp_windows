@@ -41,7 +41,7 @@ namespace Klei.AI
 		public bool Cure(string sickness_id)
 		{
 			SicknessInstance sicknessInstance = null;
-			foreach (SicknessInstance sicknessInstance2 in this)
+			foreach (SicknessInstance sicknessInstance2 in this.ModifierList)
 			{
 				if (sicknessInstance2.modifier.Id == sickness_id)
 				{

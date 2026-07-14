@@ -43,6 +43,9 @@ namespace TemplateClasses
 				prefab.rottable = new Rottable();
 				prefab.rottable.rotAmount = this.rottable.rotAmount;
 			}
+			prefab.loreUnlockId = this.loreUnlockId;
+			prefab.loreDisplayText = this.loreDisplayText;
+			prefab.loreNextCollectionId = this.loreNextCollectionId;
 			if (this.storage != null && this.storage.Count > 0)
 			{
 				prefab.storage = new List<StorageItem>();
@@ -88,6 +91,12 @@ namespace TemplateClasses
 		public string facadeId { get; set; }
 
 		public int connections { get; set; }
+
+		public string loreUnlockId { get; set; }
+
+		public string loreDisplayText { get; set; }
+
+		public string loreNextCollectionId { get; set; }
 
 		public Rottable rottable { get; set; }
 

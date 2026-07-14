@@ -6,7 +6,10 @@ public class SpaceTreeSeededComet : Comet
 {
 	protected override void DepositTiles(int cell, Element element, int world, int prev_cell, float temperature)
 	{
-		float depthOfElement = (float)base.GetDepthOfElement(cell, element, world);
+		SpaceTreeSeededComet.<>c__DisplayClass0_0 CS$<>8__locals1 = new SpaceTreeSeededComet.<>c__DisplayClass0_0();
+		CS$<>8__locals1.world = world;
+		CS$<>8__locals1.<>4__this = this;
+		float depthOfElement = (float)base.GetDepthOfElement(cell, element, CS$<>8__locals1.world);
 		float num = 1f;
 		float num2 = (depthOfElement - (float)this.addTilesMinHeight) / (float)(this.addTilesMaxHeight - this.addTilesMinHeight);
 		if (!float.IsNaN(num2))
@@ -15,37 +18,12 @@ public class SpaceTreeSeededComet : Comet
 		}
 		int num3 = Mathf.Min(this.addTiles, Mathf.Clamp(Mathf.RoundToInt((float)this.addTiles * num), 1, this.addTiles));
 		ListPool<int, Comet>.PooledList pooledList = ListPool<int, Comet>.Allocate();
-		HashSetPool<int, Comet>.PooledHashSet pooledHashSet = HashSetPool<int, Comet>.Allocate();
-		QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
-		int num4 = -1;
-		int num5 = 1;
-		if (this.velocity.x < 0f)
-		{
-			num4 *= -1;
-			num5 *= -1;
-		}
-		pooledQueue.Enqueue(new GameUtil.FloodFillInfo
-		{
-			cell = prev_cell,
-			depth = 0
-		});
-		pooledQueue.Enqueue(new GameUtil.FloodFillInfo
-		{
-			cell = Grid.OffsetCell(prev_cell, new CellOffset(num4, 0)),
-			depth = 0
-		});
-		pooledQueue.Enqueue(new GameUtil.FloodFillInfo
-		{
-			cell = Grid.OffsetCell(prev_cell, new CellOffset(num5, 0)),
-			depth = 0
-		});
-		Func<int, bool> func = (int cell) => Grid.IsValidCellInWorld(cell, world) && !Grid.Solid[cell];
-		GameUtil.FloodFillConditional(pooledQueue, func, pooledHashSet, pooledList, 10);
-		float num6 = ((num3 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
-		int num7 = this.addDiseaseCount / num3;
+		FloodFill.BreadthCollect(prev_cell, new Func<int, FloodFill.BoundaryCheckResult>(CS$<>8__locals1.<DepositTiles>g__condition|0), pooledList, 11);
+		float num4 = ((num3 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
+		int num5 = this.addDiseaseCount / num3;
 		float value = global::UnityEngine.Random.value;
-		float num8 = ((num3 == 0) ? (-1f) : (1f / (float)num3));
-		float num9 = 0f;
+		float num6 = ((num3 == 0) ? (-1f) : (1f / (float)num3));
+		float num7 = 0f;
 		bool flag = false;
 		using (List<int>.Enumerator enumerator = pooledList.GetEnumerator())
 		{
@@ -56,20 +34,18 @@ public class SpaceTreeSeededComet : Comet
 				{
 					break;
 				}
-				num9 += num8;
-				bool flag2 = !flag && num8 >= 0f && value <= num9;
-				int num10 = (flag2 ? Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
+				num7 += num6;
+				bool flag2 = !flag && num6 >= 0f && value <= num7;
+				int num8 = (flag2 ? Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
 				{
-					SpaceTreeSeededComet.PlantTreeOnSolidTileCreated(viable_cell, this.addTilesMaxHeight);
+					SpaceTreeSeededComet.PlantTreeOnSolidTileCreated(viable_cell, CS$<>8__locals1.<>4__this.addTilesMaxHeight);
 				}, false)).index : (-1));
-				SimMessages.AddRemoveSubstance(viable_cell, element.id, CellEventLogger.Instance.ElementEmitted, num6, temperature, this.diseaseIdx, num7, true, num10);
+				SimMessages.AddRemoveSubstance(viable_cell, element.id, CellEventLogger.Instance.ElementEmitted, num4, temperature, this.diseaseIdx, num5, true, num8);
 				num3--;
 				flag = flag || flag2;
 			}
 		}
 		pooledList.Recycle();
-		pooledHashSet.Recycle();
-		pooledQueue.Recycle();
 	}
 
 	private static void PlantTreeOnSolidTileCreated(int cell, int tileMaxHeight)

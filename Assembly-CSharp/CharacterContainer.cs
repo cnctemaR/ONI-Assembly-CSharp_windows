@@ -58,9 +58,11 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		List<IListableOption> list = new List<IListableOption>();
 		foreach (SkillGroup skillGroup in new List<SkillGroup>(Db.Get().SkillGroups.resources))
 		{
-			list.Add(skillGroup);
+			if (skillGroup.allowAsAptitude)
+			{
+				list.Add(skillGroup);
+			}
 		}
-		list.Remove(Db.Get().SkillGroups.BionicSkills);
 		this.archetypeDropDown.Initialize(list, new Action<IListableOption, object>(this.OnArchetypeEntryClick), new Func<IListableOption, IListableOption, object, int>(this.archetypeDropDownSort), new Action<DropDownEntry, object>(this.archetypeDropEntryRefreshAction), false, null);
 		this.archetypeDropDown.CustomizeEmptyRow(Strings.Get("STRINGS.UI.CHARACTERCONTAINER_NOARCHETYPESELECTED"), this.noArchetypeIcon);
 		List<IListableOption> list2 = new List<IListableOption>
@@ -169,6 +171,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				this.SelectDeliverable();
 			};
 		}
+		this.UpdateDefaultOutfitSelector(this.stats.personality);
 	}
 
 	public void GenerateCharacter(bool is_starter, string guaranteedAptitudeID = null)
@@ -197,6 +200,11 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 				this.SelectDeliverable();
 			};
 		}
+		this.UpdateDefaultOutfitSelector(this.stats.personality);
+	}
+
+	private void UpdateDefaultOutfitSelector(Personality personality)
+	{
 		Option<ClothingOutfitTarget> selectedOutfit = ClothingOutfitTarget.TryFromTemplateId(this.stats.personality.GetSelectedTemplateOutfitId(ClothingOutfitUtility.OutfitType.Clothing));
 		if (selectedOutfit.IsSome())
 		{
@@ -233,10 +241,58 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		if (this.idle_anim != null)
 		{
 			this.animController.AddAnimOverrides(this.idle_anim, 0f);
+			this.animController.randomiseLoopedOffset = true;
 		}
 		KAnimFile anim = Assets.GetAnim(new HashedString("crewSelect_fx_kanim"));
-		this.bgAnimController.SwapAnims(new KAnimFile[] { Assets.GetAnim(CharacterContainer.portraitBGAnims[this.stats.personality.model]) });
-		this.bgAnimController.Play("crewSelect_bg", KAnim.PlayMode.Loop, 1f, 0f);
+		CharacterContainer.PortraitBgAnimInfo bganimInfo = this.GetBGAnimInfo(this.stats);
+		KAnimFile anim2 = Assets.GetAnim(bganimInfo.animFileName);
+		KAnimFile kanimFile = (string.IsNullOrEmpty(bganimInfo.foregroundAnimFileName) ? null : Assets.GetAnim(bganimInfo.foregroundAnimFileName));
+		bool flag = kanimFile != null;
+		this.bgAnimController.SwapAnims(new KAnimFile[] { anim2 });
+		if (flag)
+		{
+			this.fgAnimController.gameObject.SetActive(true);
+			this.fgAnimController.SwapAnims(new KAnimFile[] { kanimFile });
+		}
+		else
+		{
+			this.fgAnimController.gameObject.SetActive(false);
+		}
+		bool flag2 = false;
+		KAnimFileData data = anim2.GetData();
+		if (data != null)
+		{
+			for (int i = 0; i < data.animCount; i++)
+			{
+				KAnim.Anim anim3 = data.GetAnim(i);
+				if (anim3.name.EndsWith("_pre"))
+				{
+					this.bgAnimController.Play(anim3.name, KAnim.PlayMode.Once, 1f, 0f);
+					if (flag)
+					{
+						this.fgAnimController.Play(anim3.name, KAnim.PlayMode.Once, 1f, 0f);
+					}
+					flag2 = true;
+					break;
+				}
+			}
+		}
+		if (flag2)
+		{
+			this.bgAnimController.Queue("crewSelect_bg", KAnim.PlayMode.Loop, 1f, 0f);
+			if (flag)
+			{
+				this.fgAnimController.Queue("crewSelect_bg", KAnim.PlayMode.Loop, 1f, 0f);
+			}
+		}
+		else
+		{
+			this.bgAnimController.Play("crewSelect_bg", KAnim.PlayMode.Loop, 1f, 0f);
+			if (flag)
+			{
+				this.fgAnimController.Play("crewSelect_bg", KAnim.PlayMode.Loop, 1f, 0f);
+			}
+		}
 		if (anim != null)
 		{
 			this.animController.AddAnimOverrides(anim, 0f);
@@ -244,21 +300,54 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		this.animController.Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
+	private CharacterContainer.PortraitBgAnimInfo GetBGAnimInfo(MinionStartingStats minionStartingStats)
+	{
+		if (minionStartingStats.personality.model == GameTags.Minions.Models.Standard)
+		{
+			foreach (Trait trait in minionStartingStats.Traits)
+			{
+				if (trait.Id == "GrantSkill_Swimming" || trait.Id == "GrantSkill_Swimming2")
+				{
+					CharacterContainer.PortraitBgAnimInfo portraitBgAnimInfo = default(CharacterContainer.PortraitBgAnimInfo);
+					portraitBgAnimInfo.animFileName = "crewselect_backdrop_swim_kanim";
+					portraitBgAnimInfo.hasPreAnim = true;
+					portraitBgAnimInfo.foregroundAnimFileName = "crewselect_backdrop_swim_fg_kanim";
+					return portraitBgAnimInfo;
+				}
+			}
+		}
+		return CharacterContainer.portraitBGAnimsByModel[minionStartingStats.personality.model];
+	}
+
 	private HashedString GetIdleAnim(MinionStartingStats minionStartingStats)
 	{
 		List<HashedString> list = new List<HashedString>();
-		foreach (KeyValuePair<HashedString, string[]> keyValuePair in CharacterContainer.traitIdleAnims)
+		foreach (KeyValuePair<HashedString, string[]> keyValuePair in CharacterContainer.traitForcedIdleAnims)
 		{
 			foreach (Trait trait in minionStartingStats.Traits)
 			{
 				if (keyValuePair.Value.Contains(trait.Id))
 				{
-					list.Add(keyValuePair.Key);
+					return keyValuePair.Key;
 				}
 			}
 			if (keyValuePair.Value.Contains(minionStartingStats.joyTrait.Id) || keyValuePair.Value.Contains(minionStartingStats.stressTrait.Id))
 			{
-				list.Add(keyValuePair.Key);
+				return keyValuePair.Key;
+			}
+		}
+		foreach (KeyValuePair<HashedString, string[]> keyValuePair2 in CharacterContainer.traitIdleAnims)
+		{
+			foreach (Trait trait2 in minionStartingStats.Traits)
+			{
+				if (keyValuePair2.Value.Contains(trait2.Id))
+				{
+					list.Add(keyValuePair2.Key);
+				}
+			}
+			if (keyValuePair2.Value.Contains(minionStartingStats.joyTrait.Id) || keyValuePair2.Value.Contains(minionStartingStats.stressTrait.Id))
+			{
+				list.Add(keyValuePair2.Key);
 			}
 		}
 		if (list.Count > 0)
@@ -279,7 +368,7 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	private void RefreshOutfitSelector()
 	{
-		CharacterContainer.<>c__DisplayClass76_0 CS$<>8__locals1 = new CharacterContainer.<>c__DisplayClass76_0();
+		CharacterContainer.<>c__DisplayClass81_0 CS$<>8__locals1 = new CharacterContainer.<>c__DisplayClass81_0();
 		CS$<>8__locals1.<>4__this = this;
 		Image reference = this.outfitSelectorReferences.GetReference<Image>("CurrentOutfitIcon");
 		Image reference2 = this.outfitSelectorReferences.GetReference<Image>("NextOutfitIcon");
@@ -716,6 +805,8 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		this.modelDropDown.transform.parent.gameObject.SetActive(enable && Game.IsDlcActiveForCurrentSave("DLC3_ID"));
 	}
 
+	public event Action<CharacterContainer> OnReshuffled;
+
 	public void Reshuffle(bool is_starter)
 	{
 		if (this.controller != null && this.controller.IsSelected(this.stats))
@@ -727,6 +818,12 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 			this.fxAnim.Play("loop", KAnim.PlayMode.Once, 1f, 0f);
 		}
 		this.GenerateCharacter(is_starter, this.guaranteedAptitudeID);
+		Action<CharacterContainer> onReshuffled = this.OnReshuffled;
+		if (onReshuffled == null)
+		{
+			return;
+		}
+		onReshuffled(this);
 	}
 
 	public void SetController(CharacterSelectionController csc)
@@ -932,7 +1029,8 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		{ 3, "StandardYellow" },
 		{ 4, "StandardGreen" },
 		{ 5, "permit_standard_bionic_outfit" },
-		{ 414842661, "permit_standard_regal_neutronium_outfit" }
+		{ 414842661, "permit_standard_regal_neutronium_outfit" },
+		{ 890344243, "permit_standard_swim_outfit_red" }
 	};
 
 	[SerializeField]
@@ -968,6 +1066,9 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	[SerializeField]
 	private KBatchedAnimController bgAnimController;
+
+	[SerializeField]
+	private KBatchedAnimController fgAnimController;
 
 	[SerializeField]
 	private GameObject iconGroup;
@@ -1044,15 +1145,25 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	private string allModelSprite = "ui_duplicant_any_selection";
 
-	private static Dictionary<Tag, string> portraitBGAnims = new Dictionary<Tag, string>
+	private static Dictionary<Tag, CharacterContainer.PortraitBgAnimInfo> portraitBGAnimsByModel = new Dictionary<Tag, CharacterContainer.PortraitBgAnimInfo>
 	{
 		{
 			GameTags.Minions.Models.Standard,
-			"crewselect_backdrop_kanim"
+			new CharacterContainer.PortraitBgAnimInfo
+			{
+				animFileName = "crewselect_backdrop_kanim",
+				hasPreAnim = false,
+				foregroundAnimFileName = ""
+			}
 		},
 		{
 			GameTags.Minions.Models.Bionic,
-			"updated_crewSelect_bionic_backdrop_kanim"
+			new CharacterContainer.PortraitBgAnimInfo
+			{
+				animFileName = "updated_crewSelect_bionic_backdrop_kanim",
+				hasPreAnim = false,
+				foregroundAnimFileName = ""
+			}
 		}
 	};
 
@@ -1072,6 +1183,12 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 
 	[SerializeField]
 	private KScrollRect scroll_rect;
+
+	private static readonly Dictionary<HashedString, string[]> traitForcedIdleAnims = new Dictionary<HashedString, string[]> { 
+	{
+		"character_select_swim_kanim",
+		new string[] { "GrantSkill_Swimming", "GrantSkill_Swimming2" }
+	} };
 
 	private static readonly Dictionary<HashedString, string[]> traitIdleAnims = new Dictionary<HashedString, string[]>
 	{
@@ -1127,6 +1244,15 @@ public class CharacterContainer : KScreen, ITelepadDeliverableContainer
 		public string professionName;
 
 		public Sprite iconImg;
+	}
+
+	private struct PortraitBgAnimInfo
+	{
+		public string animFileName;
+
+		public string foregroundAnimFileName;
+
+		public bool hasPreAnim;
 	}
 
 	private class MinionModelOption : IListableOption

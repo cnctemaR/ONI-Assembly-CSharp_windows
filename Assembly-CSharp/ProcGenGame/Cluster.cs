@@ -23,13 +23,13 @@ namespace ProcGenGame
 			}
 		}
 
-		public bool IsGenerationComplete { get; private set; }
+		public Cluster.WorldGenStatus Status { get; private set; }
 
-		public bool IsGenerating
+		public bool HasGenerationStopped
 		{
 			get
 			{
-				return this.thread != null && this.thread.IsAlive;
+				return this.Status == Cluster.WorldGenStatus.Failed || this.Status == Cluster.WorldGenStatus.Complete;
 			}
 		}
 
@@ -185,16 +185,10 @@ namespace ProcGenGame
 					this.worlds[num].Initialise(callbackFn, error_cb, worldSeed + num, layoutSeed + num, terrainSeed + num, noiseSeed + num, debug, skipPlacingTemplates);
 				}
 			}
-			this.IsGenerationComplete = false;
 			this.ApplicationIsPlaying = Application.isPlaying;
 			this.thread = new Thread(new ThreadStart(this.ThreadMain));
 			global::Util.ApplyInvariantCultureToThread(this.thread);
 			this.thread.Start();
-		}
-
-		private void StopThread()
-		{
-			this.thread = null;
 		}
 
 		private bool IsRunningDebugGen()
@@ -204,6 +198,7 @@ namespace ProcGenGame
 
 		private void BeginGeneration()
 		{
+			this.Status = Cluster.WorldGenStatus.Generating;
 			this.LogBeginGeneration();
 			try
 			{
@@ -215,11 +210,10 @@ namespace ProcGenGame
 				{
 					this.currentWorld.ReportWorldGenError(ex, ex.userMessage);
 				}
-				this.StopThread();
+				this.Status = Cluster.WorldGenStatus.Failed;
 				return;
 			}
-			Sim.Cell[] array = null;
-			Sim.DiseaseCell[] array2 = null;
+			WorldgenSimData worldgenSimData = default(WorldgenSimData);
 			int num = 0;
 			AxialI startLoc = this.worlds[0].GetClusterLocation();
 			foreach (WorldGen worldGen in this.worlds)
@@ -265,24 +259,23 @@ namespace ProcGenGame
 					list2.AddRange(this.unplacedStoryTraits);
 					worldGen2.Settings.SetStoryTraitCandidates(list2);
 					GridSettings.Reset(worldGen2.GetSize().x, worldGen2.GetSize().y);
+					BackwallManager.Clear();
 					if (!worldGen2.GenerateOffline())
 					{
-						this.StopThread();
+						this.Status = Cluster.WorldGenStatus.Failed;
 						return;
 					}
 					worldGen2.FinalizeStartLocation();
-					array = null;
-					array2 = null;
 					List<WorldTrait> list3 = new List<WorldTrait>();
 					uint num2 = (uint)this.seed;
-					if (!worldGen2.RenderOffline(this.doSimSettle, num2, binaryWriter, ref array, ref array2, num, ref list3, worldGen2.isStartingWorld))
+					if (!worldGen2.RenderOffline(this.doSimSettle, num2, binaryWriter, ref worldgenSimData, num, ref list3, worldGen2.isStartingWorld))
 					{
-						this.StopThread();
+						this.Status = Cluster.WorldGenStatus.Failed;
 						return;
 					}
 					if (this.PerWorldGenCompleteCallback != null)
 					{
-						this.PerWorldGenCompleteCallback(i, worldGen2, array, array2);
+						this.PerWorldGenCompleteCallback(i, worldGen2, worldgenSimData);
 					}
 					foreach (WorldTrait worldTrait in list3)
 					{
@@ -303,13 +296,13 @@ namespace ProcGenGame
 				{
 					this.worlds[0].ReportWorldGenError(new Exception(text), UI.FRONTEND.SUPPORTWARNINGS.WORLD_GEN_FAILURE_STORY);
 				}
-				this.StopThread();
+				this.Status = Cluster.WorldGenStatus.Failed;
 				return;
 			}
 			DebugUtil.Separator();
 			if (!this.AssignClusterLocations())
 			{
-				this.StopThread();
+				this.Status = Cluster.WorldGenStatus.Failed;
 				return;
 			}
 			DebugUtil.Separator();
@@ -318,8 +311,18 @@ namespace ProcGenGame
 			BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(WorldGen.WORLDGEN_SAVE_FILENAME, FileMode.Create));
 			this.Save(binaryWriter2);
 			binaryWriter2.Write(memoryStream.ToArray());
-			this.StopThread();
-			this.IsGenerationComplete = true;
+			binaryWriter2.Flush();
+			binaryWriter2.Close();
+			this.Status = Cluster.WorldGenStatus.Complete;
+		}
+
+		public void Join()
+		{
+			if (this.thread != null)
+			{
+				this.thread.Join();
+				this.thread = null;
+			}
 		}
 
 		private bool IsValidHex(AxialI location)
@@ -481,6 +484,7 @@ namespace ProcGenGame
 			if (this.thread != null && this.thread.IsAlive)
 			{
 				this.thread.Abort();
+				this.thread.Join();
 				this.thread = null;
 			}
 		}
@@ -699,7 +703,7 @@ namespace ProcGenGame
 		public Action<int, WorldGen> PerWorldGenBeginCallback;
 
 		[NonSerialized]
-		public Action<int, WorldGen, Sim.Cell[], Sim.DiseaseCell[]> PerWorldGenCompleteCallback;
+		public Action<int, WorldGen, WorldgenSimData> PerWorldGenCompleteCallback;
 
 		[NonSerialized]
 		public Func<int, WorldGen, bool> ShouldSkipWorldCallback;
@@ -718,5 +722,13 @@ namespace ProcGenGame
 		private Thread thread;
 
 		private bool ApplicationIsPlaying;
+
+		public enum WorldGenStatus
+		{
+			NotStarted,
+			Generating,
+			Failed,
+			Complete
+		}
 	}
 }

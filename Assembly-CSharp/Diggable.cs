@@ -18,6 +18,21 @@ public class Diggable : Workable
 		}
 	}
 
+	public bool HasDigType(Diggable.DiggableType type)
+	{
+		return (this.digTypeFlags & (int)type) != 0;
+	}
+
+	public bool WillDigBackwall()
+	{
+		return this.HasDigType(Diggable.DiggableType.Backwall);
+	}
+
+	public bool WillDigTile()
+	{
+		return this.HasDigType(Diggable.DiggableType.Tile);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -45,7 +60,7 @@ public class Diggable : Workable
 	{
 		base.OnSpawn();
 		this.cached_cell = Grid.PosToCell(this);
-		this.originalDigElement = Grid.Element[this.cached_cell];
+		this.originalDigElement = this.GetTargetElement();
 		if (this.originalDigElement.hardness == 255)
 		{
 			this.OnCancel();
@@ -61,6 +76,7 @@ public class Diggable : Workable
 		this.chore = new WorkChore<Diggable>(choreType, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+		this.backwallEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.backwallChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);
 		new ReachabilityMonitor.Instance(this).StartSM();
 		base.Subscribe<Diggable>(493375141, Diggable.OnRefreshUserMenuDelegate);
@@ -113,14 +129,22 @@ public class Diggable : Workable
 		}
 		GameScenePartitioner.Instance.Free(ref this.unstableEntry);
 		int num = -1;
-		this.UpdateColor(this.isReachable);
-		if (Grid.Element[this.cached_cell].hardness == 255)
+		Element element = ElementLoader.FindElementByHash(SimHashes.Vacuum);
+		if (this.WillDigTile() && Grid.IsSolidCell(this.cached_cell))
+		{
+			element = Grid.Element[this.cached_cell];
+		}
+		else if (this.WillDigBackwall() && BackwallManager.HasBackwall(this.cached_cell))
+		{
+			element = BackwallManager.At(this.cached_cell).Element;
+		}
+		if (element.hardness == 255)
 		{
 			this.UpdateColor(false);
 			this.requiredSkillPerk = null;
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanDigUnobtanium);
 		}
-		else if (Grid.Element[this.cached_cell].hardness >= 251)
+		else if (element.hardness >= 251)
 		{
 			bool flag = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -141,7 +165,7 @@ public class Diggable : Workable
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigRadioactiveMaterials.Id;
 			this.materialDisplay.sharedMaterial = this.materials[3];
 		}
-		else if (Grid.Element[this.cached_cell].hardness >= 200)
+		else if (element.hardness >= 200)
 		{
 			bool flag2 = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -162,7 +186,7 @@ public class Diggable : Workable
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigSuperDuperHard.Id;
 			this.materialDisplay.sharedMaterial = this.materials[3];
 		}
-		else if (Grid.Element[this.cached_cell].hardness >= 150)
+		else if (element.hardness >= 150)
 		{
 			bool flag3 = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -183,7 +207,7 @@ public class Diggable : Workable
 			this.requiredSkillPerk = Db.Get().SkillPerks.CanDigNearlyImpenetrable.Id;
 			this.materialDisplay.sharedMaterial = this.materials[2];
 		}
-		else if (Grid.Element[this.cached_cell].hardness >= 50)
+		else if (element.hardness >= 50)
 		{
 			bool flag4 = false;
 			using (List<Chore.PreconditionInstance>.Enumerator enumerator = this.chore.GetPreconditions().GetEnumerator())
@@ -207,25 +231,46 @@ public class Diggable : Workable
 		else
 		{
 			this.requiredSkillPerk = null;
-			this.chore.GetPreconditions().Remove(this.chore.GetPreconditions().Find((Chore.PreconditionInstance o) => o.condition.id == ChorePreconditions.instance.HasSkillPerk.id));
+			List<Chore.PreconditionInstance> preconditions = this.chore.GetPreconditions();
+			for (int i = preconditions.Count - 1; i >= 0; i--)
+			{
+				if (preconditions[i].condition.id == ChorePreconditions.instance.HasSkillPerk.id)
+				{
+					preconditions.RemoveAtSwap<Chore.PreconditionInstance>(i);
+				}
+			}
 		}
+		this.UpdateColor(this.isReachable);
 		this.UpdateStatusItem(null);
 		bool flag5 = false;
-		if (!Grid.Solid[this.cached_cell])
+		if (this.WillDigTile())
 		{
 			num = Diggable.GetUnstableCellAbove(this.cached_cell);
-			if (num == -1)
+			if (!Grid.Solid[this.cached_cell] && num == -1)
 			{
-				flag5 = true;
+				this.digTypeFlags &= -2;
+				if (!this.WillDigBackwall() || !BackwallManager.HasBackwall(this.cached_cell))
+				{
+					flag5 = true;
+				}
 			}
-			else
+			else if (num != -1)
 			{
 				base.StartCoroutine("PeriodicUnstableFallingRecheck");
 			}
 		}
+		else if (this.WillDigBackwall() && !BackwallManager.HasBackwall(this.cached_cell))
+		{
+			flag5 = true;
+		}
 		else if (Grid.Foundation[this.cached_cell])
 		{
 			flag5 = true;
+		}
+		if (this.WillDigBackwall() && !BackwallManager.HasBackwall(this.cached_cell))
+		{
+			this.digTypeFlags &= -3;
+			flag5 |= !this.WillDigTile();
 		}
 		if (!flag5)
 		{
@@ -250,6 +295,10 @@ public class Diggable : Workable
 
 	public Element GetTargetElement()
 	{
+		if (!this.WillDigTile() && this.WillDigBackwall() && BackwallManager.HasBackwall(this.cached_cell))
+		{
+			return BackwallManager.At(this.cached_cell).Element;
+		}
 		return Grid.Element[this.cached_cell];
 	}
 
@@ -260,7 +309,11 @@ public class Diggable : Workable
 
 	protected override bool OnWorkTick(WorkerBase worker, float dt)
 	{
-		Diggable.DoDigTick(this.cached_cell, dt);
+		if (Grid.Solid[this.cached_cell] || this.WillDigBackwall())
+		{
+			Diggable.DoDigTick(this.cached_cell, dt);
+		}
+		this.isDigComplete |= !this.WillDigTile() && !this.WillDigBackwall();
 		return this.isDigComplete;
 	}
 
@@ -297,16 +350,22 @@ public class Diggable : Workable
 
 	public static float GetApproximateDigTime(int cell)
 	{
-		float num = (float)Grid.Element[cell].hardness;
-		if (num == 255f)
+		float num = Grid.Mass[cell];
+		float num2 = (float)Grid.Element[cell].hardness;
+		if (!Grid.Solid[cell] && BackwallManager.HasBackwall(cell))
+		{
+			num2 = (float)BackwallManager.At(cell).Element.hardness;
+			num = BackwallManager.At(cell).Mass;
+		}
+		if (num2 == 255f)
 		{
 			return float.MaxValue;
 		}
 		Element element = ElementLoader.FindElementByHash(SimHashes.Ice);
-		float num2 = num / (float)element.hardness;
-		float num3 = Mathf.Min(Grid.Mass[cell], 400f) / 400f;
-		float num4 = 4f * num3;
-		return num4 + num2 * num4;
+		float num3 = num2 / (float)element.hardness;
+		float num4 = Mathf.Min(num, 400f) / 400f;
+		float num5 = 4f * num4;
+		return num5 + num3 * num5;
 	}
 
 	public static Diggable GetDiggable(int cell)
@@ -445,6 +504,7 @@ public class Diggable : Workable
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		GameScenePartitioner.Instance.Free(ref this.backwallEntry);
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.unstableEntry);
 		Game.Instance.Unsubscribe(ref this.handle);
@@ -471,6 +531,8 @@ public class Diggable : Workable
 
 	private HandleVector<int>.Handle unstableEntry;
 
+	private HandleVector<int>.Handle backwallEntry;
+
 	private MeshRenderer childRenderer;
 
 	private bool isReachable;
@@ -493,6 +555,9 @@ public class Diggable : Workable
 
 	private bool isDigComplete;
 
+	[Serialize]
+	public int digTypeFlags = 1;
+
 	private static List<global::Tuple<string, Tag>> lasersForHardness = new List<global::Tuple<string, Tag>>
 	{
 		new global::Tuple<string, Tag>("dig", "fx_dig_splash"),
@@ -512,4 +577,10 @@ public class Diggable : Workable
 	});
 
 	public Chore chore;
+
+	public enum DiggableType
+	{
+		Tile = 1,
+		Backwall
+	}
 }

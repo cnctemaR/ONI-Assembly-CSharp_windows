@@ -44,6 +44,7 @@ public class SmokerConfig : IBuildingConfig
 		complexFabricator.heatedTemperature = 368.15f;
 		complexFabricator.duplicantOperated = false;
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
+		complexFabricator.fetchChoreTypeIdHash = Db.Get().ChoreTypes.CookFetch.IdHash;
 		complexFabricator.showProgressBar = true;
 		complexFabricator.storeProduced = true;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
@@ -51,7 +52,7 @@ public class SmokerConfig : IBuildingConfig
 		Storage storage = go.AddComponent<Storage>();
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.CookFetch.IdHash;
 		manualDeliveryKG.RequestedItemTag = SimHashes.Peat.CreateTag();
 		manualDeliveryKG.capacity = 240f;
 		manualDeliveryKG.refillMass = 120f;

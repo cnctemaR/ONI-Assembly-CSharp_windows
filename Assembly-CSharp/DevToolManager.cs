@@ -47,6 +47,7 @@ public class DevToolManager
 		this.RegisterDevTool<DevTool_StoryTraits_Reveal>("Debuggers/Story Traits Reveal");
 		this.RegisterDevTool<DevTool_StoryTrait_CritterManipulator>("Debuggers/Story Trait - Critter Manipulator");
 		this.RegisterDevTool<DevToolAnimEventManager>("Debuggers/Anim Event Manager");
+		this.RegisterDevTool<DevToolDebugModeToggle>("Debuggers/Debug Mode Toggle");
 		this.RegisterDevTool<DevToolSceneBrowser>("Scene/Browser");
 		this.RegisterDevTool<DevToolSceneInspector>("Scene/Inspector");
 		this.menuNodes.AddAction("Help/" + UI.FRONTEND.DEVTOOLS.TITLE.text, delegate

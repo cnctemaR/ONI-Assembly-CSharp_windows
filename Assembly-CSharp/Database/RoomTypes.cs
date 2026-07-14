@@ -53,7 +53,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, null, false, false, new string[] { "RoomPrivateBedroom" }, 5));
+			}, 1, null, false, false, new string[] { "RoomPrivateBedroom", "BedroomStamina" }, 5));
 			this.Bedroom = base.Add(new RoomType("Bedroom", ROOMS.TYPES.BEDROOM.NAME, ROOMS.TYPES.BEDROOM.DESCRIPTION, ROOMS.TYPES.BEDROOM.TOOLTIP, ROOMS.TYPES.BEDROOM.EFFECT, Db.Get().RoomTypeCategories.Sleep, RoomConstraints.HAS_LUXURY_BED, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_COTS,
@@ -66,7 +66,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, new RoomType[] { this.PrivateBedroom }, false, false, new string[] { "RoomBedroom" }, 4));
+			}, 1, new RoomType[] { this.PrivateBedroom }, false, false, new string[] { "RoomBedroom", "LuxuryBarracksStamina" }, 4));
 			this.Barracks = base.Add(new RoomType("Barracks", ROOMS.TYPES.BARRACKS.NAME, ROOMS.TYPES.BARRACKS.DESCRIPTION, ROOMS.TYPES.BARRACKS.TOOLTIP, ROOMS.TYPES.BARRACKS.EFFECT, Db.Get().RoomTypeCategories.Sleep, RoomConstraints.HAS_BED, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
@@ -76,7 +76,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, new RoomType[] { this.Bedroom, this.PrivateBedroom }, false, false, new string[] { "RoomBarracks" }, 3));
+			}, 1, new RoomType[] { this.Bedroom, this.PrivateBedroom }, false, false, new string[] { "RoomBarracks", "BarracksStamina" }, 3));
 			this.BanquetHall = base.Add(new RoomType("BanquetHall", ROOMS.TYPES.BANQUETHALL.NAME, ROOMS.TYPES.BANQUETHALL.DESCRIPTION, ROOMS.TYPES.BANQUETHALL.TOOLTIP, ROOMS.TYPES.BANQUETHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.MULTI_MINION_DINING_TABLE, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
@@ -119,7 +119,7 @@ namespace Database
 			this.Kitchen = base.Add(new RoomType("Kitchen", ROOMS.TYPES.KITCHEN.NAME, ROOMS.TYPES.KITCHEN.DESCRIPTION, ROOMS.TYPES.KITCHEN.TOOLTIP, ROOMS.TYPES.KITCHEN.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.SPICE_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.COOK_TOP,
-				RoomConstraints.REFRIGERATOR,
+				RoomConstraints.KITCHENREFRIGERATOR,
 				RoomConstraints.NO_MESS_STATION,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_96

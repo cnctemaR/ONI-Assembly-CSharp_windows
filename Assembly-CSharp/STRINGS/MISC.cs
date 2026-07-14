@@ -137,6 +137,8 @@ namespace STRINGS
 
 			public static LocString WATERSEED = "Aquatic Seed";
 
+			public static LocString BACKWALLSEED = "Backwall Seed";
+
 			public static LocString DECORSEED = "Decor Seed";
 
 			public static LocString CERAMIC = UI.FormatAsLink("Ceramic", "CERAMIC");
@@ -177,6 +179,19 @@ namespace STRINGS
 				" and ",
 				UI.FormatAsLink("solids", "ELEMENTS_SOLID"),
 				" have a remarkably low coefficient of friction. These present a safety hazard if left on the ground, as Duplicants may slip and fall when traveling across them."
+			});
+
+			public static LocString CRITTERDRINKABLE = UI.FormatAsLink("Critter Drinkable", "CRITTERDRINKABLE");
+
+			public static LocString CRITTERDRINKABLE_DESC = string.Concat(new string[]
+			{
+				"These ",
+				UI.FormatAsLink("liquids", "ELEMENTS_LIQUID"),
+				" can be safely consumed by ",
+				UI.FormatAsLink("Critters", "CREATURES"),
+				" at the ",
+				UI.FormatAsLink("Critter Fountain", "MILKFEEDER"),
+				". Giving critters access to proper hydration improves their mood and helps them better tolerate crowded living conditions."
 			});
 
 			public static LocString LEAD = UI.FormatAsLink("Lead", "LEAD");
@@ -255,6 +270,8 @@ namespace STRINGS
 
 			public static LocString CLOTHES = UI.FormatAsLink("Clothing", "EQUIPMENT");
 
+			public static LocString SHOES = UI.FormatAsLink("Footwear", "EQUIPMENT");
+
 			public static LocString EMITSLIGHT = UI.FormatAsLink("Light Emitter", "LIGHT");
 
 			public static LocString BED = "Beds";
@@ -307,6 +324,8 @@ namespace STRINGS
 			public static LocString MEDICINE = "Medicine";
 
 			public static LocString SEED = "Seed";
+
+			public static LocString LARGESEED = "Seed";
 
 			public static LocString ANYWATER = "Water Based";
 
@@ -361,17 +380,6 @@ namespace STRINGS
 
 			public static LocString ANY = "Any";
 
-			public static LocString TRANSPARENT = "Transparent";
-
-			public static LocString TRANSPARENT_DESC = string.Concat(new string[]
-			{
-				"Transparent materials allow ",
-				UI.FormatAsLink("Light", "LIGHT"),
-				" to pass through. Illumination boosts Duplicant productivity during working hours, but undermines sleep quality.\n\nTransparency is also important for buildings that require a clear line of sight in order to function correctly, such as the ",
-				UI.FormatAsLink("Space Scanner", "COMETDETECTOR"),
-				"."
-			});
-
 			public static LocString RAREMATERIALS = "Rare Resource";
 
 			public static LocString FARMINGMATERIAL = "Fertilizer";
@@ -387,6 +395,12 @@ namespace STRINGS
 			public static LocString STORYTRAITRESOURCE = "Story Trait";
 
 			public static LocString GLASS = "Glass";
+
+			public static LocString GLASSES = UI.FormatAsLink("Glassy", "GLASSES");
+
+			public static LocString GLASSES_DESC = "Glassy materials are smooth and transparent, allowing " + UI.FormatAsLink("Light", "LIGHT") + " to pass through them.\n\nThey are useful in the construction of buildings that require internal illumination, as well as those that display their currently stored resources.";
+
+			public static LocString RUBBER = "Rubber";
 
 			public static LocString OBSIDIAN = UI.FormatAsLink("Obsidian", "OBSIDIAN");
 
@@ -405,6 +419,21 @@ namespace STRINGS
 			public static LocString COMMAND_MODULE = "Command Module";
 
 			public static LocString HABITAT_MODULE = "Habitat Module";
+
+			public static LocString BUILDINGGASKET = "Gasket";
+
+			public static LocString BUILDINGGASKET_DESC = string.Concat(new string[]
+			{
+				"Gaskets are mechanical seals made from ",
+				UI.FormatAsLink("Rubber", "RUBBER"),
+				" or ",
+				UI.FormatAsLink("Plastic", "PLASTIC"),
+				" at the ",
+				UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+				".\n\nThey are essential components for certain buildings and objects that require a strong ",
+				UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+				" seal."
+			});
 
 			public static LocString COMBUSTIBLEGAS = UI.FormatAsLink("Combustible Gas", "COMBUSTIBLEGAS");
 
@@ -683,6 +712,27 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = "My Duplicants have uncovered a {Uncoverable}!\n\n" + UI.CLICK(UI.ClickType.Click) + " to jump to its location.";
 			}
 
+			public class BACKWALLMASS
+			{
+				public static LocString NAME = "{Mass}";
+
+				public static LocString TOOLTIP = "This backwall has a mass of <b>{Mass}</b>";
+			}
+
+			public class BACKWALLTEMPERATURE
+			{
+				public static LocString NAME = "{Temp}";
+
+				public static LocString TOOLTIP = "This backwall is currently <b>{Temp}</b>";
+			}
+
+			public class BUBBLECONTENTS
+			{
+				public static LocString NAME = "{BubbleInfo}";
+
+				public static LocString TOOLTIP = "Bubbles currently passing through this cell";
+			}
+
 			public class GENETICANALYSISCOMPLETED
 			{
 				public static LocString NAME = "Genome Sequenced";
@@ -752,6 +802,55 @@ namespace STRINGS
 				public static LocString NAME = MISC.STATUSITEMS.ELEMENTALMASS.NAME;
 
 				public static LocString TOOLTIP = MISC.STATUSITEMS.ELEMENTALMASS.TOOLTIP;
+			}
+
+			public class UNDERWATERVENTBEINGDRILLED
+			{
+				public static LocString NAME = "Drilling in progress";
+
+				public static LocString TOOLTIP = "This geyser is being unblocked by a " + UI.PRE_KEYWORD + "Marine Drill" + UI.PST_KEYWORD;
+			}
+
+			public class UNDERWATERVENTBUILDUPPROGRESS
+			{
+				public static LocString NAME = "Sulfur build-up: {PERCENTAGE}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This geyser will become blocked when ",
+					UI.PRE_KEYWORD,
+					"Sulfur",
+					UI.PST_KEYWORD,
+					" build-up reaches 100%\n\nIt can be unblocked by building a ",
+					UI.PRE_KEYWORD,
+					"Marine Drill",
+					UI.PST_KEYWORD,
+					" on top of the vent"
+				});
+			}
+
+			public class UNDERWATERVENTEMITING
+			{
+				public static LocString NAME = "Emitting {ELEMENT_NAME}: {RATE} at {TEMP}";
+
+				public static LocString TOOLTIP = "This geyser is releasing stored " + UI.PRE_KEYWORD + "Gas" + UI.PST_KEYWORD;
+			}
+
+			public class UNDERWATERVENTBLOCKED
+			{
+				public static LocString NAME = "Blocked";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This geyser is blocked by ",
+					UI.PRE_KEYWORD,
+					"Sulfur",
+					UI.PST_KEYWORD,
+					" build-up\n\nIt will resume function when unblocked by a ",
+					UI.PRE_KEYWORD,
+					"Marine Drill",
+					UI.PST_KEYWORD
+				});
 			}
 
 			public class ORETEMP
@@ -1031,6 +1130,27 @@ namespace STRINGS
 				public static LocString NAME = "Self-Charging: {0}";
 
 				public static LocString TOOLTIP = "This " + UI.FormatAsLink("Power Bank", "ELECTROBANK") + " is always slowly charging itself";
+			}
+
+			public class MINNOWPOIDEHYDRATEDSTATUS
+			{
+				public static LocString NAME = "Insufficient Liquid";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This area was once a ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" pool occupied by an unknown survivor Duplicant\n\nIts occupant will return when the area is sufficiently flooded"
+				});
+			}
+
+			public class MINNOWPOIDELIVERYPENDING
+			{
+				public static LocString NAME = "Awaiting Delivery";
+
+				public static LocString TOOLTIP = "The occupant of this site is patiently awaiting deliveries";
 			}
 		}
 
@@ -1593,7 +1713,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Research Complete";
 
-				public static LocString MESSAGEBODY = "Eureka! We've discovered {0} Technology.\n\nNew buildings have become available:\n  • {1}";
+				public static LocString MESSAGEBODY = "Eureka! We've discovered {0} Technology.\n\nNew technology has become available:\n  • {1}";
 
 				public static LocString TOOLTIP = "{0} research complete!";
 			}

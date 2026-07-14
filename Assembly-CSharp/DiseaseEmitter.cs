@@ -51,8 +51,14 @@ public class DiseaseEmitter : KMonoBehaviour
 		this.SimUnregister();
 	}
 
-	private void OnCellChanged()
+	private void SimModifyDiseaseEmitter(int emitterIndex, int cell)
 	{
+		SimMessages.ModifyDiseaseEmitter(this.simHandles[emitterIndex], cell, this.emitRange, this.emitDiseases[emitterIndex], this.emitRate, this.emitCount);
+	}
+
+	protected void OnCellChanged()
+	{
+		DebugUtil.DevAssert(this.simHandles != null, "DiseaseEmitter received cell change notification but has not been Spawned?!", null);
 		if (this.simHandles == null || !this.enableEmitter)
 		{
 			return;
@@ -64,7 +70,7 @@ public class DiseaseEmitter : KMonoBehaviour
 			{
 				if (Sim.IsValidHandle(this.simHandles[i]))
 				{
-					SimMessages.ModifyDiseaseEmitter(this.simHandles[i], num, this.emitRange, this.emitDiseases[i], this.emitRate, this.emitCount);
+					this.SimModifyDiseaseEmitter(i, num);
 				}
 			}
 		}
@@ -72,23 +78,32 @@ public class DiseaseEmitter : KMonoBehaviour
 
 	private void SimRegister()
 	{
+		DebugUtil.DevAssert(this.simHandles != null, "DiseaseEmitter.SimRegister invoked but has not been Spawned?!", null);
 		if (this.simHandles == null || !this.enableEmitter)
 		{
 			return;
 		}
-		this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, DiseaseEmitter.OnCellChangedDispatcher, "DiseaseEmitter.Modify", null);
+		if (this.cellChangedHandlerID != 0UL)
+		{
+			this.cellChangedHandlerID = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, DiseaseEmitter.OnCellChangedDispatcher, this, null);
+		}
 		for (int i = 0; i < this.simHandles.Length; i++)
 		{
 			if (this.simHandles[i] == -1)
 			{
 				this.simHandles[i] = -2;
-				SimMessages.AddDiseaseEmitter(Game.Instance.simComponentCallbackManager.Add(new Action<int, object>(DiseaseEmitter.OnSimRegisteredCallback), this, "DiseaseEmitter").index);
+				SimMessages.AddDiseaseEmitter(Game.Instance.simComponentCallbackManager.Add(new Action<int, object>(DiseaseEmitter.OnSimRegisteredCallback), new DiseaseEmitter.EmitterRegistration
+				{
+					emitter = this,
+					emitterIndex = i
+				}, "DiseaseEmitter").index);
 			}
 		}
 	}
 
 	private void SimUnregister()
 	{
+		DebugUtil.DevAssert(this.simHandles != null, "DiseaseEmitter.SimUnregister invoked but has not been Spawned?!", null);
 		if (this.simHandles == null)
 		{
 			return;
@@ -106,28 +121,23 @@ public class DiseaseEmitter : KMonoBehaviour
 
 	private static void OnSimRegisteredCallback(int handle, object data)
 	{
-		((DiseaseEmitter)data).OnSimRegistered(handle);
+		DiseaseEmitter.EmitterRegistration emitterRegistration = (DiseaseEmitter.EmitterRegistration)data;
+		emitterRegistration.emitter.OnSimRegistered(handle, emitterRegistration.emitterIndex);
 	}
 
-	private void OnSimRegistered(int handle)
+	private void OnSimRegistered(int handle, int emitterIndex)
 	{
-		bool flag = false;
-		if (this != null)
-		{
-			for (int i = 0; i < this.simHandles.Length; i++)
-			{
-				if (this.simHandles[i] == -2)
-				{
-					this.simHandles[i] = handle;
-					flag = true;
-					break;
-				}
-			}
-			this.OnCellChanged();
-		}
-		if (!flag)
+		if (this.IsNullOrDestroyed())
 		{
 			SimMessages.RemoveDiseaseEmitter(-1, handle);
+			return;
+		}
+		this.simHandles[emitterIndex] = handle;
+		int num = Grid.PosToCell(this);
+		DebugUtil.DevAssert(Grid.IsValidCell(num), "Failed to initialize DiseaseEmitter because it is on an invalid cell", null);
+		if (Grid.IsValidCell(num))
+		{
+			this.SimModifyDiseaseEmitter(emitterIndex, num);
 		}
 	}
 
@@ -155,12 +165,19 @@ public class DiseaseEmitter : KMonoBehaviour
 	public int[] simHandles;
 
 	[Serialize]
-	private bool enableEmitter;
+	protected bool enableEmitter = true;
 
 	private ulong cellChangedHandlerID;
 
-	private static Action<object> OnCellChangedDispatcher = delegate(object obj)
+	private static readonly Action<object> OnCellChangedDispatcher = delegate(object obj)
 	{
 		Unsafe.As<DiseaseEmitter>(obj).OnCellChanged();
 	};
+
+	private struct EmitterRegistration
+	{
+		public DiseaseEmitter emitter;
+
+		public int emitterIndex;
+	}
 }

@@ -32,7 +32,7 @@ public class FlyTrapPlantConfig : IEntityConfig, IHasDlcRestrictions
 		List<Tag> list = new List<Tag> { GameTags.Hanging };
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 291.15f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 2);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 273.15f, 283.15f, 328.15f, 348.15f, null, true, 0f, 0.15f, SimHashes.Amber.ToString(), true, true, true, true, 2400f, 0f, 7400f, "FlyTrapPlantOriginal", global::STRINGS.CREATURES.SPECIES.FLYTRAPPLANT.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 273.15f, 283.15f, 328.15f, 348.15f, null, true, 0f, 0.15f, SimHashes.Amber.ToString(), true, true, true, false, true, 2400f, 0f, 7400f, "FlyTrapPlantOriginal", global::STRINGS.CREATURES.SPECIES.FLYTRAPPLANT.NAME);
 		gameObject.GetComponent<UprootedMonitor>().monitorCells = new CellOffset[]
 		{
 			new CellOffset(0, 1)

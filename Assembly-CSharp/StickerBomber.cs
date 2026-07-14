@@ -121,17 +121,8 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 			private int FindPlacementCell()
 			{
 				int num = Grid.PosToCell(this.reactor.transform.GetPosition() + Vector3.up);
-				HashSetPool<int, PathFinder>.PooledHashSet pooledHashSet = HashSetPool<int, PathFinder>.Allocate();
 				ListPool<int, PathFinder>.PooledList pooledList = ListPool<int, PathFinder>.Allocate();
-				QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
-				pooledQueue.Enqueue(new GameUtil.FloodFillInfo
-				{
-					cell = num,
-					depth = 0
-				});
-				GameUtil.FloodFillConditional(pooledQueue, this.canPlaceStickerCb, pooledHashSet, pooledList, 2);
-				pooledHashSet.Recycle();
-				pooledQueue.Recycle();
+				FloodFill.BreadthCollect(num, this.canPlaceStickerCb, pooledList, 2);
 				int num2 = ((pooledList.Count > 0) ? pooledList.GetRandom<int>() : 0);
 				pooledList.Recycle();
 				return num2;
@@ -188,7 +179,34 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 
 			private StickerBomber.Instance stickerBomber;
 
-			private Func<int, bool> canPlaceStickerCb = (int cell) => !Grid.Solid[cell] && (!Grid.IsValidCell(Grid.CellLeft(cell)) || !Grid.Solid[Grid.CellLeft(cell)]) && (!Grid.IsValidCell(Grid.CellRight(cell)) || !Grid.Solid[Grid.CellRight(cell)]) && (!Grid.IsValidCell(Grid.OffsetCell(cell, 0, 1)) || !Grid.Solid[Grid.OffsetCell(cell, 0, 1)]) && (!Grid.IsValidCell(Grid.OffsetCell(cell, 0, -1)) || !Grid.Solid[Grid.OffsetCell(cell, 0, -1)]) && !Grid.IsCellOpenToSpace(cell);
+			private Func<int, FloodFill.BoundaryCheckResult> canPlaceStickerCb = delegate(int cell)
+			{
+				if (Grid.Solid[cell])
+				{
+					return FloodFill.BoundaryCheckResult.Halt;
+				}
+				if (Grid.IsValidCell(Grid.CellLeft(cell)) && Grid.Solid[Grid.CellLeft(cell)])
+				{
+					return FloodFill.BoundaryCheckResult.Halt;
+				}
+				if (Grid.IsValidCell(Grid.CellRight(cell)) && Grid.Solid[Grid.CellRight(cell)])
+				{
+					return FloodFill.BoundaryCheckResult.Halt;
+				}
+				if (Grid.IsValidCell(Grid.OffsetCell(cell, 0, 1)) && Grid.Solid[Grid.OffsetCell(cell, 0, 1)])
+				{
+					return FloodFill.BoundaryCheckResult.Halt;
+				}
+				if (Grid.IsValidCell(Grid.OffsetCell(cell, 0, -1)) && Grid.Solid[Grid.OffsetCell(cell, 0, -1)])
+				{
+					return FloodFill.BoundaryCheckResult.Halt;
+				}
+				if (Grid.IsCellOpenToSpace(cell))
+				{
+					return FloodFill.BoundaryCheckResult.Halt;
+				}
+				return FloodFill.BoundaryCheckResult.Continue;
+			};
 		}
 	}
 }

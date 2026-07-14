@@ -20,7 +20,7 @@ public class UpTopPoopStates : GameStateMachine<UpTopPoopStates, UpTopPoopStates
 		bool flag = false;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		state.ToggleStatusItem(text, text2, text3, iconType, notificationType, flag, default(HashedString), 129022, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
-		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.Poop, false);
+		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).TriggerOnEnter(GameHashes.PoopStatesCompleted, (UpTopPoopStates.Instance smi) => null).BehaviourComplete(GameTags.Creatures.Poop, false);
 	}
 
 	public GameStateMachine<UpTopPoopStates, UpTopPoopStates.Instance, IStateMachineTarget, UpTopPoopStates.Def>.State goingtopoop;

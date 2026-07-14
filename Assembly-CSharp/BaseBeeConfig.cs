@@ -8,7 +8,7 @@ public static class BaseBeeConfig
 	public static GameObject BaseBee(string id, string name, string desc, string anim_file, string traitId, EffectorValues decor, bool is_baby, string symbolOverridePrefix = null)
 	{
 		float num = 5f;
-		KAnimFile anim = Assets.GetAnim(anim_file);
+		KAnimFile anim = Assets.GetAnim(is_baby ? anim_file : "bee_build_kanim");
 		string text = "idle_loop";
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
 		int num2 = 1;
@@ -83,6 +83,7 @@ public static class BaseBeeConfig
 		gameObject.AddOrGetDef<BeeSleepMonitor.Def>();
 		gameObject.AddOrGetDef<BeeForagingMonitor.Def>();
 		gameObject.AddOrGet<Storage>();
+		KAnimFile anim2 = Assets.GetAnim("bee_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), true, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new BaggedStates.Def(), true, -1)
@@ -102,7 +103,7 @@ public static class BaseBeeConfig
 			.Add(new BeeMakeHiveStates.Def(), true, -1)
 			.Add(new BeeForageStates.Def(SimHashes.UraniumOre.CreateTag(), BeeHiveTuning.ORE_DELIVERY_AMOUNT), true, -1)
 			.Add(new BuzzStates.Def(), true, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("bee_emotes_kanim")), true, -1);
+			.Add(new CritterEmoteStates.Def(anim2), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.BeetaSpecies, symbolOverridePrefix);
 		return gameObject;
 	}
@@ -111,4 +112,6 @@ public static class BaseBeeConfig
 	{
 		inst.GetComponent<LoopingSounds>().StartSound(GlobalAssets.GetSound("Bee_wings_LP", false));
 	}
+
+	public const string EMOTION_FILE_NAME = "bee_emotes_kanim";
 }

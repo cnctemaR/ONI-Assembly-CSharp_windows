@@ -14,6 +14,10 @@ public class AlgaeConfig : IOreConfig
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.CreateSolidOreEntity(this.ElementID, new List<Tag> { GameTags.Life });
+		GameObject gameObject = EntityTemplates.CreateSolidOreEntity(this.ElementID, new List<Tag> { GameTags.Life });
+		DissolvingAlgae dissolvingAlgae = gameObject.AddOrGet<DissolvingAlgae>();
+		dissolvingAlgae.emitRange = 1;
+		dissolvingAlgae.emitCount = 1000;
+		return gameObject;
 	}
 }

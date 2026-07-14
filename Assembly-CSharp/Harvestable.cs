@@ -67,7 +67,7 @@ public class Harvestable : Workable
 		this.completed_by = null;
 	}
 
-	public void OnMarkedForHarvest()
+	public virtual void OnMarkedForHarvest()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (this.chore == null)

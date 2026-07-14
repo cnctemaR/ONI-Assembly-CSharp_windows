@@ -17,9 +17,9 @@ public class SolidLimitValveConfig : IBuildingConfig
 		float[] array = new float[]
 		{
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0[0],
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
+			1f
 		};
-		string[] array2 = new string[] { "RefinedMetal", "Plastic" };
+		string[] array2 = new string[] { "RefinedMetal", "BuildingGasket" };
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER1;

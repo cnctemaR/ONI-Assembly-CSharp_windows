@@ -182,7 +182,7 @@ public class Game : KMonoBehaviour
 		Singleton<CellChangeMonitor>.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
 		this.unlocks = base.GetComponent<Unlocks>();
 		this.changelistsPlayedOn = new List<uint>();
-		this.changelistsPlayedOn.Add(722606U);
+		this.changelistsPlayedOn.Add(736649U);
 		this.dateGenerated = global::System.DateTime.UtcNow.ToString("U", CultureInfo.InvariantCulture);
 		AsyncPathProber.CreateInstance(1);
 	}
@@ -214,7 +214,7 @@ public class Game : KMonoBehaviour
 							int num = Grid.XYToCell(i, worldContainer.WorldOffset.Y + worldContainer.WorldSize.Y - j);
 							if (Grid.IsSolidCell(num) && Grid.Element[num].id != SimHashes.Unobtanium)
 							{
-								SimMessages.Dig(num, -1, true);
+								SimMessages.Dig(num, -1, true, false);
 							}
 						}
 					}
@@ -433,9 +433,11 @@ public class Game : KMonoBehaviour
 		Grid.diseaseCount = ptr->diseaseCount;
 		Grid.AccumulatedFlowValues = ptr->accumulatedFlow;
 		Grid.exposedToSunlight = (byte*)(void*)ptr->propertyTextureExposedToSunlight;
+		BackwallManager.UpdateFromSim(ptr);
 		PropertyTextures.externalFlowTex = ptr->propertyTextureFlow;
 		PropertyTextures.externalLiquidTex = ptr->propertyTextureLiquid;
 		PropertyTextures.externalLiquidDataTex = ptr->propertyTextureLiquidData;
+		PropertyTextures.externalMaterialDataTex = ptr->propertyTextureMaterialData;
 		PropertyTextures.externalExposedToSunlight = ptr->propertyTextureExposedToSunlight;
 		List<Element> elements = ElementLoader.elements;
 		this.simData.emittedMassEntries = ptr->emittedMassEntries;
@@ -468,7 +470,7 @@ public class Game : KMonoBehaviour
 						Grid.CellToXY(solidInfo.cellIdx, out num2, out num3);
 						if (!worldContainer.IsModuleInterior && num3 > worldContainer.WorldOffset.Y + worldContainer.WorldSize.Y - Grid.TopBorderHeight)
 						{
-							SimMessages.Dig(solidInfo.cellIdx, -1, true);
+							SimMessages.Dig(solidInfo.cellIdx, -1, true, false);
 						}
 					}
 				}
@@ -641,6 +643,13 @@ public class Game : KMonoBehaviour
 				global::Util.KDestroyGameObject(gameObject);
 			}
 		}
+		int numBackwallElementChangedInfos = ptr->numBackwallElementChangedInfos;
+		for (int num18 = 0; num18 < numBackwallElementChangedInfos; num18++)
+		{
+			Sim.BackwallElementChangedInfo backwallElementChangedInfo = ptr->backwallElementChangedInfos[num18];
+			GameScenePartitioner.Instance.TriggerEvent(backwallElementChangedInfo.gameCell, GameScenePartitioner.Instance.backwallChangedLayer, null);
+			World.Instance.groundRenderer.MarkDirty(backwallElementChangedInfo.gameCell);
+		}
 		if (dt > 0f)
 		{
 			this.conduitTemperatureManager.Sim200ms(0.2f);
@@ -654,7 +663,6 @@ public class Game : KMonoBehaviour
 		Sim.DebugProperties debugProperties;
 		debugProperties.buildingTemperatureScale = 100f;
 		debugProperties.buildingToBuildingTemperatureScale = 0.001f;
-		debugProperties.biomeTemperatureLerpRate = 0.001f;
 		debugProperties.isDebugEditing = ((DebugPaintElementScreen.Instance != null && DebugPaintElementScreen.Instance.gameObject.activeSelf) ? 1 : 0);
 		debugProperties.pad0 = (debugProperties.pad1 = (debugProperties.pad2 = 0));
 		SimMessages.SetDebugProperties(debugProperties);
@@ -1079,6 +1087,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.gasConduitFlow = this.gasConduitFlow;
 		gameSaveData.liquidConduitFlow = this.liquidConduitFlow;
 		gameSaveData.fallingWater = this.world.GetComponent<FallingWater>();
+		gameSaveData.bubbleManager = this.world.GetComponent<BubbleManager>();
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = SaveLoader.Instance.clusterDetailSave;
 		gameSaveData.debugWasUsed = this.debugWasUsed;
@@ -1090,9 +1099,9 @@ public class Game : KMonoBehaviour
 		gameSaveData.savedInfo = this.savedInfo;
 		global::Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		gameSaveData.dateGenerated = this.dateGenerated;
-		if (!this.changelistsPlayedOn.Contains(722606U))
+		if (!this.changelistsPlayedOn.Contains(736649U))
 		{
-			this.changelistsPlayedOn.Add(722606U);
+			this.changelistsPlayedOn.Add(736649U);
 		}
 		gameSaveData.changelistsPlayedOn = this.changelistsPlayedOn;
 		if (this.OnSave != null)
@@ -1108,6 +1117,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.gasConduitFlow = this.gasConduitFlow;
 		gameSaveData.liquidConduitFlow = this.liquidConduitFlow;
 		gameSaveData.fallingWater = this.world.GetComponent<FallingWater>();
+		gameSaveData.bubbleManager = this.world.GetComponent<BubbleManager>();
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = new WorldDetailSave();
 		gameSaveData.customGameSettings = CustomGameSettings.Instance;
@@ -1391,6 +1401,7 @@ public class Game : KMonoBehaviour
 		Db.Get().ResetProblematicDbs();
 		AsyncPathProber.DestroyInstance();
 		GridSettings.ClearGrid();
+		BackwallManager.Clear();
 		StateMachineManager.ResetParameters();
 		ChoreTable.Instance.ResetParameters();
 		BubbleManager.DestroyInstance();
@@ -2226,6 +2237,8 @@ public class Game : KMonoBehaviour
 		public ConduitFlow liquidConduitFlow;
 
 		public FallingWater fallingWater;
+
+		public BubbleManager bubbleManager;
 
 		public UnstableGroundManager unstableGround;
 

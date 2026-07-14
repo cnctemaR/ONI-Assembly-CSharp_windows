@@ -58,10 +58,10 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 		if (smi.currentScaleLevel != num)
 		{
 			KBatchedAnimController component = smi.GetComponent<KBatchedAnimController>();
-			for (int i = 0; i < ScaleGrowthMonitor.SCALE_SYMBOL_NAMES.Length; i++)
+			for (int i = 0; i < smi.def.symbolNames.Length; i++)
 			{
 				bool flag = i <= num - 1;
-				component.SetSymbolVisiblity(ScaleGrowthMonitor.SCALE_SYMBOL_NAMES[i], flag);
+				component.SetSymbolVisiblity(smi.def.symbolNames[i], flag);
 			}
 			smi.currentScaleLevel = num;
 		}
@@ -80,6 +80,10 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 		public override void Configure(GameObject prefab)
 		{
 			prefab.GetComponent<Modifiers>().initialAmounts.Add(Db.Get().Amounts.ScaleGrowth.Id);
+			if (this.symbolNames == null)
+			{
+				this.symbolNames = ScaleGrowthMonitor.SCALE_SYMBOL_NAMES;
+			}
 		}
 
 		public List<Descriptor> GetDescriptors(GameObject obj)
@@ -99,6 +103,8 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 		}
 
 		public int levelCount;
+
+		public HashedString[] symbolNames;
 
 		public float defaultGrowthRate;
 

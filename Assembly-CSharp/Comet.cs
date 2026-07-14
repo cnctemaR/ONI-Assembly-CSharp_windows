@@ -258,7 +258,9 @@ public class Comet : KMonoBehaviour, ISim33ms
 
 	protected virtual void DepositTiles(int cell, Element element, int world, int prev_cell, float temperature)
 	{
-		float depthOfElement = (float)this.GetDepthOfElement(cell, element, world);
+		Comet.<>c__DisplayClass68_0 CS$<>8__locals1 = new Comet.<>c__DisplayClass68_0();
+		CS$<>8__locals1.world = world;
+		float depthOfElement = (float)this.GetDepthOfElement(cell, element, CS$<>8__locals1.world);
 		float num = 1f;
 		float num2 = (depthOfElement - (float)this.addTilesMinHeight) / (float)(this.addTilesMaxHeight - this.addTilesMinHeight);
 		if (!float.IsNaN(num2))
@@ -267,34 +269,9 @@ public class Comet : KMonoBehaviour, ISim33ms
 		}
 		int num3 = Mathf.Min(this.addTiles, Mathf.Clamp(Mathf.RoundToInt((float)this.addTiles * num), 1, this.addTiles));
 		ListPool<int, Comet>.PooledList pooledList = ListPool<int, Comet>.Allocate();
-		HashSetPool<int, Comet>.PooledHashSet pooledHashSet = HashSetPool<int, Comet>.Allocate();
-		QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
-		int num4 = -1;
-		int num5 = 1;
-		if (this.velocity.x < 0f)
-		{
-			num4 *= -1;
-			num5 *= -1;
-		}
-		pooledQueue.Enqueue(new GameUtil.FloodFillInfo
-		{
-			cell = prev_cell,
-			depth = 0
-		});
-		pooledQueue.Enqueue(new GameUtil.FloodFillInfo
-		{
-			cell = Grid.OffsetCell(prev_cell, new CellOffset(num4, 0)),
-			depth = 0
-		});
-		pooledQueue.Enqueue(new GameUtil.FloodFillInfo
-		{
-			cell = Grid.OffsetCell(prev_cell, new CellOffset(num5, 0)),
-			depth = 0
-		});
-		Func<int, bool> func = (int cell) => Grid.IsValidCellInWorld(cell, world) && !Grid.Solid[cell];
-		GameUtil.FloodFillConditional(pooledQueue, func, pooledHashSet, pooledList, 10);
-		float num6 = ((num3 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
-		int num7 = this.addDiseaseCount / num3;
+		FloodFill.BreadthCollect(prev_cell, new Func<int, FloodFill.BoundaryCheckResult>(CS$<>8__locals1.<DepositTiles>g__BoundaryCondition|0), pooledList, 11);
+		float num4 = ((num3 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
+		int num5 = this.addDiseaseCount / num3;
 		if (element.HasTag(GameTags.Unstable))
 		{
 			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
@@ -302,30 +279,28 @@ public class Comet : KMonoBehaviour, ISim33ms
 			{
 				while (enumerator.MoveNext())
 				{
-					int num8 = enumerator.Current;
+					int num6 = enumerator.Current;
 					if (num3 <= 0)
 					{
 						break;
 					}
-					component.Spawn(num8, element, num6, temperature, byte.MaxValue, 0);
+					component.Spawn(num6, element, num4, temperature, byte.MaxValue, 0);
 					num3--;
 				}
-				goto IL_0229;
+				goto IL_0171;
 			}
 		}
-		foreach (int num9 in pooledList)
+		foreach (int num7 in pooledList)
 		{
 			if (num3 <= 0)
 			{
 				break;
 			}
-			SimMessages.AddRemoveSubstance(num9, element.id, CellEventLogger.Instance.ElementEmitted, num6, temperature, this.diseaseIdx, num7, true, -1);
+			SimMessages.AddRemoveSubstance(num7, element.id, CellEventLogger.Instance.ElementEmitted, num4, temperature, this.diseaseIdx, num5, true, -1);
 			num3--;
 		}
-		IL_0229:
+		IL_0171:
 		pooledList.Recycle();
-		pooledHashSet.Recycle();
-		pooledQueue.Recycle();
 	}
 
 	protected virtual void SpawnCraterPrefabs()

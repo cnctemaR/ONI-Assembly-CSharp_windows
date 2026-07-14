@@ -734,139 +734,157 @@ public class KleiInventoryScreen : KModalScreen
 			{
 				if (num <= 1036100273U)
 				{
-					if (num <= 297556592U)
+					if (num <= 296872528U)
 					{
-						if (num <= 228062815U)
+						if (num <= 112031228U)
 						{
-							if (num != 38823703U)
+							if (num != 6945394U)
 							{
-								if (num != 112031228U)
+								if (num != 38823703U)
 								{
-									if (num != 228062815U)
+									if (num != 112031228U)
 									{
-										goto IL_08E5;
+										goto IL_0912;
 									}
-									if (!(text == "LuxuryBed"))
+									if (!(text == "LogicGateDemultiplexer"))
 									{
-										goto IL_08E5;
+										goto IL_0912;
 									}
-									string id = permit.Id;
-									if (id == "LuxuryBed_boat")
-									{
-										return "elegantbed_boat";
-									}
-									if (!(id == "LuxuryBed_bouncy"))
-									{
-										return "elegantbed";
-									}
-									return "elegantbed_bouncy";
+									goto IL_08D6;
 								}
 								else
 								{
-									if (!(text == "LogicGateDemultiplexer"))
+									if (!(text == "LogicGateXOR"))
 									{
-										goto IL_08E5;
+										goto IL_0912;
 									}
-									goto IL_08A9;
+									goto IL_08D6;
 								}
 							}
 							else
 							{
-								if (!(text == "LogicGateXOR"))
+								if (!(text == "GlassCeilingLight"))
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
-								goto IL_08A9;
+								goto IL_0882;
 							}
 						}
-						else if (num != 228549509U)
+						else if (num != 228062815U)
 						{
-							if (num != 296872528U)
+							if (num != 228549509U)
 							{
-								if (num != 297556592U)
+								if (num != 296872528U)
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
-								if (!(text == "LogicRibbonBridge"))
+								if (!(text == "ItemPedestal"))
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
-								goto IL_08A9;
 							}
-							else if (!(text == "ItemPedestal"))
+							else
 							{
-								goto IL_08E5;
+								if (!(text == "WashSink"))
+								{
+									goto IL_0912;
+								}
+								return "sink";
 							}
 						}
 						else
 						{
-							if (!(text == "WashSink"))
+							if (!(text == "LuxuryBed"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							return "sink";
+							string id = permit.Id;
+							if (id == "LuxuryBed_boat")
+							{
+								return "elegantbed_boat";
+							}
+							if (!(id == "LuxuryBed_bouncy"))
+							{
+								return "elegantbed";
+							}
+							return "elegantbed_bouncy";
 						}
 					}
-					else if (num <= 595816591U)
+					else if (num <= 585850236U)
 					{
-						if (num != 301047391U)
+						if (num != 297556592U)
 						{
-							if (num != 585850236U)
+							if (num != 301047391U)
 							{
-								if (num != 595816591U)
+								if (num != 585850236U)
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
-								if (!(text == "FlowerVase"))
+								if (!(text == "GravitasPedestal"))
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
-								goto IL_0811;
 							}
-							else if (!(text == "GravitasPedestal"))
+							else
 							{
-								goto IL_08E5;
+								if (!(text == "WireRefined"))
+								{
+									goto IL_0912;
+								}
+								goto IL_08BE;
 							}
 						}
 						else
 						{
-							if (!(text == "WireRefined"))
+							if (!(text == "LogicRibbonBridge"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_0891;
+							goto IL_08D6;
 						}
 					}
-					else if (num != 674245745U)
+					else if (num <= 674245745U)
 					{
-						if (num != 781890915U)
+						if (num != 595816591U)
 						{
-							if (num != 1036100273U)
+							if (num != 674245745U)
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							if (!(text == "WireRefinedBridgeHighWattage"))
+							if (!(text == "CraftingTable"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_0891;
+							return "craftingstation";
 						}
 						else
 						{
-							if (!(text == "LogicGateNOT"))
+							if (!(text == "FlowerVase"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_08A9;
+							goto IL_083E;
 						}
+					}
+					else if (num != 781890915U)
+					{
+						if (num != 1036100273U)
+						{
+							goto IL_0912;
+						}
+						if (!(text == "WireRefinedBridgeHighWattage"))
+						{
+							goto IL_0912;
+						}
+						goto IL_08BE;
 					}
 					else
 					{
-						if (!(text == "CraftingTable"))
+						if (!(text == "LogicGateNOT"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
-						return "craftingstation";
+						goto IL_08D6;
 					}
 					return "sculpture";
 				}
@@ -880,19 +898,19 @@ public class KleiInventoryScreen : KModalScreen
 							{
 								if (num != 1232204109U)
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
 								if (!(text == "WireBridge"))
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
-								goto IL_0891;
+								goto IL_08BE;
 							}
 							else
 							{
 								if (!(text == "Refrigerator"))
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
 								return "refrigerator";
 							}
@@ -901,9 +919,9 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (!(text == "LogicGateFILTER"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_08A9;
+							goto IL_08D6;
 						}
 					}
 					else if (num != 1269853127U)
@@ -912,11 +930,11 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 1526604543U)
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							if (!(text == "StorageLockerSmart"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							return "storagelockersmart";
 						}
@@ -924,16 +942,16 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (!(text == "LogicGateMultiplexer"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_08A9;
+							goto IL_08D6;
 						}
 					}
 					else
 					{
 						if (!(text == "AdvancedResearchCenter"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "advancedresearchcenter";
 					}
@@ -946,11 +964,11 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 1734850496U)
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							if (!(text == "RockCrusher"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							return "rockrefinery";
 						}
@@ -958,16 +976,16 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (!(text == "CeilingLight"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_0855;
+							goto IL_0882;
 						}
 					}
 					else
 					{
 						if (!(text == "FlushToilet"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "flushtoilate";
 					}
@@ -978,32 +996,32 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 1908704479U)
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						if (!(text == "LogicGateAND"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
-						goto IL_08A9;
+						goto IL_08D6;
 					}
 					else
 					{
 						if (!(text == "LogicGateOR"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
-						goto IL_08A9;
+						goto IL_08D6;
 					}
 				}
 				else if (num != 1938276536U)
 				{
 					if (num != 1943253450U)
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 					if (!(text == "WaterCooler"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 					return "watercooler";
 				}
@@ -1011,9 +1029,9 @@ public class KleiInventoryScreen : KModalScreen
 				{
 					if (!(text == "Wire"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
-					goto IL_0891;
+					goto IL_08BE;
 				}
 			}
 			else if (num <= 3132083755U)
@@ -1028,11 +1046,11 @@ public class KleiInventoryScreen : KModalScreen
 							{
 								if (num != 2076384603U)
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
 								if (!(text == "GasReservoir"))
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
 								return "gasstorage";
 							}
@@ -1040,14 +1058,14 @@ public class KleiInventoryScreen : KModalScreen
 							{
 								if (!(text == "CookingStation"))
 								{
-									goto IL_08E5;
+									goto IL_0912;
 								}
 								return "grill";
 							}
 						}
 						else if (!(text == "FlowerVaseHanging"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 					}
 					else if (num != 2402859370U)
@@ -1056,11 +1074,11 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 2691468069U)
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							if (!(text == "ResearchCenter"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							return "researchcenter";
 						}
@@ -1068,16 +1086,16 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (!(text == "WireBridgeHighWattage"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_0891;
+							goto IL_08BE;
 						}
 					}
 					else
 					{
 						if (!(text == "StorageLocker"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "storagelocker";
 					}
@@ -1090,11 +1108,11 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 2818521706U)
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							if (!(text == "GourmetCookingStation"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							return "gasrange";
 						}
@@ -1102,7 +1120,7 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (!(text == "PlanterBox"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							return "planterbox";
 						}
@@ -1111,7 +1129,7 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (!(text == "ManualGenerator"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "manualgenerator";
 					}
@@ -1122,11 +1140,11 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 3048425356U)
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						if (!(text == "Bed"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "bed";
 					}
@@ -1134,7 +1152,7 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (!(text == "ExteriorWall"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "wall";
 					}
@@ -1143,18 +1161,18 @@ public class KleiInventoryScreen : KModalScreen
 				{
 					if (num != 3132083755U)
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 					if (!(text == "FlowerVaseWall"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 				}
 				else
 				{
 					if (!(text == "MilkPress"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 					return "pulverizer";
 				}
@@ -1169,30 +1187,30 @@ public class KleiInventoryScreen : KModalScreen
 						{
 							if (num != 3371266309U)
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
 							if (!(text == "LogicRibbon"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_08A9;
+							goto IL_08D6;
 						}
 						else
 						{
 							if (!(text == "LogicGateBUFFER"))
 							{
-								goto IL_08E5;
+								goto IL_0912;
 							}
-							goto IL_08A9;
+							goto IL_08D6;
 						}
 					}
 					else
 					{
 						if (!(text == "LogicWire"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
-						goto IL_08A9;
+						goto IL_08D6;
 					}
 				}
 				else if (num != 3422134480U)
@@ -1201,11 +1219,11 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 3562718686U)
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						if (!(text == "Headquarters"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "headquarters";
 					}
@@ -1213,7 +1231,7 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (!(text == "MassageTable"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						return "massagetable";
 					}
@@ -1222,7 +1240,7 @@ public class KleiInventoryScreen : KModalScreen
 				{
 					if (!(text == "MicrobeMusher"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 					return "microbemusher";
 				}
@@ -1235,30 +1253,30 @@ public class KleiInventoryScreen : KModalScreen
 					{
 						if (num != 3873680366U)
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
 						if (!(text == "WireRefinedBridge"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
-						goto IL_0891;
+						goto IL_08BE;
 					}
 					else
 					{
 						if (!(text == "HighWattageWire"))
 						{
-							goto IL_08E5;
+							goto IL_0912;
 						}
-						goto IL_0891;
+						goto IL_08BE;
 					}
 				}
 				else
 				{
 					if (!(text == "FloorLamp"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
-					goto IL_0855;
+					goto IL_0882;
 				}
 			}
 			else if (num <= 3958671086U)
@@ -1267,18 +1285,18 @@ public class KleiInventoryScreen : KModalScreen
 				{
 					if (num != 3958671086U)
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 					if (!(text == "FlowerVaseHangingFancy"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 				}
 				else
 				{
 					if (!(text == "EggCracker"))
 					{
-						goto IL_08E5;
+						goto IL_0912;
 					}
 					return "eggcracker";
 				}
@@ -1287,32 +1305,32 @@ public class KleiInventoryScreen : KModalScreen
 			{
 				if (num != 4243975822U)
 				{
-					goto IL_08E5;
+					goto IL_0912;
 				}
 				if (!(text == "WireRefinedHighWattage"))
 				{
-					goto IL_08E5;
+					goto IL_0912;
 				}
-				goto IL_0891;
+				goto IL_08BE;
 			}
 			else
 			{
 				if (!(text == "LogicWireBridge"))
 				{
-					goto IL_08E5;
+					goto IL_0912;
 				}
-				goto IL_08A9;
+				goto IL_08D6;
 			}
-			IL_0811:
+			IL_083E:
 			return "flowervase";
-			IL_0855:
+			IL_0882:
 			return "ceilingLight";
-			IL_0891:
+			IL_08BE:
 			return "wire";
-			IL_08A9:
+			IL_08D6:
 			return "logicwire";
 		}
-		IL_08E5:
+		IL_0912:
 		if (permit.Category == PermitCategory.Artwork)
 		{
 			BuildingDef buildingDef2 = KleiPermitVisUtil.GetBuildingDef(permit);

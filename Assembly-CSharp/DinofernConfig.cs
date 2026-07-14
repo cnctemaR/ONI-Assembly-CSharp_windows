@@ -29,7 +29,7 @@ public class DinofernConfig : IEntityConfig, IHasDlcRestrictions
 		float num4 = 288.15f;
 		float num5 = 308.15f;
 		string text4 = FernFoodConfig.ID;
-		GameObject gameObject2 = EntityTemplates.ExtendEntityToBasicPlant(gameObject, num2, num3, num4, num5, new SimHashes[] { SimHashes.ChlorineGas }, true, 0f, 0.5f, text4, true, false, true, true, 2400f, 0f, 2200f, "DinofernOriginal", global::STRINGS.CREATURES.SPECIES.DINOFERN.NAME);
+		GameObject gameObject2 = EntityTemplates.ExtendEntityToBasicPlant(gameObject, num2, num3, num4, num5, new SimHashes[] { SimHashes.ChlorineGas }, true, 0f, 0.5f, text4, true, false, true, false, true, 2400f, 0f, 2200f, "DinofernOriginal", global::STRINGS.CREATURES.SPECIES.DINOFERN.NAME);
 		gameObject2.AddOrGet<LoopingSounds>();
 		gameObject2.AddOrGet<StandardCropPlant>();
 		gameObject2.AddOrGet<Dinofern>();
@@ -57,6 +57,7 @@ public class DinofernConfig : IEntityConfig, IHasDlcRestrictions
 		SingleEntityReceptacle.ReceptacleDirection receptacleDirection = SingleEntityReceptacle.ReceptacleDirection.Top;
 		text4 = global::STRINGS.CREATURES.SPECIES.DINOFERN.DOMESTICATEDDESC;
 		EntityTemplates.CreateAndRegisterPreviewForPlant(EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, this, productionType, text5, text6, text7, anim, text8, num6, list, receptacleDirection, default(Tag), 20, text4, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "", false), "Dinofern_preview", Assets.GetAnim("prehistoric_fern_kanim"), "place", 3, 3);
+		gameObject2.AddTag(GameTags.BlockBuildOverPlantFeature);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject2;

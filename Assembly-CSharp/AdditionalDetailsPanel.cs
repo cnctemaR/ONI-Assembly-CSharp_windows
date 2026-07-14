@@ -73,36 +73,45 @@ public class AdditionalDetailsPanel : DetailScreenTab
 			b = component.DiseaseIdx;
 			num3 = component.DiseaseCount;
 		}
-		else
+		else if (component2 != null)
 		{
-			if (!(component2 != null))
-			{
-				return;
-			}
 			num = component2.Mass;
 			num2 = component2.temperature;
 			element = component2.element;
 			b = component2.diseaseIdx;
 			num3 = component2.diseaseCount;
 		}
+		else
+		{
+			BackwallSelectionObject component3 = targetEntity.GetComponent<BackwallSelectionObject>();
+			if (!(component3 != null) || component3.element == null)
+			{
+				return;
+			}
+			num = component3.Mass;
+			num2 = component3.temperature;
+			element = component3.element;
+			b = byte.MaxValue;
+			num3 = 0;
+		}
 		bool flag = element.id == SimHashes.Vacuum || element.id == SimHashes.Void;
 		float specificHeatCapacity = element.specificHeatCapacity;
 		float highTemp = element.highTemp;
 		float lowTemp = element.lowTemp;
-		BuildingComplete component3 = targetEntity.GetComponent<BuildingComplete>();
+		BuildingComplete component4 = targetEntity.GetComponent<BuildingComplete>();
 		float num4;
-		if (component3 != null)
+		if (component4 != null)
 		{
-			num4 = component3.creationTime;
+			num4 = component4.creationTime;
 		}
 		else
 		{
 			num4 = -1f;
 		}
-		LogicPorts component4 = targetEntity.GetComponent<LogicPorts>();
-		EnergyConsumer component5 = targetEntity.GetComponent<EnergyConsumer>();
-		Operational component6 = targetEntity.GetComponent<Operational>();
-		Battery component7 = targetEntity.GetComponent<Battery>();
+		LogicPorts component5 = targetEntity.GetComponent<LogicPorts>();
+		EnergyConsumer component6 = targetEntity.GetComponent<EnergyConsumer>();
+		Operational component7 = targetEntity.GetComponent<Operational>();
+		Battery component8 = targetEntity.GetComponent<Battery>();
 		targetPanel.SetLabel("element_name", string.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name), string.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name));
 		targetPanel.SetLabel("element_mass", string.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
 		if (num4 > 0f)
@@ -113,11 +122,11 @@ public class AdditionalDetailsPanel : DetailScreenTab
 		float num6;
 		float num7;
 		float num8;
-		if (component6 != null && (component4 != null || component5 != null || component7 != null))
+		if (component7 != null && (component5 != null || component6 != null || component8 != null))
 		{
-			num6 = component6.GetCurrentCycleUptime();
-			num7 = component6.GetLastCycleUptime();
-			num8 = component6.GetUptimeOverCycles(num5);
+			num6 = component7.GetCurrentCycleUptime();
+			num7 = component7.GetLastCycleUptime();
+			num8 = component7.GetUptimeOverCycles(num5);
 		}
 		else
 		{
@@ -141,11 +150,11 @@ public class AdditionalDetailsPanel : DetailScreenTab
 		{
 			bool flag2 = false;
 			float num9 = element.thermalConductivity;
-			Building component8 = targetEntity.GetComponent<Building>();
-			if (component8 != null)
+			Building component9 = targetEntity.GetComponent<Building>();
+			if (component9 != null)
 			{
-				num9 *= component8.Def.ThermalConductivity;
-				flag2 = component8.Def.ThermalConductivity < 1f;
+				num9 *= component9.Def.ThermalConductivity;
+				flag2 = component9.Def.ThermalConductivity < 1f;
 			}
 			string temperatureUnitSuffix = GameUtil.GetTemperatureUnitSuffix();
 			float num10 = specificHeatCapacity * 1f;

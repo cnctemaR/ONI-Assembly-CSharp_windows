@@ -53,7 +53,11 @@ public class MicrobeMusherConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("Dirt".ToTag(), 75f),
-			new ComplexRecipe.RecipeElement("Water".ToTag(), 75f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				SimHashes.Water.CreateTag(),
+				SimHashes.Mucus.CreateTag()
+			}, 75f)
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
@@ -71,7 +75,11 @@ public class MicrobeMusherConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("BasicPlantFood", 2f),
-			new ComplexRecipe.RecipeElement("Water".ToTag(), 50f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				SimHashes.Water.CreateTag(),
+				SimHashes.Mucus.CreateTag()
+			}, 50f)
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
@@ -151,6 +159,28 @@ public class MicrobeMusherConfig : IBuildingConfig
 			};
 			PemmicanConfig.recipe.SetFabricationAnim("pemmican_kanim");
 		}
+		ComplexRecipe.RecipeElement[] array11 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(new Tag[] { "BasicSingleHarvestPlantSeed", "PrickleFlowerSeed", "MushroomSeed", "SeaLettuceSeed", "BeanPlantSeed", "ColdWheatSeed" }, 6f),
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				SimHashes.Water.CreateTag(),
+				SimHashes.Mucus.CreateTag()
+			}, 30f)
+		};
+		ComplexRecipe.RecipeElement[] array12 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("FishFood".ToTag(), 6f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+		};
+		FishFoodConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array11, array12), array11, array12)
+		{
+			time = FOOD.RECIPES.SMALL_COOK_TIME,
+			description = global::STRINGS.ITEMS.FOOD.FISHFOOD.RECIPEDESC,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
+			fabricators = new List<Tag> { "MicrobeMusher" },
+			sortOrder = 5
+		};
+		FishFoodConfig.recipe.SetFabricationAnim("fishfood_kanim");
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

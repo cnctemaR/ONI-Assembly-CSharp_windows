@@ -11,7 +11,7 @@ public static class BaseMooConfig
 	{
 		float num = 50f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 2, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(is_baby ? anim_file : "gassy_moo_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 2, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "gassy_moo_build_kanim", symbol_override_prefix, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid2x2", NavType.Hover, 32, 2f, "Meat", 10f, true, true, 223.15f, 323.15f, 73.149994f, 473.15f);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
@@ -49,6 +49,7 @@ public static class BaseMooConfig
 		MilkProductionMonitor.Def def2 = gameObject.AddOrGetDef<MilkProductionMonitor.Def>();
 		def2.CaloriesPerCycle = MooTuning.WELLFED_CALORIES_PER_CYCLE;
 		def2.Capacity = MooTuning.MILK_CAPACITY;
+		KAnimFile anim = Assets.GetAnim("gassy_moo_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new TrappedStates.Def(), true, -1)
 			.Add(new BaggedStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
@@ -68,13 +69,13 @@ public static class BaseMooConfig
 				shouldBeBehindMilkTank = false,
 				drinkCellOffsetGetFn = new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_GassyMoo)
 			}, true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP, false), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CritterCondoStates.Def
 			{
 				working_anim = "cc_working_moo"
 			}, !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("gassy_moo_emotes_kanim")), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(anim), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
@@ -122,4 +123,6 @@ public static class BaseMooConfig
 		Navigator component = inst.GetComponent<Navigator>();
 		component.transitionDriver.overrideLayers.Add(new FullPuftTransitionLayer(component));
 	}
+
+	public const string EMOTION_FILE_NAME = "gassy_moo_emotes_kanim";
 }

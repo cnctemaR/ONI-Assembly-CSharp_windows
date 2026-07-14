@@ -16,6 +16,8 @@ public class KBatchedAnimInstanceData
 		animInstanceData.tintColour = Color.white;
 		animInstanceData.highlightColour = Color.black;
 		animInstanceData.overlayColour = Color.white;
+		animInstanceData.packedParameters = 0U;
+		animInstanceData.packedParameters |= 2U;
 		this.converter.animInstanceData[0] = animInstanceData;
 	}
 
@@ -24,9 +26,30 @@ public class KBatchedAnimInstanceData
 		this.converter.animInstanceData[0].clipParameters = new Vector4(x, y, dist_sq, (float)(do_clip ? 1 : 0));
 	}
 
-	public void SetBlend(float amt)
+	public uint GetAllBlendPackedValues()
 	{
-		this.converter.animInstanceData[0].blend = amt;
+		return this.converter.animInstanceData[0].packedParameters;
+	}
+
+	public void SetActiveBlend(KBatchedAnimInstanceData.BlendActiveOptions blendType, bool isActive)
+	{
+		if (isActive)
+		{
+			KBatchedAnimInstanceData.AnimInstanceData[] animInstanceData = this.converter.animInstanceData;
+			int num = 0;
+			animInstanceData[num].packedParameters = animInstanceData[num].packedParameters | (uint)blendType;
+		}
+		if (!isActive)
+		{
+			KBatchedAnimInstanceData.AnimInstanceData[] animInstanceData2 = this.converter.animInstanceData;
+			int num2 = 0;
+			animInstanceData2[num2].packedParameters = animInstanceData2[num2].packedParameters & (uint)(~(uint)blendType);
+		}
+	}
+
+	public void SetBlendValues(uint newValue)
+	{
+		this.converter.animInstanceData[0].packedParameters = newValue;
 	}
 
 	public Color GetOverlayColour()
@@ -135,7 +158,7 @@ public class KBatchedAnimInstanceData
 		public Matrix2x3 transformMatrix;
 
 		[FieldOffset(40)]
-		public float blend;
+		public uint packedParameters;
 
 		[FieldOffset(44)]
 		public float noOffset_y;
@@ -161,5 +184,14 @@ public class KBatchedAnimInstanceData
 
 		[FieldOffset(0)]
 		public KBatchedAnimInstanceData.AnimInstanceData[] animInstanceData;
+	}
+
+	[Flags]
+	public enum BlendActiveOptions : uint
+	{
+		None = 0U,
+		BuildingDamaged = 1U,
+		LiquidVisibilityLayer = 2U,
+		WaterProof = 4U
 	}
 }

@@ -36,7 +36,7 @@ public class BalloonFX : GameStateMachine<BalloonFX, BalloonFX.Instance>
 			this.balloonAnimController = FXHelpers.CreateEffectOverride(new string[] { "balloon_anim_kanim", "balloon_basic_red_kanim" }, master.gameObject.transform.GetPosition() + new Vector3(0f, 0.3f, 1f), master.transform, true, Grid.SceneLayer.Creatures, false);
 			base.sm.fx.Set(this.balloonAnimController.gameObject, base.smi, false);
 			this.balloonAnimController.defaultAnim = "idle_default";
-			master.GetComponent<KBatchedAnimController>().GetSynchronizer().Add(this.balloonAnimController.GetComponent<KBatchedAnimController>());
+			master.GetComponent<KBatchedAnimController>().GetSynchronizer().Add(this.balloonAnimController.GetComponent<KBatchedAnimController>(), null);
 		}
 
 		public void SetBalloonSymbolOverride(BalloonOverrideSymbol balloonOverride)

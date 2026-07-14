@@ -57,7 +57,8 @@ public class UISounds : KMonoBehaviour
 		HUD_Mouseover,
 		Object_Mouseover,
 		ClickHUD,
-		Object_AutoSelected
+		Object_AutoSelected,
+		Find
 	}
 
 	[Serializable]

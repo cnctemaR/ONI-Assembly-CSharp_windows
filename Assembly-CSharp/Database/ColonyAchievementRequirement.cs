@@ -15,5 +15,7 @@ namespace Database
 		{
 			return "";
 		}
+
+		public bool shouldUpdateNameAndDescription;
 	}
 }

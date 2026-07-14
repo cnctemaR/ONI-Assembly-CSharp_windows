@@ -45,6 +45,7 @@ public class GasPermeableMembraneConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.setLiquidImpermeable = true;
 		simCellOccupier.doReplaceElement = false;
+		simCellOccupier.setTransparent = true;
 		go.AddOrGet<KAnimGridTileVisualizer>().blockTileConnectorID = MeshTileConfig.BlockTileConnectorID;
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		go.AddComponent<SimTemperatureTransfer>();

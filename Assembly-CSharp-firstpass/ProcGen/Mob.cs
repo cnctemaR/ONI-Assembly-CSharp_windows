@@ -42,7 +42,9 @@ namespace ProcGen
 			AnyFloor,
 			LiquidCeiling,
 			Liquid,
-			EntombedFloorPeek
+			EntombedFloorPeek,
+			AnchoredToBackWall,
+			LiquidFloorCavityNoRequired
 		}
 	}
 }

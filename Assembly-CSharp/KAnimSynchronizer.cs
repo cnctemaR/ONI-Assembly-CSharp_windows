@@ -25,20 +25,26 @@ public class KAnimSynchronizer
 		controller.Play(this.IdleAnim, KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
-	public void Add(KAnimControllerBase controller)
+	public void Add(KAnimControllerBase controller, KAnimSynchronizer.TranslateAnimName translate = null)
 	{
 		this.Targets.Add(controller);
+		if (translate != null)
+		{
+			this.targetTranslators[controller] = translate;
+		}
 	}
 
 	public void Remove(KAnimControllerBase controller)
 	{
 		this.Clear(controller);
 		this.Targets.Remove(controller);
+		this.targetTranslators.Remove(controller);
 	}
 
 	public void RemoveWithoutIdleAnim(KAnimControllerBase controller)
 	{
 		this.Targets.Remove(controller);
+		this.targetTranslators.Remove(controller);
 	}
 
 	private void Clear(KAnimSynchronizedController controller)
@@ -67,6 +73,7 @@ public class KAnimSynchronizer
 			}
 		}
 		this.Targets.Clear();
+		this.targetTranslators.Clear();
 		foreach (KAnimSynchronizedController kanimSynchronizedController in this.SyncedControllers)
 		{
 			if (!(kanimSynchronizedController.synchronizedController == null) && kanimSynchronizedController.synchronizedController.AnimFiles != null)
@@ -88,19 +95,22 @@ public class KAnimSynchronizer
 			return;
 		}
 		KAnim.Anim currentAnim = this.masterController.GetCurrentAnim();
-		if (currentAnim != null && !string.IsNullOrEmpty(controller.defaultAnim) && !controller.HasAnimation(currentAnim.name))
-		{
-			controller.Play(controller.defaultAnim, KAnim.PlayMode.Loop, 1f, 0f);
-			return;
-		}
 		if (currentAnim == null)
 		{
+			return;
+		}
+		KAnimSynchronizer.TranslateAnimName translateAnimName;
+		this.targetTranslators.TryGetValue(controller, out translateAnimName);
+		string text = ((translateAnimName != null) ? translateAnimName(currentAnim.name) : currentAnim.name);
+		if (!string.IsNullOrEmpty(controller.defaultAnim) && !controller.HasAnimation(text))
+		{
+			controller.Play(controller.defaultAnim, KAnim.PlayMode.Loop, 1f, 0f);
 			return;
 		}
 		KAnim.PlayMode mode = this.masterController.GetMode();
 		float playSpeed = this.masterController.GetPlaySpeed();
 		float elapsedTime = this.masterController.GetElapsedTime();
-		controller.Play(currentAnim.name, mode, playSpeed, elapsedTime);
+		controller.Play(text, mode, playSpeed, elapsedTime);
 		Facing component = controller.GetComponent<Facing>();
 		if (component != null)
 		{
@@ -169,7 +179,13 @@ public class KAnimSynchronizer
 		float elapsedTime = this.masterController.GetElapsedTime();
 		for (int i = 0; i < this.Targets.Count; i++)
 		{
-			this.Targets[i].SetElapsedTime(elapsedTime);
+			KAnimControllerBase kanimControllerBase = this.Targets[i];
+			kanimControllerBase.SetElapsedTime(elapsedTime);
+			KBatchedAnimController kbatchedAnimController = kanimControllerBase as KBatchedAnimController;
+			if (kbatchedAnimController != null)
+			{
+				kbatchedAnimController.UpdateFromSync();
+			}
 		}
 		for (int j = 0; j < this.SyncedControllers.Count; j++)
 		{
@@ -183,5 +199,9 @@ public class KAnimSynchronizer
 
 	private List<KAnimControllerBase> Targets = new List<KAnimControllerBase>();
 
+	private readonly Dictionary<KAnimControllerBase, KAnimSynchronizer.TranslateAnimName> targetTranslators = new Dictionary<KAnimControllerBase, KAnimSynchronizer.TranslateAnimName>();
+
 	private List<KAnimSynchronizedController> SyncedControllers = new List<KAnimSynchronizedController>();
+
+	public delegate string TranslateAnimName(string masterAnimName);
 }

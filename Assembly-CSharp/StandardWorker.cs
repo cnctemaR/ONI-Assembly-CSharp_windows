@@ -368,14 +368,14 @@ public class StandardWorker : WorkerBase
 			if (workable != null)
 			{
 				this.animInfo = workable.GetAnim(this);
+				Vector3 position = base.transform.GetPosition();
+				position.z = Grid.GetLayerZ(workable.workLayer);
+				base.transform.SetPosition(position);
 				if (this.animInfo.smi != null)
 				{
 					this.smi = this.animInfo.smi;
 					this.smi.StartSM();
 				}
-				Vector3 position = base.transform.GetPosition();
-				position.z = Grid.GetLayerZ(workable.workLayer);
-				base.transform.SetPosition(position);
 				KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 				if (this.animInfo.smi == null)
 				{
@@ -397,7 +397,7 @@ public class StandardWorker : WorkerBase
 							this.kanimSynchronizer = animController.GetSynchronizer();
 							if (this.kanimSynchronizer != null)
 							{
-								this.kanimSynchronizer.Add(component);
+								this.kanimSynchronizer.Add(component, null);
 							}
 						}
 						animController.Play(workAnims, workAnimPlayMode);

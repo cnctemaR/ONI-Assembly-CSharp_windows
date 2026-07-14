@@ -21,7 +21,7 @@ namespace ProcGenGame
 			base.AddSegment(e1, e0);
 		}
 
-		private void SetCell(int gridCell, float defaultTemperature, TerrainCell.SetValuesFunction SetValues, SeededRandom rnd)
+		private void SetCell(int gridCell, float defaultTemperature, TerrainCell.ISimDataSetter simDataSetter, SeededRandom rnd)
 		{
 			WeightedSimHash weightedSimHash = WeightedRandom.Choose<WeightedSimHash>(this.element, rnd);
 			TerrainCell.ElementOverride elementOverride = TerrainCell.GetElementOverride(weightedSimHash.element, weightedSimHash.overrides);
@@ -29,10 +29,10 @@ namespace ProcGenGame
 			{
 				elementOverride.pdelement.temperature = defaultTemperature;
 			}
-			SetValues(gridCell, elementOverride.element, elementOverride.pdelement, elementOverride.dc);
+			simDataSetter.SetSimCell(gridCell, elementOverride.element, elementOverride.pdelement, elementOverride.dc);
 		}
 
-		public void ConvertToMap(Chunk world, TerrainCell.SetValuesFunction SetValues, float neighbour0Temperature, float neighbour1Temperature, float midTemp, SeededRandom rnd, int snapLastCells)
+		public void ConvertToMap(Chunk world, TerrainCell.ISimDataSetter simDataSetter, float neighbour0Temperature, float neighbour1Temperature, float midTemp, SeededRandom rnd, int snapLastCells)
 		{
 			for (int i = 0; i < this.pathElements.Count; i++)
 			{
@@ -44,7 +44,7 @@ namespace ProcGenGame
 					int num = Grid.XYToCell(line[j].x, line[j].y);
 					if (Grid.IsValidCell(num))
 					{
-						this.SetCell(num, midTemp, SetValues, rnd);
+						this.SetCell(num, midTemp, simDataSetter, rnd);
 					}
 					for (float num2 = 0.5f; num2 <= this.width; num2 += 1f)
 					{
@@ -58,14 +58,14 @@ namespace ProcGenGame
 						num = Grid.XYToCell((int)vector2.x, (int)vector2.y);
 						if (Grid.IsValidCell(num))
 						{
-							this.SetCell(num, num4, SetValues, rnd);
+							this.SetCell(num, num4, simDataSetter, rnd);
 						}
 						Vector2 vector3 = line[j] - normalized * num2;
 						float num5 = midTemp + (neighbour1Temperature - midTemp) * num3;
 						num = Grid.XYToCell((int)vector3.x, (int)vector3.y);
 						if (Grid.IsValidCell(num))
 						{
-							this.SetCell(num, num5, SetValues, rnd);
+							this.SetCell(num, num5, simDataSetter, rnd);
 						}
 					}
 				}

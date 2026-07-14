@@ -23,6 +23,7 @@ public class EntityTemplates
 		EntityTemplates.baseEntityTemplate.AddComponent<SaveLoadRoot>();
 		EntityTemplates.baseEntityTemplate.AddComponent<StateMachineController>();
 		EntityTemplates.baseEntityTemplate.AddComponent<PrimaryElement>();
+		EntityTemplates.baseEntityTemplate.AddComponent<InfraredPrimaryElement>();
 		EntityTemplates.baseEntityTemplate.AddComponent<SimTemperatureTransfer>();
 		EntityTemplates.baseEntityTemplate.AddComponent<InfoDescription>();
 		EntityTemplates.baseEntityTemplate.AddComponent<Notifier>();
@@ -161,7 +162,12 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendEntityToBasicPlant(GameObject template, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, string crop_id = null, bool can_drown = true, bool can_tinker = true, bool require_solid_tile = true, bool should_grow_old = true, float max_age = 2400f, float min_radiation = 0f, float max_radiation = 2200f, string baseTraitId = null, string baseTraitName = null)
+	private GameObject ExtendEntityToBasicPlant(GameObject template, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, string crop_id = null, bool can_drown = true, bool can_tinker = true, bool require_solid_tile = true, bool should_grow_old = true, float max_age = 2400f, float min_radiation = 0f, float max_radiation = 2200f, string baseTraitId = null, string baseTraitName = null)
+	{
+		return EntityTemplates.ExtendEntityToBasicPlant(template, temperature_lethal_low, temperature_warning_low, temperature_warning_high, temperature_lethal_high, safe_elements, pressure_sensitive, pressure_lethal_low, pressure_warning_low, crop_id, can_drown, can_tinker, require_solid_tile, false, should_grow_old, max_age, min_radiation, max_radiation, baseTraitId, baseTraitName);
+	}
+
+	public static GameObject ExtendEntityToBasicPlant(GameObject template, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, string crop_id = null, bool can_drown = true, bool can_tinker = true, bool require_solid_tile = true, bool require_Backwall_Foundation = false, bool should_grow_old = true, float max_age = 2400f, float min_radiation = 0f, float max_radiation = 2200f, string baseTraitId = null, string baseTraitName = null)
 	{
 		Modifiers component = template.GetComponent<Modifiers>();
 		Trait trait = Db.Get().CreateTrait(baseTraitId, baseTraitName, baseTraitName, null, false, null, true, true);
@@ -184,6 +190,10 @@ public class EntityTemplates
 		if (require_solid_tile)
 		{
 			template.AddOrGet<UprootedMonitor>();
+		}
+		if (require_Backwall_Foundation)
+		{
+			EntityTemplates.ExtendPlantEntityToRequireBackwall(template);
 		}
 		template.AddOrGet<ReceptacleMonitor>();
 		template.AddOrGet<Notifier>();
@@ -251,6 +261,22 @@ public class EntityTemplates
 		return template;
 	}
 
+	public static void ExtendPlantEntityToRequireBackwall(GameObject plantGameObject)
+	{
+		UprootedMonitor uprootedMonitor = plantGameObject.AddOrGet<UprootedMonitor>();
+		uprootedMonitor.customFoundationCheckFn = new Func<int, bool>(BackwallManager.HasBackwall);
+		uprootedMonitor.customScenePartitionerLayerFn = new Func<ScenePartitionerLayer>(EntityTemplates.UprootBackwallScenePartitionerLayer);
+		uprootedMonitor.monitorCells = new CellOffset[]
+		{
+			new CellOffset(0, 0)
+		};
+	}
+
+	private static ScenePartitionerLayer UprootBackwallScenePartitionerLayer()
+	{
+		return GameScenePartitioner.Instance.backwallChangedLayer;
+	}
+
 	public static GameObject ExtendEntityToWildCreature(GameObject prefab, int space_required_per_creature)
 	{
 		return EntityTemplates.ExtendEntityToWildCreature(prefab, space_required_per_creature, true);
@@ -295,10 +321,10 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts, float eggMassToDrop)
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(prefab, dlcRestrictions, eggId, eggName, eggDesc, eggAnim, eggMass, babyId, fertilityCycles, incubationCycles, eggChances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated, preventEggFromDroppingProducts, eggMassToDrop, true);
+		return EntityTemplates.ExtendEntityToFertileCreature(prefab, dlcRestrictions, eggId, eggName, eggDesc, eggAnim, eggMass, 0.5f, babyId, fertilityCycles, incubationCycles, eggChances, eggSortOrder, is_ranchable, add_fish_overcrowding_monitor, egg_anim_scale, deprecated, preventEggFromDroppingProducts, eggMassToDrop, true);
 	}
 
-	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts, float eggMassToDrop, bool allowEggCrackerRecipeCreation = true)
+	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, IHasDlcRestrictions dlcRestrictions, string eggId, string eggName, string eggDesc, string eggAnim, float eggMass, float eggShellRatio, string babyId, float fertilityCycles, float incubationCycles, List<FertilityMonitor.BreedingChance> eggChances, int eggSortOrder, bool is_ranchable, bool add_fish_overcrowding_monitor, float egg_anim_scale, bool deprecated, bool preventEggFromDroppingProducts, float eggMassToDrop, bool allowEggCrackerRecipeCreation = true)
 	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
 		def.baseFertileCycles = fertilityCycles;
@@ -306,7 +332,7 @@ public class EntityTemplates
 		float num = 100f / (600f * incubationCycles);
 		string[] requiredDlcsOrNull = DlcRestrictionsUtil.GetRequiredDlcsOrNull(dlcRestrictions);
 		string[] forbiddenDlcIdsOrNull = DlcRestrictionsUtil.GetForbiddenDlcIdsOrNull(dlcRestrictions);
-		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull, preventEggFromDroppingProducts, eggMassToDrop, allowEggCrackerRecipeCreation);
+		GameObject gameObject = EggConfig.CreateEgg(eggId, eggName, eggDesc, babyId, eggAnim, eggMass, eggSortOrder, num, requiredDlcsOrNull, forbiddenDlcIdsOrNull, preventEggFromDroppingProducts, eggMassToDrop, eggShellRatio, allowEggCrackerRecipeCreation);
 		def.eggPrefab = new Tag(eggId);
 		def.initialBreedingWeights = eggChances;
 		if (egg_anim_scale != 1f)
@@ -388,9 +414,45 @@ public class EntityTemplates
 
 	public static GameObject ExtendEntityToBasicCreature(bool isWarmBlooded, GameObject template, string anim_filename, string build_filename = null, string symbol_override_prefix = null, FactionManager.FactionID faction = FactionManager.FactionID.Prey, string initialTraitID = null, string NavGridName = "WalkerNavGrid1x1", NavType navType = NavType.Floor, int max_probing_radius = 32, float moveSpeed = 2f, string onDeathDropID = "Meat", float onDeathDropCount = 1f, bool drownVulnerable = true, bool entombVulnerable = true, float warningLowTemperature = 283.15f, float warningHighTemperature = 293.15f, float lethalLowTemperature = 243.15f, float lethalHighTemperature = 343.15f)
 	{
+		EntityTemplates.ExtendEntityToBasicCreatureData extendEntityToBasicCreatureData = new EntityTemplates.ExtendEntityToBasicCreatureData();
+		extendEntityToBasicCreatureData.isWarmBlooded = isWarmBlooded;
+		extendEntityToBasicCreatureData.template = template;
+		extendEntityToBasicCreatureData.anim_filename = anim_filename;
+		extendEntityToBasicCreatureData.build_filename = build_filename;
+		extendEntityToBasicCreatureData.symbol_override_prefix = symbol_override_prefix;
+		extendEntityToBasicCreatureData.faction = faction;
+		extendEntityToBasicCreatureData.initialTraitID = initialTraitID;
+		extendEntityToBasicCreatureData.NavGridName = NavGridName;
+		extendEntityToBasicCreatureData.navType = navType;
+		extendEntityToBasicCreatureData.max_probing_radius = max_probing_radius;
+		extendEntityToBasicCreatureData.moveSpeed = moveSpeed;
+		EntityTemplates.ExtendEntityToBasicCreatureData extendEntityToBasicCreatureData2 = extendEntityToBasicCreatureData;
+		string[] array;
+		if (!string.IsNullOrEmpty(onDeathDropID))
+		{
+			(array = new string[1])[0] = onDeathDropID;
+		}
+		else
+		{
+			array = null;
+		}
+		extendEntityToBasicCreatureData2.onDeathDropsID = array;
+		extendEntityToBasicCreatureData.onDeathDropsCount = new float[] { onDeathDropCount };
+		extendEntityToBasicCreatureData.drownVulnerable = drownVulnerable;
+		extendEntityToBasicCreatureData.entombVulnerable = entombVulnerable;
+		extendEntityToBasicCreatureData.warningLowTemperature = warningLowTemperature;
+		extendEntityToBasicCreatureData.warningHighTemperature = warningHighTemperature;
+		extendEntityToBasicCreatureData.lethalLowTemperature = lethalLowTemperature;
+		extendEntityToBasicCreatureData.lethalHighTemperature = lethalHighTemperature;
+		return EntityTemplates.ExtendEntityToBasicCreature(extendEntityToBasicCreatureData);
+	}
+
+	public static GameObject ExtendEntityToBasicCreature(EntityTemplates.ExtendEntityToBasicCreatureData data)
+	{
+		GameObject template = data.template;
 		List<KAnimFile> list = new List<KAnimFile>();
-		KAnimFile kanimFile = ((anim_filename != null) ? Assets.GetAnim(anim_filename) : null);
-		KAnimFile kanimFile2 = ((build_filename != null) ? Assets.GetAnim(build_filename) : null);
+		KAnimFile kanimFile = ((data.anim_filename != null) ? Assets.GetAnim(data.anim_filename) : null);
+		KAnimFile kanimFile2 = ((data.build_filename != null) ? Assets.GetAnim(data.build_filename) : null);
 		list.Add(kanimFile2);
 		list.Add(kanimFile);
 		KBatchedAnimController component = template.GetComponent<KBatchedAnimController>();
@@ -401,9 +463,9 @@ public class EntityTemplates
 		}
 		template.AddOrGet<KPrefabID>().AddTag(GameTags.Creature, false);
 		Modifiers modifiers = template.AddOrGet<Modifiers>();
-		if (initialTraitID != null)
+		if (data.initialTraitID != null)
 		{
-			modifiers.initialTraits.Add(initialTraitID);
+			modifiers.initialTraits.Add(data.initialTraitID);
 		}
 		modifiers.initialAmounts.Add(Db.Get().Amounts.HitPoints.Id);
 		Pickupable pickupable = template.AddOrGet<Pickupable>();
@@ -419,7 +481,7 @@ public class EntityTemplates
 		template.AddOrGet<Health>().isCritter = true;
 		template.AddOrGet<CharacterOverlay>();
 		template.AddOrGet<RangedAttackable>();
-		template.AddOrGet<FactionAlignment>().Alignment = faction;
+		template.AddOrGet<FactionAlignment>().Alignment = data.faction;
 		template.AddOrGet<Prioritizable>();
 		template.AddOrGet<Effects>();
 		template.AddOrGetDef<CritterEmoteMonitor.Def>();
@@ -429,18 +491,18 @@ public class EntityTemplates
 		template.AddOrGetDef<AnimInterruptMonitor.Def>();
 		template.AddOrGet<AnimEventHandler>();
 		SymbolOverrideController symbolOverrideController = SymbolOverrideControllerUtil.AddToPrefab(template);
-		if (symbol_override_prefix != null && kanimFile != null)
+		if (data.symbol_override_prefix != null && kanimFile != null)
 		{
-			symbolOverrideController.ApplySymbolOverridesByAffix((kanimFile2 == null) ? kanimFile : kanimFile2, symbol_override_prefix, null, 0);
+			symbolOverrideController.ApplySymbolOverridesByAffix((kanimFile2 == null) ? kanimFile : kanimFile2, data.symbol_override_prefix, null, 0);
 		}
 		CritterTemperatureMonitor.Def def = template.AddOrGetDef<CritterTemperatureMonitor.Def>();
-		def.temperatureHotDeadly = lethalHighTemperature;
-		def.temperatureHotUncomfortable = warningHighTemperature;
-		def.temperatureColdDeadly = lethalLowTemperature;
-		def.temperatureColdUncomfortable = warningLowTemperature;
+		def.temperatureHotDeadly = data.lethalHighTemperature;
+		def.temperatureHotUncomfortable = data.warningHighTemperature;
+		def.temperatureColdDeadly = data.lethalLowTemperature;
+		def.temperatureColdUncomfortable = data.warningLowTemperature;
 		template.GetComponent<PrimaryElement>().Temperature = def.GetIdealTemperature();
 		modifiers.initialAmounts.Add(Db.Get().Amounts.CritterTemperature.Id);
-		if (isWarmBlooded)
+		if (data.isWarmBlooded)
 		{
 			string properName = template.GetProperName();
 			template.UpdateComponentRequirement<SimTemperatureTransfer>(false);
@@ -458,26 +520,26 @@ public class EntityTemplates
 			warmBlooded.BaseGenerationKW = 10f;
 			warmBlooded.BaseTemperatureModifierDescription = properName;
 		}
-		if (drownVulnerable)
+		if (data.drownVulnerable)
 		{
 			template.AddOrGet<DrowningMonitor>();
 		}
-		if (entombVulnerable)
+		if (data.entombVulnerable)
 		{
 			template.AddOrGet<EntombVulnerable>();
 		}
-		EntityTemplates.DeathDropFunction(template, onDeathDropCount, onDeathDropID);
+		EntityTemplates.DeathDropFunction(template, data.onDeathDropsCount, data.onDeathDropsID);
 		template.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject inst)
 		{
-			EntityTemplates.DeathDropFunction(inst, onDeathDropCount, onDeathDropID);
+			EntityTemplates.DeathDropFunction(inst, data.onDeathDropsCount, data.onDeathDropsID);
 		};
 		Navigator navigator = template.AddOrGet<Navigator>();
-		navigator.NavGridName = NavGridName;
-		navigator.CurrentNavType = navType;
-		navigator.defaultSpeed = moveSpeed;
+		navigator.NavGridName = data.NavGridName;
+		navigator.CurrentNavType = data.navType;
+		navigator.defaultSpeed = data.moveSpeed;
 		navigator.updateProber = true;
-		navigator.maxProbeRadiusX = max_probing_radius;
-		navigator.maxProbeRadiusY = max_probing_radius;
+		navigator.maxProbeRadiusX = data.max_probing_radius;
+		navigator.maxProbeRadiusY = data.max_probing_radius;
 		navigator.sceneLayer = Grid.SceneLayer.Creatures;
 		template.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject inst)
 		{
@@ -495,9 +557,26 @@ public class EntityTemplates
 
 	private static void DeathDropFunction(GameObject inst, float onDeathDropCount, string onDeathDropID)
 	{
-		if (onDeathDropCount > 0f && !string.IsNullOrEmpty(onDeathDropID))
+		EntityTemplates.DeathDropFunction(inst, new float[] { onDeathDropCount }, new string[] { onDeathDropID });
+	}
+
+	private static void DeathDropFunction(GameObject inst, float[] onDeathDropCounts, string[] onDeathDropIDs)
+	{
+		if (onDeathDropIDs == null || onDeathDropCounts == null)
 		{
-			Dictionary<string, float> dictionary = new Dictionary<string, float> { { onDeathDropID, onDeathDropCount } };
+			return;
+		}
+		Dictionary<string, float> dictionary = new Dictionary<string, float>();
+		for (int i = 0; i < onDeathDropIDs.Length; i++)
+		{
+			float num = ((i < onDeathDropCounts.Length) ? onDeathDropCounts[i] : onDeathDropCounts[onDeathDropCounts.Length - 1]);
+			if (num > 0f && !string.IsNullOrEmpty(onDeathDropIDs[i]))
+			{
+				dictionary[onDeathDropIDs[i]] = num;
+			}
+		}
+		if (dictionary.Count > 0)
+		{
 			inst.AddOrGet<Butcherable>().SetDrops(dictionary);
 		}
 	}
@@ -587,6 +666,7 @@ public class EntityTemplates
 		EntityTemplates.baseOreTemplate.SetActive(false);
 		EntityTemplates.baseOreTemplate.AddComponent<KPrefabID>();
 		EntityTemplates.baseOreTemplate.AddComponent<PrimaryElement>();
+		EntityTemplates.baseOreTemplate.AddComponent<InfraredPrimaryElement>();
 		EntityTemplates.baseOreTemplate.AddComponent<Pickupable>();
 		EntityTemplates.baseOreTemplate.AddComponent<KSelectable>();
 		EntityTemplates.baseOreTemplate.AddComponent<SaveLoadRoot>();
@@ -961,6 +1041,47 @@ public class EntityTemplates
 	private static GameObject placedEntityTemplate;
 
 	private static GameObject baseOreTemplate;
+
+	public class ExtendEntityToBasicCreatureData
+	{
+		public bool isWarmBlooded;
+
+		public GameObject template;
+
+		public string anim_filename;
+
+		public string build_filename;
+
+		public string symbol_override_prefix;
+
+		public FactionManager.FactionID faction = FactionManager.FactionID.Prey;
+
+		public string initialTraitID;
+
+		public string NavGridName = "WalkerNavGrid1x1";
+
+		public NavType navType;
+
+		public int max_probing_radius = 32;
+
+		public float moveSpeed = 2f;
+
+		public string[] onDeathDropsID = new string[] { "Meat" };
+
+		public float[] onDeathDropsCount = new float[] { 1f };
+
+		public bool drownVulnerable = true;
+
+		public bool entombVulnerable = true;
+
+		public float warningLowTemperature = 283.15f;
+
+		public float warningHighTemperature = 293.15f;
+
+		public float lethalLowTemperature = 243.15f;
+
+		public float lethalHighTemperature = 343.15f;
+	}
 
 	public enum CollisionShape
 	{

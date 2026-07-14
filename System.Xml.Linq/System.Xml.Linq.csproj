@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{9658BD80-0462-4503-ADB4-10AC98627101}</ProjectGuid>
+    <ProjectGuid>{1D119CA1-935B-4071-9DB4-19566E492FE2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Xml.Linq</RootNamespace>
     <AssemblyName>System.Xml.Linq</AssemblyName>
@@ -71,19 +71,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270E9}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCA}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270EE}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCF}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC98627100}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FE1}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270F1}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FD2}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

@@ -5,7 +5,8 @@ public class LoreBearerSideScreen : SideScreenContent
 {
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<LoreBearer>() != null;
+		LoreBearer component = target.GetComponent<LoreBearer>();
+		return component != null && !component.hideLore && (component.useDefaultLore || !component.poiOverrideLoreUnlockId.IsNullOrWhiteSpace());
 	}
 
 	public override int GetSideScreenSortOrder()

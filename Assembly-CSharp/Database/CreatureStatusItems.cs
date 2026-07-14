@@ -67,6 +67,15 @@ namespace Database
 				str = str.Replace("high_temperature", GameUtil.GetFormattedTemperature(temperatureVulnerable4.TemperatureWarningHigh, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 				return str;
 			};
+			this.BubbleGasProduction = new StatusItem("BubbleGasProduction", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022, null);
+			this.BubbleGasProduction.resolveStringCallback = delegate(string str, object data)
+			{
+				global::Tuple<SimHashes, float> tuple = (global::Tuple<SimHashes, float>)data;
+				Element element = ElementLoader.FindElementByHash(tuple.first);
+				str = str.Replace("{ELEMENT}", element.name);
+				str = str.Replace("{RATE}", GameUtil.GetFormattedMass(tuple.second, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			};
 			this.Crop_Too_Dark = new StatusItem("Crop_Too_Dark", "CREATURES", "status_item_plant_light", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
 			this.Crop_Too_Bright = new StatusItem("Crop_Too_Bright", "CREATURES", "status_item_plant_light", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
 			this.Crop_Blighted = new StatusItem("Crop_Blighted", "CREATURES", "status_item_plant_blighted", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 129022, null);
@@ -277,6 +286,7 @@ namespace Database
 				GameObject gameObject = go as GameObject;
 				return string.Format(str, GameUtil.GetIdentityDescriptor(gameObject, GameUtil.IdentityDescriptorTense.Normal));
 			};
+			this.NotSubmerged = new StatusItem("NotSubmerged", "CREATURES", "status_item_flooded", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022, null);
 			this.Wilting = new StatusItem("Wilting", "CREATURES", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, false, 1026, null);
 			this.Wilting.resolveStringCallback = delegate(string str, object data)
 			{
@@ -319,9 +329,9 @@ namespace Database
 			this.WrongAtmosphere.resolveStringCallback = delegate(string str, object data)
 			{
 				string text8 = "";
-				foreach (Element element in (data as PressureVulnerable).safe_atmospheres)
+				foreach (Element element2 in (data as PressureVulnerable).safe_atmospheres)
 				{
-					text8 = text8 + "\n    •  " + element.name;
+					text8 = text8 + "\n    •  " + element2.name;
 				}
 				str = str.Replace("{elements}", text8);
 				return str;
@@ -625,6 +635,20 @@ namespace Database
 			this.TravelingToPollinate = new StatusItem("POLLINATING.MOVINGTO", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.Pollinating = new StatusItem("POLLINATING.INTERACTING", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 			this.NotPollinated = new StatusItem("NOT_POLLINATED", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.Desiccation = new StatusItem("Desiccation", "CREATURES", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022, null);
+			this.Desiccation.SetResolveStringCallback(delegate(string str, object data)
+			{
+				DesiccationMonitor.Instance instance19 = data as DesiccationMonitor.Instance;
+				if (instance19 == null)
+				{
+					return str;
+				}
+				return string.Format(str, GameUtil.GetFormattedTime(instance19.GetEstimatedTimeUntilDeath(), "F0"));
+			});
+			this.FishFullMilk = new StatusItem("FishMilkFull", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.InkFull = new StatusItem("InkFull", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.PunchClamApproach = new StatusItem("PUNCH_CLAM_APPROACH", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
+			this.PunchClamAttack = new StatusItem("PUNCH_CLAM_ATTACK", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022, null);
 		}
 
 		public StatusItem Dead;
@@ -671,6 +695,8 @@ namespace Database
 
 		public StatusItem GrowingFruit;
 
+		public StatusItem GermDiet;
+
 		public StatusItem CarnivorousPlantAwaitingVictim;
 
 		public StatusItem ReadyForHarvest;
@@ -680,6 +706,8 @@ namespace Database
 		public StatusItem EnvironmentTooWarm;
 
 		public StatusItem EnvironmentTooCold;
+
+		public StatusItem NotSubmerged;
 
 		public StatusItem Entombed;
 
@@ -803,6 +831,18 @@ namespace Database
 
 		public StatusItem Pollinating;
 
+		public StatusItem BubbleGasProduction;
+
 		public StatusItem NotPollinated;
+
+		public StatusItem Desiccation;
+
+		public StatusItem FishFullMilk;
+
+		public StatusItem InkFull;
+
+		public StatusItem PunchClamApproach;
+
+		public StatusItem PunchClamAttack;
 	}
 }

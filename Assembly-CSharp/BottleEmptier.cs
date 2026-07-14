@@ -176,9 +176,9 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			this.meter.meterController.Play("empty", KAnim.PlayMode.Paused, 1f, 0f);
 			Color32 colour = firstPrimaryElement.Element.substance.colour;
 			colour.a = byte.MaxValue;
-			this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), colour);
-			this.meter.SetSymbolTint(new KAnimHashedString("water1"), colour);
-			this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+			GameUtil.TintLiquidSymbolOnBuilding("meter_fill", this.meter.meterController, firstPrimaryElement.Element);
+			GameUtil.TintLiquidSymbolOnBuilding("water1", this.meter.meterController, firstPrimaryElement.Element);
+			GameUtil.TintLiquidSymbolOnBuilding("substance_tinter", this.meter.meterController, firstPrimaryElement.Element);
 			this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter_cap"), colour);
 			this.OnStorageChange(null);
 		}
@@ -191,7 +191,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				if (!(gameObject == null))
 				{
 					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					if (!(component == null))
+					if (!(component == null) && component.Mass > 0f)
 					{
 						return component;
 					}

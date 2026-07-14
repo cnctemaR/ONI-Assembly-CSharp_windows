@@ -13,25 +13,33 @@ public class MiningSounds : KMonoBehaviour
 
 	private void OnStartMiningSound(object data)
 	{
-		if (this.miningSound == null)
+		if (this.miningSound != null)
 		{
-			Element element = data as Element;
-			if (element != null)
-			{
-				string text = element.substance.GetMiningSound();
-				if (text == null || text == "")
-				{
-					return;
-				}
-				text = "Mine_" + text;
-				string sound = GlobalAssets.GetSound(text, false);
-				this.miningSoundEvent = RuntimeManager.PathToEventReference(sound);
-				if (!this.miningSoundEvent.IsNull)
-				{
-					this.loopingSounds.StartSound(this.miningSoundEvent);
-				}
-			}
+			return;
 		}
+		Element element = data as Element;
+		if (element == null)
+		{
+			return;
+		}
+		string text = element.substance.GetMiningSound();
+		if (text == null || text == "")
+		{
+			return;
+		}
+		if (this.IsTargetCellLiquid())
+		{
+			return;
+		}
+		text = "Mine_" + text;
+		string sound = GlobalAssets.GetSound(text, false);
+		this.miningSoundEvent = RuntimeManager.PathToEventReference(sound);
+		DebugUtil.DevAssert(!this.miningSoundEvent.IsNull, "Failed to find mining sound event for element", null);
+		if (this.miningSoundEvent.IsNull)
+		{
+			return;
+		}
+		this.loopingSounds.StartSound(this.miningSoundEvent);
 	}
 
 	private void OnStopMiningSound(object data)
@@ -49,6 +57,17 @@ public class MiningSounds : KMonoBehaviour
 		{
 			this.loopingSounds.SetParameter(this.miningSoundEvent, MiningSounds.HASH_PERCENTCOMPLETE, progress);
 		}
+	}
+
+	private bool IsTargetCellLiquid()
+	{
+		WorkerBase workerBase;
+		if (!base.TryGetComponent<WorkerBase>(out workerBase))
+		{
+			return false;
+		}
+		Workable workable = workerBase.GetWorkable();
+		return !(workable == null) && Grid.IsLiquid(Grid.PosToCell(workable));
 	}
 
 	private static HashedString HASH_PERCENTCOMPLETE = "percentComplete";

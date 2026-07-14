@@ -179,7 +179,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 			this.scheduleNameIncrementor++;
 			base.name = string.Format(UI.SCHEDULESCREEN.SCHEDULE_NAME_FORMAT, this.scheduleNameIncrementor.ToString());
 		}
-		Schedule schedule = new Schedule("copy of " + source.name, source.GetBlocks(), source.alarmActivated);
+		Schedule schedule = new Schedule(UI.SCHEDULESCREEN.SCHEDULE_NAME_COPY_PREFIX + source.name, source.GetBlocks(), source.alarmActivated);
 		schedule.ProgressTimetableIdx = source.ProgressTimetableIdx;
 		this.schedules.Add(schedule);
 		if (this.onSchedulesChanged != null)

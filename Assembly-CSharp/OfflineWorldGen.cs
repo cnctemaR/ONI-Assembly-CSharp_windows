@@ -141,6 +141,10 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private void Update()
 	{
+		if (this.cluster.HasGenerationStopped)
+		{
+			this.cluster.Join();
+		}
 		if (this.loadTriggered)
 		{
 			return;
@@ -158,7 +162,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			return;
 		}
 		this.updateText.text = Strings.Get(this.currentConvertedCurrentStage.String);
-		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 1f && this.cluster.IsGenerationComplete)
+		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 1f && this.cluster.HasGenerationStopped)
 		{
 			if (KCrashReporter.terminateOnError && KCrashReporter.hasCrash)
 			{

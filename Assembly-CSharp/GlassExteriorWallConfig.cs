@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class GlassExteriorWallConfig : IBuildingConfig
+{
+	public override string[] GetRequiredDlcIds()
+	{
+		return DlcManager.DLC5;
+	}
+
+	public override BuildingDef CreateBuildingDef()
+	{
+		string text = "GlassExteriorWall";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "walls_glass_kanim";
+		int num3 = 30;
+		float num4 = 10f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] glasses = MATERIALS.GLASSES;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.NotInTiles;
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, glasses, num5, buildLocationRule, new EffectorValues
+		{
+			amount = 15,
+			radius = 0
+		}, none, 0.2f);
+		buildingDef.Entombable = false;
+		buildingDef.Floodable = false;
+		buildingDef.Overheatable = false;
+		buildingDef.AudioCategory = "Glass";
+		buildingDef.AudioSize = "small";
+		buildingDef.BaseTimeUntilRepair = -1f;
+		buildingDef.DefaultAnimState = "off";
+		buildingDef.ObjectLayer = ObjectLayer.Backwall;
+		buildingDef.SceneLayer = Grid.SceneLayer.Backwall;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.Backwall;
+		buildingDef.PermittedRotations = PermittedRotations.R360;
+		buildingDef.ReplacementLayer = ObjectLayer.ReplacementBackwall;
+		buildingDef.ReplacementCandidateLayers = new List<ObjectLayer>
+		{
+			ObjectLayer.FoundationTile,
+			ObjectLayer.Backwall
+		};
+		buildingDef.ReplacementTags = new List<Tag>
+		{
+			GameTags.FloorTiles,
+			GameTags.Backwall
+		};
+		buildingDef.AddSearchTerms(SEARCH_TERMS.TILE);
+		buildingDef.AddSearchTerms(SEARCH_TERMS.GLASS);
+		return buildingDef;
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		go.GetComponent<KPrefabID>();
+		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
+		go.AddOrGet<AnimTileable>().objectLayer = ObjectLayer.Backwall;
+		go.AddComponent<ZoneTile>();
+		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		go.GetComponent<KBatchedAnimController>().initialBlendParameters = 0;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Backwall, false);
+		GeneratedBuildings.RemoveLoopingSounds(go);
+	}
+
+	public const string ID = "GlassExteriorWall";
+}

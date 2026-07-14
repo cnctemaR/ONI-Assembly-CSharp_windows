@@ -11,7 +11,7 @@ public static class BaseRaptorConfig
 	{
 		float num = 400f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 2, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(is_baby ? anim_file : "raptor_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 2, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
 		kboxCollider2D.offset = new Vector2f(0f, kboxCollider2D.offset.y);
 		gameObject.GetComponent<KBatchedAnimController>().Offset = new Vector3(0f, 0f, 0f);
@@ -40,6 +40,7 @@ public static class BaseRaptorConfig
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
+		KAnimFile anim = Assets.GetAnim("raptor_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -61,13 +62,13 @@ public static class BaseRaptorConfig
 				shouldBeBehindMilkTank = false,
 				drinkCellOffsetGetFn = (is_baby ? new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_CritterOneByOne) : new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_TwoByTwo))
 			}, true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def
 			{
 				entersBuilding = false
 			}, !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("raptor_emotes_kanim")), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(anim), !is_baby, -1)
 			.Add(new CritterRoarStates.Def(), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
@@ -108,6 +109,13 @@ public static class BaseRaptorConfig
 			hashSet.Add("GlassDeer");
 			hashSet.Add("GlassDeerBaby");
 		}
+		if (DlcManager.IsContentSubscribed("DLC5_ID"))
+		{
+			hashSet.Add("Snail");
+			hashSet.Add("SnailBaby");
+			hashSet.Add("SnailIron");
+			hashSet.Add("SnailIronBaby");
+		}
 		list.Add(new Diet.Info(hashSet, RaptorTuning.POOP_ELEMENT, RaptorTuning.CALORIES_PER_UNIT_EATEN, RaptorTuning.PREY_PRODUCTION_RATE, null, 0f, false, Diet.Info.FoodType.EatButcheredPrey, false, null));
 		return list;
 	}
@@ -128,4 +136,6 @@ public static class BaseRaptorConfig
 		def2.diet = diet;
 		return prefab;
 	}
+
+	public const string EMOTION_FILE_NAME = "raptor_emotes_kanim";
 }

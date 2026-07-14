@@ -196,7 +196,7 @@ namespace STRINGS
 				{
 					public static LocString TITLE = "Tame";
 
-					public static LocString CONTAINER1 = "Domesticated critters produce far more resources and lay eggs at a higher frequency than wild ones. They require additional care in order to maintain the levels of happiness that maximize their utility in the colony. (Happy critters are also generally more pleasant to be around.)\n\nOnce tame, critters can access the Critter Feeder, which is unavailable to wild critters.";
+					public static LocString CONTAINER1 = "Domesticated critters produce far more resources and lay eggs at a higher frequency than wild ones. They require additional care in order to maintain the levels of happiness that maximize their utility in the colony. (Happy critters are also generally more pleasant to be around.)\n\nGrooming and feeding stations enable Duplicants to domesticate critters.";
 
 					public static LocString SUBTITLE = "<b>Effects</b>";
 
@@ -209,6 +209,96 @@ namespace STRINGS
 
 		public class INVESTIGATIONS
 		{
+			public class DLC5_FLOOD
+			{
+				public static LocString TITLE = "Day Three";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString EMAILHEADER1 = "<smallcaps>To: <b>ALL</b><alpha=#AA><size=12></size></color>\nFrom: <b>ADMIN</b><alpha=#AA><size=12> <admin@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+					public static LocString CONTAINER1 = "<indent=5%>Updated guidelines for employees sheltering in place are attached. See highlights below:\n\n<indent=5%>    •  Emergency cots are not designed to be stacked.\n    •  Coffee ration cards are non-transferable and cannot be sold.\n    •  Please review the personal hygiene handout.\n\n</indent>Employees with functioning equipment should continue as normal while flood restoration efforts continue.\n\nThank you for your patience.\n\n<indent=10%><alpha=#AA>[MISSING ATTACHMENT]</color></indent>";
+
+					public static LocString SIGNATURE1 = "\nThank-you,\n-Admin\n<size=11>The Gravitas Facility</size>\n------------------\n";
+				}
+			}
+
+			public class DLC5_RESEARCHPORTAL
+			{
+				public static LocString TITLE = "In Case of Emergency";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Got a quick draft done - let me know what you think. Feels like we're getting way ahead of ourselves.\n\n- E\n\n----------------------\n\n<b>WIP DRAFT:</b>\n\nIn the extremely unlikely event that this emergency is a direct result of Gravitas equipment malfunction, please contact your resettlement agent.\n\nThey will review the situation and recommend a course of action custom-designed to suit your unique needs. This process may take up to four business days.\n\nOur office is open 24/7, 364 days a year. We are closed from 00:01 to 23:59 CEST on November 7 every year.\n\nBest wishes!\n\n<indent=5%><smallcaps>- Catalina Rosado\n  Gravitas Resettlement Manager</smallcaps></indent>\n\n----------------------\n\n";
+				}
+			}
+
+			public class DLC5_PRINTANOMALY
+			{
+				public static LocString TITLE = "Useful Anomaly";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: TWO";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "<smallcaps>[Log Fragmentation Detected]\n[Voice Recognition Unavailable]</smallcaps>\n\n[LOG BEGINS]\n\nA216: Commencing exploratory reprint of donor number 890, \"Anemone,\" adult female,  103 centimeters, 30 kilgrams.\n\nTech: Copy that.\n\n(sound of a machine powering up)\n\nA216: Printing subject in three... two...\n\n(sound of a machine whining to a halt)\n\nA216: Ugh, can you <i>please</i> clean out the secondary tank? There are still traces from yesterday's reprint.\n\nTech: Sorry, Doctor. I thought I got it all.\n\n(sound of a machine powering up)\n\n(sound of electricity crackling)\n\nA216: Printing subject in three... two... one... Stand back, please.\n\nTech: Reprint complete. Subject number is 2988, \"Anemone-93.\" Adult female, 103 centimeters, 30 kilgrams. Subject is conscious and appears fully formed. No observable physical abnormalities noted. A216: Initiate vitals scan.\n\nTech: Scan complete. Pupil size, skin temperature, limb formation and distribution are all typical, except... huh. The respiration rate... it's... there doesn't really seem to be one.\n\nA216: I swear, this equipment gets less and less reliable by the day. Recalibrate the printing pod and run it again.\n\nTech: But that will take the rest of the night, Doctor.\n\nA216: The sooner you start, the sooner it will be done. Bring me the updated results when they're ready.\n\n[LOG ENDS]\n\n----------------------\n\n[LOG BEGINS]\n\nTech: Doctor Surahashi? Oh! I'm sorry to interrupt, Doctor Broussard.\n\nOlivia: It's quite all right. I invited myself when I saw last night's anomaly on my feed. \n\nA216: It may be nothing, again. We've had a few inconsistencies since the earthquakes started.\n\nTech: Um... actually...\n\nA216: Well?\n\nTech: I... well, look.\n\nOlivia: My god. It's true.\n\nA216: Hmm. Flood the tank.\n\nTech: Yes, Doctor.\n\nOlivia: What? No! She'll drown!\n\nA216: With all due respect, Dr. Broussard, further testing is crucial. This isn't just another vestigial ear. If this anomaly can be confirmed and replicated-Olivia: -We've just given humanity a whole new category of possible colony sites. I am aware.\n\nA216: Correct. For what it's worth, I am reasonably confident that Anemone-93's oxygen consumption is so low as to make fatality extremely unlikely. But I understand if you would prefer to step out of the room for a moment.\n\nOlivia: No, I-I'll stay.\n\nTech: Tank filling in three...two...\n\n(sound of rushing water)\n\nTech: Tank maximum volume has been reached.\n\nA216: Subject appears unaffected by the change in environment.\n\nOlivia: Incredible.\n\nA216: Indeed.\n\nA216: Maintain liquid levels and monitor subject's response. I want to know exactly how long vitals remain steady.\n\nTech: Yes, Doctor.\n\n[LOG ENDS]\n\n";
+				}
+			}
+
+			public class DLC5_FRIDGENOTE
+			{
+				public static LocString TITLE = "Fridge Note";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "pls stop stealing my Jell-O cups. I brought one for each day we're down here and there's only two of us aboard so it's not like I don't notice - thx\n\np.s. the blue ones aren't even Jell-O";
+				}
+			}
+
+			public class DLC5_HOAX
+			{
+				public static LocString TITLE = "Academic Hoax";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Acclaimed alumnae of Elion University of Science and Technology are speaking out against academic malfeasance in the world of theoretical physics.\n\nJackie Stern and Olivia Broussard, co-valedictorians of last year's graduating class, recently revealed that one of the articles they co-authored under Dr. Emil Schleichen's supervision was, in fact, a demonstrative scholarly hoax. The two women are accusing Dr. Schleichen of building his career on ideas plagiarized from his PhD students.\n\n\"Professors like him claim to be passionate about innovation,\" Stern declared, in a recording sent to more than a dozen scientific media outlets. \"Yet they make it impossible for others to establish their own reputations and access funding for the research projects that could hold the answer to humanity's survival.\"\n\nStern and Broussard also denounced the lack of critical lens applied to papers attached to such notable names as Dr. Schleichen's. \"We intentionally featured several debunked scientific theories, none of which the editors questioned,\" says Broussard.\n\nEditors of <i>The Journal of Theoretical Physics</i> did not respond to our requests for comment.\n\nDr. Schleichen has also declined to be interviewed, though the Dean of EUST published a formal statement indicating that Dr. Schleichen is currently on paid leave while the administration investigates the matter.\n\nEUST also indicated that Stern and Broussard may face repercussions for publicly undermining the university's reputation.";
+				}
+			}
+
+			public class DLC5_CAKEANDTEA
+			{
+				public static LocString TITLE = "First Slice";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+				public class BODY
+				{
+					public static LocString CONTAINER1 = "Ellie: Happy birthday, nerd!\n\nJosh: Is this... the exact same cake I got you for your birthday?\n\nEllie: So what? It was a good cake. Do you want some or not?\n\nJosh: I mean, yeah! It's just funny that you got me your favorite cake for my birthday.\n\nEllie: If I'm paying for it, I may as well enjoy it.\n\nJosh: You can see why it's weird though, right?\n\nEllie: Fine, whatever. You wanna pile on with everyone else and say I'm the worst, go ahead.\n\nJosh: I didn't say that!\n\nEllie: I may not be, like, <i>imprisoned</i> by social niceties, but I have a pretty good grasp of basic human decency. Which is more than I can say for <i>some</i> people.\n\nJosh: Ellie, I'm really not- wait, like who?\n\nEllie: Ha! I knew it. You're just as gossipy as me!\n\nJosh: I'll give you the first slice if you tell me.\n\nEllie: Deal. Okay, you know that hippie ocean scientist Director Stern brought in?\n\nJosh: The guy who was teaching us box breathing in the cafeteria?\n\nEllie: Probably. He's somewhere at the bottom of the Pacific right now. Anyway, you CANNOT tell anyone, but-\n\nJosh: He's what??\n\nEllie: He's not <i>dead</i>, dummy. He's on the Paladin with Frankie all summer. They're de-extincting amoeba or plankton or whatever.\n\nJosh: Whew. Okay. What'd he do? I thought he seemed nice.\n\nEllie: If you stopped interrupting every two seconds, maybe you'd find out.\n\nJosh: Sorryyyyyyy.\n\nEllie: I caught him recording a meeting with the Director. He came out of her office and checked a weird little device in his chest pocket. He looked <i>very</i> awkward when he realized I was standing right there.\n\nEllie: He asked me where Dr. Broussard's office was, and he got really mad that she didn't work here? Like, chill! Why did you assume she did?\n\nJosh: Who's Dr. Broussard?\n\nEllie: Seriously? Six-time winner of the Science for Humanity Prize? You really do live under a rock.\n\nJosh:  Okay, okay. So...is that it? He was just... <i>maybe</i> recording... and disappointed that someone doesn't work here?\n\nEllie: He didn't even say THANK YOU, Josh.\n\nJosh: Right. What a monster.\n\nEllie: Exactly.";
+				}
+			}
+
+			public class DLC5_CEASEDESIST
+			{
+				public static LocString TITLE = "Legal Letter";
+
+				public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+				public class BODY
+				{
+					public static LocString TITLE2 = "<b>NOTICE TO CEASE AND DESIST</b>";
+
+					public static LocString CONTAINER1 = "From: <smallcaps>VERTEX INSTITUTE OF SCIENCE</smallcaps>\nAddress: [REDACTED]\nDate: [REDACTED]\n\nTo: DR. K. TOKIOKA\n\n<b>Re: Unauthorized Disclosure of Confidential Information</b>\n\nOn [REDACTED], you signed a Non-Disclosure Agreement (NDA), referred to henceforth as the \"Agreement,\" which established strict and legally binding confidentiality obligations regarding your participation in the [REDACTED] Renewal Project.\n\nWe have reason to believe that certain confidential information covered under this Agreement has been disclosed to an unauthorized third party and competing facility. This constitutes a direct violation of the terms you agreed to uphold.\n\nTherefore, you are required to immediately:\n\n<indent=10%>1. Desist from further using or disclosing any or all of the Confidential Information mentioned in the Agreement;\n\n2. Deliver to us any materials currently in your possession or with any agent, employee, representative, affiliate, or individual that you have given copies; and\n\n3. Deliver to us a written undertaking that you will desist forthwith from using or disclosing the Confidential Information, other than what is in accordance with the Agreement, and seek our express written consent for any future use or disclosure.</indent>\n\nWe expect your acknowledgment of this letter and your response to our requests by [REDACTED]. Failure to respond by this date will leave us with no choice but to pursue legal remedies to enforce the Agreement.\n\nSincerely,\n\n<smallcaps>Hutz & Hartman, Attorneys at Law</smallcaps>\n\n<smallcaps>VERTEX INSTITUTE OF SCIENCE</smallcaps>";
+				}
+			}
+
 			public class DLC4_SURFACEPOI
 			{
 				public static LocString TITLE = "Environmental Pledge";
@@ -669,6 +759,20 @@ namespace STRINGS
 
 					public static LocString PREHISTORICPACU = "This critter attacked the transducer. Review data for more information.";
 
+					public static LocString PARROTFISH = "This critter's body is coated in millions of dinoflagellates. Review data for more information.";
+
+					public static LocString SQUID = "Camera view was obscured during scanning. Review data for more information.";
+
+					public static LocString SEAFAIRY = "This critter became stressed and shed its tail during the biopsy. Review data for more information.";
+
+					public static LocString SEATURTLE = "Specimen appears to be...ticklish. Review data for more information.";
+
+					public static LocString SEAHORSE = "Sample collected. Review data for more information.";
+
+					public static LocString PUFFERFISH = "Trace amounts of neurotoxins found. Review data for more information.";
+
+					public static LocString SNAIL = "Specimen has clogged the scanning equipment with sticky residue. Review data for more information.";
+
 					public static LocString UNKNOWN_TITLE = "MESSAGE FROM THE MANUFACTURER";
 
 					public static LocString UNKNOWN = "Subject successfully scanned.\n\nFlux function unavailable due to genome-parsing malfunction.\n\nPlease note that kicking the building's exterior is unlikely to correct this issue and may result in permanent damage to the system.";
@@ -719,6 +823,20 @@ namespace STRINGS
 					public static LocString CHAMELEON = "Scanning interrupted due to instrument displacement caused by specimen's lingual grasp.\n\nResidual markings left by specimen's tongue ridges and grooves are a 72% match to a set of unmarked fingerprints from the Gravitas personnel database.";
 
 					public static LocString PREHISTORICPACU = "This critter attacked the transducer.\n\nWhen the swallowed component was regurgitated, it was coated in microorganisms that predate this colony by at least several millenia.\n\nUnfortunately, it was reingested before analysis was completed.";
+
+					public static LocString PARROTFISH = "This critter's body is coated in millions of dinoflagellates trapped within a microscopic layer of muscilaginous gel.";
+
+					public static LocString SQUID = "Camera view was obscured during scanning by one tentacle while others probed the environment.\n\nMutated chemotactile receptors appeared to be both analyzing and mimicking the electrical signals emitted by equipment.";
+
+					public static LocString SEAFAIRY = "This critter became stressed and shed its tail during biopsy.\n\nResults indicate an unusually high pluripotent stem cell count. Specimen's tail regeneration was immediate; the original tail will be stored in this unit for further study.";
+
+					public static LocString SEATURTLE = "Specimen rocked back and forth against the overhead brush during scanning, emitting low gurgles that peaked when bristles came into contact with thinner areas of its carapace.\n\nThese vocalizations may be categorized as \"laughter\". Further study needed.";
+
+					public static LocString SEAHORSE = "Specimen exhibited signs of extreme stress at being contained.\n\nRapid onset hyperventilation resulted in violent expulsion of fine granules from specimen's snout. Content analysis indicates the presence of glass and electrolytes.";
+
+					public static LocString PUFFERFISH = "Specimen's microbiome tested positive for tetrodotoxin-producing bacteria.\n\nThe neurotoxin concentration is well within the safe range, but predators may experience a temporary numbness of the mouth, tongue, and throat.";
+
+					public static LocString SNAIL = "This critter has vestigial eyes, barely able to distinguish light from dark.\n\nInstead, it possesses a dense mat of short cirri along its stomach that are used to navigate, as well as identify minerals fit for consumption.\n\nSpecimen left enormous quantities of mucin in the chamber. Decontamination protocol engaged.";
 
 					public static LocString UNKNOWN_TITLE = "Non-Fluxable Species";
 
@@ -1648,6 +1766,10 @@ namespace STRINGS
 			public static LocString FOODSWITHEFFECT = "Foods with this effect";
 
 			public static LocString EQUIPMENTEFFECTS = "Effects";
+
+			public static LocString MOLTED = "Molted by {Creature}";
+
+			public static LocString SECRETED = "Secreted by {Creature}";
 		}
 
 		public class FORMAT_STRINGS
@@ -1673,6 +1795,10 @@ namespace STRINGS
 			public static LocString TRANSITION_LABEL_TO_ONE_ELEMENT = "{0} to {1}";
 
 			public static LocString TRANSITION_LABEL_TO_TWO_ELEMENTS = "{0} to {1} and {2}";
+
+			public static LocString MOLTED = "{Amount}\n<size=66%>when happy</size>";
+
+			public static LocString SECRETED = "<size=70%>max.</size>{0}";
 		}
 
 		public class CREATURE_DESCRIPTORS
@@ -1822,6 +1948,24 @@ namespace STRINGS
 					"\n    • ",
 					UI.FormatAsLink("Recreation Room", "REC_ROOM")
 				});
+			}
+
+			public class KITCHENREFRIGERATOR
+			{
+				public static LocString TITLE = "Refrigerator";
+
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Buildings that store perishable ",
+					UI.FormatAsLink("Food", "FOOD"),
+					" items at ",
+					UI.FormatAsLink("temperatures", "HEAT"),
+					" that to prevent spoilage."
+				});
+
+				public static LocString FLAVOUR = "";
+
+				public static LocString ROOMSREQUIRING = "    • " + UI.FormatAsLink("Kitchen", "ROOMSFOOD");
 			}
 
 			public class RECBUILDING
@@ -2030,6 +2174,15 @@ namespace STRINGS
 				public static LocString TITLE = UI.FormatAsLink("Warming Stations", "WARMINGSTATION");
 
 				public static LocString DESCRIPTION = "Buildings that Duplicants will visit when they are suffering the effects of cold environments.";
+
+				public static LocString FLAVOUR = "";
+			}
+
+			public class SUBMERGIBLE
+			{
+				public static LocString TITLE = UI.FormatAsLink("Submergible", "REQUIREMENTCLASSSUBMERGIBLE");
+
+				public static LocString DESCRIPTION = "Buildings that can operate while submerged in liquid without becoming flooded.";
 
 				public static LocString FLAVOUR = "";
 			}
@@ -2390,6 +2543,52 @@ namespace STRINGS
 			}
 		}
 
+		public class FISHFOOD
+		{
+			public static LocString TITLE = "Pacu Treat";
+
+			public static LocString SUBTITLE = "Fish Food";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: Pacu Treat</smallcaps>";
+
+				public static LocString CONTAINER2 = string.Concat(new string[]
+				{
+					"A gourmet loaf of ground seeds and ",
+					UI.FormatAsLink("Water", "WATER"),
+					", formulated to delight ",
+					UI.FormatAsLink("Pacus", "PACU"),
+					"."
+				});
+			}
+		}
+
+		public class PARROTFISH
+		{
+			public static LocString SPECIES_TITLE = "Beakon";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Beakon";
+
+			public static LocString SUBTITLE = "Aquatic Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Beakons are highly sought-after by ichthyophiles due to their radiant bioluminescence and unusual habit of surfacing for ",
+					UI.FormatAsLink("Oxygen", "OXYGEN"),
+					".\n\nThese brilliant critters enjoy the tickle of air in their gills, and are happiest cohabiting with bubbly ",
+					CREATURES.SPECIES.OXYCORAL.NAME,
+					" that provide abundant air pockets for their entertainment.\n\nSome ",
+					CREATURES.FAMILY_PLURAL.PARROTFISHSPECIES,
+					" have even been known to nap atop their preferred coral formation. Such sightings are extremely rare."
+				});
+			}
+		}
+
 		public class PIP
 		{
 			public static LocString SPECIES_TITLE = "Pips";
@@ -2512,6 +2711,31 @@ namespace STRINGS
 			}
 		}
 
+		public class PUFFERFISH
+		{
+			public static LocString SPECIES_TITLE = "Blowter";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Blowter";
+
+			public static LocString SUBTITLE = "Aquatic Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Blowters are docile fish with a poorly developed gastrointestinal tract.\n\nThis species eats only ",
+					UI.FormatAsLink("Waterweed", "SEALETTUCE"),
+					" but lacks the digestive enzymes required to process the plant efficiently. Large amounts of excess ",
+					ELEMENTS.OXYGEN.NAME,
+					" build up in the critter's gut during digestion, resulting in chronic and extreme bloating.\n\nMarine explorers have learned to siphon ",
+					ELEMENTS.OXYGEN.NAME,
+					" from Blowters in an emergency. It's not clear who was the first to attempt this."
+				});
+			}
+		}
+
 		public class PUFT
 		{
 			public static LocString SPECIES_TITLE = "Pufts";
@@ -2595,6 +2819,54 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Rover is a planetary scout robot programmed to land on and mine Planetoids where sending a Duplicant would put them unneccessarily in danger.\n\nRovers are programmed to be very pleasant and social when interacting with other beings. However, an unintended consequence of this programming is that the socialized robots tended to experience the same work slow-downs due to loneliness and low morale.\n\nTo compensate for this, the Rover was programmed to have two distinct personalities it can switch between to have pleasant in-depth conversations with itself during long stints alone.";
+			}
+		}
+
+		public class SEAFAIRY
+		{
+			public static LocString SPECIES_TITLE = "Kelpole";
+
+			public static LocString SPECIES_SUBTITLE = "Aquatic Organism";
+
+			public static LocString TITLE = "Kelpole";
+
+			public static LocString SUBTITLE = "Aquatic Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "\"Kelpole\" is the colloquial name given to <i>Osculateus venerandum</i>, a small free-moving organism spawned from microscopic eggs that attach themselves to " + CREATURES.SPECIES.SEATREE.NAME + ".\n\nThese unusual critters possess only a few hundred neurons and rely primarily on leaf mimicry to camouflage them from predators during their brief lives.\n\nFormerly considered flora, Kelpoles were eventually reclassified as fauna due to their frequent inclusion on marine biologists' lists of top ten most adorable creatures. The term \"flona\" was rejected out of hand.";
+			}
+		}
+
+		public class SEATURTLE
+		{
+			public static LocString SPECIES_TITLE = "Orehull";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Orehull";
+
+			public static LocString SUBTITLE = "Aquatic Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Orehulls are oversized anamniotes prized for the iron ore deposits that adorn their carapace.\n\nSpecialized glands between the carapace scutes continuously release microscopic amounts of the heavy metals present in the critter's environment, an immune system reaction that causes no discomfort to the Orehull.\n\n";
+			}
+		}
+
+		public class SEAHORSE
+		{
+			public static LocString SPECIES_TITLE = "Seaquine";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Seaquine";
+
+			public static LocString SUBTITLE = "Aquatic Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Adult Seaquines flood their brood pouches with " + UI.FormatAsLink("Ovolene", "FISHMILK") + " to nourish their eggs and support osmoregulation.\n\nAs this is an energy-intensive process, it is abandoned in later life stages so that geriatric Seaquine can focus their efforts on laying one final egg before they perish.";
 			}
 		}
 
@@ -2751,6 +3023,52 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Longhair\" Slickster variant</smallcaps>";
 
 				public static LocString CONTAINER2 = "Positioned on either side of the Major Rhinophores are Minor Rhinophores, which specialize in mechanical reception and detect air pressure around the Slickster. These send signals to the brain to contract or expand its air sacks accordingly.";
+			}
+		}
+
+		public class SNAIL
+		{
+			public static LocString SPECIES_TITLE = "Slogos";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Slogo";
+
+			public static LocString SUBTITLE = "Domesticable Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Slogos' unusually thick skin prevents them from succumbing to the fatal osmosis that other members of the Gastropoda class experience after exposure to " + UI.FormatAsLink("Salt", "SALT") + ".\n\n";
+
+				public static LocString CONTAINER2 = "This enables them to safely enjoy the fluid retention properties of their preferred food.";
+			}
+		}
+
+		public class SNAILIRON
+		{
+			public static LocString TITLE = "Gildgo";
+
+			public static LocString SUBTITLE = "Critter Morph";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Gildgo\" variant</smallcaps>";
+			}
+		}
+
+		public class SQUID
+		{
+			public static LocString SPECIES_TITLE = "Glo Squid";
+
+			public static LocString SPECIES_SUBTITLE = "Critter Species";
+
+			public static LocString TITLE = "Glo Squid";
+
+			public static LocString SUBTITLE = "Aquatic Critter";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Glo Squids are immediately recognizable by the bioluminescent photophores that strobe vertically along their soft bodies.\n\nThese tropical critters are distant relatives of the <i>Euprymna scolopes</i>, though rather than navigating via jet propulsion, Glo Squids have evolved a pair of elongated tentacles that enable them to swim upright.\n\n";
 			}
 		}
 
@@ -3568,6 +3886,25 @@ namespace STRINGS
 			}
 		}
 
+		public class GUMWOOD
+		{
+			public static LocString TITLE = "Gum Wood";
+
+			public static LocString SUBTITLE = "Renewable Resource";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Gum Wood is a flexible type of ",
+					UI.FormatAsLink("Wood", "WOODLOG"),
+					" with the unique sap that can be used in the production of ",
+					UI.FormatAsLink("Rubber", "RUBBER"),
+					".\n\nNote that it is not <i>made</i> of rubber, and thus will not bounce when thrown."
+				});
+			}
+		}
+
 		public class KELP
 		{
 			public static LocString TITLE = "Seakomb Leaf";
@@ -3601,11 +3938,9 @@ namespace STRINGS
 				{
 					"Thick logs of ",
 					UI.FormatAsLink("Wood", "WOOD"),
-					" harvested from ",
-					UI.FormatAsLink("Arbor Trees", "FOREST_TREE"),
-					", ",
+					" harvested from trees, ",
 					UI.FormatAsLink("Oakshells", "CRABWOOD"),
-					" and other natural sources.\n\nWood Logs are used in the production of ",
+					", and other natural sources.\n\nWood is also used in the production of ",
 					UI.FormatAsLink("Heat", "HEAT"),
 					" and ",
 					UI.FormatAsLink("Power", "POWER"),
@@ -3649,6 +3984,42 @@ namespace STRINGS
 			}
 		}
 
+		public class MUSSELSPROUT
+		{
+			public static LocString TITLE = "Mussel Sprout";
+
+			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Mussel Sprouts are hardy plants that thrive in wild marine environments. A dense shell protects the edible sprout (colloquially referred to as its \"tongue\") during growth.\n\nWhile not sentient per se, Mussel Sprouts do possess a survival instinct: during harvesting, they may attempt to escape by dragging themselves away using their prehensile tongue. This action occurs at such a glacial pace, however, that it is effectively invisible to the naked eye.";
+			}
+		}
+
+		public class SNAIL_IRON_SHELL
+		{
+			public static LocString TITLE = "Ferrgo Molt";
+
+			public static LocString SUBTITLE = "Critter Byproduct";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "A metallic exoskeleton discarded by an aquatic critter.\n\n";
+			}
+		}
+
+		public class SNAIL_SHELL
+		{
+			public static LocString TITLE = "Slogo Molt";
+
+			public static LocString SUBTITLE = "Critter Byproduct";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "A small exoskeleton discarded by an aquatic critter.\n\n";
+			}
+		}
+
 		public class SWAMPLILYFLOWER
 		{
 			public static LocString TITLE = "Balm Lily Flower";
@@ -3658,6 +4029,29 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Balm Lily Flowers bloom on " + UI.FormatAsLink("Balm Lily", "SWAMPLILY") + " plants.\n\nThey have a wide range of medicinal applications, and have been shown to be a particularly effective antidote for respiratory illnesses.\n\nThe intense perfume emitted by their vivid petals is best described as \"dizzying.\"";
+			}
+		}
+
+		public class URCHIN
+		{
+			public static LocString TITLE = "Pinpoki";
+
+			public static LocString SUBTITLE = "Aquatic Organism";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = string.Concat(new string[]
+				{
+					"Pinpoki are aquatic organisms grown in ",
+					UI.FormatAsLink("Pinpokets", "URCHINPLANT"),
+					". They can be crushed to separate the ",
+					UI.FormatAsLink("Diamond", "DIAMOND"),
+					" spines from the edible ",
+					UI.FormatAsLink("Uni", "URCHINMEAT"),
+					" inside.\n\nThey can also be displayed whole as ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					"."
+				});
 			}
 		}
 
@@ -4807,6 +5201,30 @@ namespace STRINGS
 			}
 		}
 
+		public class BULBLOOM
+		{
+			public static LocString TITLE = "Bulbloom";
+
+			public static LocString SUBTITLE = "Decor Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "On a molecular level, it is nearly impossible to distinguish between the Bulbloom's translucent bulbar envelope and high-quality arachnid silk.\n\nThis combination of strength and extensibility keep its bright bloom intact in even the strongest currents, making this plant a beacon of hope in dark marine environments.";
+			}
+		}
+
+		public class CLAM
+		{
+			public static LocString TITLE = "Clampum";
+
+			public static LocString SUBTITLE = "Aquatic Organism";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Clampum, also known as <i>Arcticidae hafrunus</i>, are the largest species of bivalve mollusk in the known universe. Their powerful adductor muscles and serrated shell edges are well-documented; in early scientific literature, field notes often included the words \"accidental amputation.\"\n\nAlthough development of proper handling techniques has long since eliminated the danger, these anecdotes still serve as cautionary tales for newbie marine biologists.";
+			}
+		}
+
 		public class LILYPAD
 		{
 			public static LocString TITLE = "Cura Lotus";
@@ -4840,6 +5258,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Dew Dripper is sometimes referred to as the \"purple starling\" of the plant world for the magnificent feather-like leaves that encircle its base.\n\nThis sculptural plant slow-drips excess sap that coagulates upon contact with air. The resulting globule is so dense that its weight would snap the Dew Dripper's hollow stem if planted in the ground.\n\nNo one has ever been seriously injured by a falling Dewdrip, but it's best not to linger beneath them.";
+			}
+		}
+
+		public class DEWPALM
+		{
+			public static LocString TITLE = "Gum Palm";
+
+			public static LocString SUBTITLE = "Cultivable Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Gum Palms have developed an eye-catching defense mechanism similar to that of poisonous amphibians.\n\nBright reddish coloring displayed in their leaves and sharp ornamental bark scales deter most predators, who recognize the warning signs of toxicity. " + UI.FormatAsLink("Pacus", "PACU") + ", however, consider the tree's highly toxic seed a spicy treat.";
 			}
 		}
 
@@ -5079,6 +5509,18 @@ namespace STRINGS
 			}
 		}
 
+		public class OXYCORAL
+		{
+			public static LocString TITLE = "Flue Coral";
+
+			public static LocString SUBTITLE = "Aquatic Organism";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Flue Corals are nurse plants that provide homes for countless microscopic organisms, as well as a rare species of seagrass that grows exclusively inside the narrow openings at the top of the coral.\n\nAgriculturalists who attempt to trim these unsightly \"nose hairs\" soon find that their instruments are blunted by the coarse grass fibers.\n\n";
+			}
+		}
+
 		public class OXYFERN
 		{
 			public static LocString TITLE = "Oxyfern";
@@ -5088,6 +5530,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Oxyferns have perhaps the highest metabolism in the plant kingdom, absorbing relatively large amounts of carbon dioxide and converting it into oxygen in quantities disproportionate to their small size.\n\nThey subsequently thrive in areas with abundant animal wildlife or ambiently high carbon dioxide concentrations.";
+			}
+		}
+
+		public class FILAMENTPLANT
+		{
+			public static LocString TITLE = "Petta Pouf";
+
+			public static LocString SUBTITLE = "Aquatic Decor Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The catkins that bloom at the end of each Petta Pouf branch are made up of thousands of silky soft hairs akin to a luxurious fur coat. Many growers find themselves regarding this diminutive member of the willow family as a beloved companion.\n\n";
 			}
 		}
 
@@ -5115,6 +5569,30 @@ namespace STRINGS
 			}
 		}
 
+		public class URCHINPLANT
+		{
+			public static LocString TITLE = "Pinpoket";
+
+			public static LocString SUBTITLE = "Aquatic Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The individual " + UI.FormatAsLink("Pinpoki", "URCHIN") + " that grow inside Pinpoket clusters are prized by marine cuisine gourmands for their delicate buttery flesh, with an aftertaste that some describe as \"transcendant.\"\n\nThe flavor is so legendary that even just gazing upon a displayed Pinpoki is enough to inspire a high level of emotional satisfaction.";
+			}
+		}
+
+		public class PLANKTONCORAL
+		{
+			public static LocString TITLE = "Starnacle";
+
+			public static LocString SUBTITLE = "Aquatic Organism";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Starnacles share DNA with both arthropods and echinoderms, though they retain elements of the latter's fascinating digestive mechanism.\n\nDuring feeding, a Starnacle's stomach is pushed out through its small mouthpiece to envelop the nutrient source. Digestion is completed outside the body, and the stomach then retracts.\n\nThe process can be disturbing to witness. Fortunately, the organism's mouthpiece is located on its underside.";
+			}
+		}
+
 		public class CARROTPLANT
 		{
 			public static LocString TITLE = "Plume Squash Plant";
@@ -5139,6 +5617,18 @@ namespace STRINGS
 			}
 		}
 
+		public class SALTYSTICKSPLANT
+		{
+			public static LocString TITLE = "Sodicane";
+
+			public static LocString SUBTITLE = "Edible Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The Sodicane plant is a hardy member of the Poaceae family of grasses, well-suited to amateur farmers in warm climates.\n\nWhile the crystallized mineral deposits on its stalks are quite palatable, they can only be eaten by gnawing on the unfortunately fibrous stalk.";
+			}
+		}
+
 		public class SATURNCRITTERTRAP
 		{
 			public static LocString TITLE = "Saturn Critter Trap";
@@ -5148,6 +5638,30 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "The Saturn Critter Trap plant is a carnivorous plant that lays in wait for unsuspecting critters to happen by, then traps them in its mouth for consumption.\n\nThe Saturn Trap Plant's predatory mechanism is reflective of the harsh radioactive habitat it resides in.\n\nOnce trapped in the deadly maw of the plant, creatures are gently asphyxiated then digested through powerful acidic enzymes which coat the inner sides of the Saturn Trap Plant's leaves.";
+			}
+		}
+
+		public class SEATREE
+		{
+			public static LocString TITLE = "Tower Kelp";
+
+			public static LocString SUBTITLE = "Cultivable Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "This species of the Laminariales order is composed of vertical stems supported by structural vines. What appear to be leaves are actually " + CREATURES.FAMILY_PLURAL.SEAFAIRYSPECIES + ", aquatic critters that consume aeronutrients present in the Tower Kelp's hollow stalk.\n\nTower Kelp stalks that fail to attract these natural pressure regulators will collapse before reaching maturation.";
+			}
+		}
+
+		public class SEAURCHIN
+		{
+			public static LocString TITLE = "Pinpoki";
+
+			public static LocString SUBTITLE = "Aquatic Organism";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Pinpoki are prized by marine cuisine gourmands for their delicate buttery flesh, with an aftertaste that some describe as \"transcendant.\"\n\nThe flavor is so legendary that even just gazing upon a displayed Pinpoki is enough to inspire a high level of emotional satisfaction.";
 			}
 		}
 
@@ -5289,6 +5803,30 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Tranquil Toes are a decorative succulent that flourish in a radioactive environment.\n\nThough most of the flora and fauna that thrive a harsh radioactive biome tends to be aggressive, Tranquil Toes provide a rare exception to this rule.\n\nIt is a generally believed that the morale boosting abilities of this plant come from its resemblence to a funny hat one might wear at a party.";
+			}
+		}
+
+		public class TUBEWORM
+		{
+			public static LocString TITLE = "Tublia";
+
+			public static LocString SUBTITLE = "Cultivable Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Little is known about the internal workings of Tublias, as their potent \"rotten egg\" stench makes them an unpopular specimen for closer study.\n\nWhile this odor dissipates during processing, it can linger on skin and clothing for an unpleasantly long time.";
+			}
+		}
+
+		public class WATERCUPS
+		{
+			public static LocString TITLE = "Husha Cups";
+
+			public static LocString SUBTITLE = "Decorative Plant";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Husha Cups belong to the Liliaceae family. While they are a welcome addition to any colony space, their noise-dampening properties make them particularly soothing in industrial areas.\n\nEach cup-shaped bloom is essentially an individual anechoic chamber made up of a thick spathe that captures ambient soundwaves, and a short woolly spadix that absorbs them.\n\nSome farmers believe that whispering compliments into Husha Cups makes them grow faster.\n\n";
 			}
 		}
 

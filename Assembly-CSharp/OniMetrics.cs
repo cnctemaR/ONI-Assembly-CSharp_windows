@@ -27,14 +27,23 @@ public class OniMetrics : MonoBehaviour
 		OniMetrics.Metrics[(int)eventType][key] = data;
 	}
 
-	public static void SendEvent(OniMetrics.Event eventType, string debugName)
+	public static void SendEvent(OniMetrics.Event eventType, string eventName)
 	{
 		if (OniMetrics.Metrics[(int)eventType] == null || OniMetrics.Metrics[(int)eventType].Count == 0)
 		{
 			return;
 		}
-		ThreadedHttps<KleiMetrics>.Instance.SendEvent(OniMetrics.Metrics[(int)eventType], debugName);
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(OniMetrics.Metrics[(int)eventType], eventName);
 		OniMetrics.Metrics[(int)eventType].Clear();
+	}
+
+	public static void SendEventImmediate(string eventName, Dictionary<string, object> data = null)
+	{
+		if (ThreadedHttps<KleiMetrics>.Instance == null || !ThreadedHttps<KleiMetrics>.Instance.enabled)
+		{
+			return;
+		}
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(data, eventName);
 	}
 
 	private static List<Dictionary<string, object>> Metrics;

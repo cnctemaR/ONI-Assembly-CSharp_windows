@@ -304,6 +304,13 @@ namespace STRINGS
 
 				public static LocString DESC = "Grants a Bionic Duplicant the full range of tidying skills, including blasting unwanted meteors out of the sky.";
 			}
+
+			public class BOOSTER_MOD_SWIM
+			{
+				public static LocString NAME = UI.FormatAsLink("Swim Hack Booster", "BOOSTER_MOD_SWIM");
+
+				public static LocString DESC = "Overrides a Bionic Duplicant's safety protocols to enable swimming.\n\n<b>WARNING:</b>\nUsage stresses bionic systems and does not protect from liquid exposure.";
+			}
 		}
 
 		public class FOOD
@@ -452,7 +459,7 @@ namespace STRINGS
 				public static LocString DESC = string.Concat(new string[]
 				{
 					"Raw ",
-					UI.FormatAsLink("Pacu Fillet", "FISHMEAT"),
+					UI.FormatAsLink("Fish Fillet", "FISHMEAT"),
 					" wrapped with fresh ",
 					UI.FormatAsLink("Lettuce", "LETTUCE"),
 					".\n\nWhile the salt of the lettuce may initially overpower the flavor, a keen palate can discern the subtle sweetness of the fillet beneath."
@@ -461,7 +468,7 @@ namespace STRINGS
 				public static LocString RECIPEDESC = string.Concat(new string[]
 				{
 					"Raw ",
-					UI.FormatAsLink("Pacu Fillet", "FISHMEAT"),
+					UI.FormatAsLink("Fish Fillet", "FISHMEAT"),
 					" wrapped with fresh ",
 					UI.FormatAsLink("Lettuce", "LETTUCE"),
 					"."
@@ -598,9 +605,25 @@ namespace STRINGS
 
 			public class FISHMEAT
 			{
-				public static LocString NAME = UI.FormatAsLink("Pacu Fillet", "FISHMEAT");
+				public static LocString NAME = UI.FormatAsLink("Fish Fillet", "FISHMEAT");
 
-				public static LocString DESC = "An uncooked fillet from a very dead " + CREATURES.SPECIES.PACU.NAME + ". Yum!";
+				public static LocString DESC = "An uncooked fillet from a very dead aquatic critter. Yum!";
+			}
+
+			public class FISHFOOD
+			{
+				public static LocString NAME = UI.FormatAsLink("Pacu Treat", "PACUSPECIES");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"A gourmet loaf of ground seeds and ",
+					UI.FormatAsLink("Water", "WATER"),
+					", formulated to delight ",
+					UI.FormatAsLink("Pacus", "PACU"),
+					"."
+				});
+
+				public static LocString RECIPEDESC = "A gourmet loaf of ground seeds, specially formulated for Pacus.";
 			}
 
 			public class MEAT
@@ -705,7 +728,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Deep-fried fish cradled in a crunchy fin.";
 
-				public static LocString RECIPEDESC = UI.FormatAsLink("Pacu Fillet", "FISHMEAT") + " lightly battered and deep-fried in " + UI.FormatAsLink("Tallow", "TALLOW") + ".";
+				public static LocString RECIPEDESC = UI.FormatAsLink("Fish Fillet", "FISHMEAT") + " lightly battered and deep-fried in " + UI.FormatAsLink("Tallow", "TALLOW") + ".";
 			}
 
 			public class DEEPFRIEDSHELLFISH
@@ -964,6 +987,22 @@ namespace STRINGS
 				public static LocString DESC = "The fruit from an " + UI.FormatAsLink("Ovagro Vine", "VINEMOTHER") + ".\n\nIt's fun to squeeze as many as possible into a single mouthful.";
 			}
 
+			public class URCHINMEAT
+			{
+				public static LocString NAME = UI.FormatAsLink("Uni", "URCHINMEAT");
+
+				public static LocString DESC = "The edible flesh of a " + UI.FormatAsLink("Pinpoki", "URCHIN") + ".\n\nA rare delicacy whose safe preparation involves destroying the valuable outer spikes.";
+
+				public static LocString RECIPEDESC = string.Concat(new string[]
+				{
+					"The edible flesh of a ",
+					UI.FormatAsLink("Pinpoki", "URCHIN"),
+					" prepared at the ",
+					UI.FormatAsLink("Sushi Bar", "SUSHIBAR"),
+					"."
+				});
+			}
+
 			public class SPICEBREAD
 			{
 				public static LocString NAME = UI.FormatAsLink("Pepper Bread", "SPICEBREAD");
@@ -1190,6 +1229,13 @@ namespace STRINGS
 				public static LocString DESC = "A cold seedless fruit that triggers mild brain freeze.\n\nIt cannot be replanted.";
 			}
 
+			public class AQUATICFORAGEPLANT
+			{
+				public static LocString NAME = UI.FormatAsLink("Mussel Tongue", "AQUATICFORAGEPLANT");
+
+				public static LocString DESC = "A seedless plant with a gummy texture.\n\nIt cannot be replanted.\n\nDigging up Buried Objects may uncover a " + ITEMS.FOOD.AQUATICFORAGEPLANT.NAME + ".";
+			}
+
 			public class ROTPILE
 			{
 				public static LocString NAME = UI.FormatAsLink("Rot Pile", "COMPOST");
@@ -1271,6 +1317,22 @@ namespace STRINGS
 				public static LocString DESC = "A seedless fruit that loses its flavor long before it is fully chewed.\n\nIt cannot be replanted.\n\nDigging up Buried Objects may uncover a " + ITEMS.FOOD.GARDENFORAGEPLANT.NAME + ".";
 			}
 
+			public class SALTYSTICKSFOOD
+			{
+				public static LocString NAME = UI.FormatAsLink("Salty Sticks", "SALTYSTICKSFOOD");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"An extremely salty snack harvested from a ",
+					UI.FormatAsLink("Sodicane", "SALTYSTICKSPLANT"),
+					".\n\nVisiting a ",
+					UI.FormatAsLink("Water Cooler", "WATERCOOLER"),
+					" will counteract the ",
+					UI.FormatAsLink("Thirst", "IDFOODEFFECTS"),
+					" caused by eating Salty Sticks."
+				});
+			}
+
 			public class BUTTERFLYPLANTSEED
 			{
 				public static LocString NAME = UI.FormatAsLink("Mimillet", "BUTTERFLYPLANTSEED");
@@ -1294,6 +1356,133 @@ namespace STRINGS
 				public static LocString DESC = "A lightly toasted " + CREATURES.SPECIES.SEEDS.BUTTERFLYPLANTSEED.NAME + ".\n\nIt makes the tummy feel a bit fluttery.";
 
 				public static LocString RECIPEDESC = "A lightly toasted " + CREATURES.SPECIES.SEEDS.BUTTERFLYPLANTSEED.NAME + ".";
+			}
+
+			public class EDAMAME
+			{
+				public static LocString NAME = UI.FormatAsLink("Edamame", "EDAMAME");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Raw ",
+					UI.FormatAsLink("Nosh Beans", "BEANPLANTSEED"),
+					" sprinkled with ",
+					UI.FormatAsLink("Sodicane", "SALTYSTICKSPLANT"),
+					" shavings.\n\nSimple and satisfying."
+				});
+
+				public static LocString RECIPEDESC = string.Concat(new string[]
+				{
+					"Raw ",
+					UI.FormatAsLink("Nosh Beans", "BEANPLANTSEED"),
+					" with ",
+					UI.FormatAsLink("Sodicane", "SALTYSTICKSPLANT"),
+					"."
+				});
+			}
+
+			public class MAKI
+			{
+				public static LocString NAME = UI.FormatAsLink("Sushi Roll", "MAKI");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Raw ",
+					UI.FormatAsLink("Fish Fillet", "FISHMEAT"),
+					" paired with ",
+					UI.FormatAsLink("Liceloaf", "BASICPLANTBAR"),
+					" and wrapped in ",
+					UI.FormatAsLink("Nori", "NORI"),
+					".\n\nThe salty, crispy wrap balances perfectly with the juicy proteins inside."
+				});
+
+				public static LocString RECIPEDESC = string.Concat(new string[]
+				{
+					"Raw ",
+					UI.FormatAsLink("Fish Fillet", "FISHMEAT"),
+					" paired with ",
+					UI.FormatAsLink("Liceloaf", "BASICPLANTBAR"),
+					" and ",
+					UI.FormatAsLink("Nori", "NORI"),
+					"."
+				});
+			}
+
+			public class NIGIRI
+			{
+				public static LocString NAME = UI.FormatAsLink("Nigiri", "NIGIRI");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Tenderized ",
+					UI.FormatAsLink("Calamari", "SQUIDMEAT"),
+					" and ",
+					UI.FormatAsLink("Liceloaf", "BASICPLANTBAR"),
+					" wrapped in ",
+					UI.FormatAsLink("Nori", "NORI"),
+					".\n\nExpert preparation highlights the meat's delicate sweetness and soft, chewy texture."
+				});
+
+				public static LocString RECIPEDESC = string.Concat(new string[]
+				{
+					"Tenderized ",
+					UI.FormatAsLink("Calamari", "SQUIDMEAT"),
+					" with ",
+					UI.FormatAsLink("Liceloaf", "BASICPLANTBAR"),
+					" and ",
+					UI.FormatAsLink("Nori", "NORI"),
+					"."
+				});
+			}
+
+			public class SQUIDMEAT
+			{
+				public static LocString NAME = UI.FormatAsLink("Calamari", "SQUIDMEAT");
+
+				public static LocString DESC = "Uncooked meat from a very dead " + CREATURES.SPECIES.SQUID.NAME + ".\n\nIt's a little slippery.";
+
+				public static LocString RECIPEDESC = "Uncooked meat from a very dead " + CREATURES.SPECIES.SQUID.NAME + ".";
+			}
+
+			public class NORI
+			{
+				public static LocString NAME = UI.FormatAsLink("Nori", "NORI");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"A bundle of slightly salty dried greenery from a ",
+					UI.FormatAsLink("Tower Kelp", "SEATREE"),
+					" or ",
+					UI.FormatAsLink("Kelpole", "SEAFAIRY"),
+					".\n\nIt's most commonly used as an ingredient in higher-tier dishes."
+				});
+			}
+
+			public class CAVIAR
+			{
+				public static LocString NAME = UI.FormatAsLink("Caviar", "CAVIAR");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Shelf-stable eggs from an aquatic critter.\n\nIt can be added to ",
+					UI.FormatAsLink("Food", "FOOD"),
+					" at a ",
+					UI.FormatAsLink("Mess Table", "DININGTABLE"),
+					" to boost ",
+					UI.FormatAsLink("Morale", "MORALE"),
+					".\n\nDuplicants will automatically use Caviar while sitting at a ",
+					BUILDINGS.PREFABS.DININGTABLE.NAME,
+					" during mealtime."
+				});
+			}
+
+			public class MUSSELTONGUE
+			{
+				public static LocString NAME = UI.FormatAsLink("Mussel Tongue", "MUSSELTONGUE");
+
+				public static LocString DESC = "Edible tongue of a " + UI.FormatAsLink("Mussel Sprout", "MUSSELSPROUT") + ".\n\nIt's bitter and chewy, but better than starvation.";
+
+				public static LocString RECIPEDESC = "Uncooked meat from a " + UI.FormatAsLink("Mussel Sprout", "MUSSELSPROUT") + ".";
 			}
 		}
 
@@ -1478,6 +1667,13 @@ namespace STRINGS
 				});
 			}
 
+			public class PLANKTON_CORAL_PRODUCT
+			{
+				public static LocString NAME = UI.FormatAsLink("Phosphorite", "PHOSPHORITE");
+
+				public static LocString DESC = "A chunk of hardened mineral.\n\nIt can be eaten by " + CREATURES.FAMILY_PLURAL.PARROTFISHSPECIES + ".";
+			}
+
 			public class FEATHER_FABRIC
 			{
 				public static LocString NAME = UI.FormatAsLink("Feather Fiber", "FEATHER_FABRIC");
@@ -1574,6 +1770,38 @@ namespace STRINGS
 					" of one ",
 					UI.FormatAsLink("Plant", "PLANTS"),
 					"."
+				});
+			}
+
+			public class PLASTIC_GASKET
+			{
+				public static LocString NAME = UI.FormatAsLink("Plastic Gasket", "PLASTIC_GASKET");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"A flexible ",
+					UI.FormatAsLink("Plastic", "POLYPROPYLENE"),
+					" seal, made at the ",
+					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+					".\n\nPrevents unwanted ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" leakage."
+				});
+			}
+
+			public class RUBBER_GASKET
+			{
+				public static LocString NAME = UI.FormatAsLink("Rubber Gasket", "RUBBER_GASKET");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"A flexible ",
+					UI.FormatAsLink("Rubber", "RUBBER"),
+					" seal, made at the ",
+					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+					".\n\nPrevents unwanted ",
+					UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID"),
+					" leakage."
 				});
 			}
 
@@ -1684,6 +1912,20 @@ namespace STRINGS
 				}
 			}
 
+			public class SNAIL_SHELL
+			{
+				public static LocString NAME = UI.FormatAsLink("Slogo Molt", "SNAILSHELL");
+
+				public static LocString DESC = "Can be crushed to produce " + UI.FormatAsLink("Lime", "LIME") + ".";
+			}
+
+			public class SNAIL_IRON_SHELL
+			{
+				public static LocString NAME = UI.FormatAsLink("Gildgo Molt", "SNAILIRONSHELL");
+
+				public static LocString DESC = "Can be crushed to produce " + UI.FormatAsLink("Gold Amalgam", "GOLDAMALGAM") + ".";
+			}
+
 			public class WOOD
 			{
 				public static LocString NAME = UI.FormatAsLink("Wood", "WOOD");
@@ -1736,6 +1978,24 @@ namespace STRINGS
 					".\n\nDuplicants will automatically use Refined Sugar while sitting at a ",
 					BUILDINGS.PREFABS.DININGTABLE.NAME,
 					" during mealtime.\n\n<i>Only the finest grains are chosen.</i>"
+				});
+			}
+
+			public class URCHIN
+			{
+				public static LocString NAME = UI.FormatAsLink("Pinpoki", "URCHIN");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Pinpoki are aquatic organisms grown in ",
+					UI.FormatAsLink("Pinpokets", "URCHINPLANT"),
+					".\n\nThey can be processed into ",
+					UI.FormatAsLink("Diamond", "DIAMOND"),
+					" or ",
+					UI.FormatAsLink("Uni", "URCHINMEAT"),
+					", or used as ",
+					UI.FormatAsLink("Decor", "DECOR"),
+					"."
 				});
 			}
 

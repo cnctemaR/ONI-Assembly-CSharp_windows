@@ -15,7 +15,8 @@ public class OxygenMaskConfig : IEquipmentConfig
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Oxygen_Mask", global::TUNING.EQUIPMENT.SUITS.SLOT, SimHashes.Dirt, 15f, "oxygen_mask_kanim", "mask_oxygen", "", 6, list, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, new Tag[]
 		{
 			GameTags.Suit,
-			GameTags.Clothes
+			GameTags.Clothes,
+			GameTags.PedestalDisplayable
 		}, null);
 		equipmentDef.wornID = "Worn_Oxygen_Mask";
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.RECIPE_DESC;
@@ -79,9 +80,6 @@ public class OxygenMaskConfig : IEquipmentConfig
 		Durability durability = go.AddComponent<Durability>();
 		durability.wornEquipmentPrefabID = "Worn_Oxygen_Mask";
 		durability.durabilityLossPerCycle = global::TUNING.EQUIPMENT.SUITS.OXYGEN_MASK_DECAY;
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Clothes, false);
-		component.AddTag(GameTags.PedestalDisplayable, false);
 		go.AddComponent<SuitDiseaseHandler>();
 	}
 

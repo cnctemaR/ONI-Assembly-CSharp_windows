@@ -39,23 +39,19 @@ public class DebugTool : DragTool
 			switch (this.type)
 			{
 			case DebugTool.Type.ReplaceSubstance:
-				this.DoReplaceSubstance(cell);
+				DebugTool.DoReplaceSubstance(cell);
 				return;
 			case DebugTool.Type.FillReplaceSubstance:
 			{
-				GameUtil.FloodFillNext.Value.Clear();
-				GameUtil.FloodFillVisited.Value.Clear();
 				SimHashes elem_hash = Grid.Element[cell].id;
-				GameUtil.FloodFillConditional(cell, delegate(int check_cell)
+				FloodFill.DepthTraverse<FloodFill.PredicateCondition, FloodFill.HashSetVisitTracker, FloodFill.NoMaxDepth, DebugTool.SubstanceReplacer>(cell, new FloodFill.PredicateCondition(delegate(int check_cell)
 				{
-					bool flag = false;
-					if (Grid.Element[check_cell].id == elem_hash)
+					if (Grid.Element[check_cell].id != elem_hash)
 					{
-						flag = true;
-						this.DoReplaceSubstance(check_cell);
+						return FloodFill.BoundaryCheckResult.Halt;
 					}
-					return flag;
-				}, GameUtil.FloodFillVisited.Value, null);
+					return FloodFill.BoundaryCheckResult.Continue;
+				}), FloodFill.HashSetVisitTracker.Default(), default(FloodFill.NoMaxDepth), default(DebugTool.SubstanceReplacer));
 				return;
 			}
 			case DebugTool.Type.Clear:
@@ -80,7 +76,7 @@ public class DebugTool : DragTool
 				this.DoStoreSubstance(cell);
 				return;
 			case DebugTool.Type.Dig:
-				SimMessages.Dig(cell, -1, false);
+				SimMessages.Dig(cell, -1, false, false);
 				return;
 			case DebugTool.Type.Heat:
 				SimMessages.ModifyEnergy(cell, 10000f, 10000f, SimMessages.EnergySourceID.DebugHeat);
@@ -100,7 +96,7 @@ public class DebugTool : DragTool
 		}
 	}
 
-	public void DoReplaceSubstance(int cell)
+	public static void DoReplaceSubstance(int cell)
 	{
 		if (!Grid.IsValidBuildingCell(cell))
 		{
@@ -149,7 +145,7 @@ public class DebugTool : DragTool
 				Grid.Objects[cell, 26]
 			})
 			{
-				if (gameObject != null)
+				if (!(gameObject == null))
 				{
 					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 					if (num > 0f)
@@ -247,5 +243,25 @@ public class DebugTool : DragTool
 		AddPressure,
 		RemovePressure,
 		PaintPlant
+	}
+
+	private struct SubstanceReplacer : FloodFill.IVisitor
+	{
+		public readonly bool EarlyOut
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public readonly void VisitCell(int cell)
+		{
+			DebugTool.DoReplaceSubstance(cell);
+		}
+
+		public readonly void VisitBoundary(int cell)
+		{
+		}
 	}
 }

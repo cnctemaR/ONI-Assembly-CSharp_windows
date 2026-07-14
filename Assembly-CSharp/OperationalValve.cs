@@ -10,6 +10,12 @@ public class OperationalValve : ValveBase
 		base.Subscribe<OperationalValve>(-592767678, OperationalValve.OnOperationalChangedDelegate);
 	}
 
+	protected override void OnSpawn()
+	{
+		this.OnOperationalChanged(this.operational.IsOperational);
+		base.OnSpawn();
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.Unsubscribe<OperationalValve>(-592767678, OperationalValve.OnOperationalChangedDelegate, false);

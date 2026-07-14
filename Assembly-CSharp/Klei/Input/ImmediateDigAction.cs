@@ -8,9 +8,14 @@ namespace Klei.Input
 	{
 		public override void Dig(int cell, int distFromOrigin)
 		{
-			if (Grid.Solid[cell] && !Grid.Foundation[cell])
+			if (DigTool.Instance.IsActiveLayer(ToolParameterMenu.FILTERLAYERS.TILES) && Grid.Solid[cell] && !Grid.Foundation[cell])
 			{
-				SimMessages.Dig(cell, -1, false);
+				SimMessages.Dig(cell, -1, false, false);
+				return;
+			}
+			if (DigTool.Instance.IsActiveLayer(ToolParameterMenu.FILTERLAYERS.NATURALBACKWALL) && BackwallManager.HasBackwall(cell))
+			{
+				SimMessages.Dig(cell, -1, false, true);
 			}
 		}
 

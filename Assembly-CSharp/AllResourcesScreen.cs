@@ -63,6 +63,7 @@ public class AllResourcesScreen : ShowOptimizedKScreen, ISim4000ms, ISim1000ms
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
 			base.isEditing = true;
+			UISounds.PlaySound(UISounds.Sound.Find);
 		}));
 		this.searchInputField.onEndEdit.AddListener(delegate(string value)
 		{

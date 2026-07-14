@@ -17,9 +17,9 @@ public class FoodDehydratorConfig : IBuildingConfig
 		float[] array = new float[]
 		{
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0],
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
+			2f
 		};
-		string[] array2 = new string[] { "RefinedMetal", "Plastic" };
+		string[] array2 = new string[] { "RefinedMetal", "BuildingGasket" };
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;

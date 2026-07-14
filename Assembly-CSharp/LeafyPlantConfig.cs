@@ -21,7 +21,7 @@ public class LeafyPlantConfig : IEntityConfig
 			SimHashes.CarbonDioxide,
 			SimHashes.ChlorineGas,
 			SimHashes.Hydrogen
-		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "LeafyPlantOriginal", global::STRINGS.CREATURES.SPECIES.LEAFYPLANT.NAME);
+		}, true, 0f, 0.15f, null, true, false, true, false, true, 2400f, 0f, 2200f, "LeafyPlantOriginal", global::STRINGS.CREATURES.SPECIES.LEAFYPLANT.NAME);
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		gameObject.AddOrGetDef<DecorPlantMonitor.Def>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;

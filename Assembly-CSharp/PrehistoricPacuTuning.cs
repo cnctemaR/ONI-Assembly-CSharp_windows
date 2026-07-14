@@ -31,5 +31,7 @@ public static class PrehistoricPacuTuning
 
 	public static Tag POOP_ELEMENT = SimHashes.Rust.CreateTag();
 
-	public static float EGG_MASS = 4f;
+	public static float EGG_MASS = 3f;
+
+	public static float EGG_SHELL_RATIO = 0.33333334f;
 }

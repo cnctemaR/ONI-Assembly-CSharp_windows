@@ -17,52 +17,26 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 	public void SetConsumedElementActive(Tag elementId, bool active)
 	{
-		int i = 0;
-		while (i < this.consumedElements.Length)
+		for (int i = 0; i < this.consumedElements.Length; i++)
 		{
 			if (!(this.consumedElements[i].Tag != elementId))
 			{
 				this.consumedElements[i].IsActive = active;
-				if (!this.ShowInUI)
-				{
-					break;
-				}
-				ElementConverter.ConsumedElement consumedElement = this.consumedElements[i];
-				if (active)
-				{
-					base.smi.AddStatusItem<ElementConverter.ConsumedElement, Tag>(consumedElement, consumedElement.Tag, ElementConverter.ElementConverterInput, this.consumedElementStatusHandles);
-					return;
-				}
-				base.smi.RemoveStatusItem<Tag>(consumedElement.Tag, this.consumedElementStatusHandles);
+				base.smi.UpdateStatusItems();
 				return;
-			}
-			else
-			{
-				i++;
 			}
 		}
 	}
 
 	public void SetOutputElementActive(SimHashes element, bool active)
 	{
-		int i = 0;
-		while (i < this.outputElements.Length)
+		for (int i = 0; i < this.outputElements.Length; i++)
 		{
 			if (this.outputElements[i].elementHash == element)
 			{
 				this.outputElements[i].IsActive = active;
-				ElementConverter.OutputElement outputElement = this.outputElements[i];
-				if (active)
-				{
-					base.smi.AddStatusItem<ElementConverter.OutputElement, SimHashes>(outputElement, outputElement.elementHash, ElementConverter.ElementConverterOutput, this.outputElementStatusHandles);
-					return;
-				}
-				base.smi.RemoveStatusItem<SimHashes>(outputElement.elementHash, this.outputElementStatusHandles);
+				base.smi.UpdateStatusItems();
 				return;
-			}
-			else
-			{
-				i++;
 			}
 		}
 	}
@@ -218,6 +192,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		}
 		if (!flag || num2 <= 0f)
 		{
+			base.smi.UpdateStatusItems();
 			return;
 		}
 		SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
@@ -336,11 +311,30 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					int num17 = Grid.PosToCell(vector);
 					if (element.IsLiquid)
 					{
-						FallingWater.instance.AddParticle(num17, element.idx, num15, num16, diseaseInfo2.idx, diseaseInfo2.count, true, false, false, false);
+						if (this.spawnBubblesUnderLiquid && Grid.IsVisiblyInLiquid(vector))
+						{
+							BubbleManager.instance.SpawnBubble(element.id, vector, num15, num16, new BubbleManager.Disease
+							{
+								Idx = diseaseInfo2.idx,
+								Count = diseaseInfo2.count
+							}, null);
+						}
+						else
+						{
+							FallingWater.instance.AddParticle(num17, element.idx, num15, num16, diseaseInfo2.idx, diseaseInfo2.count, true, false, false, false);
+						}
 					}
 					else if (element.IsSolid)
 					{
 						element.substance.SpawnResource(vector, num15, num16, diseaseInfo2.idx, diseaseInfo2.count, false, false, false);
+					}
+					else if (this.spawnBubblesUnderLiquid && Grid.IsVisiblyInLiquid(vector))
+					{
+						BubbleManager.instance.SpawnBubble(element.id, vector, num15, num16, new BubbleManager.Disease
+						{
+							Idx = diseaseInfo2.idx,
+							Count = diseaseInfo2.count
+						}, null);
 					}
 					else
 					{
@@ -353,6 +347,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				}
 			}
 		}
+		base.smi.UpdateStatusItems();
 		this.storage.Trigger(-1697596308, base.gameObject);
 	}
 
@@ -504,6 +499,8 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 	private float workSpeedMultiplier = 1f;
 
+	public bool spawnBubblesUnderLiquid;
+
 	public bool showDescriptors = true;
 
 	private const float BASE_INTERVAL = 1f;
@@ -628,24 +625,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 		public void AddStatusItems()
 		{
-			if (!base.master.ShowInUI)
-			{
-				return;
-			}
-			foreach (ElementConverter.ConsumedElement consumedElement in base.master.consumedElements)
-			{
-				if (consumedElement.IsActive)
-				{
-					this.AddStatusItem<ElementConverter.ConsumedElement, Tag>(consumedElement, consumedElement.Tag, ElementConverter.ElementConverterInput, base.master.consumedElementStatusHandles);
-				}
-			}
-			foreach (ElementConverter.OutputElement outputElement in base.master.outputElements)
-			{
-				if (outputElement.IsActive)
-				{
-					this.AddStatusItem<ElementConverter.OutputElement, SimHashes>(outputElement, outputElement.elementHash, ElementConverter.ElementConverterOutput, base.master.outputElementStatusHandles);
-				}
-			}
+			this.UpdateStatusItems();
 		}
 
 		public void RemoveStatusItems()
@@ -666,6 +646,50 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 			}
 			base.master.consumedElementStatusHandles.Clear();
 			base.master.outputElementStatusHandles.Clear();
+		}
+
+		public void UpdateStatusItems()
+		{
+			if (!base.master.ShowInUI)
+			{
+				return;
+			}
+			for (int i = 0; i < base.master.consumedElements.Length; i++)
+			{
+				ElementConverter.ConsumedElement consumedElement = base.master.consumedElements[i];
+				if (consumedElement.IsActive)
+				{
+					bool flag = consumedElement.Rate > 0f;
+					bool flag2 = base.master.consumedElementStatusHandles.ContainsKey(consumedElement.Tag);
+					if (flag && !flag2)
+					{
+						this.AddStatusItem<ElementConverter.ConsumedElement, Tag>(consumedElement, consumedElement.Tag, ElementConverter.ElementConverterInput, base.master.consumedElementStatusHandles);
+					}
+					else if (!flag && flag2)
+					{
+						this.RemoveStatusItem<Tag>(consumedElement.Tag, base.master.consumedElementStatusHandles);
+						base.master.consumedElementStatusHandles.Remove(consumedElement.Tag);
+					}
+				}
+			}
+			for (int j = 0; j < base.master.outputElements.Length; j++)
+			{
+				ElementConverter.OutputElement outputElement = base.master.outputElements[j];
+				if (outputElement.IsActive)
+				{
+					bool flag3 = outputElement.Rate > 0f;
+					bool flag4 = base.master.outputElementStatusHandles.ContainsKey(outputElement.elementHash);
+					if (flag3 && !flag4)
+					{
+						this.AddStatusItem<ElementConverter.OutputElement, SimHashes>(outputElement, outputElement.elementHash, ElementConverter.ElementConverterOutput, base.master.outputElementStatusHandles);
+					}
+					else if (!flag3 && flag4)
+					{
+						this.RemoveStatusItem<SimHashes>(outputElement.elementHash, base.master.outputElementStatusHandles);
+						base.master.outputElementStatusHandles.Remove(outputElement.elementHash);
+					}
+				}
+			}
 		}
 
 		public void AddStatusItem<ElementType, IDType>(ElementType element, IDType id, StatusItem status, Dictionary<IDType, Guid> collection)

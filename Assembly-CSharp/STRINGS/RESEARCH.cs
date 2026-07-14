@@ -26,7 +26,7 @@ namespace STRINGS
 				{
 					UI.PRE_KEYWORD,
 					"\n\n<i>",
-					UI.DLC1.NAME,
+					UI.EXPANSION1.NAME,
 					"</i>",
 					UI.PST_KEYWORD,
 					" DLC Content"
@@ -256,6 +256,51 @@ namespace STRINGS
 				});
 			}
 
+			public class GASKET
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Gasket" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Gaskets",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.CRAFTINGTABLE.NAME
+				});
+			}
+
+			public class RUBBER_BOOTS
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Rubber Boots" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Rubber Boots",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.CLOTHINGFABRICATOR.NAME
+				});
+			}
+
+			public class DRY_SUIT
+			{
+				public static LocString NAME = UI.PRE_KEYWORD + "Swimwear" + UI.PST_KEYWORD + " Pattern";
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Enables fabrication of ",
+					UI.PRE_KEYWORD,
+					"Swimwear",
+					UI.PST_KEYWORD,
+					" at the ",
+					BUILDINGS.PREFABS.CLOTHINGFABRICATOR.NAME
+				});
+			}
+
 			public class DISPOSABLE_ELECTROBANK_METAL_ORE
 			{
 				public static LocString NAME = UI.PRE_KEYWORD + "Metal Power Bank" + UI.PST_KEYWORD + " Pattern";
@@ -331,15 +376,15 @@ namespace STRINGS
 				});
 			}
 
-			public class PILOTINGBOOSTER
+			public class BOOSTER_MOD_SWIM
 			{
-				public static LocString NAME = UI.PRE_KEYWORD + "Rocketry Booster" + UI.PST_KEYWORD + " Pattern";
+				public static LocString NAME = UI.FormatAsLink("Swim Hack Booster", "BOOSTER_MOD_SWIM");
 
 				public static LocString DESC = string.Concat(new string[]
 				{
 					"Enables fabrication of ",
 					UI.PRE_KEYWORD,
-					"Rocketry Boosters",
+					"Swim Hack Booster",
 					UI.PST_KEYWORD,
 					" for Bionic Duplicants at the ",
 					BUILDINGS.PREFABS.ADVANCEDCRAFTINGTABLE.NAME

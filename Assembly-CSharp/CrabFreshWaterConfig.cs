@@ -16,7 +16,7 @@ public class CrabFreshWaterConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -CrabTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
-		List<Diet.Info> list = BaseCrabConfig.DietWithSlime(SimHashes.Sand.CreateTag(), CrabFreshWaterConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f);
+		List<Diet.Info> list = BaseCrabConfig.DietWithSlime(SimHashes.Sand.CreateTag(), CrabFreshWaterConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_0, null, 0f);
 		return BaseCrabConfig.SetupDiet(gameObject, list, CrabFreshWaterConfig.CALORIES_PER_KG_OF_ORE, CrabFreshWaterConfig.MIN_POOP_SIZE_IN_KG);
 	}
 
@@ -72,11 +72,11 @@ public class CrabFreshWaterConfig : IEntityConfig
 
 	private const SimHashes EMIT_ELEMENT = SimHashes.Sand;
 
-	private static float KG_ORE_EATEN_PER_CYCLE = 70f;
+	private static float KG_ORE_EATEN_PER_CYCLE = 15f;
 
 	private static float CALORIES_PER_KG_OF_ORE = CrabTuning.STANDARD_CALORIES_PER_CYCLE / CrabFreshWaterConfig.KG_ORE_EATEN_PER_CYCLE;
 
-	private static float MIN_POOP_SIZE_IN_KG = 25f;
+	private static float MIN_POOP_SIZE_IN_KG = 10f;
 
 	public static int EGG_SORT_ORDER = 0;
 

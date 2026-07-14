@@ -134,7 +134,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				{
 					text = string.Format(UI.OVERLAYS.HEATFLOW.COOLING_DUPE, text);
 				}
-				else if (thermalComfort2 >= ExternalTemperatureMonitor.GetExternalWarmThreshold(null))
+				else if (thermalComfort2 >= 0.008f)
 				{
 					text = string.Format(UI.OVERLAYS.HEATFLOW.HEATING_DUPE, text);
 				}
@@ -292,7 +292,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						hoverTextDrawer.NewLine(26);
 						hoverTextDrawer.DrawText(text6, this.Styles_BodyText.Standard);
 					}
-					if (text7 != "")
+					if (!string.IsNullOrEmpty(text7))
 					{
 						hoverTextDrawer.NewLine(26);
 						hoverTextDrawer.DrawText(text7, this.Styles_BodyText.Standard);
@@ -308,6 +308,23 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					}
 					hoverTextDrawer.NewLine(26);
 					hoverTextDrawer.DrawText(text8, this.Styles_BodyText.Standard);
+				}
+				FishOvercrowingManager.Pond pond = ((FishOvercrowingManager.Instance != null) ? FishOvercrowingManager.Instance.GetPond(num) : null);
+				if (pond != null)
+				{
+					hoverTextDrawer.NewLine(30);
+					hoverTextDrawer.DrawText(UI.OVERLAYS.ROOMS.POND.HEADER, this.Styles_BodyText.Standard);
+					hoverTextDrawer.NewLine(22);
+					hoverTextDrawer.DrawText(string.Format(UI.OVERLAYS.ROOMS.POND.SIZE, pond.cellCount), this.Styles_BodyText.Standard);
+					hoverTextDrawer.NewLine(22);
+					hoverTextDrawer.DrawText(string.Format(UI.OVERLAYS.ROOMS.POND.CRITTER_COUNT, pond.FishCount + pond.EggCount), this.Styles_BodyText.Standard);
+				}
+				else if (Grid.Element[num].IsLiquid && flag3)
+				{
+					hoverTextDrawer.NewLine(30);
+					hoverTextDrawer.DrawText(UI.OVERLAYS.ROOMS.POND.HEADER, this.Styles_BodyText.Standard);
+					hoverTextDrawer.NewLine(22);
+					hoverTextDrawer.DrawText(UI.OVERLAYS.ROOMS.POND.NOFISH, this.Styles_BodyText.Standard);
 				}
 				hoverTextDrawer.EndShadowBar();
 			}
@@ -449,7 +466,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		}
 		for (int k = 0; k < this.overlayValidHoverObjects.Count; k++)
 		{
-			if (this.overlayValidHoverObjects[k] != null && !CellSelectionObject.IsSelectionObject(this.overlayValidHoverObjects[k].gameObject))
+			if (this.overlayValidHoverObjects[k] != null && !ICellSelectionProxy.IsSelectionProxy(this.overlayValidHoverObjects[k].gameObject))
 			{
 				KSelectable kselectable3 = this.overlayValidHoverObjects[k];
 				if ((!(OverlayScreen.Instance != null) || !(OverlayScreen.Instance.mode != OverlayModes.None.ID) || (kselectable3.gameObject.layer & this.maskOverlay) == 0) && flag3)
@@ -608,10 +625,6 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				cellSelectionObject = SelectTool.Instance.selected.GetComponent<CellSelectionObject>();
 			}
 			bool flag12 = cellSelectionObject != null && cellSelectionObject.mouseCell == cellSelectionObject.alternateSelectionObject.mouseCell;
-			if (flag12)
-			{
-				this.currentSelectedSelectableIndex = this.recentNumberOfDisplayedSelectables - 1;
-			}
 			Element element = Grid.Element[num];
 			hoverTextDrawer.BeginShadowBar(flag12);
 			hoverTextDrawer.DrawText(element.nameUpperCase, this.Styles_Title.Standard);
@@ -699,7 +712,48 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					hoverTextDrawer.DrawText(text16, this.Styles_BodyText.Standard);
 				}
 			}
+			if (BubbleManager.instance != null)
+			{
+				ListPool<BubbleManager.CellBubbleInfo, SelectToolHoverTextCard>.PooledList pooledList = ListPool<BubbleManager.CellBubbleInfo, SelectToolHoverTextCard>.Allocate();
+				BubbleManager.instance.GetBubblesInCell(num, pooledList);
+				foreach (BubbleManager.CellBubbleInfo cellBubbleInfo in pooledList)
+				{
+					Element element3 = ElementLoader.FindElementByHash(cellBubbleInfo.element);
+					hoverTextDrawer.NewLine(26);
+					hoverTextDrawer.DrawIcon(this.iconDash, 18);
+					hoverTextDrawer.DrawText(string.Concat(new string[]
+					{
+						element3.name,
+						" ",
+						UI.TOOLS.GENERIC.BUBBLE_LABEL,
+						": ",
+						GameUtil.GetFormattedMass(cellBubbleInfo.totalMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
+					}), this.Styles_BodyText.Standard);
+				}
+				pooledList.Recycle();
+			}
 			hoverTextDrawer.EndShadowBar();
+			if (BackwallManager.HasBackwall(num))
+			{
+				bool flag16 = BackwallSelectionObject.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected.GetComponent<BackwallSelectionObject>() != null && BackwallSelectionObject.Instance.SelectedCell == num;
+				hoverTextDrawer.BeginShadowBar(flag16);
+				hoverTextDrawer.DrawText(BackwallManager.At(num).Element.nameUpperCase + " " + UI.TOOLS.GENERIC.NATURAL_BACKWALL_LABEL, this.Styles_Title.Standard);
+				if (BackwallManager.HasBackwall(num))
+				{
+					hoverTextDrawer.NewLine(26);
+					hoverTextDrawer.DrawIcon(this.iconDash, 18);
+					hoverTextDrawer.DrawText(GameUtil.GetFormattedMass(BackwallManager.At(num).Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), this.Styles_BodyText.Standard);
+					hoverTextDrawer.NewLine(26);
+					hoverTextDrawer.DrawIcon(this.iconDash, 18);
+					hoverTextDrawer.DrawText(GameUtil.GetFormattedTemperature(BackwallManager.At(num).Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), this.Styles_BodyText.Standard);
+				}
+				hoverTextDrawer.EndShadowBar();
+				num5++;
+				if (flag16)
+				{
+					this.currentSelectedSelectableIndex = num5 - 1;
+				}
+			}
 		}
 		else if (!flag3 && (int)Grid.WorldIdx[num] == ClusterManager.Instance.activeWorldId)
 		{

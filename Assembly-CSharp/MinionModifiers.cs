@@ -78,9 +78,13 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	private void OnDeath(object data)
 	{
 		global::Debug.LogFormat("OnDeath {0} -- {1} has died!", new object[] { data, base.name });
+		MinionIdentity component = base.GetComponent<MinionIdentity>();
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
-			minionIdentity.GetComponent<Effects>().Add("Mourning", true);
+			if (minionIdentity != component)
+			{
+				minionIdentity.GetComponent<Effects>().Add("Mourning", true);
+			}
 		}
 	}
 

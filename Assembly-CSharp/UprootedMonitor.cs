@@ -50,7 +50,14 @@ public class UprootedMonitor : KMonoBehaviour
 			int num = Grid.OffsetCell(this.position, cellOffset);
 			if (Grid.IsValidCell(this.position) && Grid.IsValidCell(num))
 			{
-				this.partitionerEntries.Add(GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGroundChanged)));
+				if (this.customScenePartitionerLayerFn == null)
+				{
+					this.partitionerEntries.Add(GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGroundChanged)));
+				}
+				else
+				{
+					this.partitionerEntries.Add(GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, num, this.customScenePartitionerLayerFn(), new Action<object>(this.OnFoundationChanged)));
+				}
 			}
 		}
 		this.OnGroundChanged(null);
@@ -95,6 +102,11 @@ public class UprootedMonitor : KMonoBehaviour
 
 	public void OnGroundChanged(object callbackData)
 	{
+		this.OnFoundationChanged(callbackData);
+	}
+
+	public void OnFoundationChanged(object callbackData)
+	{
 		if (!this.CheckTileGrowable())
 		{
 			this.uprooted = true;
@@ -118,6 +130,8 @@ public class UprootedMonitor : KMonoBehaviour
 	{
 		new CellOffset(0, -1)
 	};
+
+	public Func<ScenePartitionerLayer> customScenePartitionerLayerFn;
 
 	public Func<int, bool> customFoundationCheckFn;
 

@@ -10,7 +10,7 @@ public static class BaseMoleConfig
 	{
 		float num = 25f;
 		EffectorValues none = global::TUNING.BUILDINGS.DECOR.NONE;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(is_baby ? anim_file : "driller_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, none, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "driller_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, "DiggerNavGrid", NavType.Floor, 32, 2f, "Meat", (float)on_death_drop_count, true, false, warningLowTemperature, warningHighTemperature, lethalLowTemperature, lethalHighTemperature);
 		if (symbolOverridePrefix != null)
 		{
@@ -24,6 +24,7 @@ public static class BaseMoleConfig
 		gameObject.AddOrGetDef<DiggerMonitor.Def>().depthToDig = MoleTuning.DEPTH_TO_HIDE;
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
 		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Walker, false);
+		KAnimFile anim = Assets.GetAnim("driller_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new FallStates.Def(), true, -1)
 			.Add(new StunnedStates.Def(), true, -1)
 			.Add(new DrowningStates.Def(), true, -1)
@@ -46,9 +47,9 @@ public static class BaseMoleConfig
 				shouldBeBehindMilkTank = is_baby
 			}, true, -1)
 			.Add(new NestingPoopState.Def(is_baby ? Tag.Invalid : SimHashes.Regolith.CreateTag()), true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("driller_emotes_kanim")), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(anim), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def
 			{
@@ -81,6 +82,8 @@ public static class BaseMoleConfig
 		}
 		return "idle_loop";
 	}
+
+	public const string EMOTION_FILE_NAME = "driller_emotes_kanim";
 
 	private static readonly string[] SolidIdleAnims = new string[] { "idle1", "idle2", "idle3", "idle4" };
 }

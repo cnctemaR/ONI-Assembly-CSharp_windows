@@ -29,6 +29,7 @@ public class ResearchScreenSideBar : KScreen
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
 			base.isEditing = true;
+			UISounds.PlaySound(UISounds.Sound.Find);
 		}));
 		this.searchBox.onEndEdit.AddListener(delegate(string value)
 		{
@@ -643,6 +644,11 @@ public class ResearchScreenSideBar : KScreen
 		}
 		this.SetCompletionFilter(ResearchScreenSideBar.CompletionState.All, true);
 		this.UpdateProjectFilter(null);
+	}
+
+	public void FocusSearchBox()
+	{
+		this.searchBox.Select();
 	}
 
 	public void SetSearch(string newSearch)

@@ -106,7 +106,7 @@ namespace TUNING
 
 			public static readonly EdiblesManager.FoodInfo SHELLFISH_MEAT = new EdiblesManager.FoodInfo("ShellfishMeat", 1000000f, 2, 255.15f, 277.15f, 2400f, true, null, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
 
-			public static readonly EdiblesManager.FoodInfo JAWBOFILLET = new EdiblesManager.FoodInfo("PrehistoricPacuFillet", 1000000f, 3, 255.15f, 277.15f, 2400f, true, DlcManager.DLC4, null);
+			public static readonly EdiblesManager.FoodInfo JAWBOFILLET = new EdiblesManager.FoodInfo("PrehistoricPacuFillet", 1000000f, 3, 255.15f, 277.15f, 2400f, true, DlcManager.DLC4, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
 
 			public static readonly EdiblesManager.FoodInfo WORMBASICFRUIT = new EdiblesManager.FoodInfo("WormBasicFruit", 800000f, 0, 255.15f, 277.15f, 4800f, true, DlcManager.EXPANSION1, null);
 
@@ -158,6 +158,20 @@ namespace TUNING
 
 			public static readonly EdiblesManager.FoodInfo SMOKED_VEGETABLES = new EdiblesManager.FoodInfo("SmokedVegetables", 2862500f, 2, 255.15f, 277.15f, 9600f, true, DlcManager.DLC4, null);
 
+			public static readonly EdiblesManager.FoodInfo SALTYSTICKSFOOD = new EdiblesManager.FoodInfo("SaltySticksFood", 600000f, -1, 255.15f, 277.15f, 9600f, true, DlcManager.DLC5, null).AddEffects(new List<string> { "Thirsty" }, null, null);
+
+			public static readonly EdiblesManager.FoodInfo EDAMAME = new EdiblesManager.FoodInfo("Edamame", 1450000f, 3, 255.15f, 277.15f, 4800f, true, DlcManager.DLC5, null);
+
+			public static readonly EdiblesManager.FoodInfo MAKI = new EdiblesManager.FoodInfo("Maki", 3600000f, 4, 255.15f, 277.15f, 2400f, true, DlcManager.DLC5, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
+
+			public static readonly EdiblesManager.FoodInfo NIGIRI = new EdiblesManager.FoodInfo("Nigiri", 3600000f, 5, 255.15f, 277.15f, 2400f, true, DlcManager.DLC5, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
+
+			public static readonly EdiblesManager.FoodInfo SQUID_MEAT = new EdiblesManager.FoodInfo("SquidMeat", 800000f, 2, 255.15f, 277.15f, 2400f, true, DlcManager.DLC5, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
+
+			public static readonly EdiblesManager.FoodInfo URCHINMEAT = new EdiblesManager.FoodInfo(UrchinMeatConfig.ID, 7200000f, 3, 255.15f, 277.15f, 2400f, true, DlcManager.DLC5, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
+
+			public static readonly EdiblesManager.FoodInfo MUSSELTONGUE = new EdiblesManager.FoodInfo(MusselTongueConfig.ID, 2800000f, -1, 255.15f, 277.15f, 4800f, false, DlcManager.DLC5, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
+
 			public static readonly EdiblesManager.FoodInfo PANCAKES = new EdiblesManager.FoodInfo("Pancakes", 3600000f, 3, 255.15f, 277.15f, 4800f, true, null, null);
 
 			public static readonly EdiblesManager.FoodInfo SMOKED_FISH = new EdiblesManager.FoodInfo("SmokedFish", 2800000f, 3, 255.15f, 277.15f, 19200f, true, DlcManager.DLC4, null).AddEffects(new List<string> { "SeafoodRadiationResistance" }, DlcManager.EXPANSION1, null);
@@ -203,6 +217,10 @@ namespace TUNING
 			public static readonly EdiblesManager.FoodInfo BUTTERFLY_SEED = new EdiblesManager.FoodInfo("ButterflyPlantSeed", 0f, 2, 255.15f, 277.15f, 4800f, true, DlcManager.DLC4, null);
 
 			public static readonly EdiblesManager.FoodInfo DINOSAURMEAT = new EdiblesManager.FoodInfo("DinosaurMeat", 0f, -1, 255.15f, 277.15f, 2400f, true, DlcManager.DLC4, null);
+
+			public static readonly EdiblesManager.FoodInfo NORI = new EdiblesManager.FoodInfo("Nori", 0f, 2, 255.15f, 277.15f, 19200f, true, DlcManager.DLC5, null);
+
+			public static readonly EdiblesManager.FoodInfo CAVIAR = new EdiblesManager.FoodInfo("Caviar", 0f, 2, 255.15f, 277.15f, 2400f, false, DlcManager.DLC5, null);
 		}
 
 		public class RECIPES

@@ -293,6 +293,11 @@ public class TerrainBG : KMonoBehaviour
 				}
 				MaterialPropertyBlock materialPropertyBlock = this.propertyBlocks[i];
 				materialPropertyBlock.SetVector("_BackWallParameters", new Vector4(num2, Lighting.Instance.Settings.BackgroundClip, num3, num4));
+				materialPropertyBlock.SetVectorArray("_ZoneTextureParallaxData", SubworldZoneRenderData.zoneTextureParallaxData);
+				if (ClusterManager.Instance.activeWorld != null)
+				{
+					materialPropertyBlock.SetVectorArray("_BiomeSizeData", ClusterManager.Instance.activeWorld.BiomesOnlySizeData);
+				}
 				Vector3 vector4 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background));
 				Graphics.DrawMesh(this.worldPlane, vector4, Quaternion.identity, this.backgroundMaterial, this.layer, null, 0, materialPropertyBlock);
 			}

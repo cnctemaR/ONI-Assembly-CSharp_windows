@@ -13,12 +13,16 @@ public class MilkFeederConfig : IBuildingConfig
 		string text2 = "critter_milk_feeder_kanim";
 		int num3 = 100;
 		float num4 = 120f;
-		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
-		string[] refined_METALS = MATERIALS.REFINED_METALS;
+		float[] array = new float[]
+		{
+			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4[0],
+			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
+		};
+		string[] array2 = new string[] { "RefinedMetal", "Glasses" };
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, array2, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, none, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.InputConduitType = ConduitType.Liquid;
@@ -52,16 +56,19 @@ public class MilkFeederConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
-		conduitConsumer.capacityTag = GameTagExtensions.Create(SimHashes.Milk);
+		conduitConsumer.capacityTag = GameTags.Creatures.CritterDrinkable;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		conduitConsumer.storage = storage;
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.RanchStationType, false);
+		MilkFeeder.Def def = go.AddOrGetDef<MilkFeeder.Def>();
+		def.elementProducedTag = GameTags.Creatures.CritterDrinkable;
+		def.unitsProducedPerFeeding = 5f;
+		def.drinkCellOffset = MilkFeederConfig.DRINK_FROM_OFFSET;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddOrGetDef<MilkFeeder.Def>();
 	}
 
 	public override void ConfigurePost(BuildingDef def)
@@ -72,11 +79,19 @@ public class MilkFeederConfig : IBuildingConfig
 
 	public const string HAD_CONSUMED_MILK_RECENTLY_EFFECT_ID = "HadMilk";
 
+	public const string HAD_CONSUMED_INK_RECENTLY_EFFECT_ID = "HadInk";
+
+	public static readonly global::Tuple<Tag, string>[] EffectsPerDrinkableLiquid = new global::Tuple<Tag, string>[]
+	{
+		new global::Tuple<Tag, string>(SimHashes.Milk.CreateTag(), "HadMilk"),
+		new global::Tuple<Tag, string>(SimHashes.Ink.CreateTag(), "HadInk")
+	};
+
 	public const float EFFECT_DURATION_IN_SECONDS = 600f;
 
-	public static readonly CellOffset DRINK_FROM_OFFSET = new CellOffset(1, 0);
-
-	public static readonly Tag MILK_TAG = SimHashes.Milk.CreateTag();
-
 	public const float UNITS_OF_MILK_CONSUMED_PER_FEEDING = 5f;
+
+	private static readonly CellOffset DRINK_FROM_OFFSET = new CellOffset(1, 0);
+
+	private static readonly Tag MILK_TAG = SimHashes.Milk.CreateTag();
 }

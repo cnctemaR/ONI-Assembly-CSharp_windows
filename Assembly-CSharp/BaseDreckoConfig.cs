@@ -10,7 +10,7 @@ public static class BaseDreckoConfig
 	{
 		float num = 200f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		KAnimFile anim = Assets.GetAnim(anim_file);
+		KAnimFile anim = Assets.GetAnim(is_baby ? anim_file : "drecko_build_kanim");
 		string text = "idle_loop";
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
 		int num2 = 1;
@@ -39,6 +39,7 @@ public static class BaseDreckoConfig
 		gameObject.AddOrGetDef<ThreatMonitor.Def>().fleethresholdState = Health.HealthState.Dead;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
+		KAnimFile anim2 = Assets.GetAnim("drecko_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -58,10 +59,10 @@ public static class BaseDreckoConfig
 			{
 				shouldBeBehindMilkTank = is_baby
 			}, true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim2, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("drecko_emotes_kanim")), true, -1)
+			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new IdleStates.Def
@@ -97,4 +98,6 @@ public static class BaseDreckoConfig
 		}
 		return hashedString;
 	}
+
+	public const string EMOTION_FILE_NAME = "drecko_emotes_kanim";
 }

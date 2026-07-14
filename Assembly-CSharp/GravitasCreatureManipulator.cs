@@ -153,6 +153,8 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			this.m_partitionEntry = GameScenePartitioner.Instance.Add("GravitasCreatureManipulator", base.gameObject, this.pickupCell, GameScenePartitioner.Instance.pickupablesChangedLayer, new Action<object>(this.DetectCreature));
 			this.m_largeCreaturePartitionEntry = GameScenePartitioner.Instance.Add("GravitasCreatureManipulator.large", base.gameObject, Grid.CellLeft(this.pickupCell), GameScenePartitioner.Instance.pickupablesChangedLayer, new Action<object>(this.DetectLargeCreature));
 			this.m_progressMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.UserSpecified, Grid.SceneLayer.TileFront, Array.Empty<string>());
+			this.m_progressMeter.meterController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+			this.m_progressMeter.meterController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
 		}
 
 		public override void StartSM()
@@ -338,7 +340,7 @@ public class GravitasCreatureManipulator : GameStateMachine<GravitasCreatureMani
 			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(tag2), position);
 			gameObject.SetActive(true);
 			gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("growup_pst");
-			foreach (AmountInstance amountInstance in brain.gameObject.GetAmounts())
+			foreach (AmountInstance amountInstance in brain.gameObject.GetAmounts().ModifierList)
 			{
 				AmountInstance amountInstance2 = amountInstance.amount.Lookup(gameObject);
 				if (amountInstance2 != null)

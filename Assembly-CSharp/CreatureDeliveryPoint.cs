@@ -10,10 +10,35 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		base.OnPrefabInit();
 		this.fetches = new List<FetchOrder2>();
+		base.Subscribe(360192579, new Action<object>(this.OnBuildingStrawChanged));
 		TreeFilterable component = base.GetComponent<TreeFilterable>();
 		component.OnFilterChanged = (Action<HashSet<Tag>>)Delegate.Combine(component.OnFilterChanged, new Action<HashSet<Tag>>(this.OnFilterChanged));
 		base.GetComponent<Storage>().SetOffsets(this.deliveryOffsets);
 		Prioritizable.AddRef(base.gameObject);
+	}
+
+	private void OnBuildingStrawChanged(object o)
+	{
+		BuildingPointStraw buildingPointStraw = (BuildingPointStraw)o;
+		this.spawnOffset = buildingPointStraw.GetBottomCellOffset();
+		this.largeCritterSpawnOffset = new CellOffset(0, this.spawnOffset.y - 1);
+		this.animSuffix = buildingPointStraw.GetAnimSuffix();
+		StateMachine.BaseState currentState = base.smi.GetCurrentState();
+		if (currentState == null)
+		{
+			return;
+		}
+		if (currentState == base.smi.sm.operational.interact_pre || currentState == base.smi.sm.operational.interact_pst)
+		{
+			return;
+		}
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		if (currentState == base.smi.sm.unoperational)
+		{
+			component.Play("off" + this.animSuffix, KAnim.PlayMode.Once, 1f, 0f);
+			return;
+		}
+		component.Play("on" + this.animSuffix, KAnim.PlayMode.Once, 1f, 0f);
 	}
 
 	protected override void OnSpawn()
@@ -90,6 +115,10 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	private void RebalanceFetches()
 	{
 		if (!this.LogicEnabled())
+		{
+			return;
+		}
+		if (!CreatureDeliveryPoint.States.ShouldBeOn(base.smi))
 		{
 			return;
 		}
@@ -194,6 +223,8 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	public bool playAnimsOnFetch;
 
+	public string animSuffix = "";
+
 	private LogicPorts logicPorts;
 
 	private static readonly EventSystem.IntraObjectHandler<CreatureDeliveryPoint> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<CreatureDeliveryPoint>(delegate(CreatureDeliveryPoint component, object data)
@@ -208,12 +239,50 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 	public class SMInstance : GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.GameInstance
 	{
+		public bool IsOperational
+		{
+			get
+			{
+				return this.operational != null && this.operational.IsOperational;
+			}
+		}
+
+		public bool IsStrawInstalled
+		{
+			get
+			{
+				return this.straw != null;
+			}
+		}
+
+		public bool IsStrawOutsideLiquid
+		{
+			get
+			{
+				return this.IsStrawInstalled && !this.straw.isInLiquid;
+			}
+		}
+
+		public bool IsStrawBlocked
+		{
+			get
+			{
+				return this.IsStrawInstalled && this.straw.currentDepth <= 0;
+			}
+		}
+
 		public SMInstance(CreatureDeliveryPoint master)
 			: base(master)
 		{
+			this.operational = base.GetComponent<Operational>();
+			this.straw = base.GetComponent<BuildingPointStraw>();
 		}
 
 		public bool isDroppingAllCreatures;
+
+		private Operational operational;
+
+		private BuildingPointStraw straw;
 	}
 
 	public class States : GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint>
@@ -224,26 +293,83 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 			this.root.Update("RefreshCreatureCount", delegate(CreatureDeliveryPoint.SMInstance smi, float dt)
 			{
 				smi.master.critterCapacity.RefreshCreatureCount(null);
-			}, UpdateRate.SIM_1000ms, false).EventHandler(GameHashes.OnStorageChange, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State.Callback(CreatureDeliveryPoint.States.DropAllCreatures));
-			this.unoperational.EventTransition(GameHashes.LogicEvent, this.operational, (CreatureDeliveryPoint.SMInstance smi) => smi.master.LogicEnabled());
-			this.operational.EventTransition(GameHashes.LogicEvent, this.unoperational, (CreatureDeliveryPoint.SMInstance smi) => !smi.master.LogicEnabled());
-			this.operational.waiting.EnterTransition(this.operational.interact_waiting, (CreatureDeliveryPoint.SMInstance smi) => smi.master.playAnimsOnFetch);
-			this.operational.interact_waiting.WorkableStartTransition((CreatureDeliveryPoint.SMInstance smi) => smi.master.GetComponent<Storage>(), this.operational.interact_delivery);
-			this.operational.interact_delivery.PlayAnim("working_pre").QueueAnim("working_pst", false, null).OnAnimQueueComplete(this.operational.interact_waiting);
+			}, UpdateRate.SIM_1000ms, false);
+			this.root.EventHandler(GameHashes.OnStorageChange, delegate(CreatureDeliveryPoint.SMInstance smi)
+			{
+				if (!smi.master.playAnimsOnFetch)
+				{
+					CreatureDeliveryPoint.States.DropAllCreatures(smi);
+				}
+			});
+			this.unoperational.PlayAnim("off", KAnim.PlayMode.Once, (CreatureDeliveryPoint.SMInstance smi) => smi.master.animSuffix).EventTransition(GameHashes.LogicEvent, this.operational, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.ShouldBeOn)).EventTransition(GameHashes.OperationalChanged, this.operational, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.ShouldBeOn))
+				.EventTransition(GameHashes.BuildingStrawChange, this.operational, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.ShouldBeOn))
+				.Enter(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State.Callback(CreatureDeliveryPoint.States.ClearFetches))
+				.DefaultState(this.unoperational.noOperational);
+			this.unoperational.noOperational.EventTransition(GameHashes.OperationalChanged, this.unoperational.strawBlocked, (CreatureDeliveryPoint.SMInstance smi) => CreatureDeliveryPoint.States.IsOperational(smi) && CreatureDeliveryPoint.States.IsStrawBlocked(smi)).EventTransition(GameHashes.OperationalChanged, this.unoperational.noLiquidOnStraw, (CreatureDeliveryPoint.SMInstance smi) => CreatureDeliveryPoint.States.IsOperational(smi) && CreatureDeliveryPoint.States.IsStrawOutsideLiquid(smi));
+			this.unoperational.strawBlocked.ToggleStatusItem(Db.Get().BuildingStatusItems.OutputTileBlocked, null).EventTransition(GameHashes.OperationalChanged, this.unoperational.noOperational, GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Not(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.IsOperational))).EventTransition(GameHashes.BuildingStrawChange, this.unoperational.noLiquidOnStraw, (CreatureDeliveryPoint.SMInstance smi) => !CreatureDeliveryPoint.States.IsStrawBlocked(smi) && CreatureDeliveryPoint.States.IsStrawOutsideLiquid(smi));
+			this.unoperational.noLiquidOnStraw.ToggleStatusItem(Db.Get().BuildingStatusItems.NotSubmerged, null).EventTransition(GameHashes.OperationalChanged, this.unoperational.noOperational, GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Not(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.IsOperational))).EventTransition(GameHashes.BuildingStrawChange, this.unoperational.strawBlocked, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.IsStrawBlocked));
+			this.operational.PlayAnim("on", KAnim.PlayMode.Once, (CreatureDeliveryPoint.SMInstance smi) => smi.master.animSuffix).EventTransition(GameHashes.LogicEvent, this.unoperational, GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Not(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.ShouldBeOn))).EventTransition(GameHashes.BuildingStrawChange, this.unoperational, GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Not(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.ShouldBeOn)))
+				.EventTransition(GameHashes.OperationalChanged, this.unoperational, GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Not(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.ShouldBeOn)))
+				.Enter(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State.Callback(CreatureDeliveryPoint.States.RefreshFetches))
+				.DefaultState(this.operational.waiting);
+			this.operational.waiting.EnterTransition(this.operational.interact_waiting, (CreatureDeliveryPoint.SMInstance smi) => smi.master.playAnimsOnFetch).EnterTransition(this.operational.interact_pre, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.HasItemInInventory)).PlayAnim("on", KAnim.PlayMode.Once, (CreatureDeliveryPoint.SMInstance smi) => smi.master.animSuffix);
+			this.operational.interact_waiting.EnterTransition(this.operational.interact_pre, new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.Transition.ConditionCallback(CreatureDeliveryPoint.States.HasItemInInventory)).WorkableStartTransition((CreatureDeliveryPoint.SMInstance smi) => smi.master.GetComponent<Storage>(), this.operational.interact_pre);
+			this.operational.interact_pre.PlayAnim("working_pre", KAnim.PlayMode.Once, (CreatureDeliveryPoint.SMInstance smi) => smi.master.animSuffix).OnAnimQueueComplete(this.operational.interact_pst);
+			this.operational.interact_pst.Enter(new StateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State.Callback(CreatureDeliveryPoint.States.DropAllCreatures)).PlayAnim("working_pst", KAnim.PlayMode.Once, (CreatureDeliveryPoint.SMInstance smi) => smi.master.animSuffix).OnAnimQueueComplete(this.operational.interact_waiting);
+		}
+
+		public static bool ShouldBeOn(CreatureDeliveryPoint.SMInstance smi)
+		{
+			return CreatureDeliveryPoint.States.IsLogicEnabled(smi) && CreatureDeliveryPoint.States.IsOperational(smi) && !CreatureDeliveryPoint.States.IsStrawBlocked(smi) && !CreatureDeliveryPoint.States.IsStrawOutsideLiquid(smi);
+		}
+
+		public static bool IsLogicEnabled(CreatureDeliveryPoint.SMInstance smi)
+		{
+			return smi.master.LogicEnabled();
+		}
+
+		public static bool IsOperational(CreatureDeliveryPoint.SMInstance smi)
+		{
+			return smi.IsOperational;
+		}
+
+		public static bool IsStrawBlocked(CreatureDeliveryPoint.SMInstance smi)
+		{
+			return smi.IsStrawBlocked;
+		}
+
+		public static bool IsStrawOutsideLiquid(CreatureDeliveryPoint.SMInstance smi)
+		{
+			return smi.IsStrawOutsideLiquid;
+		}
+
+		public static void ClearFetches(CreatureDeliveryPoint.SMInstance smi)
+		{
+			smi.master.ClearFetches();
+		}
+
+		public static void RefreshFetches(CreatureDeliveryPoint.SMInstance smi)
+		{
+			smi.master.RebalanceFetches();
+		}
+
+		public static bool HasItemInInventory(CreatureDeliveryPoint.SMInstance smi)
+		{
+			return !smi.master.GetComponent<Storage>().IsEmpty();
 		}
 
 		public static void DropAllCreatures(CreatureDeliveryPoint.SMInstance smi)
 		{
-			if (smi.isDroppingAllCreatures)
-			{
-				return;
-			}
-			smi.isDroppingAllCreatures = true;
 			Storage component = smi.master.GetComponent<Storage>();
 			if (component.IsEmpty())
 			{
 				return;
 			}
+			if (smi.isDroppingAllCreatures)
+			{
+				return;
+			}
+			smi.isDroppingAllCreatures = true;
 			List<GameObject> items = component.items;
 			int count = items.Count;
 			Vector3 vector = Grid.CellToPosCBC(Grid.OffsetCell(Grid.PosToCell(smi.transform.GetPosition()), smi.master.spawnOffset), Grid.SceneLayer.Creatures);
@@ -269,7 +395,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 		public CreatureDeliveryPoint.States.OperationalState operational;
 
-		public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State unoperational;
+		public CreatureDeliveryPoint.States.UnoperationalStates unoperational;
 
 		public class OperationalState : GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State
 		{
@@ -277,7 +403,18 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 
 			public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State interact_waiting;
 
-			public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State interact_delivery;
+			public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State interact_pre;
+
+			public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State interact_pst;
+		}
+
+		public class UnoperationalStates : GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State
+		{
+			public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State noOperational;
+
+			public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State strawBlocked;
+
+			public GameStateMachine<CreatureDeliveryPoint.States, CreatureDeliveryPoint.SMInstance, CreatureDeliveryPoint, object>.State noLiquidOnStraw;
 		}
 	}
 }

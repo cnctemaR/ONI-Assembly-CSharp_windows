@@ -11,7 +11,7 @@ public static class BaseHatchConfig
 	{
 		float num = 100f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(is_baby ? anim_file : "hatch_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		string text = "WalkerNavGrid1x1";
 		if (is_baby)
 		{
@@ -43,6 +43,7 @@ public static class BaseHatchConfig
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
 		bool flag = !is_baby;
+		KAnimFile anim = Assets.GetAnim("hatch_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new ExitBurrowStates.Def(), flag, -1)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Burrowed, true, "idle_mound", global::STRINGS.CREATURES.STATUSITEMS.BURROWED.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWED.TOOLTIP), flag, -1)
 			.Add(new GrowUpStates.Def(), is_baby, -1)
@@ -66,10 +67,10 @@ public static class BaseHatchConfig
 			{
 				shouldBeBehindMilkTank = is_baby
 			}, true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("hatch_emotes_kanim")), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(anim), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.HatchSpecies, symbolOverridePrefix);
@@ -86,6 +87,8 @@ public static class BaseHatchConfig
 		hashSet.Add(SimHashes.Dirt.CreateTag());
 		hashSet.Add(SimHashes.SedimentaryRock.CreateTag());
 		hashSet.Add(SimHashes.Shale.CreateTag());
+		hashSet.Add(SimHashes.SiltStone.CreateTag());
+		hashSet.Add(SimHashes.Coquina.CreateTag());
 		return new List<Diet.Info>
 		{
 			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
@@ -99,6 +102,7 @@ public static class BaseHatchConfig
 		hashSet.Add(SimHashes.IgneousRock.CreateTag());
 		hashSet.Add(SimHashes.Obsidian.CreateTag());
 		hashSet.Add(SimHashes.Granite.CreateTag());
+		hashSet.Add(SimHashes.Basalt.CreateTag());
 		return new List<Diet.Info>
 		{
 			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
@@ -126,6 +130,8 @@ public static class BaseHatchConfig
 		hashSet.Add(SimHashes.Algae.CreateTag());
 		hashSet.Add(SimHashes.Fertilizer.CreateTag());
 		hashSet.Add(SimHashes.ToxicSand.CreateTag());
+		hashSet.Add(SimHashes.ToxicMud.CreateTag());
+		hashSet.Add(SimHashes.Corallium.CreateTag());
 		return new List<Diet.Info>
 		{
 			new Diet.Info(hashSet, poopTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, Diet.Info.FoodType.EatSolid, false, null)
@@ -171,4 +177,6 @@ public static class BaseHatchConfig
 		}
 		return cell;
 	}
+
+	public const string EMOTION_FILE_NAME = "hatch_emotes_kanim";
 }

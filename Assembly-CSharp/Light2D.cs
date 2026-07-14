@@ -115,8 +115,6 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 	}
 
-	public float IntensityAnimation { get; set; }
-
 	public Vector2 Offset
 	{
 		get
@@ -155,7 +153,6 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			base.Subscribe(856640610, new Action<object>(this.OnStore));
 		}
-		this.IntensityAnimation = 1f;
 	}
 
 	private void OnStore(object data)
@@ -375,6 +372,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	[SerializeField]
 	private LightGridManager.LightGridEmitter.State pending_emitter_state = LightGridManager.LightGridEmitter.State.DEFAULT;
+
+	public float IntensityAnimation = 1f;
 
 	public float Angle;
 

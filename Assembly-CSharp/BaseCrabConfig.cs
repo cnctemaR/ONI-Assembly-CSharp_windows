@@ -8,16 +8,48 @@ public static class BaseCrabConfig
 {
 	public static GameObject BaseCrab(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix = null, string onDeathDropID = "CrabShell", float onDeathDropCount = 1f)
 	{
+		string[] array;
+		if (!string.IsNullOrEmpty(onDeathDropID))
+		{
+			(array = new string[1])[0] = onDeathDropID;
+		}
+		else
+		{
+			array = null;
+		}
+		return BaseCrabConfig.BaseCrab(id, name, desc, anim_file, traitId, is_baby, symbolOverridePrefix, array, new float[] { onDeathDropCount });
+	}
+
+	public static GameObject BaseCrab(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix, string[] onDeathDropsID, float[] onDeathDropsCount)
+	{
 		float num = 100f;
 		int num2 = (is_baby ? 1 : 2);
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, num2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(is_baby ? anim_file : "pincher_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, num2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		string text = "WalkerNavGrid1x2";
 		if (is_baby)
 		{
 			text = "WalkerBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "pincher_build_kanim", symbolOverridePrefix, FactionManager.FactionID.Pest, traitId, text, NavType.Floor, 32, 2f, onDeathDropID, onDeathDropCount, false, false, 273.15f, 313.15f, 223.15f, 373.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(new EntityTemplates.ExtendEntityToBasicCreatureData
+		{
+			isWarmBlooded = false,
+			template = gameObject,
+			anim_filename = anim_file,
+			build_filename = (is_baby ? null : "pincher_build_kanim"),
+			symbol_override_prefix = symbolOverridePrefix,
+			faction = FactionManager.FactionID.Pest,
+			initialTraitID = traitId,
+			NavGridName = text,
+			onDeathDropsID = onDeathDropsID,
+			onDeathDropsCount = onDeathDropsCount,
+			entombVulnerable = false,
+			drownVulnerable = false,
+			warningLowTemperature = 273.15f,
+			warningHighTemperature = 313.15f,
+			lethalLowTemperature = 223.15f,
+			lethalHighTemperature = 373.15f
+		});
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num3 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Crab"];
 		pickupable.sortOrder = num3;
@@ -42,6 +74,7 @@ public static class BaseCrabConfig
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Creatures.Walker, false);
 		component.AddTag(GameTags.Creatures.CrabFriend, false);
+		KAnimFile anim = Assets.GetAnim("pincher_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -62,13 +95,14 @@ public static class BaseCrabConfig
 			{
 				shouldBeBehindMilkTank = true
 			}, true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
+			.Add(new PunchClamOpenStates.Def(), !is_baby && DlcManager.IsContentSubscribed("DLC5_ID"), -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def
 			{
 				entersBuilding = false
 			}, !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("pincher_emotes_kanim")), true, -1)
+			.Add(new CritterEmoteStates.Def(anim), true, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureDiseaseCleaner.Def(30f), true, -1)
 			.Add(new IdleStates.Def(), true, -1);
@@ -76,6 +110,10 @@ public static class BaseCrabConfig
 		CritterCondoInteractMontior.Def def2 = gameObject.AddOrGetDef<CritterCondoInteractMontior.Def>();
 		def2.requireCavity = false;
 		def2.condoPrefabTag = "UnderwaterCritterCondo";
+		if (!is_baby && DlcManager.IsContentSubscribed("DLC5_ID"))
+		{
+			gameObject.AddOrGetDef<PunchClamMonitor.Def>();
+		}
 		gameObject.AddTag(GameTags.Amphibious);
 		return gameObject;
 	}
@@ -126,4 +164,6 @@ public static class BaseCrabConfig
 		}
 		return cell;
 	}
+
+	public const string EMOTION_FILE_NAME = "pincher_emotes_kanim";
 }

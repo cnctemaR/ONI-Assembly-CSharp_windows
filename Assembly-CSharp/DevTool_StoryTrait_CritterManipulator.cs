@@ -50,6 +50,7 @@ public class DevTool_StoryTrait_CritterManipulator : DevTool
 		yield return GameTags.Creatures.Species.DivergentSpecies;
 		yield return GameTags.Creatures.Species.StaterpillarSpecies;
 		yield return GameTags.Creatures.Species.BeetaSpecies;
+		yield return GameTags.Creatures.Species.SnailSpecies;
 		yield break;
 	}
 }

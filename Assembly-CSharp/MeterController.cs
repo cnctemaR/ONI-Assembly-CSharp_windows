@@ -77,6 +77,7 @@ public class MeterController
 		component.isMovable = true;
 		component.FlipX = building_controller.FlipX;
 		component.FlipY = building_controller.FlipY;
+		component.CopyBlendValue(building_controller);
 		if (Meter.Offset.UserSpecified == front_back)
 		{
 			component.sceneLayer = user_specified_render_layer;
@@ -150,6 +151,8 @@ public class MeterController
 	public GameObject gameObject;
 
 	public Func<float, int, float> interpolateFunction = new Func<float, int, float>(MeterController.MinMaxStepLerp);
+
+	public bool supressKAnimLayers = true;
 
 	private KAnimLink link;
 }

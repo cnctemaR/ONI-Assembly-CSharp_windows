@@ -103,14 +103,14 @@ public class RadiationMonitor : GameStateMachine<RadiationMonitor, RadiationMoni
 			{
 				smi.sm.timeUntilNextExposureReact.Set(120f, smi, false);
 				Emote radiation_Glare = Db.Get().Emotes.Minion.Radiation_Glare;
-				smi.master.gameObject.GetSMI<ReactionMonitor.Instance>().AddSelfEmoteReactable(smi.master.gameObject, "RadiationReact", radiation_Glare, true, Db.Get().ChoreTypes.EmoteHighPriority, 0f, 20f, float.NegativeInfinity, 0f, null);
+				smi.master.gameObject.GetSMI<ReactionMonitor.Instance>().AddSelfEmoteReactable(smi.master.gameObject, "RadiationReact", radiation_Glare, true, Db.Get().ChoreTypes.EmoteHighPriority, 0f, 20f, float.PositiveInfinity, 0f, null);
 			}
 		}
 		if (smi.sm.timeUntilNextSickReact.Get(smi) <= 0f && smi.sm.isSick.Get(smi) && !smi.HasTag(GameTags.InTransitTube))
 		{
 			smi.sm.timeUntilNextSickReact.Set(60f, smi, false);
 			Emote radiation_Itch = Db.Get().Emotes.Minion.Radiation_Itch;
-			smi.master.gameObject.GetSMI<ReactionMonitor.Instance>().AddSelfEmoteReactable(smi.master.gameObject, "RadiationReact", radiation_Itch, true, Db.Get().ChoreTypes.RadiationPain, 0f, 20f, float.NegativeInfinity, 0f, null);
+			smi.master.gameObject.GetSMI<ReactionMonitor.Instance>().AddSelfEmoteReactable(smi.master.gameObject, "RadiationReact", radiation_Itch, true, Db.Get().ChoreTypes.RadiationPain, 0f, 20f, float.PositiveInfinity, 0f, null);
 		}
 		smi.sm.radiationExposure.Set(smi.master.gameObject.GetComponent<KSelectable>().GetAmounts().GetValue("RadiationBalance"), smi, false);
 	}

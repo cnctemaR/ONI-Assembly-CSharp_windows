@@ -113,8 +113,11 @@ public class WaterCoolerConfig : IBuildingConfig
 	public static global::Tuple<Tag, string>[] BEVERAGE_CHOICE_OPTIONS = new global::Tuple<Tag, string>[]
 	{
 		new global::Tuple<Tag, string>(SimHashes.Water.CreateTag(), ""),
-		new global::Tuple<Tag, string>(SimHashes.Milk.CreateTag(), "DuplicantGotMilk")
+		new global::Tuple<Tag, string>(SimHashes.Milk.CreateTag(), "DuplicantGotMilk"),
+		new global::Tuple<Tag, string>(SimHashes.Ink.CreateTag(), "DuplicantDrankInk")
 	};
 
 	public const string MilkEffectID = "DuplicantGotMilk";
+
+	public const string InkEffectID = "DuplicantDrankInk";
 }

@@ -6,6 +6,13 @@ namespace STRINGS
 	{
 		public class STATUSITEMS
 		{
+			public class LITTERBOXBEINGEMPTIED
+			{
+				public static LocString NAME = "Being Scooped";
+
+				public static LocString TOOLTIP = "This building's contents are being emptied by a Duplicant\n\nEw";
+			}
+
 			public class GUNKEMPTIERFULL
 			{
 				public static LocString NAME = "Storage Full";
@@ -521,6 +528,20 @@ namespace STRINGS
 				});
 			}
 
+			public class UNDERWATERDRILLIDLE
+			{
+				public static LocString NAME = "Idle";
+
+				public static LocString TOOLTIP = "This drill is on standby\n\nIt will become active when the underwater vent is blocked";
+			}
+
+			public class UNDERWATERDRILLACTIVE
+			{
+				public static LocString NAME = "Drilling";
+
+				public static LocString TOOLTIP = "Unblocking an underwater vent\n\nDebris will be harvestable when drilling is complete";
+			}
+
 			public class OUTPUTTILEBLOCKED
 			{
 				public static LocString NAME = "Output Blocked";
@@ -788,6 +809,13 @@ namespace STRINGS
 				public static LocString PIPECONTENTS_TRANSFER = "Transferred from pipes";
 
 				public static LocString FOOD_TRANSFER = "Internal Cooling";
+			}
+
+			public class TURBOMODE
+			{
+				public static LocString NAME = "Turbo Mode On";
+
+				public static LocString TOOLTIP = "This building is operating at maximum power\n\n    • Power consumption: <b>{0}</b>\n    • Heat production: <b>{1}</b>\n    • Boiling the surrounding liquid";
 			}
 
 			public class FLOODED
@@ -1701,6 +1729,20 @@ namespace STRINGS
 				});
 			}
 
+			public class REEFGENERATORIDLE
+			{
+				public static LocString NAME = "Awaiting flow";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This generator will resume working during the geyser's next ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" emission cycle"
+				});
+			}
+
 			public class PIPE
 			{
 				public static LocString NAME = "Contents: {Contents}";
@@ -1761,7 +1803,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Requires Emptying";
 
-				public static LocString TOOLTIP = "This building needs to be emptied of " + UI.FormatAsLink("Brackwax", "MILKFAT") + " to resume function";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building needs to be emptied of ",
+					UI.FormatAsLink("Brackwax", "MILKFAT"),
+					" and/or ",
+					UI.FormatAsLink("Caviar", "CAVIAR"),
+					" to resume function"
+				});
+			}
+
+			public class MILKSEPARATORPRODUCINGCAVIAR
+			{
+				public static LocString NAME = "Producing Caviar: {0}";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This building is processing ",
+					UI.FormatAsLink("Ovolene", "FISHMILK"),
+					" into ",
+					UI.FormatAsLink("Caviar", "CAVIAR"),
+					" at {0}"
+				});
 			}
 
 			public class HABITATNEEDSEMPTYING
@@ -1985,6 +2048,20 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Producing {Element} at a rate of " + UI.FormatAsPositiveRate("{FlowRate}");
 			}
 
+			public class DISSOLVINGELEMENTDISSOLVING
+			{
+				public static LocString NAME = "Emitting {Element}: {FlowRate}";
+
+				public static LocString TOOLTIP = "Producing {Element} at a rate of " + UI.FormatAsPositiveRate("{FlowRate}");
+			}
+
+			public class DISSOLVINGELEMENTDORMANT
+			{
+				public static LocString NAME = "Inert";
+
+				public static LocString TOOLTIP = "This element is currently inert\n\nIt will emit {Element} when submerged in " + UI.FormatAsLink("Water", "WATER") + " and exposed to sufficient " + UI.FormatAsLink("Light", "LIGHT");
+			}
+
 			public class EMITTINGBLOCKEDHIGHPRESSURE
 			{
 				public static LocString NAME = "Not Emitting: Overpressure";
@@ -2046,6 +2123,15 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" to work"
 				});
+			}
+
+			public class GEYSEREXPELLING
+			{
+				public static LocString NAME = "Emitting {ELEMENT}: {RATE}";
+
+				public static LocString INVALID_ELEMENT_NAME = "Emitting Liquid";
+
+				public static LocString TOOLTIP = "This geyser is releasing stored " + UI.PRE_KEYWORD + "Liquid" + UI.PST_KEYWORD;
 			}
 
 			public class NOGASELEMENTTOPUMP
@@ -2615,6 +2701,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = BUILDING.STATUSITEMS.COLONYLACKSREQUIREDSKILLPERK.TOOLTIP + ", or bring a Duplicant with the skill from another " + UI.CLUSTERMAP.PLANETOID;
 
 				public static LocString TOOLTIP_DLC3 = BUILDING.STATUSITEMS.COLONYLACKSREQUIREDSKILLPERK.TOOLTIP_DLC3 + ", or bring a Duplicant with this skill or booster from another " + UI.CLUSTERMAP.PLANETOID;
+			}
+
+			public class COLONYLACKSDUPEWITHMULTISKILLPERK
+			{
+				public static LocString NAME = "Requires at least one Duplicant with: {Skills}";
+
+				public static LocString TOOLTIP = "Colony lacks a Duplicant with all of the following skills:\n {Skills}\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills) + " to teach skills or assign boosters to a Duplicant";
+
+				public static LocString TOOLTIP_DLC3 = "Colony lacks a Duplicant with all of the following skills:\n {Skills} \nor {Boosters}\n\nOpen the " + UI.FormatAsManagementMenu("Skills Panel", global::Action.ManageSkills) + " to teach skills or assign boosters to a Duplicant";
 			}
 
 			public class WORKREQUIRESMINION
@@ -3928,7 +4023,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
-					"This building requires data from multiple ",
+					"This building requires data from {0} ",
 					UI.PRE_KEYWORD,
 					"Critter",
 					UI.PST_KEYWORD,

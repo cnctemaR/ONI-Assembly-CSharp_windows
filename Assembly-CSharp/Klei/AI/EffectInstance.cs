@@ -84,7 +84,7 @@ namespace Klei.AI
 			}
 			bool flag = cooldown < 0f;
 			float num = (flag ? 100000f : cooldown);
-			EmoteReactable emoteReactable = smi.AddSelfEmoteReactable(base.gameObject, this.effect.Name + "_Emote", emoteAnim, flag, Db.Get().ChoreTypes.Emote, num, 20f, float.NegativeInfinity, this.effect.maxInitialDelay, this.effect.emotePreconditions);
+			EmoteReactable emoteReactable = smi.AddSelfEmoteReactable(base.gameObject, this.effect.Name + "_Emote", emoteAnim, flag, Db.Get().ChoreTypes.Emote, num, 20f, float.PositiveInfinity, this.effect.maxInitialDelay, this.effect.emotePreconditions);
 			if (emoteReactable == null)
 			{
 				return;
@@ -105,7 +105,7 @@ namespace Klei.AI
 			}
 			bool flag = cooldown < 0f;
 			float num = (flag ? 100000f : cooldown);
-			EmoteReactable emoteReactable = smi.AddSelfEmoteReactable(base.gameObject, this.effect.Name + "_Emote", emote, flag, Db.Get().ChoreTypes.Emote, num, 20f, float.NegativeInfinity, this.effect.maxInitialDelay, this.effect.emotePreconditions);
+			EmoteReactable emoteReactable = smi.AddSelfEmoteReactable(base.gameObject, this.effect.Name + "_Emote", emote, flag, Db.Get().ChoreTypes.Emote, num, 20f, float.PositiveInfinity, this.effect.maxInitialDelay, this.effect.emotePreconditions);
 			if (emoteReactable == null)
 			{
 				return;

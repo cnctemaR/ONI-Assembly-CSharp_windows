@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 public class KBatchGroupData
@@ -260,8 +261,9 @@ public class KBatchGroupData
 		return this.symbolFrameInstances.Count;
 	}
 
-	public void WriteAnimData(int start_index, NativeArray<float> data)
+	public unsafe void WriteAnimData(int start_index, NativeArray<float> ptr)
 	{
+		float* unsafePtr = (float*)ptr.GetUnsafePtr<float>();
 		List<KAnim.Anim.Frame> animFrames = this.GetAnimFrames();
 		List<KAnim.Anim.FrameElement> animFrameElements = this.GetAnimFrameElements();
 		int num = 1 + ((animFrames.Count == 0) ? this.symbolFrameInstances.Count : animFrames.Count);
@@ -277,27 +279,27 @@ public class KBatchGroupData
 				animFrameElements.Count.ToString()
 			}));
 		}
-		data[start_index++] = (float)num;
-		data[start_index++] = (float)animFrames.Count;
-		data[start_index++] = (float)animFrameElements.Count;
-		data[start_index++] = (float)this.symbolFrameInstances.Count;
+		unsafePtr[(IntPtr)(start_index++) * 4] = (float)num;
+		unsafePtr[(IntPtr)(start_index++) * 4] = (float)animFrames.Count;
+		unsafePtr[(IntPtr)(start_index++) * 4] = (float)animFrameElements.Count;
+		unsafePtr[(IntPtr)(start_index++) * 4] = (float)this.symbolFrameInstances.Count;
 		if (animFrames.Count == 0)
 		{
 			for (int i = 0; i < this.symbolFrameInstances.Count; i++)
 			{
-				this.WriteAnimFrame(data, start_index, i, 1);
+				this.WriteAnimFrame(unsafePtr, start_index, i, 1);
 				start_index += 4;
 			}
 			for (int j = 0; j < this.symbolFrameInstances.Count; j++)
 			{
-				this.WriteAnimFrameElement(data, start_index, j, Matrix2x3.identity, 1f);
+				this.WriteAnimFrameElement(unsafePtr, start_index, j, Matrix2x3.identity, 1f);
 				start_index += 8;
 			}
 			return;
 		}
 		for (int k = 0; k < animFrames.Count; k++)
 		{
-			this.WriteAnimFrame(data, start_index, animFrames[k].firstElementIdx, animFrames[k].numElements);
+			this.WriteAnimFrame(unsafePtr, start_index, animFrames[k].firstElementIdx, animFrames[k].numElements);
 			start_index += 4;
 		}
 		for (int l = 0; l < animFrameElements.Count; l++)
@@ -305,7 +307,7 @@ public class KBatchGroupData
 			KAnim.Anim.FrameElement frameElement = animFrameElements[l];
 			if (frameElement.symbol == KGlobalAnimParser.MISSING_SYMBOL)
 			{
-				this.WriteAnimFrameElement(data, start_index, -1, Matrix2x3.identity, 1f);
+				this.WriteAnimFrameElement(unsafePtr, start_index, -1, Matrix2x3.identity, 1f);
 			}
 			else
 			{
@@ -323,7 +325,7 @@ public class KBatchGroupData
 					global::Debug.LogError(string.Concat(array));
 				}
 				int frameIdx = buildSymbol.GetFrameIdx(frameElement.frame);
-				this.WriteAnimFrameElement(data, start_index, frameIdx, frameElement.transform, frameElement.multAlpha);
+				this.WriteAnimFrameElement(unsafePtr, start_index, frameIdx, frameElement.transform, frameElement.multAlpha);
 			}
 			start_index += 8;
 		}
@@ -376,13 +378,13 @@ public class KBatchGroupData
 		return this.symbolFrameInstances.Count * 12;
 	}
 
-	private void WriteAnimFrame(NativeArray<float> data, int startIndex, int firstElementIdx, int numElements)
+	private unsafe void WriteAnimFrame(float* data, int startIndex, int firstElementIdx, int numElements)
 	{
 		data[startIndex] = (float)firstElementIdx;
 		data[startIndex + 1] = (float)numElements;
 	}
 
-	private void WriteAnimFrameElement(NativeArray<float> data, int startIndex, int symbolFrameIdx, Matrix2x3 transform, float multAlpha)
+	private unsafe void WriteAnimFrameElement(float* data, int startIndex, int symbolFrameIdx, Matrix2x3 transform, float multAlpha)
 	{
 		if (symbolFrameIdx != -1010)
 		{

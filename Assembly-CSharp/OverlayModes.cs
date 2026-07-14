@@ -789,22 +789,13 @@ public abstract class OverlayModes
 			}
 		}
 
-		public override Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		public override ToolParameterMenu.ToggleData[] CreateDefaultFilters()
 		{
-			return new Dictionary<string, ToolParameterMenu.ToggleState>
+			return new ToolParameterMenu.ToggleData[]
 			{
-				{
-					ToolParameterMenu.FILTERLAYERS.ALL,
-					ToolParameterMenu.ToggleState.On
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.GASCONDUIT,
-					ToolParameterMenu.ToggleState.Off
-				}
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.Off, false)
 			};
 		}
 
@@ -820,12 +811,11 @@ public abstract class OverlayModes
 			{
 				return;
 			}
-			KBatchedAnimController component = item.GetComponent<KBatchedAnimController>();
-			if (component == null)
+			if (item.GetComponent<KBatchedAnimController>() == null)
 			{
 				return;
 			}
-			InfraredVisualizerComponents.ClearOverlayColour(component);
+			Game.Instance.Trigger(972756592, null);
 		}
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
@@ -1992,7 +1982,7 @@ public abstract class OverlayModes
 			return null;
 		}
 
-		public virtual Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		public virtual ToolParameterMenu.ToggleData[] CreateDefaultFilters()
 		{
 			return null;
 		}
@@ -2007,9 +1997,20 @@ public abstract class OverlayModes
 
 		public abstract string GetSoundName();
 
-		protected bool InFilter(string layer, Dictionary<string, ToolParameterMenu.ToggleState> filter)
+		protected bool InFilter(string layer, ToolParameterMenu.ToggleData[] filter)
 		{
-			return (filter.ContainsKey(ToolParameterMenu.FILTERLAYERS.ALL) && filter[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On) || (filter.ContainsKey(layer) && filter[layer] == ToolParameterMenu.ToggleState.On);
+			for (int i = 0; i < filter.Length; i++)
+			{
+				if (filter[i].name == ToolParameterMenu.FILTERLAYERS.ALL && filter[i].IsOn)
+				{
+					return true;
+				}
+				if (filter[i].name == layer && filter[i].IsOn)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public void RegisterSaveLoadListeners()
@@ -2348,7 +2349,7 @@ public abstract class OverlayModes
 			}
 		}
 
-		public Dictionary<string, ToolParameterMenu.ToggleState> legendFilters;
+		public ToolParameterMenu.ToggleData[] legendFilters;
 
 		private static List<KMonoBehaviour> workingTargets = new List<KMonoBehaviour>();
 	}
@@ -3422,26 +3423,14 @@ public abstract class OverlayModes
 			}
 		}
 
-		public override Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		public override ToolParameterMenu.ToggleData[] CreateDefaultFilters()
 		{
-			return new Dictionary<string, ToolParameterMenu.ToggleState>
+			return new ToolParameterMenu.ToggleData[]
 			{
-				{
-					ToolParameterMenu.FILTERLAYERS.ABSOLUTETEMPERATURE,
-					ToolParameterMenu.ToggleState.On
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.RELATIVETEMPERATURE,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.HEATFLOW,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.STATECHANGE,
-					ToolParameterMenu.ToggleState.Off
-				}
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.ABSOLUTETEMPERATURE, ToolParameterMenu.ToggleState.On, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.RELATIVETEMPERATURE, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.HEATFLOW, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.STATECHANGE, ToolParameterMenu.ToggleState.Off, false)
 			};
 		}
 
@@ -3661,54 +3650,21 @@ public abstract class OverlayModes
 			SelectTool.Instance.ClearLayerMask();
 		}
 
-		public override Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
+		public override ToolParameterMenu.ToggleData[] CreateDefaultFilters()
 		{
-			return new Dictionary<string, ToolParameterMenu.ToggleState>
+			return new ToolParameterMenu.ToggleData[]
 			{
-				{
-					ToolParameterMenu.FILTERLAYERS.ALL,
-					ToolParameterMenu.ToggleState.On
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.METAL,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.BUILDABLE,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.FILTER,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.CONSUMABLEORE,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.ORGANICS,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.FARMABLE,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.LIQUIFIABLE,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.GAS,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.LIQUID,
-					ToolParameterMenu.ToggleState.Off
-				},
-				{
-					ToolParameterMenu.FILTERLAYERS.MISC,
-					ToolParameterMenu.ToggleState.Off
-				}
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.METAL, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.BUILDABLE, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.FILTER, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.CONSUMABLEORE, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.ORGANICS, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.FARMABLE, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.LIQUIFIABLE, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.GAS, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.LIQUID, ToolParameterMenu.ToggleState.Off, false),
+				new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.MISC, ToolParameterMenu.ToggleState.Off, false)
 			};
 		}
 

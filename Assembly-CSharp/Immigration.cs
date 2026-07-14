@@ -65,6 +65,26 @@ public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPr
 		list3.Add(new CarePackageInfo("PrehistoricPacuEgg", 1f, () => Immigration.CycleCondition(100)));
 		list3.Add(new CarePackageInfo("RaptorEgg", 1f, () => Immigration.CycleCondition(100)));
 		dictionary.Add(text3, list3);
+		string text4 = "DLC5_ID";
+		List<CarePackageInfo> list4 = new List<CarePackageInfo>();
+		list4.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Pearl).tag.ToString(), 300f, null));
+		list4.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.ZincOre).tag.ToString(), 2000f, () => Immigration.CycleCondition(12)));
+		list4.Add(new CarePackageInfo(ElementLoader.FindElementByHash(SimHashes.Corallium).tag.ToString(), 4000f, null));
+		list4.Add(new CarePackageInfo("ParrotFish", 5f, () => Immigration.CycleCondition(24)));
+		list4.Add(new CarePackageInfo("PufferFish", 3f, () => Immigration.CycleCondition(24)));
+		list4.Add(new CarePackageInfo("SeaTurtleBaby", 1f, () => Immigration.CycleCondition(48)));
+		list4.Add(new CarePackageInfo("SquidEgg", 1f, () => Immigration.CycleCondition(48)));
+		list4.Add(new CarePackageInfo(RubberBootsConfig.ID, 1f, null));
+		list4.Add(new CarePackageInfo("DrySuit", 1f, null));
+		list4.Add(new CarePackageInfo("RubberGasket", 1f, null));
+		list4.Add(new CarePackageInfo("Lettuce", 3f, () => Immigration.CycleCondition(24)));
+		list4.Add(new CarePackageInfo("SeaLettuceSeed", 1f, () => Immigration.CycleCondition(48)));
+		list4.Add(new CarePackageInfo("OxyCoralSeed", 1f, () => Immigration.CycleCondition(48)));
+		list4.Add(new CarePackageInfo("ClamSeed", 1f, () => Immigration.CycleCondition(48)));
+		list4.Add(new CarePackageInfo("UrchinPlantSeed", 1f, () => Immigration.CycleCondition(48)));
+		list4.Add(new CarePackageInfo("BulbloomSeed", 1f, () => Immigration.CycleCondition(48)));
+		list4.Add(new CarePackageInfo(DewPalmConfig.SEED_ID, 1f, () => Immigration.CycleCondition(48)));
+		dictionary.Add(text4, list4);
 		this.carePackagesByDlc = dictionary;
 		foreach (KeyValuePair<Tag, BionicUpgradeComponentConfig.BionicUpgradeData> keyValuePair in BionicUpgradeComponentConfig.UpgradesData)
 		{

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{9658BD80-0462-4503-ADB4-10AC98627104}</ProjectGuid>
+    <ProjectGuid>{1D119CA1-935B-4071-9DB4-19566E492FE5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Unity.Collections</RootNamespace>
     <AssemblyName>Unity.Collections</AssemblyName>
@@ -215,35 +215,35 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270E9}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCA}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\netstandard\netstandard.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270EA}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCB}</Project>
       <Name>netstandard</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC986270F1}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FD2}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Burst\Unity.Burst.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC98627102}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FE3}</Project>
       <Name>Unity.Burst</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC98627105}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FE6}</Project>
       <Name>Unity.Collections.LowLevel.ILSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.Mathematics\Unity.Mathematics.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC98627107}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FE8}</Project>
       <Name>Unity.Mathematics</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC9862711A}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FFB}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PropertiesModule\UnityEngine.PropertiesModule.csproj">
-      <Project>{9658BD80-0462-4503-ADB4-10AC98627137}</Project>
+      <Project>{1D119CA1-935B-4071-9DB4-19566E493018}</Project>
       <Name>UnityEngine.PropertiesModule</Name>
     </ProjectReference>
   </ItemGroup>

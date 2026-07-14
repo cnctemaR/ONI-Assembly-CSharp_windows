@@ -212,7 +212,7 @@ public class BuildTool : DragTool
 								{
 									blockTileRenderer.SetInvalidPlaceCell(this.lastCell, false);
 								}
-								blockTileRenderer.AddBlock(num3, this.def, flag2, SimHashes.Void, num2);
+								blockTileRenderer.AddBlock(num3, this.def, flag2, SimHashes.Void, num2, true);
 							}
 						}
 					}
@@ -329,13 +329,31 @@ public class BuildTool : DragTool
 					}
 				});
 			}
+			else if (this.def.ObjectLayer == ObjectLayer.Backwall)
+			{
+				this.def.RunOnArea(cell, this.buildingOrientation, delegate(int offset_cell)
+				{
+					if (BackwallManager.HasBackwall(offset_cell))
+					{
+						SimMessages.Dig(offset_cell, -1, true, true);
+					}
+				});
+			}
 			float num = ElementLoader.GetMinMeltingPointAmongElements(this.selectedElements) - 10f;
 			gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, Mathf.Min(this.def.Temperature, num), this.facadeID, false, GameClock.Instance.GetTime());
 		}
 		if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
 			GameObject replacementCandidate = this.def.GetReplacementCandidate(cell);
-			if (replacementCandidate != null && !this.def.IsReplacementLayerOccupied(cell))
+			bool replacementLayerOccupied = false;
+			this.def.RunOnArea(cell, this.buildingOrientation, delegate(int offset_cell)
+			{
+				if (this.def.IsReplacementLayerOccupied(offset_cell))
+				{
+					replacementLayerOccupied = true;
+				}
+			});
+			if (replacementCandidate != null && !replacementLayerOccupied)
 			{
 				BuildingComplete component = replacementCandidate.GetComponent<BuildingComplete>();
 				if (component != null && component.Def.Replaceable && this.def.CanReplace(replacementCandidate))
@@ -366,6 +384,31 @@ public class BuildTool : DragTool
 
 	private GameObject InstantBuildReplace(int cell, Vector3 pos, GameObject tile)
 	{
+		if (this.def.PlacementOffsets.Length > 1)
+		{
+			this.def.RunOnArea(cell, this.buildingOrientation, delegate(int offset_cell)
+			{
+				if (offset_cell == cell)
+				{
+					return;
+				}
+				GameObject neighborTile = this.def.GetReplacementCandidate(offset_cell);
+				if (neighborTile == null)
+				{
+					return;
+				}
+				SimCellOccupier component = neighborTile.GetComponent<SimCellOccupier>();
+				if (component != null)
+				{
+					component.DestroySelf(delegate
+					{
+						global::UnityEngine.Object.Destroy(neighborTile);
+					});
+					return;
+				}
+				global::UnityEngine.Object.Destroy(neighborTile);
+			});
+		}
 		if (tile.GetComponent<SimCellOccupier>() == null)
 		{
 			global::UnityEngine.Object.Destroy(tile);

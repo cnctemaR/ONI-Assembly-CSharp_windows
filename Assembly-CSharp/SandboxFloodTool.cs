@@ -17,7 +17,14 @@ public class SandboxFloodTool : FloodTool
 	{
 		base.OnPrefabInit();
 		SandboxFloodTool.instance = this;
-		this.floodCriteria = (int cell) => Grid.IsValidCell(cell) && Grid.Element[cell] == Grid.Element[this.mouseCell] && Grid.WorldIdx[cell] == Grid.WorldIdx[this.mouseCell];
+		this.floodCriteria = delegate(int cell)
+		{
+			if (!Grid.IsValidCell(cell) || Grid.Element[cell] != Grid.Element[this.mouseCell] || Grid.WorldIdx[cell] != Grid.WorldIdx[this.mouseCell])
+			{
+				return FloodFill.BoundaryCheckResult.Halt;
+			}
+			return FloodFill.BoundaryCheckResult.Continue;
+		};
 		this.paintArea = delegate(List<int> cells)
 		{
 			foreach (int num in cells)

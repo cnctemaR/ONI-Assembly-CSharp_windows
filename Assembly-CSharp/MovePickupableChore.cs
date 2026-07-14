@@ -147,7 +147,7 @@ public class MovePickupableChore : Chore<MovePickupableChore.StatesInstance>
 					{
 						smi3.GoTo(smi3.sm.root);
 					}
-					gameObject.GetComponent<Navigator>().Stop(false, true);
+					gameObject.GetComponent<Navigator>().Stop(false, false);
 				}
 			}).MoveTo<Capturable>(this.pickupablesource, this.fetch.wrangle, new Func<MovePickupableChore.StatesInstance, NavTactic>(this.GetNavTactic), null, null);
 			this.fetch.wrangle.EnterTransition(this.fetch.approach, (MovePickupableChore.StatesInstance smi) => this.pickupablesource.Get(smi).HasTag(GameTags.Creatures.Bagged)).ToggleWork<Capturable>(this.pickupablesource, this.fetch.approach, null, null);

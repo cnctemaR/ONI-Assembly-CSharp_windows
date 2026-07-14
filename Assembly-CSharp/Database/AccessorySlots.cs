@@ -41,6 +41,11 @@ namespace Database
 			}
 			Db.Get().Accessories.AddCustomAccessories(Assets.GetAnim("body_lonelyminion_kanim"), parent, this);
 			Db.Get().Accessories.AddCustomAccessories(Assets.GetAnim("body_sena_kanim"), parent, this);
+			if (DlcManager.IsContentSubscribed("DLC5_ID"))
+			{
+				Db.Get().Accessories.AddCustomAccessories(Assets.GetAnim("body_kai_kanim"), parent, this);
+				Db.Get().Accessories.AddCustomAccessories(Assets.GetAnim("body_minnow_kanim"), parent, this);
+			}
 		}
 
 		public AccessorySlot Find(KAnimHashedString symbol_name)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ProcGen;
 using UnityEngine;
 
 public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
@@ -76,6 +77,18 @@ public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
 		}
 	}
 
+	public string UI_ANIM_NAME
+	{
+		get
+		{
+			if (!this.forceRevealed && (!this.revealed || this.clusterCellRevealLevel != ClusterRevealLevel.Visible))
+			{
+				return "unknown";
+			}
+			return "ui";
+		}
+	}
+
 	public string AnimName
 	{
 		get
@@ -108,6 +121,32 @@ public class ClusterMapMeteorShowerVisualizer : ClusterGridEntity
 		kbatchedAnimController.Play(this.QuestionMarkAnimName, KAnim.PlayMode.Once, 1f, 0f);
 		kbatchedAnimController.gameObject.AddOrGet<ClusterMapIconFixRotation>();
 		return kbatchedAnimController;
+	}
+
+	public override Sprite GetUISprite()
+	{
+		if (DlcManager.FeatureClusterSpaceEnabled())
+		{
+			List<ClusterGridEntity.AnimConfig> animConfigs = this.AnimConfigs;
+			if (animConfigs.Count > 0)
+			{
+				return Def.GetUISpriteFromMultiObjectAnim(animConfigs[0].animFile, this.UI_ANIM_NAME, false, "");
+			}
+		}
+		else
+		{
+			WorldContainer component = base.GetComponent<WorldContainer>();
+			if (component != null)
+			{
+				global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(component.worldName);
+				if (worldData == null)
+				{
+					return null;
+				}
+				return Assets.GetSprite(worldData.asteroidIcon);
+			}
+		}
+		return null;
 	}
 
 	protected override void OnCleanUp()

@@ -150,7 +150,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 		if (!(smi.AnimController.currentAnim == LonelyMinionConfig.FOOD_IDLE) && !(smi.AnimController.currentAnim == LonelyMinionConfig.DECOR_IDLE) && !(smi.AnimController.currentAnim == LonelyMinionConfig.POWER_IDLE))
 		{
 			LonelyMinionHouse.Instance smi2 = smi.transform.parent.GetSMI<LonelyMinionHouse.Instance>();
-			smi.AnimController.GetSynchronizer().Add(smi2.AnimController);
+			smi.AnimController.GetSynchronizer().Add(smi2.AnimController, null);
 			if (smi.AnimController.currentAnim == LonelyMinionConfig.BLINDS_IDLE_0)
 			{
 				smi2.BlindsController.Play(string.Format("{0}_{1}", "meter_blinds", 0), KAnim.PlayMode.Paused, 1f, 0f);
@@ -176,7 +176,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 		{
 			return;
 		}
-		smi.AnimController.GetSynchronizer().Add(smi2.AnimController);
+		smi.AnimController.GetSynchronizer().Add(smi2.AnimController, null);
 		if (smi.StartingAverageDecor == float.NegativeInfinity)
 		{
 			smi.StartingAverageDecor = LonelyMinionHouse.CalculateAverageDecor(smi.def.DecorInspectionArea);
@@ -266,7 +266,7 @@ public class LonelyMinion : GameStateMachine<LonelyMinion, LonelyMinion.Instance
 		public override void StartSM()
 		{
 			LonelyMinionHouse.Instance smi = base.smi.transform.parent.GetSMI<LonelyMinionHouse.Instance>();
-			base.smi.AnimController.GetSynchronizer().Add(smi.AnimController);
+			base.smi.AnimController.GetSynchronizer().Add(smi.AnimController, null);
 			QuestInstance instance = QuestManager.GetInstance(base.def.QuestOwnerId, Db.Get().Quests.LonelyMinionGreetingQuest);
 			instance.QuestProgressChanged = (Action<QuestInstance, Quest.State, float>)Delegate.Combine(instance.QuestProgressChanged, new Action<QuestInstance, Quest.State, float>(this.ShowQuestCompleteNotification));
 			base.smi.IdleDelayTimer = global::UnityEngine.Random.Range(20f, 40f);

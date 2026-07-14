@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 [AddComponentMenu("KMonoBehaviour/scripts/ToolParameterMenu")]
 public class ToolParameterMenu : KMonoBehaviour
@@ -13,95 +15,136 @@ public class ToolParameterMenu : KMonoBehaviour
 		this.ClearMenu();
 	}
 
-	public void PopulateMenu(Dictionary<string, ToolParameterMenu.ToggleState> parameters)
+	private int ToggleStateToMultiToggleInt(ToolParameterMenu.ToggleData data)
+	{
+		switch (data.state)
+		{
+		case ToolParameterMenu.ToggleState.On:
+			if (!data.isToggleInclusive)
+			{
+				return 1;
+			}
+			return 3;
+		case ToolParameterMenu.ToggleState.Off:
+			return 0;
+		case ToolParameterMenu.ToggleState.Disabled:
+			return 2;
+		default:
+			return 0;
+		}
+	}
+
+	public void PopulateMenu(ToolParameterMenu.ToggleData[] togglesData)
 	{
 		this.ClearMenu();
-		this.currentParameters = parameters;
-		foreach (KeyValuePair<string, ToolParameterMenu.ToggleState> keyValuePair in parameters)
+		this.currentTogglesData = togglesData;
+		bool flag = true;
+		for (int i = 0; i < togglesData.Length; i++)
 		{
-			GameObject gameObject = Util.KInstantiateUI(this.widgetPrefab, this.widgetContainer, true);
-			gameObject.GetComponentInChildren<LocText>().text = Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + keyValuePair.Key + ".NAME");
-			ToolTip componentInChildren = gameObject.GetComponentInChildren<ToolTip>();
-			if (componentInChildren != null)
+			if (togglesData[i].isToggleInclusive)
 			{
-				componentInChildren.SetSimpleTooltip(Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + keyValuePair.Key + ".TOOLTIP"));
+				flag = false;
+				break;
 			}
-			this.widgets.Add(keyValuePair.Key, gameObject);
-			MultiToggle toggle = gameObject.GetComponentInChildren<MultiToggle>();
-			ToolParameterMenu.ToggleState value = keyValuePair.Value;
-			if (value == ToolParameterMenu.ToggleState.Disabled)
+		}
+		this.widgetContainer.GetComponent<ToggleGroup>().enabled = flag;
+		foreach (ToolParameterMenu.ToggleData toggleData in togglesData)
+		{
+			GameObject gameObject = this.CreateToggleGameObject(toggleData);
+			this.widgets.Add(toggleData.name, new ToolParameterMenu.Widget
 			{
-				toggle.ChangeState(2);
-			}
-			else if (value == ToolParameterMenu.ToggleState.On)
-			{
-				toggle.ChangeState(1);
-				this.lastEnabledFilter = keyValuePair.Key;
-			}
-			else
-			{
-				toggle.ChangeState(0);
-			}
-			MultiToggle toggle2 = toggle;
-			toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
-			{
-				foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.widgets)
-				{
-					if (keyValuePair2.Value == toggle.transform.parent.gameObject)
-					{
-						if (this.currentParameters[keyValuePair2.Key] == ToolParameterMenu.ToggleState.Disabled)
-						{
-							break;
-						}
-						this.ChangeToSetting(keyValuePair2.Key);
-						this.OnChange();
-						break;
-					}
-				}
-			}));
+				gameObject = gameObject,
+				data = toggleData
+			});
 		}
 		this.content.SetActive(true);
+	}
+
+	private GameObject CreateToggleGameObject(ToolParameterMenu.ToggleData data)
+	{
+		GameObject newWidget = Util.KInstantiateUI(this.widgetPrefab, this.widgetContainer, true);
+		TMP_Text componentInChildren = newWidget.GetComponentInChildren<LocText>();
+		ToolTip componentInChildren2 = newWidget.GetComponentInChildren<ToolTip>();
+		MultiToggle componentInChildren3 = newWidget.GetComponentInChildren<MultiToggle>();
+		ToolParameterMenu.ToggleState state = data.state;
+		componentInChildren.text = Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + data.name + ".NAME");
+		if (componentInChildren2 != null)
+		{
+			componentInChildren2.SetSimpleTooltip(Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + data.name + ".TOOLTIP"));
+		}
+		componentInChildren3.ChangeState(this.ToggleStateToMultiToggleInt(data));
+		MultiToggle multiToggle = componentInChildren3;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+		{
+			foreach (KeyValuePair<string, ToolParameterMenu.Widget> keyValuePair in this.widgets)
+			{
+				ToolParameterMenu.Widget value = keyValuePair.Value;
+				ToolParameterMenu.ToggleData data2 = value.data;
+				if (value.gameObject == newWidget)
+				{
+					if (data2.state == ToolParameterMenu.ToggleState.Disabled)
+					{
+						break;
+					}
+					this.ChangeToSetting(value);
+					this.OnChange();
+					break;
+				}
+			}
+		}));
+		return newWidget;
 	}
 
 	public void ClearMenu()
 	{
 		this.content.SetActive(false);
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgets)
+		foreach (KeyValuePair<string, ToolParameterMenu.Widget> keyValuePair in this.widgets)
 		{
-			Util.KDestroyGameObject(keyValuePair.Value);
+			Util.KDestroyGameObject(keyValuePair.Value.gameObject);
 		}
 		this.widgets.Clear();
 	}
 
-	private void ChangeToSetting(string key)
+	private void ChangeToSetting(ToolParameterMenu.Widget clickedWidget)
 	{
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgets)
+		ToolParameterMenu.ToggleData data = clickedWidget.data;
+		if (data.isToggleInclusive)
 		{
-			if (this.currentParameters[keyValuePair.Key] != ToolParameterMenu.ToggleState.Disabled)
+			data.state = ((data.state == ToolParameterMenu.ToggleState.Off) ? ToolParameterMenu.ToggleState.On : ToolParameterMenu.ToggleState.Off);
+			using (Dictionary<string, ToolParameterMenu.Widget>.Enumerator enumerator = this.widgets.GetEnumerator())
 			{
-				this.currentParameters[keyValuePair.Key] = ToolParameterMenu.ToggleState.Off;
+				while (enumerator.MoveNext())
+				{
+					KeyValuePair<string, ToolParameterMenu.Widget> keyValuePair = enumerator.Current;
+					ToolParameterMenu.ToggleData data2 = keyValuePair.Value.data;
+					if (data2.state != ToolParameterMenu.ToggleState.Disabled && !data.isToggleInclusive)
+					{
+						data2.state = ToolParameterMenu.ToggleState.Off;
+					}
+				}
+				return;
 			}
 		}
-		this.currentParameters[key] = ToolParameterMenu.ToggleState.On;
+		foreach (KeyValuePair<string, ToolParameterMenu.Widget> keyValuePair2 in this.widgets)
+		{
+			ToolParameterMenu.ToggleData data3 = keyValuePair2.Value.data;
+			if (data3.state != ToolParameterMenu.ToggleState.Disabled)
+			{
+				data3.state = ToolParameterMenu.ToggleState.Off;
+			}
+		}
+		data.state = ToolParameterMenu.ToggleState.On;
 	}
 
 	private void OnChange()
 	{
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgets)
+		foreach (KeyValuePair<string, ToolParameterMenu.Widget> keyValuePair in this.widgets)
 		{
-			switch (this.currentParameters[keyValuePair.Key])
-			{
-			case ToolParameterMenu.ToggleState.On:
-				keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(1);
-				this.lastEnabledFilter = keyValuePair.Key;
-				break;
-			case ToolParameterMenu.ToggleState.Off:
-				keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(0);
-				break;
-			case ToolParameterMenu.ToggleState.Disabled:
-				keyValuePair.Value.GetComponentInChildren<MultiToggle>().ChangeState(2);
-				break;
-			}
+			ToolParameterMenu.Widget value = keyValuePair.Value;
+			ToolParameterMenu.ToggleData data = value.data;
+			GameObject gameObject = value.gameObject;
+			int num = this.ToggleStateToMultiToggleInt(data);
+			gameObject.GetComponentInChildren<MultiToggle>().ChangeState(num);
 		}
 		if (this.onParametersChanged != null)
 		{
@@ -120,9 +163,9 @@ public class ToolParameterMenu : KMonoBehaviour
 
 	public GameObject widgetPrefab;
 
-	private Dictionary<string, GameObject> widgets = new Dictionary<string, GameObject>();
+	private Dictionary<string, ToolParameterMenu.Widget> widgets = new Dictionary<string, ToolParameterMenu.Widget>();
 
-	private Dictionary<string, ToolParameterMenu.ToggleState> currentParameters;
+	private ToolParameterMenu.ToggleData[] currentTogglesData;
 
 	private string lastEnabledFilter;
 
@@ -147,6 +190,10 @@ public class ToolParameterMenu : KMonoBehaviour
 		public static string LOGIC = "LOGIC";
 
 		public static string BACKWALL = "BACKWALL";
+
+		public static string NATURALBACKWALL = "NATURALBACKWALL";
+
+		public static string UPROOTPLANTS = "UPROOTPLANTS";
 
 		public static string CONSTRUCTION = "CONSTRUCTION";
 
@@ -187,6 +234,41 @@ public class ToolParameterMenu : KMonoBehaviour
 		public static string STATECHANGE = "STATECHANGE";
 
 		public static string ALL = "ALL";
+	}
+
+	public class ToggleData
+	{
+		public bool IsOn
+		{
+			get
+			{
+				return this.state == ToolParameterMenu.ToggleState.On;
+			}
+		}
+
+		public ToggleData()
+		{
+		}
+
+		public ToggleData(string name, ToolParameterMenu.ToggleState state, bool isToggleInclusive = false)
+		{
+			this.name = name;
+			this.state = state;
+			this.isToggleInclusive = isToggleInclusive;
+		}
+
+		public string name;
+
+		public bool isToggleInclusive;
+
+		public ToolParameterMenu.ToggleState state;
+	}
+
+	private class Widget
+	{
+		public GameObject gameObject;
+
+		public ToolParameterMenu.ToggleData data;
 	}
 
 	public enum ToggleState

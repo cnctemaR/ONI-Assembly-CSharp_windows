@@ -13,7 +13,8 @@ namespace Klei
 			this.worldLayout = new WorldLayout(null, 0);
 			this.terrainCells = new List<TerrainCell>();
 			this.overworldCells = new List<TerrainCell>();
-			this.rivers = new List<global::ProcGen.River>();
+			this.biomes = new List<BiomeSizeData>();
+			this.rivers = new List<River>();
 			this.gameSpawnData = new GameSpawnData();
 			this.world = new Chunk();
 			this.voronoiTree = new Tree(0);
@@ -35,7 +36,9 @@ namespace Klei
 
 		public List<TerrainCell> overworldCells;
 
-		public List<global::ProcGen.River> rivers;
+		public List<BiomeSizeData> biomes;
+
+		public List<River> rivers;
 
 		public GameSpawnData gameSpawnData;
 

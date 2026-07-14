@@ -284,7 +284,6 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		GameComps.InfraredVisualizers.Add(base.gameObject);
 		base.Subscribe<PrimaryElement>(1335436905, PrimaryElement.OnSplitFromChunkDelegate);
 		base.Subscribe<PrimaryElement>(-2064133523, PrimaryElement.OnAbsorbDelegate);
 	}
@@ -320,7 +319,6 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
-		GameComps.InfraredVisualizers.Remove(base.gameObject);
 		if (this.diseaseHandle.IsValid())
 		{
 			GameComps.DiseaseContainers.Remove(base.gameObject);

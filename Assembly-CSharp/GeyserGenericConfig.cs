@@ -115,6 +115,7 @@ public class GeyserGenericConfig : IMultiEntityConfig
 		list.Add(new GeyserGenericConfig.GeyserPrefabParams("geyser_molten_cobalt_kanim", 3, 3, new GeyserConfigurator.GeyserType("molten_cobalt", SimHashes.MoltenCobalt, GeyserConfigurator.GeyserShape.Molten, 2500f, 200f, 400f, 150f, DlcManager.EXPANSION1, null, 480f, 1080f, 0.016666668f, 0.1f, 15000f, 135000f, 0.4f, 0.8f, 372.15f), true));
 		list.Add(new GeyserGenericConfig.GeyserPrefabParams("geyser_liquid_oil_kanim", 4, 2, new GeyserConfigurator.GeyserType("oil_drip", SimHashes.CrudeOil, GeyserConfigurator.GeyserShape.Liquid, 600f, 1f, 250f, 50f, null, null, 600f, 600f, 1f, 1f, 100f, 500f, 0.4f, 0.8f, 372.15f), true));
 		list.Add(new GeyserGenericConfig.GeyserPrefabParams("geyser_liquid_sulfur_kanim", 4, 2, new GeyserConfigurator.GeyserType("liquid_sulfur", SimHashes.LiquidSulfur, GeyserConfigurator.GeyserShape.Liquid, 438.34998f, 1000f, 2000f, 500f, DlcManager.EXPANSION1, null, 60f, 1140f, 0.1f, 0.9f, 15000f, 135000f, 0.4f, 0.8f, 372.15f), true));
+		list.Add(new GeyserGenericConfig.GeyserPrefabParams("geyser_liquid_murkybrine_kanim", 4, 2, new GeyserConfigurator.GeyserType("murky_brine", SimHashes.MurkyBrine, GeyserConfigurator.GeyserShape.Liquid, 368.15f, 2000f, 4000f, 500f, DlcManager.DLC5, null, 60f, 1140f, 0.1f, 0.9f, 15000f, 135000f, 0.4f, 0.8f, 372.15f), false));
 		list.RemoveAll((GeyserGenericConfig.GeyserPrefabParams geyser) => !DlcManager.IsCorrectDlcSubscribed(geyser.geyserType));
 		return list;
 	}
@@ -172,6 +173,8 @@ public class GeyserGenericConfig : IMultiEntityConfig
 	public const string OilDrip = "oil_drip";
 
 	public const string LiquidSulfur = "liquid_sulfur";
+
+	public const string MurkyBrine = "murky_brine";
 
 	public struct GeyserPrefabParams
 	{

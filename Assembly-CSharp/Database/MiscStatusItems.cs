@@ -49,6 +49,24 @@ namespace Database
 				str = str.Replace("{Mass}", GameUtil.GetFormattedMass(gameObject.GetComponent<PrimaryElement>().Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
+			this.UnderwaterVentBlocked = this.CreateStatusItem("UnderwaterVentBlocked", "MISC", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+			this.UnderwaterVentBeingDrilled = this.CreateStatusItem("UnderwaterVentBeingDrilled", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.UnderwaterVentEmiting = this.CreateStatusItem("UnderwaterVentEmiting", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.UnderwaterVentEmiting.resolveStringCallback = delegate(string str, object data)
+			{
+				UnderwaterVent.Instance instance = (UnderwaterVent.Instance)data;
+				str = str.Replace("{ELEMENT_NAME}", GameUtil.GetElementNameByElementHash(instance.def.data.BubbleElement));
+				str = str.Replace("{RATE}", GameUtil.GetFormattedMass(instance.def.data.BubbleMassRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				str = str.Replace("{TEMP}", GameUtil.GetFormattedTemperature(instance.def.data.BubbleTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				return str;
+			};
+			this.UnderwaterVentBuildUpProgress = this.CreateStatusItem("UnderwaterVentBuildUpProgress", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.UnderwaterVentBuildUpProgress.resolveStringCallback = delegate(string str, object data)
+			{
+				UnderwaterVent.Instance instance2 = (UnderwaterVent.Instance)data;
+				str = str.Replace("{PERCENTAGE}", GameUtil.GetFormattedPercent(instance2.BuildUpProgress * 100f, GameUtil.TimeSlice.None));
+				return str;
+			};
 			this.OreTemp = this.CreateStatusItem("OreTemp", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.OreTemp.resolveStringCallback = delegate(string str, object data)
 			{
@@ -145,6 +163,44 @@ namespace Database
 			};
 			this.Space = this.CreateStatusItem("Space", "MISC", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022);
 			this.BuriedItem = this.CreateStatusItem("BuriedItem", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.BackwallMass = this.CreateStatusItem("BackwallMass", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.BackwallMass.resolveStringCallback = delegate(string str, object data)
+			{
+				BackwallSelectionObject backwallSelectionObject = (BackwallSelectionObject)data;
+				str = str.Replace("{Mass}", GameUtil.GetFormattedMass(backwallSelectionObject.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			};
+			this.BackwallTemperature = this.CreateStatusItem("BackwallTemperature", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
+			this.BackwallTemperature.resolveStringCallback = delegate(string str, object data)
+			{
+				BackwallSelectionObject backwallSelectionObject2 = (BackwallSelectionObject)data;
+				str = str.Replace("{Temp}", GameUtil.GetFormattedTemperature(backwallSelectionObject2.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+				return str;
+			};
+			this.BubbleContents = this.CreateStatusItem("BubbleContents", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 129022);
+			this.BubbleContents.resolveStringCallback = delegate(string str, object data)
+			{
+				CellSelectionObject cellSelectionObject8 = (CellSelectionObject)data;
+				string text = "";
+				foreach (BubbleManager.CellBubbleInfo cellBubbleInfo in cellSelectionObject8.bubbleInfos)
+				{
+					Element element3 = ElementLoader.FindElementByHash(cellBubbleInfo.element);
+					if (text.Length > 0)
+					{
+						text += "\n";
+					}
+					text = string.Concat(new string[]
+					{
+						text,
+						element3.name,
+						" ",
+						UI.TOOLS.GENERIC.BUBBLE_LABEL,
+						": ",
+						GameUtil.GetFormattedMass(cellBubbleInfo.totalMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
+					});
+				}
+				return text;
+			};
 			this.SpoutOverPressure = this.CreateStatusItem("SpoutOverPressure", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.SpoutOverPressure.resolveStringCallback = delegate(string str, object data)
 			{
@@ -209,24 +265,24 @@ namespace Database
 			this.SpicedFood = this.CreateStatusItem("SpicedFood", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.SpicedFood.resolveTooltipCallback = delegate(string baseString, object data)
 			{
-				string text = baseString;
-				string text2 = "\n    • ";
+				string text2 = baseString;
+				string text3 = "\n    • ";
 				foreach (SpiceInstance spiceInstance in ((List<SpiceInstance>)data))
 				{
-					string text3 = "STRINGS.ITEMS.SPICES.";
+					string text4 = "STRINGS.ITEMS.SPICES.";
 					Tag id = spiceInstance.Id;
-					string text4 = text3 + id.Name.ToUpper() + ".NAME";
+					string text5 = text4 + id.Name.ToUpper() + ".NAME";
 					StringEntry stringEntry;
-					Strings.TryGet(text4, out stringEntry);
-					string text5 = ((stringEntry == null) ? ("MISSING " + text4) : stringEntry.String);
-					text = text + text2 + text5;
-					string text6 = "\n        • ";
+					Strings.TryGet(text5, out stringEntry);
+					string text6 = ((stringEntry == null) ? ("MISSING " + text5) : stringEntry.String);
+					text2 = text2 + text3 + text6;
+					string text7 = "\n        • ";
 					if (spiceInstance.StatBonus != null)
 					{
-						text += Effect.CreateTooltip(spiceInstance.StatBonus, false, text6, false);
+						text2 += Effect.CreateTooltip(spiceInstance.StatBonus, false, text7, false);
 					}
 				}
-				return text;
+				return text2;
 			};
 			this.RehydratedFood = this.CreateStatusItem("RehydratedFood", "MISC", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			this.OrderAttack = this.CreateStatusItem("OrderAttack", "MISC", "status_item_attack", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -272,8 +328,8 @@ namespace Database
 			this.BionicExplorerBooster = this.CreateStatusItem("BionicExplorerBooster", "MISC", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.BionicExplorerBooster.resolveStringCallback = delegate(string str, object data)
 			{
-				BionicUpgrade_ExplorerBooster.Instance instance = (BionicUpgrade_ExplorerBooster.Instance)data;
-				str = string.Format(str, GameUtil.GetFormattedPercent(instance.Progress * 100f, GameUtil.TimeSlice.None));
+				BionicUpgrade_ExplorerBooster.Instance instance3 = (BionicUpgrade_ExplorerBooster.Instance)data;
+				str = string.Format(str, GameUtil.GetFormattedPercent(instance3.Progress * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
 			this.BionicExplorerBoosterReady = this.CreateStatusItem("BionicExplorerBoosterReady", "MISC", "", StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
@@ -331,13 +387,13 @@ namespace Database
 			this.ImpactorHealth = this.CreateStatusItem("LargeImpactorHealth", "MISC", "", StatusItem.IconType.Exclamation, NotificationType.Bad, false, OverlayModes.None.ID, true, 129022);
 			this.ImpactorHealth.resolveStringCallback = delegate(string str, object data)
 			{
-				LargeImpactorStatus.Instance instance2 = (LargeImpactorStatus.Instance)data;
+				LargeImpactorStatus.Instance instance4 = (LargeImpactorStatus.Instance)data;
 				int num4 = 0;
 				int num5 = 0;
 				if (data != null)
 				{
-					num4 = instance2.Health;
-					num5 = instance2.def.MAX_HEALTH;
+					num4 = instance4.Health;
+					num5 = instance4.def.MAX_HEALTH;
 				}
 				return string.Format(str, num4, num5);
 			};
@@ -345,18 +401,18 @@ namespace Database
 			this.LongRangeMissileTTI.resolveStringCallback = delegate(string str, object data)
 			{
 				ClusterMapLongRangeMissile.StatesInstance statesInstance5 = (ClusterMapLongRangeMissile.StatesInstance)data;
-				string text7 = "";
+				string text8 = "";
 				float num6 = 0f;
 				if (statesInstance5 != null)
 				{
 					GameObject gameObject4 = statesInstance5.sm.targetObject.Get(statesInstance5);
 					if (gameObject4 != null)
 					{
-						text7 = gameObject4.GetProperName();
+						text8 = gameObject4.GetProperName();
 					}
 					num6 = statesInstance5.InterceptETA();
 				}
-				return string.Format(str, text7, GameUtil.GetFormattedCycles(num6, "F1", false));
+				return string.Format(str, text8, GameUtil.GetFormattedCycles(num6, "F1", false));
 			};
 			this.LongRangeMissileTTI.resolveTooltipCallback = this.LongRangeMissileTTI.resolveStringCallback;
 			this.MarkedForMove = this.CreateStatusItem("MarkedForMove", "MISC", "status_item_manually_controlled", StatusItem.IconType.Custom, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
@@ -366,19 +422,20 @@ namespace Database
 			this.ClusterMapHarvestableResource.resolveStringCallback = delegate(string str, object data)
 			{
 				List<StarmapHexCellInventory.SerializedItem> list = data as List<StarmapHexCellInventory.SerializedItem>;
-				string text8 = "";
+				string text9 = "";
 				for (int i = 0; i < list.Count; i++)
 				{
 					StarmapHexCellInventory.SerializedItem serializedItem = list[i];
-					text8 = text8 + serializedItem.ID.ProperName() + ": " + (serializedItem.IsEntity ? GameUtil.GetFormattedUnits(serializedItem.Mass, GameUtil.TimeSlice.None, true, "") : GameUtil.GetFormattedMass(serializedItem.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+					text9 = text9 + serializedItem.ID.ProperName() + ": " + (serializedItem.IsEntity ? GameUtil.GetFormattedUnits(serializedItem.Mass, GameUtil.TimeSlice.None, true, "") : GameUtil.GetFormattedMass(serializedItem.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 					if (i < list.Count - 1)
 					{
-						text8 += "\n";
+						text9 += "\n";
 					}
 				}
-				return GameUtil.SafeStringFormat(str, new object[] { text8 });
+				return GameUtil.SafeStringFormat(str, new object[] { text9 });
 			};
 			this.ClusterMapHarvestableResource.resolveTooltipCallback = this.ClusterMapHarvestableResource.resolveStringCallback;
+			this.MinnowPOIDehydratedStatus = this.CreateStatusItem("MinnowPOIDehydratedStatus", "MISC", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 		}
 
 		public StatusItem AttentionRequired;
@@ -506,5 +563,21 @@ namespace Database
 		public StatusItem ElectrobankSelfCharging;
 
 		public StatusItem ClusterMapHarvestableResource;
+
+		public StatusItem BackwallMass;
+
+		public StatusItem BackwallTemperature;
+
+		public StatusItem BubbleContents;
+
+		public StatusItem UnderwaterVentBuildUpProgress;
+
+		public StatusItem UnderwaterVentEmiting;
+
+		public StatusItem UnderwaterVentBlocked;
+
+		public StatusItem UnderwaterVentBeingDrilled;
+
+		public StatusItem MinnowPOIDehydratedStatus;
 	}
 }

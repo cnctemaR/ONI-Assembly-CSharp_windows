@@ -9,8 +9,15 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 	{
 		default_state = this.operational;
 		base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
-		this.unoperational.TagTransition(GameTags.Operational, this.operational, false);
-		this.operational.DefaultState(this.operational.manual).TagTransition(GameTags.Operational, this.unoperational, true);
+		this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Transition.ConditionCallback(FixedCapturePoint.ShouldBeOn)).EventTransition(GameHashes.BuildingStrawChange, this.operational, new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Transition.ConditionCallback(FixedCapturePoint.ShouldBeOn)).EventHandler(GameHashes.BuildingStrawChange, new GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.GameEvent.Callback(FixedCapturePoint.HandleBuildingStrawChange))
+			.Enter(new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State.Callback(FixedCapturePoint.Refresh))
+			.DefaultState(this.unoperational.noOperational);
+		this.unoperational.noOperational.EventTransition(GameHashes.OperationalChanged, this.unoperational.strawBlocked, (FixedCapturePoint.Instance smi) => FixedCapturePoint.IsOperational(smi) && FixedCapturePoint.IsStrawBlocked(smi)).EventTransition(GameHashes.OperationalChanged, this.unoperational.noLiquidOnStraw, (FixedCapturePoint.Instance smi) => FixedCapturePoint.IsOperational(smi) && FixedCapturePoint.IsStrawOutsideLiquid(smi));
+		this.unoperational.strawBlocked.ToggleStatusItem(Db.Get().BuildingStatusItems.OutputTileBlocked, null).EventTransition(GameHashes.OperationalChanged, this.unoperational.noOperational, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Not(new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Transition.ConditionCallback(FixedCapturePoint.IsOperational))).EventTransition(GameHashes.BuildingStrawChange, this.unoperational.noLiquidOnStraw, (FixedCapturePoint.Instance smi) => !FixedCapturePoint.IsStrawBlocked(smi) && FixedCapturePoint.IsStrawOutsideLiquid(smi));
+		this.unoperational.noLiquidOnStraw.ToggleStatusItem(Db.Get().BuildingStatusItems.NotSubmerged, null).EventTransition(GameHashes.OperationalChanged, this.unoperational.noOperational, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Not(new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Transition.ConditionCallback(FixedCapturePoint.IsOperational))).EventTransition(GameHashes.BuildingStrawChange, this.unoperational.strawBlocked, new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Transition.ConditionCallback(FixedCapturePoint.IsStrawBlocked));
+		this.operational.DefaultState(this.operational.manual).EventTransition(GameHashes.OperationalChanged, this.unoperational, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Not(new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Transition.ConditionCallback(FixedCapturePoint.ShouldBeOn))).EventTransition(GameHashes.BuildingStrawChange, this.unoperational, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Not(new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.Transition.ConditionCallback(FixedCapturePoint.ShouldBeOn)))
+			.EventHandler(GameHashes.BuildingStrawChange, new GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.GameEvent.Callback(FixedCapturePoint.HandleBuildingStrawChange))
+			.Enter(new StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State.Callback(FixedCapturePoint.Refresh));
 		this.operational.manual.ParamTransition<bool>(this.automated, this.operational.automated, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.IsTrue);
 		this.operational.automated.ParamTransition<bool>(this.automated, this.operational.manual, GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.IsFalse).ToggleChore((FixedCapturePoint.Instance smi) => smi.CreateChore(), this.unoperational, this.unoperational).Update("FindFixedCapturable", delegate(FixedCapturePoint.Instance smi, float dt)
 		{
@@ -18,11 +25,45 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 		}, UpdateRate.SIM_1000ms, false);
 	}
 
+	public static bool ShouldBeOn(FixedCapturePoint.Instance smi)
+	{
+		return FixedCapturePoint.IsOperational(smi) && !FixedCapturePoint.IsStrawBlocked(smi) && !FixedCapturePoint.IsStrawOutsideLiquid(smi);
+	}
+
+	public static bool IsOperational(FixedCapturePoint.Instance smi)
+	{
+		return smi.IsOperational;
+	}
+
+	public static bool IsStrawBlocked(FixedCapturePoint.Instance smi)
+	{
+		return smi.IsStrawBlocked;
+	}
+
+	public static bool IsStrawOutsideLiquid(FixedCapturePoint.Instance smi)
+	{
+		return smi.IsStrawOutsideLiquid;
+	}
+
+	public static void HandleBuildingStrawChange(FixedCapturePoint.Instance smi, object o)
+	{
+		FixedCapturePoint.Refresh(smi);
+	}
+
+	public static void Refresh(FixedCapturePoint.Instance smi)
+	{
+		if (smi.IsStrawInstalled)
+		{
+			smi.UpdateCaptureCell(smi.Straw.GetBottomCellOffset());
+		}
+		smi.PlayOnOffAnim();
+	}
+
 	public static readonly Operational.Flag enabledFlag = new Operational.Flag("enabled", Operational.Flag.Type.Requirement);
 
 	private StateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.BoolParameter automated;
 
-	public GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State unoperational;
+	public FixedCapturePoint.UnoperationalStates unoperational;
 
 	public FixedCapturePoint.OperationalState operational;
 
@@ -46,6 +87,22 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 		};
 
 		public bool allowBabies;
+
+		public CellOffset captureCellOffset = new CellOffset(0, 0);
+
+		public CellOffset rancherInteractOffset = new CellOffset(0, 0);
+
+		public HashedString logicPortId = "CritterPickUpInput";
+
+		public CellOffset? postCaptureOffset;
+
+		public string preCaptureAnimName;
+
+		public Func<FixedCapturePoint.Instance, string> getPreCaptureAnimSuffix;
+
+		public string offAnimName;
+
+		public string onAnimName;
 	}
 
 	public class OperationalState : GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State
@@ -55,37 +112,105 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 		public GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State automated;
 	}
 
+	public class UnoperationalStates : GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State
+	{
+		public GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State noOperational;
+
+		public GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State strawBlocked;
+
+		public GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.State noLiquidOnStraw;
+	}
+
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public new class Instance : GameStateMachine<FixedCapturePoint, FixedCapturePoint.Instance, IStateMachineTarget, FixedCapturePoint.Def>.GameInstance
 	{
+		public bool IsOperational
+		{
+			get
+			{
+				return this.operationComp != null || this.operationComp.IsOperational;
+			}
+		}
+
+		public bool IsStrawInstalled
+		{
+			get
+			{
+				return this.Straw != null;
+			}
+		}
+
+		public bool IsStrawOutsideLiquid
+		{
+			get
+			{
+				return this.IsStrawInstalled && !this.Straw.isInLiquid;
+			}
+		}
+
+		public bool IsStrawBlocked
+		{
+			get
+			{
+				return this.IsStrawInstalled && this.Straw.currentDepth <= 0;
+			}
+		}
+
 		public FixedCapturableMonitor.Instance targetCapturable { get; private set; }
 
 		public bool shouldCreatureGoGetCaptured { get; private set; }
+
+		public BuildingPointStraw Straw { get; private set; }
 
 		public Instance(IStateMachineTarget master, FixedCapturePoint.Def def)
 			: base(master, def)
 		{
 			base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
-			this.captureCell = Grid.PosToCell(base.transform.GetPosition());
+			this.captureCell = Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), def.captureCellOffset);
 			this.critterCapactiy = base.GetComponent<BaggableCritterCapacityTracker>();
+			this.Straw = base.GetComponent<BuildingPointStraw>();
 			this.operationComp = base.GetComponent<Operational>();
 			this.logicPorts = base.GetComponent<LogicPorts>();
 			if (this.logicPorts != null)
 			{
 				base.Subscribe(-801688580, new Action<object>(this.OnLogicEvent));
-				this.operationComp.SetFlag(FixedCapturePoint.enabledFlag, !this.logicPorts.IsPortConnected("CritterPickUpInput") || this.logicPorts.GetInputValue("CritterPickUpInput") > 0);
+				this.operationComp.SetFlag(FixedCapturePoint.enabledFlag, !this.logicPorts.IsPortConnected(def.logicPortId) || this.logicPorts.GetInputValue(def.logicPortId) > 0);
 				return;
 			}
 			this.operationComp.SetFlag(FixedCapturePoint.enabledFlag, true);
 		}
 
+		public int GetRancherInteractCell()
+		{
+			return Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), base.def.rancherInteractOffset);
+		}
+
 		private void OnLogicEvent(object data)
 		{
 			LogicValueChanged logicValueChanged = (LogicValueChanged)data;
-			if (logicValueChanged.portID == "CritterPickUpInput" && this.logicPorts.IsPortConnected("CritterPickUpInput"))
+			if (logicValueChanged.portID == base.def.logicPortId && this.logicPorts.IsPortConnected(base.def.logicPortId))
 			{
 				this.operationComp.SetFlag(FixedCapturePoint.enabledFlag, logicValueChanged.newValue > 0);
 			}
+		}
+
+		public void PlayOnOffAnim()
+		{
+			string text = ((this.Straw != null) ? this.Straw.GetAnimSuffix() : "");
+			string text2;
+			if (FixedCapturePoint.ShouldBeOn(this))
+			{
+				text2 = ((base.def.onAnimName != null) ? (base.def.onAnimName + text) : null);
+			}
+			else
+			{
+				text2 = ((base.def.offAnimName != null) ? (base.def.offAnimName + text) : null);
+			}
+			if (string.IsNullOrEmpty(text2))
+			{
+				return;
+			}
+			base.GetComponent<KBatchedAnimController>().Play(text2, KAnim.PlayMode.Once, 1f, 0f);
 		}
 
 		public override void StartSM()
@@ -165,14 +290,13 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 
 		public void FindFixedCapturable()
 		{
-			int num = Grid.PosToCell(base.transform.GetPosition());
-			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
+			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(this.captureCell);
 			if (cavityForCell == null)
 			{
 				this.ResetCapturePoint();
 				return;
 			}
-			if (!this.targetCapturable.IsNullOrStopped() && !FixedCapturePoint.Instance.CanCapturableBeCapturedAtCapturePoint(this.targetCapturable, this, cavityForCell, num))
+			if (!this.targetCapturable.IsNullOrStopped() && !this.isCurrentlyCapturingCreature && !FixedCapturePoint.Instance.CanCapturableBeCapturedAtCapturePoint(this.targetCapturable, this, cavityForCell, this.captureCell))
 			{
 				this.ResetCapturePoint();
 			}
@@ -181,7 +305,7 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 				foreach (object obj in Components.FixedCapturableMonitors)
 				{
 					FixedCapturableMonitor.Instance instance = (FixedCapturableMonitor.Instance)obj;
-					if (FixedCapturePoint.Instance.CanCapturableBeCapturedAtCapturePoint(instance, this, cavityForCell, num))
+					if (FixedCapturePoint.Instance.CanCapturableBeCapturedAtCapturePoint(instance, this, cavityForCell, this.captureCell))
 					{
 						this.targetCapturable = instance;
 						if (!this.targetCapturable.IsNullOrStopped())
@@ -195,6 +319,11 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			}
 		}
 
+		public void UpdateCaptureCell(CellOffset offset)
+		{
+			this.captureCell = Grid.OffsetCell(Grid.PosToCell(base.transform.GetPosition()), offset);
+		}
+
 		public void ResetCapturePoint()
 		{
 			base.Trigger(643180843, null);
@@ -205,6 +334,8 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 				this.targetCapturable = null;
 			}
 		}
+
+		public bool isCurrentlyCapturingCreature;
 
 		public BaggableCritterCapacityTracker critterCapactiy;
 

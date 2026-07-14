@@ -51,6 +51,7 @@ public class ExteriorWallConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.GetComponent<KPrefabID>();
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<AnimTileable>().objectLayer = ObjectLayer.Backwall;
 		go.AddComponent<ZoneTile>();
@@ -59,6 +60,7 @@ public class ExteriorWallConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<KBatchedAnimController>().initialBlendParameters = 0;
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Backwall, false);
 		GeneratedBuildings.RemoveLoopingSounds(go);
 	}

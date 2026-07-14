@@ -73,8 +73,6 @@ public class BeehiveCalorieMonitor : GameStateMachine<BeehiveCalorieMonitor, Bee
 		public float minConsumedCaloriesBeforePooping = 100f;
 
 		public float minimumTimeBeforePooping = 10f;
-
-		public bool storePoop = true;
 	}
 
 	public new class Instance : GameStateMachine<BeehiveCalorieMonitor, BeehiveCalorieMonitor.Instance, IStateMachineTarget, BeehiveCalorieMonitor.Def>.GameInstance
@@ -84,7 +82,7 @@ public class BeehiveCalorieMonitor : GameStateMachine<BeehiveCalorieMonitor, Bee
 		{
 			this.calories = Db.Get().Amounts.Calories.Lookup(base.gameObject);
 			this.calories.value = this.calories.GetMax() * 0.9f;
-			this.stomach = new CreatureCalorieMonitor.Stomach(master.gameObject, def.minConsumedCaloriesBeforePooping, -1f, def.storePoop);
+			this.stomach = new CreatureCalorieMonitor.Stomach(master.gameObject, def.minConsumedCaloriesBeforePooping, -1f);
 			this.metabolism = base.gameObject.GetAttributes().Add(Db.Get().CritterAttributes.Metabolism);
 			this.deltaCalorieMetabolismModifier = new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, 1f, DUPLICANTS.MODIFIERS.METABOLISM_CALORIE_MODIFIER.NAME, true, false, false);
 			this.calories.deltaAttribute.Add(this.deltaCalorieMetabolismModifier);
@@ -101,7 +99,7 @@ public class BeehiveCalorieMonitor : GameStateMachine<BeehiveCalorieMonitor, Bee
 		public void Poop()
 		{
 			this.lastMealOrPoopTime = Time.time;
-			this.stomach.Poop();
+			this.stomach.PoopInStorage(base.GetComponent<Storage>(), false, null, null);
 		}
 
 		public float GetCalories0to1()

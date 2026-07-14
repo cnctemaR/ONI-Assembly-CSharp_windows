@@ -100,6 +100,42 @@ public class DebugHandler : IInputHandler
 		DebugHandler.NotificationsDisabled = !DebugHandler.NotificationsDisabled;
 	}
 
+	public static void ToggleInstantBuildMode()
+	{
+		if (Game.Instance == null)
+		{
+			return;
+		}
+		DebugHandler.InstantBuildMode = !DebugHandler.InstantBuildMode;
+		InterfaceTool.ToggleConfig(global::Action.DebugInstantBuildMode);
+		Game.Instance.Trigger(1557339983, null);
+		if (PlanScreen.Instance != null)
+		{
+			PlanScreen.Instance.Refresh();
+		}
+		if (BuildMenu.Instance != null)
+		{
+			BuildMenu.Instance.Refresh();
+		}
+		if (OverlayMenu.Instance != null)
+		{
+			OverlayMenu.Instance.Refresh();
+		}
+		if (ConsumerManager.instance != null)
+		{
+			ConsumerManager.instance.RefreshDiscovered(null);
+		}
+		if (ManagementMenu.Instance != null)
+		{
+			ManagementMenu.Instance.Refresh();
+		}
+		if (SelectTool.Instance != null && SelectTool.Instance.selected != null)
+		{
+			DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);
+		}
+		Game.Instance.Trigger(1594320620, "all_the_things");
+	}
+
 	private string GetScreenshotFileName()
 	{
 		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
@@ -188,7 +224,7 @@ public class DebugHandler : IInputHandler
 		}
 		else if (e.TryConsume(global::Action.DebugDig) && Game.Instance != null)
 		{
-			SimMessages.Dig(DebugHandler.GetMouseCell(), -1, false);
+			SimMessages.Dig(DebugHandler.GetMouseCell(), -1, false, false);
 		}
 		else if (e.TryConsume(global::Action.DebugToggleFastWorkers) && Game.Instance != null)
 		{
@@ -196,34 +232,7 @@ public class DebugHandler : IInputHandler
 		}
 		else if (e.TryConsume(global::Action.DebugInstantBuildMode) && Game.Instance != null)
 		{
-			DebugHandler.InstantBuildMode = !DebugHandler.InstantBuildMode;
-			InterfaceTool.ToggleConfig(global::Action.DebugInstantBuildMode);
-			Game.Instance.Trigger(1557339983, null);
-			if (PlanScreen.Instance != null)
-			{
-				PlanScreen.Instance.Refresh();
-			}
-			if (BuildMenu.Instance != null)
-			{
-				BuildMenu.Instance.Refresh();
-			}
-			if (OverlayMenu.Instance != null)
-			{
-				OverlayMenu.Instance.Refresh();
-			}
-			if (ConsumerManager.instance != null)
-			{
-				ConsumerManager.instance.RefreshDiscovered(null);
-			}
-			if (ManagementMenu.Instance != null)
-			{
-				ManagementMenu.Instance.Refresh();
-			}
-			if (SelectTool.Instance.selected != null)
-			{
-				DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);
-			}
-			Game.Instance.Trigger(1594320620, "all_the_things");
+			DebugHandler.ToggleInstantBuildMode();
 		}
 		else if (e.TryConsume(global::Action.DebugExplosion) && Game.Instance != null)
 		{
@@ -245,7 +254,7 @@ public class DebugHandler : IInputHandler
 			{
 				if (!(DiscoveredResources.Instance != null))
 				{
-					goto IL_0CF4;
+					goto IL_0C1A;
 				}
 				using (List<Element>.Enumerator enumerator = ElementLoader.elements.GetEnumerator())
 				{
@@ -254,7 +263,7 @@ public class DebugHandler : IInputHandler
 						Element element = enumerator.Current;
 						DiscoveredResources.Instance.Discover(element.tag, element.GetMaterialCategoryTag());
 					}
-					goto IL_0CF4;
+					goto IL_0C1A;
 				}
 			}
 			if (e.TryConsume(global::Action.DebugToggleUI))
@@ -360,7 +369,7 @@ public class DebugHandler : IInputHandler
 								smi2.GoToCursor();
 							}
 						}
-						goto IL_0CF4;
+						goto IL_0C1A;
 					}
 				}
 				if (e.TryConsume(global::Action.DebugTeleport))
@@ -534,7 +543,7 @@ public class DebugHandler : IInputHandler
 				}
 			}
 		}
-		IL_0CF4:
+		IL_0C1A:
 		if (e.Consumed && Game.Instance != null)
 		{
 			Game.Instance.debugWasUsed = true;

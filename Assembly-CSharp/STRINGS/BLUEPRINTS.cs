@@ -2247,6 +2247,911 @@ namespace STRINGS
 			public static LocString DESC = "Before it was forgotten, it was revered.";
 		}
 
+		public class PERMIT_ATMO_BELT_DIVING_TAN
+		{
+			public static LocString NAME = "Abyss Atmo Belt";
+
+			public static LocString DESC = "Ideal for lurking unseen in hostile environments.";
+		}
+
+		public class PERMIT_ATMO_BELT_FLOATIE
+		{
+			public static LocString NAME = "Floatie Atmo Belt";
+
+			public static LocString DESC = "A high-tech safety donut that has no actual effect on buoyancy.";
+		}
+
+		public class PERMIT_ATMO_BELT_DUCKIE_GASBALL
+		{
+			public static LocString NAME = "Ducky Atmo Belt";
+
+			public static LocString DESC = "Like a cheerful pal who's always by your side...or around your waist, rather.";
+		}
+
+		public class PERMIT_ATMO_BELT_TURTLE
+		{
+			public static LocString NAME = "Orehull Atmo Belt";
+
+			public static LocString DESC = "Goes swimmingly with Atmo Suits of any kind.";
+		}
+
+		public class PERMIT_ATMOSUIT_DIVING_KHAKI_TAN
+		{
+			public static LocString NAME = "Antique Atmo Suit";
+
+			public static LocString DESC = "Makes the wearer look like a legitimate atmo suit collector.";
+		}
+
+		public class PERMIT_ATMOSUIT_BASIC_RUBBLE_ELECTRO
+		{
+			public static LocString NAME = "Electro Atmo Suit";
+
+			public static LocString DESC = "A sleek gray suit with a pop of electro blue.";
+		}
+
+		public class PERMIT_ATMOSUIT_TAP_01
+		{
+			public static LocString NAME = "Hotspot Atmo Suit";
+
+			public static LocString DESC = "This suit features colorful fabric reinforcement patches in high-wear areas, including the armpits. Especially the armpits.";
+		}
+
+		public class PERMIT_ATMOSUIT_TURTLE
+		{
+			public static LocString NAME = "Orehull Atmo Suit";
+
+			public static LocString DESC = "Looks right at home in a kelp forest.";
+		}
+
+		public class PERMIT_ATMO_SHOES_DIVING_TAN
+		{
+			public static LocString NAME = "Antique Atmo Boots";
+
+			public static LocString DESC = "Cutting-edge protective footwear with rusting-edge styling.";
+		}
+
+		public class PERMIT_ATMO_SHOES_BASIC_ELECTRO
+		{
+			public static LocString NAME = "Electro Atmo Boots";
+
+			public static LocString DESC = "There's a little tag inside each one, to remind Duplicants which foot it's for.";
+		}
+
+		public class PERMIT_ATMO_SHOES_TAP_01
+		{
+			public static LocString NAME = "Hotspot Atmo Boots";
+
+			public static LocString DESC = "Abstract pops of color turn hostile atmospheres into haute-style atmospheres.";
+		}
+
+		public class PERMIT_ATMO_SHOES_TURTLE
+		{
+			public static LocString NAME = "Orehull Atmo Boots";
+
+			public static LocString DESC = "Like a coupla little foot shells.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_DIVING_KHAKI_TAN
+		{
+			public static LocString NAME = "Antique Atmo Gloves";
+
+			public static LocString DESC = "The wrist rivets have a tendency to get caught on things.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_ELECTRO
+		{
+			public static LocString NAME = "Electro Atmo Gloves";
+
+			public static LocString DESC = "Electric blue gloves for hostile environments.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_TAP_01
+		{
+			public static LocString NAME = "Rubberized Atmo Gloves";
+
+			public static LocString DESC = "Thick rubber cuffs keep hostile atmospheres out, and sweaty fingers in.";
+		}
+
+		public class PERMIT_ATMO_GLOVES_TURTLE
+		{
+			public static LocString NAME = "Orehull Atmo Gloves";
+
+			public static LocString DESC = "Perfect for giving carapace scritches to aquatic critters.";
+		}
+
+		public class PERMIT_ATMO_HELMET_DIVING_KHAKI_TAN
+		{
+			public static LocString NAME = "Antique Atmo Helmet";
+
+			public static LocString DESC = "There might still be a mothball or two inside.";
+		}
+
+		public class PERMIT_ATMO_HELMET_TAP_ELECTRO_RUBBLE
+		{
+			public static LocString NAME = "Electro Atmo Helmet";
+
+			public static LocString DESC = "In the right liquid environment, it makes excellent camouflage.";
+		}
+
+		public class PERMIT_ATMO_HELMET_TAP_01
+		{
+			public static LocString NAME = "Optimist Atmo Helmet";
+
+			public static LocString DESC = "Brightly colored headgear for Duplicants who err on the side of hope.";
+		}
+
+		public class PERMIT_ATMO_HELMET_TURTLE
+		{
+			public static LocString NAME = "Orehull Atmo Helmet";
+
+			public static LocString DESC = "For aquatic ranchers who really want to get inside the critter's head.";
+		}
+
+		public class PERMIT_SWIMSUIT_MERM
+		{
+			public static LocString NAME = "Merfolk Aquasuit";
+
+			public static LocString DESC = "The epaulettes are reinforced with real fishbones!";
+		}
+
+		public class PERMIT_SWIMSUIT_WAVECRESTS
+		{
+			public static LocString NAME = "Breaker Aquasuit";
+
+			public static LocString DESC = "One cannot control the waves, but one can dress as though one has learned how to swim.";
+		}
+
+		public class PERMIT_PANTS_NAUTICAL_WHITE
+		{
+			public static LocString NAME = "High-Waisted Nautical Pants";
+
+			public static LocString DESC = "Twice the usual number of buttons, and zero pockets.";
+		}
+
+		public class PERMIT_PANTS_SWIM_BLACK
+		{
+			public static LocString NAME = "Black Scaly Pants";
+
+			public static LocString DESC = "Monochromatic bottoms with just the subtlest hint of merfolk whimsy.";
+		}
+
+		public class PERMIT_SHOES_BASIC_BLUE_NAUTICAL
+		{
+			public static LocString NAME = "Basic Nautical Shoes";
+
+			public static LocString DESC = "A shipshape pair of nautical blue shoes that go with everything.";
+		}
+
+		public class PERMIT_SHOES_BASIC_BLUE_NAVY
+		{
+			public static LocString NAME = "Basic Navy Shoes";
+
+			public static LocString DESC = "A shipshape pair of navy blue shoes that go with everything.";
+		}
+
+		public class PERMIT_SHOES_BOOTS_SAILOR_NAUTICAL
+		{
+			public static LocString NAME = "Nautical Dress Shoes";
+
+			public static LocString DESC = "This pair of shoes passes inspection every time.";
+		}
+
+		public class PERMIT_SHOES_SWIM_RED
+		{
+			public static LocString NAME = "Red Neoprene Boots";
+
+			public static LocString DESC = "A pair of thick red boots that slosh with every step.";
+		}
+
+		public class PERMIT_SHOES_SWIM_GREEN
+		{
+			public static LocString NAME = "Green Neoprene Boots";
+
+			public static LocString DESC = "A pair of thick green boots that slosh with every step.";
+		}
+
+		public class PERMIT_SHOES_SWIM_YELLOW
+		{
+			public static LocString NAME = "Yellow Neoprene Boots";
+
+			public static LocString DESC = "A pair of thick yellow boots that slosh with every step.";
+		}
+
+		public class PERMIT_SHOES_SWIM_BLUE
+		{
+			public static LocString NAME = "Blue Neoprene Boots";
+
+			public static LocString DESC = "A pair of thick blue boots that slosh with every step.";
+		}
+
+		public class PERMIT_SHOES_SWIM_WHEEZY
+		{
+			public static LocString NAME = "Wheezy Neoprene Boots";
+
+			public static LocString DESC = "A pair of thick Wheezewort-blue boots that slosh with every step.";
+		}
+
+		public class PERMIT_SHOES_SWIM_MERM
+		{
+			public static LocString NAME = "Merfolk Boots";
+
+			public static LocString DESC = "Sustainable boots made from processed fish skin, dried seaweed, and lots of scrapbook glue.";
+		}
+
+		public class PERMIT_SHOES_SWIM_WAVECRESTS
+		{
+			public static LocString NAME = "Breaker Boots";
+
+			public static LocString DESC = "Makes every step feel like riding a big wave.";
+		}
+
+		public class PERMIT_GLOVES_BASIC_BLUE_NAUTICAL
+		{
+			public static LocString NAME = "Basic Nautical Gloves";
+
+			public static LocString DESC = "A good, solid pair of nautical blue gloves that go with everything.";
+		}
+
+		public class PERMIT_GLOVES_BASIC_NAVY
+		{
+			public static LocString NAME = "Basic Navy Gloves";
+
+			public static LocString DESC = "A good, solid pair of navy blue gloves that go with everything.";
+		}
+
+		public class PERMIT_GLOVES_SWIM_GOLD
+		{
+			public static LocString NAME = "Gold Fin Gloves";
+
+			public static LocString DESC = "Standard uniform gloves for natural swimmers. It's all in the wrist!";
+		}
+
+		public class PERMIT_GLOVES_SWIM_WHEEZY
+		{
+			public static LocString NAME = "Wheezy Fin Gloves";
+
+			public static LocString DESC = "Standard uniform gloves for freedivers who spend all their spare time swimming with the fishes.";
+		}
+
+		public class PERMIT_GLOVES_SWIM_MERM
+		{
+			public static LocString NAME = "Merfolk Gloves";
+
+			public static LocString DESC = "Webbed fingers and flared wrist \"gills\" make these the gloves of choice for thalassophiles.";
+		}
+
+		public class PERMIT_GLOVES_SWIM_WAVECRESTS
+		{
+			public static LocString NAME = "Wave Crest Gloves";
+
+			public static LocString DESC = "They add a little extra swoop to the wearer's swimming stroke.";
+		}
+
+		public class PERMIT_TOP_NAUTICAL_BLUE_WHITE
+		{
+			public static LocString NAME = "Seafarer Sweater";
+
+			public static LocString DESC = "A coastal classic for maritime colonists.";
+		}
+
+		public class PERMIT_TOP_SWIM_RED
+		{
+			public static LocString NAME = "Red Swim Shirt";
+
+			public static LocString DESC = "A red neoprene swimming top that zips all the way up to the chin.";
+		}
+
+		public class PERMIT_TOP_SWIM_GREEN
+		{
+			public static LocString NAME = "Green Swim Shirt";
+
+			public static LocString DESC = "A green neoprene swimming top that zips all the way up to the chin.";
+		}
+
+		public class PERMIT_TOP_SWIM_BLUE
+		{
+			public static LocString NAME = "Blue Swim Shirt";
+
+			public static LocString DESC = "A blue neoprene swimming top that zips all the way up to the chin.";
+		}
+
+		public class PERMIT_TOP_SWIM_YELLOW
+		{
+			public static LocString NAME = "Yellow Swim Shirt";
+
+			public static LocString DESC = "A yellow neoprene swimming top that zips all the way up to the chin.";
+		}
+
+		public class PERMIT_TOP_SWIM_AXON
+		{
+			public static LocString NAME = "Axon Swim Shirt";
+
+			public static LocString DESC = "An axon-blue neoprene swimming top that zips all the way up to the chin.";
+		}
+
+		public class PERMIT_DRESS_SAILOR_WHITE_NAUTICAL
+		{
+			public static LocString NAME = "Sailor Dress";
+
+			public static LocString DESC = "Expert pleating ensures this skirt maintains its shape no matter what the universe throws at it.";
+		}
+
+		public class PERMIT_BEACH_CHAIR_BEAKON
+		{
+			public static LocString NAME = UI.FormatAsLink("Beakon Beach Chair", "BEACHCHAIR");
+
+			public static LocString DESC = "Everything feels lighter and brighter after a little R&R.";
+		}
+
+		public class PERMIT_BEACH_CHAIR_POKESHELL
+		{
+			public static LocString NAME = UI.FormatAsLink("Pokeshell Beach Chair", "BEACHCHAIR");
+
+			public static LocString DESC = "Feeling crabby? Come take a load off.";
+		}
+
+		public class PERMIT_BEACH_CHAIR_KRAKEN
+		{
+			public static LocString NAME = UI.FormatAsLink("Glo Squid Beach Chair", "BEACHCHAIR");
+
+			public static LocString DESC = "Some people find the threat of imminent danger quite relaxing, actually.";
+		}
+
+		public class PERMIT_GLASSCEILINGLIGHT_JELLY_PINK
+		{
+			public static LocString NAME = UI.FormatAsLink("Rosy Jelly Ceiling Light", "GLASSCEILINGLIGHT");
+
+			public static LocString DESC = "It's like rose-colored glasses for the whole room.";
+		}
+
+		public class PERMIT_GLASSCEILINGLIGHT_JELLY_BLUE
+		{
+			public static LocString NAME = UI.FormatAsLink("Hush Jelly Ceiling Light", "GLASSCEILINGLIGHT");
+
+			public static LocString DESC = "Soft blue overhead light uplifts the Duplicant soul.";
+		}
+
+		public class PERMIT_CORNER_TILE_RETRO_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Corner Trim", "CORNERMOULDING");
+
+			public static LocString DESC = "A rising tide directs all eyes to the ceiling, where they'll land on this magnificent maritime corner trim.";
+		}
+
+		public class PERMIT_CROWN_MOULDING_RETRO_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Ceiling Trim", "CROWNMOULDING");
+
+			public static LocString DESC = "Top-notch deckhead decor fit for a captain's quarters.";
+		}
+
+		public class PERMIT_GENERATORMANUAL_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Manual Generator", "MANUALGENERATOR");
+
+			public static LocString DESC = "Time spent operating this building does nothing to help Duplicants get their sea legs.";
+		}
+
+		public class PERMIT_GENERATORMANUAL_WATERBUBBLES
+		{
+			public static LocString NAME = UI.FormatAsLink("Ripple Manual Generator", "MANUALGENERATOR");
+
+			public static LocString DESC = "Out here, \"all hands on deck\" also means \"all feet on generator pedals.\"";
+		}
+
+		public class PERMIT_HQBASE_AQUATIC
+		{
+			public static LocString NAME = UI.FormatAsLink("Aquarius Printing Pod", "HEADQUARTERS");
+
+			public static LocString DESC = "It looks like it spent some time in an underwater research facility.";
+		}
+
+		public class PERMIT_PORTA_POD_Y_AQUATIC
+		{
+			public static LocString NAME = UI.FormatAsLink("Aquarius Mini-Pod", "EXOBASEHEADQUARTERS");
+
+			public static LocString DESC = "Built to withstand the undertow of cosmic oceans.";
+		}
+
+		public class PERMIT_UNDERWATER_CRITTER_CONDO_AQUATIC
+		{
+			public static LocString NAME = UI.FormatAsLink("Nosedive Aquatic Critter Condo", "UNDERWATERCRITTERCONDO");
+
+			public static LocString DESC = "Its periscope has seen things that no Duplicant could possibly understand.";
+		}
+
+		public class PERMIT_STORAGELOCKER_STRIPES_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Stripe Storage Bin", "STORAGELOCKER");
+
+			public static LocString DESC = "Without proper storage, colonies would be chock-a-block with flotsam and jetsam.";
+		}
+
+		public class PERMIT_STORAGELOCKER_WATERBUBBLES
+		{
+			public static LocString NAME = UI.FormatAsLink("Ripple Storage Bin", "STORAGELOCKER");
+
+			public static LocString DESC = "It's impossible not to go overboard on marine-themed storage styles.";
+		}
+
+		public class PERMIT_GASSTORAGE_STRIPES_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Stripe Gas Reservoir", "GASRESERVOIR");
+
+			public static LocString DESC = "Classically striped storage is a mainstay of marine colony management.";
+		}
+
+		public class PERMIT_GASSTORAGE_WATERBUBBLES
+		{
+			public static LocString NAME = UI.FormatAsLink("Ripple Gas Reservoir", "GASRESERVOIR");
+
+			public static LocString DESC = "This style has been making waves in colonies across the universe since time began.";
+		}
+
+		public class PERMIT_FRIDGE_STRIPES_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Stripe Refrigerator", "REFRIGERATOR");
+
+			public static LocString DESC = "Because Duplicants will keel over if they don't get enough calories.";
+		}
+
+		public class PERMIT_FRIDGE_WATERBUBBLES
+		{
+			public static LocString NAME = UI.FormatAsLink("Ripple Refrigerator", "REFRIGERATOR");
+
+			public static LocString DESC = "Holds enough food to tide over a small colony.";
+		}
+
+		public class PERMIT_BALLOON_BLOWFISH_EGG
+		{
+			public static LocString NAME = "Blown-Up Blowties";
+
+			public static LocString DESC = "These balloons are not a source of oxygen and will not auto-reinflate if emptied.";
+		}
+
+		public class PERMIT_MONUMENT_BASE_A_AQUATIC
+		{
+			public static LocString NAME = "Orehull Stand";
+
+			public static LocString DESC = "The ore chunks were secured with a glue stick and should not be tampered with.";
+		}
+
+		public class PERMIT_MONUMENT_BASE_B_AQUATIC
+		{
+			public static LocString NAME = "Seaquine Mount";
+
+			public static LocString DESC = "Galloping forth towards monumental glory!";
+		}
+
+		public class PERMIT_MONUMENT_MID_A_AQUATIC
+		{
+			public static LocString NAME = "Hang Ten";
+
+			public static LocString DESC = "Don't let the cosmos get ya down, dude.";
+		}
+
+		public class PERMIT_MONUMENT_MID_B_AQUATIC
+		{
+			public static LocString NAME = "Babes in Arms IV";
+
+			public static LocString DESC = "Clutching slippery lil critter babies.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_A_AQUATIC
+		{
+			public static LocString NAME = "Kai Noggin";
+
+			public static LocString DESC = "Celebrates the interspecies kiss of life. The smooch of survival, if you will.";
+		}
+
+		public class PERMIT_MONUMENT_UPPER_B_AQUATIC
+		{
+			public static LocString NAME = "Freediver Noggin";
+
+			public static LocString DESC = "There's no one quite like her.";
+		}
+
+		public class PERMIT_PAINTING_ART_AQUATIC
+		{
+			public static LocString NAME = "Serenity Swim";
+
+			public static LocString DESC = "A peaceful meditation on the nature of life, love, and the universe.";
+		}
+
+		public class PERMIT_PAINTING_WIDE_ART_VENUS
+		{
+			public static LocString NAME = "The Nascence of Nisbet";
+
+			public static LocString DESC = "What if the Printing Pod <i>isn't</i> where Duplicants come from?";
+		}
+
+		public class PERMIT_PAINTING_TALL_ART_AQUATIC
+		{
+			public static LocString NAME = "O Kraken! My Kraken!";
+
+			public static LocString DESC = "A ship can weather many storms with the right captain at the helm.";
+		}
+
+		public class PERMIT_ELEGANTBED_CLAM
+		{
+			public static LocString NAME = UI.FormatAsLink("Pearly Pillowtop Bed", "LUXURYBED");
+
+			public static LocString DESC = "Whoever sleeps here will wake up happy as a clampum.";
+		}
+
+		public class PERMIT_ELEGANTBED_SUBMARINE
+		{
+			public static LocString NAME = UI.FormatAsLink("Aquatic Rocket Bed", "LUXURYBED");
+
+			public static LocString DESC = "Too bad there's no widely known term for underwater vehicles in this particular color.";
+		}
+
+		public class PERMIT_MECHANICAL_SURFBOARD_JAWS
+		{
+			public static LocString NAME = UI.FormatAsLink("Danger Fish Mechanical Surfboard", "MECHANICALSURFBOARD");
+
+			public static LocString DESC = "Duplicants aren't sure what kind of aquatic critter this is supposed to be, but it makes them nervous.";
+		}
+
+		public class PERMIT_SCULPTURE_MARBLE_SWIRLING_PACUS
+		{
+			public static LocString NAME = "A Whole New Swirl";
+
+			public static LocString DESC = "A few fantastic piled Pacus.";
+		}
+
+		public class PERMIT_SCULPTURE_MARBLE_SEQUINE_SQUAD
+		{
+			public static LocString NAME = "Sea Squad";
+
+			public static LocString DESC = "They've really got each other's backs.";
+		}
+
+		public class PERMIT_SCULPTURE_MARBLE_ATLAS_HAUL
+		{
+			public static LocString NAME = "The Weight of the Planet";
+
+			public static LocString DESC = "Someone dropped it onto this poor critter from a great height.";
+		}
+
+		public class PERMIT_WALLS_BASIC_BLUE_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Solid Nautical", "EXTERIORWALL");
+
+			public static LocString DESC = "A smooth-sailing solid blue wallpaper.";
+		}
+
+		public class PERMIT_WALLS_DIAGONAL_BLUE_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Diagonal", "EXTERIORWALL");
+
+			public static LocString DESC = "A maritime wallpaper with a diagonal stripe.";
+		}
+
+		public class PERMIT_WALLS_CIRCLE_BLUE_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Wedge", "EXTERIORWALL");
+
+			public static LocString DESC = "It can be arranged into giant polka dots...or scalloped edges.";
+		}
+
+		public class PERMIT_WALLS_CIRCLE_WHITE_BLUE_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Curved Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A white wedge with just the tiniest bit of blue in one corner.";
+		}
+
+		public class PERMIT_WALLS_STRIPES_DIAGONAL_WHITE_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Diagonal Stripe", "EXTERIORWALL");
+
+			public static LocString DESC = "It's like a regular nautical stripe, but at an angle.";
+		}
+
+		public class PERMIT_WALLS_STRIPES_WHITE_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Stripe", "EXTERIORWALL");
+
+			public static LocString DESC = "They go straight up and down or side to side, and nothing in between.";
+		}
+
+		public class PERMIT_WALLS_STRIPES_CIRCLE_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Curves I", "EXTERIORWALL");
+
+			public static LocString DESC = "Alternating blue and white curves, with blue on the outside.";
+		}
+
+		public class PERMIT_WALLS_STRIPES_CIRCLE_WHITE_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Curves II", "EXTERIORWALL");
+
+			public static LocString DESC = "Alternating blue and white curves, with white on the outside.";
+		}
+
+		public class PERMIT_WALLS_SQUARES_BLUE_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Checkers", "EXTERIORWALL");
+
+			public static LocString DESC = "Ideal for marine-themed kitchens.";
+		}
+
+		public class PERMIT_WALLS_PLUS_BLUE_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Digital Nautical", "EXTERIORWALL");
+
+			public static LocString DESC = "A world without swimming? Does not compute.";
+		}
+
+		public class PERMIT_WALLS_SQUARE_BLUE_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Square", "EXTERIORWALL");
+
+			public static LocString DESC = "It's hip to be square. Or so they say.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_WHITE_NAUTICAL
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Corner", "EXTERIORWALL");
+
+			public static LocString DESC = "A nautical blue wallpaper with one crisp white corner cut out, for modular styling.";
+		}
+
+		public class PERMIT_WALLS_TRIANGLE_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical Point", "EXTERIORWALL");
+
+			public static LocString DESC = "This wallpaper features a nautical blue triangle pointing into a vast expanse of nothingness.";
+		}
+
+		public class PERMIT_WALLS_X_NAUTICAL_WHITE
+		{
+			public static LocString NAME = UI.FormatAsLink("Nautical X", "EXTERIORWALL");
+
+			public static LocString DESC = "The deep blue triangles on this wallpaper look like an X marking the spot...or an hourglass marking the passage of time.";
+		}
+
+		public class PERMIT_WALLS_WAVES
+		{
+			public static LocString NAME = UI.FormatAsLink("Allover Wave", "EXTERIORWALL");
+
+			public static LocString DESC = "A veritable wall of waves.";
+		}
+
+		public class PERMIT_WALLS_WAVES_HALF
+		{
+			public static LocString NAME = UI.FormatAsLink("Half Wave", "EXTERIORWALL");
+
+			public static LocString DESC = "Is the wallpaper half-empty, or half-full?";
+		}
+
+		public class PERMIT_WALLS_WAVES01
+		{
+			public static LocString NAME = UI.FormatAsLink("Scalloped Waves", "EXTERIORWALL");
+
+			public static LocString DESC = "A stylized take on ocean views.";
+		}
+
+		public class PERMIT_WALLS_WAVES02
+		{
+			public static LocString NAME = UI.FormatAsLink("Stacked Scales", "EXTERIORWALL");
+
+			public static LocString DESC = "Heavily inspired by real merfolk tails.";
+		}
+
+		public class PERMIT_WALLS_WAVESCRESTS
+		{
+			public static LocString NAME = UI.FormatAsLink("Allover Wave Crest", "EXTERIORWALL");
+
+			public static LocString DESC = "Waves cresting and crashing, as far as the eye can see.";
+		}
+
+		public class PERMIT_WALLS_WAVESCRESTS_HALF
+		{
+			public static LocString NAME = UI.FormatAsLink("Half Wave Crest", "EXTERIORWALL");
+
+			public static LocString DESC = "It's the view one would get by treading water in the middle of the surf.";
+		}
+
+		public class PERMIT_WALLS_WAVESCRASHING
+		{
+			public static LocString NAME = UI.FormatAsLink("Wind Chop", "EXTERIORWALL");
+
+			public static LocString DESC = "An overhead view of tiny frothing waves.";
+		}
+
+		public class PERMIT_WALLS_SEA
+		{
+			public static LocString NAME = UI.FormatAsLink("Minimalist Waves", "EXTERIORWALL");
+
+			public static LocString DESC = "Unfussy waves and bubbles in a relaxing pattern.";
+		}
+
+		public class PERMIT_WALLS_SEA_ANCHOR
+		{
+			public static LocString NAME = UI.FormatAsLink("Minimalist Anchor", "EXTERIORWALL");
+
+			public static LocString DESC = "An unfussy anchor amid bubbles and waves.";
+		}
+
+		public class PERMIT_WALLS_SEA_WHEEL
+		{
+			public static LocString NAME = UI.FormatAsLink("Minimalist Ship's Wheel", "EXTERIORWALL");
+
+			public static LocString DESC = "An unfussy ship's wheel amid bubbles and waves.";
+		}
+
+		public class PERMIT_WALLS_SEA_LIFEPRESERVER
+		{
+			public static LocString NAME = UI.FormatAsLink("Minimalist Floatie", "EXTERIORWALL");
+
+			public static LocString DESC = "An unfussy floatie amid bubbles and waves.";
+		}
+
+		public class PERMIT_WALLS_SEA_COMPASS
+		{
+			public static LocString NAME = UI.FormatAsLink("Minimalist Compass Rose", "EXTERIORWALL");
+
+			public static LocString DESC = "An unfussy compass rose amid bubbles and waves.";
+		}
+
+		public class PERMIT_WALLS_WAVESSWIRLS
+		{
+			public static LocString NAME = UI.FormatAsLink("Swirling Waves", "EXTERIORWALL");
+
+			public static LocString DESC = "An intricate filigree of frothy liquid surfaces.";
+		}
+
+		public class PERMIT_WALLS_AQUA_BLANK
+		{
+			public static LocString NAME = UI.FormatAsLink("Aqua Specks", "EXTERIORWALL");
+
+			public static LocString DESC = "It's peppered with teeny tiny specks of sediment and plankton.";
+		}
+
+		public class PERMIT_WALLS_AQUA_BUBBLES
+		{
+			public static LocString NAME = UI.FormatAsLink("Aqua Bubbles", "EXTERIORWALL");
+
+			public static LocString DESC = "More than one Duplicant has attempted to dive head-first into this wallpaper, with unfortunate results.";
+		}
+
+		public class PERMIT_WALLS_AQUA_JELLYFISH
+		{
+			public static LocString NAME = UI.FormatAsLink("Aqua Jellies", "EXTERIORWALL");
+
+			public static LocString DESC = "Squishy sea critters on a speckled aqua background.";
+		}
+
+		public class PERMIT_WALLS_AQUA_SILT_TOP
+		{
+			public static LocString NAME = UI.FormatAsLink("Sand Bar", "EXTERIORWALL");
+
+			public static LocString DESC = "An organically shaped sandy strip with speckled aqua blue above.";
+		}
+
+		public class PERMIT_WALLS_AQUA_SILT
+		{
+			public static LocString NAME = UI.FormatAsLink("Just Beachy", "EXTERIORWALL");
+
+			public static LocString DESC = "A warm sandy wallpaper that makes Duplicants feel like they're on vacation.";
+		}
+
+		public class PERMIT_WALLS_AQUA_KELP_TOP
+		{
+			public static LocString NAME = UI.FormatAsLink("Tower Kelp Canopy", "EXTERIORWALL");
+
+			public static LocString DESC = "An aquatic wallpaper featuring just the very top of a lush kelp forest.";
+		}
+
+		public class PERMIT_WALLS_AQUA_KELP
+		{
+			public static LocString NAME = UI.FormatAsLink("Tower Kelp Stalk", "EXTERIORWALL");
+
+			public static LocString DESC = "Plant lovers like to combine several of these between matching canopy and base wallpaper tiles, for floor-to-ceiling flora.";
+		}
+
+		public class PERMIT_WALLS_AQUA_KELP_SILT
+		{
+			public static LocString NAME = UI.FormatAsLink("Tower Kelp Base", "EXTERIORWALL");
+
+			public static LocString DESC = "An aquatic wallpaper that shows where the plants meet the sand.";
+		}
+
+		public class PERMIT_WALLS_AQUA_BEAKER
+		{
+			public static LocString NAME = UI.FormatAsLink("Bright Beakon", "EXTERIORWALL");
+
+			public static LocString DESC = "A head-on rendering of an overjoyed fish.";
+		}
+
+		public class PERMIT_WALLS_AQUA_PACU
+		{
+			public static LocString NAME = UI.FormatAsLink("Playful Pacu", "EXTERIORWALL");
+
+			public static LocString DESC = "The slightly judgy side-eye is actually this critter's invitation to play.";
+		}
+
+		public class PERMIT_WALLS_AQUA_PUFFER
+		{
+			public static LocString NAME = UI.FormatAsLink("Big-Cheeked Blowter", "EXTERIORWALL");
+
+			public static LocString DESC = "It's hard to resist the urge to pinch the cheeks.";
+		}
+
+		public class PERMIT_WALLS_AQUA_TURTLE
+		{
+			public static LocString NAME = UI.FormatAsLink("All-Out Orehull", "EXTERIORWALL");
+
+			public static LocString DESC = "An overhead view of this critter taking up as much space as it possibly can.";
+		}
+
+		public class PERMIT_STANDARD_SWIM_OUTFIT_RED
+		{
+			public static LocString NAME = "Red Swim Uniform";
+		}
+
+		public class PERMIT_STANDARD_SWIM_OUTFIT_BLUE
+		{
+			public static LocString NAME = "Blue Swim Uniform";
+		}
+
+		public class PERMIT_STANDARD_SWIM_OUTFIT_YELLOW
+		{
+			public static LocString NAME = "Yellow Swim Uniform";
+		}
+
+		public class PERMIT_STANDARD_SWIM_OUTFIT_GREEN
+		{
+			public static LocString NAME = "Green Swim Uniform";
+		}
+
+		public class PERMIT_MINNOW_SWIM_OUTFIT
+		{
+			public static LocString NAME = "Freediver Uniform Outfit";
+		}
+
+		public class OUTFIT_NAUTICAL_DRESS
+		{
+			public static LocString NAME = "Nautical Dress Outfit";
+		}
+
+		public class OUTFIT_NAUTICAL_SUIT
+		{
+			public static LocString NAME = "Nautical Outfit";
+		}
+
+		public class OUTFIT_SWIMSUIT_MERM
+		{
+			public static LocString NAME = "Merfolk Aquasuit Outfit";
+		}
+
+		public class OUTFIT_SWIMSUIT_WAVECRESTS
+		{
+			public static LocString NAME = "Breaker Aquasuit Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_ANTIQUE
+		{
+			public static LocString NAME = "Antique Atmo Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_DUCKY
+		{
+			public static LocString NAME = "Ducky Atmo Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_FLOATIE
+		{
+			public static LocString NAME = "Floatie Atmo Outfit";
+		}
+
+		public class OUTFIT_ATMOSUIT_OREHULL
+		{
+			public static LocString NAME = "Orehull Atmo Outfit";
+		}
+
 		public class PERMIT_ELEGANTBED_HATCH
 		{
 			public static LocString NAME = UI.FormatAsLink("Hatch Bed", "LUXURYBED");

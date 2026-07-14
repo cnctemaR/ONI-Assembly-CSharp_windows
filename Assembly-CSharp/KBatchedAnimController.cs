@@ -52,6 +52,11 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		return this.isVisible;
 	}
 
+	public bool IsAlwaysVisible()
+	{
+		return this.visibilityType == KAnimControllerBase.VisibilityType.Always;
+	}
+
 	public Vector4 GetPositionData()
 	{
 		if (this.getPositionDataFunctionInUse != null)
@@ -277,6 +282,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			}
 		}
 		this.UpdateFrame(this.elapsedTime);
+		if (this.synchronizer != null)
+		{
+			this.synchronizer.SyncTime();
+		}
 		if (!this.stopped && this.mode != KAnim.PlayMode.Paused)
 		{
 			base.SetElapsedTime(this.elapsedTime + dt * this.playSpeed);
@@ -306,10 +315,17 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 				base.AnimEnter(this.curAnim.hash);
 			}
 		}
-		if (this.synchronizer != null)
+	}
+
+	public void UpdateFromSync()
+	{
+		if (!this.IsActive() || (!this.isVisible && !this.forceRebuild))
 		{
-			this.synchronizer.SyncTime();
+			return;
 		}
+		this.curAnimFrameIdx = base.GetFrameIdx(this.elapsedTime, true);
+		this.UpdateFrame(this.elapsedTime);
+		this.forceRebuild = false;
 	}
 
 	public override void TriggerStop()
@@ -667,6 +683,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		this.symbolOverrideController = base.GetComponent<SymbolOverrideController>();
 		this.UpdateAllHiddenSymbols();
+		if (this.initialBlendParameters >= 0)
+		{
+			this.batchInstanceData.SetBlendValues((uint)this.initialBlendParameters);
+		}
 		this.hasEnableRun = false;
 	}
 
@@ -773,10 +793,15 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		base.OnDestroy();
 	}
 
-	public void SetBlendValue(float value)
+	public void SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions blendType, bool isActive)
 	{
-		this.batchInstanceData.SetBlend(value);
+		this.batchInstanceData.SetActiveBlend(blendType, isActive);
 		this.SetDirty();
+	}
+
+	public void CopyBlendValue(KAnimControllerBase source)
+	{
+		this.batchInstanceData.SetBlendValues(source.BlendPackedValues);
 	}
 
 	public SymbolOverrideController SetupSymbolOverriding()

@@ -92,6 +92,10 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable
 		{
 			this.RegisterWithPlant(this.plant.gameObject);
 		}
+		else
+		{
+			this.ClearRequireInputs();
+		}
 		base.OnSpawn();
 		this.autoReplaceEntity = false;
 		Components.PlantablePlots.Add(base.gameObject.GetMyWorldId(), this);
@@ -254,6 +258,9 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable
 	private void RegisterWithPlant(GameObject plant)
 	{
 		base.occupyingObject = plant;
+		IrrigationMonitor.Def def = plant.GetComponent<StateMachineController>().GetDef<IrrigationMonitor.Def>();
+		bool flag = def != null && def.consumedElements != null && def.consumedElements.Length != 0;
+		this.ApplyRequireInputs(flag);
 		ReceptacleMonitor component = plant.GetComponent<ReceptacleMonitor>();
 		if (component)
 		{
@@ -284,11 +291,28 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable
 		}
 	}
 
+	private void ClearRequireInputs()
+	{
+		if (this.requireInputs != null)
+		{
+			this.requireInputs.RequiresInputConduit = false;
+		}
+	}
+
+	private void ApplyRequireInputs(bool irrigate)
+	{
+		if (this.requireInputs != null)
+		{
+			this.requireInputs.RequiresInputConduit = irrigate && this.AcceptsIrrigation;
+		}
+	}
+
 	private void OnOccupantUprooted(object data)
 	{
 		this.autoReplaceEntity = false;
 		this.requestedEntityTag = Tag.Invalid;
 		this.requestedEntityAdditionalFilterTag = Tag.Invalid;
+		this.ClearRequireInputs();
 	}
 
 	public override void OrderRemoveOccupant()
@@ -429,6 +453,9 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable
 
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;
+
+	[MyCmpGet]
+	private RequireInputs requireInputs;
 
 	private EntityPreview plantPreview;
 

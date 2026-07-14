@@ -40,8 +40,7 @@ public class LadderBed : GameStateMachine<LadderBed, LadderBed.Instance, IStateM
 			attachable.onAttachmentNetworkChanged = (Action<object>)Delegate.Combine(attachable.onAttachmentNetworkChanged, new Action<object>(this.OnAttachmentChanged));
 			this.OnAttachmentChanged(null);
 			base.Subscribe(-717201811, new Action<object>(this.OnSleepDisturbedByMovement));
-			master.GetComponent<KAnimControllerBase>().GetLayering().GetLink()
-				.syncTint = false;
+			master.GetComponent<KAnimControllerBase>().GetLayering().SetSyncLayeringTint(false);
 		}
 
 		private void OnSleepDisturbedByMovement(object obj)

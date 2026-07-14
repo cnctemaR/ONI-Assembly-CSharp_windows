@@ -4,8 +4,24 @@ using ProcGen;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/scripts/CellSelectionObject")]
-public class CellSelectionObject : KMonoBehaviour
+public class CellSelectionObject : KMonoBehaviour, ICellSelectionProxy
 {
+	public KSelectable Selectable
+	{
+		get
+		{
+			return this.mSelectable;
+		}
+	}
+
+	Element ICellSelectionProxy.Element
+	{
+		get
+		{
+			return this.element;
+		}
+	}
+
 	public int SelectedCell
 	{
 		get
@@ -78,9 +94,11 @@ public class CellSelectionObject : KMonoBehaviour
 		if (SelectTool.Instance.selected != this.mSelectable)
 		{
 			this.mouseCell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
+			bool flag = this.alternateSelectionObject != null && SelectTool.Instance.selected == this.alternateSelectionObject.Selectable && this.mouseCell == this.alternateSelectionObject.SelectedCell;
+			this.mCollider.enabled = !flag;
 			if (Grid.IsValidCell(this.mouseCell) && Grid.IsVisible(this.mouseCell))
 			{
-				bool flag = true;
+				bool flag2 = true;
 				foreach (KeyValuePair<HashedString, Func<bool>> keyValuePair in this.overlayFilterMap)
 				{
 					if (keyValuePair.Value == null)
@@ -93,7 +111,7 @@ public class CellSelectionObject : KMonoBehaviour
 					}
 					else if (OverlayScreen.Instance.GetMode() == keyValuePair.Key)
 					{
-						flag = false;
+						flag2 = false;
 						if (base.gameObject.layer != LayerMask.NameToLayer("MaskedOverlay"))
 						{
 							base.gameObject.layer = LayerMask.NameToLayer("MaskedOverlay");
@@ -106,7 +124,7 @@ public class CellSelectionObject : KMonoBehaviour
 						break;
 					}
 				}
-				if (flag && base.gameObject.layer != LayerMask.NameToLayer("Default"))
+				if (flag2 && base.gameObject.layer != LayerMask.NameToLayer("Default"))
 				{
 					base.gameObject.layer = LayerMask.NameToLayer("Default");
 				}
@@ -188,11 +206,40 @@ public class CellSelectionObject : KMonoBehaviour
 		}
 		bool flag4 = CellSelectionObject.IsExposedToSpace(this.selectedCell);
 		this.mSelectable.ToggleStatusItem(Db.Get().MiscStatusItems.Space, flag4, null);
+		this.UpdateBubbleStatusItem();
+	}
+
+	private void UpdateBubbleStatusItem()
+	{
+		this.bubbleInfos.Clear();
+		if (BubbleManager.instance != null)
+		{
+			BubbleManager.instance.GetBubblesInCell(this.selectedCell, this.bubbleInfos);
+		}
+		if (this.bubbleInfos.Count == 0)
+		{
+			if (this.bubbleStatusHandle != Guid.Empty)
+			{
+				this.mSelectable.RemoveStatusItem(this.bubbleStatusHandle, false);
+				this.bubbleStatusHandle = Guid.Empty;
+				return;
+			}
+		}
+		else
+		{
+			if (this.bubbleStatusHandle != Guid.Empty)
+			{
+				this.mSelectable.RemoveStatusItem(this.bubbleStatusHandle, true);
+				this.bubbleStatusHandle = this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.BubbleContents, this);
+				return;
+			}
+			this.bubbleStatusHandle = this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.BubbleContents, this);
+		}
 	}
 
 	public static bool IsExposedToSpace(int cell)
 	{
-		return Game.Instance.world.zoneRenderData.GetSubWorldZoneType(cell) == SubWorld.ZoneType.Space && Grid.Objects[cell, 2] == null && Grid.Objects[cell, 9] == null && !Grid.HasDoor[cell];
+		return Game.Instance.world.zoneRenderData.GetSubWorldZoneType(cell) == SubWorld.ZoneType.Space && !BackwallManager.HasBackwall(cell) && Grid.Objects[cell, 2] == null && Grid.Objects[cell, 9] == null && !Grid.HasDoor[cell];
 	}
 
 	private void UpdateStatusItem()
@@ -233,7 +280,7 @@ public class CellSelectionObject : KMonoBehaviour
 			this.selectedCell = Grid.PosToCell(base.gameObject);
 			this.UpdateValues();
 			Vector3 vector = Grid.CellToPos(this.selectedCell, 0f, 0f, 0f) + this.offset;
-			vector.z = this.zDepthSelected;
+			vector.z = this.zDepth;
 			base.transform.SetPosition(vector);
 			this.SelectedDisplaySprite.GetComponent<SpriteRenderer>().sprite = this.Sprite_Selected;
 		}
@@ -256,7 +303,7 @@ public class CellSelectionObject : KMonoBehaviour
 	[HideInInspector]
 	public CellSelectionObject alternateSelectionObject;
 
-	private float zDepth = Grid.GetLayerZ(Grid.SceneLayer.WorldSelection) - 0.5f;
+	private float zDepth = Grid.GetLayerZ(Grid.SceneLayer.WorldSelection) + -0.6f;
 
 	private float zDepthSelected = Grid.GetLayerZ(Grid.SceneLayer.WorldSelection);
 
@@ -291,6 +338,10 @@ public class CellSelectionObject : KMonoBehaviour
 	public byte diseaseIdx;
 
 	public int diseaseCount;
+
+	public List<BubbleManager.CellBubbleInfo> bubbleInfos = new List<BubbleManager.CellBubbleInfo>();
+
+	private Guid bubbleStatusHandle = Guid.Empty;
 
 	private float updateTimer;
 

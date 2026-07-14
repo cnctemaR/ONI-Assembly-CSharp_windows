@@ -129,76 +129,77 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 	public void Sim200ms(float dt)
 	{
-		if (!this.prefabID.HasTag(GameTags.Dead))
+		if (this.prefabID.HasAnyTags(OxygenBreather.cannotBreathTags))
 		{
-			float num = this.airConsumptionRate.GetTotalValue() * dt;
-			OxygenBreather.IGasProvider currentGasProvider = this.GetCurrentGasProvider();
-			bool flag = currentGasProvider != null && currentGasProvider.ConsumeGas(this, num);
-			if (flag)
+			return;
+		}
+		float num = this.airConsumptionRate.GetTotalValue() * dt;
+		OxygenBreather.IGasProvider currentGasProvider = this.GetCurrentGasProvider();
+		bool flag = currentGasProvider != null && currentGasProvider.ConsumeGas(this, num);
+		if (flag)
+		{
+			if (currentGasProvider.ShouldEmitCO2())
 			{
-				if (currentGasProvider.ShouldEmitCO2())
+				if (this.cO2StatusItem != Guid.Empty)
 				{
-					if (this.cO2StatusItem != Guid.Empty)
+					this.cO2StatusItem = this.selectable.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
+				}
+				float num2 = num * this.O2toCO2conversion;
+				Game.Instance.accumulators.Accumulate(this.co2Accumulator, num2);
+				this.accumulatedCO2 += num2;
+				if (this.accumulatedCO2 >= this.minCO2ToEmit)
+				{
+					this.accumulatedCO2 -= this.minCO2ToEmit;
+					Vector3 position = base.transform.GetPosition();
+					Vector3 vector = position;
+					vector.x += (this.facing.GetFacing() ? (-this.mouthOffset.x) : this.mouthOffset.x);
+					vector.y += this.mouthOffset.y;
+					vector.z -= 0.5f;
+					if (Mathf.FloorToInt(vector.x) != Mathf.FloorToInt(position.x))
 					{
-						this.cO2StatusItem = this.selectable.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
+						vector.x = Mathf.Floor(position.x) + (this.facing.GetFacing() ? 0.01f : 0.99f);
 					}
-					float num2 = num * this.O2toCO2conversion;
-					Game.Instance.accumulators.Accumulate(this.co2Accumulator, num2);
-					this.accumulatedCO2 += num2;
+					CO2Manager.instance.SpawnBreath(vector, this.minCO2ToEmit, this.temperature.value, this.facing.GetFacing());
+				}
+			}
+			else if (currentGasProvider.ShouldStoreCO2())
+			{
+				if (this.cO2StatusItem != Guid.Empty)
+				{
+					this.cO2StatusItem = this.selectable.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
+				}
+				Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
+				if (equippable != null)
+				{
+					float num3 = num * this.O2toCO2conversion;
+					Game.Instance.accumulators.Accumulate(this.co2Accumulator, num3);
+					this.accumulatedCO2 += num3;
 					if (this.accumulatedCO2 >= this.minCO2ToEmit)
 					{
 						this.accumulatedCO2 -= this.minCO2ToEmit;
-						Vector3 position = base.transform.GetPosition();
-						Vector3 vector = position;
-						vector.x += (this.facing.GetFacing() ? (-this.mouthOffset.x) : this.mouthOffset.x);
-						vector.y += this.mouthOffset.y;
-						vector.z -= 0.5f;
-						if (Mathf.FloorToInt(vector.x) != Mathf.FloorToInt(position.x))
-						{
-							vector.x = Mathf.Floor(position.x) + (this.facing.GetFacing() ? 0.01f : 0.99f);
-						}
-						CO2Manager.instance.SpawnBreath(vector, this.minCO2ToEmit, this.temperature.value, this.facing.GetFacing());
+						equippable.GetComponent<Storage>().AddGasChunk(SimHashes.CarbonDioxide, this.minCO2ToEmit, this.temperature.value, byte.MaxValue, 0, false, true);
 					}
-				}
-				else if (currentGasProvider.ShouldStoreCO2())
-				{
-					if (this.cO2StatusItem != Guid.Empty)
-					{
-						this.cO2StatusItem = this.selectable.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
-					}
-					Equippable equippable = base.GetComponent<SuitEquipper>().IsWearingAirtightSuit();
-					if (equippable != null)
-					{
-						float num3 = num * this.O2toCO2conversion;
-						Game.Instance.accumulators.Accumulate(this.co2Accumulator, num3);
-						this.accumulatedCO2 += num3;
-						if (this.accumulatedCO2 >= this.minCO2ToEmit)
-						{
-							this.accumulatedCO2 -= this.minCO2ToEmit;
-							equippable.GetComponent<Storage>().AddGasChunk(SimHashes.CarbonDioxide, this.minCO2ToEmit, this.temperature.value, byte.MaxValue, 0, false, true);
-						}
-					}
-				}
-				else if (this.cO2StatusItem != Guid.Empty)
-				{
-					this.selectable.RemoveStatusItem(this.cO2StatusItem, false);
-					this.cO2StatusItem = Guid.Empty;
 				}
 			}
-			if (flag != this.hasAir)
+			else if (this.cO2StatusItem != Guid.Empty)
 			{
-				this.hasAirTimer.Start();
-				if (this.hasAirTimer.TryStop(2f))
-				{
-					this.hasAir = flag;
-					base.Trigger(-933153513, BoxedBools.Box(this.hasAir));
-					return;
-				}
+				this.selectable.RemoveStatusItem(this.cO2StatusItem, false);
+				this.cO2StatusItem = Guid.Empty;
 			}
-			else
+		}
+		if (flag != this.hasAir)
+		{
+			this.hasAirTimer.Start();
+			if (this.hasAirTimer.TryStop(2f))
 			{
-				this.hasAirTimer.Stop();
+				this.hasAir = flag;
+				base.Trigger(-933153513, BoxedBools.Box(this.hasAir));
+				return;
 			}
+		}
+		else
+		{
+			this.hasAirTimer.Stop();
 		}
 	}
 
@@ -242,6 +243,12 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		}
 		base.OnCleanUp();
 	}
+
+	private static Tag[] cannotBreathTags = new Tag[]
+	{
+		GameTags.Dead,
+		GameTags.SuffocatingIncapacitated
+	};
 
 	public float O2toCO2conversion = 0.5f;
 

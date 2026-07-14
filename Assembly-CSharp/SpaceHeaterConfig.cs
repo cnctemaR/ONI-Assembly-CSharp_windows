@@ -19,7 +19,7 @@ public class SpaceHeaterConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
-		buildingDef.EnergyConsumptionWhenActive = 240f;
+		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(1, 0));
@@ -37,6 +37,10 @@ public class SpaceHeaterConfig : IBuildingConfig
 		SpaceHeater spaceHeater = go.AddOrGet<SpaceHeater>();
 		spaceHeater.targetTemperature = 343.15f;
 		spaceHeater.produceHeat = true;
+		spaceHeater.maxPower = 240f;
+		spaceHeater.minPower = 120f;
+		spaceHeater.maxSelfHeatKWs = 32f;
+		spaceHeater.maxExhaustedKWs = 4f;
 		WarmthProvider.Def def = go.AddOrGetDef<WarmthProvider.Def>();
 		def.RangeMax = SpaceHeaterConfig.MAX_RANGE;
 		def.RangeMin = SpaceHeaterConfig.MIN_RANGE;

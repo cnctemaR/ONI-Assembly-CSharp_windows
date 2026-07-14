@@ -114,7 +114,7 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 	{
 		if (this.workerSnapshot.hasHat)
 		{
-			if (!this.workerSnapshot.useSalt)
+			if (!this.workerSnapshot.useGarnish)
 			{
 				return Edible.hatWorkPstAnim;
 			}
@@ -122,7 +122,7 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 		}
 		else
 		{
-			if (!this.workerSnapshot.useSalt)
+			if (!this.workerSnapshot.useGarnish)
 			{
 				return Edible.normalWorkPstAnim;
 			}
@@ -161,12 +161,12 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 		this.workerState = Edible.WorkerState.Irrelevant;
 		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
 		this.workerSnapshot.convoAnims = Edible.convoAnims;
-		this.workerSnapshot.useSalt = smi != null && smi.UseSalt();
+		this.workerSnapshot.useGarnish = smi != null && smi.UseGarnish();
 		MinionResume minionResume;
 		this.workerSnapshot.hasHat = worker.TryGetComponent<MinionResume>(out minionResume) && minionResume.CurrentHat != null;
 		if (this.workerSnapshot.hasHat)
 		{
-			if (this.workerSnapshot.useSalt)
+			if (this.workerSnapshot.useGarnish)
 			{
 				this.workerSnapshot.baseAnims = Edible.saltHatWorkAnims;
 			}
@@ -175,7 +175,7 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 				this.workerSnapshot.baseAnims = Edible.hatWorkAnims;
 			}
 		}
-		else if (this.workerSnapshot.useSalt)
+		else if (this.workerSnapshot.useGarnish)
 		{
 			this.workerSnapshot.baseAnims = Edible.saltWorkAnims;
 		}
@@ -224,7 +224,7 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 		this.workerState = Edible.WorkerState.Irrelevant;
 		worker.RemoveTag(GameTags.DoNotInterruptMe);
 		KBatchedAnimController component = worker.GetComponent<KBatchedAnimController>();
-		component.SetSymbolVisiblity(Edible.SALT_SYMBOL, true);
+		Garnish.SetDinerVisibility(component, true);
 		component.SetSymbolVisiblity(Edible.HAT_SYMBOL, true);
 		this.StopConsuming(worker);
 	}
@@ -283,7 +283,7 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 			{
 				worker.RemoveTag(GameTags.WantsToTalk);
 				hashedString = this.workerSnapshot.convoAnims[global::UnityEngine.Random.Range(0, this.workerSnapshot.convoAnims.Length)];
-				component.SetSymbolVisiblity(Edible.SALT_SYMBOL, this.workerSnapshot.useSalt);
+				Garnish.SetDinerVisibility(component, this.workerSnapshot.useGarnish);
 				component.SetSymbolVisiblity(Edible.HAT_SYMBOL, this.workerSnapshot.hasHat);
 			}
 			else
@@ -509,8 +509,6 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 
 	private AttributeModifier currentModifier;
 
-	public static readonly HashedString SALT_SYMBOL = "saltshaker_fg";
-
 	public static readonly HashedString HAT_SYMBOL = "hat";
 
 	private Edible.WorkerState workerState;
@@ -560,7 +558,7 @@ public class Edible : Workable, ISaveLoadable, IExtendSplitting
 
 	private struct WorkerSnapshot
 	{
-		public bool useSalt;
+		public bool useGarnish;
 
 		public bool hasHat;
 

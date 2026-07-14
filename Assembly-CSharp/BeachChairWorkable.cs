@@ -18,7 +18,7 @@ public class BeachChairWorkable : Workable, IWorkerPrioritizable
 		this.resetProgressOnStop = true;
 		this.synchronizeAnims = false;
 		this.lightEfficiencyBonus = false;
-		base.SetWorkTime(150f);
+		base.SetWorkTime(30f);
 		this.beachChair = base.GetComponent<BeachChair>();
 	}
 

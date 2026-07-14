@@ -150,9 +150,35 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((component != null) ? component.GetOrientation() : Orientation.Neutral);
-		int num = Grid.PosToCell(base.transform.GetLocalPosition());
+		int cell = Grid.PosToCell(base.transform.GetLocalPosition());
+		if (this.IsReplacementTile && this.building.Def.PlacementOffsets.Length > 1)
+		{
+			this.building.Def.RunOnArea(cell, orientation, delegate(int offset_cell)
+			{
+				if (offset_cell == cell)
+				{
+					return;
+				}
+				GameObject replacementCandidate = this.building.Def.GetReplacementCandidate(offset_cell);
+				if (replacementCandidate == null)
+				{
+					return;
+				}
+				SimCellOccupier component5 = replacementCandidate.GetComponent<SimCellOccupier>();
+				if (component5 != null)
+				{
+					component5.DestroySelf(null);
+				}
+				Deconstructable component6 = replacementCandidate.GetComponent<Deconstructable>();
+				if (component6 != null)
+				{
+					component6.SpawnItemsFromConstruction(workerForGameplayEvent);
+				}
+				replacementCandidate.DeleteObject();
+			});
+		}
 		this.UnmarkArea();
-		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, base.GetComponent<BuildingFacade>().CurrentFacade, true, GameClock.Instance.GetTime());
+		GameObject gameObject = this.building.Def.Build(cell, orientation, this.storage, this.selectedElementsTags, this.initialTemperature, base.GetComponent<BuildingFacade>().CurrentFacade, true, GameClock.Instance.GetTime());
 		BonusEvent.GameplayEventData gameplayEventData = new BonusEvent.GameplayEventData();
 		gameplayEventData.building = gameObject.GetComponent<BuildingComplete>();
 		gameplayEventData.workable = this;
@@ -256,17 +282,17 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			base.gameObject.layer = LayerMask.NameToLayer("Construction");
 		}
-		this.building.RunOnArea(delegate(int offset_cell)
+		if (base.gameObject.GetComponent<ConduitBridge>() == null)
 		{
-			if (base.gameObject.GetComponent<ConduitBridge>() == null)
+			this.building.RunOnArea(delegate(int offset_cell)
 			{
 				GameObject gameObject3 = Grid.Objects[offset_cell, 7];
 				if (gameObject3 != null)
 				{
 					gameObject3.DeleteObject();
 				}
-			}
-		});
+			});
+		}
 		if (this.IsReplacementTile && this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
 			int num2 = Grid.PosToCell(base.transform.GetPosition());
@@ -277,7 +303,7 @@ public class Constructable : Workable, ISaveLoadable
 				if (base.gameObject.GetComponent<SimCellOccupier>() != null)
 				{
 					int num3 = LayerMask.NameToLayer("Overlay");
-					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, this.IsReplacementTile, SimHashes.Void, num2);
+					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, this.IsReplacementTile, SimHashes.Void, num2, true);
 				}
 				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer, this.building.Def.ReplacementLayer);
 			}
@@ -450,6 +476,7 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.digPartitionerEntry);
+		GameScenePartitioner.Instance.Free(ref this.backwallPartitionerEntry);
 		GameScenePartitioner.Instance.Free(ref this.ladderPartitionerEntry);
 		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		if (component != null)
@@ -469,8 +496,8 @@ public class Constructable : Workable, ISaveLoadable
 			{
 				diggable.gameObject.DeleteObject();
 			}
-			Constructable.<OnCleanUp>g__TryAddUprootable|48_0(Grid.Objects[num2, 1], pooledHashSet);
-			Constructable.<OnCleanUp>g__TryAddUprootable|48_0(Grid.Objects[num2, 5], pooledHashSet);
+			Constructable.<OnCleanUp>g__TryAddUprootable|49_0(Grid.Objects[num2, 1], pooledHashSet);
+			Constructable.<OnCleanUp>g__TryAddUprootable|49_0(Grid.Objects[num2, 5], pooledHashSet);
 		}
 		foreach (Uprootable uprootable in pooledHashSet)
 		{
@@ -518,6 +545,15 @@ public class Constructable : Workable, ISaveLoadable
 		}
 	}
 
+	private bool IsCellDigRequired(int offset_cell)
+	{
+		if (this.building.Def.ObjectLayer == ObjectLayer.Backwall)
+		{
+			return BackwallManager.HasBackwall(offset_cell) || Diggable.IsDiggable(offset_cell);
+		}
+		return Diggable.IsDiggable(offset_cell);
+	}
+
 	private void PlaceDiggables()
 	{
 		if (this.waitForFetchesBeforeDigging && this.fetchList != null && !this.hasLadderNearby)
@@ -530,6 +566,7 @@ public class Constructable : Workable, ISaveLoadable
 			Extents validPlacementExtents = this.building.GetValidPlacementExtents();
 			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.PlaceDiggables", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 			this.digPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.PlaceDiggables", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+			this.backwallPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.PlaceDiggables", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.backwallChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 		}
 		bool digs_complete = true;
 		if (!this.IsReplacementTile)
@@ -539,7 +576,7 @@ public class Constructable : Workable, ISaveLoadable
 			this.building.RunOnArea(delegate(int offset_cell)
 			{
 				Uprootable uprootable4;
-				if (Diggable.IsDiggable(offset_cell))
+				if (this.IsCellDigRequired(offset_cell))
 				{
 					digs_complete = false;
 					Diggable diggable = Diggable.GetDiggable(offset_cell);
@@ -554,6 +591,11 @@ public class Constructable : Workable, ISaveLoadable
 						diggable.choreTypeIdHash = Db.Get().ChoreTypes.BuildDig.IdHash;
 						diggable.gameObject.SetActive(true);
 						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
+						diggable.digTypeFlags = 1;
+						if (this.building.Def.ObjectLayer == ObjectLayer.Backwall)
+						{
+							diggable.digTypeFlags |= 2;
+						}
 						Grid.Objects[offset_cell, 7] = diggable.gameObject;
 						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					}
@@ -731,7 +773,7 @@ public class Constructable : Workable, ISaveLoadable
 	}
 
 	[CompilerGenerated]
-	internal static void <OnCleanUp>g__TryAddUprootable|48_0(GameObject plant, HashSet<Uprootable> _uprootables)
+	internal static void <OnCleanUp>g__TryAddUprootable|49_0(GameObject plant, HashSet<Uprootable> _uprootables)
 	{
 		if (plant == null)
 		{
@@ -793,6 +835,8 @@ public class Constructable : Workable, ISaveLoadable
 	private HandleVector<int>.Handle solidPartitionerEntry;
 
 	private HandleVector<int>.Handle digPartitionerEntry;
+
+	private HandleVector<int>.Handle backwallPartitionerEntry;
 
 	private HandleVector<int>.Handle ladderPartitionerEntry;
 

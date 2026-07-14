@@ -40,7 +40,7 @@ public class VineBranchConfig : IEntityConfig, IHasDlcRestrictions
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 308.15f);
 		string text5 = "VineBranchOriginal";
 		bool flag = false;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 273.15f, 298.15f, 318.15f, 378.15f, null, false, 0f, 0.15f, null, true, true, false, flag, 2400f, 0f, 2200f, text5, global::STRINGS.CREATURES.SPECIES.VINEBRANCH.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 273.15f, 298.15f, 318.15f, 378.15f, null, false, 0f, 0.15f, null, true, true, false, false, flag, 2400f, 0f, 2200f, text5, global::STRINGS.CREATURES.SPECIES.VINEBRANCH.NAME);
 		gameObject.AddOrGet<HarvestDesignatable>();
 		gameObject.AddOrGet<CodexEntryRedirector>().CodexID = "VineMother";
 		gameObject.AddOrGet<PlantFiberProducer>().amount = 6f;

@@ -231,6 +231,7 @@ public class SaveLoader : KMonoBehaviour
 		Game.clusterId = this.GameInfo.clusterId;
 		Game.LoadSettings(deserializer);
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
+		BackwallManager.Clear();
 		if (Application.isPlaying)
 		{
 			Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
@@ -714,12 +715,25 @@ public class SaveLoader : KMonoBehaviour
 
 	public static SaveGame.GameInfo LoadHeader(string filename, out SaveGame.Header header)
 	{
-		byte[] array = new byte[512];
 		SaveGame.GameInfo header2;
 		using (FileStream fileStream = File.OpenRead(filename))
 		{
-			fileStream.Read(array, 0, 512);
-			header2 = SaveGame.GetHeader(new FastReader(array), out header, filename);
+			byte[] array = new byte[16];
+			fileStream.Read(array, 0, 16);
+			IReader reader = new FastReader(array);
+			header = default(SaveGame.Header);
+			header.buildVersion = reader.ReadUInt32();
+			header.headerSize = reader.ReadInt32();
+			header.headerVersion = reader.ReadUInt32();
+			if (1U <= header.headerVersion)
+			{
+				header.compression = reader.ReadInt32();
+			}
+			byte[] array2 = new byte[16 + header.headerSize];
+			Array.Copy(array, array2, 16);
+			fileStream.Position = 16L;
+			fileStream.Read(array2, 16, header.headerSize);
+			header2 = SaveGame.GetHeader(new FastReader(array2), out header, filename);
 		}
 		return header2;
 	}
@@ -874,6 +888,7 @@ public class SaveLoader : KMonoBehaviour
 			return false;
 		}
 		GridSettings.Reset(this.m_cluster.size.x, this.m_cluster.size.y);
+		BackwallManager.Clear();
 		if (Application.isPlaying)
 		{
 			Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
@@ -940,7 +955,7 @@ public class SaveLoader : KMonoBehaviour
 		OniMetrics.LogEvent(OniMetrics.Event.NewSave, "NewGame", true);
 		StoryManager.Instance.InitialSaveSetup();
 		ThreadedHttps<KleiMetrics>.Instance.IncrementGameCount();
-		OniMetrics.SendEvent(OniMetrics.Event.NewSave, "New Save");
+		OniMetrics.SendEvent(OniMetrics.Event.NewSave, "NewSave");
 		pooledList.Recycle();
 		return true;
 	}
@@ -975,19 +990,21 @@ public class SaveLoader : KMonoBehaviour
 		}
 		dictionary["CustomGameSettings"] = CustomGameSettings.Instance.GetSettingsForMetrics();
 		dictionary["CustomMixingSettings"] = CustomGameSettings.Instance.GetSettingsForMixingMetrics();
-		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary, "ReportSaveMetrics");
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary, "SaveMetrics");
 	}
 
 	private List<SaveLoader.MinionMetricsData> GetMinionMetrics()
 	{
 		List<SaveLoader.MinionMetricsData> list = new List<SaveLoader.MinionMetricsData>();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+		foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
 		{
 			if (!(minionIdentity == null))
 			{
+				int instanceID = minionIdentity.gameObject.GetComponent<KPrefabID>().InstanceID;
+				bool flag = minionIdentity.gameObject.HasTag(GameTags.Dead);
 				Amounts amounts = minionIdentity.gameObject.GetComponent<Modifiers>().amounts;
 				List<SaveLoader.MinionAttrFloatData> list2 = new List<SaveLoader.MinionAttrFloatData>(amounts.Count);
-				foreach (AmountInstance amountInstance in amounts)
+				foreach (AmountInstance amountInstance in amounts.ModifierList)
 				{
 					float value = amountInstance.value;
 					if (!float.IsNaN(value) && !float.IsInfinity(value))
@@ -1009,12 +1026,33 @@ public class SaveLoader : KMonoBehaviour
 						list3.Add(keyValuePair.Key);
 					}
 				}
+				string text = minionIdentity.model.ToString();
+				List<string> list4 = null;
+				int num = 0;
+				BionicUpgradesMonitor.Instance smi = minionIdentity.gameObject.GetSMI<BionicUpgradesMonitor.Instance>();
+				if (smi != null && smi.upgradeComponentSlots != null)
+				{
+					list4 = new List<string>();
+					foreach (BionicUpgradesMonitor.UpgradeComponentSlot upgradeComponentSlot in smi.upgradeComponentSlots)
+					{
+						if (upgradeComponentSlot.HasUpgradeInstalled)
+						{
+							list4.Add(upgradeComponentSlot.InstalledUpgradeID.ToString());
+						}
+					}
+					num = smi.UnlockedSlotCount;
+				}
 				list.Add(new SaveLoader.MinionMetricsData
 				{
+					ID = instanceID,
 					Name = minionIdentity.name,
+					Status = (flag ? "Dead" : "Alive"),
 					Modifiers = list2,
 					TotalExperienceGained = totalExperienceGained,
-					Skills = list3
+					Skills = list3,
+					Model = text,
+					Boosters = list4,
+					BoosterSlots = num
 				});
 			}
 		}
@@ -1327,6 +1365,8 @@ public class SaveLoader : KMonoBehaviour
 
 	public const string METRIC_FRAME_TIME = "AverageFrameTime";
 
+	public const string METRIC_COLONY_GUID = "ColonyGuid";
+
 	private static bool force_infinity;
 
 	public class FlowUtilityNetworkInstance
@@ -1377,13 +1417,23 @@ public class SaveLoader : KMonoBehaviour
 
 	private struct MinionMetricsData
 	{
+		public int ID;
+
 		public string Name;
+
+		public string Status;
 
 		public List<SaveLoader.MinionAttrFloatData> Modifiers;
 
 		public float TotalExperienceGained;
 
 		public List<string> Skills;
+
+		public string Model;
+
+		public List<string> Boosters;
+
+		public int BoosterSlots;
 	}
 
 	private struct SavedPrefabMetricsData

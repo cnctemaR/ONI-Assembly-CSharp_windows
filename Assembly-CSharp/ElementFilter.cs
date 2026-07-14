@@ -104,9 +104,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 							Element element = ElementLoader.FindElementByHash(contents.element);
 							if (element != null)
 							{
-								Color color = element.substance.colour;
-								color.a = 1f;
-								this.controller.SetSymbolTint(new KAnimHashedString("liquid"), color);
+								GameUtil.TintLiquidSymbolOnBuilding("liquid", this.controller, element);
 							}
 						}
 						this.lastelementMoved = contents.element;

@@ -86,7 +86,7 @@ public class RootMenu : KScreen
 			{
 				return;
 			}
-			flag = component != null || CellSelectionObject.IsSelectionObject(gameObject);
+			flag = component != null || ICellSelectionProxy.IsSelectionProxy(gameObject);
 		}
 		if (gameObject != this.selectedGO)
 		{

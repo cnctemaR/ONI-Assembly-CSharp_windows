@@ -8,12 +8,12 @@ public class DevPump : Filterable, ISim1000ms
 		base.OnPrefabInit();
 		if (this.elementState == Filterable.ElementState.Liquid)
 		{
-			base.SelectedTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
+			base.SelectedTag = ElementLoader.FindElementByHash(SimHashes.Void).tag;
 			return;
 		}
 		if (this.elementState == Filterable.ElementState.Gas)
 		{
-			base.SelectedTag = ElementLoader.FindElementByHash(SimHashes.Oxygen).tag;
+			base.SelectedTag = ElementLoader.FindElementByHash(SimHashes.Void).tag;
 		}
 	}
 

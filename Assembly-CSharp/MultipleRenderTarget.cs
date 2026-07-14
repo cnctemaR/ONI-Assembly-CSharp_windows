@@ -22,6 +22,7 @@ public class MultipleRenderTarget : MonoBehaviour
 		camera.transform.parent = component.transform;
 		camera.transform.SetLocalPosition(Vector3.zero);
 		camera.depth = component.depth - 1f;
+		camera.cullingMask &= ~(1 << LayerMask.NameToLayer("Water"));
 		component.cullingMask = 0;
 		component.clearFlags = CameraClearFlags.Color;
 		this.quad = new FullScreenQuad("MultipleRenderTarget", component, true);

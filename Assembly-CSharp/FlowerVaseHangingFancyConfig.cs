@@ -14,11 +14,11 @@ public class FlowerVaseHangingFancyConfig : IBuildingConfig
 		int num3 = 10;
 		float num4 = 10f;
 		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
-		string[] transparents = MATERIALS.TRANSPARENTS;
+		string[] glasses = MATERIALS.GLASSES;
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnCeiling;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, transparents, num5, buildLocationRule, new EffectorValues
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, glasses, num5, buildLocationRule, new EffectorValues
 		{
 			amount = global::TUNING.BUILDINGS.DECOR.BONUS.TIER1.amount,
 			radius = global::TUNING.BUILDINGS.DECOR.BONUS.TIER3.radius

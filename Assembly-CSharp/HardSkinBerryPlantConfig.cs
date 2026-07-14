@@ -29,7 +29,7 @@ public class HardSkinBerryPlantConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, "HardSkinBerry", true, true, true, true, 2400f, 0f, 4600f, "HardSkinBerryPlantOriginal", global::STRINGS.CREATURES.SPECIES.HARDSKINBERRYPLANT.NAME);
+		}, true, 0f, 0.15f, "HardSkinBerry", true, true, true, false, true, 2400f, 0f, 4600f, "HardSkinBerryPlantOriginal", global::STRINGS.CREATURES.SPECIES.HARDSKINBERRYPLANT.NAME);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<LoopingSounds>();

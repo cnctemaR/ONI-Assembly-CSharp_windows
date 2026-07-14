@@ -55,6 +55,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		go.AddOrGet<TileTemperature>();
+		go.GetComponent<KPrefabID>().prefabInitFn += this.OnPrefabInit;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -62,6 +63,15 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		base.DoPostConfigurePreview(def, go);
 		this.AddNetworkLink(go).visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
+	}
+
+	private void OnPrefabInit(GameObject instance)
+	{
+		foreach (KBatchedAnimController kbatchedAnimController in instance.GetComponentsInChildrenOnly<KBatchedAnimController>())
+		{
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+		}
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

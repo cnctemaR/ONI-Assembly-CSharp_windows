@@ -894,6 +894,96 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 				1580f
 			}
 		}, 110000f, 137500f, 30000f, 30000f, false, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC4), null)));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("aquatic_mix", new HarvestablePOIConfigurator.HarvestablePOIType("DLC5AquaticMixingField", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.ZincOre,
+				4.5f
+			},
+			{
+				SimHashes.SiltStone,
+				2.5f
+			},
+			{
+				SimHashes.Corallium,
+				2.5f
+			},
+			{
+				SimHashes.Basalt,
+				1.5f
+			},
+			{
+				SimHashes.Coquina,
+				1.5f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.ZincOre,
+				18720f
+			},
+			{
+				SimHashes.SiltStone,
+				20880f
+			},
+			{
+				SimHashes.Corallium,
+				20080f
+			},
+			{
+				SimHashes.Basalt,
+				19020f
+			},
+			{
+				SimHashes.Coquina,
+				18020f
+			}
+		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC5), null)));
+		list.Add(new HarvestablePOIConfig.HarvestablePOIParams("aquatic_field", new HarvestablePOIConfigurator.HarvestablePOIType("DLC5AquaticOreField", new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.ZincOre,
+				4.5f
+			},
+			{
+				SimHashes.SiltStone,
+				2.5f
+			},
+			{
+				SimHashes.Corallium,
+				2.5f
+			},
+			{
+				SimHashes.Basalt,
+				1.5f
+			},
+			{
+				SimHashes.Coquina,
+				1.5f
+			}
+		}, 50, new Dictionary<SimHashes, float>
+		{
+			{
+				SimHashes.ZincOre,
+				8720f
+			},
+			{
+				SimHashes.SiltStone,
+				9080f
+			},
+			{
+				SimHashes.Corallium,
+				14080f
+			},
+			{
+				SimHashes.Basalt,
+				14080f
+			},
+			{
+				SimHashes.Coquina,
+				15040f
+			}
+		}, 15000f, 25000f, 30000f, 60000f, true, HarvestablePOIConfig.AsteroidFieldOrbit, 20, DlcManager.EXPANSION1.Append<string>(DlcManager.DLC5), null)));
 		list.RemoveAll((HarvestablePOIConfig.HarvestablePOIParams poi) => !DlcManager.IsCorrectDlcSubscribed(poi.poiType));
 		return list;
 	}
@@ -959,6 +1049,10 @@ public class HarvestablePOIConfig : IMultiEntityConfig
 	public const string DLC4ImpactorDebrisField2 = "DLC4ImpactorDebrisField2";
 
 	public const string DLC4ImpactorDebrisField3 = "DLC4ImpactorDebrisField3";
+
+	public const string DLC5AquaticOreField = "DLC5AquaticOreField";
+
+	public const string DLC5AquaticMixingField = "DLC5AquaticMixingField";
 
 	private static readonly List<string> GasFieldOrbit = new List<string>
 	{

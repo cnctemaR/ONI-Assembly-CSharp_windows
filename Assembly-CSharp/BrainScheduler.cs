@@ -70,6 +70,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick
 		foreach (BrainScheduler.BrainGroup brainGroup in this.brainGroups)
 		{
 			brainGroup.RenderEveryTick(dt);
+			brainGroup.PostRenderEveryTick(dt);
 		}
 	}
 
@@ -191,6 +192,10 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick
 			this.EndBrainGroupUpdate();
 		}
 
+		public virtual void PostRenderEveryTick(float dt)
+		{
+		}
+
 		protected abstract int InitialProbeCount();
 
 		protected abstract int InitialProbeSize();
@@ -227,7 +232,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick
 
 		public int debugMaxPriorityBrainCountSeen;
 
-		private int nextUpdateBrain;
+		protected int nextUpdateBrain;
 	}
 
 	private class DupeBrainGroup : BrainScheduler.BrainGroup
@@ -343,6 +348,25 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick
 		public override float LoadBalanceThreshold()
 		{
 			return TuningData<BrainScheduler.CreatureBrainGroup.Tuning>.Get().loadBalanceThreshold;
+		}
+
+		public override void PostRenderEveryTick(float dt)
+		{
+			int num = this.InitialProbeCount();
+			int num2 = 0;
+			while (num2 < this.brains.Count && num2 < num)
+			{
+				int num3 = (this.nextUpdateBrain + num2) % this.brains.Count;
+				if (this.brains[num3].IsRunning())
+				{
+					Navigator component = this.brains[num3].GetComponent<Navigator>();
+					if (component != null && component.NavGrid != null)
+					{
+						component.NavGrid.AddDirtyCell(component.cachedCell);
+					}
+				}
+				num2++;
+			}
 		}
 
 		public override bool AllowPriorityBrains()

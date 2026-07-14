@@ -11,7 +11,7 @@ public static class BasePacuConfig
 	{
 		float mass = PacuTuning.MASS;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		KAnimFile anim = Assets.GetAnim(anim_file);
+		KAnimFile anim = Assets.GetAnim(is_baby ? anim_file : "pacu_build_kanim");
 		string text = "idle_loop";
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
 		int num = 1;
@@ -29,6 +29,7 @@ public static class BasePacuConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false, true, true);
 		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "pacu_build_kanim", symbol_prefix, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "FishMeat", 1f, false, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
+		KAnimFile anim2 = Assets.GetAnim("pacu_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -41,12 +42,14 @@ public static class BasePacuConfig
 			.Add(new FlopStates.Def(), true, -1)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), !is_baby, -1)
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new DrinkMilkStates.Def(), true, -1)
+			.Add(new PoopStates.Def(anim2, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("pacu_emotes_kanim")), true, -1)
+			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
@@ -65,7 +68,7 @@ public static class BasePacuConfig
 		hashSet.Add(SimHashes.Algae.CreateTag());
 		List<Diet.Info> list = new List<Diet.Info>
 		{
-			new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null)
+			new Diet.Info(hashSet, tag, BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_0, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null)
 		};
 		if (DlcManager.GetActiveDLCIds().Contains("DLC4_ID"))
 		{
@@ -79,7 +82,8 @@ public static class BasePacuConfig
 				new Diet.Info(hashSet3, tag, BasePacuConfig.CALORIES_PER_GROWTH_EATEN, BasePacuConfig.GROWTH_TO_PRODUCT_EFFICIENCY, null, 0f, false, Diet.Info.FoodType.EatPlantDirectly, false, null)
 			});
 		}
-		list.AddRange(BasePacuConfig.SeedDiet(tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL));
+		list.AddRange(BasePacuConfig.SeedDiet(tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, 3f));
+		list.Add(new Diet.Info(new HashSet<Tag> { "FishFood".ToTag() }, tag, PacuTuning.STANDARD_CALORIES_PER_CYCLE, 6f, null, 0f, false, Diet.Info.FoodType.EatSolid, false, null));
 		Diet diet = new Diet(list.ToArray());
 		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def3.diet = diet;
@@ -93,6 +97,7 @@ public static class BasePacuConfig
 		Pickupable pickupable = gameObject.AddOrGet<Pickupable>();
 		int num4 = global::TUNING.CREATURES.SORTING.CRITTER_ORDER["Pacu"];
 		pickupable.sortOrder = num4;
+		component.prefabSpawnFn += BasePacuConfig.SubscribeFishFoodEffect;
 		return gameObject;
 	}
 
@@ -127,6 +132,14 @@ public static class BasePacuConfig
 		return "flop_loop";
 	}
 
+	public static void SubscribeFishFoodEffect(GameObject fishGameObject)
+	{
+		Effects component = fishGameObject.GetComponent<Effects>();
+		fishGameObject.Subscribe(-2038961714, BasePacuConfig.OnCaloriesConsumed, component);
+	}
+
+	public const string EMOTION_FILE_NAME = "pacu_emotes_kanim";
+
 	private static float KG_ORE_EATEN_PER_CYCLE = 7.5f;
 
 	private static float CALORIES_PER_KG_OF_ORE = PacuTuning.STANDARD_CALORIES_PER_CYCLE / BasePacuConfig.KG_ORE_EATEN_PER_CYCLE;
@@ -148,4 +161,12 @@ public static class BasePacuConfig
 	private static float GROWTH_TO_PRODUCT_EFFICIENCY = BasePacuConfig.KELP_TO_PRODUCT_EFFICIENCY * 10f;
 
 	private static float MIN_POOP_SIZE_IN_KG = 25f;
+
+	public static Action<object, object> OnCaloriesConsumed = delegate(object context, object data)
+	{
+		if (Boxed<CreatureCalorieMonitor.CaloriesConsumedEvent>.Unbox(data).tag == "FishFood".ToTag())
+		{
+			((Effects)context).Add("AteWellPreparedFishFood", true);
+		}
+	};
 }

@@ -11,10 +11,17 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Color color = base.GetComponent<PrimaryElement>().Element.substance.colour;
+		Element element = base.GetComponent<PrimaryElement>().Element;
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		if (element.IsLiquid)
+		{
+			GameUtil.TintLiquidSymbolOnBuilding("substance_tinter", component, element);
+			return;
+		}
+		Color color = element.substance.colour;
 		color.a = 1f;
-		base.GetComponent<KBatchedAnimController>().SetSymbolTint(SubstanceChunk.symbolToTint, color);
-		base.GetComponent<KBatchedAnimController>().SetSymbolTint(SubstanceChunk.symbolToTint2, color);
+		component.SetSymbolTint(SubstanceChunk.symbolToTint, color);
+		component.SetSymbolTint(SubstanceChunk.symbolToTint2, color);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -32,6 +39,8 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 		}
 		base.gameObject.DeleteObject();
 	}
+
+	private const string symbolName = "substance_tinter";
 
 	private static readonly KAnimHashedString symbolToTint = new KAnimHashedString("substance_tinter");
 

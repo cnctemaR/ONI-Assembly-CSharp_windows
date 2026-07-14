@@ -140,6 +140,31 @@ public class ComplexRecipe : IHasDlcRestrictions
 		return string.IsNullOrEmpty(this.requiredTech) || Db.Get().Techs.Get(this.requiredTech).IsComplete();
 	}
 
+	public bool IsRequiredTechOrPOIUnlocked()
+	{
+		if (this.IsRequiredTechUnlocked())
+		{
+			return true;
+		}
+		if (string.IsNullOrEmpty(this.requiredTech))
+		{
+			return false;
+		}
+		Tech tech = Db.Get().Techs.Get(this.requiredTech);
+		if (tech == null || tech.unlockedItems == null)
+		{
+			return false;
+		}
+		foreach (TechItem techItem in tech.unlockedItems)
+		{
+			if (techItem.isPOIUnlock && techItem.IsComplete())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public Sprite GetUIIcon()
 	{
 		Sprite sprite = null;

@@ -6,10 +6,8 @@ public class FloodTool : InterfaceTool
 {
 	public List<int> Flood(int startCell)
 	{
-		HashSetPool<int, FloodTool>.PooledHashSet pooledHashSet = HashSetPool<int, FloodTool>.Allocate();
 		List<int> list = new List<int>();
-		GameUtil.FloodFillConditional(startCell, this.floodCriteria, pooledHashSet, list);
-		pooledHashSet.Recycle();
+		FloodFill.DepthCollect(startCell, this.floodCriteria, list);
 		return list;
 	}
 
@@ -25,7 +23,7 @@ public class FloodTool : InterfaceTool
 		this.mouseCell = Grid.PosToCell(cursor_pos);
 	}
 
-	public Func<int, bool> floodCriteria;
+	public Func<int, FloodFill.BoundaryCheckResult> floodCriteria;
 
 	public Action<List<int>> paintArea;
 

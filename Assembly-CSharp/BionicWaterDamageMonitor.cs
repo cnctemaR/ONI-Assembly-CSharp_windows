@@ -28,7 +28,7 @@ public class BionicWaterDamageMonitor : GameStateMachine<BionicWaterDamageMonito
 			return false;
 		}
 		int num = Grid.PosToCell(smi);
-		return Grid.IsValidCell(num) && Grid.Element[num].IsLiquid && !smi.kpid.HasTag(GameTags.HasAirtightSuit) && smi.def.IsElementIntolerable(Grid.Element[num].id);
+		return Grid.IsValidCell(num) && Grid.Element[num].IsLiquid && !smi.kpid.HasTag(GameTags.HasAirtightSuit) && smi.def.IsElementIntolerable(Grid.Element[num]) && (!smi.kpid.HasTag(GameTags.FeetProtection) || Grid.IsSubstantialLiquid(num, 0.1f)) && (!smi.kpid.HasTag(GameTags.FeetAndWaistProtection) || Grid.IsSubstantialLiquid(num, 0.35f));
 	}
 
 	public const string EFFECT_NAME = "BionicWaterStress";
@@ -39,25 +39,10 @@ public class BionicWaterDamageMonitor : GameStateMachine<BionicWaterDamageMonito
 
 	public class Def : StateMachine.BaseDef
 	{
-		public bool IsElementIntolerable(SimHashes element)
+		public bool IsElementIntolerable(Element element)
 		{
-			for (int i = 0; i < this.IntolerantToElements.Length; i++)
-			{
-				if (this.IntolerantToElements[i] == element)
-				{
-					return true;
-				}
-			}
-			return false;
+			return element != null && element.HasTag(GameTags.AnyWater);
 		}
-
-		public readonly SimHashes[] IntolerantToElements = new SimHashes[]
-		{
-			SimHashes.Water,
-			SimHashes.DirtyWater,
-			SimHashes.SaltWater,
-			SimHashes.Brine
-		};
 
 		public static float ZapInterval = 10f;
 	}

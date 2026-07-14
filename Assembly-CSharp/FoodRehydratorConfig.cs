@@ -25,9 +25,9 @@ public class FoodRehydratorConfig : IBuildingConfig
 		float[] array = new float[]
 		{
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
+			1f
 		};
-		string[] array2 = new string[] { "RefinedMetal", "Plastic" };
+		string[] array2 = new string[] { "RefinedMetal", "BuildingGasket" };
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;

@@ -574,11 +574,7 @@ public class Scenario : KMonoBehaviour
 			prefab_id,
 			"'"
 		}));
-		GameObject gameObject = buildingDef.Build(buildingDef.GetBuildingCell(num), Orientation.Neutral, null, new Tag[]
-		{
-			element2.tag,
-			ElementLoader.FindElementByHash(SimHashes.SedimentaryRock).tag
-		}, 293.15f, false, -1f);
+		GameObject gameObject = buildingDef.Build(buildingDef.GetBuildingCell(num), Orientation.Neutral, null, buildingDef.DefaultElementsWithPrimary(element2.tag), 293.15f, false, -1f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.InternalTemperature = 300f;
 		component.Temperature = 300f;
@@ -904,11 +900,8 @@ public class Scenario : KMonoBehaviour
 			this.Left += buildingDef.WidthInCells;
 			this.Scenario.RunAfterNextUpdate(delegate
 			{
-				Assets.GetBuildingDef(prefab_id).TryPlace(null, pos, Orientation.Neutral, new Tag[]
-				{
-					element.tag,
-					ElementLoader.FindElementByHash(SimHashes.SedimentaryRock).tag
-				}, 0);
+				BuildingDef buildingDef2 = Assets.GetBuildingDef(prefab_id);
+				buildingDef2.TryPlace(null, pos, Orientation.Neutral, buildingDef2.DefaultElementsWithPrimary(element.tag), 0);
 			});
 		}
 

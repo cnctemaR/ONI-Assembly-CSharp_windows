@@ -35,7 +35,7 @@ public class BuildingUnderConstruction : Building
 				TileVisualizer.RefreshCell(c, this.Def.TileLayer, this.Def.ReplacementLayer);
 			});
 		}
-		base.RegisterBlockTileRenderer();
+		base.RegisterBlockTileRenderer(true);
 	}
 
 	protected override void OnCleanUp()

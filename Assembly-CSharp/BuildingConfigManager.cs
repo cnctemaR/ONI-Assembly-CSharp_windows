@@ -15,6 +15,7 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<KSelectable>();
 		this.baseTemplate.AddComponent<Modifiers>();
 		this.baseTemplate.AddComponent<PrimaryElement>();
+		this.baseTemplate.AddComponent<InfraredPrimaryElement>();
 		this.baseTemplate.AddComponent<BuildingComplete>();
 		this.baseTemplate.AddComponent<StateMachineController>();
 		this.baseTemplate.AddComponent<Deconstructable>();
@@ -86,6 +87,10 @@ public class BuildingConfigManager : KMonoBehaviour
 		}
 		buildingDef.PostProcess();
 		config.DoPostConfigureComplete(buildingDef.BuildingComplete);
+		if (!buildingDef.Floodable && !buildingDef.IsTilePiece && !buildingDef.IsFoundation)
+		{
+			buildingDef.BuildingComplete.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Submergible, false);
+		}
 		if (flag)
 		{
 			config.DoPostConfigurePreview(buildingDef, buildingDef.BuildingPreview);

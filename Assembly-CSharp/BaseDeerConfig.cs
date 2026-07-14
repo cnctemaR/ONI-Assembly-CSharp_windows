@@ -12,7 +12,7 @@ public static class BaseDeerConfig
 		float num = 100f;
 		int num2 = (is_baby ? 1 : 2);
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, num2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(is_baby ? anim_file : "ice_floof_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, num2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		string text = "WalkerNavGrid1x2";
 		if (is_baby)
 		{
@@ -50,6 +50,7 @@ public static class BaseDeerConfig
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
+		KAnimFile anim = Assets.GetAnim("ice_floof_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -67,10 +68,10 @@ public static class BaseDeerConfig
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new DrinkMilkStates.Def(), true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("ice_floof_emotes_kanim")), true, -1)
+			.Add(new CritterEmoteStates.Def(anim), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.DeerSpecies, symbolOverridePrefix);
@@ -91,4 +92,6 @@ public static class BaseDeerConfig
 		prefab.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}
+
+	public const string EMOTION_FILE_NAME = "ice_floof_emotes_kanim";
 }

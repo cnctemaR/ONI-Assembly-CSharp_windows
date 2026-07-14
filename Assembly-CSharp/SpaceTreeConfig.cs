@@ -33,7 +33,7 @@ public class SpaceTreeConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.CarbonDioxide,
 			SimHashes.Snow,
 			SimHashes.Vacuum
-		}, false, 0f, 0.15f, null, true, false, true, false, 2400f, 0f, 12200f, text4, global::STRINGS.CREATURES.SPECIES.SPACETREE.NAME);
+		}, false, 0f, 0.15f, null, true, false, true, false, false, 2400f, 0f, 12200f, text4, global::STRINGS.CREATURES.SPECIES.SPACETREE.NAME);
 		WiltCondition component = gameObject.GetComponent<WiltCondition>();
 		component.WiltDelay = 0f;
 		component.RecoveryDelay = 0f;

@@ -7,6 +7,14 @@ namespace Klei.AI
 	[DebuggerDisplay("{Id}")]
 	public class Amount : Resource
 	{
+		public bool CanDisplayerDisplayCustomIcons
+		{
+			get
+			{
+				return this.displayer is IVariableImageAmountDisplayer;
+			}
+		}
+
 		public Amount(string id, string name, string description, Attribute min_attribute, Attribute max_attribute, Attribute delta_attribute, bool show_max, Units units, float visual_delta_threshold, bool show_in_ui, string uiSprite = null, string thoughtSprite = null)
 		{
 			this.Id = id;
@@ -66,6 +74,15 @@ namespace Klei.AI
 		public string GetTooltip(AmountInstance instance)
 		{
 			return this.displayer.GetTooltip(this, instance);
+		}
+
+		public Sprite GetSprite(AmountInstance instance)
+		{
+			if (this.CanDisplayerDisplayCustomIcons)
+			{
+				return (this.displayer as IVariableImageAmountDisplayer).GetIcon(this, instance);
+			}
+			return Assets.GetSprite(this.uiSprite);
 		}
 
 		public void DebugSetValue(AmountInstance instance, float value)

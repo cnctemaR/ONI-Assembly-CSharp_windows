@@ -28,8 +28,9 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.enabled = enabled;
 	}
 
-	protected string PostMetricData(Dictionary<string, object> data, string debug_source)
+	protected string PostMetricData(Dictionary<string, object> data, string gameEvent)
 	{
+		data["GameEvent"] = gameEvent;
 		string text = JsonConvert.SerializeObject(new KleiMetrics.PostData(this.CLIENT_KEY, data));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		if (this.isMultiThreaded)
@@ -212,7 +213,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		}
 		long num = DateTime.Now.Ticks - this.lastHeartBeatTicks;
 		dictionary.Add("HeartBeat", (int)TimeSpan.FromTicks(num).TotalSeconds);
-		this.PostMetricData(dictionary, "SendHeartBeat");
+		this.PostMetricData(dictionary, "HeartBeat");
 		this.lastHeartBeatTicks = DateTime.Now.Ticks;
 	}
 
@@ -430,7 +431,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.PostMetricData(dictionary, "EndGame");
 	}
 
-	public void SendEvent(Dictionary<string, object> eventData, string debug_event_name)
+	public void SendEvent(Dictionary<string, object> eventData, string eventName)
 	{
 		if (!this.enabled)
 		{
@@ -441,11 +442,14 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			this.StartSession();
 		}
 		Dictionary<string, object> dictionary = this.GetUserSession();
-		foreach (KeyValuePair<string, object> keyValuePair in eventData)
+		if (eventData != null)
 		{
-			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+			foreach (KeyValuePair<string, object> keyValuePair in eventData)
+			{
+				dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+			}
 		}
-		this.PostMetricData(dictionary, "SendEvent:" + debug_event_name);
+		this.PostMetricData(dictionary, eventName);
 	}
 
 	public bool SendProfileStats()
@@ -455,12 +459,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			return false;
 		}
 		Dictionary<string, object> dictionary = this.GetUserSession();
-		return ThreadedHttps<KleiMetrics>.Instance.PostMetricData(dictionary, "SendProfileStats") == "OK";
-	}
-
-	public static string GetOSName()
-	{
-		return SystemInfo.operatingSystem;
+		return ThreadedHttps<KleiMetrics>.Instance.PostMetricData(dictionary, "ProfileStats") == "OK";
 	}
 
 	public static Dictionary<string, object> GetHardwareStats()
@@ -473,7 +472,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			},
 			{
 				"OSname",
-				KleiMetrics.GetOSName()
+				Util.GetOperatingSystem()
 			},
 			{
 				"OSversion",
@@ -618,7 +617,11 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	private const string EndGameFieldName = "EndGame";
 
+	private const string GameEventFieldName = "GameEvent";
+
 	public const string GameTimeFieldName = "GameTimeSeconds";
+
+	public const string CycleTimeFieldName = "CycleTime";
 
 	private const string LevelFieldName = "Level";
 

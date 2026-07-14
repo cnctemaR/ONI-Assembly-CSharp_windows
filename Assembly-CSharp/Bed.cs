@@ -117,7 +117,7 @@ public class Bed : Workable, IBasicBuilding
 	public static readonly Dictionary<string, string> roomSleepingEffects = new Dictionary<string, string>
 	{
 		{ "Barracks", "BarracksStamina" },
-		{ "Luxury Barracks", "BarracksStamina" },
+		{ "Bedroom", "LuxuryBarracksStamina" },
 		{ "Private Bedroom", "BedroomStamina" }
 	};
 }

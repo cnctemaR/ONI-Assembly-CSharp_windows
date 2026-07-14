@@ -17,6 +17,15 @@ public class LoreBearer : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (this.displayContentAction == null && !string.IsNullOrEmpty(this.poiOverrideLoreUnlockId))
+		{
+			if (!string.IsNullOrEmpty(this.poiOverrideNextCollectionId))
+			{
+				this.displayContentAction = LoreBearerUtil.UnlockSpecificEntryThenNext(this.poiOverrideLoreUnlockId, Strings.Get(this.poiOverrideLoreDisplayText), LoreBearerUtil.GetUnlockActionForCollection(this.poiOverrideNextCollectionId), false);
+				return;
+			}
+			this.displayContentAction = LoreBearerUtil.UnlockSpecificEntry(this.poiOverrideLoreUnlockId, Strings.Get(this.poiOverrideLoreDisplayText), false);
+		}
 	}
 
 	public LoreBearer Internal_SetContent(LoreBearerAction action)
@@ -56,7 +65,10 @@ public class LoreBearer : KMonoBehaviour
 			this.displayContentAction(infoDialogScreen);
 			return;
 		}
-		LoreBearerUtil.UnlockNextJournalEntry(infoDialogScreen);
+		if (this.useDefaultLore)
+		{
+			LoreBearerUtil.UnlockNextJournalEntry(infoDialogScreen);
+		}
 	}
 
 	public string SidescreenButtonText
@@ -94,6 +106,11 @@ public class LoreBearer : KMonoBehaviour
 		return -100;
 	}
 
+	public void Debug_ResetSearched()
+	{
+		this.BeenClicked = false;
+	}
+
 	[Serialize]
 	private bool BeenClicked;
 
@@ -102,6 +119,20 @@ public class LoreBearer : KMonoBehaviour
 	private string[] collectionsToUnlockFrom;
 
 	public Func<int> GetSidescreenSortOrder;
+
+	[Serialize]
+	public string poiOverrideLoreUnlockId;
+
+	[Serialize]
+	public string poiOverrideLoreDisplayText;
+
+	[Serialize]
+	public string poiOverrideNextCollectionId;
+
+	[Tooltip("Controls if the lore should be active. The Inspect button will also disappear if set to true.")]
+	public bool hideLore;
+
+	public bool useDefaultLore = true;
 
 	private LoreBearerAction displayContentAction;
 }

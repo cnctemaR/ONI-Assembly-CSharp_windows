@@ -116,7 +116,7 @@ public class KAnimBatchManager
 		{
 			batchSet = new BatchSet(this.GetBatchGroup(new BatchGroupKey(batchKey.groupID)), batchKey, vector2I);
 			this.batchSets[batchKey] = batchSet;
-			if (batchSet.key.materialType == KAnimBatchGroup.MaterialType.UI)
+			if (batchSet.key.materialType == KAnimBatchGroup.MaterialType.UI || controller.IsAlwaysVisible())
 			{
 				this.uiBatchSets.Add(new KAnimBatchManager.BatchSetInfo
 				{
@@ -312,7 +312,7 @@ public class KAnimBatchManager
 		Shader.PropertyToID("atlas15")
 	};
 
-	public static int[] MaxAtlasesByMaterialType = new int[] { 12, 12, 12, 16, 12, 13 };
+	public static int[] MaxAtlasesByMaterialType = new int[] { 12, 12, 12, 16, 12, 13, 12, 12 };
 
 	private struct BatchSetInfo
 	{

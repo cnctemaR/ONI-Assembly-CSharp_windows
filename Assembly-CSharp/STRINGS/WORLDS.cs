@@ -546,5 +546,33 @@ namespace STRINGS
 
 			public static LocString DESCRIPTION = "A fragment of a prehistoric starting world.\n\n<smallcaps>Its biodiversity makes reliable food production more attainable for new colonies. Construction materials and fuels are also ample. </smallcaps>";
 		}
+
+		public class AQUATICBASEGAME
+		{
+			public static LocString NAME = "Marinea";
+
+			public static LocString DESCRIPTION = "A salty water-rich starting world with abundant food resources.\n\n<smallcaps>Marinea's biodiversity makes reliable food production more attainable for new colonies, provided they can navigate its ubiquitous liquid pools. Construction materials are a bit limited.</smallcaps>";
+		}
+
+		public class AQUATICCLASSIC
+		{
+			public static LocString NAME = "Marinea Asteroid";
+
+			public static LocString DESCRIPTION = "A salty water-rich starting world with abundant food resources.\n\n<smallcaps>Marinea's biodiversity makes reliable food production more attainable for new colonies, provided they can navigate its ubiquitous liquid pools. Construction materials are a bit limited.</smallcaps>";
+		}
+
+		public class AQUATICSPACEDOUT
+		{
+			public static LocString NAME = "Marinea Minor";
+
+			public static LocString DESCRIPTION = "A smaller inundated starting world with abundant food resources.\n\n<smallcaps>Marinea's biodiversity makes reliable food production more attainable for new colonies, provided they can navigate its ubiquitous liquid pools. Construction materials are a bit limited.</smallcaps>";
+		}
+
+		public class AQUATICMIXING
+		{
+			public static LocString NAME = "Marinea Fragment";
+
+			public static LocString DESCRIPTION = "A fragment of an aquatic starting world. It has abundant food resources.\n\n<smallcaps>Marinea's biodiversity makes reliable food production more attainable for new colonies, provided they can navigate its many liquid pools. Construction materials are a bit limited.</smallcaps>";
+		}
 	}
 }

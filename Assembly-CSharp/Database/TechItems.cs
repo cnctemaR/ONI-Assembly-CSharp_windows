@@ -48,6 +48,9 @@ namespace Database
 				this.lubricationStick.AddSearchTerms(SEARCH_TERMS.MEDICINE);
 				this.lubricationStick.AddSearchTerms(SEARCH_TERMS.BIONIC);
 			}
+			this.gasket = this.AddTechItem("PlasticGasket", RESEARCH.OTHER_TECH_ITEMS.GASKET.NAME, RESEARCH.OTHER_TECH_ITEMS.GASKET.DESC, this.GetPrefabSpriteFnBuilder("PlasticGasket".ToTag()), null, null, true);
+			this.rubberBoots = this.AddTechItem(RubberBootsConfig.ID, RESEARCH.OTHER_TECH_ITEMS.RUBBER_BOOTS.NAME, RESEARCH.OTHER_TECH_ITEMS.RUBBER_BOOTS.DESC, this.GetPrefabSpriteFnBuilder(RubberBootsConfig.ID.ToTag()), DlcManager.DLC5, null, false);
+			this.drySuit = this.AddTechItem("DrySuit", RESEARCH.OTHER_TECH_ITEMS.DRY_SUIT.NAME, RESEARCH.OTHER_TECH_ITEMS.DRY_SUIT.DESC, this.GetPrefabSpriteFnBuilder("DrySuit".ToTag()), DlcManager.DLC5, null, false);
 			this.disposableElectrobankUraniumOre = this.AddTechItem("DisposableElectrobank_UraniumOre", RESEARCH.OTHER_TECH_ITEMS.DISPOSABLE_ELECTROBANK_URANIUM_ORE.NAME, RESEARCH.OTHER_TECH_ITEMS.DISPOSABLE_ELECTROBANK_URANIUM_ORE.DESC, this.GetPrefabSpriteFnBuilder("DisposableElectrobank_UraniumOre".ToTag()), new string[] { "EXPANSION1_ID", "DLC3_ID" }, null, false);
 			if (this.disposableElectrobankUraniumOre != null)
 			{
@@ -171,6 +174,12 @@ namespace Database
 		public TechItem disposableElectrobankMetalOre;
 
 		public TechItem lubricationStick;
+
+		public TechItem gasket;
+
+		public TechItem rubberBoots;
+
+		public TechItem drySuit;
 
 		public TechItem disposableElectrobankUraniumOre;
 

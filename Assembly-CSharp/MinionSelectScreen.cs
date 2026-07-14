@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using FMOD.Studio;
+using Klei.AI;
 using Klei.CustomSettings;
 using ProcGen;
 using STRINGS;
@@ -35,21 +37,63 @@ public class MinionSelectScreen : CharacterSelectionController
 		yield return SequenceUtil.WaitForNextFrame;
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.ClusterLayout);
 		ClusterLayout clusterData = SettingsCache.clusterLayouts.GetClusterData(currentQualitySetting.id);
-		bool flag = clusterData.clusterTags.Contains("CeresCluster");
-		bool flag2 = clusterData.clusterTags.Contains("PrehistoricCluster");
-		if (flag)
+		MinionSelectScreen.<>c__DisplayClass5_0 CS$<>8__locals1;
+		CS$<>8__locals1.aquaticStart = MinionSelectScreen.IsAquaticStartWorld(clusterData);
+		if (clusterData.startingMinions != null)
 		{
-			((CharacterContainer)this.containers[2]).SetMinion(new MinionStartingStats(Db.Get().Personalities.Get("FREYJA"), null, null, false));
-			((CharacterContainer)this.containers[1]).GenerateCharacter(true, null);
-			((CharacterContainer)this.containers[0]).GenerateCharacter(true, null);
-		}
-		else if (flag2)
-		{
-			((CharacterContainer)this.containers[2]).SetMinion(new MinionStartingStats(Db.Get().Personalities.Get("MAYA"), null, null, false));
-			((CharacterContainer)this.containers[1]).SetMinion(new MinionStartingStats(Db.Get().Personalities.Get("HIGBY"), null, null, false));
-			((CharacterContainer)this.containers[0]).GenerateCharacter(true, null);
+			DebugUtil.Assert(clusterData.startingMinions.Length <= 3, "Cannot have more than 3 Minion presets");
+			MinionSelectScreen.<SetDefaultMinionsRoutine>g__SetupMinion|5_0((CharacterContainer)this.containers[2], (clusterData.startingMinions.Length != 0) ? clusterData.startingMinions[0] : null, ref CS$<>8__locals1);
+			MinionSelectScreen.<SetDefaultMinionsRoutine>g__SetupMinion|5_0((CharacterContainer)this.containers[1], (clusterData.startingMinions.Length > 1) ? clusterData.startingMinions[1] : null, ref CS$<>8__locals1);
+			MinionSelectScreen.<SetDefaultMinionsRoutine>g__SetupMinion|5_0((CharacterContainer)this.containers[0], (clusterData.startingMinions.Length > 2) ? clusterData.startingMinions[2] : null, ref CS$<>8__locals1);
 		}
 		yield break;
+	}
+
+	private static bool IsAquaticStartWorld(ClusterLayout cluster)
+	{
+		if (cluster == null)
+		{
+			return false;
+		}
+		string startWorld = cluster.GetStartWorld();
+		if (string.IsNullOrEmpty(startWorld))
+		{
+			return false;
+		}
+		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(startWorld);
+		return worldData != null && worldData.worldTags != null && worldData.worldTags.Contains("Aquatic");
+	}
+
+	private static void EnsureSwimmingSkill(CharacterContainer container)
+	{
+		if (container == null)
+		{
+			return;
+		}
+		MinionStartingStats stats = container.Stats;
+		if (stats == null || stats.Traits == null)
+		{
+			return;
+		}
+		if (stats.personality != null && stats.personality.model == GameTags.Minions.Models.Bionic)
+		{
+			return;
+		}
+		foreach (Trait trait in stats.Traits)
+		{
+			if (trait != null && trait.Id == "GrantSkill_Swimming")
+			{
+				return;
+			}
+		}
+		Trait trait2 = Db.Get().traits.TryGet("GrantSkill_Swimming");
+		if (trait2 == null)
+		{
+			return;
+		}
+		int num = ((stats.Traits.Count > 0) ? 1 : 0);
+		stats.Traits.Insert(num, trait2);
+		container.SetMinion(stats);
 	}
 
 	public void SetProceedButtonActive(bool state, string tooltip = null)
@@ -150,6 +194,25 @@ public class MinionSelectScreen : CharacterSelectionController
 			{
 				characterContainer.ForceStopEditingTitle();
 			}
+		}
+	}
+
+	[CompilerGenerated]
+	internal static void <SetDefaultMinionsRoutine>g__SetupMinion|5_0(CharacterContainer container, string specificMinion, ref MinionSelectScreen.<>c__DisplayClass5_0 A_2)
+	{
+		if (specificMinion != null)
+		{
+			container.SetMinion(new MinionStartingStats(Db.Get().Personalities.Get(specificMinion.ToUpper()), null, null, false));
+		}
+		else
+		{
+			container.GenerateCharacter(true, null);
+		}
+		if (A_2.aquaticStart)
+		{
+			MinionSelectScreen.EnsureSwimmingSkill(container);
+			container.OnReshuffled -= MinionSelectScreen.EnsureSwimmingSkill;
+			container.OnReshuffled += MinionSelectScreen.EnsureSwimmingSkill;
 		}
 	}
 

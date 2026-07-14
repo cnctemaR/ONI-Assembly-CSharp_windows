@@ -1302,6 +1302,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	private void OnMRTSetupComplete(Camera cam)
 	{
 		this.cameras.Add(cam);
+		cam.gameObject.AddComponent<MRTLiquidInterception>();
 	}
 
 	public bool IsAudibleSound(Vector2 pos)
@@ -1311,8 +1312,14 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public bool IsAudibleSound(Vector3 pos, EventReference event_ref)
 	{
-		string eventReferencePath = KFMOD.GetEventReferencePath(event_ref);
-		return this.soundCuller.IsAudible(pos, eventReferencePath);
+		float num;
+		float num2;
+		RuntimeManager.GetEventDescription(event_ref).getMinMaxDistance(out num, out num2);
+		if (num2 == 0f)
+		{
+			num2 = 60f;
+		}
+		return this.soundCuller.IsAudible(pos, num2 * num2);
 	}
 
 	public bool IsAudibleSound(Vector3 pos, HashedString sound_path)

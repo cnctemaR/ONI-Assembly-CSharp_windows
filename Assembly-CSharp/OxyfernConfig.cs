@@ -14,7 +14,7 @@ public class OxyfernConfig : IEntityConfig
 		float num = 1f;
 		EffectorValues tier = DECOR.PENALTY.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("oxy_fern_kanim"), "idle_full", Grid.SceneLayer.BuildingBack, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		gameObject = EntityTemplates.ExtendEntityToBasicPlant(gameObject, 253.15f, 273.15f, 313.15f, 373.15f, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.025f, null, true, false, true, true, 2400f, 0f, 2200f, "OxyfernOriginal", global::STRINGS.CREATURES.SPECIES.OXYFERN.NAME);
+		gameObject = EntityTemplates.ExtendEntityToBasicPlant(gameObject, 253.15f, 273.15f, 313.15f, 373.15f, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0.025f, null, true, false, true, false, true, 2400f, 0f, 2200f, "OxyfernOriginal", global::STRINGS.CREATURES.SPECIES.OXYFERN.NAME);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{

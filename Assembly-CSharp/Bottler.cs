@@ -144,20 +144,30 @@ public class Bottler : Workable, IUserControlledCapacity
 		{
 			this.CleanupBottleProxyObject();
 		}
-		PrimaryElement firstPrimaryElement = this.smi.master.GetFirstPrimaryElement();
-		if (firstPrimaryElement == null)
+		PrimaryElement primaryElement = this.smi.master.GetFirstPrimaryElement();
+		WorkerBase.StartWorkInfo startWorkInfo = worker.GetStartWorkInfo();
+		if (startWorkInfo != null && startWorkInfo is Pickupable.PickupableStartWorkInfo)
+		{
+			Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)startWorkInfo;
+			if (pickupableStartWorkInfo != null && pickupableStartWorkInfo.originalPickupable != null)
+			{
+				primaryElement = pickupableStartWorkInfo.originalPickupable.PrimaryElement;
+			}
+		}
+		if (primaryElement == null)
 		{
 			return;
 		}
 		this.workerMeter = new MeterController(worker.GetComponent<KBatchedAnimController>(), "snapto_chest", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "snapto_chest" });
-		this.workerMeter.meterController.SwapAnims(firstPrimaryElement.Element.substance.anims);
-		this.workerMeter.meterController.Play("empty", KAnim.PlayMode.Paused, 1f, 0f);
-		Color32 colour = firstPrimaryElement.Element.substance.colour;
+		this.workerMeter.meterController.SwapAnims(primaryElement.Element.substance.anims);
+		this.workerMeter.meterController.Play(OreSizeVisualizerComponents.GetAnimForMass(primaryElement.Mass), KAnim.PlayMode.Paused, 1f, 0f);
+		Color32 colour = primaryElement.Element.substance.colour;
 		colour.a = byte.MaxValue;
-		this.workerMeter.SetSymbolTint(new KAnimHashedString("meter_fill"), colour);
-		this.workerMeter.SetSymbolTint(new KAnimHashedString("water1"), colour);
-		this.workerMeter.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+		GameUtil.TintLiquidSymbolOnBuilding("meter_fill", this.workerMeter.meterController, primaryElement.Element);
+		GameUtil.TintLiquidSymbolOnBuilding("water1", this.workerMeter.meterController, primaryElement.Element);
+		GameUtil.TintLiquidSymbolOnBuilding("substance_tinter", this.workerMeter.meterController, primaryElement.Element);
 		this.workerMeter.SetSymbolTint(new KAnimHashedString("substance_tinter_cap"), colour);
+		this.smi.UpdateMeterManually(primaryElement);
 	}
 
 	private void CleanupBottleProxyObject()
@@ -405,25 +415,45 @@ public class Bottler : Workable, IUserControlledCapacity
 			public Instance(Bottler master)
 				: base(master)
 			{
+				this.storage = base.GetComponent<Storage>();
 				this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "bottle", "off", Meter.Offset.UserSpecified, Grid.SceneLayer.BuildingFront, new string[] { "bottle", "substance_tinter", "substance_tinter_cap" });
+				base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 			}
 
 			public void UpdateMeter()
 			{
-				PrimaryElement firstPrimaryElement = base.smi.master.GetFirstPrimaryElement();
-				if (firstPrimaryElement == null)
+				this.UpdateMeterManually((this.LastElementStored == null) ? base.smi.master.GetFirstPrimaryElement() : this.LastElementStored);
+			}
+
+			public void UpdateMeterManually(PrimaryElement primary_element)
+			{
+				if (primary_element == null)
 				{
 					return;
 				}
-				this.meter.meterController.SwapAnims(firstPrimaryElement.Element.substance.anims);
-				this.meter.meterController.Play(OreSizeVisualizerComponents.GetAnimForMass(firstPrimaryElement.Mass), KAnim.PlayMode.Paused, 1f, 0f);
-				Color32 colour = firstPrimaryElement.Element.substance.colour;
+				this.meter.meterController.SwapAnims(primary_element.Element.substance.anims);
+				this.meter.meterController.Play(OreSizeVisualizerComponents.GetAnimForMass(primary_element.Mass), KAnim.PlayMode.Paused, 1f, 0f);
+				Color32 colour = primary_element.Element.substance.colour;
 				colour.a = byte.MaxValue;
-				this.meter.SetSymbolTint(new KAnimHashedString("meter_fill"), colour);
-				this.meter.SetSymbolTint(new KAnimHashedString("water1"), colour);
-				this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter"), colour);
+				GameUtil.TintLiquidSymbolOnBuilding("meter_fill", this.meter.meterController, primary_element.Element);
+				GameUtil.TintLiquidSymbolOnBuilding("water1", this.meter.meterController, primary_element.Element);
+				GameUtil.TintLiquidSymbolOnBuilding("substance_tinter", this.meter.meterController, primary_element.Element);
 				this.meter.SetSymbolTint(new KAnimHashedString("substance_tinter_cap"), colour);
 			}
+
+			private void OnStorageChanged(object data)
+			{
+				GameObject gameObject = (GameObject)data;
+				PrimaryElement primaryElement = ((gameObject == null) ? null : gameObject.GetComponent<PrimaryElement>());
+				if (primaryElement != null)
+				{
+					this.LastElementStored = primaryElement;
+				}
+			}
+
+			public PrimaryElement LastElementStored;
+
+			private Storage storage;
 		}
 	}
 }

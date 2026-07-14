@@ -15,7 +15,7 @@ public class GasGrassConfig : IEntityConfig
 		float num = 1f;
 		EffectorValues tier = DECOR.BONUS.TIER3;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("gassygrass_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 3, tier, default(EffectorValues), SimHashes.Creature, null, 255f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 0f, 348.15f, 373.15f, null, false, 0f, 0.15f, "PlantFiber", true, true, true, true, 2400f, 0f, 12200f, "GasGrassOriginal", global::STRINGS.CREATURES.SPECIES.GASGRASS.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 0f, 348.15f, 373.15f, null, false, 0f, 0.15f, "PlantFiber", true, true, true, false, true, 2400f, 0f, 12200f, "GasGrassOriginal", global::STRINGS.CREATURES.SPECIES.GASGRASS.NAME);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

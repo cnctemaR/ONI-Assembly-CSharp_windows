@@ -74,11 +74,15 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		{
 			return null;
 		}
+		if (smi.def.eggShellRatio <= 0f)
+		{
+			return null;
+		}
 		Vector3 position = smi.transform.GetPosition();
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("EggShell"), position);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		PrimaryElement component2 = smi.GetComponent<PrimaryElement>();
-		component.Mass = component2.Mass * 0.5f;
+		component.Mass = component2.Mass * smi.def.eggShellRatio;
 		gameObject.SetActive(true);
 		return gameObject;
 	}
@@ -89,11 +93,15 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		{
 			return null;
 		}
+		if (smi.def.eggShellRatio >= 1f)
+		{
+			return null;
+		}
 		Vector3 position = smi.transform.GetPosition();
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab("RawEgg"), position);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		PrimaryElement component2 = smi.GetComponent<PrimaryElement>();
-		component.Mass = component2.Mass * 0.5f;
+		component.Mass = component2.Mass * (1f - smi.def.eggShellRatio);
 		gameObject.SetActive(true);
 		return gameObject;
 	}
@@ -158,6 +166,8 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 		}
 
 		public bool preventEggDrops;
+
+		public float eggShellRatio;
 
 		public float baseIncubationRate;
 

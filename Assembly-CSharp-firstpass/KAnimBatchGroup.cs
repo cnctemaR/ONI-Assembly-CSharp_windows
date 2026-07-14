@@ -22,6 +22,8 @@ public class KAnimBatchGroup
 			return "Klei/AnimationInvisible";
 		case KAnimBatchGroup.MaterialType.Human:
 			return "Klei/BatchedAnimationHuman";
+		case KAnimBatchGroup.MaterialType.Shine:
+			return "Klei/BatchedAnimationShine";
 		}
 		return "Klei/BatchedAnimation";
 	}
@@ -33,6 +35,12 @@ public class KAnimBatchGroup
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOLS_PER_BUILD, (float)this.data.maxSymbolsPerBuild);
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_ANIM_TEXTURE_START_OFFSET, (float)(this.data.animDataStartOffset / 4));
 		material.SetFloat(KAnimBatchGroup.ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD, (float)this.data.symbolFrameInstances.Count);
+		if (material_type == KAnimBatchGroup.MaterialType.DefaultInsideVistas)
+		{
+			material.SetInt("_StencilRef", 3);
+			material.SetFloat("_StencilComp", 4f);
+			material.SetFloat("_StencilPass", 0f);
+		}
 		return material;
 	}
 
@@ -79,7 +87,7 @@ public class KAnimBatchGroup
 	public KAnimBatchGroup(HashedString id)
 	{
 		this.data = KAnimBatchManager.Instance().GetBatchGroupData(id);
-		this.materials = new Material[6];
+		this.materials = new Material[8];
 		this.batchID = id;
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(id);
 		if (group == null)
@@ -110,7 +118,7 @@ public class KAnimBatchGroup
 			KAnimBatchGroup.cache.Free(this.buildAndAnimTex);
 			this.buildAndAnimTex = null;
 		}
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 8; i++)
 		{
 			if (this.materials[i] != null)
 			{
@@ -271,8 +279,6 @@ public class KAnimBatchGroup
 
 	public static int ShaderProperty_SYMBOL_OVERRIDES_PER_BUILD = Shader.PropertyToID("SYMBOL_OVERRIDES_PER_BUILD");
 
-	private static Color ResetColor = new Color(0f, 0f, 0f, 0f);
-
 	private static KAnimBatchGroup.KAnimBatchTextureCache cache = new KAnimBatchGroup.KAnimBatchTextureCache();
 
 	public int batchCount;
@@ -389,13 +395,6 @@ public class KAnimBatchGroup
 				this.texture.wrapMode = TextureWrapMode.Clamp;
 				this.texture.filterMode = FilterMode.Point;
 				this.texture.anisoLevel = 0;
-				int num = float4s_width * float4s_height;
-				NativeArray<Color> rawTextureData = this.texture.GetRawTextureData<Color>();
-				for (int i = 0; i < num; i++)
-				{
-					rawTextureData[i] = KAnimBatchGroup.ResetColor;
-				}
-				this.texture.Apply();
 			}
 
 			public void SetTextureAndSize(MaterialPropertyBlock property_block)
@@ -486,6 +485,8 @@ public class KAnimBatchGroup
 		UI,
 		Invisible,
 		Human,
+		Shine,
+		DefaultInsideVistas,
 		NumMaterials
 	}
 }

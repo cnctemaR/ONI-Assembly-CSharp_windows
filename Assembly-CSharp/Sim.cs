@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -145,10 +146,12 @@ public static class Sim
 		Grid.insulation = ptr->insulation;
 		Grid.diseaseIdx = ptr->diseaseIdx;
 		Grid.diseaseCount = ptr->diseaseCount;
+		BackwallManager.UpdateFromSim(ptr);
 		Grid.AccumulatedFlowValues = ptr->accumulatedFlow;
 		PropertyTextures.externalFlowTex = ptr->propertyTextureFlow;
 		PropertyTextures.externalLiquidTex = ptr->propertyTextureLiquid;
 		PropertyTextures.externalLiquidDataTex = ptr->propertyTextureLiquidData;
+		PropertyTextures.externalMaterialDataTex = ptr->propertyTextureMaterialData;
 		PropertyTextures.externalExposedToSunlight = ptr->propertyTextureExposedToSunlight;
 		Grid.InitializeCells();
 	}
@@ -235,6 +238,12 @@ public static class Sim
 	public const float MinMass = 1.0001f;
 
 	public const float MAX_SUBLIMATE_MASS = 1.8f;
+
+	public const float MIN_LIQUID_MASS = 0.01f;
+
+	public const float MIN_GAS_MASS = 1E-09f;
+
+	public const float MIN_STATE_TRANSITION_MASS = 0.001f;
 
 	private const int PressureUpdateInterval = 1;
 
@@ -364,10 +373,49 @@ public static class Sim
 		}
 	}
 
+	public enum MaterialPropertiesAccessor
+	{
+		Glows,
+		Caustics,
+		Metalic,
+		OpaqueLiquid,
+		TextureID = 24
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct SimBackwall
+	{
+		public void SetValues(ushort elementIdx, float mass, float temperature)
+		{
+			this.elementIdx = elementIdx;
+			this.mass = mass;
+			this.temperature = temperature;
+		}
+
+		public void Write(BinaryWriter writer)
+		{
+			writer.Write(this.elementIdx);
+			writer.Write(this.pad0);
+			writer.Write(this.pad1);
+			writer.Write(this.mass);
+			writer.Write(this.temperature);
+		}
+
+		public ushort elementIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
+		public float mass;
+
+		public float temperature;
+	}
+
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct Element
 	{
-		public Element(global::Element e, List<global::Element> elements)
+		public unsafe Element(global::Element e, List<global::Element> elements)
 		{
 			this.id = e.id;
 			this.state = (byte)e.state;
@@ -400,15 +448,48 @@ public static class Sim
 			this.lowTempTransitionOreMassConversion = e.lowTempTransitionOreMassConversion;
 			this.sublimateIndex = (ushort)elements.FindIndex((global::Element ele) => ele.id == e.sublimateId);
 			this.convertIndex = (ushort)elements.FindIndex((global::Element ele) => ele.id == e.convertId);
-			this.pack0 = 0;
+			this.numberOfGradientColors = (byte)e.substance.Gradient.colorKeys.Length;
+			for (int i = 0; i < 6; i++)
+			{
+				if (i < e.substance.Gradient.colorKeys.Length)
+				{
+					Color color = e.substance.Gradient.colorKeys[i].color;
+					color.a = e.substance.Gradient.colorKeys[i].time;
+					Color32 color2 = color;
+					uint num3 = (uint)(((int)color2.a << 24) | ((int)color2.b << 16) | ((int)color2.g << 8) | (int)color2.r);
+					*((ref this.gradientColours.FixedElementField) + (IntPtr)i * 4) = num3;
+				}
+				else
+				{
+					*((ref this.gradientColours.FixedElementField) + (IntPtr)i * 4) = 0U;
+				}
+			}
+			this.materialProperties = 0U;
+			if (e.substance.Glows)
+			{
+				this.materialProperties |= 1U;
+			}
+			if (e.substance.LiquidCaustics)
+			{
+				this.materialProperties |= 2U;
+			}
+			if (e.substance.Metalic)
+			{
+				this.materialProperties |= 4U;
+			}
+			if (e.substance.IsOpaqueLiquid)
+			{
+				this.materialProperties |= 8U;
+			}
+			this.materialProperties |= (uint)((uint)((Substance.SubstanceTexture)255 & e.substance.Texture) << 24);
 			if (e.substance == null)
 			{
 				this.colour = 0U;
 			}
 			else
 			{
-				Color32 color = e.substance.colour;
-				this.colour = (uint)(((int)color.a << 24) | ((int)color.b << 16) | ((int)color.g << 8) | (int)color.r);
+				Color32 color3 = e.substance.colour;
+				this.colour = (uint)(((int)color3.a << 24) | ((int)color3.b << 16) | ((int)color3.g << 8) | (int)color3.r);
 			}
 			this.sublimateFX = e.sublimateFX;
 			this.sublimateRate = e.sublimateRate;
@@ -421,14 +502,14 @@ public static class Sim
 			this.defaultValues = e.defaultValues;
 		}
 
-		public void Write(BinaryWriter writer)
+		public unsafe void Write(BinaryWriter writer)
 		{
 			writer.Write((int)this.id);
 			writer.Write(this.lowTempTransitionIdx);
 			writer.Write(this.highTempTransitionIdx);
 			writer.Write(this.elementsTableIdx);
 			writer.Write(this.state);
-			writer.Write(this.pack0);
+			writer.Write(this.numberOfGradientColors);
 			writer.Write(this.specificHeatCapacity);
 			writer.Write(this.thermalConductivity);
 			writer.Write(this.molarMass);
@@ -449,7 +530,12 @@ public static class Sim
 			writer.Write(this.highTempTransitionOreMassConversion);
 			writer.Write(this.sublimateIndex);
 			writer.Write(this.convertIndex);
+			writer.Write(this.materialProperties);
 			writer.Write(this.colour);
+			for (int i = 0; i < 6; i++)
+			{
+				writer.Write(*((ref this.gradientColours.FixedElementField) + (IntPtr)i * 4));
+			}
 			writer.Write((int)this.sublimateFX);
 			writer.Write(this.sublimateRate);
 			writer.Write(this.sublimateEfficiency);
@@ -461,6 +547,8 @@ public static class Sim
 			this.defaultValues.Write(writer);
 		}
 
+		private const int kMaxGradientCount = 6;
+
 		public SimHashes id;
 
 		public ushort lowTempTransitionIdx;
@@ -471,7 +559,7 @@ public static class Sim
 
 		public byte state;
 
-		public byte pack0;
+		public byte numberOfGradientColors;
 
 		public float specificHeatCapacity;
 
@@ -513,7 +601,12 @@ public static class Sim
 
 		public ushort convertIndex;
 
+		public uint materialProperties;
+
 		public uint colour;
+
+		[FixedBuffer(typeof(uint), 6)]
+		public Sim.Element.<gradientColours>e__FixedBuffer gradientColours;
 
 		public SpawnFXHashes sublimateFX;
 
@@ -532,6 +625,14 @@ public static class Sim
 		public float radiationPer1000Mass;
 
 		public Sim.PhysicsData defaultValues;
+
+		[CompilerGenerated]
+		[UnsafeValueType]
+		[StructLayout(LayoutKind.Sequential, Size = 24)]
+		public struct <gradientColours>e__FixedBuffer
+		{
+			public uint FixedElementField;
+		}
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -626,6 +727,12 @@ public static class Sim
 		public unsafe byte* diseaseIdx;
 
 		public unsafe int* diseaseCount;
+
+		public unsafe ushort* backwallElement;
+
+		public unsafe float* backwallMass;
+
+		public unsafe float* backwallTemperature;
 
 		public int numSolidInfo;
 
@@ -723,6 +830,14 @@ public static class Sim
 
 		public unsafe Sim.CellMeltedInfo* cellMeltedInfos;
 
+		public int numBackwallElementChangedInfos;
+
+		public unsafe Sim.BackwallElementChangedInfo* backwallElementChangedInfos;
+
+		public int numBackwallShouldTransitionInfos;
+
+		public unsafe Sim.BackwallShouldTransitionInfo* backwallShouldTransitionInfos;
+
 		public int numDiseaseEmittedInfos;
 
 		public unsafe Sim.DiseaseEmittedInfo* diseaseEmittedInfos;
@@ -742,6 +857,8 @@ public static class Sim
 		public IntPtr propertyTextureLiquid;
 
 		public IntPtr propertyTextureLiquidData;
+
+		public IntPtr propertyTextureMaterialData;
 
 		public IntPtr propertyTextureExposedToSunlight;
 	}
@@ -917,8 +1034,6 @@ public static class Sim
 
 		public float buildingToBuildingTemperatureScale;
 
-		public float biomeTemperatureLerpRate;
-
 		public byte isDebugEditing;
 
 		public byte pad0;
@@ -994,6 +1109,18 @@ public static class Sim
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct CellMeltedInfo
+	{
+		public int gameCell;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct BackwallElementChangedInfo
+	{
+		public int gameCell;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct BackwallShouldTransitionInfo
 	{
 		public int gameCell;
 	}

@@ -83,9 +83,7 @@ public class ValveBase : KMonoBehaviour, ISaveLoadable
 					Element element = ElementLoader.FindElementByHash(contents.element);
 					if (element != null)
 					{
-						Color color = element.substance.colour;
-						color.a = 1f;
-						this.controller.SetSymbolTint(new KAnimHashedString("water_color"), color);
+						GameUtil.TintLiquidSymbolOnBuilding("water_color", this.controller, element);
 					}
 				}
 				this.lastElementTransfered = contents.element;

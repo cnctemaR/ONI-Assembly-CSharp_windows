@@ -171,10 +171,10 @@ public class Timelapser : KMonoBehaviour
 					DebugHandler.SetTimelapseMode(false, 0);
 					this.screenshotPending = false;
 					this.previewScreenshot = false;
-					this.screenshotActive = false;
 					this.debugScreenShot = false;
 					this.previewSaveGamePath = "";
 					OverlayScreen.Instance.ToggleOverlay(this.activeOverlay, false);
+					this.screenshotActive = false;
 				}
 			}
 		}

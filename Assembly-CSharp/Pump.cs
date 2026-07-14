@@ -18,9 +18,7 @@ public class Pump : KMonoBehaviour, ISim1000ms
 			Element element = ElementLoader.elements[(int)elementConsumedInfo.removedElemIdx];
 			if (this.lastElementConsumed != element.id && element.id != SimHashes.Vacuum)
 			{
-				Color color = element.substance.colour;
-				color.a = 1f;
-				this.controller.SetSymbolTint(new KAnimHashedString("water"), color);
+				GameUtil.TintLiquidSymbolOnBuilding("water", this.controller, element);
 			}
 			this.lastElementConsumed = element.id;
 		}

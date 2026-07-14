@@ -39,7 +39,7 @@ public class KelpPlantConfig : IEntityConfig, IHasDlcRestrictions
 		float num7 = 373.15f;
 		string id = KelpConfig.ID;
 		string text5 = global::STRINGS.CREATURES.SPECIES.KELPPLANT.NAME;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num4, num5, num6, num7, KelpPlantConfig.ALLOWED_ELEMENTS, false, 0f, 0.15f, id, false, true, true, true, 2400f, 0f, 7400f, "KelpPlantOriginal", text5);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num4, num5, num6, num7, KelpPlantConfig.ALLOWED_ELEMENTS, false, 0f, 0.15f, id, false, true, true, false, true, 2400f, 0f, 7400f, "KelpPlantOriginal", text5);
 		gameObject.AddOrGet<PressureVulnerable>().allCellsMustBeSafe = true;
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{

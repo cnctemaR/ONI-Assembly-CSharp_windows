@@ -269,6 +269,27 @@ public class LegacyModMain
 			{
 				id = SimHashes.WoodLog,
 				decor = 0.5f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.SiltStone,
+				decor = 0.1f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Corallium,
+				decor = 0.1f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Pearl,
+				decor = 0.5f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Basalt,
+				decor = 0.1f,
+				overheatMod = 50f
 			}
 		})
 		{

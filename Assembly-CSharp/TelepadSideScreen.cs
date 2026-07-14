@@ -137,6 +137,12 @@ public class TelepadSideScreen : SideScreenContent
 				foreach (ColonyAchievementRequirement colonyAchievementRequirement in colonyAchievement.requirementChecklist)
 				{
 					this.entries[colonyAchievement.Id][colonyAchievementRequirement].GetComponent<HierarchyReferences>().GetReference<Image>("Check").enabled = colonyAchievementRequirement.Success();
+					VictoryColonyAchievementRequirement victoryColonyAchievementRequirement = colonyAchievementRequirement as VictoryColonyAchievementRequirement;
+					if (victoryColonyAchievementRequirement != null && victoryColonyAchievementRequirement.shouldUpdateNameAndDescription)
+					{
+						this.entries[colonyAchievement.Id][colonyAchievementRequirement].GetComponent<HierarchyReferences>().GetReference<LocText>("Label").SetText(victoryColonyAchievementRequirement.Name());
+						this.entries[colonyAchievement.Id][colonyAchievementRequirement].GetComponent<ToolTip>().SetSimpleTooltip(victoryColonyAchievementRequirement.Description());
+					}
 				}
 			}
 		}

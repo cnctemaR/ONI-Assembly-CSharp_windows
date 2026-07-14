@@ -50,16 +50,16 @@ public class BuildingFacade : KMonoBehaviour
 		}
 		this.currentFacade = facade.Id;
 		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim(facade.AnimFile) };
-		this.ChangeBuilding(array, facade.Name, facade.Description, facade.InteractFile, shouldTryAnimate);
+		this.ChangeBuilding(array, facade.Name, facade.Description, facade.InteractFile, shouldTryAnimate, facade.Data);
 	}
 
 	private void ClearFacade(bool shouldTryAnimate = false)
 	{
 		Building component = base.GetComponent<Building>();
-		this.ChangeBuilding(component.Def.AnimFiles, component.Def.Name, component.Def.Desc, null, shouldTryAnimate);
+		this.ChangeBuilding(component.Def.AnimFiles, component.Def.Name, component.Def.Desc, null, shouldTryAnimate, null);
 	}
 
-	private void ChangeBuilding(KAnimFile[] animFiles, string displayName, string desc, Dictionary<string, string> interactAnimsNames = null, bool shouldTryAnimate = false)
+	private void ChangeBuilding(KAnimFile[] animFiles, string displayName, string desc, Dictionary<string, string> interactAnimsNames = null, bool shouldTryAnimate = false, Dictionary<string, string> data = null)
 	{
 		this.interactAnims.Clear();
 		if (interactAnimsNames != null && interactAnimsNames.Count > 0)
@@ -70,6 +70,7 @@ public class BuildingFacade : KMonoBehaviour
 				this.interactAnims.Add(keyValuePair.Key, new KAnimFile[] { Assets.GetAnim(keyValuePair.Value) });
 			}
 		}
+		Dictionary<string, string> dictionary = ((data == null) ? null : new Dictionary<string, string>(data));
 		Building[] components = base.GetComponents<Building>();
 		foreach (Building building in components)
 		{
@@ -95,8 +96,21 @@ public class BuildingFacade : KMonoBehaviour
 				float num = 1f;
 				KFMOD.PlayUISoundWithParameter(GlobalAssets.GetSound(KleiInventoryScreen.GetFacadeItemSoundName(Db.Get().Permits.TryGet(this.currentFacade)) + "_Click", false), text, num);
 			}
+			BuildingFacadeCustomData.ApplyCustomData(building, dictionary);
 		}
-		base.GetComponent<KSelectable>().SetName(displayName);
+		UserNameable component2 = base.GetComponent<UserNameable>();
+		if (component2 != null && !string.IsNullOrEmpty(component2.savedName) && component2.savedName != base.GetComponent<Building>().Def.Name)
+		{
+			component2.SetName(component2.savedName);
+		}
+		else
+		{
+			base.GetComponent<KSelectable>().SetName(displayName);
+			if (DetailsScreen.Instance != null && DetailsScreen.Instance.target == base.gameObject)
+			{
+				DetailsScreen.Instance.RefreshTitle();
+			}
+		}
 		if (base.GetComponent<AnimTileable>() != null && components.Length != 0)
 		{
 			GameScenePartitioner.Instance.TriggerEvent(components[0].GetExtents(), GameScenePartitioner.Instance.objectLayers[1], null);

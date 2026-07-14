@@ -227,48 +227,54 @@ public class DevAutoPlumber
 		return building.gameObject;
 	}
 
-	private static int FindClearPlacementLocation(int nearStartingCell, int[] placementBlockingObjectLayers, List<int> rejectLocations)
+	private static bool IsNeighborhoodClear(int test, int[] placementBlockingObjectLayers, List<int> rejectLocations)
 	{
-		Func<int, object, bool> func = delegate(int test, object unusedData)
+		foreach (int num in new int[]
 		{
-			foreach (int num2 in new int[]
+			test,
+			Grid.OffsetCell(test, 1, 0),
+			Grid.OffsetCell(test, 1, -1),
+			Grid.OffsetCell(test, 0, -1),
+			Grid.OffsetCell(test, 0, 1),
+			Grid.OffsetCell(test, 1, 1)
+		})
+		{
+			if (!Grid.IsValidCell(num))
 			{
-				test,
-				Grid.OffsetCell(test, 1, 0),
-				Grid.OffsetCell(test, 1, -1),
-				Grid.OffsetCell(test, 0, -1),
-				Grid.OffsetCell(test, 0, 1),
-				Grid.OffsetCell(test, 1, 1)
-			})
+				return false;
+			}
+			if (Grid.Solid[num])
 			{
-				if (!Grid.IsValidCell(num2))
-				{
-					return false;
-				}
-				if (Grid.Solid[num2])
-				{
-					return false;
-				}
-				if (Grid.ObjectLayers[1].ContainsKey(num2))
-				{
-					return false;
-				}
-				foreach (int num3 in placementBlockingObjectLayers)
-				{
-					if (Grid.ObjectLayers[num3].ContainsKey(num2))
-					{
-						return false;
-					}
-				}
-				if (rejectLocations.Contains(test))
+				return false;
+			}
+			if (Grid.ObjectLayers[1].ContainsKey(num))
+			{
+				return false;
+			}
+			foreach (int num2 in placementBlockingObjectLayers)
+			{
+				if (Grid.ObjectLayers[num2].ContainsKey(num))
 				{
 					return false;
 				}
 			}
-			return true;
-		};
+			if (rejectLocations.Contains(test))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static int FindClearPlacementLocation(int nearStartingCell, int[] placementBlockingObjectLayers, List<int> rejectLocations)
+	{
+		DevAutoPlumber.<>c__DisplayClass10_0 CS$<>8__locals1 = new DevAutoPlumber.<>c__DisplayClass10_0();
+		CS$<>8__locals1.placementBlockingObjectLayers = placementBlockingObjectLayers;
+		CS$<>8__locals1.rejectLocations = rejectLocations;
 		int num = 20;
-		return GameUtil.FloodFillFind<object>(func, null, nearStartingCell, num, false, false);
+		FloodFill.Finder finder = new FloodFill.Finder(new Func<int, bool>(CS$<>8__locals1.<FindClearPlacementLocation>g__IsNeighborhoodClearBoundToArgs|0));
+		FloodFill.BreadthTraverse<FloodFill.NoBoundary, FloodFill.GenerationGrid, FloodFill.MaxDepth, FloodFill.Finder>(nearStartingCell, default(FloodFill.NoBoundary), FloodFill.GenerationGrid.Default(), new FloodFill.MaxDepth(num), finder);
+		return finder.Cell;
 	}
 
 	private static List<int> GenerateClearConduitPath(Building sourceBuilding, Building destinationBuilding, int[] conduitTypeLayers, DevAutoPlumber.PortSelection portSelection)
@@ -349,7 +355,7 @@ public class DevAutoPlumber
 
 	private static List<int> GetGridPath(int startCell, int endCell, Func<int, bool> testFunction, int maxDepth = 20)
 	{
-		DevAutoPlumber.<>c__DisplayClass14_0 CS$<>8__locals1;
+		DevAutoPlumber.<>c__DisplayClass15_0 CS$<>8__locals1;
 		CS$<>8__locals1.testFunction = testFunction;
 		CS$<>8__locals1.endCell = endCell;
 		List<int> list = new List<int>();
@@ -368,7 +374,7 @@ public class DevAutoPlumber
 			}
 			foreach (int num2 in CS$<>8__locals1.frontier)
 			{
-				DevAutoPlumber.<GetGridPath>g___ExpandFrontier|14_0(num2, ref CS$<>8__locals1);
+				DevAutoPlumber.<GetGridPath>g___ExpandFrontier|15_0(num2, ref CS$<>8__locals1);
 			}
 			CS$<>8__locals1.frontier.Clear();
 			foreach (int num3 in CS$<>8__locals1.newFrontier)
@@ -389,7 +395,7 @@ public class DevAutoPlumber
 	}
 
 	[CompilerGenerated]
-	internal static void <GetGridPath>g___ExpandFrontier|14_0(int fromCell, ref DevAutoPlumber.<>c__DisplayClass14_0 A_1)
+	internal static void <GetGridPath>g___ExpandFrontier|15_0(int fromCell, ref DevAutoPlumber.<>c__DisplayClass15_0 A_1)
 	{
 		foreach (int num in new int[]
 		{

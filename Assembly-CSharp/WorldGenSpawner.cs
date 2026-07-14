@@ -129,6 +129,11 @@ public class WorldGenSpawner : KMonoBehaviour
 		return list;
 	}
 
+	public WorldGenSpawner.Spawnable GetSpawnableInCellWithTag(int cell, Tag tag)
+	{
+		return this.spawnables.Find((WorldGenSpawner.Spawnable s) => s.cell == cell && s.spawnInfo.id == tag);
+	}
+
 	public WorldGenSpawner.Spawnable GetSpawnableInCell(int cell)
 	{
 		return this.spawnables.Find((WorldGenSpawner.Spawnable s) => s.cell == cell);
@@ -211,25 +216,33 @@ public class WorldGenSpawner : KMonoBehaviour
 				prefab2.type = Prefab.Type.Ore;
 				this.AddSpawnable(prefab2);
 			}
-			foreach (Prefab prefab3 in worldGen.SpawnData.otherEntities)
+			foreach (Prefab prefab3 in worldGen.SpawnData.backwallEntities)
 			{
 				prefab3.location_x += worldGen.data.world.offset.x;
 				prefab3.location_y += worldGen.data.world.offset.y;
 				prefab3.type = Prefab.Type.Other;
 				this.AddSpawnable(prefab3);
 			}
-			foreach (Prefab prefab4 in worldGen.SpawnData.pickupables)
+			foreach (Prefab prefab4 in worldGen.SpawnData.otherEntities)
 			{
 				prefab4.location_x += worldGen.data.world.offset.x;
 				prefab4.location_y += worldGen.data.world.offset.y;
-				prefab4.type = Prefab.Type.Pickupable;
+				prefab4.type = Prefab.Type.Other;
 				this.AddSpawnable(prefab4);
+			}
+			foreach (Prefab prefab5 in worldGen.SpawnData.pickupables)
+			{
+				prefab5.location_x += worldGen.data.world.offset.x;
+				prefab5.location_y += worldGen.data.world.offset.y;
+				prefab5.type = Prefab.Type.Pickupable;
+				this.AddSpawnable(prefab5);
 			}
 			foreach (Tag tag in worldGen.SpawnData.discoveredResources)
 			{
 				DiscoveredResources.Instance.Discover(tag);
 			}
 			worldGen.SpawnData.buildings.Clear();
+			worldGen.SpawnData.backwallEntities.Clear();
 			worldGen.SpawnData.elementalOres.Clear();
 			worldGen.SpawnData.otherEntities.Clear();
 			worldGen.SpawnData.pickupables.Clear();

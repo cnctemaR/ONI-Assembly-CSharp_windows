@@ -44,40 +44,10 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 	{
 		bool flag = WildnessMonitor.IsWild(smi);
 		smi.wildness.hide = !flag;
-		AttributeInstance attributeInstance = Db.Get().CritterAttributes.Happiness.Lookup(smi.gameObject);
-		if (attributeInstance != null)
-		{
-			attributeInstance.hide = flag;
-		}
-		AttributeInstance attributeInstance2 = Db.Get().CritterAttributes.Metabolism.Lookup(smi.gameObject);
-		if (attributeInstance2 != null)
-		{
-			attributeInstance2.hide = flag;
-		}
 		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(smi.gameObject);
 		if (amountInstance != null)
 		{
 			amountInstance.hide = flag;
-		}
-		AmountInstance amountInstance2 = Db.Get().Amounts.Temperature.Lookup(smi.gameObject);
-		if (amountInstance2 != null)
-		{
-			amountInstance2.hide = flag;
-		}
-		AmountInstance amountInstance3 = Db.Get().Amounts.Fertility.Lookup(smi.gameObject);
-		if (amountInstance3 != null)
-		{
-			amountInstance3.hide = flag;
-		}
-		AmountInstance amountInstance4 = Db.Get().Amounts.MilkProduction.Lookup(smi.gameObject);
-		if (amountInstance4 != null)
-		{
-			amountInstance4.hide = flag;
-		}
-		AmountInstance amountInstance5 = Db.Get().Amounts.Beckoning.Lookup(smi.gameObject);
-		if (amountInstance5 != null)
-		{
-			amountInstance5.hide = flag;
 		}
 	}
 

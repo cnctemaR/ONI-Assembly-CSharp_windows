@@ -114,7 +114,7 @@ namespace STRINGS
 				UI.FormatAsLink("Liquid Chlorine", "CHLORINE"),
 				" and ",
 				UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
-				" gas, toxic to Duplicants. When exploring here, it is worth setting up a good system."
+				" gas, toxic to Duplicants."
 			});
 
 			public static LocString UTILITY = string.Concat(new string[]
@@ -211,7 +211,7 @@ namespace STRINGS
 				UI.FormatAsLink("Chlorine Gas", "CHLORINEGAS"),
 				" and ",
 				UI.FormatAsLink("Hydrogen Gas", "HYDROGEN"),
-				" are the prevailing gasses in this biome, ",
+				" are the prevailing gases in this biome, ",
 				UI.FormatAsLink("Oxylite", "OXYROCK"),
 				" exists in rock form and can provide ",
 				UI.FormatAsLink("Oxygen", "OXYGEN"),
@@ -819,6 +819,174 @@ namespace STRINGS
 				UI.FormatAsLink("Pacus", "PACUSPECIES"),
 				" and excrete hefty chunks of ",
 				UI.FormatAsLink("Rust", "RUST"),
+				"."
+			});
+		}
+
+		public static class BEACH
+		{
+			public static LocString NAME = "Beach Biome";
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Layers of ",
+				UI.FormatAsLink("Coquina", "COQUINA"),
+				", ",
+				UI.FormatAsLink("Salt", "SALT"),
+				", ",
+				UI.FormatAsLink("Sandstone", "SANDSTONE"),
+				", and ",
+				UI.FormatAsLink("Siltstone", "SILTSTONE"),
+				" imply that this area may once have been an ocean floor. Now, its warm climate and abundant life-sustaining resources make it a welcoming place for new colonies.\n\n"
+			});
+
+			public static LocString UTILITY = string.Concat(new string[]
+			{
+				"The ",
+				UI.FormatAsLink("Gum Wood", "PALMWOOD"),
+				" harvested from ",
+				UI.FormatAsLink("Gum Palms", "DEWPALM"),
+				" can be processed at the ",
+				UI.FormatAsLink("Plant Pulverizer", "MILKPRESS"),
+				" to produce ",
+				UI.FormatAsLink("Latex", "LATEX"),
+				". This enables ",
+				UI.FormatAsLink("Rubber", "RUBBER"),
+				" production, which my colony can use to craft ",
+				UI.FormatAsLink("Swimwear", "DrySuit"),
+				" or manufacture the ",
+				UI.FormatAsLink("Gaskets", "BUILDINGGASKET"),
+				" required for the ",
+				UI.FormatAsLink("Power", "POWER"),
+				"-generating ",
+				UI.FormatAsLink("Tidal Turbine", "REEFGENERATOR"),
+				".\n\nBasic caloric requirements are easily met by harvesting ",
+				UI.FormatAsLink("Mussel Sprouts", "MUSSELSPROUT"),
+				" and ",
+				UI.FormatAsLink("Sodicane", "SALTYSTICKSPLANT"),
+				", though the latter is so salty that it's best to build a ",
+				UI.FormatAsLink("Water Cooler", "WATERCOOLER"),
+				" nearby to combat thirst-induced fatigue.\n\n",
+				UI.FormatAsLink("Blowters", "PUFFERFISHSPECIES"),
+				" provide a more palatable ",
+				UI.FormatAsLink("Food", "FOOD"),
+				" and — when bloated — double as an emergency ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				" source for suffocating Duplicants. When the need arises, my Duplicants will know what to do."
+			});
+		}
+
+		public static class REEF
+		{
+			public static LocString NAME = "Reef Biome";
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"This tropical biome is filled with vast ",
+				UI.FormatAsLink("Salt Water", "SALTWATER"),
+				" stores and fascinating wildlife. Dry land is almost non-existent, so ",
+				UI.FormatAsLink("Swimming", "SWIMMER"),
+				" will be an important skill for my Duplicants to acquire.\n\n"
+			});
+
+			public static LocString UTILITY = string.Concat(new string[]
+			{
+				"Duplicants can breathe easy here, as ",
+				UI.FormatAsLink("Flue Coral", "OXYCORAL"),
+				" continuously converts ",
+				UI.FormatAsLink("Light", "LIGHT"),
+				" from the ",
+				UI.FormatAsLink("Beakon", "PARROTFISH"),
+				" fish into a steady stream of ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				" that accumulates in cave ceilings.\n\n",
+				UI.FormatAsLink("Blowters'", "PUFFERFISHSPECIES"),
+				" delicate digestive systems cause them to bloat with ",
+				UI.FormatAsLink("Oxygen", "OXYGEN"),
+				" after consuming ",
+				UI.FormatAsLink("Waterweed", "SEALETTUCE"),
+				". If my Duplicants are suffocating underwater and an oxygen-bloated Blowter is within reach, they will instinctively commandeer the fish's stored gas in order to survive.\n\nMassive ",
+				UI.FormatAsLink("Clampum", "CLAM"),
+				" produce ",
+				UI.FormatAsLink("Pearls", "PEARL"),
+				" that can be used as an attractive construction material. Unused pearls will be eaten by ",
+				UI.FormatAsLink("Seaquines", "SEAHORSESPECIES"),
+				" who can then be brought to an ",
+				UI.FormatAsLink("Aquatic Milking Station", "UNDERWATERMILKINGSTATION"),
+				" to obtain ",
+				UI.FormatAsLink("Ovolene", "FISHMILK"),
+				"."
+			});
+		}
+
+		public static class KELPFOREST
+		{
+			public static LocString NAME = "Kelp Forest Biome";
+
+			public static LocString DESC = "The temperate Kelp Forest biome contains plentiful natural resources, with enough breathable gas to sustain my Duplicants as they build the infrastructure for longer-term solutions.\n\n";
+
+			public static LocString UTILITY = string.Concat(new string[]
+			{
+				"Initial scans reveal that beneath the ",
+				UI.FormatAsLink("Polluted Mud", "TOXICMUD"),
+				" are rich veins of ",
+				UI.FormatAsLink("Iron Ore", "IRONORE"),
+				". Native aquatic critters called ",
+				UI.FormatAsLink("Orehulls", "SEATURTLESPECIES"),
+				" can also be sheared for this same ore - establishing a strong ranching system in this biome will ensure an infinite supply.\n\nDeep pools of ",
+				UI.FormatAsLink("Polluted Water", "DIRTYWATER"),
+				" can be piped into cooling systems to support colony-wide ",
+				UI.FormatAsLink("Temperature", "HEAT"),
+				" management. It off-gases into breathable ",
+				UI.FormatAsLink("Polluted Oxygen", "CONTAMINATEDOXYGEN"),
+				", and keeps local ",
+				UI.FormatAsLink("Thimble Reed", "BASICFABRICPLANT"),
+				" healthy."
+			});
+		}
+
+		public static class ABYSS
+		{
+			public static LocString NAME = "Abyss Biome";
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"This aquatic environment is marked by gloomy shafts flooded with ",
+				UI.FormatAsLink("Polluted Brine", "MURKYBRINE"),
+				" and renewable natural resources ideal for colony industrialization. Training my Duplicants to ",
+				UI.FormatAsLink("Swim", "SWIMMER"),
+				" should be a priority.\n\n"
+			});
+
+			public static LocString UTILITY = string.Concat(new string[]
+			{
+				UI.FormatAsLink("Thermal Gas Fissures", "UNDERWATERVENT"),
+				" provide a steady source of ",
+				UI.FormatAsLink("Natural Gas", "METHANE"),
+				". ",
+				UI.FormatAsLink("Galena", "GALENA"),
+				" can be processed into ",
+				UI.FormatAsLink("Lead", "LEAD"),
+				" and ",
+				UI.FormatAsLink("Sulfur", "SULFUR"),
+				", each contributing to the ",
+				UI.FormatAsLink("Power", "POWER"),
+				" systems that will fuel my colony's expansion.\n\nRich deposits of ",
+				UI.FormatAsLink("Diamond", "DIAMOND"),
+				" supply the crucial component required for the ",
+				UI.FormatAsLink("Drillcone", "NOSECONEHARVEST"),
+				" my colony uses in space mining. Aquatic organisms called ",
+				UI.FormatAsLink("Pinpoki", "URCHIN"),
+				" can also be processed into diamond.\n\nNative ",
+				UI.FormatAsLink("Tublia", "TUBEWORM"),
+				" plants can be harvested for ",
+				UI.FormatAsLink("Plastic", "PLASTIC"),
+				". The latter is useful for crafting the ",
+				UI.FormatAsLink("Gaskets", "BUILDINGGASKET"),
+				" that enable the construction of ",
+				UI.FormatAsLink("Tidal Turbines", "REEFGENERATOR"),
+				" and ",
+				UI.FormatAsLink("Marine Drills", "UNDERWATERVENTDRILL"),
 				"."
 			});
 		}

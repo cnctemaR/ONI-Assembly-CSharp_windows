@@ -7,9 +7,9 @@ public class EffectConfigs : IMultiEntityConfig
 	public List<GameObject> CreatePrefabs()
 	{
 		List<GameObject> list = new List<GameObject>();
-		var anon = new <>f__AnonymousType0<string, string[], string, KAnim.PlayMode, bool>[]
+		List<EffectConfigs.EffectTemplate> list2 = new List<EffectConfigs.EffectTemplate>
 		{
-			new
+			new EffectConfigs.EffectTemplate
 			{
 				id = EffectConfigs.EffectTemplateId,
 				animFiles = new string[0],
@@ -17,7 +17,7 @@ public class EffectConfigs : IMultiEntityConfig
 				initialMode = KAnim.PlayMode.Once,
 				destroyOnAnimComplete = false
 			},
-			new
+			new EffectConfigs.EffectTemplate
 			{
 				id = EffectConfigs.EffectTemplateOverrideId,
 				animFiles = new string[0],
@@ -25,7 +25,7 @@ public class EffectConfigs : IMultiEntityConfig
 				initialMode = KAnim.PlayMode.Once,
 				destroyOnAnimComplete = false
 			},
-			new
+			new EffectConfigs.EffectTemplate
 			{
 				id = EffectConfigs.AttackSplashId,
 				animFiles = new string[] { "attack_beam_contact_fx_kanim" },
@@ -33,7 +33,7 @@ public class EffectConfigs : IMultiEntityConfig
 				initialMode = KAnim.PlayMode.Loop,
 				destroyOnAnimComplete = false
 			},
-			new
+			new EffectConfigs.EffectTemplate
 			{
 				id = EffectConfigs.OreAbsorbId,
 				animFiles = new string[] { "ore_collision_kanim" },
@@ -41,7 +41,7 @@ public class EffectConfigs : IMultiEntityConfig
 				initialMode = KAnim.PlayMode.Once,
 				destroyOnAnimComplete = true
 			},
-			new
+			new EffectConfigs.EffectTemplate
 			{
 				id = EffectConfigs.PlantDeathId,
 				animFiles = new string[] { "plant_death_fx_kanim" },
@@ -49,7 +49,7 @@ public class EffectConfigs : IMultiEntityConfig
 				initialMode = KAnim.PlayMode.Once,
 				destroyOnAnimComplete = true
 			},
-			new
+			new EffectConfigs.EffectTemplate
 			{
 				id = EffectConfigs.BuildSplashId,
 				animFiles = new string[] { "sparks_radial_build_kanim" },
@@ -57,7 +57,7 @@ public class EffectConfigs : IMultiEntityConfig
 				initialMode = KAnim.PlayMode.Loop,
 				destroyOnAnimComplete = false
 			},
-			new
+			new EffectConfigs.EffectTemplate
 			{
 				id = EffectConfigs.DemolishSplashId,
 				animFiles = new string[] { "poi_demolish_impact_kanim" },
@@ -66,26 +66,36 @@ public class EffectConfigs : IMultiEntityConfig
 				destroyOnAnimComplete = false
 			}
 		};
-		for (int i = 0; i < anon.Length; i++)
+		if (DlcManager.IsContentSubscribed("DLC5_ID"))
 		{
-			var anon2 = anon[i];
-			GameObject gameObject = EntityTemplates.CreateEntity(anon2.id, anon2.id, false);
+			list2.Add(new EffectConfigs.EffectTemplate
+			{
+				id = EffectConfigs.SquidAttackId,
+				animFiles = new string[] { "squid_ink_fx_kanim" },
+				initialAnim = "loop",
+				initialMode = KAnim.PlayMode.Once,
+				destroyOnAnimComplete = true
+			});
+		}
+		foreach (EffectConfigs.EffectTemplate effectTemplate in list2)
+		{
+			GameObject gameObject = EntityTemplates.CreateEntity(effectTemplate.id, effectTemplate.id, false);
 			KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 			kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.Simple;
-			kbatchedAnimController.initialAnim = anon2.initialAnim;
-			kbatchedAnimController.initialMode = anon2.initialMode;
+			kbatchedAnimController.initialAnim = effectTemplate.initialAnim;
+			kbatchedAnimController.initialMode = effectTemplate.initialMode;
 			kbatchedAnimController.isMovable = true;
-			kbatchedAnimController.destroyOnAnimComplete = anon2.destroyOnAnimComplete;
-			if (anon2.id == EffectConfigs.EffectTemplateOverrideId)
+			kbatchedAnimController.destroyOnAnimComplete = effectTemplate.destroyOnAnimComplete;
+			if (effectTemplate.id == EffectConfigs.EffectTemplateOverrideId)
 			{
 				SymbolOverrideControllerUtil.AddToPrefab(gameObject);
 			}
-			if (anon2.animFiles.Length != 0)
+			if (effectTemplate.animFiles.Length != 0)
 			{
-				KAnimFile[] array = new KAnimFile[anon2.animFiles.Length];
-				for (int j = 0; j < array.Length; j++)
+				KAnimFile[] array = new KAnimFile[effectTemplate.animFiles.Length];
+				for (int i = 0; i < array.Length; i++)
 				{
-					array[j] = Assets.GetAnim(anon2.animFiles[j]);
+					array[i] = Assets.GetAnim(effectTemplate.animFiles[i]);
 				}
 				kbatchedAnimController.AnimFiles = array;
 			}
@@ -116,4 +126,19 @@ public class EffectConfigs : IMultiEntityConfig
 	public static string BuildSplashId = "BuildSplashFx";
 
 	public static string DemolishSplashId = "DemolishSplashFx";
+
+	public static string SquidAttackId = "SquidAttackFx";
+
+	public struct EffectTemplate
+	{
+		public string id;
+
+		public string[] animFiles;
+
+		public string initialAnim;
+
+		public KAnim.PlayMode initialMode;
+
+		public bool destroyOnAnimComplete;
+	}
 }

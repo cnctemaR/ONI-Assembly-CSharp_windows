@@ -10,6 +10,8 @@ public class LightingSettings : ScriptableObject
 
 	public Color32 LightColour = Color.white;
 
+	public Texture2D GenericNormalNoise;
+
 	[Header("Digging")]
 	public float DigMapScale;
 

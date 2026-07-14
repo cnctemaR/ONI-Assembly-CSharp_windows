@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using UnityEngine;
 
 public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance>
@@ -11,13 +12,17 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 		{
 			smi.RecoverBleedOutStamina(dt, smi);
 		}, UpdateRate.SIM_200ms, false).EventTransition(GameHashes.BecameIncapacitated, this.incapacitated, null);
-		this.incapacitated.EventTransition(GameHashes.IncapacitationRecovery, this.healthy, null).ToggleTag(GameTags.Incapacitated).ToggleRecurringChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), null)
+		this.incapacitated.EventTransition(GameHashes.IncapacitationRecovery, this.recovered, null).ToggleTag(GameTags.Incapacitated).ToggleRecurringChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), null)
 			.ParamTransition<float>(this.bleedOutStamina, this.die, GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.IsLTEZero)
 			.ToggleUrge(Db.Get().Urges.BeIncapacitated)
 			.Update(delegate(IncapacitationMonitor.Instance smi, float dt)
 			{
 				smi.Bleed(dt, smi);
 			}, UpdateRate.SIM_200ms, false);
+		this.recovered.Enter(delegate(IncapacitationMonitor.Instance smi)
+		{
+			smi.ApplyRecoverEffect();
+		}).GoTo(this.healthy);
 		this.die.Enter(delegate(IncapacitationMonitor.Instance smi)
 		{
 			smi.master.gameObject.GetSMI<DeathMonitor.Instance>().Kill(smi.GetCauseOfIncapacitation());
@@ -26,7 +31,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 
 	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State healthy;
 
-	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State start_recovery;
+	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State recovered;
 
 	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State incapacitated;
 
@@ -79,6 +84,11 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 				return Db.Get().Deaths.Slain;
 			}
 			return Db.Get().Deaths.Generic;
+		}
+
+		public void ApplyRecoverEffect()
+		{
+			base.smi.Get<Effects>().Add("NearDeathExperience", true);
 		}
 	}
 }

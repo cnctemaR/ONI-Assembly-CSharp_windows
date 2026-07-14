@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using UnityEngine;
 
 [AddComponentMenu("KMonoBehaviour/Workable/MessStation")]
@@ -44,18 +43,25 @@ public class MessStation : Workable, IDiningSeat
 	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		if (go.GetComponent<Storage>().Has(TableSaltConfig.ID.ToTag()))
+		Storage component = go.GetComponent<Storage>();
+		if (component != null)
 		{
-			list.Add(MessStation.TABLE_SALT_DESCRIPTOR);
+			foreach (Garnish garnish in Garnish.All)
+			{
+				if (component.Has(garnish.itemTag))
+				{
+					list.Add(garnish.descriptor);
+				}
+			}
 		}
 		return list;
 	}
 
-	public bool HasSalt
+	public bool HasGarnish
 	{
 		get
 		{
-			return this.smi.HasSalt;
+			return this.smi.HasGarnish;
 		}
 	}
 
@@ -87,8 +93,6 @@ public class MessStation : Workable, IDiningSeat
 
 	public KPrefabID Diner { get; set; }
 
-	public static readonly Descriptor TABLE_SALT_DESCRIPTOR = new Descriptor(string.Format(UI.BUILDINGEFFECTS.MESS_TABLE_SALT, TableSaltTuning.MORALE_MODIFIER), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.MESS_TABLE_SALT, TableSaltTuning.MORALE_MODIFIER), Descriptor.DescriptorType.Effect, false);
-
 	[MyCmpGet]
 	private Ownable ownable;
 
@@ -103,9 +107,9 @@ public class MessStation : Workable, IDiningSeat
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.salt.none;
-			this.salt.none.Transition(this.salt.salty, (MessStation.MessStationSM.Instance smi) => smi.HasSalt, UpdateRate.SIM_200ms).PlayAnim("off");
-			this.salt.salty.Transition(this.salt.none, (MessStation.MessStationSM.Instance smi) => !smi.HasSalt, UpdateRate.SIM_200ms).PlayAnim("salt").EventTransition(GameHashes.EatStart, this.eating, null);
-			this.eating.Transition(this.salt.salty, (MessStation.MessStationSM.Instance smi) => smi.HasSalt && !smi.IsEating(), UpdateRate.SIM_200ms).Transition(this.salt.none, (MessStation.MessStationSM.Instance smi) => !smi.HasSalt && !smi.IsEating(), UpdateRate.SIM_200ms).PlayAnim("off");
+			this.salt.none.Transition(this.salt.salty, (MessStation.MessStationSM.Instance smi) => smi.HasGarnish, UpdateRate.SIM_200ms).PlayAnim("off");
+			this.salt.salty.Transition(this.salt.none, (MessStation.MessStationSM.Instance smi) => !smi.HasGarnish, UpdateRate.SIM_200ms).PlayAnim("salt").EventTransition(GameHashes.EatStart, this.eating, null);
+			this.eating.Transition(this.salt.salty, (MessStation.MessStationSM.Instance smi) => smi.HasGarnish && !smi.IsEating(), UpdateRate.SIM_200ms).Transition(this.salt.none, (MessStation.MessStationSM.Instance smi) => !smi.HasGarnish && !smi.IsEating(), UpdateRate.SIM_200ms).PlayAnim("off");
 		}
 
 		public MessStation.MessStationSM.SaltState salt;
@@ -124,16 +128,38 @@ public class MessStation : Workable, IDiningSeat
 			public Instance(MessStation master)
 				: base(master)
 			{
-				this.saltStorage = master.GetComponent<Storage>();
+				this.garnishStorage = master.GetComponent<Storage>();
 				this.reservable = master.GetComponent<Reservable>();
+				this.symbolOverrideController = master.GetComponent<SymbolOverrideController>();
+				this.garnishStorage.Subscribe(-1697596308, delegate(object _)
+				{
+					this.UpdateGarnishOverride();
+				});
+				this.UpdateGarnishOverride();
 			}
 
-			public bool HasSalt
+			public bool HasGarnish
 			{
 				get
 				{
-					return this.saltStorage.Has(TableSaltConfig.ID.ToTag());
+					return Garnish.HasAny(this.garnishStorage);
 				}
+			}
+
+			public void UpdateGarnishOverride()
+			{
+				if (this.symbolOverrideController == null)
+				{
+					return;
+				}
+				Garnish active = Garnish.GetActive(this.garnishStorage);
+				KAnim.Build.Symbol symbol = ((active != null) ? active.GetOverrideSymbol() : null);
+				if (symbol != null)
+				{
+					this.symbolOverrideController.AddSymbolOverride(MessStation.MessStationSM.Instance.SALT_SYMBOL, symbol, 0);
+					return;
+				}
+				this.symbolOverrideController.RemoveSymbolOverride(MessStation.MessStationSM.Instance.SALT_SYMBOL, 0);
 			}
 
 			public bool IsEating()
@@ -163,9 +189,13 @@ public class MessStation : Workable, IDiningSeat
 				return choreDriver.GetCurrentChore().choreType.urge == Db.Get().Urges.Eat;
 			}
 
-			private Storage saltStorage;
+			private Storage garnishStorage;
 
 			private Reservable reservable;
+
+			private SymbolOverrideController symbolOverrideController;
+
+			private static readonly HashedString SALT_SYMBOL = "saltshaker";
 		}
 	}
 }

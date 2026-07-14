@@ -21,6 +21,8 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 			return 20000f;
 		case Wire.WattageRating.Max50000:
 			return 50000f;
+		case Wire.WattageRating.Max4000:
+			return 4000f;
 		default:
 			return 0f;
 		}
@@ -279,6 +281,7 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		Max2000,
 		Max20000,
 		Max50000,
+		Max4000,
 		NumRatings
 	}
 }

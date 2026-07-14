@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ElementData;
 using Klei;
 using ProcGenGame;
 using STRINGS;
@@ -24,28 +25,28 @@ public class ElementLoader
 		return num;
 	}
 
-	public static List<ElementLoader.ElementEntry> CollectElementsFromYAML()
+	public static List<ElementEntry> CollectElementsFromYAML()
 	{
-		List<ElementLoader.ElementEntry> list = new List<ElementLoader.ElementEntry>();
+		List<ElementEntry> list = new List<ElementEntry>();
 		ListPool<FileHandle, ElementLoader>.PooledList pooledList = ListPool<FileHandle, ElementLoader>.Allocate();
 		FileSystem.GetFiles(FileSystem.Normalize(ElementLoader.path), "*.yaml", pooledList);
 		ListPool<YamlIO.Error, ElementLoader>.PooledList errors = ListPool<YamlIO.Error, ElementLoader>.Allocate();
-		YamlIO.ErrorHandler <>9__0;
-		foreach (FileHandle fileHandle in pooledList)
+		using (List<FileHandle>.Enumerator enumerator = pooledList.GetEnumerator())
 		{
-			if (!Path.GetFileName(fileHandle.full_path).StartsWith("."))
+			while (enumerator.MoveNext())
 			{
-				string full_path = fileHandle.full_path;
-				YamlIO.ErrorHandler errorHandler;
-				if ((errorHandler = <>9__0) == null)
+				FileHandle file = enumerator.Current;
+				ElementEntryCollection elementEntryCollection;
+				if (!Path.GetFileName(file.full_path).StartsWith(".") && KYaml.LoadFile<ElementEntryCollection>(file, out elementEntryCollection, delegate(string path, Exception exception)
 				{
-					errorHandler = (<>9__0 = delegate(YamlIO.Error error, bool force_log_as_warning)
+					errors.Add(new YamlIO.Error
 					{
-						errors.Add(error);
+						file = file,
+						message = exception.Message,
+						inner_exception = exception.InnerException,
+						severity = YamlIO.Error.Severity.Fatal
 					});
-				}
-				ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(full_path, errorHandler, null);
-				if (elementEntryCollection != null)
+				}))
 				{
 					list.AddRange(elementEntryCollection.elements);
 				}
@@ -65,7 +66,7 @@ public class ElementLoader
 		ElementLoader.elements = new List<Element>();
 		ElementLoader.elementTable = new Dictionary<int, Element>();
 		ElementLoader.elementTagTable = new Dictionary<Tag, Element>();
-		foreach (ElementLoader.ElementEntry elementEntry in ElementLoader.CollectElementsFromYAML())
+		foreach (ElementEntry elementEntry in ElementLoader.CollectElementsFromYAML())
 		{
 			int num = Hash.SDBMLower(elementEntry.elementId);
 			if (!ElementLoader.elementTable.ContainsKey(num) && substanceTablesByDlc.ContainsKey(elementEntry.dlcId))
@@ -90,7 +91,7 @@ public class ElementLoader
 		WorldGen.SetupDefaultElements();
 	}
 
-	private static void CopyEntryToElement(ElementLoader.ElementEntry entry, Element elem)
+	private static void CopyEntryToElement(ElementEntry entry, Element elem)
 	{
 		Hash.SDBMLower(entry.elementId);
 		elem.tag = TagManager.Create(entry.elementId.ToString());
@@ -111,9 +112,9 @@ public class ElementLoader
 		elem.gasSurfaceAreaMultiplier = entry.gasSurfaceAreaMultiplier;
 		elem.state = entry.state;
 		elem.hardness = entry.hardness;
-		elem.lowTemp = entry.lowTemp;
+		elem.lowTemp = ((entry.lowTemp != null) ? entry.lowTemp.Value : 0f);
 		elem.lowTempTransitionTarget = (SimHashes)Hash.SDBMLower(entry.lowTempTransitionTarget);
-		elem.highTemp = entry.highTemp;
+		elem.highTemp = ((entry.highTemp != null) ? entry.highTemp.Value : 10000f);
 		elem.highTempTransitionTarget = (SimHashes)Hash.SDBMLower(entry.highTempTransitionTarget);
 		elem.highTempTransitionOreID = (SimHashes)Hash.SDBMLower(entry.highTempTransitionOreId);
 		elem.highTempTransitionOreMassConversion = entry.highTempTransitionOreMassConversion;
@@ -369,33 +370,17 @@ public class ElementLoader
 					{
 						element.state |= Element.State.Unbreakable;
 					}
-					if (element.IsSolid)
+					if (element.IsSolid || element.IsLiquid || element.IsGas)
 					{
 						Element element2 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
 						if (element2 != null)
 						{
 							element.highTempTransition = element2;
 						}
-					}
-					else if (element.IsLiquid)
-					{
-						Element element3 = ElementLoader.FindElementByHash(element.highTempTransitionTarget);
+						Element element3 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
 						if (element3 != null)
 						{
-							element.highTempTransition = element3;
-						}
-						Element element4 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
-						if (element4 != null)
-						{
-							element.lowTempTransition = element4;
-						}
-					}
-					else if (element.IsGas)
-					{
-						Element element5 = ElementLoader.FindElementByHash(element.lowTempTransitionTarget);
-						if (element5 != null)
-						{
-							element.lowTempTransition = element5;
+							element.lowTempTransition = element3;
 						}
 					}
 				}
@@ -466,131 +451,4 @@ public class ElementLoader
 	private static string path = Application.streamingAssetsPath + "/elements/";
 
 	private static readonly Color noColour = new Color(0f, 0f, 0f, 0f);
-
-	public class ElementEntryCollection
-	{
-		public ElementLoader.ElementEntry[] elements { get; set; }
-	}
-
-	public class ElementComposition
-	{
-		public string elementID { get; set; }
-
-		public float percentage { get; set; }
-	}
-
-	public class ElementEntry
-	{
-		public ElementEntry()
-		{
-			this.lowTemp = 0f;
-			this.highTemp = 10000f;
-		}
-
-		public string elementId { get; set; }
-
-		public float specificHeatCapacity { get; set; }
-
-		public float thermalConductivity { get; set; }
-
-		public float solidSurfaceAreaMultiplier { get; set; }
-
-		public float liquidSurfaceAreaMultiplier { get; set; }
-
-		public float gasSurfaceAreaMultiplier { get; set; }
-
-		public float defaultMass { get; set; }
-
-		public float defaultTemperature { get; set; }
-
-		public float defaultPressure { get; set; }
-
-		public float molarMass { get; set; }
-
-		public float lightAbsorptionFactor { get; set; }
-
-		public float radiationAbsorptionFactor { get; set; }
-
-		public float radiationPer1000Mass { get; set; }
-
-		public string lowTempTransitionTarget { get; set; }
-
-		public float lowTemp { get; set; }
-
-		public string highTempTransitionTarget { get; set; }
-
-		public float highTemp { get; set; }
-
-		public string lowTempTransitionOreId { get; set; }
-
-		public float lowTempTransitionOreMassConversion { get; set; }
-
-		public string highTempTransitionOreId { get; set; }
-
-		public float highTempTransitionOreMassConversion { get; set; }
-
-		public string sublimateId { get; set; }
-
-		public string sublimateFx { get; set; }
-
-		public float sublimateRate { get; set; }
-
-		public float sublimateEfficiency { get; set; }
-
-		public float sublimateProbability { get; set; }
-
-		public float offGasPercentage { get; set; }
-
-		public string materialCategory { get; set; }
-
-		public string[] tags { get; set; }
-
-		public bool isDisabled { get; set; }
-
-		public float strength { get; set; }
-
-		public float maxMass { get; set; }
-
-		public byte hardness { get; set; }
-
-		public float toxicity { get; set; }
-
-		public float liquidCompression { get; set; }
-
-		public float speed { get; set; }
-
-		public float minHorizontalFlow { get; set; }
-
-		public float minVerticalFlow { get; set; }
-
-		public string convertId { get; set; }
-
-		public float flow { get; set; }
-
-		public int buildMenuSort { get; set; }
-
-		public Element.State state { get; set; }
-
-		public string localizationID { get; set; }
-
-		public string dlcId { get; set; }
-
-		public string refinedMetalTarget { get; set; }
-
-		public ElementLoader.ElementComposition[] composition { get; set; }
-
-		public string description
-		{
-			get
-			{
-				return this.description_backing ?? ("STRINGS.ELEMENTS." + this.elementId.ToString().ToUpper() + ".DESC");
-			}
-			set
-			{
-				this.description_backing = value;
-			}
-		}
-
-		private string description_backing;
-	}
 }

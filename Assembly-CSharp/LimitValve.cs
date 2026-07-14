@@ -147,10 +147,8 @@ public class LimitValve : KMonoBehaviour, ISaveLoadable
 			Element element2 = ElementLoader.FindElementByHash(element);
 			if (element2 != null)
 			{
-				Color color = element2.substance.colour;
-				color.a = 1f;
-				this.controller.SetSymbolTint(new KAnimHashedString("gradient"), color);
-				this.fg_Controller.SetSymbolTint(new KAnimHashedString("water_color_fg"), color);
+				GameUtil.TintLiquidSymbolOnBuilding("gradient", this.controller, element2);
+				GameUtil.TintLiquidSymbolOnBuilding("water_color_fg", this.fg_Controller, element2);
 			}
 		}
 		this.lastElemenet = element;

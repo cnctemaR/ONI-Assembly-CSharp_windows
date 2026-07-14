@@ -9,7 +9,7 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.normal;
-		this.root.Update(new Action<GasLiquidExposureMonitor.Instance, float>(this.UpdateExposure), UpdateRate.SIM_33ms, false);
+		this.root.Update(new Action<GasLiquidExposureMonitor.Instance, float>(this.UpdateExposure), UpdateRate.SIM_33ms, false).EventHandler(GameHashes.AssignedRoleChanged, new StateMachine<GasLiquidExposureMonitor, GasLiquidExposureMonitor.Instance, IStateMachineTarget, GasLiquidExposureMonitor.Def>.State.Callback(GasLiquidExposureMonitor.ModifySaltWaterExposureRate));
 		this.normal.ParamTransition<bool>(this.isIrritated, this.irritated, (GasLiquidExposureMonitor.Instance smi, bool p) => this.isIrritated.Get(smi));
 		this.irritated.ParamTransition<bool>(this.isIrritated, this.normal, (GasLiquidExposureMonitor.Instance smi, bool p) => !this.isIrritated.Get(smi)).ToggleStatusItem(Db.Get().DuplicantStatusItems.GasLiquidIrritation, (GasLiquidExposureMonitor.Instance smi) => smi).DefaultState(this.irritated.irritated);
 		this.irritated.irritated.Transition(this.irritated.rubbingEyes, new StateMachine<GasLiquidExposureMonitor, GasLiquidExposureMonitor.Instance, IStateMachineTarget, GasLiquidExposureMonitor.Def>.Transition.ConditionCallback(GasLiquidExposureMonitor.CanReact), UpdateRate.SIM_200ms);
@@ -22,6 +22,16 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 	private static bool CanReact(GasLiquidExposureMonitor.Instance smi)
 	{
 		return GameClock.Instance.GetTime() > smi.lastReactTime + 60f;
+	}
+
+	public static void ModifySaltWaterExposureRate(GasLiquidExposureMonitor.Instance smi)
+	{
+		if (smi.resume.HasPerk(Db.Get().SkillPerks.ReduceSaltWaterSwimmingEyeIrritation))
+		{
+			smi.ApplyCustomExposureRate(SimHashes.SaltWater, -1f);
+			return;
+		}
+		smi.RemoveCustomExposureRate(SimHashes.SaltWater);
 	}
 
 	private static void InitializeCustomRates()
@@ -42,6 +52,7 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.ContaminatedOxygen] = num3;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.DirtyWater] = num3;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.ViscoGel] = num3;
+		GasLiquidExposureMonitor.customExposureRates[SimHashes.Mucus] = num3;
 		float num4 = 0.5f;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.Hydrogen] = num4;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.SaltWater] = num4;
@@ -59,16 +70,17 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.Petroleum] = num6;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.Mercury] = num6;
 		GasLiquidExposureMonitor.customExposureRates[SimHashes.MercuryGas] = num6;
+		GasLiquidExposureMonitor.customExposureRates[SimHashes.Ink] = num6;
 	}
 
 	public float GetCurrentExposure(GasLiquidExposureMonitor.Instance smi)
 	{
-		float num;
-		if (GasLiquidExposureMonitor.customExposureRates.TryGetValue(smi.CurrentlyExposedToElement().id, out num))
+		float num = 0f;
+		if (!smi.exposureRateOverride.TryGetValue(smi.CurrentlyExposedToElement().id, out num))
 		{
-			return num;
+			GasLiquidExposureMonitor.customExposureRates.TryGetValue(smi.CurrentlyExposedToElement().id, out num);
 		}
-		return 0f;
+		return num;
 	}
 
 	private void UpdateExposure(GasLiquidExposureMonitor.Instance smi, float dt)
@@ -82,7 +94,7 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 		{
 			Element element = Grid.Element[num2];
 			float num3;
-			if (!GasLiquidExposureMonitor.customExposureRates.TryGetValue(element.id, out num3))
+			if (!smi.exposureRateOverride.TryGetValue(element.id, out num3) && !GasLiquidExposureMonitor.customExposureRates.TryGetValue(element.id, out num3))
 			{
 				if (Grid.Temperature[num2] >= -13657.5f && Grid.Temperature[num2] <= 27315f)
 				{
@@ -98,7 +110,7 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 				smi.isImmuneToIrritability = true;
 				num = GasLiquidExposureMonitor.customExposureRates[SimHashes.Oxygen];
 			}
-			if ((smi.master.gameObject.HasTag(GameTags.HasSuitTank) && smi.gameObject.GetComponent<SuitEquipper>().IsWearingAirtightSuit()) || smi.master.gameObject.HasTag(GameTags.InTransitTube))
+			if ((smi.prefabID.HasTag(GameTags.HasSuitTank) && smi.suitEquipper.IsWearingAirtightSuit()) || smi.prefabID.HasTag(GameTags.InTransitTube))
 			{
 				smi.isInAirtightEnvironment = true;
 				num = GasLiquidExposureMonitor.customExposureRates[SimHashes.Oxygen];
@@ -238,6 +250,10 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 			: base(master, def)
 		{
 			this.effects = master.GetComponent<Effects>();
+			this.prefabID = master.GetComponent<KPrefabID>();
+			this.suitEquipper = master.GetComponent<SuitEquipper>();
+			this.resume = master.GetComponent<MinionResume>();
+			GasLiquidExposureMonitor.ModifySaltWaterExposureRate(this);
 		}
 
 		public Reactable GetReactable()
@@ -278,6 +294,16 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 			this.exposure = 0f;
 		}
 
+		public void ApplyCustomExposureRate(SimHashes element_hash, float rate)
+		{
+			this.exposureRateOverride[element_hash] = rate;
+		}
+
+		public void RemoveCustomExposureRate(SimHashes element)
+		{
+			this.exposureRateOverride.Remove(element);
+		}
+
 		[Serialize]
 		public float exposure;
 
@@ -287,10 +313,18 @@ public class GasLiquidExposureMonitor : GameStateMachine<GasLiquidExposureMonito
 		[Serialize]
 		public float exposureRate;
 
+		public Dictionary<SimHashes, float> exposureRateOverride = new Dictionary<SimHashes, float>();
+
 		public Effects effects;
 
 		public bool isInAirtightEnvironment;
 
 		public bool isImmuneToIrritability;
+
+		public KPrefabID prefabID;
+
+		public SuitEquipper suitEquipper;
+
+		public MinionResume resume;
 	}
 }

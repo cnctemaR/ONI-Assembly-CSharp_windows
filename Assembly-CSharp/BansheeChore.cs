@@ -65,7 +65,7 @@ public class BansheeChore : Chore<BansheeChore.StatesInstance>
 			Navigator component = base.smi.master.GetComponent<Navigator>();
 			MinionPathFinderAbilities minionPathFinderAbilities = (MinionPathFinderAbilities)component.GetCurrentAbilities();
 			minionPathFinderAbilities.SetIdleNavMaskEnabled(true);
-			IdleCellQuery idleCellQuery = PathFinderQueries.idleCellQuery.Reset(base.GetComponent<MinionBrain>(), global::UnityEngine.Random.Range(30, 90));
+			IdleCellQuery idleCellQuery = PathFinderQueries.idleCellQuery.Reset(base.GetComponent<MinionBrain>(), global::UnityEngine.Random.Range(30, 90), false);
 			component.RunQuery(idleCellQuery);
 			minionPathFinderAbilities.SetIdleNavMaskEnabled(false);
 			return idleCellQuery.GetResultCell();

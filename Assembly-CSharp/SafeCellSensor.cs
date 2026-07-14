@@ -76,10 +76,10 @@ public class SafeCellSensor : Sensor
 	{
 		MinionPathFinderAbilities minionPathFinderAbilities = (MinionPathFinderAbilities)this.navigator.GetCurrentAbilities();
 		minionPathFinderAbilities.SetIdleNavMaskEnabled(true);
-		SafeCellQuery safeCellQuery = PathFinderQueries.safeCellQuery.Reset(this.brain, avoid_light, this.GetIgnoredFlags());
-		this.navigator.RunQuery(safeCellQuery);
+		PathFinderQuery pathFinderQuery = PathFinderQueries.safeCellQuery.Reset(this.brain, avoid_light, this.GetIgnoredFlags());
+		this.navigator.RunQuery(pathFinderQuery);
 		minionPathFinderAbilities.SetIdleNavMaskEnabled(false);
-		this.cell = safeCellQuery.GetResultCell();
+		this.cell = pathFinderQuery.GetResultCell();
 		return this.cell;
 	}
 

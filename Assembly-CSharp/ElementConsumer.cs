@@ -343,6 +343,8 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IGameObjectEffectDes
 	[SerializeField]
 	public ElementConsumer.Configuration configuration;
 
+	public string overrideStatusItemString;
+
 	[Serialize]
 	[NonSerialized]
 	public float consumedMass;

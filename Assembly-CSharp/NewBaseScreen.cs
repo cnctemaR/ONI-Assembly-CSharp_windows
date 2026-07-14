@@ -140,9 +140,10 @@ public class NewBaseScreen : KScreen
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num6, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
 			minionStartingStats.Apply(gameObject);
+			bool flag = minionStartingStats.personality.model == GameTags.Minions.Models.Bionic;
 			if (component != null)
 			{
-				component.AddNewBaseMinion(gameObject, minionStartingStats.personality.model == GameTags.Minions.Models.Bionic);
+				component.AddNewBaseMinion(gameObject, flag);
 			}
 		}
 		component.ScheduleNewBaseEvents();

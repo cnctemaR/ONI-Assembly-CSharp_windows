@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AcousticDisturbance
@@ -11,12 +10,13 @@ public class AcousticDisturbance
 		Vector2 vector = gameObject.transform.GetPosition();
 		int num = Grid.PosToCell(vector);
 		int num2 = EmissionRadius * EmissionRadius;
-		AcousticDisturbance.cellsInRange = GameUtil.CollectCellsBreadthFirst(num, (int cell) => !Grid.Solid[cell], EmissionRadius);
+		AcousticDisturbance.cellsInRange.Clear();
+		FloodFill.DepthTraverse<FloodFill.PredicateCondition, FloodFill.HashSetVisitTracker, FloodFill.MaxDepth, AcousticDisturbance.CellCollector>(num, new FloodFill.PredicateCondition(AcousticDisturbance.notSolid), FloodFill.HashSetVisitTracker.Default(), new FloodFill.MaxDepth(EmissionRadius), default(AcousticDisturbance.CellCollector));
 		AcousticDisturbance.DrawVisualEffect(num, AcousticDisturbance.cellsInRange);
 		for (int i = 0; i < liveMinionIdentities.Count; i++)
 		{
 			MinionIdentity minionIdentity = liveMinionIdentities[i];
-			if (minionIdentity.gameObject != gameObject.gameObject)
+			if (!(minionIdentity.gameObject == gameObject.gameObject))
 			{
 				Vector2 vector2 = minionIdentity.transform.GetPosition();
 				if (Vector2.SqrMagnitude(vector - vector2) <= (float)num2)
@@ -34,16 +34,16 @@ public class AcousticDisturbance
 				}
 			}
 		}
-		AcousticDisturbance.cellsInRange.Clear();
 	}
 
-	private static void DrawVisualEffect(int center_cell, HashSet<int> cells)
+	private static void DrawVisualEffect(int center_cell, HybridListHashSet<int> cells)
 	{
 		SoundEvent.PlayOneShot(GlobalResources.Instance().AcousticDisturbanceSound, Grid.CellToPos(center_cell), 1f);
-		foreach (int num in cells)
+		for (int num = 0; num != cells.Count; num++)
 		{
-			int gridDistance = AcousticDisturbance.GetGridDistance(num, center_cell);
-			GameScheduler.Instance.Schedule("radialgrid_pre", AcousticDisturbance.distanceDelay * (float)gridDistance, new Action<object>(AcousticDisturbance.SpawnEffect), num, null);
+			int num2 = cells[num];
+			int gridDistance = AcousticDisturbance.GetGridDistance(num2, center_cell);
+			GameScheduler.Instance.Schedule("radialgrid_pre", AcousticDisturbance.distanceDelay * (float)gridDistance, new Action<object>(AcousticDisturbance.SpawnEffect), num2, null);
 		}
 	}
 
@@ -80,5 +80,34 @@ public class AcousticDisturbance
 
 	private static float duration = 3f;
 
-	private static HashSet<int> cellsInRange = new HashSet<int>();
+	private static readonly Func<int, FloodFill.BoundaryCheckResult> notSolid = delegate(int cell)
+	{
+		if (!Grid.Solid[cell])
+		{
+			return FloodFill.BoundaryCheckResult.Continue;
+		}
+		return FloodFill.BoundaryCheckResult.Halt;
+	};
+
+	private static readonly HybridListHashSet<int> cellsInRange = new HybridListHashSet<int>();
+
+	private readonly struct CellCollector : FloodFill.IVisitor
+	{
+		public bool EarlyOut
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public void VisitCell(int cell)
+		{
+			AcousticDisturbance.cellsInRange.Add(cell);
+		}
+
+		public void VisitBoundary(int cell)
+		{
+		}
+	}
 }

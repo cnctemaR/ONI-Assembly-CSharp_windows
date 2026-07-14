@@ -19,7 +19,7 @@ public class ChemicalRefineryConfig : IBuildingConfig
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0],
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
 		};
-		string[] array2 = new string[] { "RefinedMetal", "Glass" };
+		string[] array2 = new string[] { "RefinedMetal", "Glasses" };
 		float num5 = 2400f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER1;

@@ -15,11 +15,14 @@ public class CancelTool : FilteredDragTool
 		CancelTool.Instance = this;
 	}
 
-	protected override void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
+	protected override void GetDefaultFilters(out ToolParameterMenu.ToggleData[] filters)
 	{
-		base.GetDefaultFilters(filters);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.CLEANANDCLEAR, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.Off);
+		base.GetDefaultFilters(out filters);
+		filters = new List<ToolParameterMenu.ToggleData>(filters)
+		{
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.CLEANANDCLEAR, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.Off, false)
+		}.ToArray();
 	}
 
 	protected override string GetConfirmSound()

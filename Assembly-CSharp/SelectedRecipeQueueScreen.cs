@@ -333,7 +333,7 @@ public class SelectedRecipeQueueScreen : KScreen
 
 	private void RefreshQueueCountDisplay()
 	{
-		this.ResearchRequiredContainer.SetActive(!this.selectedRecipes[0].IsRequiredTechUnlocked());
+		this.ResearchRequiredContainer.SetActive(!this.selectedRecipes[0].IsRequiredTechOrPOIUnlocked());
 		if (this.selectedRecipe == null)
 		{
 			return;

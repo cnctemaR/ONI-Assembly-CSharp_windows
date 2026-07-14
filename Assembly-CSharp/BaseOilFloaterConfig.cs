@@ -10,7 +10,7 @@ public static class BaseOilFloaterConfig
 	{
 		float num = 50f;
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		KAnimFile anim = Assets.GetAnim(anim_file);
+		KAnimFile anim = Assets.GetAnim(is_baby ? anim_file : "oilfloater_build_kanim");
 		string text = "idle_loop";
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Creatures;
 		int num2 = 1;
@@ -39,6 +39,7 @@ public static class BaseOilFloaterConfig
 		{
 			text2 = "OilFloaterBaby_intake_air";
 		}
+		KAnimFile anim2 = Assets.GetAnim("oilfloater_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -60,7 +61,7 @@ public static class BaseOilFloaterConfig
 			.Add(new SameSpotPoopStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("oilfloater_emotes_kanim")), true, -1)
+			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		EntityTemplates.AddCreatureBrain(gameObject, builder, GameTags.Creatures.Species.OilFloaterSpecies, symbolOverridePrefix);
@@ -85,4 +86,6 @@ public static class BaseOilFloaterConfig
 		prefab.AddOrGetDef<GasAndLiquidConsumerMonitor.Def>().diet = diet;
 		return prefab;
 	}
+
+	public const string EMOTION_FILE_NAME = "oilfloater_emotes_kanim";
 }

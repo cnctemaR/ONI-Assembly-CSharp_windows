@@ -160,29 +160,29 @@ public class LockerMenuScreen : KModalScreen
 
 	private void CreateDLCLogos()
 	{
-		using (Dictionary<string, DlcManager.DlcInfo>.Enumerator enumerator = DlcManager.DLC_PACKS.GetEnumerator())
+		using (Dictionary<string, DlcManager.DlcInfo>.ValueCollection.Enumerator enumerator = DlcManager.DLC_PACKS.Values.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{
-				KeyValuePair<string, DlcManager.DlcInfo> dlc = enumerator.Current;
-				if (dlc.Value.isCosmetic)
+				DlcManager.DlcInfo dlcInfo = enumerator.Current;
+				if (dlcInfo.isCosmetic)
 				{
 					GameObject gameObject = global::Util.KInstantiateUI(this.DLCLogoPrefab, this.DLCLogoContainer, true);
 					Image component = gameObject.GetComponent<Image>();
-					component.sprite = Assets.GetSprite(DlcManager.GetDlcLargeLogo(dlc.Key));
-					component.material = (DlcManager.IsContentSubscribed(dlc.Key) ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
-					gameObject.GetComponent<MultiToggle>().states[0].sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(dlc.Key));
-					string text = DlcManager.GetDlcTitle(dlc.Key);
-					if (!DlcManager.IsContentSubscribed(dlc.Key))
+					component.sprite = Assets.GetSprite(DlcManager.GetDlcLargeLogo(dlcInfo.id));
+					component.material = (DlcManager.IsContentSubscribed(dlcInfo.id) ? GlobalResources.Instance().AnimUIMaterial : GlobalResources.Instance().AnimMaterialUIDesaturated);
+					gameObject.GetComponent<MultiToggle>().states[0].sprite = Assets.GetSprite(DlcManager.GetDlcSmallLogo(dlcInfo.id));
+					string text = DlcManager.GetDlcTitle(dlcInfo.id);
+					if (!DlcManager.IsContentSubscribed(dlcInfo.id))
 					{
-						text = string.Concat(new string[]
+						if (DlcManager.CanPurchase(dlcInfo.id))
 						{
-							text,
-							"\n\n",
-							UI.FRONTEND.MAINMENU.WISHLIST_AD,
-							"\n\n",
-							UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP
-						});
+							text = text + "\n\n" + UI.FRONTEND.MAINMENU.DLC.CONTENT_NOTOWNED_PURCHASE_TOOLTIP;
+						}
+						else if (DlcManager.CanWishlist(dlcInfo.id))
+						{
+							text = text + "\n\n" + UI.FRONTEND.MAINMENU.DLC.CONTENT_NOTOWNED_WISHLIST_TOOLTIP;
+						}
 					}
 					else
 					{
@@ -194,51 +194,22 @@ public class LockerMenuScreen : KModalScreen
 							"\n\n",
 							UI.FRONTEND.MAINMENU.DLC.COSMETIC_CONTENT_ACTIVE_TOOLTIP,
 							"\n\n",
-							UI.FRONTEND.MAINMENU.WISHLIST_AD_TOOLTIP
+							UI.FRONTEND.MAINMENU.DLC.CONTENT_NOTOWNED_WISHLIST_TOOLTIP
 						});
 					}
 					gameObject.GetComponent<ToolTip>().SetSimpleTooltip(text);
 					MultiToggle component2 = gameObject.GetComponent<MultiToggle>();
 					component2.onClick = (global::System.Action)Delegate.Combine(component2.onClick, new global::System.Action(delegate
 					{
-						App.OpenWebURL(this.GetCosmeticDLCStoreURL(dlc.Key));
+						if (!dlcInfo.storeUrl.IsNullOrWhiteSpace())
+						{
+							App.OpenWebURL(dlcInfo.storeUrl);
+						}
 					}));
 					gameObject.gameObject.SetActive(true);
 				}
 			}
 		}
-	}
-
-	private string GetCosmeticDLCStoreURL(string dlcId)
-	{
-		if (DistributionPlatform.Initialized || Application.isEditor)
-		{
-			if (DistributionPlatform.Inst.Name == "Steam")
-			{
-				if (dlcId == "COSMETIC1_ID")
-				{
-					return "https://store.steampowered.com/app/4157740/Oxygen_Not_Included_Neutronium_Cosmetics_Pack/";
-				}
-				return "";
-			}
-			else if (DistributionPlatform.Inst.Name == "Epic")
-			{
-				if (dlcId == "COSMETIC1_ID")
-				{
-					return "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-neutronium-cosmetics-pack-d9e8af";
-				}
-				return "";
-			}
-			else if (DistributionPlatform.Inst.Name == "Rail")
-			{
-				if (dlcId == "COSMETIC1_ID")
-				{
-					return "https://www.wegame.com.cn/store/2002628";
-				}
-				return "";
-			}
-		}
-		return "";
 	}
 
 	public static LockerMenuScreen Instance;

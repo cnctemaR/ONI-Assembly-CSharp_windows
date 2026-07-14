@@ -317,6 +317,7 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 				}
 			}
 		}
+		Game.Instance.Trigger(-1523247426, null);
 	}
 
 	private void ApplySkillPerksForSkill(string skillId)
@@ -597,11 +598,17 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 	public void ForceSetSkillPoints(int points)
 	{
 		this.totalExperienceGained = MinionResume.CalculatePreviousExperienceBar(points);
+		if (this.TotalSkillPointsGained != points)
+		{
+			float num = MinionResume.CalculatePreviousExperienceBar(points);
+			float num2 = MinionResume.CalculateNextExperienceBar(points);
+			this.totalExperienceGained = num + (num2 - num) * 0.01f;
+		}
 	}
 
 	public void ForceAddSkillPoint()
 	{
-		this.AddExperience(MinionResume.CalculateNextExperienceBar(this.TotalSkillPointsGained) - this.totalExperienceGained);
+		this.ForceSetSkillPoints(this.TotalSkillPointsGained + 1);
 	}
 
 	public static float CalculateNextExperienceBar(int current_skill_points)
@@ -854,11 +861,32 @@ public class MinionResume : IExperienceRecipient, ISaveLoadable, ISim200ms
 
 	public static bool AnyMinionHasPerk(string perk, int worldId = -1)
 	{
-		using (List<MinionResume>.Enumerator enumerator = ((worldId >= 0) ? Components.MinionResumes.GetWorldItems(worldId, true) : Components.MinionResumes.Items).Where<MinionResume>((MinionResume minion) => !minion.HasTag(GameTags.Dead)).ToList<MinionResume>().GetEnumerator())
+		foreach (MinionResume minionResume in ((worldId >= 0) ? Components.MinionResumes.GetWorldItems(worldId, true) : Components.MinionResumes.Items))
 		{
-			while (enumerator.MoveNext())
+			if (!minionResume.HasTag(GameTags.Dead) && minionResume.HasPerk(perk))
 			{
-				if (enumerator.Current.HasPerk(perk))
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool AnyMinionHasAllPerks(string[] perks, int worldId = -1)
+	{
+		foreach (MinionResume minionResume in ((worldId >= 0) ? Components.MinionResumes.GetWorldItems(worldId, true) : Components.MinionResumes.Items))
+		{
+			if (!minionResume.HasTag(GameTags.Dead))
+			{
+				bool flag = false;
+				foreach (string text in perks)
+				{
+					flag |= minionResume.HasPerk(text);
+					if (!flag)
+					{
+						break;
+					}
+				}
+				if (flag)
 				{
 					return true;
 				}

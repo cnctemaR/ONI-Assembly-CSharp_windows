@@ -79,11 +79,11 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IC
 	{
 		get
 		{
-			if (this.operational.IsActive)
+			if (!this.operational.IsActive)
 			{
-				return this.BaseWattageRating;
+				return 0f;
 			}
-			return 0f;
+			return this.BaseWattageRating;
 		}
 	}
 
@@ -91,7 +91,11 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IC
 	{
 		get
 		{
-			return this.building.Def.EnergyConsumptionWhenActive;
+			if (this._BaseWattageRating <= 0f)
+			{
+				return this.building.Def.EnergyConsumptionWhenActive;
+			}
+			return this._BaseWattageRating;
 		}
 	}
 

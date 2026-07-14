@@ -56,6 +56,7 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue).ParamTransition<bool>(this.isOnTube, this.idle.ontube, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
 				.ParamTransition<bool>(this.isOnSuitMarkerCell, this.idle.onsuitmarker, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
 				.ParamTransition<bool>(this.isHovering, this.idle.hovering, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
+				.ParamTransition<bool>(this.isSwimming, this.idle.swimming, GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.IsTrue)
 				.ToggleScheduleCallback("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 				{
 					smi.GoTo(this.idle.move);
@@ -78,13 +79,29 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 					smi.GoTo(this.idle.move);
 				}
 			}, UpdateRate.SIM_1000ms, false);
+			this.idle.swimming.Enter("swimming", delegate(IdleChore.StatesInstance smi)
+			{
+				string text = "treading_loop";
+				int num = Grid.CellBelow(smi.navigator.cachedCell);
+				if (!Grid.IsSubstantialLiquid(smi.navigator.cachedCell, 0.35f) && Grid.IsValidCell(num) && Grid.IsLiquid(num))
+				{
+					text = "shallow_treading_loop";
+				}
+				smi.animController.Play(text, KAnim.PlayMode.Loop, 1f, 0f);
+			}).Update("IdleMove", delegate(IdleChore.StatesInstance smi, float dt)
+			{
+				if (smi.HasIdleCell())
+				{
+					smi.GoTo(this.idle.move);
+				}
+			}, UpdateRate.SIM_1000ms, false);
 			this.idle.onsuitmarker.PlayAnim("idle_default", KAnim.PlayMode.Loop).Enter(delegate(IdleChore.StatesInstance smi)
 			{
-				int num = Grid.PosToCell(smi);
+				int num2 = Grid.PosToCell(smi);
 				Grid.SuitMarker.Flags flags;
 				PathFinder.PotentialPath.Flags flags2;
-				Grid.TryGetSuitMarkerFlags(num, out flags, out flags2);
-				IdleSuitMarkerCellQuery idleSuitMarkerCellQuery = new IdleSuitMarkerCellQuery((flags & Grid.SuitMarker.Flags.Rotated) > (Grid.SuitMarker.Flags)0, Grid.CellToXY(num).X);
+				Grid.TryGetSuitMarkerFlags(num2, out flags, out flags2);
+				IdleSuitMarkerCellQuery idleSuitMarkerCellQuery = new IdleSuitMarkerCellQuery((flags & Grid.SuitMarker.Flags.Rotated) > (Grid.SuitMarker.Flags)0, Grid.CellToXY(num2).X);
 				smi.navigator.RunQuery(idleSuitMarkerCellQuery);
 				smi.navigator.GoTo(idleSuitMarkerCellQuery.GetResultCell(), null);
 			}).EventTransition(GameHashes.DestinationReached, this.idle, null)
@@ -111,6 +128,7 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			smi.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, smi, false);
 			smi.sm.isOnTube.Set(currentNavType == NavType.Tube, smi, false);
 			smi.sm.isHovering.Set(currentNavType == NavType.Hover, smi, false);
+			smi.sm.isSwimming.Set(currentNavType == NavType.Swim, smi, false);
 			int num = Grid.PosToCell(smi);
 			smi.sm.isOnSuitMarkerCell.Set(Grid.IsValidCell(num) && Grid.HasSuitMarker[num], smi, false);
 		}
@@ -122,6 +140,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isOnSuitMarkerCell;
 
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isHovering;
+
+		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.BoolParameter isSwimming;
 
 		public StateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.TargetParameter idler;
 
@@ -138,6 +158,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State onsuitmarker;
 
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State hovering;
+
+			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State swimming;
 
 			public GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.State move;
 		}

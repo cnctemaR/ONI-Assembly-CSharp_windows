@@ -106,7 +106,7 @@ public class Uprootable : Workable, IDigActionEntity
 		return this.planterStorage != null;
 	}
 
-	public void Uproot()
+	public virtual void Uproot()
 	{
 		this.isMarkedForUproot = false;
 		this.chore = null;

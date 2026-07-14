@@ -33,10 +33,11 @@ public class GravitasCreatureManipulatorConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		PrimaryElement component = go.GetComponent<PrimaryElement>();
-		component.SetElement(SimHashes.Steel, true);
-		component.Temperature = 294.15f;
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		PrimaryElement component2 = go.GetComponent<PrimaryElement>();
+		component2.SetElement(SimHashes.Steel, true);
+		component2.Temperature = 294.15f;
 		BuildingTemplates.ExtendBuildingToGravitas(go);
 		go.AddComponent<Storage>();
 		Activatable activatable = go.AddComponent<Activatable>();
@@ -55,10 +56,23 @@ public class GravitasCreatureManipulatorConfig : IBuildingConfig
 		{
 			def2.solidOffsets[i] = new CellOffset(0, i);
 		}
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
+		component.prefabInitFn += delegate(GameObject game_object)
 		{
 			game_object.GetComponent<Activatable>().SetOffsets(OffsetGroups.LeftOrRight);
 		};
+		component.prefabSpawnFn += this.OnSpawn;
+	}
+
+	private void OnSpawn(GameObject instance)
+	{
+		foreach (KBatchedAnimController kbatchedAnimController in instance.GetComponentsInChildrenOnly<KBatchedAnimController>())
+		{
+			if (kbatchedAnimController.name.Contains("_fg"))
+			{
+				kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+				kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+			}
+		}
 	}
 
 	public static Option<string> GetBodyContentForSpeciesTag(Tag species)

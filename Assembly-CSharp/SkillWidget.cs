@@ -349,16 +349,50 @@ public class SkillWidget : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 		if (minionIdentity != null)
 		{
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
-			if (DebugHandler.InstantBuildMode && component.AvailableSkillpoints < 1)
+			if (DebugHandler.InstantBuildMode)
 			{
-				component.ForceAddSkillPoint();
+				if (!component.HasMasteredSkill(this.skillID))
+				{
+					Queue<string> queue = new Queue<string>();
+					List<string> list = new List<string>();
+					queue.Enqueue(this.skillID);
+					while (queue.Count > 0)
+					{
+						string text = queue.Dequeue();
+						if (!list.Contains(text))
+						{
+							list.Add(text);
+							foreach (string text2 in Db.Get().Skills.Get(text).priorSkills)
+							{
+								queue.Enqueue(text2);
+							}
+						}
+					}
+					for (int i = list.Count - 1; i >= 0; i--)
+					{
+						string text3 = list[i];
+						if (!component.HasMasteredSkill(text3))
+						{
+							if (component.AvailableSkillpoints < 1)
+							{
+								component.ForceAddSkillPoint();
+							}
+							component.MasterSkill(text3);
+						}
+					}
+					this.skillsScreen.RefreshAll();
+					return;
+				}
 			}
-			MinionResume.SkillMasteryConditions[] skillMasteryConditions = component.GetSkillMasteryConditions(this.skillID);
-			bool flag = component.CanMasterSkill(skillMasteryConditions);
-			if (component != null && !component.HasMasteredSkill(this.skillID) && flag)
+			else
 			{
-				component.MasterSkill(this.skillID);
-				this.skillsScreen.RefreshAll();
+				MinionResume.SkillMasteryConditions[] skillMasteryConditions = component.GetSkillMasteryConditions(this.skillID);
+				bool flag = component.CanMasterSkill(skillMasteryConditions);
+				if (component != null && !component.HasMasteredSkill(this.skillID) && flag)
+				{
+					component.MasterSkill(this.skillID);
+					this.skillsScreen.RefreshAll();
+				}
 			}
 		}
 	}

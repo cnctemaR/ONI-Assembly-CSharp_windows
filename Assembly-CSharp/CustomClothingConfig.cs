@@ -15,7 +15,11 @@ public class CustomClothingConfig : IEquipmentConfig
 		dictionary.Add("BasicFabric", 3f);
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.CUSTOM_CLOTHING;
 		List<AttributeModifier> list = new List<AttributeModifier>();
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("CustomClothing", global::TUNING.EQUIPMENT.CLOTHING.SLOT, SimHashes.Carbon, (float)global::TUNING.EQUIPMENT.VESTS.CUSTOM_CLOTHING_MASS, "shirt_decor01_kanim", global::TUNING.EQUIPMENT.VESTS.SNAPON0, "body_shirt_decor01_kanim", 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null, null);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("CustomClothing", global::TUNING.EQUIPMENT.CLOTHING.SLOT, SimHashes.Carbon, (float)global::TUNING.EQUIPMENT.VESTS.CUSTOM_CLOTHING_MASS, "shirt_decor01_kanim", global::TUNING.EQUIPMENT.VESTS.SNAPON0, "body_shirt_decor01_kanim", 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, new Tag[]
+		{
+			GameTags.Clothes,
+			GameTags.PedestalDisplayable
+		}, null);
 		Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.CUSTOM_CLOTHING.conductivityMod)), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.CUSTOM_CLOTHING.conductivityMod)), Descriptor.DescriptorType.Effect, false);
 		Descriptor descriptor2 = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.CUSTOM_CLOTHING.decorMod), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.CUSTOM_CLOTHING.decorMod), Descriptor.DescriptorType.Effect, false);
 		equipmentDef.additionalDescriptors.Add(descriptor);
@@ -38,7 +42,6 @@ public class CustomClothingConfig : IEquipmentConfig
 
 	public static void SetupVest(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().AddTag(GameTags.Clothes, false);
 		Equippable equippable = go.GetComponent<Equippable>();
 		if (equippable == null)
 		{
@@ -51,7 +54,6 @@ public class CustomClothingConfig : IEquipmentConfig
 	public void DoPostConfigure(GameObject go)
 	{
 		CustomClothingConfig.SetupVest(go);
-		go.GetComponent<KPrefabID>().AddTag(GameTags.PedestalDisplayable, false);
 	}
 
 	public const string ID = "CustomClothing";

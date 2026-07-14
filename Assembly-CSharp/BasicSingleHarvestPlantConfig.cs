@@ -19,7 +19,7 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, "BasicPlantFood", true, false, true, true, 2400f, 0f, 4600f, "BasicSingleHarvestPlantOriginal", global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.NAME);
+		}, true, 0f, 0.15f, "BasicPlantFood", true, false, true, false, true, 2400f, 0f, 4600f, "BasicSingleHarvestPlantOriginal", global::STRINGS.CREATURES.SPECIES.BASICSINGLEHARVESTPLANT.NAME);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();

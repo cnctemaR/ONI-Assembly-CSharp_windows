@@ -50,7 +50,7 @@ public class Infrared : MonoBehaviour
 			else
 			{
 				zero = new Vector4(1f, 0f, 0f, 0f);
-				GameComps.InfraredVisualizers.ClearOverlayColour();
+				Game.Instance.Trigger(972756592, null);
 			}
 		}
 		else
@@ -78,8 +78,12 @@ public class Infrared : MonoBehaviour
 		case Infrared.Mode.Disabled:
 			break;
 		case Infrared.Mode.Infrared:
-			GameComps.InfraredVisualizers.UpdateTemperature();
+		{
+			GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+			Infrared.temperatureOvelayInfraredParams.bounds = visibleArea;
+			Game.Instance.Trigger(-880408538, Infrared.temperatureOvelayInfraredParams);
 			return;
+		}
 		case Infrared.Mode.Disease:
 			GameComps.DiseaseContainers.UpdateOverlayColours();
 			break;
@@ -98,10 +102,17 @@ public class Infrared : MonoBehaviour
 
 	public static Infrared Instance;
 
+	private static Infrared.TemperatureOverlayInfraredData temperatureOvelayInfraredParams = new Infrared.TemperatureOverlayInfraredData();
+
 	public enum Mode
 	{
 		Disabled,
 		Infrared,
 		Disease
+	}
+
+	public class TemperatureOverlayInfraredData
+	{
+		public GridArea bounds;
 	}
 }

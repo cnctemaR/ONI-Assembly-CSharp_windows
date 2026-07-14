@@ -40,6 +40,17 @@ namespace TUNING
 			public static string SLOT = "Outfit";
 		}
 
+		public class SHOES
+		{
+			public static string SLOT = "Shoes";
+
+			public static string SNAPON0 = "snapTo_foot";
+
+			public static float BOOTS_FABRICATIONTIME = 20f;
+
+			public static float BOOTS_RUBBER_FABRICATION_MASS = 50f;
+		}
+
 		public class SUITS
 		{
 			public static string SLOT = "Suit";
@@ -99,6 +110,8 @@ namespace TUNING
 			public static int AQUASUIT_MASS = EQUIPMENT.SUITS.ATMOSUIT_MASS;
 
 			public static int AQUASUIT_UNDERWATER_TRAVELCOST = 6;
+
+			public static int DRY_SUIT_MASS = 100;
 
 			public static int TEMPERATURESUIT_FABTIME = EQUIPMENT.SUITS.ATMOSUIT_FABTIME;
 

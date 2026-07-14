@@ -4,7 +4,11 @@ public static class RenderQueues
 {
 	public static int WorldOpaque = 2000;
 
-	public static int Backwall = 2499;
+	public static int Backwall = 2001;
+
+	public static int NaturalBackwall = 3498;
+
+	public static int BackwallTransparent = 3499;
 
 	public static int Stars = 2501;
 

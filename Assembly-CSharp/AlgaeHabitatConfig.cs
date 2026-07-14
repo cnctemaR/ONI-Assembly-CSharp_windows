@@ -67,6 +67,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		algaeHabitat.lightBonusMultiplier = 1.1f;
 		algaeHabitat.pressureSampleOffset = new CellOffset(0, 1);
 		ElementConverter elementConverter = go.AddComponent<ElementConverter>();
+		elementConverter.spawnBubblesUnderLiquid = true;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
 			new ElementConverter.ConsumedElement(tag, 0.030000001f, true),

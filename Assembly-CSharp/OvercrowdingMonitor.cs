@@ -80,7 +80,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		}
 		if (occupancy != null && occupancy.dirty)
 		{
-			occupancy.Analyze(list, list2);
+			occupancy.Analyze(list, list2, !smi.IsFish);
 		}
 		if (smi.regionAnalysis.IsDirty)
 		{
@@ -245,31 +245,37 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 		public int Generation { get; private set; }
 
-		public void Analyze(List<KPrefabID> creatures, List<KPrefabID> eggs)
+		public void Analyze(List<KPrefabID> creatures, List<KPrefabID> eggs, bool excludeFish = false)
 		{
 			DebugUtil.DevAssert(this.dirty, "Only incur Analyze overhead when dirty", null);
 			this.CritterCounts.EnsureCapacity(creatures.Count);
 			this.CritterCounts.Clear();
 			this.OccupiedCellCount = 0;
 			this.HatchedEggOccupiedCellCount = 0;
-			creatures.RemoveAll(new Predicate<KPrefabID>(Util.IsNullOrDestroyed));
+			creatures.RemoveAll(Util.IsNullOrDestroyedPredicate);
 			foreach (KPrefabID kprefabID in creatures)
 			{
-				this.OccupiedCellCount += OvercrowdingMonitor.FetchCreaturePersonalSpace(kprefabID);
-				int num;
-				if (this.CritterCounts.TryGetValue(kprefabID.PrefabTag, out num))
+				if (!excludeFish || !OvercrowdingMonitor.FetchIsFish(kprefabID))
 				{
-					this.CritterCounts[kprefabID.PrefabTag] = num + 1;
-				}
-				else
-				{
-					this.CritterCounts[kprefabID.PrefabTag] = 1;
+					this.OccupiedCellCount += OvercrowdingMonitor.FetchCreaturePersonalSpace(kprefabID);
+					int num;
+					if (this.CritterCounts.TryGetValue(kprefabID.PrefabTag, out num))
+					{
+						this.CritterCounts[kprefabID.PrefabTag] = num + 1;
+					}
+					else
+					{
+						this.CritterCounts[kprefabID.PrefabTag] = 1;
+					}
 				}
 			}
-			eggs.RemoveAll(new Predicate<KPrefabID>(Util.IsNullOrDestroyed));
+			eggs.RemoveAll(Util.IsNullOrDestroyedPredicate);
 			foreach (KPrefabID kprefabID2 in eggs)
 			{
-				this.HatchedEggOccupiedCellCount += OvercrowdingMonitor.FetchEggPersonalSpace(kprefabID2);
+				if (!excludeFish || !OvercrowdingMonitor.FetchIsFishEgg(kprefabID2))
+				{
+					this.HatchedEggOccupiedCellCount += OvercrowdingMonitor.FetchEggPersonalSpace(kprefabID2);
+				}
 			}
 			int generation = this.Generation;
 			this.Generation = generation + 1;
@@ -462,12 +468,17 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 		public readonly string Substitute(string s)
 		{
 			LocString locString = (this.IsPond ? ((this.CellCount == 0) ? CREATURES.MODIFIERS.OVERCROWDED.EXPLANATION_AQUATIC.NO_CELLS : ((this.CellCount == 1) ? CREATURES.MODIFIERS.OVERCROWDED.EXPLANATION_AQUATIC.SINGLE_CELL : CREATURES.MODIFIERS.OVERCROWDED.EXPLANATION_AQUATIC.MULTIPLE_CELLS)) : ((this.CellCount == 0) ? CREATURES.MODIFIERS.OVERCROWDED.EXPLANATION.NO_CELLS : ((this.CellCount == 1) ? CREATURES.MODIFIERS.OVERCROWDED.EXPLANATION.SINGLE_CELL : CREATURES.MODIFIERS.OVERCROWDED.EXPLANATION.MULTIPLE_CELLS)));
-			return s.Replace("{explanation}", locString).Replace("{contextCritterType}", this.smi.kpid.PrefabTag.ProperName()).Replace("{personalSpace}", string.Format("{0}", this.PersonalSpace))
-				.Replace("{cellCount}", string.Format("{0}", this.CellCount))
-				.Replace("{occupiedCellCount}", string.Format("{0}", this.OccupiedCellCount))
-				.Replace("{unoccupiedCellCount}", string.Format("{0}", this.IsOvercrowded ? 0 : this.UnoccupiedCellCount))
-				.Replace("{overOccupiedCellCount}", string.Format("{0}", this.IsOvercrowded ? this.OverOccupiedCellCount : 0))
-				.Replace("{bullets}", this.BuildCritterOccupancies());
+			StringBuilder stringBuilder = GlobalStringBuilderPool.Alloc();
+			stringBuilder.Append(s);
+			stringBuilder.Replace("{explanation}", locString);
+			stringBuilder.Replace("{contextCritterType}", this.smi.kpid.PrefabTag.ProperName());
+			stringBuilder.Replace("{personalSpace}", this.PersonalSpace.ToString());
+			stringBuilder.Replace("{cellCount}", this.CellCount.ToString());
+			stringBuilder.Replace("{occupiedCellCount}", this.OccupiedCellCount.ToString());
+			stringBuilder.Replace("{unoccupiedCellCount}", (this.IsOvercrowded ? 0 : this.UnoccupiedCellCount).ToString());
+			stringBuilder.Replace("{overOccupiedCellCount}", (this.IsOvercrowded ? this.OverOccupiedCellCount : 0).ToString());
+			stringBuilder.Replace("{bullets}", this.BuildCritterOccupancies());
+			return GlobalStringBuilderPool.ReturnAndFree(stringBuilder);
 		}
 
 		private readonly int ComputeOverOccupiedCritterCount(int personalSpace)
@@ -516,10 +527,17 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 				LocString locString = ((num4 == 1) ? (critterOccupancy.canFix ? CREATURES.MODIFIERS.OVERCROWDED.BULLET.CAN_FIX.SINGULAR : CREATURES.MODIFIERS.OVERCROWDED.BULLET.CANNOT_FIX.SINGULAR) : (critterOccupancy.canFix ? CREATURES.MODIFIERS.OVERCROWDED.BULLET.CAN_FIX.MULTIPLE : CREATURES.MODIFIERS.OVERCROWDED.BULLET.CANNOT_FIX.MULTIPLE));
 				int num5 = OvercrowdingMonitor.personalSpaces[critterOccupancy.critterType];
 				int num6 = this.OccupiedCellCount - critterOccupancy.overOccupancy * num5;
-				string text = locString.Replace("{critterType}", critterOccupancy.critterType.ProperName()).Replace("{critterCount}", string.Format("{0}", num4)).Replace("{personalSpace}", string.Format("{0}", num5))
-					.Replace("{overOccupancy}", string.Format("{0}", critterOccupancy.overOccupancy))
-					.Replace("{cellCountWithFix}", string.Format("{0}", num6));
-				stringBuilder.AppendLine(text);
+				StringBuilder stringBuilder2 = GlobalStringBuilderPool.Alloc();
+				stringBuilder2.Append(locString);
+				stringBuilder2.Replace("{critterType}", critterOccupancy.critterType.ProperName());
+				stringBuilder2.Replace("{critterCount}", num4.ToString());
+				stringBuilder2.Replace("{personalSpace}", num5.ToString());
+				StringBuilder stringBuilder3 = stringBuilder2;
+				string text = "{overOccupancy}";
+				int overOccupancy = critterOccupancy.overOccupancy;
+				stringBuilder3.Replace(text, overOccupancy.ToString());
+				stringBuilder2.Replace("{cellCountWithFix}", num6.ToString());
+				stringBuilder.AppendLine(GlobalStringBuilderPool.ReturnAndFree(stringBuilder2));
 			}
 			if (this.CritterCounts.Count > 0)
 			{

@@ -101,10 +101,6 @@ public class AtmoSuitConfig : IEquipmentConfig
 		suitTank.elementTag = GameTags.Breathable;
 		suitTank.SafeCellFlagsToIgnoreOnEquipped = (SafeCellQuery.SafeFlags)464;
 		go.AddComponent<HelmetController>();
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Clothes, false);
-		component.AddTag(GameTags.PedestalDisplayable, false);
-		component.AddTag(GameTags.AirtightSuit, false);
 		Durability durability = go.AddComponent<Durability>();
 		durability.wornEquipmentPrefabID = "Worn_Atmo_Suit";
 		durability.durabilityLossPerCycle = global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DECAY;

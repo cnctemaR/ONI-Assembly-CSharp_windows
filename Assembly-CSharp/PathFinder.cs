@@ -13,12 +13,9 @@ public class PathFinder
 		PathFinder.PathGrid = new PathGrid(Grid.WidthInCells, Grid.HeightInCells, false, array);
 		for (int j = 0; j < Grid.CellCount; j++)
 		{
-			if (Grid.Visible[j] > 0 || Grid.Spawnable[j] > 0)
+			if (Grid.Visible[j] > 0 && Grid.Spawnable[j] > 0)
 			{
-				HashSetPool<int, PathFinder>.PooledHashSet pooledHashSet = HashSetPool<int, PathFinder>.Allocate();
-				GameUtil.FloodFillConditional(j, PathFinder.allowPathfindingFloodFillCb, pooledHashSet, null);
-				Grid.AllowPathfinding[j] = true;
-				pooledHashSet.Recycle();
+				FloodFill.DepthTraverse<FloodFill.PredicateCondition, PathFinder.PathTracker, FloodFill.NoMaxDepth, FloodFill.DoNothing>(j, new FloodFill.PredicateCondition(PathFinder.notSolid), default(PathFinder.PathTracker), default(FloodFill.NoMaxDepth), default(FloodFill.DoNothing));
 			}
 		}
 		Grid.OnReveal = (Action<int>)Delegate.Combine(Grid.OnReveal, new Action<int>(PathFinder.OnReveal));
@@ -221,12 +218,19 @@ public class PathFinder
 			if (flag)
 			{
 				int num5 = cost + (int)link3.cost;
-				bool flag2 = cell.cost == -1;
-				bool flag3 = num5 < cell.cost;
-				if (flag2 || flag3)
+				bool flag2 = PathFinder.IsSubmerged(link4);
+				if (flag2 || link3.endNavType == NavType.Swim)
+				{
+					int submergedPathCostPenalty = abilities.GetSubmergedPathCostPenalty(potential, link3);
+					num5 += submergedPathCostPenalty;
+				}
+				bool flag3 = cell.cost == -1;
+				bool flag4 = num5 < cell.cost;
+				if (flag3 || flag4)
 				{
 					linksInCellRange[num4++] = new PathFinder.PotentialScratchPad.PathGridCellData
 					{
+						isSubmerged = flag2,
 						pathGridCell = cell,
 						link = link3
 					};
@@ -236,31 +240,29 @@ public class PathFinder
 		for (int k = 0; k < num4; k++)
 		{
 			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData = linksInCellRange[k];
-			int link5 = pathGridCellData.link.link;
-			pathGridCellData.isSubmerged = PathFinder.IsSubmerged(link5);
-			linksInCellRange[k] = pathGridCellData;
-		}
-		for (int l = 0; l < num4; l++)
-		{
-			PathFinder.PotentialScratchPad.PathGridCellData pathGridCellData2 = linksInCellRange[l];
-			NavGrid.Link link6 = pathGridCellData2.link;
-			int link7 = link6.link;
-			PathFinder.Cell pathGridCell = pathGridCellData2.pathGridCell;
-			int num6 = cost + (int)link6.cost;
+			NavGrid.Link link5 = pathGridCellData.link;
+			int link6 = link5.link;
+			PathFinder.Cell pathGridCell = pathGridCellData.pathGridCell;
+			int num6 = cost + (int)link5.cost;
 			PathFinder.PotentialPath potentialPath = potential;
-			potentialPath.cell = link7;
-			potentialPath.navType = link6.endNavType;
-			if (pathGridCellData2.isSubmerged)
+			potentialPath.cell = link6;
+			potentialPath.navType = link5.endNavType;
+			if (pathGridCellData.isSubmerged || potentialPath.navType == NavType.Swim)
 			{
-				int submergedPathCostPenalty = abilities.GetSubmergedPathCostPenalty(potentialPath, link6);
-				num6 += submergedPathCostPenalty;
+				int submergedPathCostPenalty2 = abilities.GetSubmergedPathCostPenalty(potentialPath, link5);
+				num6 += submergedPathCostPenalty2;
 			}
-			PathFinder.PotentialPath.Flags flags = potentialPath.flags;
-			bool flag4 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link6.transitionId, pathGridCellData2.isSubmerged);
-			PathFinder.PotentialPath.Flags flags2 = potentialPath.flags;
-			if (flag4)
+			bool flag5 = pathGridCell.cost == -1;
+			bool flag6 = num6 < pathGridCell.cost;
+			if (flag5 || flag6)
 			{
-				PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, link6.transitionId, potentials, path_grid, ref pathGridCell);
+				PathFinder.PotentialPath.Flags flags = potentialPath.flags;
+				bool flag7 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link5.transitionId, pathGridCellData.isSubmerged);
+				PathFinder.PotentialPath.Flags flags2 = potentialPath.flags;
+				if (flag7)
+				{
+					PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, link5.transitionId, potentials, path_grid, ref pathGridCell);
+				}
 			}
 		}
 	}
@@ -280,18 +282,13 @@ public class PathFinder
 
 	public static PathGrid PathGrid;
 
-	private static readonly Func<int, bool> allowPathfindingFloodFillCb = delegate(int cell)
+	private static readonly Func<int, FloodFill.BoundaryCheckResult> notSolid = delegate(int cell)
 	{
-		if (Grid.Solid[cell])
+		if (!Grid.Solid[cell])
 		{
-			return false;
+			return FloodFill.BoundaryCheckResult.Continue;
 		}
-		if (Grid.AllowPathfinding[cell])
-		{
-			return false;
-		}
-		Grid.AllowPathfinding[cell] = true;
-		return true;
+		return FloodFill.BoundaryCheckResult.Halt;
 	};
 
 	public struct Cell
@@ -637,6 +634,24 @@ public class PathFinder
 	private class Temp
 	{
 		public static PathFinder.PotentialList Potentials = new PathFinder.PotentialList();
+	}
+
+	private struct PathTracker : FloodFill.IVisitTracker
+	{
+		public readonly bool Add(int cell)
+		{
+			if (this.Contains(cell))
+			{
+				return false;
+			}
+			Grid.AllowPathfinding[cell] = true;
+			return true;
+		}
+
+		public readonly bool Contains(int cell)
+		{
+			return Grid.AllowPathfinding[cell];
+		}
 	}
 
 	public class PotentialScratchPad

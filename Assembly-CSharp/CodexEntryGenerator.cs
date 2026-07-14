@@ -735,35 +735,31 @@ public static class CodexEntryGenerator
 	public static Dictionary<string, CodexEntry> GenerateGeyserEntries()
 	{
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
-		List<GameObject> prefabsWithComponent = Assets.GetPrefabsWithComponent<Geyser>();
-		if (prefabsWithComponent != null)
+		foreach (GameObject gameObject in Assets.GetPrefabsWithTag(GameTags.GeyserFeature))
 		{
-			foreach (GameObject gameObject in prefabsWithComponent)
+			KPrefabID component = gameObject.GetComponent<KPrefabID>();
+			if (!component.HasTag(GameTags.DeprecatedContent) && Game.IsCorrectDlcActiveForCurrentSave(component))
 			{
-				KPrefabID component = gameObject.GetComponent<KPrefabID>();
-				if (!component.HasTag(GameTags.DeprecatedContent) && Game.IsCorrectDlcActiveForCurrentSave(component))
+				List<ContentContainer> list = new List<ContentContainer>();
+				CodexEntryGenerator.GenerateTitleContainers(gameObject.GetProperName(), list);
+				Sprite first = Def.GetUISprite(gameObject, "ui", false).first;
+				CodexEntryGenerator.GenerateImageContainers(first, list);
+				List<ICodexWidget> list2 = new List<ICodexWidget>();
+				string text = gameObject.PrefabID().ToString();
+				string text2 = text.ToUpper();
+				if (text2.StartsWith("GEYSERGENERIC_"))
 				{
-					List<ContentContainer> list = new List<ContentContainer>();
-					CodexEntryGenerator.GenerateTitleContainers(gameObject.GetProperName(), list);
-					Sprite first = Def.GetUISprite(gameObject, "ui", false).first;
-					CodexEntryGenerator.GenerateImageContainers(first, list);
-					List<ICodexWidget> list2 = new List<ICodexWidget>();
-					string text = gameObject.PrefabID().ToString().ToUpper();
-					string text2 = "GENERICGEYSER_";
-					if (text.StartsWith(text2))
-					{
-						text.Remove(0, text2.Length);
-					}
-					list2.Add(new CodexText(UI.CODEX.GEYSERS.DESC, CodexTextStyle.Body, null));
-					ContentContainer contentContainer = new ContentContainer(list2, ContentContainer.ContentLayout.Vertical);
-					list.Add(contentContainer);
-					CodexEntry codexEntry = new CodexEntry("GEYSERS", list, gameObject.GetProperName());
-					codexEntry.icon = first;
-					codexEntry.parentId = "GEYSERS";
-					codexEntry.id = gameObject.PrefabID().ToString();
-					CodexCache.AddEntry(codexEntry.id, codexEntry, null);
-					dictionary.Add(codexEntry.id, codexEntry);
+					text2 = text2.Substring("GEYSERGENERIC_".Length);
 				}
+				list2.Add(new CodexText(Strings.Get("STRINGS.CREATURES.SPECIES.GEYSER." + text2 + ".DESC"), CodexTextStyle.Body, null));
+				list2.Add(new CodexText(UI.CODEX.GEYSERS.DESC, CodexTextStyle.Body, null));
+				list.Add(new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
+				CodexEntry codexEntry = new CodexEntry("GEYSERS", list, gameObject.GetProperName());
+				codexEntry.icon = first;
+				codexEntry.parentId = "GEYSERS";
+				codexEntry.id = text;
+				CodexCache.AddEntry(codexEntry.id, codexEntry, null);
+				dictionary.Add(codexEntry.id, codexEntry);
 			}
 		}
 		return dictionary;
@@ -1802,22 +1798,54 @@ public static class CodexEntryGenerator
 		containers.Add(new ContentContainer(list, ContentContainer.ContentLayout.Vertical));
 	}
 
-	private static void GenerateBuildingDescriptionContainers(BuildingDef def, List<ContentContainer> containers)
+	private static void AddDescriptorWidgets(List<ICodexWidget> widgets, string title, List<Descriptor> descriptors)
 	{
-		List<ICodexWidget> list = new List<ICodexWidget>();
-		list.Add(new CodexText(Strings.Get("STRINGS.BUILDINGS.PREFABS." + def.PrefabID.ToUpper() + ".EFFECT"), CodexTextStyle.Body, null));
-		list.Add(new CodexSpacer());
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def.BuildingComplete, false);
-		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
-		if (requirementDescriptors.Count > 0)
+		if (descriptors == null)
 		{
-			list.Add(new CodexText(CODEX.HEADERS.BUILDINGREQUIREMENTS, CodexTextStyle.Subtitle, null));
-			foreach (Descriptor descriptor in requirementDescriptors)
-			{
-				list.Add(new CodexTextWithTooltip("    " + descriptor.text, descriptor.tooltipText, CodexTextStyle.Body));
-			}
-			list.Add(new CodexSpacer());
+			return;
 		}
+		if (descriptors.Count == 0)
+		{
+			return;
+		}
+		widgets.Add(new CodexText(title, CodexTextStyle.Subtitle, null));
+		foreach (Descriptor descriptor in descriptors)
+		{
+			widgets.Add(new CodexTextWithTooltip("    " + descriptor.text, descriptor.tooltipText, CodexTextStyle.Body));
+		}
+		widgets.Add(new CodexSpacer());
+	}
+
+	private static void AddRequirementDescriptors(List<ICodexWidget> widgets, List<Descriptor> nonConverterReqs, [TupleElementNames(new string[] { "converter", "descriptors" })] List<ValueTuple<ElementConverter, List<Descriptor>>> converterDescCache, bool hasConverterReqs)
+	{
+		if (nonConverterReqs.Count <= 0 && converterDescCache.Count <= 0)
+		{
+			return;
+		}
+		widgets.Add(new CodexText(CODEX.HEADERS.BUILDINGREQUIREMENTS, CodexTextStyle.Subtitle, null));
+		foreach (Descriptor descriptor in nonConverterReqs)
+		{
+			widgets.Add(new CodexTextWithTooltip("    " + descriptor.text, descriptor.tooltipText, CodexTextStyle.Body));
+		}
+		if (hasConverterReqs)
+		{
+			widgets.Add(new CodexText("    " + UI.BUILDINGEFFECTS.OPERATIONINPUTS, CodexTextStyle.Body, null));
+		}
+		foreach (ValueTuple<ElementConverter, List<Descriptor>> valueTuple in converterDescCache)
+		{
+			foreach (Descriptor descriptor2 in valueTuple.Item2)
+			{
+				if (descriptor2.type == Descriptor.DescriptorType.Requirement)
+				{
+					widgets.Add(new CodexTextWithTooltip("        • " + descriptor2.text, descriptor2.tooltipText, CodexTextStyle.Body));
+				}
+			}
+		}
+		widgets.Add(new CodexSpacer());
+	}
+
+	private static void AddConstructionPropertyDescriptors(List<ICodexWidget> widgets, BuildingDef def)
+	{
 		if (def.MaterialCategory.Length != def.Mass.Length)
 		{
 			global::Debug.LogWarningFormat("{0} Required Materials({1}) and Masses({2}) mismatch!", new object[]
@@ -1827,33 +1855,77 @@ public static class CodexEntryGenerator
 				string.Join<float>(", ", def.Mass)
 			});
 		}
-		if (def.MaterialCategory.Length + def.Mass.Length != 0)
+		if (def.MaterialCategory.Length + def.Mass.Length == 0)
 		{
-			list.Add(new CodexText(CODEX.HEADERS.BUILDINGCONSTRUCTIONPROPS, CodexTextStyle.Subtitle, null));
-			list.Add(new CodexText("    " + string.Format(CODEX.FORMAT_STRINGS.BUILDING_SIZE, def.WidthInCells, def.HeightInCells), CodexTextStyle.Body, null));
-			list.Add(new CodexText("    " + string.Format(CODEX.FORMAT_STRINGS.CONSTRUCTION_TIME, def.ConstructionTime), CodexTextStyle.Body, null));
-			List<string> list2 = new List<string>();
-			for (int i = 0; i < Math.Min(def.MaterialCategory.Length, def.Mass.Length); i++)
-			{
-				list2.Add(string.Format(CODEX.FORMAT_STRINGS.MATERIAL_MASS, MATERIALS.GetMaterialString(def.MaterialCategory[i]), GameUtil.GetFormattedMass(def.Mass[i], GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
-			}
-			list.Add(new CodexText("    " + CODEX.HEADERS.BUILDINGCONSTRUCTIONMATERIALS + string.Join(", ", list2), CodexTextStyle.Body, null));
-			list.Add(new CodexSpacer());
+			return;
 		}
-		List<Descriptor> effectDescriptors = GameUtil.GetEffectDescriptors(allDescriptors);
-		if (effectDescriptors.Count > 0)
+		widgets.Add(new CodexText(CODEX.HEADERS.BUILDINGCONSTRUCTIONPROPS, CodexTextStyle.Subtitle, null));
+		widgets.Add(new CodexText("    " + string.Format(CODEX.FORMAT_STRINGS.BUILDING_SIZE, def.WidthInCells, def.HeightInCells), CodexTextStyle.Body, null));
+		widgets.Add(new CodexText("    " + string.Format(CODEX.FORMAT_STRINGS.CONSTRUCTION_TIME, def.ConstructionTime), CodexTextStyle.Body, null));
+		List<string> list = new List<string>();
+		for (int i = 0; i < Math.Min(def.MaterialCategory.Length, def.Mass.Length); i++)
 		{
-			list.Add(new CodexText(CODEX.HEADERS.BUILDINGEFFECTS, CodexTextStyle.Subtitle, null));
-			foreach (Descriptor descriptor2 in effectDescriptors)
-			{
-				list.Add(new CodexTextWithTooltip("    " + descriptor2.text, descriptor2.tooltipText, CodexTextStyle.Body));
-			}
-			list.Add(new CodexSpacer());
+			list.Add(string.Format(CODEX.FORMAT_STRINGS.MATERIAL_MASS, MATERIALS.GetMaterialString(def.MaterialCategory[i]), GameUtil.GetFormattedMass(def.Mass[i], GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
 		}
+		widgets.Add(new CodexText("    " + CODEX.HEADERS.BUILDINGCONSTRUCTIONMATERIALS + string.Join(", ", list), CodexTextStyle.Body, null));
+		widgets.Add(new CodexSpacer());
+	}
+
+	private static void AddEffectDescriptors(List<ICodexWidget> widgets, List<Descriptor> nonConverterEffects, [TupleElementNames(new string[] { "converter", "descriptors" })] List<ValueTuple<ElementConverter, List<Descriptor>>> converterDescCache)
+	{
+		if (nonConverterEffects.Count <= 0 && converterDescCache.Count <= 0)
+		{
+			return;
+		}
+		widgets.Add(new CodexText(CODEX.HEADERS.BUILDINGEFFECTS, CodexTextStyle.Subtitle, null));
+		foreach (Descriptor descriptor in nonConverterEffects)
+		{
+			widgets.Add(new CodexTextWithTooltip("    " + descriptor.text, descriptor.tooltipText, CodexTextStyle.Body));
+		}
+		foreach (ValueTuple<ElementConverter, List<Descriptor>> valueTuple in converterDescCache)
+		{
+			ElementConverter item = valueTuple.Item1;
+			List<Descriptor> item2 = valueTuple.Item2;
+			string text = item.consumedElements[0].Name;
+			for (int i = 1; i < item.consumedElements.Length; i++)
+			{
+				text = text + ", " + item.consumedElements[i].Name;
+			}
+			widgets.Add(new CodexText("    " + text + ":", CodexTextStyle.Body, null));
+			foreach (Descriptor descriptor2 in item2)
+			{
+				if (descriptor2.type != Descriptor.DescriptorType.Requirement)
+				{
+					widgets.Add(new CodexTextWithTooltip("        " + descriptor2.text, descriptor2.tooltipText, CodexTextStyle.Body));
+				}
+			}
+		}
+		widgets.Add(new CodexSpacer());
+	}
+
+	private static void GenerateBuildingDescriptionContainers(BuildingDef def, List<ContentContainer> containers)
+	{
+		List<ICodexWidget> list = new List<ICodexWidget>
+		{
+			new CodexText(Strings.Get("STRINGS.BUILDINGS.PREFABS." + def.PrefabID.ToUpper() + ".EFFECT"), CodexTextStyle.Body, null),
+			new CodexSpacer()
+		};
+		ListPool<ValueTuple<ElementConverter, List<Descriptor>>, BuildingDef>.PooledList pooledList = ListPool<ValueTuple<ElementConverter, List<Descriptor>>, BuildingDef>.Allocate();
+		ListPool<Descriptor, BuildingDef>.PooledList pooledList2 = ListPool<Descriptor, BuildingDef>.Allocate();
+		ListPool<Descriptor, BuildingDef>.PooledList pooledList3 = ListPool<Descriptor, BuildingDef>.Allocate();
+		List<Descriptor> list2;
+		bool flag;
+		GameUtil.PartitionBuildingDescriptors(def.BuildingComplete, false, out list2, pooledList, pooledList2, pooledList3, out flag);
+		CodexEntryGenerator.AddRequirementDescriptors(list, pooledList2, pooledList, flag);
+		pooledList2.Recycle();
+		CodexEntryGenerator.AddConstructionPropertyDescriptors(list, def);
+		CodexEntryGenerator.AddEffectDescriptors(list, pooledList3, pooledList);
+		pooledList3.Recycle();
+		pooledList.Recycle();
 		string[] roomClassForObject = CodexEntryGenerator.GetRoomClassForObject(def.BuildingComplete);
 		string[] categoriesForObject = CodexEntryGenerator.GetCategoriesForObject(def.BuildingComplete);
-		bool flag = roomClassForObject != null || categoriesForObject != null;
-		if (flag)
+		bool flag2 = roomClassForObject != null || categoriesForObject != null;
+		if (flag2)
 		{
 			list.Add(new CodexText(CODEX.HEADERS.BUILDINGTYPE, CodexTextStyle.Subtitle, null));
 		}
@@ -1871,7 +1943,7 @@ public static class CodexEntryGenerator
 				list.Add(new CodexText("    " + text2, CodexTextStyle.Body, null));
 			}
 		}
-		if (flag)
+		if (flag2)
 		{
 			list.Add(new CodexSpacer());
 		}
@@ -2086,12 +2158,16 @@ public static class CodexEntryGenerator
 		dictionary[rocketInterior] = RocketControlStationConfig.ID;
 		Tag cookTop = RoomConstraints.ConstraintTags.CookTop;
 		dictionary[cookTop] = "CookingStation";
-		Tag tag = RoomConstraints.ConstraintTags.WarmingStation;
-		dictionary[tag] = "SpaceHeater";
-		Tag tag2 = RoomConstraints.ConstraintTags.PowerBuilding;
-		dictionary[tag2] = "Battery";
-		Tag tag3 = RoomConstraints.ConstraintTags.DiningTableType;
-		dictionary[tag3] = "DiningTable";
+		Tag warmingStation = RoomConstraints.ConstraintTags.WarmingStation;
+		dictionary[warmingStation] = "SpaceHeater";
+		Tag powerBuilding = RoomConstraints.ConstraintTags.PowerBuilding;
+		dictionary[powerBuilding] = "Battery";
+		Tag tag = RoomConstraints.ConstraintTags.DiningTableType;
+		dictionary[tag] = "DiningTable";
+		Tag tag2 = RoomConstraints.ConstraintTags.Submergible;
+		dictionary[tag2] = "UnderwaterCritterCondo";
+		Tag tag3 = RoomConstraints.ConstraintTags.KitchenRefrigerator;
+		dictionary[tag3] = "Refrigerator";
 		CodexEntryGenerator.RoomConstrainTagIcons = dictionary;
 		Dictionary<Tag, Tag> dictionary2 = new Dictionary<Tag, Tag>();
 		tag3 = GameTags.CodexCategories.CreatureRelocator;

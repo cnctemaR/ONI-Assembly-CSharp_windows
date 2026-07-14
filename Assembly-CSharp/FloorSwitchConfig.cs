@@ -45,6 +45,16 @@ public class FloorSwitchConfig : IBuildingConfig
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT_MODIFIERS.BONUS_2;
 		simCellOccupier.notifyOnMelt = true;
+		go.GetComponent<KPrefabID>().prefabSpawnFn += this.OnSpawn;
+	}
+
+	private void OnSpawn(GameObject instance)
+	{
+		foreach (KBatchedAnimController kbatchedAnimController in instance.GetComponentsInChildrenOnly<KBatchedAnimController>())
+		{
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

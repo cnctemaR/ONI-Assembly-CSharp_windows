@@ -9,7 +9,7 @@ namespace ProcGenGame
 {
 	public static class MobSpawning
 	{
-		public static Dictionary<int, string> PlaceFeatureAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug, ref HashSet<int> alreadyOccupiedCells)
+		public static Dictionary<int, string> PlaceFeatureAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, ref WorldgenSimData simData, HashSet<int> cavityCells, HashSet<int> avoidCells, bool isDebug, ref HashSet<int> alreadyOccupiedCells)
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
 			Cell node = tc.node;
@@ -35,7 +35,7 @@ namespace ProcGenGame
 			for (int i = availableSpawnCellsFeature.Count - 1; i > 0; i--)
 			{
 				int num = availableSpawnCellsFeature[i];
-				if (ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num))
+				if (ElementLoader.elements[(int)simData.cells[num].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)simData.cells[num].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num))
 				{
 					availableSpawnCellsFeature.RemoveAt(i);
 				}
@@ -58,7 +58,7 @@ namespace ProcGenGame
 				}
 				else
 				{
-					List<int> mobPossibleSpawnPoints = MobSpawning.GetMobPossibleSpawnPoints(mob, availableSpawnCellsFeature, cells, alreadyOccupiedCells, rnd);
+					List<int> mobPossibleSpawnPoints = MobSpawning.GetMobPossibleSpawnPoints(mob, availableSpawnCellsFeature, ref simData, tc, cavityCells, alreadyOccupiedCells, rnd);
 					if (mobPossibleSpawnPoints.Count == 0)
 					{
 						if (isDebug)
@@ -78,7 +78,7 @@ namespace ProcGenGame
 			return dictionary;
 		}
 
-		public static Dictionary<int, string> PlaceBiomeAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug, ref HashSet<int> alreadyOccupiedCells)
+		public static Dictionary<int, string> PlaceBiomeAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, ref WorldgenSimData simData, HashSet<int> cavityCells, HashSet<int> avoidCells, bool isDebug, ref HashSet<int> alreadyOccupiedCells)
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
 			Cell node = tc.node;
@@ -105,7 +105,7 @@ namespace ProcGenGame
 			for (int i = list2.Count - 1; i > 0; i--)
 			{
 				int num = list2[i];
-				if (ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num))
+				if (ElementLoader.elements[(int)simData.cells[num].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)simData.cells[num].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num))
 				{
 					list2.RemoveAt(i);
 				}
@@ -129,7 +129,7 @@ namespace ProcGenGame
 				}
 				else
 				{
-					List<int> mobPossibleSpawnPoints = MobSpawning.GetMobPossibleSpawnPoints(mob, list2, cells, alreadyOccupiedCells, rnd);
+					List<int> mobPossibleSpawnPoints = MobSpawning.GetMobPossibleSpawnPoints(mob, list2, ref simData, tc, cavityCells, alreadyOccupiedCells, rnd);
 					if (mobPossibleSpawnPoints.Count == 0)
 					{
 						if (isDebug)
@@ -159,9 +159,16 @@ namespace ProcGenGame
 			return dictionary;
 		}
 
-		private static List<int> GetMobPossibleSpawnPoints(Mob mob, List<int> possibleSpawnPoints, Sim.Cell[] cells, HashSet<int> alreadyOccupiedCells, SeededRandom rnd)
+		private static List<int> GetMobPossibleSpawnPoints(Mob mob, List<int> possibleSpawnPoints, ref WorldgenSimData simData, TerrainCell tc, HashSet<int> cavityCells, HashSet<int> alreadyOccupiedCells, SeededRandom rnd)
 		{
-			List<int> list = possibleSpawnPoints.FindAll((int cell) => MobSpawning.IsSuitableMobSpawnPoint(cell, mob, cells, ref alreadyOccupiedCells));
+			List<int> list = new List<int>();
+			foreach (int num in possibleSpawnPoints)
+			{
+				if (MobSpawning.IsSuitableMobSpawnPoint(num, mob, ref simData, cavityCells, ref alreadyOccupiedCells, tc))
+				{
+					list.Add(num);
+				}
+			}
 			list.ShuffleSeeded<int>(rnd.RandomSource());
 			return list;
 		}
@@ -217,7 +224,7 @@ namespace ProcGenGame
 			return Grid.OffsetCell(occupiedCell, (widthIterator % 2 == 0) ? (-(widthIterator / 2)) : (widthIterator / 2 + widthIterator % 2), 0);
 		}
 
-		private static bool IsSuitableMobSpawnPoint(int cell, Mob mob, Sim.Cell[] cells, ref HashSet<int> alreadyOccupiedCells)
+		private static bool IsSuitableMobSpawnPoint(int cell, Mob mob, ref WorldgenSimData simData, HashSet<int> cavityCells, ref HashSet<int> alreadyOccupiedCells, TerrainCell tc)
 		{
 			int num = ((mob.location == Mob.Location.Ceiling || mob.location == Mob.Location.LiquidCeiling) ? (-1) : 1);
 			if (!Grid.IsValidCell(cell))
@@ -247,8 +254,8 @@ namespace ProcGenGame
 					}
 				}
 			}
-			Element element = ElementLoader.elements[(int)cells[cell].elementIdx];
-			Element element2 = ElementLoader.elements[(int)cells[Grid.CellAbove(cell)].elementIdx];
+			Element element = ElementLoader.elements[(int)simData.cells[cell].elementIdx];
+			Element element2 = ElementLoader.elements[(int)simData.cells[Grid.CellAbove(cell)].elementIdx];
 			switch (mob.location)
 			{
 			case Mob.Location.Floor:
@@ -260,10 +267,10 @@ namespace ProcGenGame
 					{
 						int num5 = Grid.OffsetCell(cell, 0, k);
 						num5 = MobSpawning.MobWidthOffset(num5, l);
-						Element element3 = ElementLoader.elements[(int)cells[num5].elementIdx];
-						Element element4 = ElementLoader.elements[(int)cells[Grid.CellAbove(num5)].elementIdx];
-						Element element5 = ElementLoader.elements[(int)cells[Grid.CellBelow(num5)].elementIdx];
-						flag = flag && MobSpawning.isNaturalCavity(num5);
+						Element element3 = ElementLoader.elements[(int)simData.cells[num5].elementIdx];
+						Element element4 = ElementLoader.elements[(int)simData.cells[Grid.CellAbove(num5)].elementIdx];
+						Element element5 = ElementLoader.elements[(int)simData.cells[Grid.CellBelow(num5)].elementIdx];
+						flag = flag && cavityCells.Contains(num5);
 						flag = flag && !element3.IsSolid;
 						flag = flag && !element3.IsLiquid;
 						if (k == 0 && l < mob.width)
@@ -292,13 +299,13 @@ namespace ProcGenGame
 					{
 						int num6 = Grid.OffsetCell(cell, 0, -m);
 						num6 = MobSpawning.MobWidthOffset(num6, n);
-						Element element6 = ElementLoader.elements[(int)cells[num6].elementIdx];
-						Element element7 = ElementLoader.elements[(int)cells[Grid.CellAbove(num6)].elementIdx];
+						Element element6 = ElementLoader.elements[(int)simData.cells[num6].elementIdx];
+						Element element7 = ElementLoader.elements[(int)simData.cells[Grid.CellAbove(num6)].elementIdx];
 						if (m == 0)
 						{
 							flag2 = flag2 && element7.IsSolid;
 						}
-						flag2 = flag2 && MobSpawning.isNaturalCavity(num6);
+						flag2 = flag2 && cavityCells.Contains(num6);
 						flag2 = flag2 && !element6.IsSolid;
 						flag2 = flag2 && !element6.IsLiquid;
 						if (!flag2)
@@ -316,6 +323,11 @@ namespace ProcGenGame
 			case Mob.Location.Air:
 				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'Air' and is used for mob " + mob.name);
 				return !element.IsSolid && !element2.IsSolid && !element.IsLiquid;
+			case Mob.Location.BackWall:
+			case Mob.Location.NearWater:
+			case Mob.Location.NearLiquid:
+			case Mob.Location.ShallowLiquid:
+				goto IL_0ACB;
 			case Mob.Location.Solid:
 			{
 				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'Solid' and is used for mob " + mob.name);
@@ -324,7 +336,7 @@ namespace ProcGenGame
 					for (int num8 = 0; num8 < mob.height; num8++)
 					{
 						int num9 = MobSpawning.MobWidthOffset(Grid.OffsetCell(cell, 0, num8 * num), num7);
-						if (MobSpawning.isNaturalCavity(num9) || !ElementLoader.elements[(int)cells[num9].elementIdx].IsSolid)
+						if (cavityCells.Contains(num9) || !ElementLoader.elements[(int)simData.cells[num9].elementIdx].IsSolid)
 						{
 							return false;
 						}
@@ -333,8 +345,8 @@ namespace ProcGenGame
 				return true;
 			}
 			case Mob.Location.Water:
-				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'Water' and is used for mob " + mob.name);
-				return (element.id == SimHashes.Water || element.id == SimHashes.DirtyWater) && (element2.id == SimHashes.Water || element2.id == SimHashes.DirtyWater);
+				DebugUtil.DevLogError("Mob location rule 'Water' is deprecated, use 'Liquid' instead. Mob: " + mob.name);
+				break;
 			case Mob.Location.Surface:
 			{
 				bool flag3 = true;
@@ -342,14 +354,15 @@ namespace ProcGenGame
 				for (int num10 = 0; num10 < mob.width; num10++)
 				{
 					int num11 = MobSpawning.MobWidthOffset(cell, num10);
-					Element element8 = ElementLoader.elements[(int)cells[num11].elementIdx];
-					Element element9 = ElementLoader.elements[(int)cells[Grid.CellBelow(num11)].elementIdx];
+					Element element8 = ElementLoader.elements[(int)simData.cells[num11].elementIdx];
+					Element element9 = ElementLoader.elements[(int)simData.cells[Grid.CellBelow(num11)].elementIdx];
 					flag3 = flag3 && element8.id == SimHashes.Vacuum;
 					flag3 = flag3 && element9.IsSolid;
 				}
 				return flag3;
 			}
 			case Mob.Location.LiquidFloor:
+			case Mob.Location.LiquidFloorCavityNoRequired:
 			{
 				bool flag4 = true;
 				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'LiquidFloor' and is used for mob " + mob.name);
@@ -359,15 +372,14 @@ namespace ProcGenGame
 					{
 						int num14 = Grid.OffsetCell(cell, 0, num12);
 						num14 = MobSpawning.MobWidthOffset(num14, num13);
-						Element element10 = ElementLoader.elements[(int)cells[num14].elementIdx];
-						Element element11 = ElementLoader.elements[(int)cells[Grid.CellAbove(num14)].elementIdx];
-						Element element12 = ElementLoader.elements[(int)cells[Grid.CellBelow(num14)].elementIdx];
-						flag4 = flag4 && MobSpawning.isNaturalCavity(cell);
+						Element element10 = ElementLoader.elements[(int)simData.cells[num14].elementIdx];
+						Element element11 = ElementLoader.elements[(int)simData.cells[Grid.CellBelow(num14)].elementIdx];
+						flag4 = flag4 && (mob.location == Mob.Location.LiquidFloorCavityNoRequired || cavityCells.Contains(cell));
 						flag4 = flag4 && !element10.IsSolid;
 						if (num12 == 0)
 						{
 							flag4 = flag4 && element10.IsLiquid;
-							flag4 = flag4 && element12.IsSolid;
+							flag4 = flag4 && element11.IsSolid;
 						}
 						if (!flag4)
 						{
@@ -391,14 +403,14 @@ namespace ProcGenGame
 					{
 						int num17 = Grid.OffsetCell(cell, 0, num15);
 						num17 = MobSpawning.MobWidthOffset(num17, num16);
-						Element element13 = ElementLoader.elements[(int)cells[num17].elementIdx];
-						Element element14 = ElementLoader.elements[(int)cells[Grid.CellAbove(num17)].elementIdx];
-						Element element15 = ElementLoader.elements[(int)cells[Grid.CellBelow(num17)].elementIdx];
-						flag5 = flag5 && MobSpawning.isNaturalCavity(cell);
-						flag5 = flag5 && !element13.IsSolid;
+						Element element12 = ElementLoader.elements[(int)simData.cells[num17].elementIdx];
+						Element element13 = ElementLoader.elements[(int)simData.cells[Grid.CellAbove(num17)].elementIdx];
+						Element element14 = ElementLoader.elements[(int)simData.cells[Grid.CellBelow(num17)].elementIdx];
+						flag5 = flag5 && cavityCells.Contains(cell);
+						flag5 = flag5 && !element12.IsSolid;
 						if (num15 == 0)
 						{
-							flag5 = flag5 && element15.IsSolid;
+							flag5 = flag5 && element14.IsSolid;
 						}
 						if (!flag5)
 						{
@@ -422,15 +434,15 @@ namespace ProcGenGame
 					{
 						int num20 = Grid.OffsetCell(cell, 0, -num18);
 						num20 = MobSpawning.MobWidthOffset(num20, num19);
-						Element element16 = ElementLoader.elements[(int)cells[num20].elementIdx];
-						Element element17 = ElementLoader.elements[(int)cells[Grid.CellAbove(num20)].elementIdx];
+						Element element15 = ElementLoader.elements[(int)simData.cells[num20].elementIdx];
+						Element element16 = ElementLoader.elements[(int)simData.cells[Grid.CellAbove(num20)].elementIdx];
 						if (num18 == 0)
 						{
-							flag6 = flag6 && element17.IsSolid;
+							flag6 = flag6 && element16.IsSolid;
 						}
-						flag6 = flag6 && MobSpawning.isNaturalCavity(num20);
-						flag6 = flag6 && element16.IsLiquid;
-						flag6 = flag6 && !element16.IsSolid;
+						flag6 = flag6 && cavityCells.Contains(num20);
+						flag6 = flag6 && element15.IsLiquid;
+						flag6 = flag6 && !element15.IsSolid;
 						if (!flag6)
 						{
 							break;
@@ -444,44 +456,51 @@ namespace ProcGenGame
 				return flag6;
 			}
 			case Mob.Location.Liquid:
+				break;
+			case Mob.Location.EntombedFloorPeek:
 			{
-				bool flag7 = true;
-				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'Liquid' and is used for mob " + mob.name);
+				bool flag7 = false;
+				bool flag8 = true;
+				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'EntombedFloorPeek' and is used for mob " + mob.name);
 				for (int num21 = 0; num21 < mob.height; num21++)
 				{
 					for (int num22 = 0; num22 < mob.width; num22++)
 					{
 						int num23 = Grid.OffsetCell(cell, 0, num21);
 						num23 = MobSpawning.MobWidthOffset(num23, num22);
-						Element element18 = ElementLoader.elements[(int)cells[num23].elementIdx];
-						flag7 = flag7 && element18.IsLiquid;
-						if (num21 == mob.height - 1)
+						Element element17 = ElementLoader.elements[(int)simData.cells[num23].elementIdx];
+						Element element18 = ElementLoader.elements[(int)simData.cells[Grid.CellBelow(num23)].elementIdx];
+						flag7 = flag7 || !element17.IsSolid;
+						if (num21 == 0)
 						{
-							Element element19 = ElementLoader.elements[(int)cells[Grid.CellAbove(num23)].elementIdx];
-							flag7 = flag7 && element19.IsLiquid;
+							flag8 = flag8 && element18.IsSolid;
+						}
+						if (!flag8)
+						{
+							break;
 						}
 					}
+					if (!flag8)
+					{
+						break;
+					}
 				}
-				return flag7;
+				return flag8 && flag7;
 			}
-			case Mob.Location.EntombedFloorPeek:
+			case Mob.Location.AnchoredToBackWall:
 			{
-				bool flag8 = false;
 				bool flag9 = true;
-				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'EntombedFloorPeek' and is used for mob " + mob.name);
+				global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'AnchoredToBackWall' and is used for mob " + mob.name);
 				for (int num24 = 0; num24 < mob.height; num24++)
 				{
 					for (int num25 = 0; num25 < mob.width; num25++)
 					{
 						int num26 = Grid.OffsetCell(cell, 0, num24);
 						num26 = MobSpawning.MobWidthOffset(num26, num25);
-						Element element20 = ElementLoader.elements[(int)cells[num26].elementIdx];
-						Element element21 = ElementLoader.elements[(int)cells[Grid.CellBelow(num26)].elementIdx];
-						flag8 = flag8 || !element20.IsSolid;
-						if (num24 == 0)
-						{
-							flag9 = flag9 && element21.IsSolid;
-						}
+						Element element19 = ElementLoader.elements[(int)simData.cells[num26].elementIdx];
+						bool isSolid = ElementLoader.elements[(int)simData.backwallCells[cell].elementIdx].IsSolid;
+						flag9 = flag9 && isSolid;
+						flag9 = flag9 && !element19.IsSolid;
 						if (!flag9)
 						{
 							break;
@@ -492,61 +511,59 @@ namespace ProcGenGame
 						break;
 					}
 				}
-				return flag9 && flag8;
+				return flag9;
 			}
+			default:
+				goto IL_0ACB;
 			}
-			return MobSpawning.isNaturalCavity(cell) && !element.IsSolid;
-		}
-
-		public static bool isNaturalCavity(int cell)
-		{
-			return MobSpawning.NaturalCavities != null && MobSpawning.allNaturalCavityCells.Contains(cell);
-		}
-
-		public static void DetectNaturalCavities(List<TerrainCell> terrainCells, WorldGen.OfflineCallbackFunction updateProgressFn, Sim.Cell[] cells)
-		{
-			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, 0f, WorldGenProgressStages.Stages.DetectNaturalCavities);
-			MobSpawning.NaturalCavities.Clear();
-			MobSpawning.allNaturalCavityCells.Clear();
-			HashSet<int> invalidCells = new HashSet<int>();
-			Func<int, bool> <>9__0;
-			for (int i = 0; i < terrainCells.Count; i++)
+			bool flag10 = true;
+			global::Debug.Assert(mob.paddingX == 0, "Mob paddingX not implemented yet for rule 'Liquid' and is used for mob " + mob.name);
+			for (int num27 = 0; num27 < mob.height; num27++)
 			{
-				TerrainCell terrainCell = terrainCells[i];
-				float num = (float)i / (float)terrainCells.Count;
-				updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, num, WorldGenProgressStages.Stages.DetectNaturalCavities);
-				MobSpawning.NaturalCavities.Add(terrainCell, new List<HashSet<int>>());
-				invalidCells.Clear();
-				List<int> allCells = terrainCell.GetAllCells();
-				for (int j = 0; j < allCells.Count; j++)
+				for (int num28 = 0; num28 < mob.width; num28++)
 				{
-					int num2 = allCells[j];
-					if (!ElementLoader.elements[(int)cells[num2].elementIdx].IsSolid && !invalidCells.Contains(num2))
+					int num29 = Grid.OffsetCell(cell, 0, num27);
+					num29 = MobSpawning.MobWidthOffset(num29, num28);
+					Element element20 = ElementLoader.elements[(int)simData.cells[num29].elementIdx];
+					flag10 = flag10 && element20.IsLiquid;
+					if (num27 == mob.height - 1)
 					{
-						int num3 = num2;
-						Func<int, bool> func;
-						if ((func = <>9__0) == null)
-						{
-							func = (<>9__0 = delegate(int checkCell)
-							{
-								Element element = ElementLoader.elements[(int)cells[checkCell].elementIdx];
-								return !invalidCells.Contains(checkCell) && !element.IsSolid;
-							});
-						}
-						HashSet<int> hashSet = GameUtil.FloodCollectCells(num3, func, 300, invalidCells, true);
-						if (hashSet != null && hashSet.Count > 0)
-						{
-							MobSpawning.NaturalCavities[terrainCell].Add(hashSet);
-							MobSpawning.allNaturalCavityCells.UnionWith(hashSet);
-						}
+						Element element21 = ElementLoader.elements[(int)simData.cells[Grid.CellAbove(num29)].elementIdx];
+						flag10 = flag10 && element21.IsLiquid;
 					}
 				}
 			}
-			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, 1f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+			return flag10;
+			IL_0ACB:
+			return cavityCells.Contains(cell) && !element.IsSolid;
 		}
 
-		public static Dictionary<TerrainCell, List<HashSet<int>>> NaturalCavities = new Dictionary<TerrainCell, List<HashSet<int>>>();
+		public static void DetectNaturalCavities(int world, Sim.Cell[] cells, HashSet<int> cavityCells, WorldGen.OfflineCallbackFunction updateProgressFn)
+		{
+			MobSpawning.<>c__DisplayClass7_0 CS$<>8__locals1 = new MobSpawning.<>c__DisplayClass7_0();
+			CS$<>8__locals1.cells = cells;
+			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, 0f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+			Func<int, FloodFill.BoundaryCheckResult> func = new Func<int, FloodFill.BoundaryCheckResult>(CS$<>8__locals1.<DetectNaturalCavities>g__BoundaryCondition|0);
+			HashSetPool<int, MobSpawning.AllocatorTag>.PooledHashSet pooledHashSet = HashSetPool<int, MobSpawning.AllocatorTag>.Allocate();
+			ListPool<int, MobSpawning.AllocatorTag>.PooledList pooledList = ListPool<int, MobSpawning.AllocatorTag>.Allocate();
+			for (int i = 0; i < CS$<>8__locals1.cells.Length; i++)
+			{
+				float num = (float)pooledHashSet.Count / (float)CS$<>8__locals1.cells.Length;
+				updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, num, WorldGenProgressStages.Stages.DetectNaturalCavities);
+				pooledList.Clear();
+				FloodFill.DepthCollect(i, func, pooledHashSet, pooledList);
+				if (pooledList.Count != 0 && pooledList.Count <= 300)
+				{
+					cavityCells.UnionWith(pooledList);
+				}
+			}
+			pooledList.Recycle();
+			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, 1f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+			pooledHashSet.Recycle();
+		}
 
-		public static HashSet<int> allNaturalCavityCells = new HashSet<int>();
+		private struct AllocatorTag
+		{
+		}
 	}
 }

@@ -19,14 +19,13 @@ public class BubbleSpawner : KMonoBehaviour
 			return;
 		}
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		if (component.Mass >= this.emitMass)
+		if (component.Mass < this.emitMass)
 		{
-			gameObject.GetComponent<PrimaryElement>().Mass -= this.emitMass;
-			BubbleManager.instance.SpawnBubble(base.transform.GetPosition(), this.initialVelocity, component.ElementID, this.emitMass, component.Temperature);
+			return;
 		}
+		gameObject.GetComponent<PrimaryElement>().Mass -= this.emitMass;
+		BubbleManager.instance.SpawnBubble(this.element, base.transform.GetPosition(), this.emitMass, component.Temperature, BubbleManager.Disease.None, null);
 	}
-
-	public SimHashes element;
 
 	public float emitMass;
 
@@ -34,10 +33,10 @@ public class BubbleSpawner : KMonoBehaviour
 
 	public Vector3 emitOffset = Vector3.zero;
 
-	public Vector2 initialVelocity;
-
 	[MyCmpGet]
 	private Storage storage;
+
+	public SimHashes element;
 
 	private static readonly EventSystem.IntraObjectHandler<BubbleSpawner> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<BubbleSpawner>(delegate(BubbleSpawner component, object data)
 	{

@@ -212,7 +212,8 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		Element element = pickupableStartWorkInfo.originalPickupable.PrimaryElement.Element;
 		this.session = new LiquidPumpingStation.WorkSession(Grid.PosToCell(this), element.id, pickupableStartWorkInfo.originalPickupable.GetComponent<SubstanceChunk>(), amount, base.gameObject);
 		this.meter.SetPositionPercent(0f);
-		this.meter.SetSymbolTint(new KAnimHashedString("meter_target"), element.substance.colour);
+		GameUtil.TintLiquidSymbolOnBuilding("meter_fill", this.meter.meterController, element);
+		GameUtil.TintLiquidSymbolOnBuilding("water1", this.meter.meterController, element);
 	}
 
 	protected override void OnStopWork(WorkerBase worker)

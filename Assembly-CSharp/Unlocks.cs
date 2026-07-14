@@ -509,6 +509,14 @@ public class Unlocks : KMonoBehaviour
 			new string[] { "notices_foreword", "notes_HigbySong" }
 		},
 		{
+			"dlc5archivebuilding",
+			new string[] { "notes_marinea" }
+		},
+		{
+			"dlc5emails",
+			new string[] { "email_ceasedesist", "email_flood" }
+		},
+		{
 			"journals",
 			new string[]
 			{
@@ -525,6 +533,10 @@ public class Unlocks : KMonoBehaviour
 		{
 			"dlc4journals",
 			new string[] { "journal_expedition1", "journal_expedition2", "journal_expedition3", "journal_B824", "journal_incoming" }
+		},
+		{
+			"dlc5journals",
+			new string[] { "journal_cakeandtea", "journal_hoax", "journal_printanomaly", "journal_fridgenote" }
 		},
 		{
 			"researchnotes",

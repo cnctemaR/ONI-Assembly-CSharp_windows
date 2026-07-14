@@ -215,6 +215,8 @@ namespace TUNING
 
 		public static float RADS_TO_CALS = 333.33f;
 
+		private const string MINNOW_ID = "Minnow";
+
 		public static readonly List<global::System.Action> TRAIT_CREATORS = new List<global::System.Action>
 		{
 			TraitUtil.CreateAttributeEffectTrait("None", DUPLICANTS.CONGENITALTRAITS.NONE.NAME, DUPLICANTS.CONGENITALTRAITS.NONE.DESC, "", (float)TRAITS.NO_ATTRIBUTE_BONUS, false, null, true),
@@ -222,6 +224,29 @@ namespace TUNING
 			TraitUtil.CreateAttributeEffectTrait("Ellie", DUPLICANTS.CONGENITALTRAITS.ELLIE.NAME, DUPLICANTS.CONGENITALTRAITS.ELLIE.DESC, "AirConsumptionRate", -DUPLICANTSTATS.STANDARD.BaseStats.OXYGEN_USED_PER_SECOND * 0.45f, "DecorExpectation", -5f, false),
 			TraitUtil.CreateDisabledTaskTrait("Joshua", DUPLICANTS.CONGENITALTRAITS.JOSHUA.NAME, DUPLICANTS.CONGENITALTRAITS.JOSHUA.DESC, "Combat", true),
 			TraitUtil.CreateComponentTrait<Stinky>("Liam", DUPLICANTS.CONGENITALTRAITS.LIAM.NAME, DUPLICANTS.CONGENITALTRAITS.LIAM.DESC, false, null),
+			TraitUtil.CreateAttributeEffectTrait("Minnow", DUPLICANTS.CONGENITALTRAITS.MINNOW.NAME, DUPLICANTS.CONGENITALTRAITS.MINNOW.DESC, new string[] { "BreathMax", "ThermalConductivityBarrier" }, new float[]
+			{
+				DUPLICANTSTATS.STANDARD.Breath.MINNOW_LUNG_CAPACITY_BONUS,
+				0.008f
+			}, true, delegate(GameObject go)
+			{
+				MinionResume minionResume;
+				if (go.TryGetComponent<MinionResume>(out minionResume) && !minionResume.HasBeenGrantedSkill("Swimming"))
+				{
+					minionResume.GrantSkill("Swimming");
+					AmountInstance amountInstance = Db.Get().Amounts.Breath.Lookup(go);
+					if (amountInstance != null)
+					{
+						amountInstance.SetValue(amountInstance.GetMax());
+					}
+				}
+				Effects effects;
+				if (go.TryGetComponent<Effects>(out effects))
+				{
+					effects.AddImmunity(Db.Get().effects.Get("SoakingWet"), "Minnow", true);
+					effects.AddImmunity(Db.Get().effects.Get("WetFeet"), "Minnow", true);
+				}
+			}),
 			TraitUtil.CreateNamedTrait("AncientKnowledge", DUPLICANTS.TRAITS.ANCIENTKNOWLEDGE.NAME, DUPLICANTS.TRAITS.ANCIENTKNOWLEDGE.DESC, true),
 			TraitUtil.CreateAttributeEffectTrait("BionicBug1", DUPLICANTS.TRAITS.BIONICBUG1.NAME, DUPLICANTS.TRAITS.BIONICBUG1.DESC, new string[] { "Learning", "Strength" }, new float[] { -3f, -3f }, false),
 			TraitUtil.CreateAttributeEffectTrait("BionicBug2", DUPLICANTS.TRAITS.BIONICBUG2.NAME, DUPLICANTS.TRAITS.BIONICBUG2.DESC, new string[] { "Ranching", "Caring" }, new float[] { -3f, -3f }, false),
@@ -323,6 +348,8 @@ namespace TUNING
 			TraitUtil.CreateSkillGrantingTrait("GrantSkill_Medicine2", DUPLICANTS.TRAITS.GRANTSKILL_MEDICINE2.NAME, DUPLICANTS.TRAITS.GRANTSKILL_MEDICINE2.DESC, "Medicine2"),
 			TraitUtil.CreateSkillGrantingTrait("GrantSkill_Medicine3", DUPLICANTS.TRAITS.GRANTSKILL_MEDICINE3.NAME, DUPLICANTS.TRAITS.GRANTSKILL_MEDICINE3.DESC, "Medicine3"),
 			TraitUtil.CreateSkillGrantingTrait("GrantSkill_Pyrotechnics", DUPLICANTS.TRAITS.GRANTSKILL_PYROTECHNICS.NAME, DUPLICANTS.TRAITS.GRANTSKILL_PYROTECHNICS.DESC, "Pyrotechnics"),
+			TraitUtil.CreateSkillGrantingTrait("GrantSkill_Swimming", DUPLICANTS.TRAITS.GRANTSKILL_SWIMMING.NAME, DUPLICANTS.TRAITS.GRANTSKILL_SWIMMING.DESC, "Swimming"),
+			TraitUtil.CreateSkillGrantingTrait("GrantSkill_Swimming2", DUPLICANTS.TRAITS.GRANTSKILL_SWIMMING2.NAME, DUPLICANTS.TRAITS.GRANTSKILL_SWIMMING2.DESC, "Swimming2"),
 			TraitUtil.CreateNamedTrait("IronGut", DUPLICANTS.TRAITS.IRONGUT.NAME, DUPLICANTS.TRAITS.IRONGUT.DESC, true),
 			TraitUtil.CreateAttributeEffectTrait("StrongImmuneSystem", DUPLICANTS.TRAITS.STRONGIMMUNESYSTEM.NAME, DUPLICANTS.TRAITS.STRONGIMMUNESYSTEM.DESC, "GermResistance", 1f, true, null, true),
 			TraitUtil.CreateTrait("Aggressive", DUPLICANTS.TRAITS.AGGRESSIVE.NAME, DUPLICANTS.TRAITS.AGGRESSIVE.DESC, new Action<GameObject>(TRAITS.OnAddAggressive), null, false, () => DUPLICANTS.TRAITS.AGGRESSIVE.NOREPAIR),

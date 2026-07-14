@@ -1188,6 +1188,8 @@ namespace STRINGS
 
 				public static LocString WATER = "Wat\nDamp\nMoist\nDrench\nAytch Tew\nHydr\nFlood\nIrrig\nSoaker\nDrip\nBath\nSplash\nLiqu\nHumid\nPuddl\nBuoy\nAqu\n";
 
+				public static LocString AQUATIC = "Marit\nNaut\nSubmar\nImmers\nDeep\nCoral\nTidal\nShor\nSeas\nSunk\nNav\nReef\nBeach\nSubaqu\n";
+
 				public static LocString RADIOACTIVE = "Rad\nContam\nHazard\nGlow\nTox\nIrrad\nRadioact\nAtom\nZap\nNucl\nFusion\nRay\n";
 
 				public static LocString REGOLITH = "Filt\nRegol\nSiev\nSift\nMeteor\nSand\nRock\nDust\nSedim\nSilt\n";

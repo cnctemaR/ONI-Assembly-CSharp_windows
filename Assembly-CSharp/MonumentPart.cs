@@ -53,11 +53,14 @@ public class MonumentPart : KMonoBehaviour
 
 	public void SetState(string state)
 	{
-		MonumentPartResource monumentPartResource = Db.GetMonumentParts().Get(state);
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.SwapAnims(new KAnimFile[] { monumentPartResource.AnimFile });
-		component.Play(monumentPartResource.State, KAnim.PlayMode.Once, 1f, 0f);
-		this.chosenState = state;
+		MonumentPartResource monumentPartResource = Db.GetMonumentParts().TryGet(state);
+		if (monumentPartResource != null)
+		{
+			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+			component.SwapAnims(new KAnimFile[] { monumentPartResource.AnimFile });
+			component.Play(monumentPartResource.State, KAnim.PlayMode.Once, 1f, 0f);
+			this.chosenState = state;
+		}
 	}
 
 	public bool IsMonumentCompleted()

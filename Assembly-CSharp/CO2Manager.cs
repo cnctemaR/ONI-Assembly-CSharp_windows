@@ -158,6 +158,11 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 
 	public void SpawnBreath(Vector3 position, float mass, float temperature, bool flip)
 	{
+		if (Grid.IsVisiblyInLiquid(position))
+		{
+			BubbleManager.instance.SpawnBubble(SimHashes.CarbonDioxide, position, mass, temperature, BubbleManager.Disease.None, null);
+			return;
+		}
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
 		this.SpawnCO2(position, mass, temperature, flip);
 		GameObject gameObject = this.breathPool.GetInstance();

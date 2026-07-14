@@ -64,8 +64,7 @@ public static class GeothermalVictorySequence
 			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
-		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.ActivateGeothermalPlant.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false, true);
-		component.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.ActivateGeothermalPlant.messageBody, Db.Get().ColonyAchievements.ActivateGeothermalPlant.Id, Db.Get().ColonyAchievements.ActivateGeothermalPlant.loopVideoName, Db.Get().ColonyAchievements.ActivateGeothermalPlant.IsValidForSave(), false);
+		component.PlayShortWithVictoryLoop(Db.Get().ColonyAchievements.ActivateGeothermalPlant.shortVideoName, Db.Get().ColonyAchievements.ActivateGeothermalPlant.messageBody, Db.Get().ColonyAchievements.ActivateGeothermalPlant.Id, Db.Get().ColonyAchievements.ActivateGeothermalPlant.loopVideoName, Db.Get().ColonyAchievements.ActivateGeothermalPlant.IsValidForSave(), AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);

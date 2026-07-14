@@ -1,9 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
 public static class LoreBearerUtil
 {
+	public static Action<InfoDialogScreen> GetUnlockActionForCollection(string collectionId)
+	{
+		Action<InfoDialogScreen> action2;
+		if (LoreBearerUtil.CollectionUnlockMethods.TryGetValue(collectionId, out action2))
+		{
+			return action2;
+		}
+		LoreBearerAction action = LoreBearerUtil.UnlockNextInCollections(new string[] { collectionId });
+		return delegate(InfoDialogScreen screen)
+		{
+			action(screen);
+		};
+	}
+
+	public static void AddPOILoreSupport(GameObject prefabOrGameObject)
+	{
+		prefabOrGameObject.AddOrGet<LoreBearer>().useDefaultLore = false;
+	}
+
 	public static void AddLoreTo(GameObject prefabOrGameObject)
 	{
 		prefabOrGameObject.AddOrGet<LoreBearer>();
@@ -190,4 +210,28 @@ public static class LoreBearerUtil
 			ManagementMenu.Instance.OpenCodexToEntry(id, null);
 		};
 	}
+
+	public static readonly Dictionary<string, Action<InfoDialogScreen>> CollectionUnlockMethods = new Dictionary<string, Action<InfoDialogScreen>>
+	{
+		{
+			"emails",
+			new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextEmail)
+		},
+		{
+			"researchnotes",
+			new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextResearchNote)
+		},
+		{
+			"journals",
+			new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextJournalEntry)
+		},
+		{
+			"dimensionallore",
+			new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextDimensionalLore)
+		},
+		{
+			"space",
+			new Action<InfoDialogScreen>(LoreBearerUtil.UnlockNextSpaceEntry)
+		}
+	};
 }

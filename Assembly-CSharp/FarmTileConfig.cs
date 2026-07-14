@@ -38,7 +38,8 @@ public class FarmTileConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(GameTags.CodexCategories.FarmBuilding, false);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.CodexCategories.FarmBuilding, false);
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
@@ -50,14 +51,28 @@ public class FarmTileConfig : IBuildingConfig
 		plantablePlot.occupyingObjectRelativePosition = new Vector3(0f, 1f, 0f);
 		plantablePlot.AddDepositTag(GameTags.CropSeed);
 		plantablePlot.AddDepositTag(GameTags.WaterSeed);
+		plantablePlot.AddAdditionalCriteria(new Func<GameObject, bool>(FarmTileConfig.ForbiddenTags));
 		plantablePlot.SetFertilizationFlags(true, false);
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Farm;
 		go.AddOrGet<AnimTileable>();
 		Prioritizable.AddRef(go);
+		component.prefabInitFn += this.OnPrefabInit;
+	}
+
+	private void OnPrefabInit(GameObject instance)
+	{
+		instance.AddOrGet<PlantablePlot>().AddAdditionalCriteria(new Func<GameObject, bool>(FarmTileConfig.ForbiddenTags));
+	}
+
+	public static bool ForbiddenTags(GameObject objInQuestion)
+	{
+		KPrefabID component = objInQuestion.GetComponent<KPrefabID>();
+		return !component.HasTag(GameTags.LargeSeed) && !component.HasTag(GameTags.BackwallSeed);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<KBatchedAnimController>().initialBlendParameters = 4;
 		GeneratedBuildings.RemoveLoopingSounds(go);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.FarmTiles, false);
 		FarmTileConfig.SetUpFarmPlotTags(go);

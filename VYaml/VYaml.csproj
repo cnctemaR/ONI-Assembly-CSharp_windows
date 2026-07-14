@@ -1,0 +1,181 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{1D119CA1-935B-4071-9DB4-19566E493042}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>VYaml</RootNamespace>
+    <AssemblyName>VYaml</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Emitter\EmitState.cs" />
+    <Compile Include="Emitter\MappingStyle.cs" />
+    <Compile Include="Emitter\ScalarStyle.cs" />
+    <Compile Include="Emitter\SequenceStyle.cs" />
+    <Compile Include="Emitter\Utf8YamlEmitter.cs" />
+    <Compile Include="Emitter\YamlEmitOptions.cs" />
+    <Compile Include="Emitter\YamlEmitterException.cs" />
+    <Compile Include="Internal\ByteSequenceHash.cs" />
+    <Compile Include="Internal\EmitStringAnalyzer.cs" />
+    <Compile Include="Internal\EmitStringInfo.cs" />
+    <Compile Include="Internal\ExpandBuffer.cs" />
+    <Compile Include="Internal\InsertionQueue.cs" />
+    <Compile Include="Internal\KeyNameMutator.cs" />
+    <Compile Include="Internal\LineBreakState.cs" />
+    <Compile Include="Internal\ReusableByteSequenceBuilder.cs" />
+    <Compile Include="Internal\ReusableByteSequenceBuilderPool.cs" />
+    <Compile Include="Internal\ReusableByteSequenceSegment.cs" />
+    <Compile Include="Internal\StreamHelper.cs" />
+    <Compile Include="Internal\StringEncoding.cs" />
+    <Compile Include="Internal\TypeHelper.cs" />
+    <Compile Include="Internal\YamlCodes.cs" />
+    <Compile Include="Microsoft\CodeAnalysis\EmbeddedAttribute.cs" />
+    <Compile Include="Parser\Anchor.cs" />
+    <Compile Include="Parser\ITokenContent.cs" />
+    <Compile Include="Parser\Marker.cs" />
+    <Compile Include="Parser\ParseEventType.cs" />
+    <Compile Include="Parser\ParseState.cs" />
+    <Compile Include="Parser\Scalar.cs" />
+    <Compile Include="Parser\ScalarPool.cs" />
+    <Compile Include="Parser\SimpleKeyState.cs" />
+    <Compile Include="Parser\Tag.cs" />
+    <Compile Include="Parser\Token.cs" />
+    <Compile Include="Parser\TokenType.cs" />
+    <Compile Include="Parser\Utf8YamlTokenizer.cs" />
+    <Compile Include="Parser\VersionDirective.cs" />
+    <Compile Include="Parser\YamlParser.cs" />
+    <Compile Include="Parser\YamlParserException.cs" />
+    <Compile Include="Parser\YamlTokenizerException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\ArrayFormatter.cs" />
+    <Compile Include="Serialization\BigIntegerFormatter.cs" />
+    <Compile Include="Serialization\BitArrayFormatter.cs" />
+    <Compile Include="Serialization\BlockingCollectionFormatter.cs" />
+    <Compile Include="Serialization\BooleanFormatter.cs" />
+    <Compile Include="Serialization\BuiltinResolver.cs" />
+    <Compile Include="Serialization\ByteArrayFormatter.cs" />
+    <Compile Include="Serialization\ByteArraySegmentFormatter.cs" />
+    <Compile Include="Serialization\ByteFormatter.cs" />
+    <Compile Include="Serialization\ByteMemoryFormatter.cs" />
+    <Compile Include="Serialization\ByteReadOnlyMemoryFormatter.cs" />
+    <Compile Include="Serialization\ByteReadOnlySequenceFormatter.cs" />
+    <Compile Include="Serialization\CharFormatter.cs" />
+    <Compile Include="Serialization\CollectionFormatterBase.cs" />
+    <Compile Include="Serialization\ComplexFormatter.cs" />
+    <Compile Include="Serialization\CompositeResolver.cs" />
+    <Compile Include="Serialization\ConcurrentBagFormatter.cs" />
+    <Compile Include="Serialization\ConcurrentQueueFormatter.cs" />
+    <Compile Include="Serialization\ConcurrentStackFormatter.cs" />
+    <Compile Include="Serialization\DateTimeFormatter.cs" />
+    <Compile Include="Serialization\DateTimeOffsetFormatter.cs" />
+    <Compile Include="Serialization\DecimalFormatter.cs" />
+    <Compile Include="Serialization\DictionaryFormatter.cs" />
+    <Compile Include="Serialization\EnumAsStringFormatter.cs" />
+    <Compile Include="Serialization\EnumAsStringNonGenericHelper.cs" />
+    <Compile Include="Serialization\Float32Formatter.cs" />
+    <Compile Include="Serialization\Float64Formatter.cs" />
+    <Compile Include="Serialization\FourDimensionalArrayFormatter.cs" />
+    <Compile Include="Serialization\GeneratedResolver.cs" />
+    <Compile Include="Serialization\GuidFormatter.cs" />
+    <Compile Include="Serialization\HashSetFormatter.cs" />
+    <Compile Include="Serialization\INamingConventionMutator.cs" />
+    <Compile Include="Serialization\Int16Formatter.cs" />
+    <Compile Include="Serialization\Int32Formatter.cs" />
+    <Compile Include="Serialization\Int64Formatter.cs" />
+    <Compile Include="Serialization\InterfaceCollectionFormatter.cs" />
+    <Compile Include="Serialization\InterfaceDictionaryFormatter.cs" />
+    <Compile Include="Serialization\InterfaceEnumerableFormatter.cs" />
+    <Compile Include="Serialization\InterfaceListFormatter.cs" />
+    <Compile Include="Serialization\InterfaceReadOnlyCollectionFormatter.cs" />
+    <Compile Include="Serialization\InterfaceReadOnlyDictionaryFormatter.cs" />
+    <Compile Include="Serialization\InterfaceReadOnlyListFormatter.cs" />
+    <Compile Include="Serialization\InterfaceSetFormatter.cs" />
+    <Compile Include="Serialization\IYamlFormatter.2.cs" />
+    <Compile Include="Serialization\IYamlFormatter.cs" />
+    <Compile Include="Serialization\IYamlFormatterResolver.cs" />
+    <Compile Include="Serialization\KeyValuePairFormatter.cs" />
+    <Compile Include="Serialization\LinkedListFormatter.cs" />
+    <Compile Include="Serialization\ListFormatter.cs" />
+    <Compile Include="Serialization\LowerCamelCaseMutator.cs" />
+    <Compile Include="Serialization\NamingConventionMutator.cs" />
+    <Compile Include="Serialization\NotationCaseMutator.cs" />
+    <Compile Include="Serialization\NullableBooleanFormatter.cs" />
+    <Compile Include="Serialization\NullableByteFormatter.cs" />
+    <Compile Include="Serialization\NullableCharFormatter.cs" />
+    <Compile Include="Serialization\NullableDateTimeFormatter.cs" />
+    <Compile Include="Serialization\NullableFloat32Formatter.cs" />
+    <Compile Include="Serialization\NullableFloat64Formatter.cs" />
+    <Compile Include="Serialization\NullableFormatter.cs" />
+    <Compile Include="Serialization\NullableInt16Formatter.cs" />
+    <Compile Include="Serialization\NullableInt32Formatter.cs" />
+    <Compile Include="Serialization\NullableInt64Formatter.cs" />
+    <Compile Include="Serialization\NullableSByteFormatter.cs" />
+    <Compile Include="Serialization\NullableStringFormatter.cs" />
+    <Compile Include="Serialization\NullableUInt16Formatter.cs" />
+    <Compile Include="Serialization\NullableUInt32Formatter.cs" />
+    <Compile Include="Serialization\NullableUInt64Formatter.cs" />
+    <Compile Include="Serialization\PrimitiveObjectFormatter.cs" />
+    <Compile Include="Serialization\PrimitiveObjectResolver.cs" />
+    <Compile Include="Serialization\QueueFormatter.cs" />
+    <Compile Include="Serialization\SByteFormatter.cs" />
+    <Compile Include="Serialization\ScalarStyleScope.cs" />
+    <Compile Include="Serialization\SequenceStyleScope.cs" />
+    <Compile Include="Serialization\SortedSetFormatter.cs" />
+    <Compile Include="Serialization\SpanExtensions.cs" />
+    <Compile Include="Serialization\StackFormatter.cs" />
+    <Compile Include="Serialization\StandardResolver.cs" />
+    <Compile Include="Serialization\StaticNullableFormatter.cs" />
+    <Compile Include="Serialization\ThreeDimensionalArrayFormatter.cs" />
+    <Compile Include="Serialization\TimeSpanFormatter.cs" />
+    <Compile Include="Serialization\TupleFormatter.2.cs" />
+    <Compile Include="Serialization\TupleFormatter.3.cs" />
+    <Compile Include="Serialization\TupleFormatter.4.cs" />
+    <Compile Include="Serialization\TupleFormatter.5.cs" />
+    <Compile Include="Serialization\TupleFormatter.6.cs" />
+    <Compile Include="Serialization\TupleFormatter.7.cs" />
+    <Compile Include="Serialization\TupleFormatter.8.cs" />
+    <Compile Include="Serialization\TupleFormatter.cs" />
+    <Compile Include="Serialization\TwoDimensionalArrayFormatter.cs" />
+    <Compile Include="Serialization\TypeFormatter.cs" />
+    <Compile Include="Serialization\UInt16Formatter.cs" />
+    <Compile Include="Serialization\UInt32Formatter.cs" />
+    <Compile Include="Serialization\UInt64Formatter.cs" />
+    <Compile Include="Serialization\UpperCamelCaseMutator.cs" />
+    <Compile Include="Serialization\UriFormatter.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.2.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.3.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.4.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.5.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.6.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.7.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.8.cs" />
+    <Compile Include="Serialization\ValueTupleFormatter.cs" />
+    <Compile Include="Serialization\VersionFormatter.cs" />
+    <Compile Include="Serialization\YamlDeserializationContext.cs" />
+    <Compile Include="Serialization\YamlFormatterResolverExtensions.cs" />
+    <Compile Include="Serialization\YamlSerializationContext.cs" />
+    <Compile Include="Serialization\YamlSerializer.cs" />
+    <Compile Include="Serialization\YamlSerializerException.cs" />
+    <Compile Include="Serialization\YamlSerializerOptions.cs" />
+    <Compile Include="System\Runtime\CompilerServices\NullableAttribute.cs" />
+    <Compile Include="System\Runtime\CompilerServices\NullableContextAttribute.cs" />
+    <Compile Include="System\Runtime\CompilerServices\RefSafetyRulesAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\netstandard\netstandard.csproj">
+      <Project>{1D119CA1-935B-4071-9DB4-19566E492FCB}</Project>
+      <Name>netstandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VYaml.Annotations\VYaml.Annotations.csproj">
+      <Project>{1D119CA1-935B-4071-9DB4-19566E493041}</Project>
+      <Name>VYaml.Annotations</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

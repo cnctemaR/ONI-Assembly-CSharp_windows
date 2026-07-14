@@ -366,10 +366,24 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	public void WattsonStartDynamicMusic()
 	{
 		ClusterLayout currentClusterLayout = CustomGameSettings.Instance.GetCurrentClusterLayout();
-		if (currentClusterLayout != null && currentClusterLayout.clusterAudio != null && !string.IsNullOrWhiteSpace(currentClusterLayout.clusterAudio.musicFirst))
+		if (currentClusterLayout == null || currentClusterLayout.clusterAudio == null)
 		{
-			DebugUtil.Assert(this.fullSongPlaylist.songMap.ContainsKey(currentClusterLayout.clusterAudio.musicFirst), "Attempting to play dlc music that isn't in the fullSongPlaylist");
+			this.PlayDynamicMusic();
+			return;
+		}
+		if (currentClusterLayout.clusterAudio.musicPlaylist != null && currentClusterLayout.clusterAudio.musicPlaylist.Count > 0)
+		{
+			List<string> list = new List<string>(currentClusterLayout.clusterAudio.musicPlaylist);
+			if (!currentClusterLayout.clusterAudio.musicFirst.IsNullOrWhiteSpace() && !list.Contains(currentClusterLayout.clusterAudio.musicFirst))
+			{
+				list.Insert(0, currentClusterLayout.clusterAudio.musicFirst);
+			}
+			this.fullSongPlaylist.SetPrioritySongs(list);
+		}
+		if (!currentClusterLayout.clusterAudio.musicFirst.IsNullOrWhiteSpace())
+		{
 			this.activePlaylist = this.fullSongPlaylist;
+			this.fullSongPlaylist.MarkSongPlayed(currentClusterLayout.clusterAudio.musicFirst);
 			this.PlayDynamicMusic(currentClusterLayout.clusterAudio.musicFirst);
 			return;
 		}
@@ -927,6 +941,28 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			this.songMap.Clear();
 			this.unplayedSongs.Clear();
 			this.lastSongPlayed = "";
+		}
+
+		public void SetPrioritySongs(List<string> songs)
+		{
+			this.unplayedSongs.Clear();
+			foreach (string text in songs)
+			{
+				if (this.songMap.ContainsKey(text))
+				{
+					this.unplayedSongs.Add(text);
+				}
+				else
+				{
+					DebugUtil.DevLogError("Priority song not found in playlist: " + text);
+				}
+			}
+		}
+
+		public void MarkSongPlayed(string song)
+		{
+			this.unplayedSongs.Remove(song);
+			this.lastSongPlayed = song;
 		}
 
 		public string GetNextSong()

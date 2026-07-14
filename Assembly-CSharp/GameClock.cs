@@ -156,7 +156,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		}
 		day++;
 		OniMetrics.LogEvent(OniMetrics.Event.EndOfCycle, GameClock.NewCycleKey, day);
-		OniMetrics.SendEvent(OniMetrics.Event.EndOfCycle, "DoAutoSave");
+		OniMetrics.SendEvent(OniMetrics.Event.EndOfCycle, "AutoSave");
 		string text = SaveLoader.GetActiveSaveFilePath();
 		if (text == null)
 		{

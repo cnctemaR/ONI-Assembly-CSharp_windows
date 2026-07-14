@@ -65,7 +65,11 @@ public class MilkPressConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("ColdWheatSeed", 10f),
-			new ComplexRecipe.RecipeElement(SimHashes.Water.CreateTag(), 15f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				SimHashes.Water.CreateTag(),
+				SimHashes.Mucus.CreateTag()
+			}, 15f)
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
@@ -86,7 +90,11 @@ public class MilkPressConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(SpiceNutConfig.ID, 3f),
-			new ComplexRecipe.RecipeElement(SimHashes.Water.CreateTag(), 17f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				SimHashes.Water.CreateTag(),
+				SimHashes.Mucus.CreateTag()
+			}, 17f)
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{
@@ -107,7 +115,11 @@ public class MilkPressConfig : IBuildingConfig
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement("BeanPlantSeed", 2f),
-			new ComplexRecipe.RecipeElement(SimHashes.Water.CreateTag(), 18f)
+			new ComplexRecipe.RecipeElement(new Tag[]
+			{
+				SimHashes.Water.CreateTag(),
+				SimHashes.Mucus.CreateTag()
+			}, 18f)
 		};
 		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
 		{
@@ -216,6 +228,29 @@ public class MilkPressConfig : IBuildingConfig
 		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("MilkPress") };
 		complexRecipe.sortOrder = 30;
+		if (DlcManager.IsContentSubscribed("DLC5_ID"))
+		{
+			float num6 = 100f;
+			float num7 = 50f;
+			ComplexRecipe.RecipeElement[] array15 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(SimHashes.PalmWood.CreateTag(), num6)
+			};
+			ComplexRecipe.RecipeElement[] array16 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(SimHashes.Latex.CreateTag(), num7, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, true)
+			};
+			complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MilkPress", array15, array16), array15, array16, 0, 0, DlcManager.DLC5);
+			complexRecipe.time = 40f;
+			complexRecipe.description = GameUtil.SafeStringFormat(global::STRINGS.BUILDINGS.PREFABS.MILKPRESS.PALMWOOD_TO_LATEX_RECIPE_DESCRIPTION, new object[]
+			{
+				SimHashes.PalmWood.CreateTag().ProperName(),
+				SimHashes.Latex.CreateTag().ProperName()
+			});
+			complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.IngredientToResult;
+			complexRecipe.fabricators = new List<Tag> { TagManager.Create("MilkPress") };
+			complexRecipe.sortOrder = 40;
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

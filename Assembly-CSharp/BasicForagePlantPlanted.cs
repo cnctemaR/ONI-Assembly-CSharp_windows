@@ -3,6 +3,21 @@ using UnityEngine;
 
 public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPlanted.StatesInstance>
 {
+	private static bool DoesNOTHavePreDeathAnimation(BasicForagePlantPlanted.StatesInstance smi, object o)
+	{
+		return string.IsNullOrEmpty(smi.master.Pre_Death_Anim);
+	}
+
+	private static bool HasPreDeathAnimation(BasicForagePlantPlanted.StatesInstance smi, object o)
+	{
+		return !string.IsNullOrEmpty(smi.master.Pre_Death_Anim);
+	}
+
+	private static void DropSeed(BasicForagePlantPlanted.StatesInstance smi)
+	{
+		smi.master.seedProducer.DropSeed(null);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -14,6 +29,8 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 		CreatureHelpers.DeselectCreature(base.gameObject);
 		Util.KDestroyGameObject(base.gameObject);
 	}
+
+	public string Pre_Death_Anim;
 
 	[MyCmpReq]
 	private Harvestable harvestable;
@@ -40,14 +57,13 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 			base.serializable = StateMachine.SerializeType.Both_DEPRECATED;
 			this.seed_grow.PlayAnim("idle", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null);
 			this.alive.InitializeStates(this.masterTarget, this.dead);
-			this.alive.idle.PlayAnim("idle").EventTransition(GameHashes.Harvest, this.alive.harvest, null).Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
-			{
-				smi.master.harvestable.SetCanBeHarvested(true);
-			});
-			this.alive.harvest.Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
-			{
-				smi.master.seedProducer.DropSeed(null);
-			}).GoTo(this.dead);
+			this.alive.idle.PlayAnim("idle").EventHandlerTransition(GameHashes.Harvest, this.alive.harvest, new Func<BasicForagePlantPlanted.StatesInstance, object, bool>(BasicForagePlantPlanted.DoesNOTHavePreDeathAnimation)).EventHandlerTransition(GameHashes.Harvest, this.alive.harvestDelayed, new Func<BasicForagePlantPlanted.StatesInstance, object, bool>(BasicForagePlantPlanted.HasPreDeathAnimation))
+				.Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
+				{
+					smi.master.harvestable.SetCanBeHarvested(true);
+				});
+			this.alive.harvestDelayed.PlayAnim((BasicForagePlantPlanted.StatesInstance smi) => smi.master.Pre_Death_Anim, KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.harvest);
+			this.alive.harvest.Enter(new StateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State.Callback(BasicForagePlantPlanted.DropSeed)).EnterGoTo(this.dead);
 			this.dead.Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.PlantDeathId), smi.master.transform.GetPosition(), Grid.SceneLayer.FXFront, null, 0).SetActive(true);
@@ -69,6 +85,8 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 			public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State idle;
 
 			public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State harvest;
+
+			public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State harvestDelayed;
 		}
 	}
 }

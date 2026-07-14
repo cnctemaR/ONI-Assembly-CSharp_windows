@@ -25,12 +25,22 @@ public class SubstanceTable : ScriptableObject, ISerializationCallbackReceiver
 
 	public void OnBeforeSerialize()
 	{
+		this.DefineDefaultGradients();
 		this.BindAnimList();
 	}
 
 	public void OnAfterDeserialize()
 	{
+		this.DefineDefaultGradients();
 		this.BindAnimList();
+	}
+
+	private void DefineDefaultGradients()
+	{
+		foreach (Substance substance in this.list)
+		{
+			Gradient gradient = substance.Gradient;
+		}
 	}
 
 	private void BindAnimList()

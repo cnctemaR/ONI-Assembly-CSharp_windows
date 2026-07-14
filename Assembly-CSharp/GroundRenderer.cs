@@ -147,10 +147,11 @@ public class GroundRenderer : KMonoBehaviour
 		material.EnableKeyword("OPAQUE");
 		material.DisableKeyword("ALPHA");
 		this.ConfigureMaterialShine(material);
+		material.SetTexture("_AlphaTestMap", Texture2D.whiteTexture);
+		material.SetInt("_IsBackwallEdge", 0);
 		material.SetInt("_SrcAlpha", 1);
 		material.SetInt("_DstAlpha", 0);
 		material.SetInt("_ZWrite", 1);
-		material.SetTexture("_AlphaTestMap", Texture2D.whiteTexture);
 	}
 
 	private void InitAlphaMaterial(Material material, Element element)
@@ -161,6 +162,37 @@ public class GroundRenderer : KMonoBehaviour
 		material.DisableKeyword("OPAQUE");
 		this.ConfigureMaterialShine(material);
 		material.SetTexture("_AlphaTestMap", this.masks.maskAtlas.texture);
+		material.SetInt("_IsBackwallEdge", 0);
+		material.SetInt("_SrcAlpha", 5);
+		material.SetInt("_DstAlpha", 10);
+		material.SetInt("_ZWrite", 0);
+	}
+
+	private void InitBackwallMaterial(Material material, Element element)
+	{
+		material.name = element.id.ToString() + "_backwall";
+		material.renderQueue = RenderQueues.NaturalBackwall;
+		material.EnableKeyword("OPAQUE");
+		material.DisableKeyword("ALPHA");
+		this.ConfigureMaterialShine(material);
+		material.SetTexture("_AlphaTestMap", Texture2D.grayTexture);
+		material.SetInt("_IsBackwallEdge", 0);
+		material.SetInt("_StencilPass", 0);
+		material.SetInt("_SrcAlpha", 5);
+		material.SetInt("_DstAlpha", 10);
+		material.SetInt("_ZWrite", 0);
+	}
+
+	private void InitAlphaBackwallMaterial(Material material, Element element)
+	{
+		material.name = element.id.ToString() + "_backwall_alpha";
+		material.renderQueue = RenderQueues.BackwallTransparent;
+		material.EnableKeyword("ALPHA");
+		material.DisableKeyword("OPAQUE");
+		this.ConfigureMaterialShine(material);
+		material.SetTexture("_AlphaTestMap", this.masks.maskAtlas.texture);
+		material.SetInt("_IsBackwallEdge", 1);
+		material.SetInt("_StencilPass", 0);
 		material.SetInt("_SrcAlpha", 5);
 		material.SetInt("_DstAlpha", 10);
 		material.SetInt("_ZWrite", 0);
@@ -194,7 +226,11 @@ public class GroundRenderer : KMonoBehaviour
 				this.InitOpaqueMaterial(material, element);
 				Material material2 = new Material(material);
 				this.InitAlphaMaterial(material2, element);
-				GroundRenderer.Materials materials = new GroundRenderer.Materials(material, material2);
+				Material material3 = new Material(material);
+				this.InitBackwallMaterial(material3, element);
+				Material material4 = new Material(material);
+				this.InitAlphaBackwallMaterial(material4, element);
+				GroundRenderer.Materials materials = new GroundRenderer.Materials(material, material2, material3, material4);
 				this.elementMaterials[element.id] = materials;
 			}
 		}
@@ -220,6 +256,17 @@ public class GroundRenderer : KMonoBehaviour
 				}
 			}
 		}
+	}
+
+	public void SetShineColors(SimHashes element, Color centerColor, Color edgeColor)
+	{
+		GroundRenderer.Materials materials;
+		if (!this.elementMaterials.TryGetValue(element, out materials))
+		{
+			return;
+		}
+		materials.alpha.SetColor(GroundRenderer.SHINE_COLOR, edgeColor);
+		materials.opaque.SetColor(GroundRenderer.SHINE_COLOR, centerColor);
 	}
 
 	public void FreeResources()
@@ -249,6 +296,8 @@ public class GroundRenderer : KMonoBehaviour
 		{
 			global::UnityEngine.Object.Destroy(materials.opaque);
 			global::UnityEngine.Object.Destroy(materials.alpha);
+			global::UnityEngine.Object.Destroy(materials.backwall);
+			global::UnityEngine.Object.Destroy(materials.backwallAlpha);
 		}
 		this.elementMaterials.Clear();
 	}
@@ -268,18 +317,26 @@ public class GroundRenderer : KMonoBehaviour
 
 	private Vector2I size;
 
+	private static int SHINE_COLOR = Shader.PropertyToID("_ShineColour");
+
 	[Serializable]
 	private struct Materials
 	{
-		public Materials(Material opaque, Material alpha)
+		public Materials(Material opaque, Material alpha, Material backwall, Material backwallAlpha)
 		{
 			this.opaque = opaque;
 			this.alpha = alpha;
+			this.backwall = backwall;
+			this.backwallAlpha = backwallAlpha;
 		}
 
 		public Material opaque;
 
 		public Material alpha;
+
+		public Material backwall;
+
+		public Material backwallAlpha;
 	}
 
 	private class ElementChunk
@@ -290,6 +347,8 @@ public class GroundRenderer : KMonoBehaviour
 			GroundRenderer.Materials materials2 = materials[element];
 			this.alpha = new GroundRenderer.ElementChunk.RenderData(materials2.alpha);
 			this.opaque = new GroundRenderer.ElementChunk.RenderData(materials2.opaque);
+			this.backwall = new GroundRenderer.ElementChunk.RenderData(materials2.backwall);
+			this.backwallAlpha = new GroundRenderer.ElementChunk.RenderData(materials2.backwallAlpha);
 			this.Clear();
 		}
 
@@ -297,6 +356,8 @@ public class GroundRenderer : KMonoBehaviour
 		{
 			this.opaque.Clear();
 			this.alpha.Clear();
+			this.backwall.Clear();
+			this.backwallAlpha.Clear();
 			this.tileCount = 0;
 		}
 
@@ -312,16 +373,34 @@ public class GroundRenderer : KMonoBehaviour
 			this.tileCount++;
 		}
 
+		public void AddBackwallQuad(int x, int y, GroundMasks.UVData uvs)
+		{
+			this.backwall.AddQuad(x, y, uvs);
+			this.tileCount++;
+		}
+
+		public void AddBackwallAlphaQuad(int x, int y, GroundMasks.UVData uvs)
+		{
+			this.backwallAlpha.AddQuad(x, y, uvs);
+			this.tileCount++;
+		}
+
 		public void Build()
 		{
+			this.backwall.Build();
 			this.opaque.Build();
 			this.alpha.Build();
+			this.backwallAlpha.Build();
 		}
 
 		public void Render(int layer, int element_idx)
 		{
 			float num = Grid.GetLayerZ(Grid.SceneLayer.Ground);
 			num -= 0.0001f * (float)element_idx;
+			float num2 = Grid.GetLayerZ(Grid.SceneLayer.Backwall);
+			num2 -= 0.0001f * (float)element_idx;
+			this.backwall.Render(new Vector3(0f, 0f, num2), layer);
+			this.backwallAlpha.Render(new Vector3(0f, 0f, num2), layer);
 			this.opaque.Render(new Vector3(0f, 0f, num), layer);
 			this.alpha.Render(new Vector3(0f, 0f, num), layer);
 		}
@@ -330,8 +409,12 @@ public class GroundRenderer : KMonoBehaviour
 		{
 			this.alpha.FreeResources();
 			this.opaque.FreeResources();
+			this.backwall.FreeResources();
+			this.backwallAlpha.FreeResources();
 			this.alpha = null;
 			this.opaque = null;
+			this.backwall = null;
+			this.backwallAlpha = null;
 		}
 
 		public SimHashes element;
@@ -339,6 +422,10 @@ public class GroundRenderer : KMonoBehaviour
 		private GroundRenderer.ElementChunk.RenderData alpha;
 
 		private GroundRenderer.ElementChunk.RenderData opaque;
+
+		private GroundRenderer.ElementChunk.RenderData backwall;
+
+		private GroundRenderer.ElementChunk.RenderData backwallAlpha;
 
 		public int tileCount;
 
@@ -397,6 +484,11 @@ public class GroundRenderer : KMonoBehaviour
 
 			public void Build()
 			{
+				this.mesh.Clear();
+				if (this.pos.Count == 0)
+				{
+					return;
+				}
 				this.mesh.SetVertices(this.pos);
 				this.mesh.SetUVs(0, this.uv);
 				this.mesh.SetTriangles(this.indices, 0);
@@ -491,49 +583,53 @@ public class GroundRenderer : KMonoBehaviour
 					int num6 = num * Grid.WidthInCells + num4;
 					int num7 = num2 * Grid.WidthInCells + num3;
 					int num8 = num2 * Grid.WidthInCells + num4;
-					GroundRenderer.WorldChunk.elements[0] = Grid.Element[num5];
-					GroundRenderer.WorldChunk.elements[1] = Grid.Element[num6];
-					GroundRenderer.WorldChunk.elements[2] = Grid.Element[num7];
-					GroundRenderer.WorldChunk.elements[3] = Grid.Element[num8];
-					GroundRenderer.WorldChunk.substances[0] = ((Grid.RenderedByWorld[num5] && GroundRenderer.WorldChunk.elements[0].IsSolid) ? GroundRenderer.WorldChunk.elements[0].substance.idx : (-1));
-					GroundRenderer.WorldChunk.substances[1] = ((Grid.RenderedByWorld[num6] && GroundRenderer.WorldChunk.elements[1].IsSolid) ? GroundRenderer.WorldChunk.elements[1].substance.idx : (-1));
-					GroundRenderer.WorldChunk.substances[2] = ((Grid.RenderedByWorld[num7] && GroundRenderer.WorldChunk.elements[2].IsSolid) ? GroundRenderer.WorldChunk.elements[2].substance.idx : (-1));
-					GroundRenderer.WorldChunk.substances[3] = ((Grid.RenderedByWorld[num8] && GroundRenderer.WorldChunk.elements[3].IsSolid) ? GroundRenderer.WorldChunk.elements[3].substance.idx : (-1));
-					GroundRenderer.WorldChunk.uniqueElements[0] = GroundRenderer.WorldChunk.elements[0];
-					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[1], GroundRenderer.WorldChunk.uniqueElements, 1);
-					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[2], GroundRenderer.WorldChunk.uniqueElements, 2);
-					GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[3], GroundRenderer.WorldChunk.uniqueElements, 3);
-					int num9 = -1;
-					int biomeIdx = GroundRenderer.WorldChunk.GetBiomeIdx(i * Grid.WidthInCells + j);
-					GroundMasks.BiomeMaskData biomeMaskData = biomeMasks[biomeIdx];
-					if (biomeMaskData == null)
+					for (int k = 0; k < GroundRenderer.WorldChunk.biomeChecks.Length; k++)
 					{
-						biomeMaskData = biomeMasks[3];
-					}
-					for (int k = 0; k < GroundRenderer.WorldChunk.uniqueElements.Length; k++)
-					{
-						Element element = GroundRenderer.WorldChunk.uniqueElements[k];
-						if (element.IsSolid)
+						GroundRenderer.WorldChunk.BiomeMaskCheck biomeMaskCheck = GroundRenderer.WorldChunk.biomeChecks[k];
+						GroundRenderer.WorldChunk.elements[0] = biomeMaskCheck.elementGet(num5);
+						GroundRenderer.WorldChunk.elements[1] = biomeMaskCheck.elementGet(num6);
+						GroundRenderer.WorldChunk.elements[2] = biomeMaskCheck.elementGet(num7);
+						GroundRenderer.WorldChunk.elements[3] = biomeMaskCheck.elementGet(num8);
+						GroundRenderer.WorldChunk.substances[0] = (biomeMaskCheck.elementCheck(GroundRenderer.WorldChunk.elements[0], num5) ? GroundRenderer.WorldChunk.elements[0].substance.idx : (-1));
+						GroundRenderer.WorldChunk.substances[1] = (biomeMaskCheck.elementCheck(GroundRenderer.WorldChunk.elements[1], num6) ? GroundRenderer.WorldChunk.elements[1].substance.idx : (-1));
+						GroundRenderer.WorldChunk.substances[2] = (biomeMaskCheck.elementCheck(GroundRenderer.WorldChunk.elements[2], num7) ? GroundRenderer.WorldChunk.elements[2].substance.idx : (-1));
+						GroundRenderer.WorldChunk.substances[3] = (biomeMaskCheck.elementCheck(GroundRenderer.WorldChunk.elements[3], num8) ? GroundRenderer.WorldChunk.elements[3].substance.idx : (-1));
+						GroundRenderer.WorldChunk.uniqueElements[0] = GroundRenderer.WorldChunk.elements[0];
+						GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[1], GroundRenderer.WorldChunk.uniqueElements, 1);
+						GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[2], GroundRenderer.WorldChunk.uniqueElements, 2);
+						GroundRenderer.WorldChunk.InsertSorted(GroundRenderer.WorldChunk.elements[3], GroundRenderer.WorldChunk.uniqueElements, 3);
+						int num9 = -1;
+						int biomeIdx = GroundRenderer.WorldChunk.GetBiomeIdx(i * Grid.WidthInCells + j);
+						GroundMasks.BiomeMaskData biomeMaskData = biomeMasks[biomeIdx];
+						if (biomeMaskData == null)
 						{
-							int idx = element.substance.idx;
-							if (idx != num9)
+							biomeMaskData = biomeMasks[3];
+						}
+						for (int l = 0; l < GroundRenderer.WorldChunk.uniqueElements.Length; l++)
+						{
+							Element element = GroundRenderer.WorldChunk.uniqueElements[l];
+							if (biomeMaskCheck.elementCheck(element, Grid.InvalidCell))
 							{
-								num9 = idx;
-								int num10 = (((GroundRenderer.WorldChunk.substances[2] >= idx) ? 1 : 0) << 3) | (((GroundRenderer.WorldChunk.substances[3] >= idx) ? 1 : 0) << 2) | (((GroundRenderer.WorldChunk.substances[0] >= idx) ? 1 : 0) << 1) | ((GroundRenderer.WorldChunk.substances[1] >= idx) ? 1 : 0);
-								if (num10 > 0)
+								int idx = element.substance.idx;
+								if (idx != num9)
 								{
-									GroundMasks.UVData[] variationUVs = biomeMaskData.tiles[num10].variationUVs;
-									float staticRandom = GroundRenderer.WorldChunk.GetStaticRandom(j, i);
-									int num11 = Mathf.Min(variationUVs.Length - 1, (int)((float)variationUVs.Length * staticRandom));
-									GroundMasks.UVData uvdata = variationUVs[num11 % variationUVs.Length];
-									GroundRenderer.ElementChunk elementChunk2 = this.GetElementChunk(element.id, materials);
-									if (num10 == 15)
+									num9 = idx;
+									int num10 = (((GroundRenderer.WorldChunk.substances[2] >= idx) ? 1 : 0) << 3) | (((GroundRenderer.WorldChunk.substances[3] >= idx) ? 1 : 0) << 2) | (((GroundRenderer.WorldChunk.substances[0] >= idx) ? 1 : 0) << 1) | ((GroundRenderer.WorldChunk.substances[1] >= idx) ? 1 : 0);
+									if (num10 > 0)
 									{
-										elementChunk2.AddOpaqueQuad(j, i, uvdata);
-									}
-									else
-									{
-										elementChunk2.AddAlphaQuad(j, i, uvdata);
+										GroundMasks.UVData[] variationUVs = biomeMaskData.tiles[num10].variationUVs;
+										float staticRandom = GroundRenderer.WorldChunk.GetStaticRandom(j, i);
+										int num11 = Mathf.Min(variationUVs.Length - 1, (int)((float)variationUVs.Length * staticRandom));
+										GroundMasks.UVData uvdata = variationUVs[num11 % variationUVs.Length];
+										GroundRenderer.ElementChunk elementChunk2 = this.GetElementChunk(element.id, materials);
+										if (num10 == 15)
+										{
+											biomeMaskCheck.opaqueAction(elementChunk2, j, i, uvdata);
+										}
+										else
+										{
+											biomeMaskCheck.alphaAction(elementChunk2, j, i, uvdata);
+										}
 									}
 								}
 							}
@@ -545,12 +641,12 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				elementChunk3.Build();
 			}
-			for (int l = this.elementChunks.Count - 1; l >= 0; l--)
+			for (int m = this.elementChunks.Count - 1; m >= 0; m--)
 			{
-				if (this.elementChunks[l].tileCount == 0)
+				if (this.elementChunks[m].tileCount == 0)
 				{
 					int num12 = this.elementChunks.Count - 1;
-					this.elementChunks[l] = this.elementChunks[num12];
+					this.elementChunks[m] = this.elementChunks[num12];
 					this.elementChunks.RemoveAt(num12);
 				}
 			}
@@ -625,6 +721,43 @@ public class GroundRenderer : KMonoBehaviour
 
 		private static int[] substances = new int[4];
 
+		private static GroundRenderer.WorldChunk.BiomeMaskCheck[] biomeChecks = new GroundRenderer.WorldChunk.BiomeMaskCheck[]
+		{
+			new GroundRenderer.WorldChunk.BiomeMaskCheck((int cell) => Grid.Element[cell], (Element e, int cell) => (cell == Grid.InvalidCell || Grid.RenderedByWorld[cell]) && e.IsSolid, delegate(GroundRenderer.ElementChunk ec, int a, int b, GroundMasks.UVData c)
+			{
+				ec.AddOpaqueQuad(a, b, c);
+			}, delegate(GroundRenderer.ElementChunk ec, int a, int b, GroundMasks.UVData c)
+			{
+				ec.AddAlphaQuad(a, b, c);
+			}),
+			new GroundRenderer.WorldChunk.BiomeMaskCheck((int cell) => BackwallManager.At(cell).Element ?? ElementLoader.FindElementByHash(SimHashes.Vacuum), (Element e, int cell) => e.id != SimHashes.Vacuum, delegate(GroundRenderer.ElementChunk ec, int a, int b, GroundMasks.UVData c)
+			{
+				ec.AddBackwallQuad(a, b, c);
+			}, delegate(GroundRenderer.ElementChunk ec, int a, int b, GroundMasks.UVData c)
+			{
+				ec.AddBackwallAlphaQuad(a, b, c);
+			})
+		};
+
 		private static Vector2 NoiseScale = new Vector3(1f, 1f);
+
+		public class BiomeMaskCheck
+		{
+			public BiomeMaskCheck(Func<int, Element> elementGet, Func<Element, int, bool> checkFn, Action<GroundRenderer.ElementChunk, int, int, GroundMasks.UVData> opaqueAction, Action<GroundRenderer.ElementChunk, int, int, GroundMasks.UVData> alphaAction)
+			{
+				this.elementGet = elementGet;
+				this.elementCheck = checkFn;
+				this.opaqueAction = opaqueAction;
+				this.alphaAction = alphaAction;
+			}
+
+			public Func<int, Element> elementGet;
+
+			public Func<Element, int, bool> elementCheck;
+
+			public Action<GroundRenderer.ElementChunk, int, int, GroundMasks.UVData> opaqueAction;
+
+			public Action<GroundRenderer.ElementChunk, int, int, GroundMasks.UVData> alphaAction;
+		}
 	}
 }

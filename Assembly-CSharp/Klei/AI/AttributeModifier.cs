@@ -51,6 +51,19 @@ namespace Klei.AI
 			}
 		}
 
+		public void Reconstruct(string attribute_id, float value, string description = null, bool is_multiplier = false, bool uiOnly = false, bool is_readonly = true)
+		{
+			this.AttributeId = attribute_id;
+			this.Value = value;
+			this.Description = ((description == null) ? attribute_id : description);
+			this.DescriptionCB = null;
+			this.NameCB = null;
+			this.IsMultiplier = is_multiplier;
+			this.UIOnly = uiOnly;
+			this.IsReadonly = is_readonly;
+			this.OverrideTimeSlice = null;
+		}
+
 		public void SetValue(float value)
 		{
 			this.Value = value;

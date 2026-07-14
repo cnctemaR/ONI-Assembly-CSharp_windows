@@ -61,7 +61,7 @@ public class OffsetTracker
 		foreach (CellOffset cellOffset in this.GetOffsets(cell))
 		{
 			int num = Grid.OffsetCell(cell, cellOffset);
-			Gizmos.color = new Color(0f, 1f, 0f, 0.25f);
+			Gizmos.color = new Color(0f, 0.5f, 0f, 0.15f);
 			Gizmos.DrawWireCube(Grid.CellToPosCCC(num, Grid.SceneLayer.Move), new Vector3(0.95f, 0.95f, 0.95f));
 		}
 	}

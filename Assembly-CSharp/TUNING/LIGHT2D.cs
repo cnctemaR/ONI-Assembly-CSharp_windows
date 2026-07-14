@@ -15,6 +15,8 @@ namespace TUNING
 
 		public static readonly Color LIGHT_YELLOW = new Color(0.57f, 0.55f, 0.44f, 1f);
 
+		public static readonly Color LIGHT_ORANGE = new Color(0.87f, 0.55f, 0.44f, 1f);
+
 		public static readonly Color LIGHT_OVERLAY = new Color(0.56f, 0.56f, 0.56f, 1f);
 
 		public static readonly Vector2 DEFAULT_DIRECTION = new Vector2(0f, -1f);
@@ -45,43 +47,17 @@ namespace TUNING
 
 		public static readonly Color CEILINGLIGHT_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
 
+		public static readonly Color GLASSCEILINGLIGHT_GREEN = Util.ColorFromHex("5CFDF0");
+
+		public static readonly Color GLASSCEILINGLIGHT_GREEN_OVERLAY = Util.ColorFromHex("1DA657");
+
 		public static readonly Vector2 CEILINGLIGHT_OFFSET = new Vector2(0.05f, 0.65f);
 
 		public static readonly Vector2 CEILINGLIGHT_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
 
 		public const int CEILINGLIGHT_LUX = 1800;
 
-		public const float FOSSILSCULPTURE_RANGE = 8f;
-
-		public const float FOSSILSCULPTURE_CEILING_RANGE = 8f;
-
-		public const float FOSSILSCULPTURE_ANGLE = 0f;
-
-		public const float FOSSILSCULPTURE_CEILING_ANGLE = 2.6f;
-
-		public const int FOSSILSCULPTURE_LIGHT_WIDTH = 3;
-
-		public const DiscreteShadowCaster.Direction FOSSILSCULPTURE_LIGHT_DIRECTION = DiscreteShadowCaster.Direction.North;
-
-		public const DiscreteShadowCaster.Direction FOSSILSCULPTURE_CEILING_LIGHT_DIRECTION = DiscreteShadowCaster.Direction.South;
-
-		public const global::LightShape FOSSILSCULPTURE_SHAPE = global::LightShape.Quad;
-
-		public const global::LightShape FOSSILSCULPTURE_CEILING_SHAPE = global::LightShape.Quad;
-
-		public static readonly Color FOSSILSCULPTURE_COLOR = LIGHT2D.LIGHT_YELLOW;
-
-		public static readonly Color FOSSILSCULPTURE_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
-
-		public static readonly Vector2 FOSSILSCULPTURE_OFFSET = new Vector2(0.05f, 0.65f);
-
-		public static readonly Vector2 FOSSILSCULPTURE_CEILING_OFFSET = new Vector2(0.05f, 1.65f);
-
-		public static readonly Vector2 FOSSILSCULPTURE_DIRECTION = Vector2.up;
-
-		public static readonly Vector2 FOSSILSCULPTURE_CEILING_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
-
-		public const int FOSSILSCULPTURE_LUX = 3000;
+		public const int GLASS_CEILINGLIGHT_LUX = 5400;
 
 		public static readonly int SUNLAMP_LUX = (int)((float)BeachChairConfig.TAN_LUX * 4f);
 
@@ -194,6 +170,22 @@ namespace TUNING
 		public static readonly Color LIGHTBUG_COLOR_CRYSTAL = new Color(0.5137255f, 0.6666667f, 0.6666667f, 1f);
 
 		public static readonly Color LIGHTBUG_COLOR_GREEN = new Color(0.43137255f, 1f, 0.53333336f, 1f);
+
+		public const global::LightShape PARROTFISH_SHAPE = global::LightShape.Circle;
+
+		public static readonly Color PARROTFISH_COLOR = LIGHT2D.LIGHT_ORANGE;
+
+		public static readonly Color PARROTFISH_OVERLAYCOLOR = LIGHT2D.LIGHT_OVERLAY;
+
+		public const float PARROTFISH_RANGE = 5f;
+
+		public const float PARROTFISH_ANGLE = 0f;
+
+		public const int PARROTFISH_LUX = 5000;
+
+		public static readonly Vector2 PARROTFISH_OFFSET = new Vector2(0.2f, 0.5f);
+
+		public static readonly Vector2 PARROTFISH_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
 
 		public const int MAJORFOSSILDIGSITE_LAMP_LUX = 1000;
 

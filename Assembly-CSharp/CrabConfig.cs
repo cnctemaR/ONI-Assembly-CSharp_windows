@@ -8,9 +8,9 @@ using UnityEngine;
 [EntityConfigOrder(1)]
 public class CrabConfig : IEntityConfig
 {
-	public static GameObject CreateCrab(string id, string name, string desc, string anim_file, bool is_baby, string deathDropID, float deathDropCount)
+	public static GameObject CreateCrab(string id, string name, string desc, string anim_file, bool is_baby, string[] deathDropIDs, float[] deathDropCounts)
 	{
-		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseCrabConfig.BaseCrab(id, name, desc, anim_file, "CrabBaseTrait", is_baby, null, deathDropID, deathDropCount), CrabTuning.PEN_SIZE_PER_CREATURE);
+		GameObject gameObject = EntityTemplates.ExtendEntityToWildCreature(BaseCrabConfig.BaseCrab(id, name, desc, anim_file, "CrabBaseTrait", is_baby, null, deathDropIDs, deathDropCounts), CrabTuning.PEN_SIZE_PER_CREATURE);
 		Trait trait = Db.Get().CreateTrait("CrabBaseTrait", name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, CrabTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -CrabTuning.STANDARD_CALORIES_PER_CYCLE / 600f, UI.TOOLTIPS.BASE_VALUE, false, false, true));
@@ -24,7 +24,7 @@ public class CrabConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = CrabConfig.CreateCrab("Crab", global::STRINGS.CREATURES.SPECIES.CRAB.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "pincher_kanim", false, "CrabShell", 10f);
+		GameObject gameObject = CrabConfig.CreateCrab("Crab", global::STRINGS.CREATURES.SPECIES.CRAB.NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "pincher_kanim", false, new string[] { "CrabShell", "ShellfishMeat" }, new float[] { 60f, 1.2f });
 		gameObject = EntityTemplates.ExtendEntityToFertileCreature(gameObject, this as IHasDlcRestrictions, "CrabEgg", global::STRINGS.CREATURES.SPECIES.CRAB.EGG_NAME, global::STRINGS.CREATURES.SPECIES.CRAB.DESC, "egg_pincher_kanim", CrabTuning.EGG_MASS, "CrabBaby", 60.000004f, 20f, CrabTuning.EGG_CHANCES_BASE, CrabConfig.EGG_SORT_ORDER, true, false, 1f, false);
 		gameObject.AddOrGetDef<EggProtectionMonitor.Def>().allyTags = new Tag[] { GameTags.Creatures.CrabFriend };
 		return gameObject;
@@ -53,4 +53,8 @@ public class CrabConfig : IEntityConfig
 	private static float MIN_POOP_SIZE_IN_KG = 25f;
 
 	public static int EGG_SORT_ORDER = 0;
+
+	public const float SHELL_DROP_COUNT = 60f;
+
+	public const float SHELLFISH_MEAT_DROP_COUNT = 1.2f;
 }

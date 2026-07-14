@@ -191,19 +191,19 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			base.sm.messstation.Set(null, base.smi);
 		}
 
-		public static bool UseSalt(GameObject messStation)
+		public static bool UseGarnish(GameObject messStation)
 		{
 			if (messStation == null)
 			{
 				return false;
 			}
 			IDiningSeat diningSeat = EatChore.ResolveDiningSeat(messStation);
-			return diningSeat != null && diningSeat.HasSalt;
+			return diningSeat != null && diningSeat.HasGarnish;
 		}
 
-		public bool UseSalt()
+		public bool UseGarnish()
 		{
-			return base.smi.sm.messstation != null && EatChore.StatesInstance.UseSalt(base.sm.messstation.Get(base.smi));
+			return base.smi.sm.messstation != null && EatChore.StatesInstance.UseGarnish(base.sm.messstation.Get(base.smi));
 		}
 
 		public static ValueTuple<GameObject, int> CreateLocator(Sensors sensors, Transform transform, string locatorName)
@@ -251,10 +251,10 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			EffectInstance effectInstance = null;
 			Effects component2 = diner.GetComponent<Effects>();
 			Storage storage = diningSeat.FindStorage();
-			if (storage != null && storage.Has(TableSaltConfig.TAG))
+			Garnish active = Garnish.GetActive(storage);
+			if (active != null)
 			{
-				storage.ConsumeIgnoringDisease(TableSaltConfig.TAG, TableSaltTuning.CONSUMABLE_RATE);
-				effectInstance = component2.Add("MessTableSalt", true);
+				effectInstance = active.Activate(storage, diner);
 			}
 			diningSeat.Diner = diner.GetComponent<KPrefabID>();
 			messStation.Trigger(1356255274, null);
@@ -299,6 +299,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		public static void OnExitMessStation(GameObject messStation, GameObject diner, KAnimFile eatAnim)
 		{
 			diner.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(eatAnim);
+			Garnish.Deactivate(diner);
 			IDiningSeat diningSeat = EatChore.ResolveDiningSeat(messStation);
 			if (diningSeat != null)
 			{
@@ -389,7 +390,16 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				smi.DestroyLocator();
 			});
 			this.eatonfloorstate.moveto.InitializeStates(this.eater, this.locator, this.eatonfloorstate.eat, this.eatonfloorstate.eat, null, null);
-			this.eatonfloorstate.eat.ToggleAnims("anim_eat_floor_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null);
+			this.eatonfloorstate.eat.ToggleAnims(new Func<EatChore.StatesInstance, HashedString>(this.GetEatOnFloorAnim)).DoEat(this.ediblechunk, this.actualfoodunits, null, null);
+		}
+
+		private HashedString GetEatOnFloorAnim(EatChore.StatesInstance smi)
+		{
+			if (smi.GetComponent<Navigator>().CurrentNavType == NavType.Swim)
+			{
+				return "anim_eat_swim_kanim";
+			}
+			return "anim_eat_floor_kanim";
 		}
 
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.TargetParameter eater;

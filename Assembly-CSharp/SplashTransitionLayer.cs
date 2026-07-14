@@ -11,7 +11,7 @@ public class SplashTransitionLayer : TransitionDriver.OverrideLayer
 
 	private void RefreshSplashes(Navigator navigator, Navigator.ActiveTransition transition)
 	{
-		if (navigator == null)
+		if (navigator == null || navigator.IsSwimming())
 		{
 			return;
 		}

@@ -46,8 +46,6 @@ public class GameComps : KComponents
 
 	public static FallerComponents Fallers;
 
-	public static InfraredVisualizerComponents InfraredVisualizers;
-
 	public static ElementSplitterComponents ElementSplitters;
 
 	public static OreSizeVisualizerComponents OreSizeVisualizers;

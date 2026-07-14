@@ -36,12 +36,26 @@ public class SolarPanelConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.HeavyDutyGeneratorType, false);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
+		component.AddTag(RoomConstraints.ConstraintTags.PowerBuilding, false);
+		component.AddTag(RoomConstraints.ConstraintTags.GeneratorType, false);
+		component.AddTag(RoomConstraints.ConstraintTags.HeavyDutyGeneratorType, false);
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
+		component.prefabSpawnFn += this.OnSpawn;
+	}
+
+	private void OnSpawn(GameObject instance)
+	{
+		foreach (KBatchedAnimController kbatchedAnimController in instance.GetComponentsInChildrenOnly<KBatchedAnimController>())
+		{
+			if (kbatchedAnimController.name.Contains("_fg"))
+			{
+				kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+				kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+			}
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

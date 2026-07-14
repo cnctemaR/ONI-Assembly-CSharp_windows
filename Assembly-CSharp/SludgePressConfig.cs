@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ElementData;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -8,7 +9,11 @@ public class SludgePressConfig : IBuildingConfig
 {
 	public override string[] GetRequiredDlcIds()
 	{
-		return DlcManager.EXPANSION1;
+		if (DlcManager.IsExpansion1Active())
+		{
+			return DlcManager.EXPANSION1;
+		}
+		return DlcManager.DLC5;
 	}
 
 	public override BuildingDef CreateBuildingDef()
@@ -71,7 +76,7 @@ public class SludgePressConfig : IBuildingConfig
 			ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[element.elementComposition.Length];
 			for (int i = 0; i < element.elementComposition.Length; i++)
 			{
-				ElementLoader.ElementComposition elementComposition = element.elementComposition[i];
+				ElementComposition elementComposition = element.elementComposition[i];
 				Element element2 = ElementLoader.FindElementByName(elementComposition.elementID);
 				bool isLiquid = element2.IsLiquid;
 				array2[i] = new ComplexRecipe.RecipeElement(element2.tag, num * elementComposition.percentage, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, isLiquid);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HarvestTool : DragTool
@@ -9,12 +8,27 @@ public class HarvestTool : DragTool
 		HarvestTool.Instance = null;
 	}
 
+	private bool IsOptionOn(string name)
+	{
+		for (int i = 0; i < this.options.Length; i++)
+		{
+			if (this.options[i].name == name)
+			{
+				return this.options[i].IsOn;
+			}
+		}
+		return false;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		HarvestTool.Instance = this;
-		this.options.Add("HARVEST_WHEN_READY", ToolParameterMenu.ToggleState.On);
-		this.options.Add("DO_NOT_HARVEST", ToolParameterMenu.ToggleState.Off);
+		this.options = new ToolParameterMenu.ToggleData[]
+		{
+			new ToolParameterMenu.ToggleData("HARVEST_WHEN_READY", ToolParameterMenu.ToggleState.On, false),
+			new ToolParameterMenu.ToggleData("DO_NOT_HARVEST", ToolParameterMenu.ToggleState.Off, false)
+		};
 		this.viewMode = OverlayModes.Harvest.ID;
 	}
 
@@ -27,11 +41,11 @@ public class HarvestTool : DragTool
 				OccupyArea area = harvestDesignatable.area;
 				if (Grid.PosToCell(harvestDesignatable) == cell || (area != null && area.CheckIsOccupying(cell)))
 				{
-					if (this.options["HARVEST_WHEN_READY"] == ToolParameterMenu.ToggleState.On)
+					if (this.IsOptionOn("HARVEST_WHEN_READY"))
 					{
 						harvestDesignatable.SetHarvestWhenReady(true);
 					}
-					else if (this.options["DO_NOT_HARVEST"] == ToolParameterMenu.ToggleState.On)
+					else if (this.IsOptionOn("DO_NOT_HARVEST"))
 					{
 						Harvestable component = harvestDesignatable.GetComponent<Harvestable>();
 						if (component != null)
@@ -55,12 +69,12 @@ public class HarvestTool : DragTool
 		MeshRenderer componentInChildren = this.visualizer.GetComponentInChildren<MeshRenderer>();
 		if (componentInChildren != null)
 		{
-			if (this.options["HARVEST_WHEN_READY"] == ToolParameterMenu.ToggleState.On)
+			if (this.IsOptionOn("HARVEST_WHEN_READY"))
 			{
 				componentInChildren.material.mainTexture = this.visualizerTextures[0];
 				return;
 			}
-			if (this.options["DO_NOT_HARVEST"] == ToolParameterMenu.ToggleState.On)
+			if (this.IsOptionOn("DO_NOT_HARVEST"))
 			{
 				componentInChildren.material.mainTexture = this.visualizerTextures[1];
 			}
@@ -92,5 +106,5 @@ public class HarvestTool : DragTool
 
 	public Texture2D[] visualizerTextures;
 
-	private Dictionary<string, ToolParameterMenu.ToggleState> options = new Dictionary<string, ToolParameterMenu.ToggleState>();
+	private ToolParameterMenu.ToggleData[] options;
 }

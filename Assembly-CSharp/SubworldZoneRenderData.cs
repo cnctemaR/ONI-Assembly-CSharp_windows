@@ -42,7 +42,9 @@ public class SubworldZoneRenderData : KMonoBehaviour
 						{
 							if (Grid.IsActiveWorld(num))
 							{
-								rawTextureData2[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)this.zoneTextureArrayIndices[(int)overworldCell.zoneType]));
+								rawTextureData2[num * 3] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)this.zoneTextureArrayIndices[(int)overworldCell.zoneType]));
+								rawTextureData2[num * 3 + 1] = overworldCell.biomeIdx;
+								rawTextureData2[num * 3 + 2] = (byte)overworldCell.zoneType;
 								Color32 color = this.zoneColours[(int)overworldCell.zoneType];
 								rawTextureData[num * 3] = color.r;
 								rawTextureData[num * 3 + 1] = color.g;
@@ -50,7 +52,9 @@ public class SubworldZoneRenderData : KMonoBehaviour
 							}
 							else
 							{
-								rawTextureData2[num] = byte.MaxValue;
+								rawTextureData2[num * 3] = byte.MaxValue;
+								rawTextureData2[num * 3 + 1] = byte.MaxValue;
+								rawTextureData2[num * 3 + 2] = byte.MaxValue;
 								Color32 color2 = this.zoneColours[7];
 								rawTextureData[num * 3] = color2.r;
 								rawTextureData[num * 3 + 1] = color2.g;
@@ -74,13 +78,14 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	{
 		byte[] array = new byte[Grid.WidthInCells * Grid.HeightInCells];
 		byte[] array2 = new byte[Grid.WidthInCells * Grid.HeightInCells * 3];
+		byte[] array3 = new byte[Grid.WidthInCells * Grid.HeightInCells * 3];
 		this.worldZoneTypes = new SubWorld.ZoneType[Grid.CellCount];
 		this.colourTex = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, TextureFormat.RGB24, false);
 		this.colourTex.name = "SubworldRegionColourData";
 		this.colourTex.filterMode = FilterMode.Bilinear;
 		this.colourTex.wrapMode = TextureWrapMode.Clamp;
 		this.colourTex.anisoLevel = 0;
-		this.indexTex = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, TextureFormat.Alpha8, false);
+		this.indexTex = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, TextureFormat.RGB24, false);
 		this.indexTex.name = "SubworldRegionIndexData";
 		this.indexTex.filterMode = FilterMode.Point;
 		this.indexTex.wrapMode = TextureWrapMode.Clamp;
@@ -88,14 +93,17 @@ public class SubworldZoneRenderData : KMonoBehaviour
 		for (int i = 0; i < Grid.CellCount; i++)
 		{
 			array[i] = byte.MaxValue;
+			array2[i * 3] = byte.MaxValue;
+			array2[i * 3 + 1] = byte.MaxValue;
+			array2[i * 3 + 2] = byte.MaxValue;
 			Color32 color = this.zoneColours[7];
-			array2[i * 3] = color.r;
-			array2[i * 3 + 1] = color.g;
-			array2[i * 3 + 2] = color.b;
+			array3[i * 3] = color.r;
+			array3[i * 3 + 1] = color.g;
+			array3[i * 3 + 2] = color.b;
 			this.worldZoneTypes[i] = SubWorld.ZoneType.Space;
 		}
-		this.colourTex.LoadRawTextureData(array2);
-		this.indexTex.LoadRawTextureData(array);
+		this.colourTex.LoadRawTextureData(array3);
+		this.indexTex.LoadRawTextureData(array2);
 		this.colourTex.Apply();
 		this.indexTex.Apply();
 		WorldDetailSave clusterDetailSave = SaveLoader.Instance.clusterDetailSave;
@@ -116,6 +124,8 @@ public class SubworldZoneRenderData : KMonoBehaviour
 						if (Grid.IsValidCell(num))
 						{
 							array[num] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)overworldCell.zoneType));
+							array2[num * 3] = ((overworldCell.zoneType == SubWorld.ZoneType.Space) ? byte.MaxValue : ((byte)overworldCell.zoneType));
+							array2[num * 3 + 1] = overworldCell.biomeIdx;
 							this.worldZoneTypes[num] = overworldCell.zoneType;
 						}
 					}
@@ -189,15 +199,48 @@ public class SubworldZoneRenderData : KMonoBehaviour
 		new Color32(173, 222, 212, 14),
 		new Color32(100, 100, 222, 18),
 		new Color32(222, 100, 222, 19),
-		new Color32(100, 222, 100, 20)
+		new Color32(100, 222, 100, 20),
+		new Color32(192, 100, 16, 27)
 	};
 
 	private const int NUM_COLOUR_BYTES = 3;
 
-	public int[] zoneTextureArrayIndices = new int[]
+	private int[] zoneTextureArrayIndices = new int[]
 	{
 		0, 1, 2, 3, 4, 5, 5, 3, 6, 7,
 		8, 9, 10, 11, 12, 7, 3, 13, 0, 0,
-		0, 14, 15, 16
+		0, 14, 15, 16, 4, 6, 18, 17
+	};
+
+	public static Vector4[] zoneTextureParallaxData = new Vector4[]
+	{
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero,
+		Vector4.zero
 	};
 }

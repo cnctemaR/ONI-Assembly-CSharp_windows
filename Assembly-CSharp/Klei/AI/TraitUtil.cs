@@ -41,6 +41,11 @@ namespace Klei.AI
 
 		public static global::System.Action CreateAttributeEffectTrait(string id, string name, string desc, string[] attributeIds, float[] deltas, bool positiveTrait = false)
 		{
+			return TraitUtil.CreateAttributeEffectTrait(id, name, desc, attributeIds, deltas, positiveTrait, null);
+		}
+
+		public static global::System.Action CreateAttributeEffectTrait(string id, string name, string desc, string[] attributeIds, float[] deltas, bool positiveTrait = false, Action<GameObject> on_add = null)
+		{
 			return delegate
 			{
 				global::Debug.Assert(attributeIds.Length == deltas.Length, "CreateAttributeEffectTrait must have an equal number of attributeIds and deltas");
@@ -49,6 +54,7 @@ namespace Klei.AI
 				{
 					trait.Add(new AttributeModifier(attributeIds[i], deltas[i], name, false, false, true));
 				}
+				trait.OnAddTrait = on_add;
 			};
 		}
 

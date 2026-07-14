@@ -1,48 +1,69 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FilteredDragTool : DragTool
 {
+	protected bool IsActive
+	{
+		get
+		{
+			return this.active;
+		}
+	}
+
+	private bool IsFilterOn(string name)
+	{
+		for (int i = 0; i < this.currentFilters.Length; i++)
+		{
+			if (this.currentFilters[i].name == name)
+			{
+				return this.currentFilters[i].IsOn;
+			}
+		}
+		return false;
+	}
+
 	public bool IsActiveLayer(string layer)
 	{
-		return this.currentFilterTargets[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On || (this.currentFilterTargets.ContainsKey(layer.ToUpper()) && this.currentFilterTargets[layer.ToUpper()] == ToolParameterMenu.ToggleState.On);
+		return this.IsFilterOn(ToolParameterMenu.FILTERLAYERS.ALL) || this.IsFilterOn(layer.ToUpper());
 	}
 
 	public bool IsActiveLayer(ObjectLayer layer)
 	{
-		if (this.currentFilterTargets.ContainsKey(ToolParameterMenu.FILTERLAYERS.ALL) && this.currentFilterTargets[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On)
+		if (this.IsFilterOn(ToolParameterMenu.FILTERLAYERS.ALL))
 		{
 			return true;
 		}
-		bool flag = false;
-		foreach (KeyValuePair<string, ToolParameterMenu.ToggleState> keyValuePair in this.currentFilterTargets)
+		for (int i = 0; i < this.currentFilters.Length; i++)
 		{
-			if (keyValuePair.Value == ToolParameterMenu.ToggleState.On && this.GetObjectLayerFromFilterLayer(keyValuePair.Key) == layer)
+			if (this.currentFilters[i].IsOn && this.GetObjectLayerFromFilterLayer(this.currentFilters[i].name) == layer)
 			{
-				flag = true;
-				break;
+				return true;
 			}
 		}
-		return flag;
+		return false;
 	}
 
-	protected virtual void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
+	protected virtual void GetDefaultFilters(out ToolParameterMenu.ToggleData[] filters)
 	{
-		filters.Add(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.Off);
-		filters.Add(ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.Off);
+		filters = new ToolParameterMenu.ToggleData[]
+		{
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.SOLIDCONDUIT, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.LOGIC, ToolParameterMenu.ToggleState.Off, false),
+			new ToolParameterMenu.ToggleData(ToolParameterMenu.FILTERLAYERS.BACKWALL, ToolParameterMenu.ToggleState.Off, false)
+		};
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.ResetFilter(this.filterTargets);
+		this.ResetFilter();
+		this.userSelectedFilters = this.CloneFilters(this.currentFilters);
 	}
 
 	protected override void OnSpawn()
@@ -61,26 +82,60 @@ public class FilteredDragTool : DragTool
 
 	public void ResetFilter()
 	{
-		this.ResetFilter(this.filterTargets);
+		this.GetDefaultFilters(out this.currentFilters);
 	}
 
-	protected void ResetFilter(Dictionary<string, ToolParameterMenu.ToggleState> filters)
+	private ToolParameterMenu.ToggleData[] CloneFilters(ToolParameterMenu.ToggleData[] source)
 	{
-		filters.Clear();
-		this.GetDefaultFilters(filters);
-		this.currentFilterTargets = filters;
+		ToolParameterMenu.ToggleData[] array = new ToolParameterMenu.ToggleData[source.Length];
+		for (int i = 0; i < source.Length; i++)
+		{
+			array[i] = new ToolParameterMenu.ToggleData(source[i].name, source[i].state, source[i].isToggleInclusive);
+		}
+		return array;
+	}
+
+	private void SaveUserFilters()
+	{
+		this.userSelectedFilters = this.CloneFilters(this.currentFilters);
+	}
+
+	private void RestoreUserFilters()
+	{
+		if (this.userSelectedFilters != null)
+		{
+			this.currentFilters = this.CloneFilters(this.userSelectedFilters);
+			return;
+		}
+		this.ResetFilter();
+	}
+
+	private void OnParametersChanged()
+	{
+		if (!this.isOverlayDriven)
+		{
+			this.SaveUserFilters();
+		}
 	}
 
 	protected override void OnActivateTool()
 	{
 		this.active = true;
 		base.OnActivateTool();
-		this.OnOverlayChanged(OverlayScreen.Instance.mode);
+		ToolMenu.Instance.toolParameterMenu.onParametersChanged += this.OnParametersChanged;
+		HashedString mode = OverlayScreen.Instance.mode;
+		if (mode != this.lastAppliedOverlay)
+		{
+			this.OnOverlayChanged(mode);
+			return;
+		}
+		ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.currentFilters);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		this.active = false;
+		ToolMenu.Instance.toolParameterMenu.onParametersChanged -= this.OnParametersChanged;
 		ToolMenu.Instance.toolParameterMenu.ClearMenu();
 		base.OnDeactivateTool(new_tool);
 	}
@@ -244,12 +299,17 @@ public class FilteredDragTool : DragTool
 		throw new ArgumentException("Invalid filter layer: " + filter_layer);
 	}
 
-	private void OnOverlayChanged(HashedString overlay)
+	protected virtual void OnOverlayChanged(HashedString overlay)
 	{
 		if (!this.active)
 		{
 			return;
 		}
+		if (GameUtil.IsCapturingTimeLapse())
+		{
+			return;
+		}
+		this.lastAppliedOverlay = overlay;
 		string text = null;
 		if (overlay == OverlayModes.Power.ID)
 		{
@@ -271,37 +331,34 @@ public class FilteredDragTool : DragTool
 		{
 			text = ToolParameterMenu.FILTERLAYERS.LOGIC;
 		}
-		this.currentFilterTargets = this.filterTargets;
 		if (text != null)
 		{
-			using (List<string>.Enumerator enumerator = new List<string>(this.filterTargets.Keys).GetEnumerator())
+			if (!this.isOverlayDriven)
 			{
-				while (enumerator.MoveNext())
-				{
-					string text2 = enumerator.Current;
-					this.filterTargets[text2] = ToolParameterMenu.ToggleState.Disabled;
-					if (text2 == text)
-					{
-						this.filterTargets[text2] = ToolParameterMenu.ToggleState.On;
-					}
-				}
-				goto IL_0102;
+				this.SaveUserFilters();
+			}
+			this.isOverlayDriven = true;
+			this.GetDefaultFilters(out this.currentFilters);
+			for (int i = 0; i < this.currentFilters.Length; i++)
+			{
+				this.currentFilters[i].state = ((this.currentFilters[i].name == text) ? ToolParameterMenu.ToggleState.On : ToolParameterMenu.ToggleState.Disabled);
 			}
 		}
-		if (this.overlayFilterTargets.Count == 0)
+		else if (this.isOverlayDriven)
 		{
-			this.ResetFilter(this.overlayFilterTargets);
+			this.RestoreUserFilters();
+			this.isOverlayDriven = false;
 		}
-		this.currentFilterTargets = this.overlayFilterTargets;
-		IL_0102:
-		ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.currentFilterTargets);
+		ToolMenu.Instance.toolParameterMenu.PopulateMenu(this.currentFilters);
 	}
 
-	private Dictionary<string, ToolParameterMenu.ToggleState> filterTargets = new Dictionary<string, ToolParameterMenu.ToggleState>();
+	protected ToolParameterMenu.ToggleData[] currentFilters = new ToolParameterMenu.ToggleData[0];
 
-	private Dictionary<string, ToolParameterMenu.ToggleState> overlayFilterTargets = new Dictionary<string, ToolParameterMenu.ToggleState>();
-
-	private Dictionary<string, ToolParameterMenu.ToggleState> currentFilterTargets;
+	private ToolParameterMenu.ToggleData[] userSelectedFilters;
 
 	private bool active;
+
+	private HashedString lastAppliedOverlay;
+
+	private bool isOverlayDriven;
 }

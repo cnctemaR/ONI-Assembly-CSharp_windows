@@ -19,7 +19,7 @@ public class PixelPackConfig : IBuildingConfig
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER0[0]
 		};
-		string[] array2 = new string[] { "Glass", "RefinedMetal" };
+		string[] array2 = new string[] { "Glasses", "RefinedMetal" };
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.NotInTiles;
 		EffectorValues none = NOISE_POLLUTION.NONE;

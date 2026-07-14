@@ -37,7 +37,7 @@ public class RefrigeratorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>();
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.KitchenRefrigerator, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

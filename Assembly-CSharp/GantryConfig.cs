@@ -39,6 +39,17 @@ public class GantryConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
+		go.GetComponent<KPrefabID>().prefabSpawnFn += this.OnSpawn;
+	}
+
+	private void OnSpawn(GameObject instance)
+	{
+		instance.GetComponent<KBatchedAnimController>().SetFGLayer(Grid.SceneLayer.TileMain);
+		foreach (KBatchedAnimController kbatchedAnimController in instance.GetComponentsInChildrenOnly<KBatchedAnimController>())
+		{
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

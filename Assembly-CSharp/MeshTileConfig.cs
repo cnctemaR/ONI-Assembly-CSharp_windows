@@ -37,6 +37,7 @@ public class MeshTileConfig : IBuildingConfig
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_place_info");
 		buildingDef.AddSearchTerms(SEARCH_TERMS.TILE);
+		buildingDef.POIUnlockable = true;
 		return buildingDef;
 	}
 
@@ -44,7 +45,9 @@ public class MeshTileConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
-		go.AddOrGet<SimCellOccupier>().doReplaceElement = false;
+		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
+		simCellOccupier.doReplaceElement = false;
+		simCellOccupier.setTransparent = true;
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<KAnimGridTileVisualizer>().blockTileConnectorID = MeshTileConfig.BlockTileConnectorID;
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;

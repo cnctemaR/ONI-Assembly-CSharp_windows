@@ -10,15 +10,27 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 	{
 		this.AddPrecondition(RancherChore.IsOpenForRanching, rancher_station.GetSMI<RanchStation.Instance>());
 		SkillPerkMissingComplainer component = base.GetComponent<SkillPerkMissingComplainer>();
-		this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, component.requiredSkillPerk);
+		MultiSkillPerkMissingComplainer component2 = base.GetComponent<MultiSkillPerkMissingComplainer>();
+		Debug.Assert(component != null || component2 != null, "Rancher chore can only have a skill perk or multi skill perk not both");
+		if (component != null)
+		{
+			this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, component.requiredSkillPerk);
+		}
+		else if (component2 != null)
+		{
+			foreach (string text in component2.requiredSkillPerks)
+			{
+				this.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, text);
+			}
+		}
 		this.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		this.AddPrecondition(ChorePreconditions.instance.CanMoveTo, rancher_station.GetComponent<Building>());
-		Operational component2 = rancher_station.GetComponent<Operational>();
-		this.AddPrecondition(ChorePreconditions.instance.IsOperational, component2);
-		Deconstructable component3 = rancher_station.GetComponent<Deconstructable>();
-		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component3);
-		BuildingEnabledButton component4 = rancher_station.GetComponent<BuildingEnabledButton>();
-		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component4);
+		Operational component3 = rancher_station.GetComponent<Operational>();
+		this.AddPrecondition(ChorePreconditions.instance.IsOperational, component3);
+		Deconstructable component4 = rancher_station.GetComponent<Deconstructable>();
+		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component4);
+		BuildingEnabledButton component5 = rancher_station.GetComponent<BuildingEnabledButton>();
+		this.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component5);
 		base.smi = new RancherChore.RancherChoreStates.Instance(rancher_station);
 		base.SetPrioritizable(rancher_station.GetComponent<Prioritizable>());
 	}
@@ -66,7 +78,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				smi.WaitForAvailableRanchable(dt);
 			}, UpdateRate.SIM_200ms, false);
 			this.ranchCritter.ScheduleGoTo(0.5f, this.ranchCritter.callForCritter).EventTransition(GameHashes.CreatureAbandonedRanchStation, this.waitForAvailableRanchable, null);
-			this.ranchCritter.callForCritter.ToggleAnims("anim_interacts_rancherstation_kanim", 0f).PlayAnim("calling_loop", KAnim.PlayMode.Loop).ScheduleActionNextFrame("TellCreatureRancherIsReady", delegate(RancherChore.RancherChoreStates.Instance smi)
+			this.ranchCritter.callForCritter.ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherCallingAndWipeBrowAnim)).PlayAnim("calling_loop", KAnim.PlayMode.Loop).ScheduleActionNextFrame("TellCreatureRancherIsReady", delegate(RancherChore.RancherChoreStates.Instance smi)
 			{
 				smi.ranchStation.MessageRancherReady();
 			})
@@ -79,13 +91,18 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				{
 					smi.GoTo(this.waitForAvailableRanchable);
 				}
-			}).ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).QueueAnim("wipe_brow", false, null)
+			}).ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherCallingAndWipeBrowAnim)).QueueAnim("wipe_brow", false, null)
 				.OnAnimQueueComplete(this.waitForAvailableRanchable);
 		}
 
 		private static HashedString GetRancherInteractAnim(RancherChore.RancherChoreStates.Instance smi)
 		{
 			return smi.ranchStation.def.RancherInteractAnim;
+		}
+
+		private static HashedString GetRancherCallingAndWipeBrowAnim(RancherChore.RancherChoreStates.Instance smi)
+		{
+			return smi.ranchStation.def.RancherCallingAndWipeBrowAnim;
 		}
 
 		private static bool HasWipeBrowAnim(RancherChore.RancherChoreStates.Instance smi)
@@ -163,6 +180,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 			this.skillExperienceSkillGroup = Db.Get().SkillGroups.Ranching.Id;
 			this.skillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
+			this.shouldShowSkillPerkStatusItem = true;
 			this.lightEfficiencyBonus = false;
 		}
 

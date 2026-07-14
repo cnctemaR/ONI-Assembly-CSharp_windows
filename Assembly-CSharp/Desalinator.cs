@@ -57,6 +57,24 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 		}, global::Action.NumActions, null, null, null, UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP, true), 1f);
 	}
 
+	private void UpdateConverterStatusVisibility()
+	{
+		if (this.converters == null)
+		{
+			this.converters = base.GetComponents<ElementConverter>();
+		}
+		for (int i = 0; i < this.converters.Length; i++)
+		{
+			bool flag = this.converters[i].CanConvertAtAll();
+			if (this.converters[i].ShowInUI != flag)
+			{
+				this.converters[i].smi.RemoveStatusItems();
+				this.converters[i].ShowInUI = flag;
+				this.converters[i].smi.AddStatusItems();
+			}
+		}
+	}
+
 	private bool CheckCanConvert()
 	{
 		if (this.converters == null)
@@ -192,12 +210,14 @@ public class Desalinator : StateMachineComponent<Desalinator.StatesInstance>
 			this.on.working_pre.PlayAnim("working_pre").OnAnimQueueComplete(this.on.working);
 			this.on.working.Enter(delegate(Desalinator.StatesInstance smi)
 			{
+				smi.master.UpdateConverterStatusVisibility();
 				smi.master.operational.SetActive(true, false);
 			}).QueueAnim("working_loop", true, null).EventTransition(GameHashes.OnStorageChange, this.on.working_pst, (Desalinator.StatesInstance smi) => !smi.master.CheckCanConvert())
 				.ParamTransition<float>(this.saltStorageLeft, this.full, (Desalinator.StatesInstance smi, float p) => smi.IsFull())
 				.EventHandler(GameHashes.OnStorageChange, delegate(Desalinator.StatesInstance smi)
 				{
 					smi.UpdateStorageLeft();
+					smi.master.UpdateConverterStatusVisibility();
 				})
 				.Exit(delegate(Desalinator.StatesInstance smi)
 				{

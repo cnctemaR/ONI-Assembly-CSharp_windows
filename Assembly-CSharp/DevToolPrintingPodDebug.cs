@@ -31,9 +31,20 @@ public class DevToolPrintingPodDebug : DevTool
 			if (ImmigrantScreen.instance.Telepad == null)
 			{
 				ImmigrantScreen.InitializeImmigrantScreen(Components.Telepads[0]);
+			}
+			else
+			{
+				ImmigrantScreen.instance.DebugShuffleOptions();
+			}
+		}
+		if (ImGui.Button("Reroll Options (instant)"))
+		{
+			if (ImmigrantScreen.instance.Telepad == null)
+			{
+				ImmigrantScreen.InitializeImmigrantScreen(Components.Telepads[0]);
 				return;
 			}
-			ImmigrantScreen.instance.DebugShuffleOptions();
+			ImmigrantScreen.instance.DebugShuffleOptionsInstant();
 		}
 	}
 }

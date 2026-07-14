@@ -76,7 +76,7 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 			: base(master)
 		{
 			this.mode = mode;
-			this.animFile = emote.AnimSet;
+			this.animFile = EmoteChore.StatesInstance.ResolveAnimFile(emoter, emote);
 			emote.CollectStepAnims(out this.emoteAnims, emoteIterations);
 			base.sm.emoter.Set(emoter, base.smi, false);
 		}
@@ -88,6 +88,16 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 			this.animFile = Assets.GetAnim(animFile);
 			this.emoteAnims = anims;
 			base.sm.emoter.Set(emoter, base.smi, false);
+		}
+
+		private static KAnimFile ResolveAnimFile(GameObject emoter, Emote emote)
+		{
+			Navigator navigator;
+			if (!(emote.ManifestSwimAnimSet() != null) || !emoter.TryGetComponent<Navigator>(out navigator) || navigator.CurrentNavType != NavType.Swim)
+			{
+				return emote.AnimSet;
+			}
+			return emote.ManifestSwimAnimSet();
 		}
 
 		public KAnimFile animFile;

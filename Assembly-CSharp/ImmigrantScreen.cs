@@ -72,6 +72,24 @@ public class ImmigrantScreen : CharacterSelectionController
 		Immigration.Instance.timeBeforeSpawn = 0f;
 	}
 
+	public void DebugShuffleOptionsInstant()
+	{
+		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in this.containers)
+		{
+			global::UnityEngine.Object.Destroy(telepadDeliverableContainer.GetGameObject());
+		}
+		this.containers.Clear();
+		this.InitializeContainers();
+		foreach (ITelepadDeliverableContainer telepadDeliverableContainer2 in this.containers)
+		{
+			CharacterContainer characterContainer = telepadDeliverableContainer2 as CharacterContainer;
+			if (characterContainer != null)
+			{
+				characterContainer.SetReshufflingState(false);
+			}
+		}
+	}
+
 	public override void OnPressBack()
 	{
 		if (this.rejectConfirmationScreen.activeSelf)

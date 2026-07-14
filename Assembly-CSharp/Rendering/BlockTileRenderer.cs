@@ -224,12 +224,17 @@ namespace Rendering
 
 		public void AddBlock(int renderLayer, BuildingDef def, bool isReplacement, SimHashes element, int cell)
 		{
+			this.AddBlock(renderLayer, def, isReplacement, element, cell, false);
+		}
+
+		public void AddBlock(int renderLayer, BuildingDef def, bool isReplacement, SimHashes element, int cell, bool isBlueprint)
+		{
 			KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer> keyValuePair = new KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>(def, BlockTileRenderer.GetRenderInfoLayer(isReplacement, element));
 			BlockTileRenderer.RenderInfo renderInfo;
 			if (!this.renderInfo.TryGetValue(keyValuePair, out renderInfo))
 			{
 				int num = (int)(isReplacement ? def.ReplacementLayer : def.TileLayer);
-				renderInfo = new BlockTileRenderer.RenderInfo(this, num, renderLayer, def, element);
+				renderInfo = new BlockTileRenderer.RenderInfo(this, num, renderLayer, def, element, isBlueprint);
 				this.renderInfo[keyValuePair] = renderInfo;
 			}
 			renderInfo.AddCell(cell);
@@ -357,6 +362,11 @@ namespace Rendering
 		{
 			public RenderInfo(BlockTileRenderer renderer, int queryLayer, int renderLayer, BuildingDef def, SimHashes element)
 			{
+				new BlockTileRenderer.RenderInfo(renderer, queryLayer, renderLayer, def, element, false);
+			}
+
+			public RenderInfo(BlockTileRenderer renderer, int queryLayer, int renderLayer, BuildingDef def, SimHashes element, bool isBlueprint)
+			{
 				this.queryLayer = queryLayer;
 				this.renderLayer = renderLayer;
 				this.rootPosition = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
@@ -387,13 +397,19 @@ namespace Rendering
 					this.material.SetTexture("_MainTex", def.BlockTilePlaceAtlas.texture);
 					this.material.name = def.BlockTilePlaceAtlas.name + "Mat";
 				}
-				int num = Grid.WidthInCells / 16 + 1;
-				int num2 = Grid.HeightInCells / 16 + 1;
-				this.meshChunks = new Mesh[num, num2];
-				this.dirtyChunks = new bool[num, num2];
-				for (int i = 0; i < num2; i++)
+				uint num = (uint)def.BlockTileBlendOptions;
+				if (isBlueprint)
 				{
-					for (int j = 0; j < num; j++)
+					num |= 1U;
+				}
+				this.material.SetFloat("_packedParameters", num);
+				int num2 = Grid.WidthInCells / 16 + 1;
+				int num3 = Grid.HeightInCells / 16 + 1;
+				this.meshChunks = new Mesh[num2, num3];
+				this.dirtyChunks = new bool[num2, num3];
+				for (int i = 0; i < num3; i++)
+				{
+					for (int j = 0; j < num2; j++)
 					{
 						this.dirtyChunks[j, i] = true;
 					}
@@ -401,20 +417,20 @@ namespace Rendering
 				BlockTileDecorInfo blockTileDecorInfo = ((element == SimHashes.Void) ? def.DecorPlaceBlockTileInfo : def.DecorBlockTileInfo);
 				if (blockTileDecorInfo)
 				{
-					this.decorRenderInfo = new BlockTileRenderer.DecorRenderInfo(num, num2, queryLayer, def, blockTileDecorInfo);
+					this.decorRenderInfo = new BlockTileRenderer.DecorRenderInfo(num2, num3, queryLayer, def, blockTileDecorInfo);
 				}
-				int num3 = def.BlockTileAtlas.items[0].name.Length - 4 - 8;
-				int num4 = num3 - 1 - 8;
+				int num4 = def.BlockTileAtlas.items[0].name.Length - 4 - 8;
+				int num5 = num4 - 1 - 8;
 				this.atlasInfo = new BlockTileRenderer.RenderInfo.AtlasInfo[def.BlockTileAtlas.items.Length];
 				for (int k = 0; k < this.atlasInfo.Length; k++)
 				{
 					TextureAtlas.Item item = def.BlockTileAtlas.items[k];
-					string text = item.name.Substring(num4, 8);
-					string text2 = item.name.Substring(num3, 8);
-					int num5 = Convert.ToInt32(text, 2);
-					int num6 = Convert.ToInt32(text2, 2);
-					this.atlasInfo[k].requiredConnections = (BlockTileRenderer.Bits)num5;
-					this.atlasInfo[k].forbiddenConnections = (BlockTileRenderer.Bits)num6;
+					string text = item.name.Substring(num5, 8);
+					string text2 = item.name.Substring(num4, 8);
+					int num6 = Convert.ToInt32(text, 2);
+					int num7 = Convert.ToInt32(text2, 2);
+					this.atlasInfo[k].requiredConnections = (BlockTileRenderer.Bits)num6;
+					this.atlasInfo[k].forbiddenConnections = (BlockTileRenderer.Bits)num7;
 					this.atlasInfo[k].uvBox = item.uvBox;
 					this.atlasInfo[k].name = item.name;
 				}

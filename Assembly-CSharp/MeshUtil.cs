@@ -10,6 +10,10 @@ public static class MeshUtil
 
 	public static List<Vector2> uvs = new List<Vector2>();
 
+	public static List<Vector2> uv2s = new List<Vector2>();
+
+	public static List<Vector4> uv4s = new List<Vector4>();
+
 	public static List<Color> colours = new List<Color>();
 
 	public static List<Color32> colours32 = new List<Color32>();

@@ -220,5 +220,26 @@ namespace STRINGS
 
 			public static LocString DESCRIPTION = "A cluster of visitable planetoids with an impactor-struck starting world.";
 		}
+
+		public static class AQUATIC_BASE_CLUSTER
+		{
+			public static LocString NAME = "Marinea";
+
+			public static LocString DESCRIPTION = "A wet location with abundant food resources.";
+		}
+
+		public static class AQUATIC_CLASSIC_CLUSTER
+		{
+			public static LocString NAME = "Marinea Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with a Reef starting world.";
+		}
+
+		public static class AQUATIC_SPACEDOUT_CLUSTER
+		{
+			public static LocString NAME = "Marinea Minor Cluster";
+
+			public static LocString DESCRIPTION = "A cluster of visitable planetoids with a Reef starting world.";
+		}
 	}
 }

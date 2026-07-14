@@ -96,7 +96,7 @@ public static class LargeImpactorLandingSequence
 		{
 			Vector2I vector2I = Grid.CellToXY(Grid.OffsetCell(spawnable3.cell, 0, 2));
 			GridVisibility.Reveal(vector2I.x, vector2I.y, 6, 1f);
-			SimMessages.Dig(spawnable3.cell, -1, false);
+			SimMessages.Dig(spawnable3.cell, -1, false, false);
 		}
 		yield return null;
 		List<Geyser> geysers = Components.Geysers.GetItems(worldID);
@@ -177,7 +177,7 @@ public static class LargeImpactorLandingSequence
 				float num4 = Mathf.Clamp01(1f - (magnitude - 4f) / 2f);
 				if ((magnitude < 4f || num3 <= 1f * num4) && Grid.IsSolidCell(num2) && !Grid.Foundation[num2] && Grid.Element[num2].id != SimHashes.Unobtanium)
 				{
-					SimMessages.Dig(num2, -1, false);
+					SimMessages.Dig(num2, -1, false, false);
 				}
 			}
 		}

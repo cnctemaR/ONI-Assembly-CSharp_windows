@@ -97,9 +97,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IGameObjectEffectDe
 				this.lastSampleTime = Time.time;
 				if (this.isLiquidConditioner && this.lastElement != component.ElementID)
 				{
-					Color color = component.Element.substance.colour;
-					color.a = 1f;
-					this.controller.SetSymbolTint(new KAnimHashedString("liquid"), color);
+					GameUtil.TintLiquidSymbolOnBuilding("liquid", this.controller, component.Element);
 				}
 				this.heatEffect.SetHeatBeingProducedValue(Mathf.Abs(num5));
 				this.lastElement = component.ElementID;

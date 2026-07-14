@@ -7,6 +7,16 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 {
 	public static string GetWiltAnimFromAnimSet(StandardCropPlant.AnimSet set, float growingPercentage)
 	{
+		return StandardCropPlant.GetGenericWiltAnimFromAnimSet(set, (int stg) => set.GetWiltLevel(stg), growingPercentage);
+	}
+
+	public static string GetWiltRecoverAnimFromAnimSet(StandardCropPlant.AnimSet set, float growingPercentage)
+	{
+		return StandardCropPlant.GetGenericWiltAnimFromAnimSet(set, (int stg) => set.GetWiltRecoverLevel(stg), growingPercentage);
+	}
+
+	private static string GetGenericWiltAnimFromAnimSet(StandardCropPlant.AnimSet set, Func<int, string> wiltLevelFn, float growingPercentage)
+	{
 		int num;
 		if (growingPercentage < 0.75f)
 		{
@@ -20,7 +30,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		{
 			num = 3;
 		}
-		return set.GetWiltLevel(num);
+		return wiltLevelFn(num);
 	}
 
 	protected override void OnSpawn()
@@ -91,6 +101,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		grow_pst = "grow_pst",
 		idle_full = "idle_full",
 		wilt_base = "wilt",
+		wilt_recover_base = null,
 		harvest = "harvest",
 		waning = "waning"
 	};
@@ -101,20 +112,34 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 	{
 		public void ClearWiltLevelCache()
 		{
-			this.m_wilt = null;
+			this.m_wilt.Clear();
 		}
 
 		public string GetWiltLevel(int level)
 		{
-			if (this.m_wilt == null)
+			return this.GetWiltAnimLevel(this.wilt_base, level);
+		}
+
+		public string GetWiltRecoverLevel(int level)
+		{
+			return this.GetWiltAnimLevel(this.wilt_recover_base, level);
+		}
+
+		private string GetWiltAnimLevel(string baseSTR, int level)
+		{
+			if (baseSTR == null)
 			{
-				this.m_wilt = new string[3];
+				return null;
+			}
+			if (!this.m_wilt.ContainsKey(baseSTR))
+			{
+				this.m_wilt[baseSTR] = new string[3];
 				for (int i = 0; i < 3; i++)
 				{
-					this.m_wilt[i] = this.wilt_base + (i + 1).ToString();
+					this.m_wilt[baseSTR][i] = baseSTR + (i + 1).ToString();
 				}
 			}
-			return this.m_wilt[level - 1];
+			return this.m_wilt[baseSTR][level - 1];
 		}
 
 		public AnimSet()
@@ -128,6 +153,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			this.grow_pst = template.grow_pst;
 			this.idle_full = template.idle_full;
 			this.wilt_base = template.wilt_base;
+			this.wilt_recover_base = template.wilt_recover_base;
 			this.harvest = template.harvest;
 			this.waning = template.waning;
 			this.grow_playmode = template.grow_playmode;
@@ -143,13 +169,15 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 
 		public string wilt_base;
 
+		public string wilt_recover_base;
+
 		public string harvest;
 
 		public string waning;
 
 		public KAnim.PlayMode grow_playmode = KAnim.PlayMode.Paused;
 
-		private string[] m_wilt;
+		private Dictionary<string, string[]> m_wilt = new Dictionary<string, string[]>();
 	}
 
 	public class States : GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant>
@@ -197,7 +225,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 					smi.master.harvestable.SetCanBeHarvested(false);
 				}
 			}).GoTo(this.alive.idle);
-			this.alive.wilting.PlayAnim(new Func<StandardCropPlant.StatesInstance, string>(StandardCropPlant.States.GetWiltAnim), KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.harvest, null);
+			this.alive.wilting.PlayAnim(new Func<StandardCropPlant.StatesInstance, string>(StandardCropPlant.States.GetWiltAnim), KAnim.PlayMode.Once).EventTransition(GameHashes.WiltRecover, this.alive.wiltRecover, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.harvest, null);
+			this.alive.wiltRecover.EnterTransition(this.alive.idle, new StateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.Transition.ConditionCallback(StandardCropPlant.States.DoesNotHaveWiltRecoverAnim)).PlayAnim(new Func<StandardCropPlant.StatesInstance, string>(StandardCropPlant.States.GetWiltRecoverAnim), KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.idle);
 			this.alive.fruiting.PlayAnim((StandardCropPlant.StatesInstance smi) => smi.master.anims.idle_full, KAnim.PlayMode.Loop).ToggleTag(GameTags.FullyGrown).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (smi.master.harvestable != null)
@@ -229,6 +258,17 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		{
 			float num = smi.master.growing.PercentOfCurrentHarvest();
 			return StandardCropPlant.GetWiltAnimFromAnimSet(smi.master.anims, num);
+		}
+
+		private static bool DoesNotHaveWiltRecoverAnim(StandardCropPlant.StatesInstance smi)
+		{
+			return StandardCropPlant.States.GetWiltRecoverAnim(smi) == null;
+		}
+
+		private static string GetWiltRecoverAnim(StandardCropPlant.StatesInstance smi)
+		{
+			float num = smi.master.growing.PercentOfCurrentHarvest();
+			return StandardCropPlant.GetWiltRecoverAnimFromAnimSet(smi.master.anims, num);
 		}
 
 		private static void RefreshPositionPercent(StandardCropPlant.StatesInstance smi, float dt)
@@ -266,6 +306,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State wilting;
+
+			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State wiltRecover;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State destroy;
 

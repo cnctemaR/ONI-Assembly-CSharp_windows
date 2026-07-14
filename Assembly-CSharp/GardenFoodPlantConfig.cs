@@ -29,7 +29,7 @@ public class GardenFoodPlantConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, "GardenFoodPlantFood", true, true, true, true, 2400f, 0f, 4600f, "GardenFoodPlantOriginal", global::STRINGS.CREATURES.SPECIES.GARDENFOODPLANT.NAME);
+		}, true, 0f, 0.15f, "GardenFoodPlantFood", true, true, true, false, true, 2400f, 0f, 4600f, "GardenFoodPlantOriginal", global::STRINGS.CREATURES.SPECIES.GARDENFOODPLANT.NAME);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<LoopingSounds>();

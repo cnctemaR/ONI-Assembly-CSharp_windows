@@ -11,9 +11,13 @@ namespace Klei.CustomSettings
 
 		public static SettingConfig DLC4Mixing = new DlcMixingSettingConfig("DLC4_ID", UI.DLC4.NAME, UI.DLC4.MIXING_TOOLTIP, 5L, false, DlcManager.DLC4, "DLC4_ID", "");
 
+		public static SettingConfig DLC5Mixing = new DlcMixingSettingConfig("DLC5_ID", UI.DLC5.NAME, UI.DLC5.MIXING_TOOLTIP, 5L, false, DlcManager.DLC5, "DLC5_ID", "");
+
 		public static SettingConfig CeresAsteroidMixing = new WorldMixingSettingConfig("CeresAsteroidMixing", "dlc2::worldMixing/CeresMixingSettings", DlcManager.DLC2, "DLC2_ID", true, 5L);
 
 		public static SettingConfig PrehistoricAsteroidMixing = new WorldMixingSettingConfig("PrehistoricAsteroidMixing", "dlc4::worldMixing/PrehistoricMixingSettings", DlcManager.DLC4, "DLC4_ID", true, 5L);
+
+		public static SettingConfig AquaticAsteroidMixing = new WorldMixingSettingConfig("AquaticAsteroidMixing", "dlc5::worldMixing/AquaticMixingSettings", DlcManager.DLC5, "DLC5_ID", true, 5L);
 
 		public static SettingConfig IceCavesMixing = new SubworldMixingSettingConfig("IceCavesMixing", "dlc2::subworldMixing/IceCavesMixingSettings", DlcManager.DLC2, "DLC2_ID", true, 5L);
 
@@ -26,5 +30,13 @@ namespace Klei.CustomSettings
 		public static SettingConfig RaptorMixing = new SubworldMixingSettingConfig("RaptorMixing", "dlc4::subworldMixing/RaptorMixingSettings", DlcManager.DLC4, "DLC4_ID", true, 5L);
 
 		public static SettingConfig WetlandsMixing = new SubworldMixingSettingConfig("WetlandsMixing", "dlc4::subworldMixing/WetlandsMixingSettings", DlcManager.DLC4, "DLC4_ID", true, 5L);
+
+		public static SettingConfig BeachMixing = new SubworldMixingSettingConfig("BeachMixing", "dlc5::subworldMixing/BeachMixingSettings", DlcManager.DLC5, "DLC5_ID", true, 5L);
+
+		public static SettingConfig ReefMixing = new SubworldMixingSettingConfig("ReefMixing", "dlc5::subworldMixing/ReefMixingSettings", DlcManager.DLC5, "DLC5_ID", true, 5L);
+
+		public static SettingConfig KelpForestMixing = new SubworldMixingSettingConfig("KelpForestMixing", "dlc5::subworldMixing/KelpForestMixingSettings", DlcManager.DLC5, "DLC5_ID", true, 5L);
+
+		public static SettingConfig AbyssMixing = new SubworldMixingSettingConfig("AbyssMixing", "dlc5::subworldMixing/AbyssMixingSettings", DlcManager.DLC5, "DLC5_ID", true, 5L);
 	}
 }

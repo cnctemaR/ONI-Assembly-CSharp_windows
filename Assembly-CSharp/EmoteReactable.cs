@@ -38,12 +38,6 @@ public class EmoteReactable : Reactable
 		return this;
 	}
 
-	public EmoteReactable SetOverideAnimSet(string animSet)
-	{
-		this.overrideAnimSet = Assets.GetAnim(animSet);
-		return this;
-	}
-
 	public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 	{
 		if (this.reactor != null || new_reactor == null)
@@ -80,7 +74,9 @@ public class EmoteReactable : Reactable
 	protected override void InternalBegin()
 	{
 		this.kbac = this.reactor.GetComponent<KBatchedAnimController>();
-		this.emote.ApplyAnimOverrides(this.kbac, this.overrideAnimSet);
+		Navigator navigator;
+		this.swimOverrideAnimSet = ((this.reactor.TryGetComponent<Navigator>(out navigator) && navigator.CurrentNavType == NavType.Swim) ? this.emote.ManifestSwimAnimSet() : null);
+		this.emote.ApplyAnimOverrides(this.kbac, this.swimOverrideAnimSet);
 		if (this.expression != null)
 		{
 			this.reactor.GetComponent<FaceGraph>().AddExpression(this.expression);
@@ -97,9 +93,10 @@ public class EmoteReactable : Reactable
 		if (this.kbac != null)
 		{
 			this.kbac.onAnimComplete -= this.NextStep;
-			this.emote.RemoveAnimOverrides(this.kbac, this.overrideAnimSet);
+			this.emote.RemoveAnimOverrides(this.kbac, this.swimOverrideAnimSet);
 			this.kbac = null;
 		}
+		this.swimOverrideAnimSet = null;
 		if (this.reactor != null)
 		{
 			if (this.expression != null)
@@ -177,7 +174,7 @@ public class EmoteReactable : Reactable
 
 	private HandleVector<EmoteStep.Callbacks>.Handle[] callbackHandles;
 
-	protected KAnimFile overrideAnimSet;
+	private KAnimFile swimOverrideAnimSet;
 
 	private int currentStep = -1;
 

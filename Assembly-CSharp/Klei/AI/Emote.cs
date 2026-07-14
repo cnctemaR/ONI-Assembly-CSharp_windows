@@ -29,37 +29,55 @@ namespace Klei.AI
 			}
 		}
 
-		public Emote(ResourceSet parent, string emoteId, EmoteStep[] defaultSteps, string animSetName = null)
+		public bool IsValid { get; private set; }
+
+		public KAnimFile ManifestSwimAnimSet()
+		{
+			if (this.swimAnimSetName != null && this.swimAnimSet == null)
+			{
+				this.swimAnimSet = Assets.GetAnim(this.swimAnimSetName);
+			}
+			return this.swimAnimSet;
+		}
+
+		public Emote(ResourceSet parent, string emoteId, EmoteStep[] defaultSteps, string animSetName = null, string swimAnimSetName = null)
 			: base(emoteId, parent, null)
 		{
 			this.emoteSteps.AddRange(defaultSteps);
 			this.animSetName = animSetName;
+			this.swimAnimSetName = swimAnimSetName;
+			this.IsValid = this.Validate();
 		}
 
-		public bool IsValidForController(KBatchedAnimController animController)
+		private bool Validate()
 		{
-			bool flag = true;
-			int num = 0;
-			while (flag && num < this.StepCount)
+			KAnimFileData kanimFileData = ((this.AnimSet == null) ? null : this.AnimSet.GetData());
+			if (kanimFileData == null)
 			{
-				flag = animController.HasAnimation(this.emoteSteps[num].anim);
-				num++;
+				return false;
 			}
-			KAnimFileData kanimFileData = ((this.animSet == null) ? null : this.animSet.GetData());
-			int num2 = 0;
-			while (kanimFileData != null && flag && num2 < this.StepCount)
+			for (int i = 0; i < this.StepCount; i++)
 			{
-				bool flag2 = false;
-				int num3 = 0;
-				while (!flag2 && num3 < kanimFileData.animCount)
+				bool flag = false;
+				for (int j = 0; j < kanimFileData.animCount; j++)
 				{
-					flag2 = kanimFileData.GetAnim(num2).id == this.emoteSteps[num2].anim;
-					num3++;
+					if (kanimFileData.GetAnim(j).name == this.emoteSteps[i].anim)
+					{
+						flag = true;
+						break;
+					}
 				}
-				flag = flag2;
-				num2++;
+				if (!flag)
+				{
+					Debug.LogWarningFormat("Emote AnimFile [{0}] does not have animations for emote step [{1}]", new object[]
+					{
+						this.animSetName,
+						this.emoteSteps[i].anim
+					});
+					return false;
+				}
 			}
-			return flag;
+			return true;
 		}
 
 		public void ApplyAnimOverrides(KBatchedAnimController animController, KAnimFile overrideSet)
@@ -128,6 +146,10 @@ namespace Klei.AI
 		private HashedString animSetName = null;
 
 		private KAnimFile animSet;
+
+		private HashedString swimAnimSetName = null;
+
+		private KAnimFile swimAnimSet;
 
 		private List<EmoteStep> emoteSteps = new List<EmoteStep>();
 	}

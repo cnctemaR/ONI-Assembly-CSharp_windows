@@ -32,7 +32,7 @@ public class DewDripperPlantConfig : IEntityConfig, IHasDlcRestrictions
 		List<Tag> list = new List<Tag> { GameTags.Hanging };
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 253.15f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 2);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 238.15f, 278.15f, 308.15f, null, true, 0f, 0.25f, DewDripConfig.ID, true, false, true, true, 2400f, 0f, 4600f, "DewDripperPlantOriginal", global::STRINGS.CREATURES.SPECIES.DEWDRIPPERPLANT.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 238.15f, 278.15f, 308.15f, null, true, 0f, 0.25f, DewDripConfig.ID, true, false, true, false, true, 2400f, 0f, 4600f, "DewDripperPlantOriginal", global::STRINGS.CREATURES.SPECIES.DEWDRIPPERPLANT.NAME);
 		PressureVulnerable pressureVulnerable = gameObject.AddOrGet<PressureVulnerable>();
 		pressureVulnerable.pressureWarning_High = 2f;
 		pressureVulnerable.pressureLethal_High = 10f;

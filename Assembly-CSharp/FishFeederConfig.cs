@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -23,7 +22,7 @@ public class FishFeederConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, raw_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, none, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Entombable = true;
-		buildingDef.Floodable = true;
+		buildingDef.Floodable = false;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.TileMain;
 		buildingDef.AddSearchTerms(SEARCH_TERMS.RANCHING);
 		buildingDef.AddSearchTerms(SEARCH_TERMS.CRITTER);
@@ -56,13 +55,9 @@ public class FishFeederConfig : IBuildingConfig
 		storage2.storageID = new Tag("FishFeederBot");
 		go.AddOrGet<StorageLocker>().choreTypeID = Db.Get().ChoreTypes.RanchingFetch.Id;
 		go.AddOrGet<UserNameable>();
-		Effect effect = new Effect("AteFromFeeder", global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.TOOLTIP, 1200f, true, false, false, null, -1f, 0f, null, "");
-		effect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.033333335f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));
-		effect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 5f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));
-		Db.Get().effects.Add(effect);
 		go.AddOrGet<TreeFilterable>().filterAllStoragesOnBuilding = true;
 		CreatureFeeder creatureFeeder = go.AddOrGet<CreatureFeeder>();
-		creatureFeeder.effectId = effect.Id;
+		creatureFeeder.effectId = "AteFromFeeder";
 		creatureFeeder.feederOffset = new CellOffset(0, -2);
 		go.GetComponent<KPrefabID>().prefabInitFn += this.OnPrefabInit;
 	}
@@ -84,7 +79,11 @@ public class FishFeederConfig : IBuildingConfig
 		foreach (KeyValuePair<Tag, Diet> keyValuePair in DietManager.CollectDiets(new Tag[]
 		{
 			GameTags.Creatures.Species.PacuSpecies,
-			GameTags.Creatures.Species.PrehistoricPacuSpecies
+			GameTags.Creatures.Species.PrehistoricPacuSpecies,
+			GameTags.Creatures.Species.ParrotFishSpecies,
+			GameTags.Creatures.Species.PufferFishSpecies,
+			GameTags.Creatures.Species.SeaHorseSpecies,
+			GameTags.Creatures.Species.SeaTurtleSpecies
 		}))
 		{
 			Diet value = keyValuePair.Value;
@@ -110,6 +109,14 @@ public class FishFeederConfig : IBuildingConfig
 		foreach (Tag tag in FishFeederConfig.forbiddenTags)
 		{
 			component.ForbiddenTags.Add(tag);
+		}
+		foreach (KBatchedAnimController kbatchedAnimController in instance.GetComponentsInChildrenOnly<KBatchedAnimController>())
+		{
+			if (kbatchedAnimController.name.Contains("_fg"))
+			{
+				kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+				kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+			}
 		}
 	}
 

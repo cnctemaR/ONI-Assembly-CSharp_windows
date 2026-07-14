@@ -11,6 +11,17 @@ public class CellSelectionInstantiator : MonoBehaviour
 		CellSelectionObject component2 = gameObject2.GetComponent<CellSelectionObject>();
 		component.alternateSelectionObject = component2;
 		component2.alternateSelectionObject = component;
+		CellSelectionInstantiator.CreateBackwallSelectionProxy();
+	}
+
+	private static void CreateBackwallSelectionProxy()
+	{
+		GameObject gameObject = new GameObject("BackwallSelectionCollider");
+		gameObject.SetActive(false);
+		gameObject.AddComponent<BackwallSelectionObject>();
+		gameObject.AddComponent<KSelectable>().DisableSelectMarker = true;
+		gameObject.AddComponent<KBoxCollider2D>();
+		gameObject.SetActive(true);
 	}
 
 	public GameObject CellSelectionPrefab;

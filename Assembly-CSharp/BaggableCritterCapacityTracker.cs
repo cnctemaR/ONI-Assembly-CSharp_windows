@@ -32,6 +32,29 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 		base.Subscribe(144050788, new Action<object>(this.RefreshCreatureCount));
 	}
 
+	private void OnBuildingStrawChanged(object o)
+	{
+		BuildingPointStraw buildingPointStraw = (BuildingPointStraw)o;
+		this.UpdateCavityCell(buildingPointStraw.GetBottomCellOffset());
+	}
+
+	public void UpdateCavityCell(CellOffset newOffset)
+	{
+		this.cavityOffset = newOffset;
+		int num = Grid.PosToCell(this);
+		this.cavityCell = Grid.OffsetCell(num, this.cavityOffset);
+		if (this.requireLiquidOffset)
+		{
+			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("BaggableCritterCapacityTracker.UpdateCavityCell", base.gameObject, new Extents(this.cavityCell, new CellOffset[]
+			{
+				new CellOffset(0, 0)
+			}), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
+			this.OnLiquidChanged(null);
+		}
+		this.RefreshCreatureCount(null);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -49,6 +72,7 @@ public class BaggableCritterCapacityTracker : KMonoBehaviour, ISim1000ms, IUserC
 			};
 		}
 		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, BaggableCritterCapacityTracker.capacityStatusItem, this);
+		base.Subscribe(360192579, new Action<object>(this.OnBuildingStrawChanged));
 	}
 
 	protected override void OnCleanUp()

@@ -46,6 +46,10 @@ namespace STRINGS
 
 			public static LocString STAYCONDITION_DEMOLIOR_DESCRIPTION = "Survive 100 cycles after Demolior collides with your colony.";
 
+			public static LocString WINCONDITION_AQUATIC = "Better Together";
+
+			public static LocString WINCONDITION_AQUATIC_DESCRIPTION = "Recruit the only freediver Duplicant in the universe to your colony.";
+
 			public static LocString NO_PLANTERBOX = "Locavore";
 
 			public static LocString NO_PLANTERBOX_DESCRIPTION = "Have Duplicants consume 400,000kcal of food without planting any seeds in Planter Boxes, Farm Tiles, or Hydroponic Farms.";
@@ -517,6 +521,71 @@ namespace STRINGS
 			public static LocString REQUIREMENT_DESCRIPTION = "Survived {0}/{1} cycles after Demolior impact";
 		}
 
+		public class FINDING_MINNOW
+		{
+			public static LocString NAME = "Better Together";
+
+			public static LocString DESCRIPTION = "";
+
+			public static LocString MESSAGE_TITLE = "IN GOOD COMPANY";
+
+			public static LocString MESSAGE_BODY = "Huzzah! We have shown the survivor that ours is a colony worth joining.\n\nShe says her name is Minnow. Her serene temperament and ability to survive long stretches without oxygen will serve us well as we face the infinite challenges of marine colony-building.";
+
+			public class ACHIEVEMENTS
+			{
+				public static LocString REQUIREMENT_NAME_A = "Deliver {AMOUNT} Pearls";
+
+				public static LocString REQUIREMENT_DESCRIPTION_A = "Harvest and deliver Pearls to the survivor Duplicant in the Reef biome";
+
+				public static LocString REQUIREMENT_NAME_A_HIDDEN = "Undiscovered Requirement";
+
+				public static LocString REQUIREMENT_DESCRIPTION_A_HIDDEN = "More exploration is required";
+
+				public static LocString REQUIREMENT_NAME_B = "Deliver {AMOUNT} Sushi";
+
+				public static LocString REQUIREMENT_DESCRIPTION_B = "Craft and deliver Sushi to the survivor Duplicant in the Kelp Forest biome";
+
+				public static LocString REQUIREMENT_NAME_B_HIDDEN = "Undiscovered Requirement";
+
+				public static LocString REQUIREMENT_DESCRIPTION_B_HIDDEN = "More exploration is required";
+
+				public static LocString REQUIREMENT_NAME_C = "Deliver {AMOUNT} Caviar";
+
+				public static LocString REQUIREMENT_DESCRIPTION_C = "Produce and deliver Caviar to the survivor Duplicant in the Abyss biome";
+
+				public static LocString REQUIREMENT_NAME_C_HIDDEN = "Undiscovered Requirement";
+
+				public static LocString REQUIREMENT_DESCRIPTION_C_HIDDEN = "More exploration is required";
+			}
+
+			public class POPUPS
+			{
+				public static LocString POPUP_START_POI_A_TITLE = "Recruit Survivor: {0}/{1}";
+
+				public static LocString POPUP_START_POI_A_DESCRIPTION = "My Duplicants found the survivor exploring the Reef biome. She seems fascinated by the Clampum.\n\nShe offered to trade us {AMOUNT1} Gasket and 2 Flue Coral seeds for {AMOUNT2} of its pearls.\n\nI must enable delivery to ensure we keep our end of this bargain.";
+
+				public static LocString POPUP_COMPLETE_POI_A_TITLE = "RECRUIT SURVIVOR: Pearls Delivered";
+
+				public static LocString POPUP_COMPLETE_POI_A_DESCRIPTION = "Success! My Duplicants harvested {AMOUNT1} pearls to offer to our potential future crewmate.\n\nWe now have {AMOUNT2} new gasket and 2 Flue Coral seeds to use as needed.";
+
+				public static LocString POPUP_START_POI_B_TITLE = "Recruit Survivor: {0}/{1}";
+
+				public static LocString POPUP_START_POI_B_DESCRIPTION = "My Duplicants found the survivor exploring the Kelp Forest biome. She appears to be hungry.\n\nMy Duplicants offered to exchange {AMOUNT1} of sushi for {AMOUNT2} Gasket and 2 Gum Palm seeds, and she agreed.\n\nI must enable delivery to ensure she receives our package.";
+
+				public static LocString POPUP_COMPLETE_POI_B_TITLE = "RECRUIT SURVIVOR: Sushi Delivered";
+
+				public static LocString POPUP_COMPLETE_POI_B_DESCRIPTION = "Success! We have produced {AMOUNT1} sushi to share with the survivor Duplicant as a gesture of goodwill.\n\nWe now have {AMOUNT2} new gasket and 2 Gum Palm seeds to use as needed.";
+
+				public static LocString POPUP_START_POI_C_TITLE = "Recruit Survivor: {0}/{1}";
+
+				public static LocString POPUP_START_POI_C_DESCRIPTION = "My Duplicants found the survivor exploring the Abyss biome. She has been observing our machinery and seems particularly intrigued by caviar.\n\nWe have agreed to exchange {AMOUNT1} of caviar for {AMOUNT2} Gasket.\n\nI must enable delivery to guarantee its fulfilment.";
+
+				public static LocString POPUP_COMPLETE_POI_C_TITLE = "RECRUIT SURVIVOR: Caviar Delivered";
+
+				public static LocString POPUP_COMPLETE_POI_C_DESCRIPTION = "Success! We have procured {AMOUNT1} caviar to offer to our splashy neighbour.\n\nWe now have {AMOUNT2} new gasket to use as needed.";
+			}
+		}
+
 		public class NO_DUPES_HAVE_DIED
 		{
 			public static LocString REQUIREMENT_NAME = "Zero Duplicant deaths in the colony";
@@ -698,7 +767,7 @@ namespace STRINGS
 
 				public static LocString REPAIR_CONTROLLER_TOOLTIP = string.Concat(new string[]
 				{
-					"Reconnect this building's  ",
+					"Reconnect this building's ",
 					UI.PRE_KEYWORD,
 					"Steel",
 					UI.PST_KEYWORD,

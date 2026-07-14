@@ -229,7 +229,8 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, GameUtil.GetFormattedMass(this.info.quantity, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		}
-		if (EdiblesManager.GetFoodInfo(this.info.id) != null)
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(this.info.id);
+		if (foodInfo != null && foodInfo.CaloriesPerUnit > 0f)
 		{
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, GameUtil.GetFormattedCaloriesForItem(this.info.id, this.info.quantity, GameUtil.TimeSlice.None, true));
 		}
@@ -243,7 +244,8 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 			float amount = inventory.GetAmount(this.info.id.ToTag(), false);
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		}
-		if (EdiblesManager.GetFoodInfo(this.info.id) != null)
+		EdiblesManager.FoodInfo foodInfo = EdiblesManager.GetFoodInfo(this.info.id);
+		if (foodInfo != null && foodInfo.CaloriesPerUnit > 0f)
 		{
 			float num = WorldResourceAmountTracker<RationTracker>.Get().CountAmountForItemWithID(this.info.id, inventory, true);
 			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));

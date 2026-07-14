@@ -38,7 +38,7 @@ namespace Database
 
 		private void SortStandardOutfits()
 		{
-			List<string> standard_outfits = new List<string> { "StandardYellow", "StandardRed", "StandardGreen", "StandardBlue", "permit_standard_bionic_outfit", "permit_standard_regal_neutronium_outfit" };
+			List<string> standard_outfits = new List<string> { "StandardYellow", "StandardRed", "StandardGreen", "StandardBlue", "permit_standard_bionic_outfit", "permit_standard_regal_neutronium_outfit", "permit_minnow_swim_outfit" };
 			this.resources = this.resources.OrderBy<ClothingOutfitResource, int>(delegate(ClothingOutfitResource item)
 			{
 				if (!standard_outfits.Contains(item.Id))

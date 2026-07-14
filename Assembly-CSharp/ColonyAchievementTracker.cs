@@ -288,7 +288,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 	private void TriggerNewAchievementCompleted(string achievement, GameObject cameraTarget = null)
 	{
 		this.unlockedAchievementMetric[ColonyAchievementTracker.UnlockedAchievementKey] = achievement;
-		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.unlockedAchievementMetric, "TriggerNewAchievementCompleted");
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.unlockedAchievementMetric, "AchievementCompleted");
 		bool flag = false;
 		if (Db.Get().ColonyAchievements.Get(achievement).isVictoryCondition)
 		{
@@ -551,6 +551,12 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 
 	[Serialize]
 	public int largeImpactorLandedCycle = -1;
+
+	[Serialize]
+	public int minnowQuestsCompleted;
+
+	[Serialize]
+	public bool allMinnowQuestsCompleted;
 
 	private const int GEO_DISCOVERED_BIT = 1;
 

@@ -22,7 +22,7 @@ public class BuildingFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 
 	public string animFile { get; set; }
 
-	public BuildingFacadeInfo(string id, string name, string desc, PermitRarity rarity, string prefabId, string animFile, Dictionary<string, string> workables = null, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+	public BuildingFacadeInfo(string id, string name, string desc, PermitRarity rarity, string prefabId, string animFile, Dictionary<string, string> workables = null, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null, Dictionary<string, string> data = null)
 	{
 		this.id = id;
 		this.name = name;
@@ -33,6 +33,7 @@ public class BuildingFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 		this.workables = workables;
 		this.requiredDlcIds = requiredDlcIds;
 		this.forbiddenDlcIds = forbiddenDlcIds;
+		this.data = data;
 	}
 
 	public string[] GetRequiredDlcIds()
@@ -50,6 +51,8 @@ public class BuildingFacadeInfo : IBlueprintInfo, IHasDlcRestrictions
 	public string prefabId;
 
 	public Dictionary<string, string> workables;
+
+	public Dictionary<string, string> data;
 
 	public string[] requiredDlcIds;
 

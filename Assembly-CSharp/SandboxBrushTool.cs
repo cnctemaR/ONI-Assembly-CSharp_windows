@@ -109,13 +109,14 @@ public class SandboxBrushTool : BrushTool
 		{
 			b = Db.Get().Diseases.GetIndex(disease.id);
 		}
+		float num = ((element.id == SimHashes.Vacuum) ? 0f : this.settings.GetFloatSetting("SandboxTools.Mass"));
 		int cell2 = cell;
 		SimHashes id = element.id;
 		CellElementEvent sandBoxTool = CellEventLogger.Instance.SandBoxTool;
-		float floatSetting = this.settings.GetFloatSetting("SandboxTools.Mass");
-		float floatSetting2 = this.settings.GetFloatSetting("SandbosTools.Temperature");
-		int num = index;
-		SimMessages.ReplaceElement(cell2, id, sandBoxTool, floatSetting, floatSetting2, b, this.settings.GetIntSetting("SandboxTools.DiseaseCount"), num);
+		float num2 = num;
+		float floatSetting = this.settings.GetFloatSetting("SandbosTools.Temperature");
+		int num3 = index;
+		SimMessages.ReplaceElement(cell2, id, sandBoxTool, num2, floatSetting, b, this.settings.GetIntSetting("SandboxTools.DiseaseCount"), num3);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)

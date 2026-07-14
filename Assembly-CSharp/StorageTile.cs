@@ -345,6 +345,7 @@ public class StorageTile : GameStateMachine<StorageTile, StorageTile.Instance, I
 			KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
 			kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("storagetile_kanim") };
 			kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingFront;
+			kbatchedAnimController.CopyBlendValue(this.animController);
 			return kbatchedAnimController;
 		}
 

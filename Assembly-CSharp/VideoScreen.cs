@@ -147,6 +147,49 @@ public class VideoScreen : KModalScreen
 		}));
 	}
 
+	public void PlayShortWithVictoryLoop(string shortVideo, string message, string victoryAchievement, string loopVideo, bool showAchievements = true, EventReference overrideAudioSnapshot = default(EventReference))
+	{
+		this.PlayVideo(Assets.GetVideo(shortVideo), true, overrideAudioSnapshot, false, true);
+		this.QueueVictoryVideoLoop(true, message, victoryAchievement, loopVideo, showAchievements, false);
+	}
+
+	public void PlayVictoryLoop(string message, string victoryAchievement, string loopVideo, bool showAchievements = true, EventReference overrideAudioSnapshot = default(EventReference), bool fadeIn = false)
+	{
+		this.PlayVideo(Assets.GetVideo(loopVideo), true, overrideAudioSnapshot, false, true);
+		this.videoPlayer.isLooping = true;
+		this.videoPlayer.timeReference = VideoTimeReference.Freerun;
+		MusicManager.instance.PlaySong("Music_Victory_03_StoryAndSummary", false);
+		MusicManager.instance.SetSongParameter("Music_Victory_03_StoryAndSummary", "songSection", 1f, true);
+		this.closeButton.gameObject.SetActive(true);
+		this.proceedButton.gameObject.SetActive(true);
+		this.SetOverlayText("VictoryEnd", new List<string> { message });
+		if (fadeIn)
+		{
+			this.fadeOverlay.color = new Color(0f, 0f, 0f, 1f);
+			base.StartCoroutine(this.FadeInOverlay());
+		}
+		this.OnStop = (global::System.Action)Delegate.Combine(this.OnStop, new global::System.Action(delegate
+		{
+			if (showAchievements)
+			{
+				RetireColonyUtility.SaveColonySummaryData();
+				MainMenu.ActivateRetiredColoniesScreenFromData(this.transform.parent.gameObject, RetireColonyUtility.GetCurrentColonyRetiredColonyData());
+			}
+		}));
+	}
+
+	private IEnumerator FadeInOverlay()
+	{
+		yield return SequenceUtil.WaitForSecondsRealtime(1f);
+		for (float i = 1f; i >= 0f; i -= Time.unscaledDeltaTime)
+		{
+			this.fadeOverlay.color = new Color(0f, 0f, 0f, i);
+			yield return SequenceUtil.WaitForNextFrame;
+		}
+		this.fadeOverlay.color = new Color(0f, 0f, 0f, 0f);
+		yield break;
+	}
+
 	public void SetOverlayText(string overlayTemplate, List<string> strings)
 	{
 		VideoOverlay videoOverlay = null;

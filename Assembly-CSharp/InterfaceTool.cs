@@ -295,7 +295,7 @@ public class InterfaceTool : KMonoBehaviour
 		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;
-			if (!(kcollider2D == null) && kcollider2D.Intersects(new Vector2(vector3.x, vector3.y)))
+			if (!(kcollider2D == null) && kcollider2D.enabled && kcollider2D.Intersects(new Vector2(vector3.x, vector3.y)))
 			{
 				KSelectable kselectable = kcollider2D.GetComponent<KSelectable>();
 				if (kselectable == null)
@@ -323,34 +323,19 @@ public class InterfaceTool : KMonoBehaviour
 		this.intersections.RemoveAll(new Predicate<InterfaceTool.Intersection>(InterfaceTool.is_component_null));
 		if (this.intersections.Count <= 0)
 		{
-			this.prevIntersectionGroup.Clear();
 			return default(T);
-		}
-		this.curIntersectionGroup.Clear();
-		foreach (InterfaceTool.Intersection intersection in this.intersections)
-		{
-			this.curIntersectionGroup.Add(intersection.component);
-		}
-		if (!this.prevIntersectionGroup.Equals(this.curIntersectionGroup))
-		{
-			this.hitCycleCount = 0;
-			this.prevIntersectionGroup = this.curIntersectionGroup;
 		}
 		this.intersections.Sort((InterfaceTool.Intersection a, InterfaceTool.Intersection b) => this.SortSelectables(a.component as KMonoBehaviour, b.component as KMonoBehaviour));
 		int num = 0;
-		if (cycleSelection)
+		if (cycleSelection && previous_selection != null)
 		{
-			num = this.hitCycleCount % this.intersections.Count;
-			if (this.intersections[num].component != previous_selection || previous_selection == null)
+			for (int i = 0; i < this.intersections.Count; i++)
 			{
-				num = 0;
-				this.hitCycleCount = 0;
-			}
-			else
-			{
-				int num2 = this.hitCycleCount + 1;
-				this.hitCycleCount = num2;
-				num = num2 % this.intersections.Count;
+				if (this.intersections[i].component == previous_selection)
+				{
+					num = (i + 1) % this.intersections.Count;
+					break;
+				}
 			}
 		}
 		return this.intersections[num].component as T;
@@ -382,7 +367,7 @@ public class InterfaceTool : KMonoBehaviour
 			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 			{
 				KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;
-				if (!(kcollider2D == null) && kcollider2D.Intersects(new Vector2(vector2.x, vector2.y)))
+				if (!(kcollider2D == null) && kcollider2D.enabled && kcollider2D.Intersects(new Vector2(vector2.x, vector2.y)))
 				{
 					T t = kcollider2D.GetComponent<T>();
 					if (t == null)
@@ -520,12 +505,6 @@ public class InterfaceTool : KMonoBehaviour
 	protected bool playedSoundThisFrame;
 
 	private List<InterfaceTool.Intersection> intersections = new List<InterfaceTool.Intersection>();
-
-	private HashSet<Component> prevIntersectionGroup = new HashSet<Component>();
-
-	private HashSet<Component> curIntersectionGroup = new HashSet<Component>();
-
-	private int hitCycleCount;
 
 	public struct Intersection
 	{

@@ -154,8 +154,7 @@ public static class ArtifactSequence
 			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		VideoScreen component = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
-		component.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.CollectedArtifacts.shortVideoName), true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot, false, true);
-		component.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.CollectedArtifacts.messageBody, Db.Get().ColonyAchievements.CollectedArtifacts.Id, Db.Get().ColonyAchievements.CollectedArtifacts.loopVideoName, true, false);
+		component.PlayShortWithVictoryLoop(Db.Get().ColonyAchievements.CollectedArtifacts.shortVideoName, Db.Get().ColonyAchievements.CollectedArtifacts.messageBody, Db.Get().ColonyAchievements.CollectedArtifacts.Id, Db.Get().ColonyAchievements.CollectedArtifacts.loopVideoName, true, AudioMixerSnapshots.Get().VictoryCinematicSnapshot);
 		component.OnStop = (global::System.Action)Delegate.Combine(component.OnStop, new global::System.Action(delegate
 		{
 			StoryMessageScreen.HideInterface(false);

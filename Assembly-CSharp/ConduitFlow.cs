@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.Serialization;
 using Klei;
 using KSerialization;
@@ -1870,51 +1869,63 @@ public class ConduitFlow : IConduitFlow
 				this.cycles.Clear();
 				while (this.bfs_traversal.Count != 0)
 				{
-					ConduitFlow.BuildNetworkTask.Graph.Vertex node = this.bfs_traversal.Dequeue();
-					this.vertex_cells.Add(node.cell);
+					ConduitFlow.BuildNetworkTask.Graph.Vertex vertex = this.bfs_traversal.Dequeue();
+					this.vertex_cells.Add(vertex.cell);
 					ConduitFlow.FlowDirections flowDirections = ConduitFlow.FlowDirections.None;
 					int num2 = 4;
-					if (node.direction != ConduitFlow.FlowDirections.None)
+					if (vertex.direction != ConduitFlow.FlowDirections.None)
 					{
-						flowDirections = ConduitFlow.Opposite(node.direction);
+						flowDirections = ConduitFlow.Opposite(vertex.direction);
 						num2 = 3;
 					}
-					int conduitIdx = conduit_flow.grid[node.cell].conduitIdx;
+					int conduitIdx = conduit_flow.grid[vertex.cell].conduitIdx;
 					for (int num3 = 0; num3 != num2; num3++)
 					{
 						flowDirections = ConduitFlow.ComputeNextFlowDirection(flowDirections);
 						ConduitFlow.Conduit conduitFromDirection = conduit_flow.soaInfo.GetConduitFromDirection(conduitIdx, flowDirections);
-						ConduitFlow.BuildNetworkTask.Graph.Vertex new_node = this.WalkPath(conduitIdx, conduitFromDirection.idx, flowDirections, are_dead_ends_pseudo_sources);
-						if (new_node.is_valid)
+						ConduitFlow.BuildNetworkTask.Graph.Vertex vertex2 = this.WalkPath(conduitIdx, conduitFromDirection.idx, flowDirections, are_dead_ends_pseudo_sources);
+						if (vertex2.is_valid)
 						{
-							ConduitFlow.BuildNetworkTask.Graph.Edge edge2 = new ConduitFlow.BuildNetworkTask.Graph.Edge
+							ConduitFlow.BuildNetworkTask.Graph.Edge edge = new ConduitFlow.BuildNetworkTask.Graph.Edge
 							{
 								vertices = new ConduitFlow.BuildNetworkTask.Graph.Vertex[]
 								{
 									new ConduitFlow.BuildNetworkTask.Graph.Vertex
 									{
-										cell = node.cell,
+										cell = vertex.cell,
 										direction = flowDirections
 									},
-									new_node
+									vertex2
 								}
 							};
-							if (new_node.cell == node.cell)
+							if (vertex2.cell == vertex.cell)
 							{
-								this.cycles.Add(edge2);
+								this.cycles.Add(edge);
 							}
-							else if (!this.edges.Any<ConduitFlow.BuildNetworkTask.Graph.Edge>((ConduitFlow.BuildNetworkTask.Graph.Edge edge) => edge.vertices[0].cell == new_node.cell && edge.vertices[1].cell == node.cell) && !this.edges.Contains(edge2))
+							else
 							{
-								this.edges.Add(edge2);
-								if (this.visited.Add(new_node.cell))
+								bool flag = false;
+								foreach (ConduitFlow.BuildNetworkTask.Graph.Edge edge2 in this.edges)
 								{
-									if (this.IsSink(new_node.cell))
+									if (edge2.vertices[0].cell == vertex2.cell && edge2.vertices[1].cell == vertex.cell)
 									{
-										this.pseudo_sources.Add(new_node);
+										flag = true;
+										break;
 									}
-									else
+								}
+								if (!flag && !this.edges.Contains(edge))
+								{
+									this.edges.Add(edge);
+									if (this.visited.Add(vertex2.cell))
 									{
-										this.bfs_traversal.Enqueue(new_node);
+										if (this.IsSink(vertex2.cell))
+										{
+											this.pseudo_sources.Add(vertex2);
+										}
+										else
+										{
+											this.bfs_traversal.Enqueue(vertex2);
+										}
 									}
 								}
 							}
@@ -1922,9 +1933,9 @@ public class ConduitFlow : IConduitFlow
 					}
 					if (this.bfs_traversal.Count == 0)
 					{
-						foreach (ConduitFlow.BuildNetworkTask.Graph.Vertex vertex in this.pseudo_sources)
+						foreach (ConduitFlow.BuildNetworkTask.Graph.Vertex vertex3 in this.pseudo_sources)
 						{
-							this.bfs_traversal.Enqueue(vertex);
+							this.bfs_traversal.Enqueue(vertex3);
 						}
 						this.pseudo_sources.Clear();
 					}
@@ -2016,51 +2027,75 @@ public class ConduitFlow : IConduitFlow
 
 			public void Merge(ConduitFlow.BuildNetworkTask.Graph inverted_graph)
 			{
-				using (List<ConduitFlow.BuildNetworkTask.Graph.Edge>.Enumerator enumerator = inverted_graph.edges.GetEnumerator())
+				foreach (ConduitFlow.BuildNetworkTask.Graph.Edge edge in inverted_graph.edges)
 				{
-					while (enumerator.MoveNext())
+					ConduitFlow.BuildNetworkTask.Graph.Edge edge2 = edge.Invert();
+					bool flag = false;
+					foreach (ConduitFlow.BuildNetworkTask.Graph.Edge edge3 in this.edges)
 					{
-						ConduitFlow.BuildNetworkTask.Graph.Edge inverted_edge2 = enumerator.Current;
-						ConduitFlow.BuildNetworkTask.Graph.Edge candidate = inverted_edge2.Invert();
-						if (!this.edges.Any<ConduitFlow.BuildNetworkTask.Graph.Edge>((ConduitFlow.BuildNetworkTask.Graph.Edge edge) => edge.Equals(inverted_edge2) || edge.Equals(candidate)))
+						if (edge3.Equals(edge) || edge3.Equals(edge2))
 						{
-							this.edges.Add(candidate);
-							this.vertex_cells.Add(candidate.vertices[0].cell);
-							this.vertex_cells.Add(candidate.vertices[1].cell);
+							flag = true;
+							break;
 						}
+					}
+					if (!flag)
+					{
+						this.edges.Add(edge2);
+						this.vertex_cells.Add(edge2.vertices[0].cell);
+						this.vertex_cells.Add(edge2.vertices[1].cell);
 					}
 				}
 				int num = 1000;
 				for (int num2 = 0; num2 != num; num2++)
 				{
 					global::Debug.Assert(num2 != num - 1);
-					bool flag = false;
-					using (HashSet<int>.Enumerator enumerator2 = this.vertex_cells.GetEnumerator())
+					bool flag2 = false;
+					foreach (int num3 in this.vertex_cells)
 					{
-						while (enumerator2.MoveNext())
+						if (!this.IsSink(num3))
 						{
-							int cell = enumerator2.Current;
-							if (!this.IsSink(cell) && !this.edges.Any<ConduitFlow.BuildNetworkTask.Graph.Edge>((ConduitFlow.BuildNetworkTask.Graph.Edge edge) => edge.vertices[0].cell == cell))
+							bool flag3 = false;
+							using (List<ConduitFlow.BuildNetworkTask.Graph.Edge>.Enumerator enumerator = this.edges.GetEnumerator())
 							{
-								int num3 = inverted_graph.edges.FindIndex((ConduitFlow.BuildNetworkTask.Graph.Edge inverted_edge) => inverted_edge.vertices[1].cell == cell);
-								if (num3 != -1)
+								while (enumerator.MoveNext())
 								{
-									ConduitFlow.BuildNetworkTask.Graph.Edge edge3 = inverted_graph.edges[num3];
-									for (int num4 = 0; num4 != this.edges.Count; num4++)
+									if (enumerator.Current.vertices[0].cell == num3)
 									{
-										ConduitFlow.BuildNetworkTask.Graph.Edge edge2 = this.edges[num4];
-										if (edge2.vertices[0].cell == edge3.vertices[0].cell && edge2.vertices[1].cell == edge3.vertices[1].cell)
+										flag3 = true;
+										break;
+									}
+								}
+							}
+							if (!flag3)
+							{
+								int num4 = -1;
+								for (int i = 0; i < inverted_graph.edges.Count; i++)
+								{
+									if (inverted_graph.edges[i].vertices[1].cell == num3)
+									{
+										num4 = i;
+										break;
+									}
+								}
+								if (num4 != -1)
+								{
+									ConduitFlow.BuildNetworkTask.Graph.Edge edge4 = inverted_graph.edges[num4];
+									for (int num5 = 0; num5 != this.edges.Count; num5++)
+									{
+										ConduitFlow.BuildNetworkTask.Graph.Edge edge5 = this.edges[num5];
+										if (edge5.vertices[0].cell == edge4.vertices[0].cell && edge5.vertices[1].cell == edge4.vertices[1].cell)
 										{
-											this.edges[num4] = edge2.Invert();
+											this.edges[num5] = edge5.Invert();
 										}
 									}
-									flag = true;
+									flag2 = true;
 									break;
 								}
 							}
 						}
 					}
-					if (!flag)
+					if (!flag2)
 					{
 						break;
 					}

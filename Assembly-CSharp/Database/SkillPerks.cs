@@ -41,6 +41,12 @@ namespace Database
 			this.IncreaseAthleticsSmall = base.Add(new SkillAttributePerk("IncreaseAthleticsSmall", Db.Get().Attributes.Athletics.Id, (float)ROLES.ATTRIBUTE_BONUS_FIRST, DUPLICANTS.ROLES.HAULER.NAME, false));
 			this.IncreaseAthleticsMedium = base.Add(new SkillAttributePerk("IncreaseAthletics", Db.Get().Attributes.Athletics.Id, (float)ROLES.ATTRIBUTE_BONUS_SECOND, DUPLICANTS.ROLES.SUIT_EXPERT.NAME, false));
 			this.IncreaseAthleticsLarge = base.Add(new SkillAttributePerk("IncreaseAthleticsLarge", Db.Get().Attributes.Athletics.Id, (float)ROLES.ATTRIBUTE_BONUS_THIRD, DUPLICANTS.ROLES.SUIT_DURABILITY.NAME, false));
+			this.CanSwim = base.Add(new SimpleSkillPerk("CanSwim", UI.ROLES_SCREEN.PERKS.CAN_SWIM.DESCRIPTION));
+			this.IncreasedLungCapacity = base.Add(new LungCapacityPerk("IncreasedLungCapacity", DUPLICANTSTATS.STANDARD.Breath.SWIMMING_SKILL_LUNG_CAPACITY_BONUS, DUPLICANTS.ROLES.SWIMMER.NAME));
+			this.IncreaseSwimmerStaminaInLiquid = base.Add(new SimpleSkillPerk("IncreaseSwimmerStaminaInLiquid", UI.ROLES_SCREEN.PERKS.INCREASE_SWIMMER_STAMINA_IN_LIQUID.DESCRIPTION));
+			this.IncreaseSwimmerAthleticsInLiquid = base.Add(new SimpleSkillPerk("IncreaseSwimmerAthleticsInLiquid", UI.ROLES_SCREEN.PERKS.INCREASE_SWIMMER_ATHLETICS_IN_LIQUID.DESCRIPTION));
+			this.ReduceSaltWaterSwimmingEyeIrritation = base.Add(new SimpleSkillPerk("ReduceSaltWaterSwimmingEyeIrritation", UI.ROLES_SCREEN.PERKS.REDUCE_SALTWATER_SWIMMER_EYE_IRRITATION.DESCRIPTION));
+			this.ImprovedLiquidTemperatureTolerance = base.Add(new SimpleSkillPerk("ImprovedLiquidTemperatureTolerance", UI.ROLES_SCREEN.PERKS.IMPROVED_LIQUID_TEMPERATURE_TOLERANCE.DESCRIPTION));
 			this.IncreaseStrengthGofer = base.Add(new SkillAttributePerk("IncreaseStrengthGofer", Db.Get().Attributes.Strength.Id, (float)ROLES.ATTRIBUTE_BONUS_FIRST, DUPLICANTS.ROLES.HAULER.NAME, false));
 			this.IncreaseStrengthCourier = base.Add(new SkillAttributePerk("IncreaseStrengthCourier", Db.Get().Attributes.Strength.Id, (float)ROLES.ATTRIBUTE_BONUS_SECOND, DUPLICANTS.ROLES.MATERIALS_MANAGER.NAME, false));
 			this.IncreaseStrengthGroundskeeper = base.Add(new SkillAttributePerk("IncreaseStrengthGroundskeeper", Db.Get().Attributes.Strength.Id, (float)ROLES.ATTRIBUTE_BONUS_FIRST, DUPLICANTS.ROLES.HANDYMAN.NAME, false));
@@ -66,8 +72,10 @@ namespace Database
 			this.CanElectricGrill = base.Add(new SimpleSkillPerk("CanElectricGrill", UI.ROLES_SCREEN.PERKS.CAN_ELECTRIC_GRILL.DESCRIPTION));
 			this.CanGasRange = base.Add(new SimpleSkillPerk("CanGasRange", UI.ROLES_SCREEN.PERKS.CAN_GAS_RANGE.DESCRIPTION));
 			this.CanDeepFry = base.Add(new SimpleSkillPerk("CanDeepFry", UI.ROLES_SCREEN.PERKS.CAN_DEEP_FRYER.DESCRIPTION));
+			this.CanSushiBar = base.Add(new SimpleSkillPerk("CanSushiBar", UI.ROLES_SCREEN.PERKS.CAN_SUSHI_BAR.DESCRIPTION));
 			this.IncreaseCookingSmall = base.Add(new SkillAttributePerk("IncreaseCookingSmall", Db.Get().Attributes.Cooking.Id, (float)ROLES.ATTRIBUTE_BONUS_FIRST, DUPLICANTS.ROLES.JUNIOR_COOK.NAME, false));
 			this.IncreaseCookingMedium = base.Add(new SkillAttributePerk("IncreaseCookingMedium", Db.Get().Attributes.Cooking.Id, (float)ROLES.ATTRIBUTE_BONUS_SECOND, DUPLICANTS.ROLES.COOK.NAME, false));
+			this.IncreaseCookingLarge = base.Add(new SkillAttributePerk("IncreaseCookingLarge", Db.Get().Attributes.Cooking.Id, (float)ROLES.ATTRIBUTE_BONUS_THIRD, DUPLICANTS.ROLES.COOK.NAME, false));
 			this.CanSpiceGrinder = base.Add(new SimpleSkillPerk("CanSpiceGrinder ", UI.ROLES_SCREEN.PERKS.CAN_SPICE_GRINDER.DESCRIPTION));
 			this.IncreaseCaringSmall = base.Add(new SkillAttributePerk("IncreaseCaringSmall", Db.Get().Attributes.Caring.Id, (float)ROLES.ATTRIBUTE_BONUS_FIRST, DUPLICANTS.ROLES.JUNIOR_MEDIC.NAME, false));
 			this.IncreaseCaringMedium = base.Add(new SkillAttributePerk("IncreaseCaringMedium", Db.Get().Attributes.Caring.Id, (float)ROLES.ATTRIBUTE_BONUS_SECOND, DUPLICANTS.ROLES.MEDIC.NAME, false));
@@ -115,6 +123,11 @@ namespace Database
 				this.IncreaseAthleticsBionicsB2 = base.Add(new SkillAttributePerk("IncreaseAthleticsBionicsB2", Db.Get().Attributes.Athletics.Id, 2f, DUPLICANTS.ROLES.BIONICS_B2.NAME, false));
 				this.IncreaseAthleticsBionicsA2 = base.Add(new SkillAttributePerk("IncreaseAthleticsBionicsA2", Db.Get().Attributes.Athletics.Id, 2f, DUPLICANTS.ROLES.BIONICS_A2.NAME, false));
 				this.IncreasedCarryBionics = base.Add(new SkillAttributePerk("IncreasedCarryBionics", Db.Get().Attributes.CarryAmount.Id, 400f, global::STRINGS.ITEMS.BIONIC_BOOSTERS.BOOSTER_CARRY1.NAME, true));
+				this.IncreasedCarryBionicsMinor = base.Add(new SkillAttributePerk("IncreasedCarryBionicsMinor", Db.Get().Attributes.CarryAmount.Id, 200f, global::STRINGS.ITEMS.BIONIC_BOOSTERS.BOOSTER_MOD_SWIM.NAME, true));
+			}
+			if (DlcManager.IsContentSubscribed("DLC5_ID"))
+			{
+				this.CanFarmClams = base.Add(new SimpleSkillPerk("CanFarmClams", UI.ROLES_SCREEN.PERKS.CAN_FARM_CLAMS.DESCRIPTION));
 			}
 		}
 
@@ -158,6 +171,8 @@ namespace Database
 
 		public SkillPerk IncreaseBotanyLarge;
 
+		public SkillPerk CanFarmClams;
+
 		public SkillPerk CanFarmTinker;
 
 		public SkillPerk CanIdentifyMutantSeeds;
@@ -181,6 +196,20 @@ namespace Database
 		public SkillPerk IncreaseAthleticsMedium;
 
 		public SkillPerk IncreaseAthleticsLarge;
+
+		public SkillPerk CanSwim;
+
+		public SkillPerk SwimmingExpertise;
+
+		public SkillPerk IncreasedLungCapacity;
+
+		public SkillPerk ImprovedLiquidTemperatureTolerance;
+
+		public SkillPerk IncreaseSwimmerStaminaInLiquid;
+
+		public SkillPerk IncreaseSwimmerAthleticsInLiquid;
+
+		public SkillPerk ReduceSaltWaterSwimmingEyeIrritation;
 
 		public SkillPerk IncreaseStrengthSmall;
 
@@ -242,7 +271,11 @@ namespace Database
 
 		public SkillPerk IncreaseCookingMedium;
 
+		public SkillPerk IncreaseCookingLarge;
+
 		public SkillPerk CanSpiceGrinder;
+
+		public SkillPerk CanSushiBar;
 
 		public SkillPerk IncreaseCaringSmall;
 
@@ -329,5 +362,7 @@ namespace Database
 		public SkillPerk IncreaseAthleticsBionicsA2;
 
 		public SkillPerk IncreasedCarryBionics;
+
+		public SkillPerk IncreasedCarryBionicsMinor;
 	}
 }

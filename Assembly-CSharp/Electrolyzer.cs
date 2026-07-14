@@ -5,6 +5,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 {
+	public Electrolyzer()
+	{
+		this.overPressure = (int cell) => Grid.Mass[cell] > this.maxMass;
+	}
+
 	protected override void OnSpawn()
 	{
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
@@ -38,13 +43,8 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			num = Grid.OffsetCell(num, this.emissionOffset);
-			return !GameUtil.FloodFillCheck<Electrolyzer>(new Func<int, Electrolyzer, bool>(Electrolyzer.OverPressure), this, num, 3, true, true);
+			return !FloodFill.Any<FloodFill.MaxDepth>(this.overPressure, num, new FloodFill.MaxDepth(3), true, true);
 		}
-	}
-
-	private static bool OverPressure(int cell, Electrolyzer electrolyzer)
-	{
-		return Grid.Mass[cell] > electrolyzer.maxMass;
 	}
 
 	[SerializeField]
@@ -66,6 +66,8 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 	private Operational operational;
 
 	private MeterController meter;
+
+	private readonly Func<int, bool> overPressure;
 
 	public class StatesInstance : GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer, object>.GameInstance
 	{

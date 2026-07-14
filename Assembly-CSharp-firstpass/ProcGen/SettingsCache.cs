@@ -281,6 +281,7 @@ namespace ProcGen
 			FeatureSettings featureSettings = YamlIO.LoadFile<FeatureSettings>(SettingsCache.RewriteWorldgenPathYaml(longName), null, null);
 			if (featureSettings != null)
 			{
+				featureSettings.ReorganizeMobs();
 				SettingsCache.featureSettings.Add(longName, featureSettings);
 				if (featureSettings.forceBiome != null)
 				{

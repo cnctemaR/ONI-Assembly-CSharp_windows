@@ -21,6 +21,13 @@ public class CritterCondo : GameStateMachine<CritterCondo, CritterCondo.Instance
 
 	public GameStateMachine<CritterCondo, CritterCondo.Instance, IStateMachineTarget, CritterCondo.Def>.State operational;
 
+	public enum CreatureFGLayerType
+	{
+		SmallCreatureLayer,
+		LargeCreatureLayer,
+		SquidLayer
+	}
+
 	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
 		public List<Descriptor> GetDescriptors(GameObject go)
@@ -30,7 +37,7 @@ public class CritterCondo : GameStateMachine<CritterCondo, CritterCondo.Instance
 
 		public Func<CritterCondo.Instance, bool> IsCritterCondoOperationalCb;
 
-		public Action<KBatchedAnimController, bool> UpdateForegroundVisibilitySymbols;
+		public Action<KBatchedAnimController, CritterCondo.CreatureFGLayerType> UpdateForegroundVisibilitySymbols;
 
 		public StatusItem moveToStatusItem;
 
@@ -92,7 +99,7 @@ public class CritterCondo : GameStateMachine<CritterCondo, CritterCondo.Instance
 			return !this.IsReserved() && CritterCondo.IsOperational(this);
 		}
 
-		public void UpdateCritterAnims(string anim_name, bool enters, bool is_large_critter)
+		public void UpdateCritterAnims(string anim_name, bool enters, CritterCondo.CreatureFGLayerType fg_layer)
 		{
 			if (enters)
 			{
@@ -100,7 +107,7 @@ public class CritterCondo : GameStateMachine<CritterCondo, CritterCondo.Instance
 			}
 			if (base.def.UpdateForegroundVisibilitySymbols != null)
 			{
-				base.def.UpdateForegroundVisibilitySymbols(this.foregroundController, is_large_critter);
+				base.def.UpdateForegroundVisibilitySymbols(this.foregroundController, fg_layer);
 			}
 		}
 

@@ -43,100 +43,90 @@ public class DlcManager
 
 	public static string GetDlcTitle(string dlcId)
 	{
-		StringKey dlcTitle = new StringKey(dlcId);
+		StringKey stringKey = new StringKey(dlcId);
 		if (dlcId == "EXPANSION1_ID")
 		{
-			dlcTitle = new StringKey("STRINGS.UI.DLC1.NAME");
+			stringKey = DlcManager.EXPANSION1_INFO.dlcTitle;
 		}
 		DlcManager.DlcInfo dlcInfo;
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			dlcTitle = dlcInfo.dlcTitle;
+			stringKey = dlcInfo.dlcTitle;
 		}
 		else if (DlcManager.IsUnknownDlc(dlcId))
 		{
-			dlcTitle = new StringKey("STRINGS.UI.UNKNOWN_DLC.NAME");
+			stringKey = new StringKey("STRINGS.UI.UNKNOWN_DLC.NAME");
 		}
 		return string.Concat(new string[]
 		{
 			"<i><color=#",
 			DlcManager.GetDlcBannerColor(dlcId).ToHexString(),
 			">",
-			Strings.Get(dlcTitle),
+			Strings.Get(stringKey),
 			"</color></i>"
 		});
 	}
 
 	public static string GetDlcTitleNoFormatting(string dlcId)
 	{
-		StringKey dlcTitle = new StringKey(dlcId);
+		StringKey stringKey = new StringKey(dlcId);
 		if (dlcId == "EXPANSION1_ID")
 		{
-			dlcTitle = new StringKey("STRINGS.UI.DLC1.NAME");
+			stringKey = DlcManager.EXPANSION1_INFO.dlcTitle;
 		}
 		DlcManager.DlcInfo dlcInfo;
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			dlcTitle = dlcInfo.dlcTitle;
+			stringKey = dlcInfo.dlcTitle;
 		}
-		return Strings.Get(dlcTitle);
+		return Strings.Get(stringKey);
 	}
 
 	public static string GetDlcSmallLogo(string dlcId)
 	{
-		string text = "";
 		if (dlcId == "EXPANSION1_ID")
 		{
-			text = "SpacedOut_mini_logo";
+			return DlcManager.EXPANSION1_INFO.smallLogo;
 		}
-		DlcManager.DlcInfo dlcInfo;
-		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
-		{
-			text = dlcInfo.smallLogo;
-		}
-		else if (dlcId != "EXPANSION1_ID")
+		if (DlcManager.IsUnknownDlc(dlcId))
 		{
 			return "mode_segue";
 		}
-		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.Name == "Rail")
+		DlcManager.DlcInfo dlcInfo;
+		if (!DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			text += "_cn";
+			return "";
 		}
-		return text;
+		return dlcInfo.smallLogo;
 	}
 
 	public static string GetDlcBanner(string dlcId)
 	{
 		if (dlcId == "EXPANSION1_ID")
 		{
-			return "expansion1_banner";
+			return DlcManager.EXPANSION1_INFO.banner;
 		}
 		DlcManager.DlcInfo dlcInfo;
 		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
 			return dlcInfo.banner;
 		}
-		DebugUtil.DevLogError("No bundle exists for " + dlcId);
+		DebugUtil.DevLogError("No banner exists for " + dlcId);
 		return "unknown";
 	}
 
 	public static string GetDlcLargeLogo(string dlcId)
 	{
-		string text = "";
 		if (dlcId == "EXPANSION1_ID")
 		{
-			text = "SpacedOut_logo_crop";
+			return DlcManager.EXPANSION1_INFO.largeLogo;
 		}
 		DlcManager.DlcInfo dlcInfo;
-		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
+		if (!DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			text = dlcInfo.largeLogo;
+			return "";
 		}
-		if (DistributionPlatform.Initialized && DistributionPlatform.Inst.Name == "Rail")
-		{
-			text += "_cn";
-		}
-		return text;
+		return dlcInfo.largeLogo;
 	}
 
 	public static string GetDlcBannerSprite(string dlcId)
@@ -152,18 +142,30 @@ public class DlcManager
 		return "research_dlc_banner";
 	}
 
+	public static bool CanPurchase(string DLCID)
+	{
+		DlcManager.DlcInfo dlcInfo;
+		return DlcManager.DLC_PACKS.TryGetValue(DLCID, out dlcInfo) && dlcInfo.canPurchase;
+	}
+
+	public static bool CanWishlist(string DLCID)
+	{
+		DlcManager.DlcInfo dlcInfo;
+		return DlcManager.DLC_PACKS.TryGetValue(DLCID, out dlcInfo) && dlcInfo.canWishlist;
+	}
+
 	public static Color GetDlcBannerColor(string dlcId)
 	{
 		if (dlcId == "EXPANSION1_ID")
 		{
-			return new Color(1f, 0.79607844f, 0.003921569f);
+			return DlcManager.EXPANSION1_INFO.bannerColor;
 		}
 		DlcManager.DlcInfo dlcInfo;
-		if (DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
+		if (!DlcManager.DLC_PACKS.TryGetValue(dlcId, out dlcInfo))
 		{
-			return dlcInfo.bannerColor;
+			return Color.magenta;
 		}
-		return Color.magenta;
+		return dlcInfo.bannerColor;
 	}
 
 	public static string GetMostSignificantDlc(string[] requiredDlcIds)
@@ -720,6 +722,8 @@ public class DlcManager
 
 	public const string DLC4_ID = "DLC4_ID";
 
+	public const string DLC5_ID = "DLC5_ID";
+
 	public const string COSMETIC1_ID = "COSMETIC1_ID";
 
 	public static readonly string[] EXPANSION1 = new string[] { "EXPANSION1_ID" };
@@ -729,6 +733,8 @@ public class DlcManager
 	public static readonly string[] DLC3 = new string[] { "DLC3_ID" };
 
 	public static readonly string[] DLC4 = new string[] { "DLC4_ID" };
+
+	public static readonly string[] DLC5 = new string[] { "DLC5_ID" };
 
 	public const string EXPANSION1_VERIFICATION_FILE_NAME = "expansion1_bundle";
 
@@ -742,23 +748,29 @@ public class DlcManager
 
 	public static List<string> RELEASE_ORDER = new List<string> { "", "EXPANSION1_ID" };
 
+	public static DlcManager.DlcInfo EXPANSION1_INFO = new DlcManager.DlcInfo("EXPANSION1_ID", "S", new Color(1f, 0.79607844f, 0.003921569f), "https://store.steampowered.com/app/1452490/Oxygen_Not_Included__Spaced_Out/", "https://store.epicgames.com/en-US/p/oxygen-not-included--spaced-out", "https://www.wegame.com.cn/store/2001539/", false, null, 144, true, true, true);
+
 	public static Dictionary<string, DlcManager.DlcInfo> DLC_PACKS = new Dictionary<string, DlcManager.DlcInfo>
 	{
 		{
 			"DLC2_ID",
-			new DlcManager.DlcInfo("DLC2_ID", "dlc2_bundle", "C", "dlc2", "dlc2_mini_logo", "dlc2_logo", new StringKey("STRINGS.UI.DLC2.NAME"), "dlc2_banner", new Color(0.003921569f, 0.73333335f, 1f), false)
+			new DlcManager.DlcInfo("DLC2_ID", "C", new Color(0.003921569f, 0.73333335f, 1f), "https://store.steampowered.com/app/2952300/Oxygen_Not_Included_The_Frosty_Planet_Pack/", "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-frosty-planet-pack-915ba1", "https://www.wegame.com.cn/store/2002196/", false, null, 144, true, true, true)
 		},
 		{
 			"DLC3_ID",
-			new DlcManager.DlcInfo("DLC3_ID", "dlc3_bundle", "R", "dlc3", "dlc3_mini_logo", "dlc3_logo", new StringKey("STRINGS.UI.DLC3.NAME"), "dlc3_banner", new Color(0.79607844f, 0.3882353f, 0.95686275f), false)
+			new DlcManager.DlcInfo("DLC3_ID", "R", new Color(0.79607844f, 0.3882353f, 0.95686275f), "https://store.steampowered.com/app/3302470/Oxygen_Not_Included_The_Bionic_Booster_Pack/", "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-bionic-booster-pack-3ba9e9", "https://www.wegame.com.cn/store/2002347", false, null, 144, true, true, true)
 		},
 		{
 			"DLC4_ID",
-			new DlcManager.DlcInfo("DLC4_ID", "dlc4_bundle", "P", "dlc4", "dlc4_mini_logo", "dlc4_logo", new StringKey("STRINGS.UI.DLC4.NAME"), "dlc4_banner", new Color(0.3137255f, 0.6745098f, 0.31764707f), false)
+			new DlcManager.DlcInfo("DLC4_ID", "P", new Color(0.3137255f, 0.6745098f, 0.31764707f), "https://store.steampowered.com/app/3655420/Oxygen_Not_Included_The_Prehistoric_Planet_Pack/", "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-prehistoric-planet-pack-c14f10", "https://www.wegame.com.cn/store/2002496", false, null, 172, true, true, true)
+		},
+		{
+			"DLC5_ID",
+			new DlcManager.DlcInfo("DLC5_ID", "A", new Color(0.09803922f, 0.63529414f, 0.5803922f), "https://store.steampowered.com/app/4310080/Oxygen_Not_Included_The_Aquatic_Planet_Pack/", "https://store.epicgames.com/p/oxygen-not-included-oxygen-not-included-the-aquatic-planet-pack-cd3a3b", "https://www.wegame.com.cn/store/2002763", false, null, 210, true, true, false)
 		},
 		{
 			"COSMETIC1_ID",
-			new DlcManager.DlcInfo("COSMETIC1_ID", "cosmetic1_bundle", "N", "cosmetic1", "cosmetic1_mini_logo", "cosmetic1_logo", new StringKey("STRINGS.UI.COSMETIC1.NAME"), "cosmetics_banner", new Color(0.43529412f, 0.43529412f, 0.75686276f), true)
+			new DlcManager.DlcInfo("COSMETIC1_ID", "N", new Color(0.43529412f, 0.43529412f, 0.75686276f), "https://store.steampowered.com/app/4157740/Oxygen_Not_Included_Neutronium_Cosmetics_Pack/", "https://store.epicgames.com/en-US/p/oxygen-not-included-oxygen-not-included-neutronium-cosmetics-pack-d9e8af", "https://www.wegame.com.cn/store/2002628", true, "cosmetics", 144, true, true, true)
 		}
 	};
 
@@ -789,18 +801,23 @@ public class DlcManager
 
 	public struct DlcInfo
 	{
-		public DlcInfo(string dlcName, string bundleName, string versionLetter, string directory, string smallLogo, string largeLogo, StringKey dlcTitle, string banner, Color bannerColor, bool isCosmetic)
+		public DlcInfo(string dlcName, string versionLetter, Color bannerColor, string steamUrl, string epicUrl, string railUrl, bool isCosmetic = false, string bannerOverride = null, int mainMenuLogoWidth = 144, bool isReleased = true, bool canWishlist = true, bool canPurchase = true)
 		{
+			string text = dlcName.Replace("_ID", "").ToLowerInvariant();
 			this.id = dlcName;
-			this.bundleName = bundleName;
 			this.versionLetter = versionLetter;
-			this.directory = directory;
-			this.smallLogo = smallLogo;
-			this.largeLogo = largeLogo;
-			this.dlcTitle = dlcTitle;
-			this.banner = banner;
 			this.bannerColor = bannerColor;
 			this.isCosmetic = isCosmetic;
+			this.storeUrl = steamUrl;
+			this.mainMenuLogoWidth = mainMenuLogoWidth;
+			this.banner = bannerOverride ?? (text + "_banner");
+			this.bundleName = text + "_bundle";
+			this.directory = text;
+			this.smallLogo = text + "_mini_logo";
+			this.largeLogo = text + "_logo";
+			this.dlcTitle = new StringKey("STRINGS.UI." + text.ToUpper() + ".NAME");
+			this.canWishlist = canWishlist;
+			this.canPurchase = canPurchase;
 		}
 
 		public string id;
@@ -810,6 +827,8 @@ public class DlcManager
 		public string versionLetter;
 
 		public string directory;
+
+		public string storeUrl;
 
 		public string smallLogo;
 
@@ -822,5 +841,11 @@ public class DlcManager
 		public StringKey dlcTitle;
 
 		public bool isCosmetic;
+
+		public int mainMenuLogoWidth;
+
+		public bool canWishlist;
+
+		public bool canPurchase;
 	}
 }

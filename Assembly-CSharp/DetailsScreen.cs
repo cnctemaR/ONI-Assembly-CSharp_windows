@@ -240,32 +240,32 @@ public class DetailsScreen : KTabMenu
 		global::Debug.Assert(this.target != null, "Details Screen has no target");
 		KSelectable component = this.target.GetComponent<KSelectable>();
 		DebugUtil.AssertArgs(component != null, new object[] { "Details Screen target is not a KSelectable", this.target });
-		CellSelectionObject component2 = component.GetComponent<CellSelectionObject>();
-		CodexEntryRedirector component3 = component.GetComponent<CodexEntryRedirector>();
-		BuildingUnderConstruction component4 = component.GetComponent<BuildingUnderConstruction>();
-		CreatureBrain component5 = component.GetComponent<CreatureBrain>();
-		PlantableSeed component6 = component.GetComponent<PlantableSeed>();
+		CodexEntryRedirector component2 = component.GetComponent<CodexEntryRedirector>();
+		BuildingUnderConstruction component3 = component.GetComponent<BuildingUnderConstruction>();
+		CreatureBrain component4 = component.GetComponent<CreatureBrain>();
+		PlantableSeed component5 = component.GetComponent<PlantableSeed>();
+		ICellSelectionProxy component6 = component.GetComponent<ICellSelectionProxy>();
 		string text;
-		if (component2 != null)
+		if (component6 != null && component6.Element != null)
 		{
-			text = CodexCache.FormatLinkID(component2.element.id.ToString());
+			text = CodexCache.FormatLinkID(component6.Element.id.ToString());
 		}
-		else if (component3 != null && !string.IsNullOrEmpty(component3.CodexID))
+		else if (component2 != null && !string.IsNullOrEmpty(component2.CodexID))
 		{
-			text = CodexCache.FormatLinkID(component3.CodexID);
+			text = CodexCache.FormatLinkID(component2.CodexID);
+		}
+		else if (component3 != null)
+		{
+			text = CodexCache.FormatLinkID(component3.Def.PrefabID);
 		}
 		else if (component4 != null)
-		{
-			text = CodexCache.FormatLinkID(component4.Def.PrefabID);
-		}
-		else if (component5 != null)
 		{
 			text = CodexCache.FormatLinkID(component.PrefabID().ToString());
 			text = text.Replace("BABY", "");
 		}
-		else if (component6 != null)
+		else if (component5 != null)
 		{
-			text = CodexCache.FormatLinkID(component6.PrefabID().ToString());
+			text = CodexCache.FormatLinkID(component5.PrefabID().ToString());
 		}
 		else
 		{
@@ -307,11 +307,11 @@ public class DetailsScreen : KTabMenu
 			targetProperName = component.GetProperName();
 			return true;
 		}
-		CellSelectionObject component2 = this.target.GetComponent<CellSelectionObject>();
-		if (component2 != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|51_0(component2.element.tag))
+		ICellSelectionProxy component2 = this.target.GetComponent<ICellSelectionProxy>();
+		if (component2 != null && component2.Element != null && DetailsScreen.<PinResourceButton_TryGetResourceTagAndProperName>g__ShouldUse|51_0(component2.Element.tag))
 		{
-			targetTag = component2.element.tag;
-			targetProperName = component2.GetProperName();
+			targetTag = component2.Element.tag;
+			targetProperName = component2.Element.name;
 			return true;
 		}
 		targetTag = null;
@@ -405,8 +405,8 @@ public class DetailsScreen : KTabMenu
 		}
 		this.target = go;
 		this.sortedSideScreens.Clear();
-		CellSelectionObject component2 = this.target.GetComponent<CellSelectionObject>();
-		if (component2)
+		ICellSelectionProxy component2 = this.target.GetComponent<ICellSelectionProxy>();
+		if (component2 != null)
 		{
 			component2.OnObjectSelected(null);
 		}
@@ -689,6 +689,14 @@ public class DetailsScreen : KTabMenu
 			string text = (component5.element.IsSolid ? "ui" : component5.element.substance.name);
 			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component5.element.substance.anim, text, false, "");
 			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim2);
+			return;
+		}
+		ICellSelectionProxy component6 = target.GetComponent<ICellSelectionProxy>();
+		if (component6 != null && component6.Element != null && component6.Element.substance != null)
+		{
+			string text2 = (component6.Element.IsSolid ? "ui" : component6.Element.substance.name);
+			Sprite uispriteFromMultiObjectAnim3 = Def.GetUISpriteFromMultiObjectAnim(component6.Element.substance.anim, text2, false, "");
+			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim3);
 			return;
 		}
 	}

@@ -571,6 +571,11 @@ public class ResearchScreen : KModalScreen
 					return;
 				}
 			}
+			if (e.TryConsume(global::Action.Find))
+			{
+				this.sideBar.FocusSearchBox();
+				return;
+			}
 			if (e.TryConsume(global::Action.Escape))
 			{
 				ManagementMenu.Instance.CloseAll();
@@ -594,6 +599,11 @@ public class ResearchScreen : KModalScreen
 			if (e.TryConsume(global::Action.PanDown))
 			{
 				this.panDown = true;
+				return;
+			}
+			if (e.TryConsume(global::Action.DebugInstantBuildMode))
+			{
+				DebugHandler.ToggleInstantBuildMode();
 				return;
 			}
 		}

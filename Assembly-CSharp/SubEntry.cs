@@ -74,9 +74,23 @@ public class SubEntry : IHasDlcRestrictions
 		return this.requiredAtLeastOneDlcIds;
 	}
 
+	public List<CodexEntry_MadeAndUsed> contentMadeAndUsed
+	{
+		get
+		{
+			return this._contentMadeAndUsed;
+		}
+		set
+		{
+			this._contentMadeAndUsed = value;
+		}
+	}
+
 	public string sortString { get; set; }
 
 	public ContentContainer lockedContentContainer;
 
 	public Color iconColor = Color.white;
+
+	private List<CodexEntry_MadeAndUsed> _contentMadeAndUsed = new List<CodexEntry_MadeAndUsed>();
 }

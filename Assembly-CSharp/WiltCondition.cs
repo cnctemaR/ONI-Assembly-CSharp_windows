@@ -40,6 +40,7 @@ public class WiltCondition : KMonoBehaviour
 		this.WiltConditions.Add(11, true);
 		this.WiltConditions.Add(12, true);
 		this.WiltConditions.Add(13, true);
+		this.WiltConditions.Add(14, true);
 		base.Subscribe<WiltCondition>(-107174716, WiltCondition.SetTemperatureFalseDelegate);
 		base.Subscribe<WiltCondition>(-1758196852, WiltCondition.SetTemperatureFalseDelegate);
 		base.Subscribe<WiltCondition>(-1234705021, WiltCondition.SetTemperatureFalseDelegate);
@@ -69,6 +70,7 @@ public class WiltCondition : KMonoBehaviour
 		base.Subscribe<WiltCondition>(874353739, WiltCondition.SetRadiationComfortTrueDelegate);
 		base.Subscribe<WiltCondition>(1788072223, WiltCondition.SetRadiationComfortFalseDelegate);
 		base.Subscribe<WiltCondition>(-200207042, WiltCondition.SetPollinatedDelegate);
+		base.Subscribe<WiltCondition>(-1689370368, WiltCondition.SetGermPresenceDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -379,6 +381,11 @@ public class WiltCondition : KMonoBehaviour
 		component.SetCondition(WiltCondition.Condition.Pollination, Boxed<bool>.Unbox(data));
 	});
 
+	private static readonly EventSystem.IntraObjectHandler<WiltCondition> SetGermPresenceDelegate = new EventSystem.IntraObjectHandler<WiltCondition>(delegate(WiltCondition component, object data)
+	{
+		component.SetCondition(WiltCondition.Condition.GermPresence, Boxed<bool>.Unbox(data));
+	});
+
 	public enum Condition
 	{
 		Temperature,
@@ -395,6 +402,7 @@ public class WiltCondition : KMonoBehaviour
 		UnhealthyRoot,
 		Radiation,
 		Pollination,
+		GermPresence,
 		Count
 	}
 }

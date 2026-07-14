@@ -79,6 +79,10 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		{
 			num5 = 3;
 		}
+		else if (currentNavType == NavType.Swim)
+		{
+			num5 = 4;
+		}
 		return array[num4][num5];
 	}
 
@@ -115,35 +119,40 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			new string[] { "{verb}_dn_pre", "{verb}_dn_loop", "{verb}_dn_pst" },
 			new string[] { "ladder_{verb}_dn_pre", "ladder_{verb}_dn_loop", "ladder_{verb}_dn_pst" },
 			new string[] { "pole_{verb}_dn_pre", "pole_{verb}_dn_loop", "pole_{verb}_dn_pst" },
-			new string[] { "jetpack_{verb}_dn_pre", "jetpack_{verb}_dn_loop", "jetpack_{verb}_dn_pst" }
+			new string[] { "jetpack_{verb}_dn_pre", "jetpack_{verb}_dn_loop", "jetpack_{verb}_dn_pst" },
+			new string[] { "swim_{verb}_dn_pre", "swim_{verb}_dn_loop", "swim_{verb}_dn_pst" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_diag_dn_pre", "{verb}_diag_dn_loop", "{verb}_diag_dn_pst" },
 			new string[] { "ladder_{verb}_diag_dn_pre", "ladder_{verb}_loop_diag_dn", "ladder_{verb}_diag_dn_pst" },
 			new string[] { "pole_{verb}_diag_dn_pre", "pole_{verb}_loop_diag_dn", "pole_{verb}_diag_dn_pst" },
-			new string[] { "jetpack_{verb}_diag_dn_pre", "jetpack_{verb}_diag_dn_loop", "jetpack_{verb}_diag_dn_pst" }
+			new string[] { "jetpack_{verb}_diag_dn_pre", "jetpack_{verb}_diag_dn_loop", "jetpack_{verb}_diag_dn_pst" },
+			new string[] { "swim_{verb}_diag_dn_pre", "swim_{verb}_diag_dn_loop", "swim_{verb}_diag_dn_pst" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_fwd_pre", "{verb}_fwd_loop", "{verb}_fwd_pst" },
 			new string[] { "ladder_{verb}_pre", "ladder_{verb}_loop", "ladder_{verb}_pst" },
 			new string[] { "pole_{verb}_pre", "pole_{verb}_loop", "pole_{verb}_pst" },
-			new string[] { "jetpack_{verb}_fwd_pre", "jetpack_{verb}_fwd_loop", "jetpack_{verb}_fwd_pst" }
+			new string[] { "jetpack_{verb}_fwd_pre", "jetpack_{verb}_fwd_loop", "jetpack_{verb}_fwd_pst" },
+			new string[] { "swim_{verb}_fwd_pre", "swim_{verb}_fwd_loop", "swim_{verb}_fwd_pst" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_diag_up_pre", "{verb}_diag_up_loop", "{verb}_diag_up_pst" },
 			new string[] { "ladder_{verb}_diag_up_pre", "ladder_{verb}_loop_diag_up", "ladder_{verb}_diag_up_pst" },
 			new string[] { "pole_{verb}_diag_up_pre", "pole_{verb}_loop_diag_up", "pole_{verb}_diag_up_pst" },
-			new string[] { "jetpack_{verb}_diag_up_pre", "jetpack_{verb}_diag_up_loop", "jetpack_{verb}_diag_up_pst" }
+			new string[] { "jetpack_{verb}_diag_up_pre", "jetpack_{verb}_diag_up_loop", "jetpack_{verb}_diag_up_pst" },
+			new string[] { "swim_{verb}_diag_up_pre", "swim_{verb}_diag_up_loop", "swim_{verb}_diag_up_pst" }
 		},
 		new string[][]
 		{
 			new string[] { "{verb}_up_pre", "{verb}_up_loop", "{verb}_up_pst" },
 			new string[] { "ladder_{verb}_up_pre", "ladder_{verb}_up_loop", "ladder_{verb}_up_pst" },
 			new string[] { "pole_{verb}_up_pre", "pole_{verb}_up_loop", "pole_{verb}_up_pst" },
-			new string[] { "jetpack_{verb}_up_pre", "jetpack_{verb}_up_loop", "jetpack_{verb}_up_pst" }
+			new string[] { "jetpack_{verb}_up_pre", "jetpack_{verb}_up_loop", "jetpack_{verb}_up_pst" },
+			new string[] { "swim_{verb}_up_pre", "swim_{verb}_up_loop", "swim_{verb}_up_pst" }
 		}
 	};
 

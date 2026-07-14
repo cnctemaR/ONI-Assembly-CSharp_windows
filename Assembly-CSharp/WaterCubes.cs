@@ -15,6 +15,7 @@ public class WaterCubes : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		WaterCubes.Instance = this;
+		WaterCubes.MOLTEN_METAL_COLOR = this.material.GetColor("_MoltenMetalColor");
 	}
 
 	public void Init()
@@ -25,17 +26,31 @@ public class WaterCubes : KMonoBehaviour
 		gameObject.transform.parent = this.cubes.transform;
 		this.material.renderQueue = RenderQueues.Liquid;
 		MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-		MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-		meshRenderer.sharedMaterial = this.material;
-		meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
-		meshRenderer.receiveShadows = false;
-		meshRenderer.lightProbeUsage = LightProbeUsage.Off;
-		meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-		meshRenderer.sharedMaterial.SetTexture("_MainTex2", this.waveTexture);
+		this.waterRenderer = gameObject.AddComponent<MeshRenderer>();
+		this.waterRenderer.sharedMaterial = this.material;
+		this.waterRenderer.shadowCastingMode = ShadowCastingMode.Off;
+		this.waterRenderer.receiveShadows = false;
+		this.waterRenderer.lightProbeUsage = LightProbeUsage.Off;
+		this.waterRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+		this.waterRenderer.sharedMaterial.SetTexture("_MainTex2", this.waveTexture);
 		meshFilter.sharedMesh = this.CreateNewMesh();
-		meshRenderer.gameObject.layer = 0;
-		meshRenderer.gameObject.transform.parent = base.transform;
-		meshRenderer.gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Liquid)));
+		this.waterRenderer.gameObject.layer = LayerMask.NameToLayer("Water");
+		this.waterRenderer.gameObject.transform.parent = base.transform;
+		this.waterRenderer.gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Liquid)));
+		if (this.liquidShaderProperties != null)
+		{
+			this.liquidShaderProperties.ApplyToMaterial(this.material);
+		}
+	}
+
+	private void LateUpdate()
+	{
+		Vector3 vector = Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos());
+		this.material.SetVector("_CursorWorldPosition", vector);
+		if (this.liquidShaderProperties != null)
+		{
+			this.liquidShaderProperties.ApplyToMaterial(this.material);
+		}
 	}
 
 	private Mesh CreateNewMesh()
@@ -91,6 +106,12 @@ public class WaterCubes : KMonoBehaviour
 	public Material material;
 
 	public Texture2D waveTexture;
+
+	public MeshRenderer waterRenderer;
+
+	public LiquidShaderProperties liquidShaderProperties;
+
+	public static Color MOLTEN_METAL_COLOR = Color.white;
 
 	private GameObject cubes;
 }

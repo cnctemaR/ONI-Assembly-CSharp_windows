@@ -48,6 +48,8 @@ public class KAnimConverter
 
 		bool IsVisible();
 
+		bool IsAlwaysVisible();
+
 		Vector4 GetPositionData();
 
 		int GetCurrentNumFrames();

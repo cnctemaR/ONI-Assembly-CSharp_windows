@@ -10,7 +10,7 @@ public class BaseStaterpillarConfig
 	{
 		float num = 200f;
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(anim_file), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, Assets.GetAnim(is_baby ? anim_file : "caterpillar_build_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		gameObject.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Walker, false);
 		gameObject.AddTag(GameTags.Amphibious);
 		string text = "WalkerBabyNavGrid";
@@ -36,6 +36,7 @@ public class BaseStaterpillarConfig
 		gameObject.AddOrGetDef<ThreatMonitor.Def>().fleethresholdState = Health.HealthState.Dead;
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
+		KAnimFile anim = Assets.GetAnim("caterpillar_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -54,12 +55,12 @@ public class BaseStaterpillarConfig
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
 			.Add(new DrinkMilkStates.Def(), true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "poop", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new PoopStates.Def(anim, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(inhaleDef, inhaleTag != Tag.Invalid, -1)
 			.Add(new ConduitSleepStates.Def(), true, -1)
 			.Add(new CallAdultStates.Def(), is_baby, -1)
 			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("caterpillar_emotes_kanim")), !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(anim), !is_baby, -1)
 			.PopInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true, -1)
 			.Add(new IdleStates.Def
@@ -130,4 +131,6 @@ public class BaseStaterpillarConfig
 		}
 		return hashedString;
 	}
+
+	public const string EMOTION_FILE_NAME = "caterpillar_emotes_kanim";
 }

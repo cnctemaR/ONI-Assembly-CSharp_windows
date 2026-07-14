@@ -21,7 +21,7 @@ public class ForestTreeConfig : IEntityConfig
 		EffectorValues effectorValues = tier;
 		List<Tag> list = new List<Tag>();
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, sceneLayer, num2, num3, effectorValues, default(EffectorValues), SimHashes.Creature, list, 298.15f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, true, false, 2400f, 0f, 9800f, "ForestTreeOriginal", global::STRINGS.CREATURES.SPECIES.WOOD_TREE.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 258.15f, 288.15f, 313.15f, 448.15f, null, true, 0f, 0.15f, "WoodLog", true, true, true, false, false, 2400f, 0f, 9800f, "ForestTreeOriginal", global::STRINGS.CREATURES.SPECIES.WOOD_TREE.NAME);
 		PlantBranchGrower.Def def = gameObject.AddOrGetDef<PlantBranchGrower.Def>();
 		def.preventStartSMIOnSpawn = true;
 		def.onBranchSpawned = new Action<PlantBranch.Instance, PlantBranchGrower.Instance>(this.RollChancesForSeed);

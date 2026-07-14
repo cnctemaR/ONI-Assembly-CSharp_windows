@@ -61,11 +61,18 @@ public static class TemplateLoader
 				DiscoveredResources.Instance.Discover(tag);
 			}
 		}
+		if (template.backwallEntities != null)
+		{
+			for (int j = 0; j < template.backwallEntities.Count; j++)
+			{
+				TemplateLoader.PlaceBuilding(template.backwallEntities[j], num);
+			}
+		}
 		if (template.buildings != null)
 		{
-			for (int j = 0; j < template.buildings.Count; j++)
+			for (int k = 0; k < template.buildings.Count; k++)
 			{
-				TemplateLoader.PlaceBuilding(template.buildings[j], num);
+				TemplateLoader.PlaceBuilding(template.buildings[k], num);
 			}
 		}
 		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
@@ -243,6 +250,13 @@ public static class TemplateLoader
 					component8.ApplyBuildingFacade(buildingFacadeResource, false);
 				}
 			}
+		}
+		LoreBearer loreBearer;
+		if (!string.IsNullOrEmpty(prefab.loreUnlockId) && gameObject.TryGetComponent<LoreBearer>(out loreBearer))
+		{
+			loreBearer.poiOverrideLoreUnlockId = prefab.loreUnlockId;
+			loreBearer.poiOverrideLoreDisplayText = prefab.loreDisplayText;
+			loreBearer.poiOverrideNextCollectionId = prefab.loreNextCollectionId;
 		}
 		return gameObject;
 	}
@@ -523,6 +537,20 @@ public static class TemplateLoader
 				}
 			}
 		}
+		if (!string.IsNullOrEmpty(prefab.loreUnlockId))
+		{
+			LoreBearer loreBearer;
+			if (gameObject.TryGetComponent<LoreBearer>(out loreBearer))
+			{
+				loreBearer.poiOverrideLoreUnlockId = prefab.loreUnlockId;
+				loreBearer.poiOverrideLoreDisplayText = prefab.loreDisplayText;
+				loreBearer.poiOverrideNextCollectionId = prefab.loreNextCollectionId;
+			}
+			else
+			{
+				global::Debug.LogWarning(string.Format("Entity {0} is being given lore but does not have a LoreBearer component.", gameObject.GetProperName()));
+			}
+		}
 		return gameObject;
 	}
 
@@ -667,6 +695,10 @@ public static class TemplateLoader
 			int diseaseCount = template.cells[i].diseaseCount;
 			SimMessages.ReplaceElement(num, element, CellEventLogger.Instance.TemplateLoader, mass, temperature, index, diseaseCount, handle.index);
 			handle.index = -1;
+			ushort elementIndex = ElementLoader.GetElementIndex(template.cells[i].backwallElement);
+			float backwallMass = template.cells[i].backwallMass;
+			float backwallTemperature = template.cells[i].backwallTemperature;
+			SimMessages.SetBackwallData(num, elementIndex, backwallMass, backwallTemperature);
 		}
 	}
 

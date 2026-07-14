@@ -36,8 +36,17 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 					}
 				}
 			}
-			SimMessages.AddRemoveSubstance(Grid.PosToCell(gameObject.transform.GetPosition()), SimHashes.Methane, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.1f, value, byte.MaxValue, 0, true, -1);
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", gameObject.transform.GetPosition(), gameObject.transform, true, Grid.SceneLayer.Front, false);
+			Vector3 position = gameObject.transform.GetPosition();
+			int num = Grid.PosToCell(position);
+			if (Grid.IsVisiblyInLiquid(position))
+			{
+				BubbleManager.instance.SpawnBubble(SimHashes.Methane, position, 0.1f, value, BubbleManager.Disease.None, null);
+			}
+			else
+			{
+				SimMessages.AddRemoveSubstance(num, SimHashes.Methane, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.1f, value, byte.MaxValue, 0, true, -1);
+			}
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", position, gameObject.transform, true, Grid.SceneLayer.Front, false);
 			kbatchedAnimController.Play(Flatulence.WorkLoopAnims, KAnim.PlayMode.Once);
 			kbatchedAnimController.destroyOnAnimComplete = true;
 		}
@@ -45,17 +54,17 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 		bool flag = SoundEvent.ObjectIsSelectedAndVisible(gameObject2);
 		Vector3 vector3 = gameObject2.transform.GetPosition();
 		vector3.z = 0f;
-		float num = 1f;
+		float num2 = 1f;
 		if (flag)
 		{
 			vector3 = SoundEvent.AudioHighlightListenerPosition(vector3);
-			num = SoundEvent.GetVolume(flag);
+			num2 = SoundEvent.GetVolume(flag);
 		}
 		else
 		{
 			vector3.z = 0f;
 		}
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), vector3, num);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), vector3, num2);
 	}
 
 	private const float EmitMass = 0.1f;

@@ -110,7 +110,8 @@ public static class BaseMinionConfig
 			Assets.GetAnim("anim_loco_new_kanim"),
 			Assets.GetAnim("anim_loco_tube_kanim"),
 			Assets.GetAnim("anim_construction_firepole_kanim"),
-			Assets.GetAnim("anim_construction_jetsuit_kanim")
+			Assets.GetAnim("anim_construction_jetsuit_kanim"),
+			Assets.GetAnim("anim_construction_swim_kanim")
 		};
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
 		kboxCollider2D.offset = new Vector2(0f, 0.75f);
@@ -268,12 +269,21 @@ public static class BaseMinionConfig
 				context = "demolish",
 				buildFile = Assets.GetAnim("poi_demolish_gun_kanim"),
 				overrideSymbol = "snapTo_rgtHand"
+			},
+			new SnapOn.SnapPoint
+			{
+				pointName = global::TUNING.EQUIPMENT.SHOES.SNAPON0,
+				automatic = false,
+				context = "",
+				buildFile = Assets.GetAnim("rubber_boots_kanim"),
+				overrideSymbol = "foot"
 			}
 		});
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.InternalTemperature = statsFor.Temperature.Internal.IDEAL;
 		primaryElement.MassPerUnit = statsFor.BaseStats.DEFAULT_MASS;
 		primaryElement.ElementID = SimHashes.Creature;
+		gameObject.AddOrGet<InfraredTemperatureAmount>();
 		gameObject.AddOrGet<ChoreProvider>();
 		gameObject.AddOrGetDef<DebugGoToMonitor.Def>();
 		gameObject.AddOrGet<Sensors>();
@@ -360,6 +370,7 @@ public static class BaseMinionConfig
 		component2.transitionDriver.overrideLayers.Add(new ReactableTransitionLayer(component2));
 		component2.transitionDriver.overrideLayers.Add(new NavTeleportTransitionLayer(component2));
 		component2.transitionDriver.overrideLayers.Add(new SplashTransitionLayer(component2));
+		component2.transitionDriver.overrideLayers.Add(new BipedSwimTransitionLayer(component2));
 	}
 
 	public static AttributeModifier[] BaseMinionTraits(Tag minionModel)
@@ -424,7 +435,7 @@ public static class BaseMinionConfig
 
 	public static Func<RationalAi.Instance, StateMachine.Instance>[] BaseRationalAiStateMachines()
 	{
-		Func<RationalAi.Instance, StateMachine.Instance>[] array = new Func<RationalAi.Instance, StateMachine.Instance>[43];
+		Func<RationalAi.Instance, StateMachine.Instance>[] array = new Func<RationalAi.Instance, StateMachine.Instance>[44];
 		array[0] = (RationalAi.Instance smi) => new RadiationMonitor.Instance(smi.master);
 		array[1] = (RationalAi.Instance smi) => new InSpaceMonitor.Instance(smi.master);
 		array[2] = (RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master);
@@ -475,6 +486,7 @@ public static class BaseMinionConfig
 			offsets = BaseMinionConfig.ATTACK_OFFSETS
 		});
 		array[42] = (RationalAi.Instance smi) => new RecreationTimeMonitor.Instance(smi.master, new RecreationTimeMonitor.Def());
+		array[43] = (RationalAi.Instance smi) => new SwimMonitor.Instance(smi.master);
 		return array;
 	}
 

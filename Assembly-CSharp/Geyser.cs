@@ -274,7 +274,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 			int num2 = Grid.OffsetCell(num, cellOffset);
 			if (Grid.IsSolidCell(num2) && Grid.Element[num2].id != SimHashes.Unobtanium)
 			{
-				SimMessages.Dig(num2, -1, false);
+				SimMessages.Dig(num2, -1, false, false);
 			}
 		}
 	}

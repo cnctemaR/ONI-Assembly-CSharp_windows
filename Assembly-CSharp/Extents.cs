@@ -3,6 +3,11 @@ using UnityEngine;
 
 public struct Extents
 {
+	public Vector3 GetCentrePosition()
+	{
+		return new Vector3((float)this.x + (float)this.width / 2f, (float)this.y + (float)this.height / 2f, 0f);
+	}
+
 	public static Extents OneCell(int cell)
 	{
 		int num;

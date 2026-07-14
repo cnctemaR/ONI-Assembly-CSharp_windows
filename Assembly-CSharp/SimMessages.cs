@@ -6,6 +6,7 @@ using System.Text;
 using Database;
 using Klei.AI;
 using Klei.AI.DiseaseGrowthRules;
+using ProcGenGame;
 using STRINGS;
 
 public static class SimMessages
@@ -586,9 +587,9 @@ public static class SimMessages
 		array = null;
 	}
 
-	public static void SimDataInitializeFromCells(int width, int height, uint simSeed, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, bool headless)
+	public static void SimDataInitializeFromCells(int width, int height, uint simSeed, ref WorldgenSimData simData, bool headless)
 	{
-		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(uint)) + Marshal.SizeOf(typeof(bool)) + Marshal.SizeOf(typeof(bool)) + Marshal.SizeOf(typeof(Sim.Cell)) * width * height + Marshal.SizeOf(typeof(float)) * width * height + Marshal.SizeOf(typeof(Sim.DiseaseCell)) * width * height);
+		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(uint)) + Marshal.SizeOf(typeof(bool)) + Marshal.SizeOf(typeof(bool)) + Marshal.SizeOf(typeof(Sim.Cell)) * width * height + Marshal.SizeOf(typeof(Sim.DiseaseCell)) * width * height + Marshal.SizeOf(typeof(Sim.SimBackwall)) * width * height);
 		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
 		binaryWriter.Write(width);
 		binaryWriter.Write(height);
@@ -599,16 +600,22 @@ public static class SimMessages
 		int num = width * height;
 		for (int i = 0; i < num; i++)
 		{
-			cells[i].Write(binaryWriter);
+			simData.cells[i].Write(binaryWriter);
 		}
 		for (int j = 0; j < num; j++)
 		{
-			binaryWriter.Write(bgTemp[j]);
+			simData.diseaseCells[j].Write(binaryWriter);
 		}
+		int num2 = 0;
 		for (int k = 0; k < num; k++)
 		{
-			dc[k].Write(binaryWriter);
+			if (simData.backwallCells[k].elementIdx != ElementLoader.GetElementIndex(SimHashes.Vacuum))
+			{
+				num2++;
+			}
+			simData.backwallCells[k].Write(binaryWriter);
 		}
+		Debug.Log("Backwall cells: " + num2.ToString());
 		byte[] buffer = memoryStream.GetBuffer();
 		Sim.HandleMessage(SimMessageHashes.SimData_InitializeFromCells, buffer.Length, buffer);
 	}
@@ -639,7 +646,7 @@ public static class SimMessages
 		Sim.HandleMessage(SimMessageHashes.SimData_FreeCells, buffer.Length, buffer);
 	}
 
-	public unsafe static void Dig(int gameCell, int callbackIdx = -1, bool skipEvent = false)
+	public unsafe static void Dig(int gameCell, int callbackIdx = -1, bool skipEvent = false, bool backwall = false)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -651,6 +658,7 @@ public static class SimMessages
 			ptr->cellIdx = gameCell;
 			ptr->callbackIdx = callbackIdx;
 			ptr->skipEvent = skipEvent;
+			ptr->backwall = backwall;
 			Sim.SIM_HandleMessage(833038498, sizeof(SimMessages.DigMessage), (byte*)ptr);
 		}
 	}
@@ -1047,6 +1055,19 @@ public static class SimMessages
 		}
 	}
 
+	public unsafe static void SetBackwallData(int cell, ushort elemIdx, float mass, float temperature)
+	{
+		checked
+		{
+			SimMessages.SetBackwallDataMsg* ptr = stackalloc SimMessages.SetBackwallDataMsg[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.SetBackwallDataMsg)];
+			ptr->gameCell = cell;
+			ptr->elementIdx = elemIdx;
+			ptr->mass = mass;
+			ptr->temperature = temperature;
+			Sim.SIM_HandleMessage(-605421515, sizeof(SimMessages.SetBackwallDataMsg), (byte*)ptr);
+		}
+	}
+
 	public const int InvalidCallback = -1;
 
 	public const float STATE_TRANSITION_TEMPERATURE_BUFER = 3f;
@@ -1435,6 +1456,8 @@ public static class SimMessages
 		public int callbackIdx;
 
 		public bool skipEvent;
+
+		public bool backwall;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -1684,5 +1707,19 @@ public static class SimMessages
 		public int cell;
 
 		public byte zoneID;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct SetBackwallDataMsg
+	{
+		public int gameCell;
+
+		public ushort elementIdx;
+
+		public ushort pad;
+
+		public float mass;
+
+		public float temperature;
 	}
 }

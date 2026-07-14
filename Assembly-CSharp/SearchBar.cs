@@ -73,7 +73,7 @@ public class SearchBar : KMonoBehaviour
 	protected virtual void OnFocus()
 	{
 		this.SetEditingState(true);
-		UISounds.PlaySound(UISounds.Sound.ClickHUD);
+		UISounds.PlaySound(UISounds.Sound.Find);
 		global::System.Action focused = this.Focused;
 		if (focused == null)
 		{

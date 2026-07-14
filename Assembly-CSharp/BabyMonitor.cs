@@ -77,7 +77,7 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 				gameObject2.GetComponent<PrimaryElement>().Mass *= base.smi.def.onGrowDropUnits;
 				gameObject2.SetActive(true);
 			}
-			foreach (AmountInstance amountInstance in base.gameObject.GetAmounts())
+			foreach (AmountInstance amountInstance in base.gameObject.GetAmounts().ModifierList)
 			{
 				AmountInstance amountInstance2 = amountInstance.amount.Lookup(gameObject);
 				if (amountInstance2 != null)

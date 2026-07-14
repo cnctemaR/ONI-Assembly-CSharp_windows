@@ -10,7 +10,7 @@ namespace Klei.Input
 		{
 			if (Grid.Solid[cell] && !Grid.Foundation[cell])
 			{
-				SimMessages.Dig(cell, -1, true);
+				SimMessages.Dig(cell, -1, true, false);
 			}
 		}
 

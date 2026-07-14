@@ -15,7 +15,7 @@ public class StorageTileConfig : IBuildingConfig
 		int num3 = 30;
 		float num4 = 30f;
 		float[] array = new float[] { 100f, 100f };
-		string[] array2 = new string[] { "RefinedMetal", "Glass" };
+		string[] array2 = new string[] { "RefinedMetal", "Glasses" };
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
@@ -37,6 +37,7 @@ public class StorageTileConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
+		go.GetComponent<KPrefabID>();
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
@@ -73,6 +74,7 @@ public class StorageTileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<KBatchedAnimController>().initialBlendParameters = 4;
 		GeneratedBuildings.RemoveLoopingSounds(go);
 		go.GetComponent<KPrefabID>().AddTag(GameTags.FloorTiles, false);
 	}

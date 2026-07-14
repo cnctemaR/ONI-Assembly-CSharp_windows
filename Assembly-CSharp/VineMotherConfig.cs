@@ -26,7 +26,7 @@ public class VineMotherConfig : IEntityConfig, IHasDlcRestrictions
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, Assets.GetAnim("vine_mother_kanim"), "object", Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 308.15f);
 		string text4 = "VineMotherOriginal";
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 273.15f, 298.15f, 318.15f, 378.15f, VineMotherConfig.ALLOWED_ELEMENTS, false, 0f, 0.15f, null, true, false, true, false, 2400f, 0f, 2200f, text4, global::STRINGS.CREATURES.SPECIES.VINEMOTHER.NAME);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 273.15f, 298.15f, 318.15f, 378.15f, VineMotherConfig.ALLOWED_ELEMENTS, false, 0f, 0.15f, null, true, false, true, false, false, 2400f, 0f, 2200f, text4, global::STRINGS.CREATURES.SPECIES.VINEMOTHER.NAME);
 		WiltCondition component = gameObject.GetComponent<WiltCondition>();
 		component.WiltDelay = 0f;
 		component.RecoveryDelay = 0f;

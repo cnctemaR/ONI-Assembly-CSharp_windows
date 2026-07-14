@@ -41,6 +41,7 @@ public class EmptyConduitWorkable : Workable, IEmptyConduitWorkable
 			base.GetComponent<KSelectable>().ToggleStatusItem(statusItem, true, null);
 			this.CreateWorkChore();
 		}
+		this.handle = Game.Instance.Subscribe(-1523247426, Workable.UpdateStatusItemDispatcher, this);
 	}
 
 	private bool HasContents()
@@ -80,6 +81,7 @@ public class EmptyConduitWorkable : Workable, IEmptyConduitWorkable
 	{
 		this.CancelEmptying();
 		base.OnCleanUp();
+		Game.Instance.Unsubscribe(ref this.handle);
 	}
 
 	private ConduitFlow GetFlowManager()
@@ -223,4 +225,6 @@ public class EmptyConduitWorkable : Workable, IEmptyConduitWorkable
 	{
 		component.OnEmptyConduitCancelled(data);
 	});
+
+	private int handle;
 }

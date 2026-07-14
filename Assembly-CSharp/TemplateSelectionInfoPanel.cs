@@ -86,6 +86,27 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_JOULES, GameUtil.GetFormattedJoules(num, "F5", GameUtil.TimeSlice.None));
 	}
 
+	private static string AverageGerms(List<int> cells)
+	{
+		float num = 0f;
+		foreach (int num2 in cells)
+		{
+			num += (float)Grid.DiseaseCount[num2];
+		}
+		num /= (float)cells.Count;
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.AVERAGE_GERMS, num);
+	}
+
+	private static string TotalGerms(List<int> cells)
+	{
+		float num = 0f;
+		foreach (int num2 in cells)
+		{
+			num += (float)Grid.DiseaseCount[num2];
+		}
+		return string.Format(UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SELECTION_INFO_PANEL.TOTAL_GERMS, num);
+	}
+
 	private static float GetCellEntityEnergy(int cell, ref List<GameObject> ignoreObjects)
 	{
 		float num = 0f;
@@ -265,7 +286,9 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		new Func<List<int>, string>(TemplateSelectionInfoPanel.JoulesPerKilogram),
 		new Func<List<int>, string>(TemplateSelectionInfoPanel.MassPerElement),
 		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalRadiation),
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageRadiation)
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageRadiation),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageGerms),
+		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalGerms)
 	};
 
 	private static List<global::Tuple<Element, float>> mass_per_element = new List<global::Tuple<Element, float>>();

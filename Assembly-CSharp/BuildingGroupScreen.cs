@@ -36,7 +36,7 @@ public class BuildingGroupScreen : KScreen
 		kinputTextField.onFocus = (global::System.Action)Delegate.Combine(kinputTextField.onFocus, new global::System.Action(delegate
 		{
 			base.isEditing = true;
-			UISounds.PlaySound(UISounds.Sound.ClickHUD);
+			UISounds.PlaySound(UISounds.Sound.Find);
 			this.ConfigurePlanScreenForSearch();
 		}));
 		this.inputField.onEndEdit.AddListener(delegate(string value)

@@ -36,6 +36,7 @@ namespace Klei
 				this.poly = tc.poly;
 				this.tags = tc.node.tags;
 				this.zoneType = zoneType;
+				this.biomeIdx = tc.biomeIdx;
 			}
 
 			public Polygon poly;
@@ -43,6 +44,8 @@ namespace Klei
 			public TagSet tags;
 
 			public SubWorld.ZoneType zoneType;
+
+			public byte biomeIdx;
 		}
 	}
 }

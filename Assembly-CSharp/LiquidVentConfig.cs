@@ -52,6 +52,7 @@ public class LiquidVentConfig : IBuildingConfig
 		VentController.Def def = go.AddOrGetDef<VentController.Def>();
 		def.usingDynamicColor = true;
 		def.outputSubstanceAnimName = "leak";
+		def.outputSubstanceTintSymbolName = "leak_ceiling";
 		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 

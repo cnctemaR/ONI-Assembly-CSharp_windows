@@ -18,8 +18,12 @@ public class BulbPlantConfig : IEntityConfig
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
-			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, null, true, false, true, true, 2400f, 0f, 2200f, "BulbPlantOriginal", global::STRINGS.CREATURES.SPECIES.BULBPLANT.NAME);
+			SimHashes.CarbonDioxide,
+			SimHashes.DirtyWater,
+			SimHashes.Water,
+			SimHashes.SaltWater
+		}, true, 0f, 0.15f, null, false, false, true, false, true, 2400f, 0f, 2200f, "BulbPlantOriginal", global::STRINGS.CREATURES.SPECIES.BULBPLANT.NAME);
+		gameObject.AddOrGet<PressureVulnerable>().pressureWarning_High = 1500f;
 		PrickleGrass prickleGrass = gameObject.AddOrGet<PrickleGrass>();
 		gameObject.AddOrGetDef<DecorPlantMonitor.Def>();
 		prickleGrass.positive_decor_effect = this.POSITIVE_DECOR_EFFECT;

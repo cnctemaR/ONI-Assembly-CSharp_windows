@@ -16,11 +16,11 @@ public class MultiMinionDiningTable : KMonoBehaviour, IGameObjectEffectDescripto
 		}
 	}
 
-	public bool HasSalt
+	public bool HasGarnish
 	{
 		get
 		{
-			return this.storage != null && this.storage.GetMassAvailable(TableSaltConfig.TAG) >= TableSaltTuning.CONSUMABLE_RATE;
+			return Garnish.HasAny(this.storage);
 		}
 	}
 
@@ -45,27 +45,43 @@ public class MultiMinionDiningTable : KMonoBehaviour, IGameObjectEffectDescripto
 			MultiMinionDiningTable.SpawnSeat(this, num, i);
 		}
 		this.animController.Play(MultiMinionDiningTable.ANIM, KAnim.PlayMode.Once, 1f, 0f);
-		this.UpdateSaltVisibility();
+		this.UpdateGarnishVisibility();
 		this.storage.Subscribe(-1697596308, delegate(object _)
 		{
-			this.UpdateSaltVisibility();
+			this.UpdateGarnishVisibility();
 		});
 	}
 
-	public void UpdateSaltVisibility()
+	public void UpdateGarnishVisibility()
 	{
-		if (this.HasSalt)
+		Garnish active = Garnish.GetActive(this.storage);
+		bool flag = active != null;
+		this.UpdateGarnishOverride(active);
+		foreach (MultiMinionDiningTable.Seat seat in base.gameObject.GetComponentsInChildren<MultiMinionDiningTable.Seat>())
 		{
-			foreach (MultiMinionDiningTable.Seat seat in base.gameObject.GetComponentsInChildren<MultiMinionDiningTable.Seat>())
-			{
-				bool flag = !seat.HasDiner;
-				this.animController.SetSymbolVisiblity(seat.SaltSymbol, flag);
-			}
+			bool flag2 = flag && !seat.HasDiner;
+			this.animController.SetSymbolVisiblity(seat.SaltSymbol, flag2);
+		}
+	}
+
+	private void UpdateGarnishOverride(Garnish activeGarnish)
+	{
+		SymbolOverrideController symbolOverrideController;
+		if (!base.TryGetComponent<SymbolOverrideController>(out symbolOverrideController))
+		{
 			return;
 		}
-		foreach (MultiMinionDiningTable.Seat seat2 in base.gameObject.GetComponentsInChildren<MultiMinionDiningTable.Seat>())
+		KAnim.Build.Symbol symbol = ((activeGarnish != null) ? activeGarnish.GetOverrideSymbol() : null);
+		foreach (MultiMinionDiningTable.Seat seat in base.gameObject.GetComponentsInChildren<MultiMinionDiningTable.Seat>())
 		{
-			this.animController.SetSymbolVisiblity(seat2.SaltSymbol, false);
+			if (symbol != null)
+			{
+				symbolOverrideController.AddSymbolOverride(seat.SaltSymbol, symbol, 0);
+			}
+			else
+			{
+				symbolOverrideController.RemoveSymbolOverride(seat.SaltSymbol, 0);
+			}
 		}
 	}
 
@@ -135,7 +151,7 @@ public class MultiMinionDiningTable : KMonoBehaviour, IGameObjectEffectDescripto
 	private void OnDinerChanged(KPrefabID prevDiner, KPrefabID newDiner, int seatIndex)
 	{
 		MultiMinionDiningTable.Seat[] componentsInChildren = base.gameObject.GetComponentsInChildren<MultiMinionDiningTable.Seat>();
-		bool flag = newDiner == null && this.HasSalt;
+		bool flag = newDiner == null && this.HasGarnish;
 		this.animController.SetSymbolVisiblity(componentsInChildren[seatIndex].SaltSymbol, flag);
 		if (prevDiner != null && this.communalDiners.ContainsKey(prevDiner.gameObject))
 		{
@@ -183,9 +199,15 @@ public class MultiMinionDiningTable : KMonoBehaviour, IGameObjectEffectDescripto
 	List<Descriptor> IGameObjectEffectDescriptor.GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor> { MultiMinionDiningTable.COMMUNAL_DINING_DESCRIPTOR };
-		if (this.HasSalt)
+		if (this.storage != null)
 		{
-			list.Add(MessStation.TABLE_SALT_DESCRIPTOR);
+			foreach (Garnish garnish in Garnish.All)
+			{
+				if (this.storage.Has(garnish.itemTag))
+				{
+					list.Add(garnish.descriptor);
+				}
+			}
 		}
 		return list;
 	}
@@ -234,11 +256,11 @@ public class MultiMinionDiningTable : KMonoBehaviour, IGameObjectEffectDescripto
 			}
 		}
 
-		public bool HasSalt
+		public bool HasGarnish
 		{
 			get
 			{
-				return this.DiningTable.GetComponent<MultiMinionDiningTable>().HasSalt;
+				return this.DiningTable.GetComponent<MultiMinionDiningTable>().HasGarnish;
 			}
 		}
 

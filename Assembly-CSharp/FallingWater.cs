@@ -155,9 +155,10 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 				FallingWater.MistInfo mistInfo;
 				if (!this.mistAlive.TryGetValue(pair, out mistInfo))
 				{
+					Color color = (element.IsMoltenMetal ? FallingWater.MOLTEN_LIQUID_MIST_COLOR : element.substance.colour);
 					mistInfo = default(FallingWater.MistInfo);
 					mistInfo.fx = this.SpawnMist();
-					mistInfo.fx.TintColour = element.substance.colour;
+					mistInfo.fx.TintColour = color;
 					Vector3 vector2 = vector + (flip ? (-Vector3.right) : Vector3.right) * 0.5f;
 					mistInfo.fx.transform.SetPosition(vector2);
 					mistInfo.fx.FlipX = flip;
@@ -537,7 +538,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		this.mesh.SetUVs(0, uvs);
 		this.mesh.SetColors(colours);
 		this.mesh.SetTriangles(indices, 0);
-		int num10 = LayerMask.NameToLayer("Water");
+		int num10 = LayerMask.NameToLayer("Default");
 		Vector4 vector5 = PropertyTextures.CalculateClusterWorldSize();
 		this.material.SetVector("_ClusterWorldSizeInfo", vector5);
 		Graphics.DrawMesh(this.mesh, this.renderOffset, Quaternion.identity, this.material, num10, null, 0, this.propertyBlock);
@@ -556,7 +557,9 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 	{
 		GameObject gameObject = GameUtil.KInstantiate(this.mistEffect, Grid.SceneLayer.BuildingBack, null, 0);
 		gameObject.SetActive(false);
-		gameObject.GetComponent<KBatchedAnimController>().onDestroySelf = new Action<GameObject>(this.ReleaseMist);
+		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+		component.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+		component.onDestroySelf = new Action<GameObject>(this.ReleaseMist);
 		return gameObject;
 	}
 
@@ -741,6 +744,8 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 
 	private static FallingWater _instance;
 
+	private static Color MOLTEN_LIQUID_MIST_COLOR = new Color(1f, 0.8509804f, 0.53333336f, 1f);
+
 	private List<int> clearList = new List<int>();
 
 	private List<Pair<int, bool>> mistClearList = new List<Pair<int, bool>>();
@@ -784,8 +789,9 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			this.position = position;
 			this.velocity = velocity;
 			this.frame = frame;
-			this.colour = ElementLoader.elements[(int)elementIdx].substance.colour;
-			this.colour.a = 191;
+			Element element = ElementLoader.elements[(int)elementIdx];
+			this.colour = (element.IsMoltenMetal ? WaterCubes.MOLTEN_METAL_COLOR : element.substance.colour);
+			this.colour.a = (element.substance.Glows ? byte.MaxValue : 0);
 			this.worldIdx = worldIdx;
 		}
 

@@ -142,6 +142,11 @@ public class SandboxSettings
 			this.OnChangeElement(this.hasRestoredElement);
 			this.hasRestoredElement = true;
 		}, (int)ElementLoader.GetElementIndex(SimHashes.Oxygen));
+		this.AddIntSetting("SandboxTools.SelectedTargetLayer", delegate(int data)
+		{
+			KPlayerPrefs.SetInt("SandboxTools.SelectedTargetLayer", data);
+			this.OnChangeTargetLayer();
+		}, 0);
 		this.AddStringSetting("SandboxTools.SelectedDisease", delegate(string data)
 		{
 			KPlayerPrefs.SetString("SandboxTools.SelectedDisease", data);
@@ -227,6 +232,8 @@ public class SandboxSettings
 
 	public Action<bool> OnChangeElement;
 
+	public global::System.Action OnChangeTargetLayer;
+
 	public global::System.Action OnChangeMass;
 
 	public global::System.Action OnChangeDisease;
@@ -254,6 +261,8 @@ public class SandboxSettings
 	public const string KEY_SELECTED_ENTITY = "SandboxTools.SelectedEntity";
 
 	public const string KEY_SELECTED_ELEMENT = "SandboxTools.SelectedElement";
+
+	public const string KEY_SELECTED_TARGET_LAYER = "SandboxTools.SelectedTargetLayer";
 
 	public const string KEY_SELECTED_DISEASE = "SandboxTools.SelectedDisease";
 

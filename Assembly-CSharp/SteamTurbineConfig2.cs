@@ -14,11 +14,11 @@ public class SteamTurbineConfig2 : IBuildingConfig
 		string text2 = "steamturbine2_kanim";
 		int num3 = 30;
 		float num4 = 60f;
-		string[] array = new string[] { "RefinedMetal", "Plastic" };
+		string[] array = new string[] { "RefinedMetal", "BuildingGasket" };
 		float[] array2 = new float[]
 		{
 			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
-			global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0]
+			4f
 		};
 		string[] array3 = array;
 		float num5 = 1600f;

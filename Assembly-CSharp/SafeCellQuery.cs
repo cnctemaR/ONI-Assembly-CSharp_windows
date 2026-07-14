@@ -123,6 +123,7 @@ public class SafeCellQuery : PathFinderQuery
 		IsBreathable = 64,
 		IsNotLiquidOnMyFace = 128,
 		IsNotLiquid = 256,
+		IsNotSwimming = 512,
 		AllSafeFlags = 511
 	}
 }

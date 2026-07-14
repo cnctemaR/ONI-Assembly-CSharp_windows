@@ -332,7 +332,7 @@ public class VitalsTableScreen : TableScreen
 			if (minionIdentity != null)
 			{
 				List<KeyValuePair<string, float>> list = new List<KeyValuePair<string, float>>();
-				foreach (SicknessInstance sicknessInstance in minionIdentity.GetComponent<MinionModifiers>().sicknesses)
+				foreach (SicknessInstance sicknessInstance in minionIdentity.GetComponent<MinionModifiers>().sicknesses.ModifierList)
 				{
 					list.Add(new KeyValuePair<string, float>(sicknessInstance.modifier.Name, sicknessInstance.GetInfectedTimeRemaining()));
 				}
@@ -431,7 +431,7 @@ public class VitalsTableScreen : TableScreen
 				if (sicknesses.IsInfected())
 				{
 					flag = true;
-					foreach (SicknessInstance sicknessInstance in sicknesses)
+					foreach (SicknessInstance sicknessInstance in sicknesses.ModifierList)
 					{
 						tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
 						tooltip.AddMultiStringTooltip(sicknessInstance.modifier.Name, null);

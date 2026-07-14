@@ -77,6 +77,45 @@ public class ClothingFabricatorConfig : IBuildingConfig
 			fabricators = new List<Tag> { "ClothingFabricator" },
 			sortOrder = 1
 		};
+		if (DlcManager.IsContentSubscribed("DLC5_ID"))
+		{
+			ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(new Tag[] { SimHashes.Rubber.CreateTag() }, (float)global::TUNING.EQUIPMENT.SUITS.DRY_SUIT_MASS, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false),
+				new ComplexRecipe.RecipeElement(GameTags.Fabrics, 2f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, "", false, false)
+			};
+			ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement("DrySuit".ToTag(), 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			};
+			DrySuitConfig.recipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array5, array6), array5, array6)
+			{
+				time = global::TUNING.EQUIPMENT.VESTS.WARM_VEST_FABTIME,
+				description = global::STRINGS.EQUIPMENT.PREFABS.DRYSUIT.RECIPE_DESC,
+				nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
+				fabricators = new List<Tag> { "ClothingFabricator" },
+				sortOrder = 1,
+				requiredTech = Db.Get().TechItems.drySuit.parentTechId
+			};
+		}
+		if (DlcManager.IsContentSubscribed("DLC5_ID"))
+		{
+			ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(new Tag[] { SimHashes.Rubber.CreateTag() }, global::TUNING.EQUIPMENT.SHOES.BOOTS_RUBBER_FABRICATION_MASS, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, "", false, true)
+			};
+			ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(RubberBootsConfig.ID, 1f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			};
+			ComplexRecipe complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("ClothingFabricator", array7, array8), array7, array8);
+			complexRecipe.time = global::TUNING.EQUIPMENT.SHOES.BOOTS_FABRICATIONTIME;
+			complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.RECIPE_DESCRIPTION, ELEMENTS.RUBBER.NAME, global::STRINGS.EQUIPMENT.PREFABS.RUBBERBOOTS.NAME);
+			complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
+			complexRecipe.fabricators = new List<Tag> { "ClothingFabricator" };
+			complexRecipe.requiredTech = Db.Get().TechItems.rubberBoots.parentTechId;
+			complexRecipe.sortOrder = 2;
+		}
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

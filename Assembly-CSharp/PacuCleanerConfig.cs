@@ -9,7 +9,7 @@ public class PacuCleanerConfig : IEntityConfig
 	public static GameObject CreatePacu(string id, string name, string desc, string anim_file, bool is_baby)
 	{
 		GameObject gameObject = BasePacuConfig.CreatePrefab(id, "PacuCleanerBaseTrait", name, desc, anim_file, is_baby, "glp_", 243.15f, 278.15f, 223.15f, 298.15f);
-		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, false);
+		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, true);
 		if (!is_baby)
 		{
 			Storage storage = gameObject.AddComponent<Storage>();
@@ -27,10 +27,9 @@ public class PacuCleanerConfig : IEntityConfig
 			passiveElementConsumer.showDescriptor = false;
 			gameObject.AddOrGet<UpdateElementConsumerPosition>();
 			BubbleSpawner bubbleSpawner = gameObject.AddComponent<BubbleSpawner>();
-			bubbleSpawner.element = SimHashes.Water;
 			bubbleSpawner.emitMass = 2f;
 			bubbleSpawner.emitVariance = 0.5f;
-			bubbleSpawner.initialVelocity = new Vector2f(0, 1);
+			bubbleSpawner.element = PacuCleanerConfig.OUTPUT_ELEMENT;
 			ElementConverter elementConverter = gameObject.AddOrGet<ElementConverter>();
 			elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 			{
@@ -38,7 +37,7 @@ public class PacuCleanerConfig : IEntityConfig
 			};
 			elementConverter.outputElements = new ElementConverter.OutputElement[]
 			{
-				new ElementConverter.OutputElement(0.2f, SimHashes.Water, 0f, true, true, 0f, 0.5f, 1f, byte.MaxValue, 0, true)
+				new ElementConverter.OutputElement(0.2f, PacuCleanerConfig.OUTPUT_ELEMENT, 0f, true, true, 0f, 0.5f, 1f, byte.MaxValue, 0, true)
 			};
 		}
 		return gameObject;
@@ -46,7 +45,7 @@ public class PacuCleanerConfig : IEntityConfig
 
 	public GameObject CreatePrefab()
 	{
-		return EntityTemplates.ExtendEntityToFertileCreature(EntityTemplates.ExtendEntityToWildCreature(PacuCleanerConfig.CreatePacu("PacuCleaner", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.DESC, "pacu_kanim", false), PacuTuning.PEN_SIZE_PER_CREATURE, false), this as IHasDlcRestrictions, "PacuCleanerEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuCleanerBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_CLEANER, 501, false, true, 0.75f, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(EntityTemplates.ExtendEntityToWildCreature(PacuCleanerConfig.CreatePacu("PacuCleaner", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.DESC, "pacu_kanim", false), PacuTuning.PEN_SIZE_PER_CREATURE, true), this as IHasDlcRestrictions, "PacuCleanerEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_CLEANER.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, PacuTuning.EGG_SHELL_RATIO, "PacuCleanerBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_CLEANER, 501, true, true, 0.75f, false, false, PacuTuning.EGG_MASS, true);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -55,10 +54,10 @@ public class PacuCleanerConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
-		ElementConsumer component = inst.GetComponent<ElementConsumer>();
-		if (component != null)
+		ElementConsumer elementConsumer;
+		if (inst.TryGetComponent<ElementConsumer>(out elementConsumer))
 		{
-			component.EnableConsumption(true);
+			elementConsumer.EnableConsumption(true);
 		}
 	}
 
@@ -72,7 +71,7 @@ public class PacuCleanerConfig : IEntityConfig
 
 	public const SimHashes INPUT_ELEMENT = SimHashes.DirtyWater;
 
-	public const SimHashes OUTPUT_ELEMENT = SimHashes.Water;
+	public static SimHashes OUTPUT_ELEMENT = SimHashes.Water;
 
 	public static readonly EffectorValues DECOR = global::TUNING.BUILDINGS.DECOR.BONUS.TIER4;
 

@@ -112,7 +112,7 @@ public class AudioMixerSnapshots : ScriptableObject
 	public EventReference FrontEndItemDropScreenSnapshot;
 
 	[SerializeField]
-	private EventReference[] snapshots;
+	public EventReference[] snapshots;
 
 	[NonSerialized]
 	public List<string> snapshotMap = new List<string>();

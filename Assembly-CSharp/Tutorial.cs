@@ -529,7 +529,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		bool flag2 = false;
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
-			using (IEnumerator<SicknessInstance> enumerator = Components.LiveMinionIdentities[i].GetSicknesses().GetEnumerator())
+			using (List<SicknessInstance>.Enumerator enumerator = Components.LiveMinionIdentities[i].GetSicknesses().ModifierList.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{

@@ -12,11 +12,11 @@ public class GasVentHighPressureConfig : IBuildingConfig
 		string text2 = "ventgas_powered_kanim";
 		int num3 = 30;
 		float num4 = 30f;
-		string[] array = new string[] { "RefinedMetal", "Plastic" };
+		string[] array = new string[] { "RefinedMetal", "BuildingGasket" };
 		float[] array2 = new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0],
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
+			1f
 		};
 		string[] array3 = array;
 		float num5 = 1600f;

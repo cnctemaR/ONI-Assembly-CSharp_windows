@@ -29,7 +29,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	private void OnNewGameSpawn(object data)
 	{
 		Prefab prefab = (Prefab)data;
-		if (prefab.amounts != null)
+		if (prefab != null && prefab.amounts != null)
 		{
 			foreach (Prefab.template_amount_value template_amount_value in prefab.amounts)
 			{
@@ -140,6 +140,15 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	public void ConsumeGrowthUnits(float units_to_consume, float unit_maturity_ratio)
 	{
 		float num = units_to_consume / unit_maturity_ratio;
+		DebugUtil.DevAssert(num <= this.maturity.value, string.Concat(new string[]
+		{
+			"A critter consuming a plant (",
+			base.gameObject.GetProperName(),
+			") tried to consumed more maturity units than there were available, available: ",
+			this.maturity.value.ToString(),
+			", attempted amount: ",
+			num.ToString()
+		}), null);
 		num = Mathf.Clamp(num, 0f, this.maturity.value);
 		this.maturity.value -= num;
 		base.gameObject.Trigger(-1793167409, null);
@@ -202,6 +211,17 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 			this.wildGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, master.WILD_GROWTH_RATE, CREATURES.STATS.MATURITY.GROWINGWILD, false, false, true);
 			this.getOldRate = new AttributeModifier(master.oldAge.deltaAttribute.Id, master.shouldGrowOld ? 1f : 0f, null, false, false, true);
 			this.harvestable = base.GetComponent<Harvestable>();
+		}
+
+		public void ModifyOldAgeGrowthRate(float newValue)
+		{
+			Attributes attributes = base.gameObject.GetAttributes();
+			attributes.Remove(this.getOldRate);
+			this.getOldRate = new AttributeModifier(base.master.oldAge.deltaAttribute.Id, newValue, null, false, false, true);
+			if (base.smi.IsInsideState(base.sm.grown))
+			{
+				attributes.Add(this.getOldRate);
+			}
 		}
 
 		public bool IsGrown()

@@ -101,6 +101,11 @@ namespace Klei.AI
 			return this.amount.GetTooltip(this);
 		}
 
+		public Sprite GetSprite()
+		{
+			return this.amount.GetSprite(this);
+		}
+
 		public void Activate()
 		{
 			SimAndRenderScheduler.instance.Add(this, false);

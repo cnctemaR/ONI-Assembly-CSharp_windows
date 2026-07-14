@@ -2,7 +2,7 @@
 
 public interface IDiningSeat
 {
-	bool HasSalt { get; }
+	bool HasGarnish { get; }
 
 	HashedString EatAnim { get; }
 

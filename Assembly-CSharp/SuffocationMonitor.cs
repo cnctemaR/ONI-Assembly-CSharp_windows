@@ -14,18 +14,36 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 			.Transition(this.noOxygen, (SuffocationMonitor.Instance smi) => !smi.CanBreath(), UpdateRate.SIM_200ms);
 		this.satisfied.normal.Transition(this.satisfied.low, (SuffocationMonitor.Instance smi) => smi.oxygenBreather.IsLowOxygen(), UpdateRate.SIM_200ms);
 		this.satisfied.low.Transition(this.satisfied.normal, (SuffocationMonitor.Instance smi) => !smi.oxygenBreather.IsLowOxygen(), UpdateRate.SIM_200ms).ToggleEffect("LowOxygen");
-		this.noOxygen.EventTransition(GameHashes.OxygenBreatherHasAirChanged, this.satisfied, (SuffocationMonitor.Instance smi) => smi.CanBreath()).TagTransition(GameTags.RecoveringBreath, this.satisfied, false).ToggleExpression(Db.Get().Expressions.Suffocate, null)
+		this.noOxygen.EventTransition(GameHashes.OxygenBreatherHasAirChanged, this.satisfied, (SuffocationMonitor.Instance smi) => smi.CanBreath()).TagTransition(GameTags.RecoveringBreath, this.satisfied, false).ToggleExpression(Db.Get().Expressions.Suffocate, (SuffocationMonitor.Instance smi) => smi.IsBreathDepletingSignificantly() || smi.IsBreathLow())
 			.ToggleAttributeModifier("Holding Breath", (SuffocationMonitor.Instance smi) => smi.decreaseBreathModifier, null)
 			.ToggleTag(GameTags.NoOxygen)
 			.DefaultState(this.noOxygen.holdingbreath);
 		this.noOxygen.holdingbreath.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Suffocation, Db.Get().DuplicantStatusItems.HoldingBreath, null).Transition(this.noOxygen.suffocating, (SuffocationMonitor.Instance smi) => smi.IsSuffocating(), UpdateRate.SIM_200ms);
-		this.noOxygen.suffocating.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Suffocation, Db.Get().DuplicantStatusItems.Suffocating, null).Transition(this.death, (SuffocationMonitor.Instance smi) => smi.HasSuffocated(), UpdateRate.SIM_200ms);
+		this.noOxygen.suffocating.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Suffocation, Db.Get().DuplicantStatusItems.Suffocating, null).Transition(this.noOxygen.incapacitated, (SuffocationMonitor.Instance smi) => smi.HasSuffocated(), UpdateRate.SIM_200ms);
+		this.noOxygen.incapacitated.Enter(delegate(SuffocationMonitor.Instance smi)
+		{
+			smi.sm.timeUntilDeath.Set(smi.def.timeBeforeDeath, smi, false);
+		}).ToggleRecurringChore((SuffocationMonitor.Instance smi) => new BeIncapacitatedSuffocatingChore(smi.master), null).ToggleUrge(Db.Get().Urges.BeIncapacitated)
+			.ToggleTag(GameTags.SuffocatingIncapacitated)
+			.Update(delegate(SuffocationMonitor.Instance smi, float dt)
+			{
+				this.UpdateTimeUntilDeath(smi, dt);
+			}, UpdateRate.SIM_200ms, false)
+			.ParamTransition<float>(this.timeUntilDeath, this.death, GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, SuffocationMonitor.Def>.IsLTZero)
+			.EventTransition(GameHashes.IncapacitationRecovery, this.satisfied, null);
 		this.death.Enter("SuffocationDeath", delegate(SuffocationMonitor.Instance smi)
 		{
 			smi.Kill();
 		});
 		this.dead.DoNothing();
 	}
+
+	private void UpdateTimeUntilDeath(SuffocationMonitor.Instance smi, float dt)
+	{
+		smi.sm.timeUntilDeath.Delta(dt * -1f, smi);
+	}
+
+	public StateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, SuffocationMonitor.Def>.FloatParameter timeUntilDeath;
 
 	public SuffocationMonitor.SatisfiedState satisfied;
 
@@ -37,6 +55,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 
 	public class Def : StateMachine.BaseDef
 	{
+		public float timeBeforeDeath = 120f;
 	}
 
 	public class NoOxygenState : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, SuffocationMonitor.Def>.State
@@ -44,6 +63,8 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, SuffocationMonitor.Def>.State holdingbreath;
 
 		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, SuffocationMonitor.Def>.State suffocating;
+
+		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, SuffocationMonitor.Def>.State incapacitated;
 	}
 
 	public class SatisfiedState : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, SuffocationMonitor.Def>.State
@@ -68,9 +89,14 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 			this.oxygenBreather = base.GetComponent<OxygenBreather>();
 		}
 
-		public override void StartSM()
+		public bool IsBreathDepletingSignificantly()
 		{
-			base.StartSM();
+			return this.breath.deltaAttribute.GetTotalValue() <= -DUPLICANTSTATS.STANDARD.Breath.BREATH_RATE * 0.5f;
+		}
+
+		public bool IsBreathLow()
+		{
+			return this.breath.value <= DUPLICANTSTATS.STANDARD.Breath.SUFFOCATE_AMOUNT;
 		}
 
 		public bool CanBreath()
@@ -86,6 +112,11 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 		public bool IsSuffocating()
 		{
 			return this.breath.deltaAttribute.GetTotalValue() <= 0f && this.breath.value <= DUPLICANTSTATS.STANDARD.Breath.SUFFOCATE_AMOUNT;
+		}
+
+		public float GetTimeUntilDeath(SuffocationMonitor.Instance smi)
+		{
+			return smi.sm.timeUntilDeath.Get(smi);
 		}
 
 		public void Kill()

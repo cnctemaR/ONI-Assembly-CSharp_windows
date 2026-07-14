@@ -30,7 +30,7 @@ public class BlueGrassConfig : IEntityConfig, IHasDlcRestrictions
 		float num4 = 273.15f;
 		float num5 = 273.15f;
 		string text4 = global::STRINGS.CREATURES.SPECIES.BLUE_GRASS.NAME;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0f, "OxyRock", true, true, true, true, 2400f, 0f, 2200f, "BlueGrassOriginal", text4);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num2, num3, num4, num5, new SimHashes[] { SimHashes.CarbonDioxide }, true, 0f, 0f, "OxyRock", true, true, true, false, true, 2400f, 0f, 2200f, "BlueGrassOriginal", text4);
 		ElementConsumer elementConsumer = gameObject.AddOrGet<ElementConsumer>();
 		elementConsumer.showInStatusPanel = true;
 		elementConsumer.storeOnConsume = false;

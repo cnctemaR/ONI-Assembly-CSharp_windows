@@ -79,10 +79,24 @@ public class MetalRefineryConfig : IBuildingConfig
 					{
 						new ComplexRecipe.RecipeElement(element.tag, 100f)
 					};
-					ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+					ComplexRecipe.RecipeElement[] array2;
+					if (element.HasTag(GameTags.UseSmeltingByproducts) && element.highTempTransitionOreID != SimHashes.Vacuum && element.highTempTransitionOreMassConversion > 0f)
 					{
-						new ComplexRecipe.RecipeElement(lowTempTransition.tag, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
-					};
+						Element element2 = ElementLoader.FindElementByHash(element.highTempTransitionOreID);
+						float num = 100f * element.highTempTransitionOreMassConversion;
+						array2 = new ComplexRecipe.RecipeElement[]
+						{
+							new ComplexRecipe.RecipeElement(lowTempTransition.tag, 100f - num, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
+							new ComplexRecipe.RecipeElement(element2.tag, num, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+						};
+					}
+					else
+					{
+						array2 = new ComplexRecipe.RecipeElement[]
+						{
+							new ComplexRecipe.RecipeElement(lowTempTransition.tag, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+						};
+					}
 					string text = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element.tag);
 					string text2 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array, array2);
 					ComplexRecipe complexRecipe = new ComplexRecipe(text2, array, array2);
@@ -94,7 +108,7 @@ public class MetalRefineryConfig : IBuildingConfig
 				}
 			}
 		}
-		Element element2 = ElementLoader.FindElementByHash(SimHashes.Steel);
+		Element element3 = ElementLoader.FindElementByHash(SimHashes.Steel);
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
 			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Iron).tag, 70f),
@@ -105,7 +119,7 @@ public class MetalRefineryConfig : IBuildingConfig
 		{
 			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Steel).tag, 100f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
 		};
-		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element2.tag);
+		string text3 = ComplexRecipeManager.MakeObsoleteRecipeID("MetalRefinery", element3.tag);
 		string text4 = ComplexRecipeManager.MakeRecipeID("MetalRefinery", array3, array4);
 		ComplexRecipe complexRecipe2 = new ComplexRecipe(text4, array3, array4);
 		complexRecipe2.time = 40f;

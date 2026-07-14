@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 
 public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>
@@ -25,7 +26,22 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 				Messenger.Instance.QueueMessage(deathMessage);
 			}
 		}).TriggerOnExit(GameHashes.Died, null)
-			.GoTo(this.dead);
+			.GoTo(this.dead)
+			.Exit("DeathMetrics", delegate(DeathMonitor.Instance smi)
+			{
+				Death death2 = this.death.Get(smi);
+				OniMetrics.SendEventImmediate("MinionDeath", new Dictionary<string, object>
+				{
+					{
+						"CauseOfDeath",
+						(death2 != null) ? death2.Id : "Unknown"
+					},
+					{
+						"MinionID",
+						smi.GetComponent<KPrefabID>().InstanceID
+					}
+				});
+			});
 		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f).DefaultState(this.dead.ground).ToggleTag(GameTags.Dead)
 			.Enter(delegate(DeathMonitor.Instance smi)
 			{
@@ -34,14 +50,14 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			});
 		this.dead.ground.Enter(delegate(DeathMonitor.Instance smi)
 		{
-			Death death2 = this.death.Get(smi);
-			if (death2 == null)
+			Death death3 = this.death.Get(smi);
+			if (death3 == null)
 			{
-				death2 = Db.Get().Deaths.Generic;
+				death3 = Db.Get().Deaths.Generic;
 			}
 			if (smi.IsDuplicant)
 			{
-				smi.GetComponent<KAnimControllerBase>().Play(death2.loopAnim, KAnim.PlayMode.Loop, 1f, 0f);
+				smi.GetComponent<KAnimControllerBase>().Play(death3.loopAnim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 		}).EventTransition(GameHashes.OnStore, this.dead.carried, (DeathMonitor.Instance smi) => smi.IsDuplicant && smi.HasTag(GameTags.Stored));
 		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f).PlayAnim("idle_default", KAnim.PlayMode.Loop).EventTransition(GameHashes.OnStore, this.dead.ground, (DeathMonitor.Instance smi) => !smi.HasTag(GameTags.Stored));

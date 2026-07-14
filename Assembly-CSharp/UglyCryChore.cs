@@ -49,8 +49,6 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 
 		private readonly SuitEquipper suitEquipper;
 
-		private const float MIN_LIQUID_MASS = 0.01f;
-
 		private const float TEARS_MASS_EMISSION_THRESHOLD = 0.0101f;
 	}
 

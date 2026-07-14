@@ -68,6 +68,11 @@ public class PlantableCellQuery : PathFinderQuery
 			{
 				return false;
 			}
+			SingleEntityReceptacle component2 = gameObject.GetComponent<SingleEntityReceptacle>();
+			if (component2 != null && !component2.IsValidEntity(seed.gameObject))
+			{
+				return false;
+			}
 		}
 		else
 		{

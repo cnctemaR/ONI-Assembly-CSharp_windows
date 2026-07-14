@@ -108,6 +108,7 @@ public class ProgressBar : KMonoBehaviour
 		{
 			vector -= Vector3.right * 0.5f;
 		}
+		vector += this.offset;
 		base.transform.SetPosition(vector);
 	}
 
@@ -133,7 +134,13 @@ public class ProgressBar : KMonoBehaviour
 
 	public static ProgressBar CreateProgressBar(GameObject entity, Func<float> updateFunc)
 	{
+		return ProgressBar.CreateProgressBar(entity, updateFunc, Vector3.zero);
+	}
+
+	public static ProgressBar CreateProgressBar(GameObject entity, Func<float> updateFunc, Vector3 offset)
+	{
 		ProgressBar progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
+		progressBar.offset = offset;
 		progressBar.SetUpdateFunc(updateFunc);
 		progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
 		progressBar.name = ((entity != null) ? (entity.name + "_") : "") + " ProgressBar";
@@ -150,6 +157,8 @@ public class ProgressBar : KMonoBehaviour
 	private int overlayUpdateHandle = -1;
 
 	public bool autoHide = true;
+
+	private Vector3 offset = Vector3.zero;
 
 	private bool lastVisibilityValue = true;
 

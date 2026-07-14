@@ -244,8 +244,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		SimpleInfoScreen.RefreshMovePanel(this.movePanel, this.selectedTarget);
 		SimpleInfoScreen.RefreshFertilityPanel(this.fertilityPanel, this.selectedTarget);
 		SimpleInfoScreen.RefreshMooSongPanel(this.mooFertilityPanel, this.selectedTarget);
-		SimpleInfoScreen.RefreshEffectsPanel(this.effectsPanel, this.selectedTarget, this.effectsContent);
-		SimpleInfoScreen.RefreshRequirementsPanel(this.requirementsPanel, this.selectedTarget, this.requirementContent);
+		SimpleInfoScreen.RefreshRequirementsAndEffectsPanels(this.requirementsPanel, this.effectsPanel, this.selectedTarget, this.requirementContent, this.effectsContent);
 		SimpleInfoScreen.RefreshInfoPanel(this.infoPanel, this.selectedTarget);
 		this.vitalsPanel.Refresh(this.selectedTarget);
 		this.rocketSimpleInfoPanel.Refresh(this.rocketStatusContainer, this.selectedTarget);
@@ -276,7 +275,7 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		BuildingUnderConstruction component4 = targetEntity.GetComponent<BuildingUnderConstruction>();
 		Edible component5 = targetEntity.GetComponent<Edible>();
 		PrimaryElement component6 = targetEntity.GetComponent<PrimaryElement>();
-		CellSelectionObject component7 = targetEntity.GetComponent<CellSelectionObject>();
+		ICellSelectionProxy component7 = targetEntity.GetComponent<ICellSelectionProxy>();
 		if (!component)
 		{
 			if (component2)
@@ -297,9 +296,9 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 				EdiblesManager.FoodInfo foodInfo = component5.FoodInfo;
 				text += string.Format(UI.GAMEOBJECTEFFECTS.CALORIES, GameUtil.GetFormattedCalories(foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true));
 			}
-			else if (component7 != null)
+			else if (component7 != null && component7.Element != null)
 			{
-				text = component7.element.FullDescription(false);
+				text = component7.Element.FullDescription(false);
 			}
 			else if (component6 != null)
 			{
@@ -330,45 +329,55 @@ public class SimpleInfoScreen : DetailScreenTab, ISim4000ms, ISim1000ms
 		targetPanel.Commit();
 	}
 
-	private static void RefreshEffectsPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity, DescriptorPanel effectsContent)
+	private static void RefreshRequirementsAndEffectsPanels(CollapsibleDetailContentPanel requirementsTargetPanel, CollapsibleDetailContentPanel effectsTargetPanel, GameObject targetEntity, DescriptorPanel requirementContent, DescriptorPanel effectsContent)
 	{
 		if (targetEntity.GetComponent<MinionIdentity>() != null)
 		{
-			targetPanel.SetActive(false);
+			requirementsTargetPanel.SetActive(false);
+			effectsTargetPanel.SetActive(false);
 			return;
 		}
-		targetEntity.GetComponent<BuildingComplete>();
-		BuildingUnderConstruction component = targetEntity.GetComponent<BuildingUnderConstruction>();
-		List<Descriptor> gameObjectEffects = GameUtil.GetGameObjectEffects(component ? component.Def.BuildingComplete : targetEntity, true);
-		bool flag = gameObjectEffects.Count > 0;
-		effectsContent.gameObject.SetActive(flag);
+		global::UnityEngine.Object component = targetEntity.GetComponent<WiltCondition>();
+		CreatureBrain component2 = targetEntity.GetComponent<CreatureBrain>();
+		bool flag = component != null || component2 != null;
+		BuildingUnderConstruction component3 = targetEntity.GetComponent<BuildingUnderConstruction>();
+		GameObject gameObject = (component3 ? component3.Def.BuildingComplete : targetEntity);
+		ListPool<ValueTuple<ElementConverter, List<Descriptor>>, SimpleInfoScreen>.PooledList pooledList = ListPool<ValueTuple<ElementConverter, List<Descriptor>>, SimpleInfoScreen>.Allocate();
+		ListPool<Descriptor, SimpleInfoScreen>.PooledList pooledList2 = ListPool<Descriptor, SimpleInfoScreen>.Allocate();
+		ListPool<Descriptor, SimpleInfoScreen>.PooledList pooledList3 = ListPool<Descriptor, SimpleInfoScreen>.Allocate();
+		List<Descriptor> list;
+		bool flag2;
+		GameUtil.PartitionBuildingDescriptors(gameObject, true, out list, pooledList, pooledList2, pooledList3, out flag2);
 		if (flag)
 		{
-			effectsContent.SetDescriptors(gameObjectEffects);
+			requirementsTargetPanel.SetActive(false);
 		}
-		targetPanel.SetActive(targetEntity != null && flag);
-	}
-
-	private static void RefreshRequirementsPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity, DescriptorPanel requirementContent)
-	{
-		MinionIdentity component = targetEntity.GetComponent<MinionIdentity>();
-		global::UnityEngine.Object component2 = targetEntity.GetComponent<WiltCondition>();
-		CreatureBrain component3 = targetEntity.GetComponent<CreatureBrain>();
-		if (component2 != null || component != null || component3 != null)
+		else
 		{
-			targetPanel.SetActive(false);
-			return;
+			ListPool<Descriptor, SimpleInfoScreen>.PooledList pooledList4 = ListPool<Descriptor, SimpleInfoScreen>.Allocate();
+			GameUtil.BuildPartitionedRequirements(pooledList4, pooledList2, pooledList, flag2);
+			bool flag3 = pooledList4.Count > 0;
+			requirementContent.gameObject.SetActive(flag3);
+			if (flag3)
+			{
+				requirementContent.SetDescriptors(pooledList4);
+			}
+			requirementsTargetPanel.SetActive(flag3);
+			pooledList4.Recycle();
 		}
-		targetPanel.SetActive(true);
-		BuildingUnderConstruction component4 = targetEntity.GetComponent<BuildingUnderConstruction>();
-		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(GameUtil.GetAllDescriptors(component4 ? component4.Def.BuildingComplete : targetEntity, true), false);
-		bool flag = requirementDescriptors.Count > 0;
-		requirementContent.gameObject.SetActive(flag);
-		if (flag)
+		ListPool<Descriptor, SimpleInfoScreen>.PooledList pooledList5 = ListPool<Descriptor, SimpleInfoScreen>.Allocate();
+		GameUtil.BuildPartitionedEffects(pooledList5, pooledList3, pooledList);
+		bool flag4 = pooledList5.Count > 0;
+		effectsContent.gameObject.SetActive(flag4);
+		if (flag4)
 		{
-			requirementContent.SetDescriptors(requirementDescriptors);
+			effectsContent.SetDescriptors(pooledList5);
 		}
-		targetPanel.SetActive(flag);
+		effectsTargetPanel.SetActive(targetEntity != null && flag4);
+		pooledList5.Recycle();
+		pooledList2.Recycle();
+		pooledList3.Recycle();
+		pooledList.Recycle();
 	}
 
 	private static void RefreshFertilityPanel(CollapsibleDetailContentPanel targetPanel, GameObject targetEntity)

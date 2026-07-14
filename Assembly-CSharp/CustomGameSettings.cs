@@ -159,6 +159,12 @@ public class CustomGameSettings : KMonoBehaviour
 		action3(CustomMixingSettingsConfigs.RaptorMixing);
 		action3(CustomMixingSettingsConfigs.WetlandsMixing);
 		action3(CustomMixingSettingsConfigs.PrehistoricAsteroidMixing);
+		action3(CustomMixingSettingsConfigs.DLC5Mixing);
+		action3(CustomMixingSettingsConfigs.BeachMixing);
+		action3(CustomMixingSettingsConfigs.ReefMixing);
+		action3(CustomMixingSettingsConfigs.KelpForestMixing);
+		action3(CustomMixingSettingsConfigs.AbyssMixing);
+		action3(CustomMixingSettingsConfigs.AquaticAsteroidMixing);
 		foreach (Story story in Db.Get().Stories.GetStoriesSortedByCoordinateOrder())
 		{
 			int num = ((story.kleiUseOnlyCoordinateOrder == -1) ? (-1) : 3);

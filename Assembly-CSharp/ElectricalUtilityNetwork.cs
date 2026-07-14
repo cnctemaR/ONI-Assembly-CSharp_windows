@@ -26,7 +26,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 
 	public override void Reset(UtilityNetworkGridNode[] grid)
 	{
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			List<Wire> list = this.wireGroups[i];
 			if (list != null)
@@ -55,7 +55,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 		bool flag = false;
 		List<Wire> list = null;
 		List<WireUtilityNetworkLink> list2 = null;
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			List<Wire> list3 = this.wireGroups[i];
 			List<WireUtilityNetworkLink> list4 = bridgeGroups[i];
@@ -169,7 +169,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 
 	private Notification overloadedNotification;
 
-	private List<Wire>[] wireGroups = new List<Wire>[5];
+	private List<Wire>[] wireGroups = new List<Wire>[6];
 
 	public List<Wire> allWires = new List<Wire>();
 

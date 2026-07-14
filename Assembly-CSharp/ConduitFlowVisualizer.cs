@@ -33,8 +33,8 @@ public class ConduitFlowVisualizer
 	{
 		if (element != null)
 		{
-			Color color = element.substance.conduitColour;
-			color.a = 128f;
+			Color color = (element.IsMoltenMetal ? Color.Lerp(element.substance.conduitColour, WaterCubes.MOLTEN_METAL_COLOR, 0.8f) : element.substance.conduitColour);
+			color.a = (element.substance.Glows ? 1f : 0.5f);
 			return color;
 		}
 		return default_color;

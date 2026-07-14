@@ -25,8 +25,7 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 
 	private static void UpdateOldStatusItem(AgeMonitor.Instance smi, float dt)
 	{
-		bool flag = smi.age.value > smi.age.GetMax() * 0.9f;
-		smi.oldStatusGuid = smi.kselectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Old, smi.oldStatusGuid, flag, smi);
+		smi.oldStatusGuid = smi.kselectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Old, smi.oldStatusGuid, smi.IsElderly, smi);
 	}
 
 	public GameStateMachine<AgeMonitor, AgeMonitor.Instance, IStateMachineTarget, AgeMonitor.Def>.State alive;
@@ -49,6 +48,14 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 
 	public new class Instance : GameStateMachine<AgeMonitor, AgeMonitor.Instance, IStateMachineTarget, AgeMonitor.Def>.GameInstance
 	{
+		public bool IsElderly
+		{
+			get
+			{
+				return this.age.value > this.age.GetMax() * 0.9f;
+			}
+		}
+
 		public Instance(IStateMachineTarget master, AgeMonitor.Def def)
 			: base(master, def)
 		{
@@ -81,6 +88,8 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 		public AmountInstance age;
 
 		public Guid oldStatusGuid;
+
+		private const float ELDERLY_THRESHOLD = 0.9f;
 
 		[MyCmpReq]
 		public KSelectable kselectable;

@@ -322,19 +322,19 @@ public class BuildingHP : Workable
 			return new FXAnim.Instance(base.smi.master, base.master.damageSourceInfo.fullDamageEffectName, "idle", KAnim.PlayMode.Loop, zero, Color.white);
 		}
 
-		public void SetCrackOverlayValue(float value)
+		public void SetCrackOverlayValue(bool isCracked)
 		{
 			KBatchedAnimController component = base.master.GetComponent<KBatchedAnimController>();
 			if (component == null)
 			{
 				return;
 			}
-			component.SetBlendValue(value);
+			component.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.BuildingDamaged, isCracked);
 			BuildingHP.kbacQueryList.Clear();
 			base.master.GetComponentsInChildren<Meter>(BuildingHP.kbacQueryList);
 			for (int i = 0; i < BuildingHP.kbacQueryList.Count; i++)
 			{
-				BuildingHP.kbacQueryList[i].GetComponent<KBatchedAnimController>().SetBlendValue(value);
+				BuildingHP.kbacQueryList[i].GetComponent<KBatchedAnimController>().SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.BuildingDamaged, isCracked);
 			}
 		}
 
@@ -380,7 +380,7 @@ public class BuildingHP : Workable
 				}
 				smi.ShowProgressBar(true);
 				smi.master.Trigger(774203113, smi.master);
-				smi.SetCrackOverlayValue(1f);
+				smi.SetCrackOverlayValue(true);
 			}).ToggleNotification((BuildingHP.SMInstance smi) => smi.CreateBrokenMachineNotification()).ToggleStatusItem(Db.Get().BuildingStatusItems.Broken, null)
 				.ToggleFX((BuildingHP.SMInstance smi) => smi.InstantiateDamageFX())
 				.EventTransition(GameHashes.BuildingPartiallyRepaired, this.healthy.perfect, (BuildingHP.SMInstance smi) => smi.master.HitPoints == smi.master.building.Def.HitPoints)
@@ -396,7 +396,7 @@ public class BuildingHP : Workable
 						component2.SetFlag(BuildingHP.States.healthyFlag, true);
 					}
 					smi.ShowProgressBar(false);
-					smi.SetCrackOverlayValue(0f);
+					smi.SetCrackOverlayValue(false);
 				});
 		}
 

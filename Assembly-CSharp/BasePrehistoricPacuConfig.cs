@@ -35,6 +35,7 @@ public static class BasePrehistoricPacuConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 100f, name, false, false, true));
 		EntityTemplates.ExtendEntityToBasicCreature(false, gameObject, anim_file, is_baby ? null : "paculacanth_build_kanim", null, FactionManager.FactionID.Prey, base_trait_id, is_baby ? "SwimmerNavGrid" : "SwimmerGrid2x2", NavType.Swim, 32, 2f, "PrehistoricPacuFillet", 12f, false, false, warnLowTemp, warnHighTemp, lethalLowTemp, lethalHighTemp);
+		KAnimFile anim2 = Assets.GetAnim("paculacanth_emotes_kanim");
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true, -1).Add(new AnimInterruptStates.Def(), true, -1).Add(new GrowUpStates.Def(), is_baby, -1)
 			.Add(new TrappedStates.Def(), true, -1)
 			.Add(new IncubatingStates.Def(), is_baby, -1)
@@ -47,12 +48,21 @@ public static class BasePrehistoricPacuConfig
 			.Add(new FlopStates.Def(), true, -1)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true, -1)
+			.Add(new RanchedStates.Def(), !is_baby, -1)
 			.Add(new LayEggStates.Def(), !is_baby, -1)
 			.Add(new EatStates.Def(), true, -1)
-			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true, -1)
+			.Add(new DrinkMilkStates.Def
+			{
+				shouldBeBehindMilkTank = false,
+				drinkCellOffsetGetFn = (is_baby ? new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_CritterOneByOne) : new DrinkMilkStates.Def.DrinkCellOffsetGetFn(DrinkMilkStates.Def.DrinkCellOffsetGet_TwoByTwo))
+			}, true, -1)
+			.Add(new PoopStates.Def(anim2, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP, false), true, -1)
 			.Add(new MoveToLureStates.Def(), true, -1)
-			.Add(new CritterCondoStates.Def(), !is_baby, -1)
-			.Add(new CritterEmoteStates.Def(Assets.GetAnim("paculacanth_emotes_kanim")), true, -1)
+			.Add(new CritterCondoStates.Def
+			{
+				fgLayer = CritterCondo.CreatureFGLayerType.LargeCreatureLayer
+			}, !is_baby, -1)
+			.Add(new CritterEmoteStates.Def(anim2), true, -1)
 			.PopInterruptGroup()
 			.Add(new IdleStates.Def(), true, -1);
 		CreatureFallMonitor.Def def = gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
@@ -70,6 +80,11 @@ public static class BasePrehistoricPacuConfig
 		hashSet.Add("Pacu");
 		hashSet.Add("PacuCleaner");
 		hashSet.Add("PacuTropical");
+		if (DlcManager.IsContentSubscribed("DLC5_ID"))
+		{
+			hashSet.Add("ParrotFish");
+			hashSet.Add("PufferFish");
+		}
 		HashSet<Tag> hashSet2 = new HashSet<Tag>();
 		hashSet2.Add("FishMeat");
 		Diet diet = new Diet(new List<Diet.Info>
@@ -81,6 +96,7 @@ public static class BasePrehistoricPacuConfig
 		def3.diet = diet;
 		def3.minConsumedCaloriesBeforePooping = BasePrehistoricPacuConfig.CALORIES_PER_KG_OF_PACU * 60f;
 		gameObject.AddOrGetDef<SolidConsumerMonitor.Def>().diet = diet;
+		gameObject.AddOrGetDef<LureableMonitor.Def>().lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_prefix, null, 0);
@@ -99,6 +115,8 @@ public static class BasePrehistoricPacuConfig
 		}
 		return "flop_loop";
 	}
+
+	public const string EMOTION_FILE_NAME = "paculacanth_emotes_kanim";
 
 	private static float CALORIES_PER_KG_OF_PACU = PrehistoricPacuTuning.STANDARD_CALORIES_PER_CYCLE / 1f / PacuTuning.MASS;
 

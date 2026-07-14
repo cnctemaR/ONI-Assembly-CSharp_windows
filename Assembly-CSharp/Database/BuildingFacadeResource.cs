@@ -18,13 +18,20 @@ namespace Database
 		{
 		}
 
+		[Obsolete("Please use the one with data parameter")]
 		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, Dictionary<string, string> workables = null, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null)
+			: this(Id, Name, Description, Rarity, PrefabID, AnimFile, workables, requiredDlcIds, forbiddenDlcIds, null)
+		{
+		}
+
+		public BuildingFacadeResource(string Id, string Name, string Description, PermitRarity Rarity, string PrefabID, string AnimFile, Dictionary<string, string> workables = null, string[] requiredDlcIds = null, string[] forbiddenDlcIds = null, Dictionary<string, string> data = null)
 			: base(Id, Name, Description, PermitCategory.Building, Rarity, requiredDlcIds, forbiddenDlcIds)
 		{
 			this.Id = Id;
 			this.PrefabID = PrefabID;
 			this.AnimFile = AnimFile;
 			this.InteractFile = workables;
+			this.Data = data;
 		}
 
 		public void Init()
@@ -70,5 +77,7 @@ namespace Database
 		public string AnimFile;
 
 		public Dictionary<string, string> InteractFile;
+
+		public Dictionary<string, string> Data;
 	}
 }

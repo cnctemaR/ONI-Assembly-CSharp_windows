@@ -44,7 +44,7 @@ public class DiningTableConfig : IBuildingConfig
 		ownable.priority = 10;
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
-		storage.capacityKg = TableSaltTuning.SALTSHAKERSTORAGEMASS;
+		storage.capacityKg = TableSaltTuning.SALTSHAKERSTORAGEMASS + CaviarTuning.STORAGEMASS;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.RequestedItemTag = TableSaltConfig.ID.ToTag();
@@ -52,7 +52,15 @@ public class DiningTableConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = TableSaltTuning.CONSUMABLE_RATE;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FoodFetch.IdHash;
 		manualDeliveryKG.ShowStatusItem = false;
+		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG2.SetStorage(storage);
+		manualDeliveryKG2.RequestedItemTag = CaviarConfig.TAG;
+		manualDeliveryKG2.capacity = CaviarTuning.STORAGEMASS;
+		manualDeliveryKG2.refillMass = CaviarTuning.CONSUMABLE_RATE;
+		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FoodFetch.IdHash;
+		manualDeliveryKG2.ShowStatusItem = false;
 		go.AddOrGet<Reservable>();
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 
 	public const string ID = "DiningTable";

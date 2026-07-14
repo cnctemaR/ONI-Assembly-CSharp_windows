@@ -35,7 +35,7 @@ public class CarrotPlantConfig : IEntityConfig, IHasDlcRestrictions
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, text4, true, true, true, true, 2400f, 0f, 4600f, "CarrotPlantOriginal", global::STRINGS.CREATURES.SPECIES.CARROTPLANT.NAME);
+		}, true, 0f, 0.15f, text4, true, true, true, false, true, 2400f, 0f, 4600f, "CarrotPlantOriginal", global::STRINGS.CREATURES.SPECIES.CARROTPLANT.NAME);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<LoopingSounds>();

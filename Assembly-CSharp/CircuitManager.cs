@@ -120,7 +120,7 @@ public class CircuitManager
 					inputTransformers = new List<Battery>(),
 					outputTransformers = new List<Generator>()
 				};
-				circuitInfo.bridgeGroups = new List<WireUtilityNetworkLink>[5];
+				circuitInfo.bridgeGroups = new List<WireUtilityNetworkLink>[6];
 				for (int i = 0; i < circuitInfo.bridgeGroups.Length; i++)
 				{
 					circuitInfo.bridgeGroups[i] = new List<WireUtilityNetworkLink>();

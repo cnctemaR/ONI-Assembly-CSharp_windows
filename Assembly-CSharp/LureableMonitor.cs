@@ -86,7 +86,7 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 			int num;
 			int num2;
 			Grid.CellToXY(Grid.PosToCell(base.smi.transform.GetPosition()), out num, out num2);
-			GameScenePartitioner.Instance.ReadonlyVisitEntries<LureableMonitor.Instance.FindLureCounterContext>(num - 1, num2 - 1, 2, 2, GameScenePartitioner.Instance.lure, new GameScenePartitioner.VisitorRef<LureableMonitor.Instance.FindLureCounterContext>(LureableMonitor.Instance.FindLureCounter), ref findLureCounterContext);
+			GameScenePartitioner.Instance.ReadonlyVisitEntries<LureableMonitor.Instance.FindLureCounterContext>(num - 1, num2 - 1, 2, 2, GameScenePartitioner.Instance.lure, LureableMonitor.Instance._findLureCounterVisitor, ref findLureCounterContext);
 			base.sm.targetLure.Set(findLureCounterContext.result, this, false);
 		}
 
@@ -102,6 +102,8 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 
 		[MyCmpReq]
 		private Navigator navigator;
+
+		private static GameScenePartitioner.VisitorRef<LureableMonitor.Instance.FindLureCounterContext> _findLureCounterVisitor = new GameScenePartitioner.VisitorRef<LureableMonitor.Instance.FindLureCounterContext>(LureableMonitor.Instance.FindLureCounter);
 
 		private struct FindLureCounterContext
 		{

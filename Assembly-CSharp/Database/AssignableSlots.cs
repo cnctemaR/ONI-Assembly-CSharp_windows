@@ -27,6 +27,7 @@ namespace Database
 			this.Suit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.SUITS.SLOT, MISC.TAGS.SUIT, true));
 			this.Tool = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.TOOLS.TOOLSLOT, MISC.TAGS.MULTITOOL, false));
 			this.Outfit = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.CLOTHING.SLOT, UI.StripLinkFormatting(MISC.TAGS.CLOTHES), true));
+			this.Shoes = base.Add(new EquipmentSlot(global::TUNING.EQUIPMENT.SHOES.SLOT, UI.StripLinkFormatting(MISC.TAGS.SHOES), true));
 		}
 
 		public AssignableSlot Bed;
@@ -58,6 +59,8 @@ namespace Database
 		public AssignableSlot Tool;
 
 		public AssignableSlot Outfit;
+
+		public AssignableSlot Shoes;
 
 		public AssignableSlot BionicUpgrade;
 	}

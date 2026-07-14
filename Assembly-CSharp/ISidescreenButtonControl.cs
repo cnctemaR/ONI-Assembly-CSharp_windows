@@ -17,4 +17,12 @@ public interface ISidescreenButtonControl
 	int HorizontalGroupID();
 
 	int ButtonSideScreenSortOrder();
+
+	string SidescreenTitle
+	{
+		get
+		{
+			return null;
+		}
+	}
 }

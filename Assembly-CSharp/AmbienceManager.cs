@@ -271,6 +271,8 @@ public class AmbienceManager : KMonoBehaviour
 		public float averageTemperature;
 
 		public float averageRadiation;
+
+		public static Comparison<AmbienceManager.Layer> DefaultComparitor = (AmbienceManager.Layer a, AmbienceManager.Layer b) => a.CompareTo(b);
 	}
 
 	[Serializable]
@@ -321,7 +323,7 @@ public class AmbienceManager : KMonoBehaviour
 				this.radiationLayer = new AmbienceManager.Layer(def.radiationSound, default(EventReference));
 				this.allLayers.Add(this.radiationLayer);
 			}
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < this.gasLayers.Length; i++)
 			{
 				this.gasLayers[i] = new AmbienceManager.Layer(def.gasSounds[i], default(EventReference));
 				this.liquidLayers[i] = new AmbienceManager.LiquidLayer(def.liquidSounds[i], default(EventReference));
@@ -457,7 +459,7 @@ public class AmbienceManager : KMonoBehaviour
 			{
 				this.allLayers[l].UpdatePercentage(num4);
 			}
-			this.loopingLayers.Sort();
+			this.loopingLayers.Sort(AmbienceManager.Layer.DefaultComparitor);
 			this.topLayers.Clear();
 			for (int m = 0; m < this.loopingLayers.Count; m++)
 			{
@@ -491,7 +493,7 @@ public class AmbienceManager : KMonoBehaviour
 				this.radiationLayer.UpdateAverageRadiation();
 				this.radiationLayer.UpdateParameters(emitter_position);
 			}
-			this.oneShotLayers.Sort();
+			this.oneShotLayers.Sort(AmbienceManager.Layer.DefaultComparitor);
 			for (int n = 0; n < AmbienceManager.Quadrant.activeSolidLayerCount; n++)
 			{
 				if (this.solidTimers[n].ShouldPlay() && this.oneShotLayers[n].tilePercentage > 0f)
@@ -510,9 +512,9 @@ public class AmbienceManager : KMonoBehaviour
 
 		public Vector3 emitterPosition;
 
-		public AmbienceManager.Layer[] gasLayers = new AmbienceManager.Layer[4];
+		public AmbienceManager.Layer[] gasLayers = new AmbienceManager.Layer[6];
 
-		public AmbienceManager.LiquidLayer[] liquidLayers = new AmbienceManager.LiquidLayer[4];
+		public AmbienceManager.LiquidLayer[] liquidLayers = new AmbienceManager.LiquidLayer[6];
 
 		public AmbienceManager.Layer fogLayer;
 

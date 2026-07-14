@@ -738,6 +738,15 @@ public class SimDebugView : KMonoBehaviour
 		return Color.cyan;
 	}
 
+	private static Color GetIsVisiblyInLiquidColour(SimDebugView instance, int cell)
+	{
+		if (!Grid.IsVisiblyInLiquid(Grid.CellToPos(cell)))
+		{
+			return Color.black;
+		}
+		return Color.cyan;
+	}
+
 	private static Color GetFoundationColour(SimDebugView instance, int cell)
 	{
 		if (!Grid.Foundation[cell])
@@ -1087,6 +1096,10 @@ public class SimDebugView : KMonoBehaviour
 			new Func<SimDebugView, int, Color>(SimDebugView.GetMinionAsyncRenderDataColour)
 		},
 		{
+			SimDebugView.OverlayModes.IsVisiblyInLiquid,
+			new Func<SimDebugView, int, Color>(SimDebugView.GetIsVisiblyInLiquidColour)
+		},
+		{
 			SimDebugView.OverlayModes.ScenePartitioner,
 			new Func<SimDebugView, int, Color>(SimDebugView.GetScenePartitionerColour)
 		}
@@ -1166,6 +1179,8 @@ public class SimDebugView : KMonoBehaviour
 		public static readonly HashedString MinionNavTableIsValid = "MinionNavTableIsValid";
 
 		public static readonly HashedString MinionAsyncRenderDelta = "MinionAsyncRenderDelta";
+
+		public static readonly HashedString IsVisiblyInLiquid = "IsVisiblyInLiquid";
 	}
 
 	public enum GameGridMode

@@ -229,6 +229,14 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			Rottable.RotAtmosphereQuality.Contaminating
 		},
 		{
+			1618409177,
+			Rottable.RotAtmosphereQuality.Contaminating
+		},
+		{
+			-2044124200,
+			Rottable.RotAtmosphereQuality.Contaminating
+		},
+		{
 			-1528777920,
 			Rottable.RotAtmosphereQuality.Normal
 		},

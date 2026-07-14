@@ -31,7 +31,9 @@ public class LeadSuitConfig : IEquipmentConfig, IHasDlcRestrictions
 		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Lead_Suit", global::TUNING.EQUIPMENT.SUITS.SLOT, SimHashes.Dirt, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS, "suit_leadsuit_kanim", "", "body_leadsuit_kanim", 6, list, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, new Tag[]
 		{
 			GameTags.Suit,
-			GameTags.Clothes
+			GameTags.Clothes,
+			GameTags.PedestalDisplayable,
+			GameTags.AirtightSuit
 		}, null);
 		equipmentDef.wornID = "Worn_Lead_Suit";
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.LEAD_SUIT.RECIPE_DESC;
@@ -106,10 +108,6 @@ public class LeadSuitConfig : IEquipmentConfig, IHasDlcRestrictions
 		suitTank.SafeCellFlagsToIgnoreOnEquipped = (SafeCellQuery.SafeFlags)496;
 		go.AddComponent<LeadSuitTank>().batteryDuration = 200f;
 		go.AddComponent<HelmetController>();
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Clothes, false);
-		component.AddTag(GameTags.PedestalDisplayable, false);
-		component.AddTag(GameTags.AirtightSuit, false);
 		Durability durability = go.AddComponent<Durability>();
 		durability.wornEquipmentPrefabID = "Worn_Lead_Suit";
 		durability.durabilityLossPerCycle = global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DECAY;

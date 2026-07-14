@@ -357,6 +357,10 @@ namespace TUNING
 			{
 				id = "Liam",
 				mutuallyExclusiveTraits = new List<string> { "Flatulence", "InteriorDecorator" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Minnow"
 			}
 		};
 
@@ -940,6 +944,19 @@ namespace TUNING
 				statBonus = -DUPLICANTSTATS.LARGE_STATPOINT_BONUS,
 				rarity = DUPLICANTSTATS.RARITY_EPIC,
 				mutuallyExclusiveTraits = new List<string> { "Hemophobia" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Swimming",
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				requiredDlcIds = DlcManager.DLC5
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "GrantSkill_Swimming2",
+				rarity = DUPLICANTSTATS.RARITY_EPIC,
+				requiredDlcIds = DlcManager.DLC5,
+				doNotGenerateTrait = true
 			}
 		};
 
@@ -1439,6 +1456,10 @@ namespace TUNING
 			private float SUFFOCATION_WARN_AT_SECONDS = 50f;
 
 			public float BREATH_BAR_TOTAL_AMOUNT = 100f;
+
+			public float SWIMMING_SKILL_LUNG_CAPACITY_BONUS = 100f;
+
+			public float MINNOW_LUNG_CAPACITY_BONUS = 400f;
 		}
 
 		public class LIGHT

@@ -115,6 +115,22 @@ public class WorldContainer : KMonoBehaviour
 		}
 	}
 
+	public Vector4[] BiomesOnlySizeData
+	{
+		get
+		{
+			return this.m_biomesSize;
+		}
+	}
+
+	public List<BiomeSizeData> BiomesData
+	{
+		get
+		{
+			return this.m_biomesData;
+		}
+	}
+
 	public List<string> Biomes
 	{
 		get
@@ -785,6 +801,13 @@ public class WorldContainer : KMonoBehaviour
 				hashSet.Add(text);
 			}
 			this.m_subworldNames = hashSet.ToList<string>();
+			this.m_biomesData = world.data.biomes;
+			Vector4[] array = new Vector4[world.data.biomes.Count];
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i] = world.data.biomes[i].size;
+			}
+			this.m_biomesSize = array;
 			this.m_worldTraitIds = new List<string>();
 			this.m_worldTraitIds.AddRange(world.Settings.GetWorldTraitIDs());
 			this.m_storyTraitIds = new List<string>();
@@ -1462,6 +1485,12 @@ public class WorldContainer : KMonoBehaviour
 
 	[Serialize]
 	private List<string> m_generatedSubworlds;
+
+	[Serialize]
+	private List<BiomeSizeData> m_biomesData;
+
+	[Serialize]
+	private Vector4[] m_biomesSize = new Vector4[] { Vector4.zero };
 
 	private WorldParentChangedEventArgs parentChangeArgs = new WorldParentChangedEventArgs();
 

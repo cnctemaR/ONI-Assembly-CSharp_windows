@@ -9,20 +9,36 @@ using UnityEngine;
 
 public class CodexEntryGenerator_Elements
 {
+	private static Tag WaterTag
+	{
+		get
+		{
+			return ElementLoader.FindElementByHash(SimHashes.Water).tag;
+		}
+	}
+
+	private static Tag DirtyWaterTag
+	{
+		get
+		{
+			return ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
+		}
+	}
+
 	public static Dictionary<string, CodexEntry> GenerateEntries()
 	{
-		CodexEntryGenerator_Elements.<>c__DisplayClass9_0 CS$<>8__locals1;
+		CodexEntryGenerator_Elements.<>c__DisplayClass13_0 CS$<>8__locals1;
 		CS$<>8__locals1.entriesElements = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary2 = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary3 = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary4 = new Dictionary<string, CodexEntry>();
 		Dictionary<string, CodexEntry> dictionary5 = new Dictionary<string, CodexEntry>();
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_SOLIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSSOLID, Assets.GetSprite("ui_elements-solid"), dictionary, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_LIQUIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, Assets.GetSprite("ui_elements-liquids"), dictionary2, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_GASES_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, Assets.GetSprite("ui_elements-gases"), dictionary3, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENTS_OTHER_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSOTHER, Assets.GetSprite("ui_elements-other"), dictionary4, ref CS$<>8__locals1);
-		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|9_0(CodexEntryGenerator_Elements.ELEMENT_TYPES, UI.CODEX.CATEGORYNAMES.ELEMENTTYPES, Assets.GetSprite("ui_element_poperties"), dictionary5, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|13_0(CodexEntryGenerator_Elements.ELEMENTS_SOLIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSSOLID, Assets.GetSprite("ui_elements-solid"), dictionary, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|13_0(CodexEntryGenerator_Elements.ELEMENTS_LIQUIDS_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSLIQUID, Assets.GetSprite("ui_elements-liquids"), dictionary2, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|13_0(CodexEntryGenerator_Elements.ELEMENTS_GASES_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSGAS, Assets.GetSprite("ui_elements-gases"), dictionary3, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|13_0(CodexEntryGenerator_Elements.ELEMENTS_OTHER_ID, UI.CODEX.CATEGORYNAMES.ELEMENTSOTHER, Assets.GetSprite("ui_elements-other"), dictionary4, ref CS$<>8__locals1);
+		CodexEntryGenerator_Elements.<GenerateEntries>g__AddCategoryEntry|13_0(CodexEntryGenerator_Elements.ELEMENT_TYPES, UI.CODEX.CATEGORYNAMES.ELEMENTTYPES, Assets.GetSprite("ui_element_poperties"), dictionary5, ref CS$<>8__locals1);
 		foreach (Element element in ElementLoader.elements)
 		{
 			if (!element.disabled)
@@ -349,305 +365,322 @@ public class CodexEntryGenerator_Elements
 		}
 	}
 
-	public static CodexEntryGenerator_Elements.ElementEntryContext GetElementEntryContext()
+	private static void AddPlantFiberInfo(ref HashSet<ElementUsage> inSet, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap, GameObject prefabOfProducer, GameObject prefabForPlayerFacing, Crop crop, Func<Tag, float, bool, string> customFormatting = null)
 	{
-		if (CodexEntryGenerator_Elements.contextInstance == null)
+		PlantFiberProducer plantFiberProducer;
+		if (!prefabOfProducer.TryGetComponent<PlantFiberProducer>(out plantFiberProducer))
 		{
-			CodexEntryGenerator_Elements.CodexElementMap codexElementMap = new CodexEntryGenerator_Elements.CodexElementMap();
-			CodexEntryGenerator_Elements.<>c__DisplayClass13_0 CS$<>8__locals1;
-			CS$<>8__locals1.madeMap = new CodexEntryGenerator_Elements.CodexElementMap();
-			CodexEntryGenerator_Elements.<>c__DisplayClass13_1 CS$<>8__locals2;
-			CS$<>8__locals2.waterTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
-			CS$<>8__locals2.dirtyWaterTag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
-			foreach (PlanScreen.PlanInfo planInfo in global::TUNING.BUILDINGS.PLANORDER)
-			{
-				foreach (KeyValuePair<string, string> keyValuePair in planInfo.buildingAndSubcategoryData)
-				{
-					BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
-					if (buildingDef == null)
-					{
-						global::Debug.LogError("Building def for id " + keyValuePair.Key + " is null");
-					}
-					if (!buildingDef.Deprecated && !buildingDef.BuildingComplete.HasTag(GameTags.DevBuilding))
-					{
-						CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_1(buildingDef.BuildingComplete, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
-					}
-				}
-			}
-			HashSet<GameObject> hashSet = new HashSet<GameObject>(Assets.GetPrefabsWithComponent<Harvestable>());
-			foreach (GameObject gameObject in Assets.GetPrefabsWithComponent<WiltCondition>())
-			{
-				hashSet.Add(gameObject);
-			}
-			foreach (GameObject gameObject2 in hashSet)
-			{
-				if (!gameObject2.HasTag(GameTags.HideFromCodex))
-				{
-					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_1(gameObject2, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
-				}
-			}
-			foreach (GameObject gameObject3 in Assets.GetPrefabsWithComponent<CreatureBrain>())
-			{
-				if (gameObject3.GetDef<BabyMonitor.Def>() == null)
-				{
-					CodexEntryGenerator_Elements.<GetElementEntryContext>g__CheckPrefab|13_1(gameObject3, codexElementMap, CS$<>8__locals1.madeMap, ref CS$<>8__locals1, ref CS$<>8__locals2);
-				}
-			}
-			foreach (KeyValuePair<Tag, Diet> keyValuePair2 in DietManager.CollectSaveDiets(null))
-			{
-				GameObject gameObject4 = Assets.GetPrefab(keyValuePair2.Key).gameObject;
-				if (gameObject4.GetDef<BabyMonitor.Def>() == null)
-				{
-					float num = 0f;
-					foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(gameObject4.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
-					{
-						if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
-						{
-							num = attributeModifier.Value;
-						}
-					}
-					Diet value = keyValuePair2.Value;
-					foreach (Diet.Info info in value.infos)
-					{
-						foreach (Tag tag in info.consumedTags)
-						{
-							float num2 = -num / info.caloriesPerKg;
-							float num3 = num2 * info.producedConversionRate;
-							bool flag = value.IsConsumedTagAbleToBeEatenDirectly(tag);
-							ElementUsage elementUsage = null;
-							if (flag)
-							{
-								if (info.foodType == Diet.Info.FoodType.EatPlantDirectly)
-								{
-									elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedDirectPlantConsumptionValuePerCycle));
-								}
-								else if (info.foodType == Diet.Info.FoodType.EatPlantStorage)
-								{
-									elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPlantStorageConsumptionValuePerCycle));
-								}
-								else if (info.foodType == Diet.Info.FoodType.EatPrey || info.foodType == Diet.Info.FoodType.EatButcheredPrey)
-								{
-									float num4 = value.AvailableCaloriesInPrey(tag);
-									num2 = -num / num4;
-									num3 = num2 * info.producedConversionRate * num4 / info.caloriesPerKg;
-									elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPreyConsumptionValuePerCycle));
-								}
-							}
-							else
-							{
-								elementUsage = new ElementUsage(tag, num2, true);
-							}
-							CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
-							conversionEntry.title = gameObject4.GetProperName();
-							conversionEntry.prefab = gameObject4;
-							conversionEntry.inSet = new HashSet<ElementUsage>();
-							conversionEntry.inSet.Add(elementUsage);
-							conversionEntry.outSet = new HashSet<ElementUsage>();
-							conversionEntry.outSet.Add(new ElementUsage(info.producedElement, num3, true));
-							codexElementMap.Add(tag, conversionEntry);
-							CS$<>8__locals1.madeMap.Add(info.producedElement, conversionEntry);
-						}
-					}
-				}
-			}
-			CodexEntryGenerator_Elements.contextInstance = new CodexEntryGenerator_Elements.ElementEntryContext
-			{
-				usedMap = codexElementMap,
-				madeMap = CS$<>8__locals1.madeMap
-			};
+			return;
 		}
-		return CodexEntryGenerator_Elements.contextInstance;
-	}
-
-	[CompilerGenerated]
-	internal static void <GenerateEntries>g__AddCategoryEntry|9_0(string categoryId, string name, Sprite icon, Dictionary<string, CodexEntry> entries, ref CodexEntryGenerator_Elements.<>c__DisplayClass9_0 A_4)
-	{
-		CodexEntry codexEntry = CodexEntryGenerator.GenerateCategoryEntry(categoryId, name, entries, icon, true, true, null);
-		codexEntry.parentId = CodexEntryGenerator_Elements.ELEMENTS_ID;
-		codexEntry.category = CodexEntryGenerator_Elements.ELEMENTS_ID;
-		A_4.entriesElements.Add(categoryId, codexEntry);
-	}
-
-	[CompilerGenerated]
-	internal static void <GetElementEntryContext>g__AddPlantFiberInfo|13_0(ref HashSet<ElementUsage> inSet, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap, GameObject prefabOfProducer, GameObject prefabForPlayerFacing, Crop crop, Func<Tag, float, bool, string> customFormating = null)
-	{
-		PlantFiberProducer component = prefabOfProducer.GetComponent<PlantFiberProducer>();
-		if (component != null)
+		CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
+		conversionEntry.title = prefabForPlayerFacing.GetProperName();
+		conversionEntry.prefab = prefabForPlayerFacing;
+		conversionEntry.inSet = inSet;
+		conversionEntry.outSet.Add(new ElementUsage("PlantFiber", plantFiberProducer.amount / crop.cropVal.cropDuration, true, customFormatting));
+		CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 = conversionEntry;
+		CodexConversionPanel.IconSettings iconSettings = new CodexConversionPanel.IconSettings();
+		iconSettings.spriteName = "skillbadge_role_farming3";
+		iconSettings.tooltip = CODEX.MISC.TIP_ICON.FARMING3_SKILL.TOOLTIP;
+		iconSettings.onClickActions = delegate
 		{
-			CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry.title = prefabForPlayerFacing.GetProperName();
-			conversionEntry.prefab = prefabForPlayerFacing;
-			conversionEntry.inSet = inSet;
-			conversionEntry.outSet.Add(new ElementUsage("PlantFiber", component.amount / crop.cropVal.cropDuration, true, customFormating));
-			CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 = conversionEntry;
-			CodexConversionPanel.IconSettings iconSettings = new CodexConversionPanel.IconSettings();
-			iconSettings.spriteName = "skillbadge_role_farming3";
-			iconSettings.tooltip = CODEX.MISC.TIP_ICON.FARMING3_SKILL.TOOLTIP;
-			iconSettings.onClickActions = delegate
-			{
-				ManagementMenu.Instance.OpenSkills(null);
-			};
-			conversionEntry2.aidIcon1 = iconSettings;
-			usedMap.Add(prefabForPlayerFacing.PrefabID(), conversionEntry);
-			madeMap.Add("PlantFiber", conversionEntry);
-		}
+			ManagementMenu.Instance.OpenSkills(null);
+		};
+		conversionEntry2.aidIcon1 = iconSettings;
+		usedMap.Add(prefabForPlayerFacing.PrefabID(), conversionEntry);
+		madeMap.Add("PlantFiber", conversionEntry);
 	}
 
-	[CompilerGenerated]
-	internal static void <GetElementEntryContext>g__CheckPrefab|13_1(GameObject prefab, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap made, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_0 A_3, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_1 A_4)
+	private static void CheckPrefab(GameObject prefab, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap)
 	{
 		HashSet<ElementUsage> hashSet = new HashSet<ElementUsage>();
 		HashSet<ElementUsage> hashSet2 = new HashSet<ElementUsage>();
+		List<ElementConverter> list = new List<ElementConverter>();
+		List<ElementConverter> list2 = new List<ElementConverter>();
+		List<ElementConverter> list3 = new List<ElementConverter>();
+		CodexEntryGenerator_Elements.PartitionElementConverters(prefab, list, list2, list3);
+		CodexEntryGenerator_Elements.CollectSharedConversionIO(prefab, hashSet, hashSet2, list);
+		CodexEntryGenerator_Elements.RegisterConversionEntries(prefab, hashSet, hashSet2, usedMap, madeMap, list2);
+		CodexEntryGenerator_Elements.AddIndependentConversionEntries(prefab, hashSet, usedMap, madeMap, list3);
+	}
+
+	private static void PartitionElementConverters(GameObject prefab, List<ElementConverter> outputOnlyConverters, List<ElementConverter> withInputsConverters, List<ElementConverter> categoryConverters)
+	{
+		IEnumerable<ElementConverter> components = prefab.GetComponents<ElementConverter>();
+		foreach (ElementConverter elementConverter in (components ?? Enumerable.Empty<ElementConverter>()))
+		{
+			if (elementConverter.inputIsCategory)
+			{
+				categoryConverters.Add(elementConverter);
+			}
+			else if (elementConverter.consumedElements != null && elementConverter.consumedElements.Length != 0)
+			{
+				withInputsConverters.Add(elementConverter);
+			}
+			else
+			{
+				outputOnlyConverters.Add(elementConverter);
+			}
+		}
+	}
+
+	private static void VerifyClaimedByproduct(GameObject prefab, List<ElementConverter> withInputsConverters, List<ElementConverter> categoryConverters)
+	{
+		IConverterByproduct defImplementingInterface = prefab.GetDefImplementingInterface<IConverterByproduct>();
+		if (defImplementingInterface == null)
+		{
+			return;
+		}
+		if (defImplementingInterface.ByproductRate <= 0f)
+		{
+			return;
+		}
+		bool flag = false;
+		foreach (ElementConverter elementConverter in withInputsConverters)
+		{
+			ElementUsage elementUsage;
+			if (CodexEntryGenerator_Elements.TryGetByproductUsage(defImplementingInterface, elementConverter, out elementUsage))
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (!flag)
+		{
+			foreach (ElementConverter elementConverter2 in categoryConverters)
+			{
+				ElementUsage elementUsage;
+				if (CodexEntryGenerator_Elements.TryGetByproductUsage(defImplementingInterface, elementConverter2, out elementUsage))
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		DebugUtil.DevAssert(flag, "IConverterByproduct has no associated ElementConverter", null);
+	}
+
+	private static void RegisterConversionEntries(GameObject prefab, HashSet<ElementUsage> inSet, HashSet<ElementUsage> outSet, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap, List<ElementConverter> withInputsConverters)
+	{
+		IrrigationMonitor.Def def = prefab.GetDef<IrrigationMonitor.Def>();
+		IConverterByproduct defImplementingInterface = prefab.GetDefImplementingInterface<IConverterByproduct>();
+		if (withInputsConverters.Count == 0)
+		{
+			CodexEntryGenerator_Elements.RegisterIrrigationOrSingleEntry(prefab, inSet, outSet, usedMap, madeMap, def);
+			return;
+		}
+		foreach (ElementConverter elementConverter in withInputsConverters)
+		{
+			HashSet<ElementUsage> hashSet = new HashSet<ElementUsage>(inSet);
+			foreach (ElementConverter.ConsumedElement consumedElement in elementConverter.consumedElements)
+			{
+				hashSet.Add(new ElementUsage(consumedElement.Tag, consumedElement.MassConsumptionRate, true));
+			}
+			HashSet<ElementUsage> hashSet2 = new HashSet<ElementUsage>(outSet);
+			IEnumerable<ElementConverter.OutputElement> outputElements = elementConverter.outputElements;
+			foreach (ElementConverter.OutputElement outputElement in (outputElements ?? Enumerable.Empty<ElementConverter.OutputElement>()))
+			{
+				Tag tag = ElementLoader.FindElementByHash(outputElement.elementHash).tag;
+				hashSet2.Add(new ElementUsage(tag, outputElement.massGenerationRate, true));
+			}
+			ElementUsage elementUsage;
+			if (CodexEntryGenerator_Elements.TryGetByproductUsage(defImplementingInterface, elementConverter, out elementUsage))
+			{
+				hashSet2.Add(elementUsage);
+			}
+			CodexEntryGenerator_Elements.RegisterIrrigationOrSingleEntry(prefab, hashSet, hashSet2, usedMap, madeMap, def);
+		}
+	}
+
+	private static void RegisterIrrigationOrSingleEntry(GameObject prefab, HashSet<ElementUsage> inSet, HashSet<ElementUsage> outSet, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap, IrrigationMonitor.Def irrigation)
+	{
+		if (irrigation != null)
+		{
+			foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in irrigation.consumedElements)
+			{
+				CodexEntryGenerator_Elements.RegisterSingleEntry(prefab, new HashSet<ElementUsage>(inSet)
+				{
+					new ElementUsage(consumeInfo.tag, consumeInfo.massConsumptionRate, true)
+				}, outSet, usedMap, madeMap);
+			}
+			return;
+		}
+		CodexEntryGenerator_Elements.RegisterSingleEntry(prefab, inSet, outSet, usedMap, madeMap);
+	}
+
+	private static void RegisterSingleEntry(GameObject prefab, HashSet<ElementUsage> inSet, HashSet<ElementUsage> outSet, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap)
+	{
+		CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
+		conversionEntry.title = prefab.GetProperName();
+		conversionEntry.prefab = prefab;
+		conversionEntry.inSet = inSet;
+		conversionEntry.outSet = outSet;
+		if (inSet.Count > 0 && outSet.Count > 0)
+		{
+			usedMap.Add(prefab.PrefabID(), conversionEntry);
+		}
+		foreach (ElementUsage elementUsage in inSet)
+		{
+			usedMap.Add(elementUsage.tag, conversionEntry);
+		}
+		foreach (ElementUsage elementUsage2 in outSet)
+		{
+			madeMap.Add(elementUsage2.tag, conversionEntry);
+		}
+		Crop component = prefab.GetComponent<Crop>();
+		if (component != null && prefab.GetComponent<IPlantConsumeEntities>() == null)
+		{
+			CodexEntryGenerator_Elements.AddPlantFiberInfo(ref inSet, usedMap, madeMap, prefab, prefab, component, null);
+		}
+	}
+
+	private static bool TryGetByproductUsage(IConverterByproduct byproduct, ElementConverter conv, out ElementUsage usage)
+	{
+		usage = null;
+		if (byproduct == null || byproduct.ByproductRate <= 0f)
+		{
+			return false;
+		}
+		IEnumerable<ElementConverter.ConsumedElement> consumedElements = conv.consumedElements;
+		using (IEnumerator<ElementConverter.ConsumedElement> enumerator = (consumedElements ?? Enumerable.Empty<ElementConverter.ConsumedElement>()).GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current.Tag == byproduct.ByproductAssociatedInputTag)
+				{
+					usage = new ElementUsage(byproduct.ByproductTag, byproduct.ByproductRate, byproduct.ByproductIsContinuous);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static void CollectSharedConversionIO(GameObject prefab, HashSet<ElementUsage> inSet, HashSet<ElementUsage> outSet, List<ElementConverter> outputOnlyConverters)
+	{
 		EnergyGenerator component = prefab.GetComponent<EnergyGenerator>();
 		if (component)
 		{
 			IEnumerable<EnergyGenerator.InputItem> inputs = component.formula.inputs;
 			foreach (EnergyGenerator.InputItem inputItem in (inputs ?? Enumerable.Empty<EnergyGenerator.InputItem>()))
 			{
-				hashSet.Add(new ElementUsage(inputItem.tag, inputItem.consumptionRate, true));
+				inSet.Add(new ElementUsage(inputItem.tag, inputItem.consumptionRate, true));
 			}
 			IEnumerable<EnergyGenerator.OutputItem> outputs = component.formula.outputs;
 			foreach (EnergyGenerator.OutputItem outputItem in (outputs ?? Enumerable.Empty<EnergyGenerator.OutputItem>()))
 			{
 				Tag tag = ElementLoader.FindElementByHash(outputItem.element).tag;
-				hashSet2.Add(new ElementUsage(tag, outputItem.creationRate, true));
+				outSet.Add(new ElementUsage(tag, outputItem.creationRate, true));
 			}
 		}
-		IEnumerable<ElementConverter> components = prefab.GetComponents<ElementConverter>();
-		foreach (ElementConverter elementConverter in (components ?? Enumerable.Empty<ElementConverter>()))
+		foreach (ElementConverter elementConverter in outputOnlyConverters)
+		{
+			IEnumerable<ElementConverter.OutputElement> outputElements = elementConverter.outputElements;
+			foreach (ElementConverter.OutputElement outputElement in (outputElements ?? Enumerable.Empty<ElementConverter.OutputElement>()))
+			{
+				Tag tag2 = ElementLoader.FindElementByHash(outputElement.elementHash).tag;
+				outSet.Add(new ElementUsage(tag2, outputElement.massGenerationRate, true));
+			}
+		}
+		IEnumerable<ElementConsumer> components = prefab.GetComponents<ElementConsumer>();
+		foreach (ElementConsumer elementConsumer in (components ?? Enumerable.Empty<ElementConsumer>()))
+		{
+			if (!elementConsumer.storeOnConsume)
+			{
+				Tag tag3 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag;
+				inSet.Add(new ElementUsage(tag3, elementConsumer.consumptionRate, true));
+			}
+		}
+		FertilizationMonitor.Def def = prefab.GetDef<FertilizationMonitor.Def>();
+		if (def != null)
+		{
+			foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in def.consumedElements)
+			{
+				inSet.Add(new ElementUsage(consumeInfo.tag, consumeInfo.massConsumptionRate, true));
+			}
+		}
+		Crop component2 = prefab.GetComponent<Crop>();
+		if (component2 != null && prefab.GetComponent<IPlantConsumeEntities>() == null)
+		{
+			outSet.Add(new ElementUsage(component2.cropId, (float)component2.cropVal.numProduced / component2.cropVal.cropDuration, true));
+		}
+		FlushToilet component3 = prefab.GetComponent<FlushToilet>();
+		if (component3)
+		{
+			inSet.Add(new ElementUsage(CodexEntryGenerator_Elements.WaterTag, component3.massConsumedPerUse, false));
+			outSet.Add(new ElementUsage(CodexEntryGenerator_Elements.DirtyWaterTag, component3.massEmittedPerUse, false));
+		}
+		HandSanitizer component4 = prefab.GetComponent<HandSanitizer>();
+		if (component4)
+		{
+			Tag tag4 = ElementLoader.FindElementByHash(component4.consumedElement).tag;
+			inSet.Add(new ElementUsage(tag4, component4.massConsumedPerUse, false));
+			if (component4.outputElement != SimHashes.Vacuum)
+			{
+				Tag tag5 = ElementLoader.FindElementByHash(component4.outputElement).tag;
+				outSet.Add(new ElementUsage(tag5, component4.massConsumedPerUse, false));
+			}
+		}
+	}
+
+	private static void AddIndependentConversionEntries(GameObject prefab, HashSet<ElementUsage> inSet, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap, List<ElementConverter> categoryConverters)
+	{
+		Crop component = prefab.GetComponent<Crop>();
+		IPlantConsumeEntities component2 = prefab.GetComponent<IPlantConsumeEntities>();
+		foreach (ElementConverter elementConverter in categoryConverters)
 		{
 			List<CodexEntryGenerator_Elements.ConversionEntry> list = new List<CodexEntryGenerator_Elements.ConversionEntry>();
 			IEnumerable<ElementConverter.ConsumedElement> consumedElements = elementConverter.consumedElements;
-			using (IEnumerator<ElementConverter.ConsumedElement> enumerator4 = (consumedElements ?? Enumerable.Empty<ElementConverter.ConsumedElement>()).GetEnumerator())
+			using (IEnumerator<ElementConverter.ConsumedElement> enumerator2 = (consumedElements ?? Enumerable.Empty<ElementConverter.ConsumedElement>()).GetEnumerator())
 			{
-				while (enumerator4.MoveNext())
+				while (enumerator2.MoveNext())
 				{
-					ElementConverter.ConsumedElement c2 = enumerator4.Current;
-					if (elementConverter.inputIsCategory)
+					ElementConverter.ConsumedElement c2 = enumerator2.Current;
+					foreach (Element element in ElementLoader.FindElements((Element e) => e.HasTag(c2.Tag)))
 					{
-						using (List<Element>.Enumerator enumerator5 = ElementLoader.FindElements((Element e) => e.HasTag(c2.Tag)).GetEnumerator())
+						list.Add(new CodexEntryGenerator_Elements.ConversionEntry
 						{
-							while (enumerator5.MoveNext())
+							title = prefab.GetProperName(),
+							prefab = prefab,
+							inSet = 
 							{
-								Element element = enumerator5.Current;
-								list.Add(new CodexEntryGenerator_Elements.ConversionEntry
-								{
-									title = prefab.GetProperName(),
-									prefab = prefab,
-									inSet = 
-									{
-										new ElementUsage(element.tag, c2.MassConsumptionRate, true)
-									}
-								});
+								new ElementUsage(element.tag, c2.MassConsumptionRate, true)
 							}
-							continue;
-						}
+						});
 					}
-					hashSet.Add(new ElementUsage(c2.Tag, c2.MassConsumptionRate, true));
 				}
 			}
 			IEnumerable<ElementConverter.OutputElement> outputElements = elementConverter.outputElements;
 			foreach (ElementConverter.OutputElement outputElement in (outputElements ?? Enumerable.Empty<ElementConverter.OutputElement>()))
 			{
 				ElementUsage elementUsage = new ElementUsage(ElementLoader.FindElementByHash(outputElement.elementHash).tag, outputElement.massGenerationRate, true);
-				if (elementConverter.inputIsCategory)
+				foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry in list)
 				{
-					using (List<CodexEntryGenerator_Elements.ConversionEntry>.Enumerator enumerator7 = list.GetEnumerator())
-					{
-						while (enumerator7.MoveNext())
-						{
-							CodexEntryGenerator_Elements.ConversionEntry conversionEntry = enumerator7.Current;
-							conversionEntry.outSet.Add(elementUsage);
-						}
-						continue;
-					}
-				}
-				hashSet2.Add(elementUsage);
-			}
-			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 in list)
-			{
-				if (conversionEntry2.inSet.Count > 0 && conversionEntry2.outSet.Count > 0)
-				{
-					usedMap.Add(prefab.PrefabID(), conversionEntry2);
-				}
-				foreach (ElementUsage elementUsage2 in conversionEntry2.inSet)
-				{
-					usedMap.Add(elementUsage2.tag, conversionEntry2);
-				}
-				foreach (ElementUsage elementUsage3 in conversionEntry2.outSet)
-				{
-					A_3.madeMap.Add(elementUsage3.tag, conversionEntry2);
+					conversionEntry.outSet.Add(elementUsage);
 				}
 			}
-		}
-		IEnumerable<ElementConsumer> components2 = prefab.GetComponents<ElementConsumer>();
-		foreach (ElementConsumer elementConsumer in (components2 ?? Enumerable.Empty<ElementConsumer>()))
-		{
-			if (!elementConsumer.storeOnConsume)
+			ElementUsage elementUsage2;
+			if (CodexEntryGenerator_Elements.TryGetByproductUsage(prefab.GetDefImplementingInterface<IConverterByproduct>(), elementConverter, out elementUsage2))
 			{
-				Tag tag2 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag;
-				hashSet.Add(new ElementUsage(tag2, elementConsumer.consumptionRate, true));
+				foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry2 in list)
+				{
+					conversionEntry2.outSet.Add(elementUsage2);
+				}
 			}
-		}
-		IrrigationMonitor.Def def = prefab.GetDef<IrrigationMonitor.Def>();
-		if (def != null)
-		{
-			foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in def.consumedElements)
+			foreach (CodexEntryGenerator_Elements.ConversionEntry conversionEntry3 in list)
 			{
-				hashSet.Add(new ElementUsage(consumeInfo.tag, consumeInfo.massConsumptionRate, true));
+				if (conversionEntry3.inSet.Count > 0 && conversionEntry3.outSet.Count > 0)
+				{
+					usedMap.Add(prefab.PrefabID(), conversionEntry3);
+				}
+				foreach (ElementUsage elementUsage3 in conversionEntry3.inSet)
+				{
+					usedMap.Add(elementUsage3.tag, conversionEntry3);
+				}
+				foreach (ElementUsage elementUsage4 in conversionEntry3.outSet)
+				{
+					madeMap.Add(elementUsage4.tag, conversionEntry3);
+				}
 			}
-		}
-		FertilizationMonitor.Def def2 = prefab.GetDef<FertilizationMonitor.Def>();
-		if (def2 != null)
-		{
-			foreach (PlantElementAbsorber.ConsumeInfo consumeInfo2 in def2.consumedElements)
-			{
-				hashSet.Add(new ElementUsage(consumeInfo2.tag, consumeInfo2.massConsumptionRate, true));
-			}
-		}
-		IPlantConsumeEntities component2 = prefab.GetComponent<IPlantConsumeEntities>();
-		Crop component3 = prefab.GetComponent<Crop>();
-		if (component3 != null && component2 == null)
-		{
-			hashSet2.Add(new ElementUsage(component3.cropId, (float)component3.cropVal.numProduced / component3.cropVal.cropDuration, true));
-		}
-		FlushToilet component4 = prefab.GetComponent<FlushToilet>();
-		if (component4)
-		{
-			hashSet.Add(new ElementUsage(A_4.waterTag, component4.massConsumedPerUse, false));
-			hashSet2.Add(new ElementUsage(A_4.dirtyWaterTag, component4.massEmittedPerUse, false));
-		}
-		HandSanitizer component5 = prefab.GetComponent<HandSanitizer>();
-		if (component5)
-		{
-			Tag tag3 = ElementLoader.FindElementByHash(component5.consumedElement).tag;
-			hashSet.Add(new ElementUsage(tag3, component5.massConsumedPerUse, false));
-			if (component5.outputElement != SimHashes.Vacuum)
-			{
-				Tag tag4 = ElementLoader.FindElementByHash(component5.outputElement).tag;
-				hashSet2.Add(new ElementUsage(tag4, component5.massConsumedPerUse, false));
-			}
-		}
-		CodexEntryGenerator_Elements.ConversionEntry conversionEntry3 = new CodexEntryGenerator_Elements.ConversionEntry();
-		conversionEntry3.title = prefab.GetProperName();
-		conversionEntry3.prefab = prefab;
-		conversionEntry3.inSet = hashSet;
-		conversionEntry3.outSet = hashSet2;
-		if (hashSet.Count > 0 && hashSet2.Count > 0)
-		{
-			usedMap.Add(prefab.PrefabID(), conversionEntry3);
-		}
-		foreach (ElementUsage elementUsage4 in hashSet)
-		{
-			usedMap.Add(elementUsage4.tag, conversionEntry3);
-		}
-		foreach (ElementUsage elementUsage5 in hashSet2)
-		{
-			A_3.madeMap.Add(elementUsage5.tag, conversionEntry3);
-		}
-		if (component3 != null && component2 == null)
-		{
-			CodexEntryGenerator_Elements.<GetElementEntryContext>g__AddPlantFiberInfo|13_0(ref hashSet, usedMap, A_3.madeMap, prefab, prefab, component3, null);
 		}
 		IPlantBranchGrower defImplementingInterface = prefab.GetDefImplementingInterface<IPlantBranchGrower>();
 		if (defImplementingInterface != null)
@@ -655,35 +688,35 @@ public class CodexEntryGenerator_Elements
 			GameObject prefab2 = Assets.GetPrefab(defImplementingInterface.GetPlantBranchPrefabName());
 			if (prefab2 != null)
 			{
-				Crop component6 = prefab2.GetComponent<Crop>();
-				if (component6 != null && (component3 == null || component6.cropId != component3.cropId || component6.cropVal.numProduced != component3.cropVal.numProduced))
+				Crop component3 = prefab2.GetComponent<Crop>();
+				if (component3 != null && (component == null || component3.cropId != component.cropId || component3.cropVal.numProduced != component.cropVal.numProduced))
 				{
 					CodexEntryGenerator_Elements.ConversionEntry conversionEntry4 = new CodexEntryGenerator_Elements.ConversionEntry();
 					conversionEntry4.title = prefab2.GetProperName();
 					conversionEntry4.prefab = prefab;
 					usedMap.Add(prefab.PrefabID(), conversionEntry4);
 					conversionEntry4.inSet = new HashSet<ElementUsage>();
-					IrrigationMonitor.Def def3 = prefab.GetDef<IrrigationMonitor.Def>();
-					if (def3 != null)
+					IrrigationMonitor.Def def = prefab.GetDef<IrrigationMonitor.Def>();
+					if (def != null)
 					{
-						foreach (PlantElementAbsorber.ConsumeInfo consumeInfo3 in def3.consumedElements)
+						foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in def.consumedElements)
 						{
-							conversionEntry4.inSet.Add(new ElementUsage(consumeInfo3.tag, consumeInfo3.massConsumptionRate, true));
+							conversionEntry4.inSet.Add(new ElementUsage(consumeInfo.tag, consumeInfo.massConsumptionRate, true));
 						}
 					}
-					FertilizationMonitor.Def def4 = prefab.GetDef<FertilizationMonitor.Def>();
-					if (def4 != null)
+					FertilizationMonitor.Def def2 = prefab.GetDef<FertilizationMonitor.Def>();
+					if (def2 != null)
 					{
-						foreach (PlantElementAbsorber.ConsumeInfo consumeInfo4 in def4.consumedElements)
+						foreach (PlantElementAbsorber.ConsumeInfo consumeInfo2 in def2.consumedElements)
 						{
-							conversionEntry4.inSet.Add(new ElementUsage(consumeInfo4.tag, consumeInfo4.massConsumptionRate, true));
+							conversionEntry4.inSet.Add(new ElementUsage(consumeInfo2.tag, consumeInfo2.massConsumptionRate, true));
 						}
 					}
 					conversionEntry4.outSet = new HashSet<ElementUsage>();
 					int branchCount = defImplementingInterface.GetMaxBranchCount();
-					conversionEntry4.outSet.Add(new ElementUsage(component6.cropId, (float)component6.cropVal.numProduced / component6.cropVal.cropDuration, true, (Tag t, float a, bool b) => GameUtil.GetFormattedBranchGrowerPlantProductionValuePerCycle(t, a, branchCount, true)));
-					A_3.madeMap.Add(component6.cropId, conversionEntry4);
-					CodexEntryGenerator_Elements.<GetElementEntryContext>g__AddPlantFiberInfo|13_0(ref hashSet, usedMap, A_3.madeMap, prefab2, prefab, component6, (Tag t, float a, bool b) => GameUtil.GetFormattedBranchGrowerPlantPlantFiberProductionValuePerCycle(t, a, branchCount, true));
+					conversionEntry4.outSet.Add(new ElementUsage(component3.cropId, (float)component3.cropVal.numProduced / component3.cropVal.cropDuration, true, (Tag t, float a, bool b) => GameUtil.GetFormattedBranchGrowerPlantProductionValuePerCycle(t, a, branchCount, true)));
+					madeMap.Add(component3.cropId, conversionEntry4);
+					CodexEntryGenerator_Elements.AddPlantFiberInfo(ref inSet, usedMap, madeMap, prefab2, prefab, component3, (Tag t, float a, bool b) => GameUtil.GetFormattedBranchGrowerPlantPlantFiberProductionValuePerCycle(t, a, branchCount, true));
 				}
 			}
 		}
@@ -693,91 +726,297 @@ public class CodexEntryGenerator_Elements
 			List<string> list2 = new List<string>();
 			foreach (KPrefabID kprefabID in prefabsOfPossiblePrey)
 			{
-				CreatureBrain component7 = kprefabID.GetComponent<CreatureBrain>();
-				Tag tag5 = ((component7 == null) ? kprefabID.PrefabID() : component7.species);
-				string text = tag5.ProperName();
+				CreatureBrain component4 = kprefabID.GetComponent<CreatureBrain>();
+				Tag tag3 = ((component4 == null) ? kprefabID.PrefabID() : component4.species);
+				string text = tag3.ProperName();
 				if (!list2.Contains(text))
 				{
 					CodexEntryGenerator_Elements.ConversionEntry conversionEntry5 = new CodexEntryGenerator_Elements.ConversionEntry();
 					conversionEntry5.title = component2.GetConsumableEntitiesCategoryName() + ": " + text;
 					conversionEntry5.prefab = prefab;
-					conversionEntry5.inSet.Add(new ElementUsage(tag5, (component3 == null) ? 1f : (1f / component3.cropVal.cropDuration), component3 != null, (Tag t, float amount, bool c) => GameUtil.GetFormattedUnits(amount, c ? GameUtil.TimeSlice.PerCycle : GameUtil.TimeSlice.None, true, "")));
-					if (component3 != null)
+					conversionEntry5.inSet.Add(new ElementUsage(tag3, (component == null) ? 1f : (1f / component.cropVal.cropDuration), component != null, (Tag t, float amount, bool c) => GameUtil.GetFormattedUnits(amount, c ? GameUtil.TimeSlice.PerCycle : GameUtil.TimeSlice.None, true, "")));
+					if (component != null)
 					{
-						conversionEntry5.outSet.Add(new ElementUsage(component3.cropId, (float)component3.cropVal.numProduced / component3.cropVal.cropDuration, true));
-						A_3.madeMap.Add(component3.cropId, conversionEntry5);
+						conversionEntry5.outSet.Add(new ElementUsage(component.cropId, (float)component.cropVal.numProduced / component.cropVal.cropDuration, true));
+						madeMap.Add(component.cropId, conversionEntry5);
 					}
 					usedMap.Add(prefab.PrefabID(), conversionEntry5);
 					list2.Add(text);
 				}
 			}
 		}
-		ScaleGrowthMonitor.Def def5 = prefab.GetDef<ScaleGrowthMonitor.Def>();
-		if (def5 != null)
+		ScaleGrowthMonitor.Def def3 = prefab.GetDef<ScaleGrowthMonitor.Def>();
+		if (def3 != null)
 		{
 			CodexEntryGenerator_Elements.ConversionEntry conversionEntry6 = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry6.title = Assets.GetPrefab("ShearingStation").GetProperName();
-			conversionEntry6.prefab = Assets.GetPrefab("ShearingStation");
+			GameObject prefab3 = Assets.GetPrefab(prefab.GetComponent<KPrefabID>().HasTag(GameTags.SwimmingCreature) ? "UnderwaterShearingStation" : "ShearingStation");
+			conversionEntry6.title = prefab3.GetProperName();
+			conversionEntry6.prefab = prefab3;
 			conversionEntry6.inSet = new HashSet<ElementUsage>();
 			conversionEntry6.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
 			usedMap.Add(prefab.PrefabID(), conversionEntry6);
+			usedMap.Add(prefab3.PrefabID(), conversionEntry6);
 			conversionEntry6.outSet = new HashSet<ElementUsage>();
-			conversionEntry6.outSet.Add(new ElementUsage(def5.itemDroppedOnShear, def5.dropMass, false));
-			A_3.madeMap.Add(def5.itemDroppedOnShear, conversionEntry6);
+			conversionEntry6.outSet.Add(new ElementUsage(def3.itemDroppedOnShear, def3.dropMass, false));
+			madeMap.Add(def3.itemDroppedOnShear, conversionEntry6);
 		}
-		WellFedShearable.Def def6 = prefab.GetDef<WellFedShearable.Def>();
-		if (def6 != null)
+		WellFedShearable.Def def4 = prefab.GetDef<WellFedShearable.Def>();
+		if (def4 != null)
 		{
 			CodexEntryGenerator_Elements.ConversionEntry conversionEntry7 = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry7.title = Assets.GetPrefab("ShearingStation").GetProperName();
-			conversionEntry7.prefab = Assets.GetPrefab("ShearingStation");
+			GameObject prefab4 = Assets.GetPrefab(prefab.GetComponent<KPrefabID>().HasTag(GameTags.SwimmingCreature) ? "UnderwaterShearingStation" : "ShearingStation");
+			conversionEntry7.title = prefab4.GetProperName();
+			conversionEntry7.prefab = prefab4;
 			conversionEntry7.inSet = new HashSet<ElementUsage>();
 			conversionEntry7.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
 			usedMap.Add(prefab.PrefabID(), conversionEntry7);
+			usedMap.Add(prefab4.PrefabID(), conversionEntry7);
 			conversionEntry7.outSet = new HashSet<ElementUsage>();
-			conversionEntry7.outSet.Add(new ElementUsage(def6.itemDroppedOnShear, def6.dropMass, false));
-			A_3.madeMap.Add(def6.itemDroppedOnShear, conversionEntry7);
+			conversionEntry7.outSet.Add(new ElementUsage(def4.itemDroppedOnShear, def4.dropMass, false));
+			madeMap.Add(def4.itemDroppedOnShear, conversionEntry7);
 		}
-		MilkProductionMonitor.Def def7 = prefab.GetDef<MilkProductionMonitor.Def>();
-		if (def7 != null)
+		FertilityShearable.Def def5 = prefab.GetDef<FertilityShearable.Def>();
+		if (def5 != null)
 		{
 			CodexEntryGenerator_Elements.ConversionEntry conversionEntry8 = new CodexEntryGenerator_Elements.ConversionEntry();
-			GameObject prefab3 = Assets.GetPrefab("MilkingStation");
-			conversionEntry8.title = prefab3.GetProperName();
-			conversionEntry8.prefab = prefab3;
-			conversionEntry8.inSet = new HashSet<ElementUsage>();
-			conversionEntry8.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
-			usedMap.Add(prefab.PrefabID(), conversionEntry8);
-			conversionEntry8.outSet = new HashSet<ElementUsage>();
-			conversionEntry8.outSet.Add(new ElementUsage(def7.element.CreateTag(), def7.Capacity, false));
-			A_3.madeMap.Add(def7.element.CreateTag(), conversionEntry8);
-		}
-		Butcherable component8 = prefab.GetComponent<Butcherable>();
-		if (component8 != null)
-		{
-			CodexEntryGenerator_Elements.ConversionEntry conversionEntry9 = new CodexEntryGenerator_Elements.ConversionEntry();
-			conversionEntry9.title = prefab.GetProperName();
-			conversionEntry9.prefab = prefab;
-			usedMap.Add(prefab.PrefabID(), conversionEntry9);
-			conversionEntry9.outSet = new HashSet<ElementUsage>();
-			Dictionary<string, float> dictionary = new Dictionary<string, float>();
-			foreach (KeyValuePair<string, float> keyValuePair in component8.drops)
+			GameObject prefab5 = Assets.GetPrefab("UnderwaterMilkingStation");
+			conversionEntry8.title = prefab5.GetProperName();
+			conversionEntry8.prefab = prefab5;
+			conversionEntry8.inSet = new HashSet<ElementUsage>
 			{
-				float num;
-				dictionary.TryGetValue(keyValuePair.Key, out num);
-				dictionary[keyValuePair.Key] = num + Assets.GetPrefab(keyValuePair.Key).GetComponent<PrimaryElement>().Mass * keyValuePair.Value;
+				new ElementUsage(prefab.PrefabID(), 1f, false)
+			};
+			usedMap.Add(prefab.PrefabID(), conversionEntry8);
+			usedMap.Add(prefab5.PrefabID(), conversionEntry8);
+			Tag tag2 = def5.milkElement.CreateTag();
+			conversionEntry8.outSet = new HashSet<ElementUsage>
+			{
+				new ElementUsage(tag2, def5.dropMass, false)
+			};
+			madeMap.Add(tag2, conversionEntry8);
+		}
+		MilkProductionMonitor.Def def6 = prefab.GetDef<MilkProductionMonitor.Def>();
+		if (def6 != null)
+		{
+			string text2 = (prefab.GetComponent<KPrefabID>().HasTag(GameTags.SwimmingCreature) ? "UnderwaterMilkingStation" : "MilkingStation");
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry9 = new CodexEntryGenerator_Elements.ConversionEntry();
+			GameObject prefab6 = Assets.GetPrefab(text2);
+			conversionEntry9.title = prefab6.GetProperName();
+			conversionEntry9.prefab = prefab6;
+			conversionEntry9.inSet = new HashSet<ElementUsage>();
+			conversionEntry9.inSet.Add(new ElementUsage(prefab.PrefabID(), 1f, false));
+			usedMap.Add(prefab.PrefabID(), conversionEntry9);
+			usedMap.Add(prefab6.PrefabID(), conversionEntry9);
+			conversionEntry9.outSet = new HashSet<ElementUsage>();
+			conversionEntry9.outSet.Add(new ElementUsage(def6.element.CreateTag(), def6.Capacity, false));
+			madeMap.Add(def6.element.CreateTag(), conversionEntry9);
+		}
+		MoistureMonitor.Def def7 = prefab.GetDef<MoistureMonitor.Def>();
+		if (def7 != null)
+		{
+			string text3 = CODEX.HEADERS.SECRETED.Replace("{Creature}", prefab.GetProperName());
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry10 = CodexEntryGenerator_Elements.SimpleConversionBase(usedMap, prefab, text3);
+			string id = Db.Get().Amounts.Mucus.deltaAttribute.Id;
+			float num = 0f;
+			foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(prefab.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
+			{
+				if (attributeModifier.AttributeId == id)
+				{
+					num = attributeModifier.Value;
+					break;
+				}
+			}
+			float num2 = num + def7.GetMaxModification();
+			ElementUsage elementUsage5 = new ElementUsage(def7.lubricant.CreateTag(), num2, true);
+			elementUsage5.customFormating = (Tag tag, float amount, bool continous) => string.Format(CODEX.FORMAT_STRINGS.SECRETED, GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			ElementUsage elementUsage6 = elementUsage5;
+			conversionEntry10.outSet.Add(elementUsage6);
+			madeMap.Add(def7.lubricant.CreateTag(), conversionEntry10);
+		}
+		MoltDropperMonitor.Def def8 = prefab.GetDef<MoltDropperMonitor.Def>();
+		if (def8 != null)
+		{
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry11 = CodexEntryGenerator_Elements.SimpleConversionBase(usedMap, prefab, CODEX.HEADERS.MOLTED.Replace("{Creature}", prefab.GetProperName()));
+			ElementUsage elementUsage7 = new ElementUsage(def8.onGrowDropID, def8.massToDrop / 600f, true);
+			elementUsage7.customFormating = (Tag tag, float amount, bool continous) => CODEX.FORMAT_STRINGS.MOLTED.Replace("{Amount}", GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+			ElementUsage elementUsage8 = elementUsage7;
+			conversionEntry11.outSet.Add(elementUsage8);
+			madeMap.Add(def8.onGrowDropID, conversionEntry11);
+		}
+		Butcherable component5 = prefab.GetComponent<Butcherable>();
+		if (component5 != null)
+		{
+			CodexEntryGenerator_Elements.ConversionEntry conversionEntry12 = new CodexEntryGenerator_Elements.ConversionEntry();
+			conversionEntry12.title = prefab.GetProperName();
+			conversionEntry12.prefab = prefab;
+			usedMap.Add(prefab.PrefabID(), conversionEntry12);
+			conversionEntry12.outSet = new HashSet<ElementUsage>();
+			Dictionary<string, float> dictionary = new Dictionary<string, float>();
+			foreach (KeyValuePair<string, float> keyValuePair in component5.drops)
+			{
+				float num3;
+				dictionary.TryGetValue(keyValuePair.Key, out num3);
+				dictionary[keyValuePair.Key] = num3 + Assets.GetPrefab(keyValuePair.Key).GetComponent<PrimaryElement>().Mass * keyValuePair.Value;
 			}
 			foreach (KeyValuePair<string, float> keyValuePair2 in dictionary)
 			{
-				string text2;
-				float num2;
-				keyValuePair2.Deconstruct(out text2, out num2);
-				string text3 = text2;
-				float num3 = num2;
-				conversionEntry9.outSet.Add(new ElementUsage(text3, num3, false));
-				A_3.madeMap.Add(text3, conversionEntry9);
+				string text4;
+				float num4;
+				keyValuePair2.Deconstruct(out text4, out num4);
+				string text5 = text4;
+				float num5 = num4;
+				conversionEntry12.outSet.Add(new ElementUsage(text5, num5, false));
+				madeMap.Add(text5, conversionEntry12);
 			}
 		}
+	}
+
+	private static void AddDietConversions(GameObject prefab, CodexEntryGenerator_Elements.CodexElementMap usedMap, CodexEntryGenerator_Elements.CodexElementMap madeMap)
+	{
+		Diet diet = null;
+		CreatureCalorieMonitor.Def def = prefab.GetDef<CreatureCalorieMonitor.Def>();
+		if (def != null)
+		{
+			diet = def.diet;
+		}
+		else
+		{
+			BeehiveCalorieMonitor.Def def2 = prefab.GetDef<BeehiveCalorieMonitor.Def>();
+			if (def2 != null)
+			{
+				diet = def2.diet;
+			}
+		}
+		if (diet == null)
+		{
+			return;
+		}
+		float num = 0f;
+		foreach (AttributeModifier attributeModifier in Db.Get().traits.Get(prefab.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers)
+		{
+			if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
+			{
+				num = attributeModifier.Value;
+			}
+		}
+		foreach (Diet.Info info in diet.infos)
+		{
+			foreach (Tag tag in info.consumedTags)
+			{
+				float num2 = -num / info.caloriesPerKg;
+				float num3 = num2 * info.producedConversionRate;
+				bool flag = diet.IsConsumedTagAbleToBeEatenDirectly(tag);
+				ElementUsage elementUsage = null;
+				if (flag)
+				{
+					if (info.foodType == Diet.Info.FoodType.EatPlantDirectly)
+					{
+						elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedDirectPlantConsumptionValuePerCycle));
+					}
+					else if (info.foodType == Diet.Info.FoodType.EatPlantStorage)
+					{
+						elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPlantStorageConsumptionValuePerCycle));
+					}
+					else if (info.foodType == Diet.Info.FoodType.EatPrey || info.foodType == Diet.Info.FoodType.EatButcheredPrey)
+					{
+						float num4 = diet.AvailableCaloriesInPrey(tag);
+						num2 = -num / num4;
+						num3 = num2 * info.producedConversionRate * num4 / info.caloriesPerKg;
+						elementUsage = new ElementUsage(tag, num2, true, new Func<Tag, float, bool, string>(GameUtil.GetFormattedPreyConsumptionValuePerCycle));
+					}
+				}
+				else
+				{
+					elementUsage = new ElementUsage(tag, num2, true);
+				}
+				CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry();
+				conversionEntry.title = prefab.GetProperName();
+				conversionEntry.prefab = prefab;
+				conversionEntry.inSet.Add(elementUsage);
+				conversionEntry.outSet.Add(new ElementUsage(info.producedElement, num3, true));
+				usedMap.Add(tag, conversionEntry);
+				madeMap.Add(info.producedElement, conversionEntry);
+			}
+		}
+	}
+
+	public static CodexEntryGenerator_Elements.ElementEntryContext GetElementEntryContext()
+	{
+		if (CodexEntryGenerator_Elements.contextInstance != null)
+		{
+			return CodexEntryGenerator_Elements.contextInstance;
+		}
+		CodexEntryGenerator_Elements.CodexElementMap codexElementMap = new CodexEntryGenerator_Elements.CodexElementMap();
+		CodexEntryGenerator_Elements.CodexElementMap codexElementMap2 = new CodexEntryGenerator_Elements.CodexElementMap();
+		foreach (PlanScreen.PlanInfo planInfo in global::TUNING.BUILDINGS.PLANORDER)
+		{
+			foreach (KeyValuePair<string, string> keyValuePair in planInfo.buildingAndSubcategoryData)
+			{
+				BuildingDef buildingDef = Assets.GetBuildingDef(keyValuePair.Key);
+				if (buildingDef == null)
+				{
+					global::Debug.LogError("Building def for id " + keyValuePair.Key + " is null");
+				}
+				if (!buildingDef.Deprecated && !buildingDef.BuildingComplete.HasTag(GameTags.DevBuilding))
+				{
+					CodexEntryGenerator_Elements.CheckPrefab(buildingDef.BuildingComplete, codexElementMap, codexElementMap2);
+				}
+			}
+		}
+		HashSet<GameObject> hashSet = new HashSet<GameObject>(Assets.GetPrefabsWithComponent<Harvestable>());
+		foreach (GameObject gameObject in Assets.GetPrefabsWithComponent<WiltCondition>())
+		{
+			hashSet.Add(gameObject);
+		}
+		foreach (GameObject gameObject2 in hashSet)
+		{
+			if (!gameObject2.HasTag(GameTags.HideFromCodex))
+			{
+				CodexEntryGenerator_Elements.CheckPrefab(gameObject2, codexElementMap, codexElementMap2);
+			}
+		}
+		List<GameObject> prefabsWithComponent = Assets.GetPrefabsWithComponent<CreatureBrain>();
+		foreach (GameObject gameObject3 in prefabsWithComponent)
+		{
+			if (gameObject3.GetDef<BabyMonitor.Def>() == null)
+			{
+				CodexEntryGenerator_Elements.CheckPrefab(gameObject3, codexElementMap, codexElementMap2);
+			}
+		}
+		foreach (GameObject gameObject4 in prefabsWithComponent)
+		{
+			if (gameObject4.GetDef<BabyMonitor.Def>() == null)
+			{
+				CodexEntryGenerator_Elements.AddDietConversions(gameObject4, codexElementMap, codexElementMap2);
+			}
+		}
+		CodexEntryGenerator_Elements.contextInstance = new CodexEntryGenerator_Elements.ElementEntryContext
+		{
+			usedMap = codexElementMap,
+			madeMap = codexElementMap2
+		};
+		return CodexEntryGenerator_Elements.contextInstance;
+	}
+
+	private static CodexEntryGenerator_Elements.ConversionEntry SimpleConversionBase(CodexEntryGenerator_Elements.CodexElementMap usedMap, GameObject prefab, string title = null)
+	{
+		CodexEntryGenerator_Elements.ConversionEntry conversionEntry = new CodexEntryGenerator_Elements.ConversionEntry
+		{
+			title = ((title == null) ? prefab.GetProperName() : title),
+			prefab = prefab,
+			inSet = new HashSet<ElementUsage>()
+		};
+		usedMap.Add(prefab.PrefabID(), conversionEntry);
+		return conversionEntry;
+	}
+
+	[CompilerGenerated]
+	internal static void <GenerateEntries>g__AddCategoryEntry|13_0(string categoryId, string name, Sprite icon, Dictionary<string, CodexEntry> entries, ref CodexEntryGenerator_Elements.<>c__DisplayClass13_0 A_4)
+	{
+		CodexEntry codexEntry = CodexEntryGenerator.GenerateCategoryEntry(categoryId, name, entries, icon, true, true, null);
+		codexEntry.parentId = CodexEntryGenerator_Elements.ELEMENTS_ID;
+		codexEntry.category = CodexEntryGenerator_Elements.ELEMENTS_ID;
+		A_4.entriesElements.Add(categoryId, codexEntry);
 	}
 
 	public static string ELEMENTS_ID = CodexCache.FormatLinkID("ELEMENTS");

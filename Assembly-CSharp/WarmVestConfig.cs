@@ -12,7 +12,11 @@ public class WarmVestConfig : IEquipmentConfig
 		new Dictionary<string, float>().Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.WARM_VEST_MASS);
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.WARM_CLOTHING;
 		List<AttributeModifier> list = new List<AttributeModifier>();
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Warm_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, SimHashes.Carbon, (float)global::TUNING.EQUIPMENT.VESTS.WARM_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.WARM_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.WARM_VEST_ANIM0, 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null, null);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Warm_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, SimHashes.Carbon, (float)global::TUNING.EQUIPMENT.VESTS.WARM_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.WARM_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.WARM_VEST_ANIM0, 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, new Tag[]
+		{
+			GameTags.Clothes,
+			GameTags.PedestalDisplayable
+		}, null);
 		int decorMod = ClothingWearer.ClothingInfo.WARM_CLOTHING.decorMod;
 		Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.WARM_CLOTHING.conductivityMod)), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.WARM_CLOTHING.conductivityMod)), Descriptor.DescriptorType.Effect, false);
 		Descriptor descriptor2 = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, decorMod), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, decorMod), Descriptor.DescriptorType.Effect, false);
@@ -32,7 +36,6 @@ public class WarmVestConfig : IEquipmentConfig
 
 	public static void SetupVest(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().AddTag(GameTags.Clothes, false);
 		Equippable equippable = go.GetComponent<Equippable>();
 		if (equippable == null)
 		{
@@ -45,7 +48,6 @@ public class WarmVestConfig : IEquipmentConfig
 	public void DoPostConfigure(GameObject go)
 	{
 		WarmVestConfig.SetupVest(go);
-		go.GetComponent<KPrefabID>().AddTag(GameTags.PedestalDisplayable, false);
 	}
 
 	public const string ID = "Warm_Vest";

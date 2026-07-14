@@ -47,6 +47,10 @@ public class EquipmentConfigManager : KMonoBehaviour
 		equippable.slotID = equipmentDef.Slot;
 		global::Debug.Assert(equippable.slot != null);
 		config.DoPostConfigure(gameObject);
+		foreach (Tag tag in equipmentDef.AdditionalTags)
+		{
+			gameObject.GetComponent<KPrefabID>().AddTag(tag, false);
+		}
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
 		if (equipmentDef.wornID != null)
 		{
@@ -55,9 +59,9 @@ public class EquipmentConfigManager : KMonoBehaviour
 			repairableEquipment.def = equipmentDef;
 			global::Debug.Assert(repairableEquipment.def != null);
 			SymbolOverrideControllerUtil.AddToPrefab(gameObject2);
-			foreach (Tag tag in equipmentDef.AdditionalTags)
+			foreach (Tag tag2 in equipmentDef.AdditionalTags)
 			{
-				gameObject2.GetComponent<KPrefabID>().AddTag(tag, false);
+				gameObject2.GetComponent<KPrefabID>().AddTag(tag2, false);
 			}
 			Assets.AddPrefab(gameObject2.GetComponent<KPrefabID>());
 		}

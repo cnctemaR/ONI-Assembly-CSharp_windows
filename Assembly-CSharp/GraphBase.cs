@@ -67,7 +67,8 @@ public class GraphBase : KMonoBehaviour
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.prefab_guide_x, this.guides_x, true);
 			gameObject.name = "guides_horizontal";
-			Vector2[] array = new Vector2[2 * (int)(this.axis_y.range / this.axis_y.guide_frequency)];
+			int num = ((this.axis_y.guide_frequency > 0f) ? ((int)(this.axis_y.range / this.axis_y.guide_frequency)) : 0);
+			Vector2[] array = new Vector2[2 * num];
 			for (int i = 0; i < array.Length; i += 2)
 			{
 				Vector2 vector = new Vector2(this.axis_x.min_value, (float)i * (this.axis_y.guide_frequency / 2f));
@@ -93,7 +94,8 @@ public class GraphBase : KMonoBehaviour
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.prefab_guide_y, this.guides_y, true);
 			gameObject.name = "guides_vertical";
-			Vector2[] array = new Vector2[2 * (int)(this.axis_x.range / this.axis_x.guide_frequency)];
+			int num = ((this.axis_x.guide_frequency > 0f) ? ((int)(this.axis_x.range / this.axis_x.guide_frequency)) : 0);
+			Vector2[] array = new Vector2[2 * num];
 			for (int i = 0; i < array.Length; i += 2)
 			{
 				Vector2 vector = new Vector2((float)i * (this.axis_x.guide_frequency / 2f), this.axis_y.min_value);

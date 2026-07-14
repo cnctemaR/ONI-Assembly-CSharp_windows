@@ -6,5 +6,8 @@ public enum AmbienceType
 	Light,
 	MidLight,
 	MidHeavy,
-	Heavy
+	Heavy,
+	SaltyLiquid,
+	DirtyLiquid,
+	NumTypes
 }

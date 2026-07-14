@@ -32,6 +32,15 @@ namespace ProcGen
 			this.internalMobs = new List<MobReference>();
 		}
 
+		public void ReorganizeMobs()
+		{
+			if (this.internalMobs == null)
+			{
+				return;
+			}
+			this.internalMobs.Sort((MobReference m1, MobReference m2) => m1.spawnOrder.CompareTo(m2.spawnOrder));
+		}
+
 		public bool HasGroup(string item)
 		{
 			return this.ElementChoiceGroups.ContainsKey(item);

@@ -492,7 +492,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		{
 			base.isEditing = true;
 			KScreenManager.Instance.RefreshStack();
-			UISounds.PlaySound(UISounds.Sound.ClickHUD);
+			UISounds.PlaySound(UISounds.Sound.Find);
 			this.RecordRowExpandedStatus();
 		}));
 		this.inputField.onEndEdit.AddListener(delegate(string value)

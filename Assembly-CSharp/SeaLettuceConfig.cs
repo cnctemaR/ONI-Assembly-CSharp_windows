@@ -19,26 +19,17 @@ public class SeaLettuceConfig : IEntityConfig
 			SimHashes.Water,
 			SimHashes.SaltWater,
 			SimHashes.Brine
-		}, false, 0f, 0.15f, "Lettuce", true, true, true, true, 2400f, 0f, 7400f, SeaLettuceConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.SEALETTUCE.NAME);
+		}, false, 0f, 0.15f, "Lettuce", false, true, true, false, true, 2400f, 0f, 7400f, SeaLettuceConfig.ID + "Original", global::STRINGS.CREATURES.SPECIES.SEALETTUCE.NAME);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
 			{
 				tag = SimHashes.SaltWater.CreateTag(),
-				massConsumptionRate = 0.008333334f
+				massConsumptionRate = 0.033333335f
 			}
 		});
-		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
-		{
-			new PlantElementAbsorber.ConsumeInfo
-			{
-				tag = SimHashes.BleachStone.CreateTag(),
-				massConsumptionRate = 0.00083333335f
-			}
-		});
-		gameObject.GetComponent<DrowningMonitor>().canDrownToDeath = false;
-		gameObject.GetComponent<DrowningMonitor>().livesUnderWater = true;
 		gameObject.AddOrGet<StandardCropPlant>();
+		gameObject.AddOrGet<DirectlyEdiblePlant_Growth>();
 		gameObject.AddOrGet<LoopingSounds>();
 		GameObject gameObject2 = gameObject;
 		IHasDlcRestrictions hasDlcRestrictions = this as IHasDlcRestrictions;
@@ -71,7 +62,17 @@ public class SeaLettuceConfig : IEntityConfig
 
 	public const string SEED_ID = "SeaLettuceSeed";
 
-	public const float WATER_RATE = 0.008333334f;
+	public const string CROP_ID = "Lettuce";
 
-	public const float FERTILIZATION_RATE = 0.00083333335f;
+	public const int GROWTH_CYCLES = 12;
+
+	public const int YIELD_UNITS_PER_HARVEST = 12;
+
+	public const float CALCULATED_YIELD_MASS_PER_HARVEST = 12f;
+
+	public const float CALCULATED_YIELD_MASS_PER_CYCLE = 1f;
+
+	public const float CALCULATED_GROWTH_PER_CYCLE = 0.083333336f;
+
+	public const float WATER_RATE = 0.033333335f;
 }

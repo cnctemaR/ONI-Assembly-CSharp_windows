@@ -107,7 +107,9 @@ namespace Database
 					FOOD.FOOD_TYPES.BURGER.Id,
 					FOOD.FOOD_TYPES.JAWBOFILLET.Id,
 					FOOD.FOOD_TYPES.SMOKED_FISH.Id,
-					FOOD.FOOD_TYPES.SMOKED_DINOSAURMEAT.Id
+					FOOD.FOOD_TYPES.SMOKED_DINOSAURMEAT.Id,
+					FOOD.FOOD_TYPES.SQUID_MEAT.Id,
+					FOOD.FOOD_TYPES.URCHINMEAT.Id
 				})
 			}, "", "", "", "", null, default(EventReference), "Carnivore", null, null, null, null));
 			this.NoFarmTilesAndKCal = base.Add(new ColonyAchievement("NoFarmTilesAndKCal", "NO_PLANTERBOX", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.NO_PLANTERBOX, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.NO_PLANTERBOX_DESCRIPTION, false, new List<ColonyAchievementRequirement>
@@ -148,7 +150,7 @@ namespace Database
 			}, "", "", "", "", null, default(EventReference), "enter_oil_biome", null, null, null, null));
 			this.EatCookedFood = base.Add(new ColonyAchievement("EatCookedFood", "COOKED_FOOD", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COOKED_FOOD, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.COOKED_FOOD_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
-				new EatXKCalProducedByY(1, new List<Tag> { "GourmetCookingStation", "CookingStation", "Deepfryer", "Smoker" })
+				new EatXKCalProducedByY(1, new List<Tag> { "GourmetCookingStation", "CookingStation", "Deepfryer", "Smoker", "SushiBar" })
 			}, "", "", "", "", null, default(EventReference), "its_not_raw", null, null, null, null));
 			this.BasicPumping = base.Add(new ColonyAchievement("BasicPumping", "BASIC_PUMPING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_PUMPING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.BASIC_PUMPING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
@@ -182,7 +184,7 @@ namespace Database
 				{
 					"DreckoPlasticBaby", "HatchHardBaby", "HatchMetalBaby", "HatchVeggieBaby", "LightBugBlackBaby", "LightBugBlueBaby", "LightBugCrystalBaby", "LightBugOrangeBaby", "LightBugPinkBaby", "LightBugPurpleBaby",
 					"OilfloaterDecorBaby", "OilfloaterHighTempBaby", "PacuCleanerBaby", "PacuTropicalBaby", "PuftBleachstoneBaby", "PuftOxyliteBaby", "SquirrelHugBaby", "CrabWoodBaby", "CrabFreshWaterBaby", "MoleDelicacyBaby",
-					"GlassDeerBaby", "AlgaeStegoBaby"
+					"GlassDeerBaby", "AlgaeStegoBaby", "SnailIronBaby"
 				})
 			}, "", "", "", "", null, default(EventReference), "good_egg", null, null, null, null));
 			this.CuredDisease = base.Add(new ColonyAchievement("CuredDisease", "CURED_DISEASE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE_DESCRIPTION, false, new List<ColonyAchievementRequirement>
@@ -415,6 +417,15 @@ namespace Database
 				string[] array = DlcManager.DLC4;
 				this.AsteroidSurvived = base.Add(new ColonyAchievement(text93, text94, text95, text96, flag13, list13, text97, text98, text99, text100, action12, default(EventReference), "life_found_a_way", array, null, "DLC4_ID", "DemoliorSurivedAchievement"));
 			}
+			if (DlcManager.IsContentSubscribed("DLC5_ID"))
+			{
+				this.MinnowRecruited = base.Add(new ColonyAchievement("MinnowRecruited", "MINNOW_RECRUITED", COLONY_ACHIEVEMENTS.FINDING_MINNOW.NAME, COLONY_ACHIEVEMENTS.FINDING_MINNOW.DESCRIPTION, true, new List<ColonyAchievementRequirement>
+				{
+					new MinnowRecruited(MinnowImperativePOIStates.MinnowPOIIdentity.POI_A),
+					new MinnowRecruited(MinnowImperativePOIStates.MinnowPOIIdentity.POI_B),
+					new MinnowRecruited(MinnowImperativePOIStates.MinnowPOIIdentity.POI_C)
+				}, COLONY_ACHIEVEMENTS.FINDING_MINNOW.MESSAGE_TITLE, COLONY_ACHIEVEMENTS.FINDING_MINNOW.MESSAGE_BODY, "victoryShorts/Stay", "DLC5/aquatic_loop", new Action<KMonoBehaviour>(FindingMinnowCompleteSequence.Start), AudioMixerSnapshots.Get().VictoryNISGenericSnapshot, "finding_minnow", DlcManager.DLC5, null, "DLC5_ID", "MinnowRecruitedAchievement"));
+			}
 		}
 
 		public ColonyAchievement Thriving;
@@ -516,5 +527,7 @@ namespace Database
 		public ColonyAchievement AsteroidDestroyed;
 
 		public ColonyAchievement AsteroidSurvived;
+
+		public ColonyAchievement MinnowRecruited;
 	}
 }

@@ -211,6 +211,11 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 
 	protected void RegisterBlockTileRenderer()
 	{
+		this.RegisterBlockTileRenderer(false);
+	}
+
+	protected void RegisterBlockTileRenderer(bool isBlueprint)
+	{
 		if (this.Def.BlockTileAtlas != null)
 		{
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
@@ -220,7 +225,7 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 				int num = Grid.PosToCell(base.transform.GetPosition());
 				Constructable component2 = base.GetComponent<Constructable>();
 				bool flag = component2 != null && component2.IsReplacementTile;
-				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, flag, visualizationElementID, num);
+				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, flag, visualizationElementID, num, isBlueprint);
 			}
 		}
 	}
@@ -331,10 +336,15 @@ public class Building : KMonoBehaviour, IGameObjectEffectDescriptor, IUniformGri
 		BuildingComplete component = def.BuildingComplete.GetComponent<BuildingComplete>();
 		if (def.RequiresPowerInput)
 		{
-			float wattsNeededWhenActive = component.GetComponent<IEnergyConsumer>().WattsNeededWhenActive;
-			if (wattsNeededWhenActive > 0f)
+			IEnergyConsumer energyConsumer;
+			if (!base.TryGetComponent<IEnergyConsumer>(out energyConsumer))
 			{
-				string formattedWattage = GameUtil.GetFormattedWattage(wattsNeededWhenActive, GameUtil.WattageFormatterUnit.Automatic, true);
+				component.TryGetComponent<IEnergyConsumer>(out energyConsumer);
+			}
+			float num = ((energyConsumer != null) ? energyConsumer.WattsNeededWhenActive : 0f);
+			if (num > 0f)
+			{
+				string formattedWattage = GameUtil.GetFormattedWattage(num, GameUtil.WattageFormatterUnit.Automatic, true);
 				Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESPOWER, formattedWattage), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWER, formattedWattage), Descriptor.DescriptorType.Requirement, false);
 				list.Add(descriptor);
 			}

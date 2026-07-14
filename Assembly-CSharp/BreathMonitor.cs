@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
 public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Instance>
 {
@@ -17,8 +18,9 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 			.Enter(new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State.Callback(BreathMonitor.ShowBreathBar))
 			.Enter(new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State.Callback(BreathMonitor.UpdateRecoverBreathCell))
 			.Update(new Action<BreathMonitor.Instance, float>(BreathMonitor.UpdateRecoverBreathCell), UpdateRate.RENDER_1000ms, true);
-		this.lowbreath.nowheretorecover.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.recoveryavailable, new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.Parameter<int>.Callback(BreathMonitor.IsValidRecoverCell));
-		this.lowbreath.recoveryavailable.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.nowheretorecover, new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.Parameter<int>.Callback(BreathMonitor.IsNotValidRecoverCell)).Enter(new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State.Callback(BreathMonitor.UpdateRecoverBreathCell)).ToggleChore(new Func<BreathMonitor.Instance, Chore>(BreathMonitor.CreateRecoverBreathChore), this.lowbreath.nowheretorecover);
+		this.lowbreath.nowheretorecover.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.recoveryatcell, new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.Parameter<int>.Callback(BreathMonitor.IsValidRecoverCell)).ParamTransition<GameObject>(this.recoverBreathStation, this.lowbreath.recoveratstation, GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.IsNotNull);
+		this.lowbreath.recoveryatcell.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.nowheretorecover, new StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.Parameter<int>.Callback(BreathMonitor.IsNotValidRecoverCell)).ToggleChore(new Func<BreathMonitor.Instance, Chore>(BreathMonitor.CreateRecoverBreathChore), this.lowbreath.nowheretorecover);
+		this.lowbreath.recoveratstation.ParamTransition<GameObject>(this.recoverBreathStation, this.lowbreath.nowheretorecover, GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.IsNull).ToggleChore(new Func<BreathMonitor.Instance, Chore>(BreathMonitor.CreateBreathingStationChore), this.lowbreath.nowheretorecover);
 	}
 
 	private static bool IsLowBreath(BreathMonitor.Instance smi)
@@ -34,6 +36,50 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 	private static Chore CreateRecoverBreathChore(BreathMonitor.Instance smi)
 	{
 		return new RecoverBreathChore(smi.master);
+	}
+
+	private static Chore CreateBreathingStationChore(BreathMonitor.Instance smi)
+	{
+		UnderwaterBreathingLocation underwaterBreathingLocation = smi.sm.recoverBreathStation.Get<UnderwaterBreathingLocation>(smi);
+		if (underwaterBreathingLocation != null)
+		{
+			UnderwaterBreathingLocationWorkable component = underwaterBreathingLocation.GetComponent<UnderwaterBreathingLocationWorkable>();
+			if (component != null)
+			{
+				if (smi.swimMonitor.CanSwim() && Grid.IsLiquid(underwaterBreathingLocation.breathableCell))
+				{
+					component.workAnims = BreathMonitor.swimmingWorkAnims;
+					component.workingPstComplete = BreathMonitor.swimmingWorkingPstAnims;
+					component.workingPstFailed = BreathMonitor.swimmingWorkingPstAnims;
+				}
+				else
+				{
+					component.workAnims = BreathMonitor.landWorkAnims;
+					component.workingPstComplete = BreathMonitor.landWorkingPstCompleteAnims;
+					component.workingPstFailed = BreathMonitor.landWorkingPstCompleteAnims;
+				}
+				return new WorkChore<UnderwaterBreathingLocationWorkable>(Db.Get().ChoreTypes.RecoverBreath, component, null, true, null, new Action<Chore>(BreathMonitor.ReserveBreathLocation), new Action<Chore>(BreathMonitor.UnReserveBreathLocation), true, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.compulsory, 5, false, true);
+			}
+		}
+		return null;
+	}
+
+	private static void ReserveBreathLocation(Chore chore)
+	{
+		UnderwaterBreathingLocation underwaterBreathingLocation;
+		if (chore.gameObject.TryGetComponent<UnderwaterBreathingLocation>(out underwaterBreathingLocation))
+		{
+			underwaterBreathingLocation.ReserveLocation(chore.driver.gameObject, true);
+		}
+	}
+
+	private static void UnReserveBreathLocation(Chore chore)
+	{
+		UnderwaterBreathingLocation underwaterBreathingLocation;
+		if (chore.gameObject.TryGetComponent<UnderwaterBreathingLocation>(out underwaterBreathingLocation))
+		{
+			underwaterBreathingLocation.ReserveLocation(chore.lastDriver.gameObject, false);
+		}
 	}
 
 	private static bool IsNotFullBreath(BreathMonitor.Instance smi)
@@ -93,9 +139,58 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 			{
 				num = PathFinder.InvalidCell;
 			}
-			smi.sm.recoverBreathCell.Set(num, smi, false);
+			bool flag = false;
+			UnderwaterBreathingLocation underwaterBreathingLocation = BreathMonitor.FindNearestReachableStation(smi.navigator);
+			if (underwaterBreathingLocation != null)
+			{
+				int num2 = smi.navigator.GetNavigationCost(num);
+				if (num2 != -1 && Grid.IsSubstantialLiquid(smi.navigator.cachedCell, 0.35f))
+				{
+					num2 += BreathMonitor.breathableStationPreferenceCost;
+				}
+				int navigationCost = smi.navigator.GetNavigationCost(underwaterBreathingLocation.breathableCell);
+				if ((num2 == -1 && navigationCost != -1) || num2 > navigationCost)
+				{
+					flag = true;
+					smi.sm.recoverBreathStation.Set(underwaterBreathingLocation, smi);
+					smi.sm.recoverBreathCell.Set(Grid.InvalidCell, smi, false);
+				}
+			}
+			if (!flag)
+			{
+				smi.sm.recoverBreathStation.Set(null, smi);
+				smi.sm.recoverBreathCell.Set(num, smi, false);
+			}
 		}
 	}
+
+	public static UnderwaterBreathingLocation FindNearestReachableStation(Navigator navigator)
+	{
+		UnderwaterBreathingLocation underwaterBreathingLocation = null;
+		int num = int.MaxValue;
+		for (int i = 0; i < Components.UnderwaterBreathingLocations.Count; i++)
+		{
+			UnderwaterBreathingLocation underwaterBreathingLocation2 = Components.UnderwaterBreathingLocations[i];
+			if (underwaterBreathingLocation2.GetAvailableBreathableMass() > 0f && underwaterBreathingLocation2.CanReserve(navigator.gameObject))
+			{
+				int navigationCost = navigator.GetNavigationCost(underwaterBreathingLocation2.breathableCell);
+				if (navigationCost != -1 && navigationCost < num)
+				{
+					num = navigationCost;
+					underwaterBreathingLocation = underwaterBreathingLocation2;
+				}
+			}
+		}
+		return underwaterBreathingLocation;
+	}
+
+	private static HashedString[] swimmingWorkAnims = new HashedString[] { "working_pre", "working_loop" };
+
+	private static HashedString[] swimmingWorkingPstAnims = new HashedString[] { "working_pst" };
+
+	private static HashedString[] landWorkAnims = new HashedString[] { "working_land_pre", "working_land_loop" };
+
+	private static HashedString[] landWorkingPstCompleteAnims = new HashedString[] { "working_land_pst" };
 
 	public BreathMonitor.SatisfiedState satisfied;
 
@@ -103,11 +198,17 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 
 	public StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.IntParameter recoverBreathCell;
 
+	public StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.TargetParameter recoverBreathStation;
+
+	private static int breathableStationPreferenceCost = 15;
+
 	public class LowBreathState : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State
 	{
 		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State nowheretorecover;
 
-		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State recoveryavailable;
+		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State recoveryatcell;
+
+		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State recoveratstation;
 	}
 
 	public class SatisfiedState : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State
@@ -126,6 +227,7 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 			this.query = new SafetyQuery(Game.Instance.safetyConditions.RecoverBreathChecker, base.GetComponent<KMonoBehaviour>(), int.MaxValue);
 			this.navigator = base.GetComponent<Navigator>();
 			this.breather = base.GetComponent<OxygenBreather>();
+			this.swimMonitor = base.gameObject.GetSMI<SwimMonitor.Instance>();
 		}
 
 		public int GetRecoverCell()
@@ -147,5 +249,7 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		public OxygenBreather breather;
 
 		public bool canRecoverBreath = true;
+
+		public SwimMonitor.Instance swimMonitor;
 	}
 }

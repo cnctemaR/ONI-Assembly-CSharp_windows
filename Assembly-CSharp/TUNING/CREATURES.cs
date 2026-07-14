@@ -124,6 +124,8 @@ namespace TUNING
 
 			public static float NORMAL = 0.5f;
 
+			public static float GOOD_0 = 0.6666667f;
+
 			public static float GOOD_1 = 0.75f;
 
 			public static float GOOD_2 = 0.95f;
@@ -491,7 +493,8 @@ namespace TUNING
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("StaterpillarLiquid", "StaterpillarLiquidEgg".ToTag(), GameTags.Liquid, 0.00025f, true, false, CREATURES.FERTILITY_MODIFIERS.LIVING_IN_ELEMENT.LIQUID),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateDietaryModifier("BellyGold", "GoldBellyEgg".ToTag(), "FriesCarrot".ToTag(), 0.05f / BellyTuning.STANDARD_CALORIES_PER_CYCLE),
 				CREATURES.EGG_CHANCE_MODIFIERS.CreateDecorModifier("GlassDeerDecor", "GlassDeerEgg".ToTag(), 100f, 8.333333E-05f, true),
-				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("AlgaeStego", "AlgaeStegoEgg".ToTag(), SimHashes.CarbonDioxide.CreateTag(), 0.00025f, true, false, null)
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateElementCreatureModifier("AlgaeStego", "AlgaeStegoEgg".ToTag(), SimHashes.CarbonDioxide.CreateTag(), 0.00025f, true, false, null),
+				CREATURES.EGG_CHANCE_MODIFIERS.CreateTemperatureModifier("SnailHighTemp", "SnailIronEgg".ToTag(), 333.15f, 413.15f, 0.00025f, false)
 			};
 		}
 
@@ -576,7 +579,14 @@ namespace TUNING
 				{ "Butterfly", 190 },
 				{ "Mosquito", 200 },
 				{ "Chameleon", 210 },
-				{ "PrehistoricPacu", 220 }
+				{ "PrehistoricPacu", 220 },
+				{ "ParrotFish", 230 },
+				{ "Squid", 240 },
+				{ "PufferFish", 250 },
+				{ "SeaFairy", 260 },
+				{ "SeaTurtle", 270 },
+				{ "SeaHorse", 280 },
+				{ "Snail", 290 }
 			};
 		}
 	}

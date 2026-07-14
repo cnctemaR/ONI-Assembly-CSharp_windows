@@ -73,7 +73,7 @@ public class SicknessMonitor : GameStateMachine<SicknessMonitor, SicknessMonitor
 
 		public bool HasMajorDisease()
 		{
-			using (IEnumerator<SicknessInstance> enumerator = this.sicknesses.GetEnumerator())
+			using (List<SicknessInstance>.Enumerator enumerator = this.sicknesses.ModifierList.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
 				{

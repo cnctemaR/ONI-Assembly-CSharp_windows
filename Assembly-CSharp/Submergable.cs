@@ -13,29 +13,22 @@ public class Submergable : KMonoBehaviour
 		}
 	}
 
-	public BuildingDef Def
-	{
-		get
-		{
-			return this.building.Def;
-		}
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Submergable.OnSpawn", base.gameObject, this.building.GetExtents(), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnElementChanged));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("Submergable.OnSpawn", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnElementChanged));
 		this.OnElementChanged(null);
-		this.operational.SetFlag(Submergable.notSubmergedFlag, this.isSubmerged);
-		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NotSubmerged, !this.isSubmerged, this);
+		this.RefreshStatusItem();
 	}
 
-	private void OnElementChanged(object data)
+	protected virtual void OnElementChanged(object data)
 	{
 		bool flag = true;
-		for (int i = 0; i < this.building.PlacementCells.Length; i++)
+		int num = Grid.PosToCell(base.gameObject);
+		for (int i = 0; i < this.occupyArea.OccupiedCellsOffsets.Length; i++)
 		{
-			if (!Grid.IsLiquid(this.building.PlacementCells[i]))
+			CellOffset cellOffset = this.occupyArea.OccupiedCellsOffsets[i];
+			if (!Grid.IsLiquid(Grid.OffsetCell(num, cellOffset)))
 			{
 				flag = false;
 				break;
@@ -44,8 +37,21 @@ public class Submergable : KMonoBehaviour
 		if (flag != this.isSubmerged)
 		{
 			this.isSubmerged = flag;
-			this.operational.SetFlag(Submergable.notSubmergedFlag, this.isSubmerged);
-			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NotSubmerged, !this.isSubmerged, this);
+			this.OnSubmergedStateChanged();
+			base.gameObject.Trigger(1983811727, null);
+		}
+	}
+
+	protected virtual void OnSubmergedStateChanged()
+	{
+		this.RefreshStatusItem();
+	}
+
+	protected virtual void RefreshStatusItem()
+	{
+		if (this.GetStatusItem != null)
+		{
+			base.GetComponent<KSelectable>().ToggleStatusItem(this.GetStatusItem(), !this.isSubmerged, this);
 		}
 	}
 
@@ -54,21 +60,12 @@ public class Submergable : KMonoBehaviour
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 	}
 
-	[MyCmpReq]
-	private Building building;
-
-	[MyCmpReq]
-	private PrimaryElement primaryElement;
-
 	[MyCmpGet]
-	private SimCellOccupier simCellOccupier;
+	private OccupyArea occupyArea;
 
-	[MyCmpReq]
-	private Operational operational;
+	public Func<StatusItem> GetStatusItem;
 
-	public static Operational.Flag notSubmergedFlag = new Operational.Flag("submerged", Operational.Flag.Type.Functional);
-
-	private bool isSubmerged;
+	protected bool isSubmerged;
 
 	private HandleVector<int>.Handle partitionerEntry;
 }

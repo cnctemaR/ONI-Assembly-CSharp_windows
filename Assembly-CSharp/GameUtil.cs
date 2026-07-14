@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
 using Database;
 using Klei;
 using Klei.AI;
@@ -66,6 +66,17 @@ public static class GameUtil
 			}
 		}
 		return list.ToArray();
+	}
+
+	public static void TintLiquidSymbolOnBuilding(string symbolName, KBatchedAnimController controller, Element element)
+	{
+		Color color = (element.IsMoltenMetal ? WaterCubes.MOLTEN_METAL_COLOR : element.substance.colour);
+		color.a = 1f;
+		string text = symbolName + "_bloom";
+		string text2 = (element.substance.Glows ? text : symbolName);
+		controller.SetSymbolVisiblity(new KAnimHashedString(symbolName), !element.substance.Glows);
+		controller.SetSymbolVisiblity(new KAnimHashedString(text), element.substance.Glows);
+		controller.SetSymbolTint(new KAnimHashedString(text2), color);
 	}
 
 	public static string GetTemperatureUnitSuffix()
@@ -1135,6 +1146,54 @@ public static class GameUtil
 		{
 			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.DEERSPECIES);
 		}
+		else if (species == GameTags.Creatures.Species.RaptorSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.RAPTORSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.ChameleonSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.CHAMELEONSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.PrehistoricPacuSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.PREHISTORICPACUSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.StegoSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.STEGOSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.ButterflySpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.BUTTERFLYSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.ParrotFishSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.PARROTFISHSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.SnailSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SNAILSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.SquidSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SQUIDSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.PufferFishSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.PUFFERFISHSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.SeaFairySpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SEAFAIRYSPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.SeaTurtleSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SEATURTLESPECIES);
+		}
+		else if (species == GameTags.Creatures.Species.SeaHorseSpecies)
+		{
+			option = Option.Some<string>(global::STRINGS.CREATURES.FAMILY_PLURAL.SEAHORSESPECIES);
+		}
 		else
 		{
 			option = Option.None;
@@ -1590,20 +1649,6 @@ public static class GameUtil
 		return !(component == null) && component.HasTrait(traitName);
 	}
 
-	public static HashSet<int> GetFloodFillCavity(int startCell, bool allowLiquid)
-	{
-		HashSet<int> hashSet = new HashSet<int>();
-		if (allowLiquid)
-		{
-			hashSet = GameUtil.FloodCollectCells(startCell, (int cell) => !Grid.Solid[cell], 300, null, true);
-		}
-		else
-		{
-			hashSet = GameUtil.FloodCollectCells(startCell, (int cell) => Grid.Element[cell].IsVacuum || Grid.Element[cell].IsGas, 300, null, true);
-		}
-		return hashSet;
-	}
-
 	public static float GetRadiationAbsorptionPercentage(int cell)
 	{
 		if (Grid.IsValidCell(cell))
@@ -1629,272 +1674,6 @@ public static class GameUtil
 			num5 = elem.radiationAbsorptionFactor * num2 + mass / num * elem.radiationAbsorptionFactor * num3;
 		}
 		return Mathf.Clamp(num5, 0f, 1f);
-	}
-
-	public static HashSet<int> CollectCellsBreadthFirst(int start_cell, Func<int, bool> test_func, int max_depth = 10)
-	{
-		HashSet<int> hashSet = new HashSet<int>();
-		HashSet<int> hashSet2 = new HashSet<int>();
-		HashSet<int> hashSet3 = new HashSet<int>();
-		hashSet3.Add(start_cell);
-		Vector2Int[] array = new Vector2Int[]
-		{
-			new Vector2Int(1, 0),
-			new Vector2Int(-1, 0),
-			new Vector2Int(0, 1),
-			new Vector2Int(0, -1)
-		};
-		for (int i = 0; i < max_depth; i++)
-		{
-			List<int> list = new List<int>();
-			foreach (int num in hashSet3)
-			{
-				foreach (Vector2Int vector2Int in array)
-				{
-					int num2 = Grid.OffsetCell(num, vector2Int.x, vector2Int.y);
-					if (!hashSet2.Contains(num2) && !hashSet.Contains(num2))
-					{
-						if (Grid.IsValidCell(num2) && test_func(num2))
-						{
-							hashSet.Add(num2);
-							list.Add(num2);
-						}
-						else
-						{
-							hashSet2.Add(num2);
-						}
-					}
-				}
-			}
-			hashSet3.Clear();
-			foreach (int num3 in list)
-			{
-				hashSet3.Add(num3);
-			}
-			list.Clear();
-			if (hashSet3.Count == 0)
-			{
-				break;
-			}
-		}
-		return hashSet;
-	}
-
-	public static HashSet<int> FloodCollectCells(int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null, bool clearOversizedResults = true)
-	{
-		HashSet<int> hashSet = new HashSet<int>();
-		HashSet<int> hashSet2 = new HashSet<int>();
-		GameUtil.probeFromCell(start_cell, is_valid, hashSet, hashSet2, maxSize);
-		if (AddInvalidCellsToSet != null)
-		{
-			AddInvalidCellsToSet.UnionWith(hashSet2);
-			if (hashSet.Count > maxSize)
-			{
-				AddInvalidCellsToSet.UnionWith(hashSet);
-			}
-		}
-		if (hashSet.Count > maxSize && clearOversizedResults)
-		{
-			hashSet.Clear();
-		}
-		return hashSet;
-	}
-
-	public static HashSet<int> FloodCollectCells(HashSet<int> results, int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null, bool clearOversizedResults = true)
-	{
-		HashSet<int> hashSet = new HashSet<int>();
-		GameUtil.probeFromCell(start_cell, is_valid, results, hashSet, maxSize);
-		if (AddInvalidCellsToSet != null)
-		{
-			AddInvalidCellsToSet.UnionWith(hashSet);
-			if (results.Count > maxSize)
-			{
-				AddInvalidCellsToSet.UnionWith(results);
-			}
-		}
-		if (results.Count > maxSize && clearOversizedResults)
-		{
-			results.Clear();
-		}
-		return results;
-	}
-
-	private static void probeFromCell(int start_cell, Func<int, bool> is_valid, HashSet<int> cells, HashSet<int> invalidCells, int maxSize = 300)
-	{
-		if (cells.Count > maxSize || !Grid.IsValidCell(start_cell) || invalidCells.Contains(start_cell) || cells.Contains(start_cell) || !is_valid(start_cell))
-		{
-			invalidCells.Add(start_cell);
-			return;
-		}
-		cells.Add(start_cell);
-		GameUtil.probeFromCell(Grid.CellLeft(start_cell), is_valid, cells, invalidCells, maxSize);
-		GameUtil.probeFromCell(Grid.CellRight(start_cell), is_valid, cells, invalidCells, maxSize);
-		GameUtil.probeFromCell(Grid.CellAbove(start_cell), is_valid, cells, invalidCells, maxSize);
-		GameUtil.probeFromCell(Grid.CellBelow(start_cell), is_valid, cells, invalidCells, maxSize);
-	}
-
-	public static bool FloodFillCheck<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
-	{
-		return GameUtil.FloodFillFind<ArgType>(fn, arg, start_cell, max_depth, stop_at_solid, stop_at_liquid) != -1;
-	}
-
-	private static void FillThreadLocalNeighbors(int cell)
-	{
-		GameUtil.FloodFillNeighbors.Value[0] = Grid.CellLeft(cell);
-		GameUtil.FloodFillNeighbors.Value[1] = Grid.CellAbove(cell);
-		GameUtil.FloodFillNeighbors.Value[2] = Grid.CellRight(cell);
-		GameUtil.FloodFillNeighbors.Value[3] = Grid.CellBelow(cell);
-	}
-
-	private static bool CellCheck(int cell, bool stop_at_solid, bool stop_at_liquid)
-	{
-		if (!Grid.IsValidCell(cell))
-		{
-			return false;
-		}
-		Element element = Grid.Element[cell];
-		return (!stop_at_solid || !element.IsSolid) && (!stop_at_liquid || !element.IsLiquid) && !GameUtil.FloodFillVisited.Value.Contains(cell);
-	}
-
-	public static int FloodFillFind<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
-	{
-		if (GameUtil.CellCheck(start_cell, stop_at_solid, stop_at_liquid))
-		{
-			GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-			{
-				cell = start_cell,
-				depth = 0
-			});
-		}
-		int num = -1;
-		while (GameUtil.FloodFillNext.Value.Count > 0)
-		{
-			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Value.Dequeue();
-			if (!GameUtil.FloodFillVisited.Value.Contains(floodFillInfo.cell))
-			{
-				GameUtil.FloodFillVisited.Value.Add(floodFillInfo.cell);
-				if (fn(floodFillInfo.cell, arg))
-				{
-					num = floodFillInfo.cell;
-					break;
-				}
-				if (floodFillInfo.depth < max_depth)
-				{
-					GameUtil.FillThreadLocalNeighbors(floodFillInfo.cell);
-					foreach (int num2 in GameUtil.FloodFillNeighbors.Value)
-					{
-						if (GameUtil.CellCheck(num2, stop_at_solid, stop_at_liquid))
-						{
-							GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-							{
-								cell = num2,
-								depth = floodFillInfo.depth + 1
-							});
-						}
-					}
-				}
-			}
-		}
-		GameUtil.FloodFillVisited.Value.Clear();
-		GameUtil.FloodFillNext.Value.Clear();
-		return num;
-	}
-
-	public static int FloodFillFindBest<ArgType>(Func<int, ArgType, float> rateCell, ArgType arg, Func<int, ArgType, bool> validCheck, int startCell, int maxCellEvaluations = -1)
-	{
-		if (!validCheck(startCell, arg))
-		{
-			return Grid.InvalidCell;
-		}
-		float num = rateCell(startCell, arg);
-		int num2 = startCell;
-		if (validCheck(startCell, arg))
-		{
-			GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-			{
-				cell = startCell,
-				depth = 0
-			});
-		}
-		GameUtil.FloodFillVisited.Value.Add(Grid.InvalidCell);
-		GameUtil.FloodFillVisited.Value.Add(startCell);
-		while (GameUtil.FloodFillNext.Value.Count > 0 && maxCellEvaluations != 0)
-		{
-			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Value.Dequeue();
-			float num3 = rateCell(floodFillInfo.cell, arg);
-			if (num3 > num)
-			{
-				num = num3;
-				num2 = floodFillInfo.cell;
-			}
-			GameUtil.FillThreadLocalNeighbors(floodFillInfo.cell);
-			foreach (int num4 in GameUtil.FloodFillNeighbors.Value)
-			{
-				if (!GameUtil.FloodFillVisited.Value.Contains(num4) && validCheck(num4, arg))
-				{
-					GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-					{
-						cell = num4,
-						depth = floodFillInfo.depth + 1
-					});
-					GameUtil.FloodFillVisited.Value.Add(num4);
-				}
-			}
-			if (maxCellEvaluations > 0)
-			{
-				maxCellEvaluations--;
-			}
-		}
-		GameUtil.FloodFillNext.Value.Clear();
-		GameUtil.FloodFillVisited.Value.Clear();
-		return num2;
-	}
-
-	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, HashSet<int> visited_cells, List<int> valid_cells = null)
-	{
-		GameUtil.FloodFillNext.Value.Enqueue(new GameUtil.FloodFillInfo
-		{
-			cell = start_cell,
-			depth = 0
-		});
-		GameUtil.FloodFillConditional(GameUtil.FloodFillNext.Value, condition, visited_cells, valid_cells, 10000);
-	}
-
-	public static void FloodFillConditional(Queue<GameUtil.FloodFillInfo> queue, Func<int, bool> condition, HashSet<int> visited_cells, List<int> valid_cells = null, int max_depth = 10000)
-	{
-		while (queue.Count > 0)
-		{
-			GameUtil.FloodFillInfo floodFillInfo = queue.Dequeue();
-			if (floodFillInfo.depth < max_depth && Grid.IsValidCell(floodFillInfo.cell) && visited_cells.Add(floodFillInfo.cell) && condition(floodFillInfo.cell))
-			{
-				if (valid_cells != null)
-				{
-					valid_cells.Add(floodFillInfo.cell);
-				}
-				int num = floodFillInfo.depth + 1;
-				queue.Enqueue(new GameUtil.FloodFillInfo
-				{
-					cell = Grid.CellLeft(floodFillInfo.cell),
-					depth = num
-				});
-				queue.Enqueue(new GameUtil.FloodFillInfo
-				{
-					cell = Grid.CellRight(floodFillInfo.cell),
-					depth = num
-				});
-				queue.Enqueue(new GameUtil.FloodFillInfo
-				{
-					cell = Grid.CellAbove(floodFillInfo.cell),
-					depth = num
-				});
-				queue.Enqueue(new GameUtil.FloodFillInfo
-				{
-					cell = Grid.CellBelow(floodFillInfo.cell),
-					depth = num
-				});
-			}
-		}
-		queue.Clear();
 	}
 
 	public static void AppendHardnessString(StringBuilder builder, Element element, bool addColor = true)
@@ -2691,6 +2470,136 @@ public static class GameUtil
 		return list;
 	}
 
+	public static void PartitionBuildingDescriptors(GameObject buildingComplete, bool simpleInfoScreen, out List<Descriptor> allDescs, [TupleElementNames(new string[] { "converter", "descriptors" })] List<ValueTuple<ElementConverter, List<Descriptor>>> converterDescCache, List<Descriptor> nonConverterReqs, List<Descriptor> nonConverterEffects, out bool hasConverterReqs)
+	{
+		ElementConverter[] components = buildingComplete.GetComponents<ElementConverter>();
+		allDescs = GameUtil.GetAllDescriptors(buildingComplete, simpleInfoScreen);
+		hasConverterReqs = false;
+		HashSetPool<string, BuildingDef>.PooledHashSet pooledHashSet = HashSetPool<string, BuildingDef>.Allocate();
+		foreach (ElementConverter elementConverter in components)
+		{
+			if (elementConverter.consumedElements != null && elementConverter.consumedElements.Length != 0)
+			{
+				List<Descriptor> descriptors = elementConverter.GetDescriptors(buildingComplete);
+				converterDescCache.Add(new ValueTuple<ElementConverter, List<Descriptor>>(elementConverter, descriptors));
+				if (descriptors != null)
+				{
+					foreach (Descriptor descriptor in descriptors)
+					{
+						pooledHashSet.Add(descriptor.text);
+						if (descriptor.type == Descriptor.DescriptorType.Requirement)
+						{
+							hasConverterReqs = true;
+						}
+					}
+				}
+			}
+		}
+		IConverterByproduct defImplementingInterface = buildingComplete.GetDefImplementingInterface<IConverterByproduct>();
+		if (defImplementingInterface != null && defImplementingInterface.ByproductRate > 0f)
+		{
+			foreach (ValueTuple<ElementConverter, List<Descriptor>> valueTuple in converterDescCache)
+			{
+				ElementConverter item = valueTuple.Item1;
+				List<Descriptor> item2 = valueTuple.Item2;
+				bool flag = false;
+				ElementConverter.ConsumedElement[] consumedElements = item.consumedElements;
+				for (int i = 0; i < consumedElements.Length; i++)
+				{
+					if (consumedElements[i].Tag == defImplementingInterface.ByproductAssociatedInputTag)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (flag)
+				{
+					defImplementingInterface.GetByproductDescriptors(buildingComplete, item2);
+					break;
+				}
+			}
+		}
+		foreach (Descriptor descriptor2 in allDescs)
+		{
+			if (!pooledHashSet.Contains(descriptor2.text))
+			{
+				switch (descriptor2.type)
+				{
+				case Descriptor.DescriptorType.Requirement:
+					nonConverterReqs.Add(descriptor2);
+					break;
+				case Descriptor.DescriptorType.Effect:
+				case Descriptor.DescriptorType.DiseaseSource:
+					nonConverterEffects.Add(descriptor2);
+					break;
+				}
+			}
+		}
+		pooledHashSet.Recycle();
+	}
+
+	public static void BuildPartitionedRequirements(List<Descriptor> result, List<Descriptor> nonConverterReqs, [TupleElementNames(new string[] { "converter", "descriptors" })] List<ValueTuple<ElementConverter, List<Descriptor>>> converterDescCache, bool hasConverterReqs)
+	{
+		foreach (Descriptor descriptor in nonConverterReqs)
+		{
+			descriptor.IncreaseIndent();
+			result.Add(descriptor);
+		}
+		if (hasConverterReqs)
+		{
+			Descriptor descriptor2 = default(Descriptor);
+			descriptor2.SetupDescriptor(UI.BUILDINGEFFECTS.OPERATIONINPUTS, "", Descriptor.DescriptorType.Requirement);
+			descriptor2.IncreaseIndent();
+			result.Add(descriptor2);
+		}
+		foreach (ValueTuple<ElementConverter, List<Descriptor>> valueTuple in converterDescCache)
+		{
+			foreach (Descriptor descriptor3 in valueTuple.Item2)
+			{
+				if (descriptor3.type == Descriptor.DescriptorType.Requirement)
+				{
+					Descriptor descriptor4 = descriptor3;
+					descriptor4.text = "• " + descriptor4.text;
+					descriptor4.IncreaseIndent();
+					descriptor4.IncreaseIndent();
+					result.Add(descriptor4);
+				}
+			}
+		}
+	}
+
+	public static void BuildPartitionedEffects(List<Descriptor> result, List<Descriptor> nonConverterEffects, [TupleElementNames(new string[] { "converter", "descriptors" })] List<ValueTuple<ElementConverter, List<Descriptor>>> converterDescCache)
+	{
+		foreach (Descriptor descriptor in nonConverterEffects)
+		{
+			descriptor.IncreaseIndent();
+			result.Add(descriptor);
+		}
+		foreach (ValueTuple<ElementConverter, List<Descriptor>> valueTuple in converterDescCache)
+		{
+			ElementConverter item = valueTuple.Item1;
+			List<Descriptor> item2 = valueTuple.Item2;
+			string text = item.consumedElements[0].Name;
+			for (int i = 1; i < item.consumedElements.Length; i++)
+			{
+				text = text + ", " + item.consumedElements[i].Name;
+			}
+			Descriptor descriptor2 = new Descriptor(text + ":", "", Descriptor.DescriptorType.Effect, false);
+			descriptor2.IncreaseIndent();
+			result.Add(descriptor2);
+			foreach (Descriptor descriptor3 in item2)
+			{
+				if (descriptor3.type != Descriptor.DescriptorType.Requirement)
+				{
+					Descriptor descriptor4 = descriptor3;
+					descriptor4.IncreaseIndent();
+					descriptor4.IncreaseIndent();
+					result.Add(descriptor4);
+				}
+			}
+		}
+	}
+
 	public static List<Descriptor> GetPlantRequirementDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -2722,10 +2631,6 @@ public static class GameUtil
 	public static List<Descriptor> GetPlantEffectDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		if (go.GetComponent<Growing>() == null)
-		{
-			return list;
-		}
 		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(go, false);
 		List<Descriptor> list2 = new List<Descriptor>();
 		list2.AddRange(GameUtil.GetEffectDescriptors(allDescriptors));
@@ -3667,6 +3572,10 @@ public static class GameUtil
 			{
 				SimMessages.ReplaceElement(cell, SimHashes.Vacuum, eventSource, 0f, 0f, byte.MaxValue, 0, -1);
 			}
+			if (BackwallManager.HasBackwall(cell))
+			{
+				SimMessages.Dig(cell, -1, true, true);
+			}
 		}
 	}
 
@@ -3697,12 +3606,6 @@ public static class GameUtil
 	public static GameUtil.MassUnit massUnit;
 
 	private static string[] adjectives;
-
-	public static ThreadLocal<Queue<GameUtil.FloodFillInfo>> FloodFillNext = new ThreadLocal<Queue<GameUtil.FloodFillInfo>>(() => new Queue<GameUtil.FloodFillInfo>());
-
-	public static ThreadLocal<HashSet<int>> FloodFillVisited = new ThreadLocal<HashSet<int>>(() => new HashSet<int>());
-
-	public static ThreadLocal<List<int>> FloodFillNeighbors = new ThreadLocal<List<int>>(() => new List<int>(4) { -1, -1, -1, -1 });
 
 	public static TagSet foodTags = new TagSet(new string[]
 	{
@@ -3800,13 +3703,6 @@ public static class GameUtil
 		DTU_S,
 		KDTU_S,
 		Automatic
-	}
-
-	public struct FloodFillInfo
-	{
-		public int cell;
-
-		public int depth;
 	}
 
 	public static class Hardness

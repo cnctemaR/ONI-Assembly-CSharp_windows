@@ -293,6 +293,8 @@ public class KFMOD
 
 	private static Dictionary<HashedString, OneShotSoundParameterUpdater> parameterUpdaters = new Dictionary<HashedString, OneShotSoundParameterUpdater>();
 
+	public const float kFallbackMaxDistance = 60f;
+
 	public static KFMOD.AudioDevice currentDevice;
 
 	private struct SoundCountEntry

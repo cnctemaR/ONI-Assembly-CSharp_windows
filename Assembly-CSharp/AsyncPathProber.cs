@@ -35,15 +35,12 @@ public static class AsyncPathProber
 		public List<int> newlyReachableCells;
 
 		public List<int> noLongerReachableCells;
+
+		public PathFinderAbilities abilitiesInstance;
 	}
 
 	public struct WorkOrder
 	{
-		public void Cleanup()
-		{
-			this.abilities.RecycleClone();
-		}
-
 		public void Execute(PathFinder.PotentialList potentials, PathFinder.PotentialScratchPad scratch, ref AsyncPathProber.WorkResult result)
 		{
 			if (result.pathGrid.SerialNo >= this.serialNo)
@@ -51,9 +48,11 @@ public static class AsyncPathProber
 				result.pathGrid.ResetProberCells();
 			}
 			PathProber.Run(this.originCell, this.abilities, this.navGrid, this.startingNavType, result.pathGrid, this.serialNo, scratch, potentials, this.startingFlags, result.reachableCells);
+			result.abilitiesInstance = this.abilities;
+			this.abilities = null;
 			if (this.computeReachables)
 			{
-				result.reachableCells.Sort();
+				result.reachableCells.Sort(AsyncPathProber.WorkOrder.WorkOrderIntSorter);
 				int i = 0;
 				int j = 0;
 				while (i < this.navigator.occupiedCells.Count)
@@ -89,7 +88,6 @@ public static class AsyncPathProber
 					j++;
 				}
 			}
-			this.Cleanup();
 		}
 
 		public Navigator navigator;
@@ -109,6 +107,8 @@ public static class AsyncPathProber
 		public ushort serialNo;
 
 		public bool computeReachables;
+
+		private static Comparison<int> WorkOrderIntSorter = (int lhs, int rhs) => lhs.CompareTo(rhs);
 	}
 
 	private static class AsyncPathProbeWorker
@@ -288,6 +288,7 @@ public static class AsyncPathProber
 					this.indexListPool.Release(workResult.reachableCells);
 					this.indexListPool.Release(workResult.newlyReachableCells);
 					this.indexListPool.Release(workResult.noLongerReachableCells);
+					workResult.abilitiesInstance.RecycleClone();
 				}
 				this.finishedWork.Clear();
 				foreach (KeyValuePair<Navigator, int> keyValuePair in this.navigators)
@@ -310,7 +311,7 @@ public static class AsyncPathProber
 				this.navigatorOrdering.Sort(this.navigatorOrderer);
 				for (int k = 0; k < this.workQueue.Count; k++)
 				{
-					this.workQueue[k].Cleanup();
+					this.workQueue[k].abilities.RecycleClone();
 				}
 				this.workQueue.Clear();
 				int num2 = 0;
@@ -323,7 +324,7 @@ public static class AsyncPathProber
 					}
 					else
 					{
-						workOrder.Cleanup();
+						workOrder.abilities.RecycleClone();
 					}
 					num2++;
 				}

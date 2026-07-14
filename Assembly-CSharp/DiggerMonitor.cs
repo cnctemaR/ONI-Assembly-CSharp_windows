@@ -96,20 +96,20 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 			int num2 = Grid.PosToCell(base.smi.master.gameObject);
 			this.lastDigCell = num2;
 			int num3 = Grid.CellBelow(num2);
-			while (this.IsValidDigCell(num3, null) && num > 0)
+			while (DiggerMonitor.Instance.IsValidDigCell(num3) && num > 0)
 			{
 				num3 = Grid.CellBelow(num3);
 				num--;
 			}
 			if (num > 0)
 			{
-				num3 = GameUtil.FloodFillFind<object>(new Func<int, object, bool>(this.IsValidDigCell), null, num2, base.smi.def.depthToDig, false, true);
+				num3 = FloodFill.Find<FloodFill.MaxDepth>(DiggerMonitor.Instance.isValidDigCell, num2, new FloodFill.MaxDepth(base.smi.def.depthToDig), false, true);
 			}
 			this.lastDigCell = num3;
 			return this.lastDigCell != -1;
 		}
 
-		private bool IsValidDigCell(int cell, object arg = null)
+		private static bool IsValidDigCell(int cell)
 		{
 			if (Grid.IsValidCell(cell) && Grid.Solid[cell])
 			{
@@ -133,5 +133,7 @@ public class DiggerMonitor : GameStateMachine<DiggerMonitor, DiggerMonitor.Insta
 		public int lastDigCell = -1;
 
 		private Action<object> OnDestinationReachedDelegate;
+
+		private static Func<int, bool> isValidDigCell = new Func<int, bool>(DiggerMonitor.Instance.IsValidDigCell);
 	}
 }

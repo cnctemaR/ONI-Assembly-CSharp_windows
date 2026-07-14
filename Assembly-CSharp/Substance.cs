@@ -7,6 +7,68 @@ using UnityEngine.Serialization;
 [Serializable]
 public class Substance
 {
+	public Substance.SubstanceTexture Texture
+	{
+		get
+		{
+			return this.texture;
+		}
+	}
+
+	public bool LiquidCaustics
+	{
+		get
+		{
+			return this.usesCaustics;
+		}
+	}
+
+	public bool Glows
+	{
+		get
+		{
+			return this.glows;
+		}
+	}
+
+	public bool Metalic
+	{
+		get
+		{
+			return this.metalic;
+		}
+	}
+
+	public bool IsOpaqueLiquid
+	{
+		get
+		{
+			return this.isOpaqueLiquid;
+		}
+	}
+
+	public Gradient Gradient
+	{
+		get
+		{
+			if (this.gradient == null)
+			{
+				this.gradient = new Gradient
+				{
+					colorKeys = new GradientColorKey[]
+					{
+						new GradientColorKey
+						{
+							color = this.colour,
+							time = 0f
+						}
+					}
+				};
+			}
+			return this.gradient;
+		}
+	}
+
 	public GameObject SpawnResource(Vector3 position, float mass, float temperature, byte disease_idx, int disease_count, bool prevent_merge = false, bool forceTemperature = false, bool manual_activation = false)
 	{
 		GameObject gameObject = null;
@@ -177,6 +239,24 @@ public class Substance
 
 	public Color32 colour;
 
+	[SerializeField]
+	private bool usesCaustics;
+
+	[SerializeField]
+	private bool glows;
+
+	[SerializeField]
+	private bool metalic;
+
+	[SerializeField]
+	private bool isOpaqueLiquid;
+
+	[SerializeField]
+	private Gradient gradient;
+
+	[SerializeField]
+	private Substance.SubstanceTexture texture;
+
 	[FormerlySerializedAs("debugColour")]
 	public Color32 uiColour;
 
@@ -208,4 +288,22 @@ public class Substance
 	public EventReference fallingStartSound;
 
 	public EventReference fallingStopSound;
+
+	public static int SUBSTANCE_TEXTURE_COUNT = 11;
+
+	public enum SubstanceTexture : byte
+	{
+		None,
+		Magma,
+		MoltenMetal,
+		Polluted,
+		Oil,
+		Thick,
+		Sap,
+		CrystalFragments,
+		Ovolene,
+		Mucus,
+		Ink,
+		PollutedBrine
+	}
 }

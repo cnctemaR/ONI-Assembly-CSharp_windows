@@ -33,6 +33,7 @@ public class MakeBaseSolid : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Insta
 			Grid.Foundation[num2] = true;
 			Grid.SetSolid(num2, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			SimMessages.SetCellProperties(num2, 103);
+			SimMessages.SetStrength(num2, 0, 1f);
 			Grid.RenderedByWorld[num2] = false;
 			World.Instance.OnSolidChanged(num2);
 			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);
@@ -56,6 +57,7 @@ public class MakeBaseSolid : GameStateMachine<MakeBaseSolid, MakeBaseSolid.Insta
 			Grid.Foundation[num2] = false;
 			Grid.SetSolid(num2, false, CellEventLogger.Instance.SimCellOccupierDestroy);
 			SimMessages.ClearCellProperties(num2, 103);
+			SimMessages.SetStrength(num2, 1, 1f);
 			Grid.RenderedByWorld[num2] = true;
 			World.Instance.OnSolidChanged(num2);
 			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);

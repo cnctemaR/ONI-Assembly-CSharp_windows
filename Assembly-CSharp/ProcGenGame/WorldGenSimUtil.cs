@@ -11,12 +11,12 @@ namespace ProcGenGame
 {
 	public static class WorldGenSimUtil
 	{
-		public unsafe static bool DoSettleSim(WorldGenSettings settings, BinaryWriter writer, uint simSeed, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, int baseId)
+		public unsafe static bool DoSettleSim(WorldGenSettings settings, BinaryWriter writer, uint simSeed, ref WorldgenSimData simData, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<TemplateSpawning.TemplateSpawner> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, int baseId)
 		{
 			Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
 			SimMessages.CreateDiseaseTable(WorldGen.diseaseStats);
-			SimMessages.SimDataInitializeFromCells(Grid.WidthInCells, Grid.HeightInCells, simSeed, cells, bgTemp, dcs, true);
+			SimMessages.SimDataInitializeFromCells(Grid.WidthInCells, Grid.HeightInCells, simSeed, ref simData, true);
 			updateProgressFn(UI.WORLDGEN.SETTLESIM.key, 0f, WorldGenProgressStages.Stages.SettleSim);
 			Sim.Start();
 			byte[] array = new byte[Grid.CellCount];
@@ -54,7 +54,11 @@ namespace ProcGenGame
 										float mass = cell.mass;
 										byte index = WorldGen.diseaseStats.GetIndex(cell.diseaseName);
 										int diseaseCount = cell.diseaseCount;
+										ushort elementIndex2 = ElementLoader.GetElementIndex(cell.backwallElement);
+										float backwallMass = cell.backwallMass;
+										float backwallTemperature = cell.backwallTemperature;
 										SimMessages.ModifyCell(num, elementIndex, temperature, mass, index, diseaseCount, SimMessages.ReplaceType.Replace, false, -1);
+										SimMessages.SetBackwallData(num, elementIndex2, backwallMass, backwallTemperature);
 									}
 								}
 							}
@@ -82,18 +86,19 @@ namespace ProcGenGame
 					Grid.diseaseCount = ptr->diseaseCount;
 					Grid.AccumulatedFlowValues = ptr->accumulatedFlow;
 					Grid.exposedToSunlight = (byte*)(void*)ptr->propertyTextureExposedToSunlight;
+					BackwallManager.UpdateFromSim(ptr);
 					for (int l = 0; l < ptr->numSubstanceChangeInfo; l++)
 					{
 						Sim.SubstanceChangeInfo substanceChangeInfo = ptr->substanceChangeInfo[l];
 						int cellIdx = substanceChangeInfo.cellIdx;
-						cells[cellIdx].elementIdx = ptr->elementIdx[cellIdx];
-						cells[cellIdx].insulation = ptr->insulation[cellIdx];
-						cells[cellIdx].properties = ptr->properties[cellIdx];
-						cells[cellIdx].temperature = ptr->temperature[cellIdx];
-						cells[cellIdx].mass = ptr->mass[cellIdx];
-						cells[cellIdx].strengthInfo = ptr->strengthInfo[cellIdx];
-						dcs[cellIdx].diseaseIdx = ptr->diseaseIdx[cellIdx];
-						dcs[cellIdx].elementCount = ptr->diseaseCount[cellIdx];
+						simData.cells[cellIdx].elementIdx = ptr->elementIdx[cellIdx];
+						simData.cells[cellIdx].insulation = ptr->insulation[cellIdx];
+						simData.cells[cellIdx].properties = ptr->properties[cellIdx];
+						simData.cells[cellIdx].temperature = ptr->temperature[cellIdx];
+						simData.cells[cellIdx].mass = ptr->mass[cellIdx];
+						simData.cells[cellIdx].strengthInfo = ptr->strengthInfo[cellIdx];
+						simData.diseaseCells[cellIdx].diseaseIdx = ptr->diseaseIdx[cellIdx];
+						simData.diseaseCells[cellIdx].elementCount = ptr->diseaseCount[cellIdx];
 						Grid.Element[cellIdx] = ElementLoader.elements[(int)substanceChangeInfo.newElemIdx];
 					}
 					for (int m = 0; m < ptr->numSolidInfo; m++)

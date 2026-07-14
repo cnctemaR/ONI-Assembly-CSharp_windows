@@ -300,10 +300,18 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 				smi.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, tag, Sickness.InfectionVector.Digestion);
 			}
 			Effects component = druplicant.GetComponent<Effects>();
-			if (tag == SimHashes.Milk.CreateTag())
+			for (int i = 0; i < WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS.Length; i++)
 			{
-				component.Add("DuplicantGotMilk", true);
+				global::Tuple<Tag, string> tuple = WaterCoolerConfig.BEVERAGE_CHOICE_OPTIONS[i];
+				Tag first = tuple.first;
+				string second = tuple.second;
+				if (tag == first && !string.IsNullOrEmpty(second))
+				{
+					component.Add(second, true);
+					break;
+				}
 			}
+			component.Remove("Thirsty");
 			if (triggerOnDrinkCallback)
 			{
 				Action<GameObject, GameObject> onDuplicantDrank = WaterCooler.OnDuplicantDrank;

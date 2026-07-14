@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei;
 using Klei.AI;
 using TUNING;
@@ -14,8 +15,11 @@ namespace Database
 			this.Stamina.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.Calories = this.CreateAmount("Calories", 0f, 0f, false, Units.Flat, 4000f, true, "STRINGS.DUPLICANTS", "ui_icon_calories", "attribute_calories", "mod_calories");
 			this.Calories.SetDisplayer(new CaloriesDisplayer());
-			this.Breath = this.CreateAmount("Breath", 0f, 100f, false, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_breath", null, "mod_breath");
-			this.Breath.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
+			this.Breath = this.CreateAmount("Breath", 0f, 100f, true, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_breath", null, "mod_breath");
+			StandardAmountDisplayer standardAmountDisplayer = new StandardAmountDisplayer(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal);
+			standardAmountDisplayer.SetDeltaFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerSecond));
+			this.Breath.SetDisplayer(standardAmountDisplayer);
+			this.Breath.maxAttribute.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.Stress = this.CreateAmount("Stress", 0f, 100f, false, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", "ui_icon_stress", "attribute_stress", "mod_stress");
 			this.Stress.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Toxicity = this.CreateAmount("Toxicity", 0f, 100f, true, Units.Flat, 0.5f, true, "STRINGS.DUPLICANTS", null, null, null);
@@ -64,7 +68,11 @@ namespace Database
 			this.ScaleGrowth = this.CreateAmount("ScaleGrowth", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES", "ui_icon_scale_growth", null, null);
 			this.ScaleGrowth.SetDisplayer(new ScaleGrowthDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.MilkProduction = this.CreateAmount("MilkProduction", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES", "ui_icon_milk_production", null, null);
-			this.MilkProduction.SetDisplayer(new MilkProductionDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.MilkProduction.SetDisplayer(new MilkProductionDisplayer(GameUtil.TimeSlice.PerCycle, new Dictionary<Tag, string> { 
+			{
+				SimHashes.Ink.CreateTag(),
+				"ui_icon_gunk"
+			} }));
 			this.ElementGrowth = this.CreateAmount("ElementGrowth", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES", "ui_icon_scale_growth", null, null);
 			this.ElementGrowth.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Beckoning = this.CreateAmount("Beckoning", 0f, 100f, true, Units.Flat, 100.5f, true, "STRINGS.CREATURES", "ui_icon_moo", null, null);
@@ -124,6 +132,10 @@ namespace Database
 			this.InternalBioBattery.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Energy, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
 			this.InternalElectroBank = this.CreateAmount("InternalElectroBank", 0f, 0f, true, Units.Flat, 4000f, true, "STRINGS.ROBOTS", "ui_icon_battery", null, null);
 			this.InternalElectroBank.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Energy, GameUtil.TimeSlice.PerSecond, null, GameUtil.IdentityDescriptorTense.Normal));
+			this.Moisture = this.CreateAmount("Moisture", 0f, 100f, false, Units.Flat, 0.35f, true, "STRINGS.CREATURES", "ui_icon_wet", null, null);
+			this.Moisture.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal));
+			this.Mucus = this.CreateAmount("Mucus", 0f, 10f, false, Units.Flat, 0.35f, true, "STRINGS.CREATURES", "ui_icon_stamina", "attribute_stamina", "mod_stamina");
+			this.Mucus.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerCycle, null, GameUtil.IdentityDescriptorTense.Normal));
 		}
 
 		public Amount CreateAmount(string id, float min, float max, bool show_max, Units units, float delta_threshold, bool show_in_ui, string string_root, string uiSprite = null, string thoughtSprite = null, string uiFullColourSprite = null)
@@ -226,6 +238,10 @@ namespace Database
 		public Amount Beckoning;
 
 		public Amount MilkProduction;
+
+		public Amount Moisture;
+
+		public Amount Mucus;
 
 		public Amount InternalBattery;
 

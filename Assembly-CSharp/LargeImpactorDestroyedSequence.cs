@@ -139,8 +139,7 @@ public static class LargeImpactorDestroyedSequence
 			SpeedControlScreen.Instance.Pause(false, false);
 		}
 		screen = GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.VideoScreen.gameObject, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<VideoScreen>();
-		screen.PlayVideo(Assets.GetVideo(Db.Get().ColonyAchievements.AsteroidDestroyed.shortVideoName), true, AudioMixerSnapshots.Get().VictoryNISGenericSnapshot, false, true);
-		screen.QueueVictoryVideoLoop(true, Db.Get().ColonyAchievements.AsteroidDestroyed.messageBody, Db.Get().ColonyAchievements.AsteroidDestroyed.Id, Db.Get().ColonyAchievements.AsteroidDestroyed.loopVideoName, true, false);
+		screen.PlayShortWithVictoryLoop(Db.Get().ColonyAchievements.AsteroidDestroyed.shortVideoName, Db.Get().ColonyAchievements.AsteroidDestroyed.messageBody, Db.Get().ColonyAchievements.AsteroidDestroyed.Id, Db.Get().ColonyAchievements.AsteroidDestroyed.loopVideoName, true, AudioMixerSnapshots.Get().VictoryNISGenericSnapshot);
 		global::System.Action onVideoCompletedCallback = delegate
 		{
 			videoCompleted = true;

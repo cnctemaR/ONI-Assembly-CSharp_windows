@@ -54,6 +54,14 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 
 	public SymbolOverrideInfoGpuData symbolOverrideInfoGpuData { get; protected set; }
 
+	public uint BlendPackedValues
+	{
+		get
+		{
+			return this.batchInstanceData.GetAllBlendPackedValues();
+		}
+	}
+
 	public Color32 TintColour
 	{
 		get
@@ -981,7 +989,7 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 
 	protected void StartAnimEventSequence()
 	{
-		if (!this.layering.GetIsForeground() && this.aem != null)
+		if (!this.layering.GetIsLayer() && this.aem != null)
 		{
 			this.eventManagerHandle = this.aem.PlayAnim(this, this.curAnim, this.mode, this.elapsedTime, this.visibilityType == KAnimControllerBase.VisibilityType.Always);
 		}
@@ -1065,6 +1073,8 @@ public abstract class KAnimControllerBase : MonoBehaviour, ISerializationCallbac
 
 	[SerializeField]
 	protected bool flipY;
+
+	public int initialBlendParameters = -1;
 
 	[SerializeField]
 	public bool forceUseGameTime;

@@ -42,6 +42,7 @@ public class PropGravitasLabWindowHorizontalConfig : IBuildingConfig
 		go.GetComponent<PrimaryElement>().SetElement(SimHashes.Glass, true);
 		go.GetComponent<PrimaryElement>().Temperature = 273f;
 		go.GetComponent<KPrefabID>().AddTag(GameTags.Gravitas, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Backwall, false);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 	}
 

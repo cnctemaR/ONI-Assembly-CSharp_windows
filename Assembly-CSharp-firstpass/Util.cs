@@ -734,6 +734,11 @@ public static class Util
 
 	public static string GetOperatingSystem()
 	{
+		if (Util.operatingSystem != null)
+		{
+			return Util.operatingSystem;
+		}
+		Util.operatingSystem = SystemInfo.operatingSystem;
 		return Util.operatingSystem;
 	}
 
@@ -975,7 +980,9 @@ public static class Util
 
 	private static string consoleLogPath = Application.consoleLogPath;
 
-	private static string operatingSystem = SystemInfo.operatingSystem;
+	private static string operatingSystem = null;
+
+	public static Predicate<KPrefabID> IsNullOrDestroyedPredicate = (KPrefabID pref) => pref.IsNullOrDestroyed();
 
 	public enum IterationInstruction : byte
 	{

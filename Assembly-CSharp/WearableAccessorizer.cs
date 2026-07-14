@@ -194,6 +194,7 @@ public class WearableAccessorizer : KMonoBehaviour
 				return;
 			}
 		}
+		new List<WearableAccessorizer.WearableType>();
 		SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
 		WearableAccessorizer.WearableType highestAccessory = this.GetHighestAccessory();
 		foreach (object obj in Enum.GetValues(typeof(WearableAccessorizer.WearableType)))
@@ -597,7 +598,8 @@ public class WearableAccessorizer : KMonoBehaviour
 		CustomClothing,
 		Outfit,
 		Suit,
-		CustomSuit
+		CustomSuit,
+		Shoes
 	}
 
 	[SerializationConfig(MemberSerialization.OptIn)]

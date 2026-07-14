@@ -21,6 +21,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		this.jetPackSpeed = 7f;
 		this.movementSpeed = Db.Get().AttributeConverters.MovementSpeed.Lookup(navigator.gameObject);
 		this.attributeLevels = navigator.GetComponent<AttributeLevels>();
+		this.attributes = navigator.gameObject.GetAttributes();
 	}
 
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
@@ -30,7 +31,11 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		bool flag = (transition.start == NavType.Pole || transition.end == NavType.Pole) && transition.y < 0 && transition.x == 0;
 		bool flag2 = transition.start == NavType.Tube || transition.end == NavType.Tube;
 		bool flag3 = transition.start == NavType.Hover || transition.end == NavType.Hover;
-		if (!flag && !flag2 && !flag3)
+		bool flag4 = transition.start == NavType.Swim || transition.end == NavType.Swim;
+		bool flag5 = !flag && !flag2 && !flag3;
+		int num2 = Grid.PosToCell(navigator);
+		this.isInLiquid = navigator.CurrentNavType == NavType.Swim || Grid.IsSubstantialLiquid(num2, 0.35f);
+		if (flag5)
 		{
 			if (this.isWalking)
 			{
@@ -38,21 +43,26 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 			}
 			num = this.GetMovementSpeedMultiplier();
 		}
-		int num2 = Grid.PosToCell(navigator);
 		float num3 = 1f;
-		bool flag4 = (navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
-		bool flag5 = (navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
-		bool flag6 = (navigator.flags & PathFinder.PotentialPath.Flags.HasLeadSuit) > PathFinder.PotentialPath.Flags.None;
-		if (!flag5 && !flag4 && !flag6 && Grid.IsSubstantialLiquid(num2, 0.35f))
+		bool flag6 = (navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) > PathFinder.PotentialPath.Flags.None;
+		bool flag7 = (navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) > PathFinder.PotentialPath.Flags.None;
+		bool flag8 = (navigator.flags & PathFinder.PotentialPath.Flags.HasLeadSuit) > PathFinder.PotentialPath.Flags.None;
+		bool flag9 = flag7 || flag6 || flag8;
+		if (!flag9 && !flag4 && Grid.IsSubstantialLiquid(num2, 0.35f))
 		{
 			num3 = 0.5f;
+		}
+		else if (flag9 && flag4)
+		{
+			num3 = 0.3f;
+			transition.animSpeed = BipedTransitionLayer.GetSwimmingInSuitAnimSpeed(transition);
 		}
 		num *= num3;
 		if (transition.x == 0 && (transition.start == NavType.Ladder || transition.start == NavType.Pole) && transition.start == transition.end)
 		{
 			if (flag)
 			{
-				transition.speed = 15f * num3;
+				transition.speed = 15f * num;
 			}
 			else
 			{
@@ -122,6 +132,12 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		{
 			this.attributeLevels.AddExperience(Db.Get().Attributes.Athletics.Id, Time.time - this.startTime, DUPLICANTSTATS.ATTRIBUTE_LEVELING.ALL_DAY_EXPERIENCE);
 		}
+		int num = Grid.OffsetCell(navigator.cachedCell, transition.x, transition.y);
+		if (transition.end != NavType.Swim)
+		{
+			Grid.IsSubstantialLiquid(num, 0.35f);
+		}
+		bool flag3 = this.isInLiquid;
 	}
 
 	public float GetTubeTravellingSpeedMultiplier(Navigator navigator)
@@ -144,6 +160,15 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		return Mathf.Max(0.1f, num);
 	}
 
+	public static float GetSwimmingInSuitAnimSpeed(Navigator.ActiveTransition transition)
+	{
+		if (!transition.isLooping && transition.x != 0 && transition.y != 0 && transition.start == NavType.Swim && transition.end == NavType.Swim)
+		{
+			return 0.3f;
+		}
+		return transition.animSpeed;
+	}
+
 	public float GetMovementSpeedMultiplier()
 	{
 		return BipedTransitionLayer.GetMovementSpeedMultiplier(this.movementSpeed);
@@ -157,13 +182,21 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 
 	private float startTime;
 
+	private bool isInLiquid;
+
 	private float jetPackSpeed;
 
 	private const float downPoleSpeed = 15f;
 
 	private const float WATER_SPEED_PENALTY = 0.5f;
 
+	private const float SUIT_SWIM_SPEED_PENALTY = 0.3f;
+
+	private const float SUIT_SWIM_ANIM_PENALTY = 0.3f;
+
 	private AttributeConverterInstance movementSpeed;
 
 	private AttributeLevels attributeLevels;
+
+	private Attributes attributes;
 }

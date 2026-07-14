@@ -29,11 +29,12 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			: base(master)
 		{
 			base.sm.breaker.Set(breaker, base.smi, false);
+			this.navigator = master.GetComponent<Navigator>();
+			this.isBreakableCell = (int cell) => !Grid.Solid[cell] && this.navigator.CanReach(cell) && ((Grid.IsValidCell(Grid.CellLeft(cell)) && Grid.Solid[Grid.CellLeft(cell)]) || (Grid.IsValidCell(Grid.CellRight(cell)) && Grid.Solid[Grid.CellRight(cell)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, 1, 1)) && Grid.Solid[Grid.OffsetCell(cell, 1, 1)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, -1, 1)) && Grid.Solid[Grid.OffsetCell(cell, -1, 1)]));
 		}
 
 		public void FindBreakable()
 		{
-			Navigator navigator = base.GetComponent<Navigator>();
 			int num = int.MaxValue;
 			Breakable breakable = null;
 			if (global::UnityEngine.Random.Range(0, 100) >= 50)
@@ -42,7 +43,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 				{
 					if (!(breakable2 == null) && !breakable2.IsInvincible && !breakable2.isBroken())
 					{
-						int navigationCost = navigator.GetNavigationCost(breakable2);
+						int navigationCost = this.navigator.GetNavigationCost(breakable2);
 						if (navigationCost != -1 && navigationCost < num)
 						{
 							num = navigationCost;
@@ -53,7 +54,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			}
 			if (breakable == null)
 			{
-				int num2 = GameUtil.FloodFillFind<object>((int cell, object arg) => !Grid.Solid[cell] && navigator.CanReach(cell) && ((Grid.IsValidCell(Grid.CellLeft(cell)) && Grid.Solid[Grid.CellLeft(cell)]) || (Grid.IsValidCell(Grid.CellRight(cell)) && Grid.Solid[Grid.CellRight(cell)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, 1, 1)) && Grid.Solid[Grid.OffsetCell(cell, 1, 1)]) || (Grid.IsValidCell(Grid.OffsetCell(cell, -1, 1)) && Grid.Solid[Grid.OffsetCell(cell, -1, 1)])), null, Grid.PosToCell(navigator.gameObject), 128, true, true);
+				int num2 = FloodFill.Find<FloodFill.MaxDepth>(this.isBreakableCell, Grid.PosToCell(this.navigator.gameObject), new FloodFill.MaxDepth(128), true, true);
 				base.sm.moveToWallTarget.Set(num2, base.smi, false);
 				this.GoTo(base.sm.move_notarget);
 				return;
@@ -61,6 +62,10 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			base.sm.breakable.Set(breakable, base.smi);
 			this.GoTo(base.sm.move_target);
 		}
+
+		private readonly Navigator navigator;
+
+		private readonly Func<int, bool> isBreakableCell;
 	}
 
 	public class States : GameStateMachine<AggressiveChore.States, AggressiveChore.StatesInstance, AggressiveChore>

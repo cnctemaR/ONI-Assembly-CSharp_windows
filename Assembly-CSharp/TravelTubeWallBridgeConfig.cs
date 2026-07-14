@@ -46,6 +46,16 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		go.AddOrGet<BuildingHP>().destroyOnDamaged = true;
 		go.AddOrGet<TileTemperature>();
 		go.AddOrGet<TravelTubeBridge>();
+		go.GetComponent<KPrefabID>().prefabInitFn += this.OnPrefabInit;
+	}
+
+	private void OnPrefabInit(GameObject instance)
+	{
+		foreach (KBatchedAnimController kbatchedAnimController in instance.GetComponentsInChildrenOnly<KBatchedAnimController>())
+		{
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.LiquidVisibilityLayer, false);
+			kbatchedAnimController.SetBlendValue(KBatchedAnimInstanceData.BlendActiveOptions.WaterProof, true);
+		}
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)

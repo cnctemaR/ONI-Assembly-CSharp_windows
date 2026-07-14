@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 public class MoltDropperMonitor : GameStateMachine<MoltDropperMonitor, MoltDropperMonitor.Instance, IStateMachineTarget, MoltDropperMonitor.Def>
@@ -30,8 +32,22 @@ public class MoltDropperMonitor : GameStateMachine<MoltDropperMonitor, MoltDropp
 
 	public MoltDropperMonitor.DropStates drop;
 
-	public class Def : StateMachine.BaseDef
+	public class Def : StateMachine.BaseDef, IGameObjectEffectDescriptor
 	{
+		public List<Descriptor> GetDescriptors(GameObject obj)
+		{
+			string text = new Tag(this.onGrowDropID).ProperName();
+			string formattedMass = GameUtil.GetFormattedMass(this.massToDrop / 600f, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+			string text2 = GlobalStringBuilderPool.ReturnAndFree(GlobalStringBuilderPool.Alloc().Append(UI.BUILDINGEFFECTS.MOLT_DROP).Replace("{Item}", text)
+				.Replace("{Rate}", formattedMass));
+			string text3 = GlobalStringBuilderPool.ReturnAndFree(GlobalStringBuilderPool.Alloc().Append(UI.BUILDINGEFFECTS.TOOLTIPS.MOLT_DROP).Replace("{Item}", text)
+				.Replace("{Rate}", formattedMass));
+			return new List<Descriptor>
+			{
+				new Descriptor(text2, text3, Descriptor.DescriptorType.Effect, false)
+			};
+		}
+
 		public bool synchWithBehaviour;
 
 		public string onGrowDropID;

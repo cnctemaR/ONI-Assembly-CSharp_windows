@@ -48,8 +48,4 @@ public class BeachChairConfig : IBuildingConfig
 	public const string ID = "BeachChair";
 
 	public static readonly int TAN_LUX = DUPLICANTSTATS.STANDARD.Light.HIGH_LIGHT;
-
-	private const float TANK_SIZE_KG = 20f;
-
-	private const float SPILL_RATE_KG = 0.05f;
 }

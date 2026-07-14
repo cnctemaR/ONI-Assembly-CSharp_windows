@@ -5,7 +5,7 @@ using System.Diagnostics;
 using ProcGen;
 using UnityEngine;
 
-public class Grid
+public static class Grid
 {
 	private static void UpdateBuildMask(int i, Grid.BuildFlags flag, bool state)
 	{
@@ -609,7 +609,7 @@ public class Grid
 
 	public static bool IsCellOpenToSpace(int cell)
 	{
-		return !Grid.IsSolidCell(cell) && !(Grid.Objects[cell, 2] != null) && Grid.IsCellBiomeSpaceBiome(cell);
+		return !Grid.IsSolidCell(cell) && !BackwallManager.HasBackwall(cell) && !(Grid.Objects[cell, 2] != null) && Grid.IsCellBiomeSpaceBiome(cell);
 	}
 
 	public static bool IsCellBiomeSpaceBiome(int cell)
@@ -817,47 +817,50 @@ public class Grid
 		return Grid.IsValidCell(cell) && Grid.Solid[cell];
 	}
 
-	public unsafe static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
+	public unsafe static bool IsSubstantialLiquidUnsafe(int cell, float threshold = 0.35f)
 	{
-		if (Grid.IsValidCell(cell))
+		ushort num = Grid.elementIdx[cell];
+		if ((int)num < ElementLoader.elements.Count)
 		{
-			ushort num = Grid.elementIdx[cell];
-			if ((int)num < ElementLoader.elements.Count)
+			Element element = ElementLoader.elements[(int)num];
+			if (element.IsLiquid && Grid.mass[cell] >= element.defaultValues.mass * threshold)
 			{
-				Element element = ElementLoader.elements[(int)num];
-				if (element.IsLiquid && Grid.mass[cell] >= element.defaultValues.mass * threshold)
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;
+	}
+
+	public static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
+	{
+		return Grid.IsValidCell(cell) && Grid.IsSubstantialLiquidUnsafe(cell, threshold);
 	}
 
 	public static bool IsVisiblyInLiquid(Vector2 pos)
 	{
 		int num = Grid.PosToCell(pos);
-		if (Grid.IsValidCell(num) && Grid.IsLiquid(num))
+		if (!Grid.IsValidCell(num))
 		{
-			int num2 = Grid.CellAbove(num);
-			if (Grid.IsValidCell(num2) && Grid.IsLiquid(num2))
-			{
-				return true;
-			}
-			float num3 = Grid.Mass[num];
-			float num4 = pos.y - (float)((int)pos.y);
-			if (num3 / 1000f >= num4)
-			{
-				return true;
-			}
+			return false;
 		}
-		return false;
+		if (!Grid.IsLiquid(num))
+		{
+			return false;
+		}
+		int num2 = Grid.CellAbove(num);
+		if (Grid.IsValidCell(num2) && Grid.IsLiquid(num2))
+		{
+			return true;
+		}
+		float num3 = Grid.Mass[num];
+		float num4 = pos.y - (float)((int)pos.y);
+		return num3 / 1000f >= num4;
 	}
 
-	public static bool IsNavigatableLiquid(int cell)
+	public static bool IsNavigatableLiquidUnsafe(int cell)
 	{
 		int num = Grid.CellAbove(cell);
-		if (!Grid.IsValidCell(cell) || !Grid.IsValidCell(num))
+		if (!Grid.IsValidCell(num))
 		{
 			return false;
 		}
@@ -877,6 +880,11 @@ public class Grid
 			}
 		}
 		return false;
+	}
+
+	public static bool IsNavigatableLiquid(int cell)
+	{
+		return Grid.IsValidCell(cell) && Grid.IsNavigatableLiquidUnsafe(cell);
 	}
 
 	public static bool IsLiquid(int cell)

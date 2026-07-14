@@ -231,7 +231,15 @@ namespace STRINGS
 					UI.PRE_KEYWORD,
 					"Breath",
 					UI.PST_KEYWORD,
-					" will die immediately"
+					" will become incapacitated and die unless they are rescued\n\nDuplicants can increase their ",
+					UI.PRE_KEYWORD,
+					"Maximum Breath",
+					UI.PST_KEYWORD,
+					" by learning the ",
+					UI.PRE_KEYWORD,
+					"Basic Swimming",
+					UI.PST_KEYWORD,
+					" skill"
 				});
 			}
 
@@ -410,6 +418,13 @@ namespace STRINGS
 				public static LocString NAME = "Node Health";
 
 				public static LocString TOOLTIP = "Vines cannot grow if they do not have a healthy node to grow from";
+			}
+
+			public class SEATREEROOTHEALTH
+			{
+				public static LocString NAME = "Root Health";
+
+				public static LocString TOOLTIP = "Tower Kelp cannot grow if it does not have a healthy root to grow from";
 			}
 		}
 
@@ -1560,6 +1575,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is dropping off organic material at the " + BUILDINGS.PREFABS.COMPOST.NAME;
 			}
 
+			public class CLEANLITTERBOX
+			{
+				public static LocString NAME = "Scoop";
+
+				public static LocString STATUS = "Going to scoop";
+
+				public static LocString TOOLTIP = BUILDINGS.PREFABS.LITTERBOX.NAME + "s need to be scooped in order for their contents to drop";
+			}
+
 			public class FLIPCOMPOST
 			{
 				public static LocString NAME = "Flip";
@@ -1956,6 +1980,8 @@ namespace STRINGS
 				public static LocString FAILURE_ROW = "{Duplicant} -- {Reason}";
 
 				public static LocString CONTAINS_OXYGEN = "Not enough Oxygen";
+
+				public static LocString IS_POOP_COOLDOWN = "Has recently checked";
 
 				public static LocString IS_PREEMPTABLE = "Already assigned to {Assignee}";
 
@@ -2383,10 +2409,22 @@ namespace STRINGS
 
 				public static LocString ARCHETYPE_NAME = "Pilot";
 			}
+
+			public class SWIMMING
+			{
+				public static LocString NAME = "Swimming";
+			}
 		}
 
 		public class STATUSITEMS
 		{
+			public class EMPTYINGLITTERBOX
+			{
+				public static LocString NAME = "Scooping litter box";
+
+				public static LocString TOOLTIP = "This Duplicant is emptying a " + BUILDINGS.PREFABS.LITTERBOX.NAME + "\n\nUgh";
+			}
+
 			public class SLIPPERING
 			{
 				public static LocString NAME = "Slipping";
@@ -2458,6 +2496,24 @@ namespace STRINGS
 
 					public static LocString TOOLTIP = "This Duplicant is carefully uncovering a " + UI.FormatAsLink("Fossil", "FOSSIL");
 				}
+			}
+
+			public class PUFFER_SHARING_AIR
+			{
+				public static LocString NAME = "Sharing Oxygen";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant is breathing in a ",
+					UI.PRE_KEYWORD,
+					"Blowter's",
+					UI.PST_KEYWORD,
+					" stored ",
+					UI.PRE_KEYWORD,
+					"Oxygen",
+					UI.PST_KEYWORD,
+					" to avoid drowning"
+				});
 			}
 
 			public class SLEEPING
@@ -2606,6 +2662,17 @@ namespace STRINGS
 				public static LocString NOTIFICATION_NAME = "Incapacitated";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are near death.\nA " + BUILDINGS.PREFABS.MEDICALCOT.NAME + " is required for rescue:";
+			}
+
+			public class SUFFOCATINGINCAPACITATED
+			{
+				public static LocString NAME = "Incapacitated: Suffocated\nTime until death: {TimeUntilDeath}\n";
+
+				public static LocString TOOLTIP = "This Duplicant is near death!\n\nThey need someone to rescue and resuscitate them ASAP";
+
+				public static LocString NOTIFICATION_NAME = "Suffocated";
+
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are near death\nResuscitation by another Duplicant is required for rescue:";
 			}
 
 			public class BIONICOFFLINEINCAPACITATED
@@ -4251,6 +4318,13 @@ namespace STRINGS
 				});
 			}
 
+			public class HASSUITSWIMPENALTY
+			{
+				public static LocString NAME = "Suit Swim Penalty";
+
+				public static LocString TOOLTIP = "This Duplicant's suit is making it harder to swim";
+			}
+
 			public class REMOTEWORKER
 			{
 				public class ENTERINGDOCK
@@ -5038,6 +5112,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant shares sleeping quarters with others";
 			}
 
+			public class LUXURYBARRACKSSTAMINA
+			{
+				public static LocString NAME = "Luxury Barracks";
+
+				public static LocString TOOLTIP = "This Duplicant shares luxurious sleeping quarters with others";
+			}
+
 			public class LADDERBEDSTAMINA
 			{
 				public static LocString NAME = "Sleeping in a ladder bed";
@@ -5367,7 +5448,7 @@ namespace STRINGS
 
 			public class DUPLICANTGOTMILK
 			{
-				public static LocString NAME = "Extra Hydrated";
+				public static LocString NAME = "Extra Hydrated: Brackene";
 
 				public static LocString TOOLTIP = string.Concat(new string[]
 				{
@@ -5376,6 +5457,34 @@ namespace STRINGS
 					"Brackene",
 					UI.PST_KEYWORD,
 					". It's helping them relax"
+				});
+			}
+
+			public class DUPLICANTDRANKINK
+			{
+				public static LocString NAME = "Extra Hydrated: Squid Ink";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant recently drank ",
+					UI.PRE_KEYWORD,
+					"Squid Ink",
+					UI.PST_KEYWORD,
+					". It's helping them relax"
+				});
+			}
+
+			public class MESSCAVIAR
+			{
+				public static LocString NAME = "Ate Caviar";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant recently ate a meal topped with ",
+					UI.PRE_KEYWORD,
+					"Caviar",
+					UI.PST_KEYWORD,
+					"\n\nThey're feeling very swanky"
 				});
 			}
 
@@ -5424,6 +5533,25 @@ namespace STRINGS
 				public static LocString CAUSE = "Obtained by eating a very spicy meal";
 
 				public static LocString DESCRIPTION = "Duplicants find this spicy meal quite invigorating";
+			}
+
+			public class THIRSTY
+			{
+				public static LocString NAME = "Thirsty";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This Duplicant ate a very salty snack and is feeling parched\n\nVisiting a ",
+					UI.FormatAsLink("Water Cooler", "WATERCOOLER"),
+					" will restore their ",
+					UI.PRE_KEYWORD,
+					"Stamina",
+					UI.PST_KEYWORD
+				});
+
+				public static LocString CAUSE = "Obtained by eating very salty food";
+
+				public static LocString DESCRIPTION = "Eating salty food reduces " + UI.PRE_KEYWORD + "Stamina" + UI.PST_KEYWORD;
 			}
 
 			public class WARMTOUCHFOOD
@@ -5509,6 +5637,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Woah, something really messed up this Duplicant's eyes!\n\nCaused by exposure to a harsh liquid or gas";
 
 				public static LocString CAUSE = "Obtained by exposure to a harsh liquid or gas";
+			}
+
+			public class NEARDEATHEXPERIENCE
+			{
+				public static LocString NAME = "Near-Death Experience";
+
+				public static LocString TOOLTIP = "This Duplicant recently recovered from being incapacitated\n\nIt was deeply unsettling";
 			}
 
 			public class FRESH_AND_CLEAN
@@ -7409,6 +7544,27 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This Duplicant is getting a real adrenaline rush from being in space!";
 			}
+
+			public class INLIQUIDSTAMINA
+			{
+				public static LocString NAME = "Waterlogged";
+
+				public static LocString TOOLTIP = "This Duplicant feels weighed down by expectations and liquid surroundings";
+			}
+
+			public class SWIMMINGSTAMINA
+			{
+				public static LocString NAME = "Strong Swimmer";
+
+				public static LocString TOOLTIP = "This Duplicant feels like they could swim all day";
+			}
+
+			public class SWIMMINGATHLETICS
+			{
+				public static LocString NAME = "Fast Swimmer";
+
+				public static LocString TOOLTIP = "This Duplicant treats every swim like it's a race";
+			}
 		}
 
 		public class CONGENITALTRAITS
@@ -7453,6 +7609,13 @@ namespace STRINGS
 				public static LocString NAME = "Stinkiness";
 
 				public static LocString DESC = "This Duplicant is genetically cursed by a pungent bodily odor";
+			}
+
+			public class MINNOW
+			{
+				public static LocString NAME = "Freediver";
+
+				public static LocString DESC = "This Duplicant is practically amphibious";
 			}
 		}
 
@@ -8607,6 +8770,28 @@ namespace STRINGS
 				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_SHORT_DESC_TOOLTIP;
 			}
 
+			public class GRANTSKILL_SWIMMING
+			{
+				public static LocString NAME = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_NAME + DUPLICANTS.ROLES.SWIMMER.NAME;
+
+				public static LocString DESC = DUPLICANTS.ROLES.SWIMMER.DESCRIPTION;
+
+				public static LocString SHORT_DESC = "Starts with a Tier 1 <b>Skill</b>";
+
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_SHORT_DESC_TOOLTIP;
+			}
+
+			public class GRANTSKILL_SWIMMING2
+			{
+				public static LocString NAME = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_NAME + DUPLICANTS.ROLES.EXPERT_SWIMMER.NAME;
+
+				public static LocString DESC = DUPLICANTS.ROLES.EXPERT_SWIMMER.DESCRIPTION;
+
+				public static LocString SHORT_DESC = "Starts with a Tier 2 <b>Skill</b>";
+
+				public static LocString SHORT_DESC_TOOLTIP = DUPLICANTS.TRAITS.GRANTED_SKILL_SHARED_SHORT_DESC_TOOLTIP;
+			}
+
 			public class STARTWITHBOOSTER_DIG1
 			{
 				public static LocString NAME = ITEMS.BIONIC_BOOSTERS.BOOSTER_DIG1.NAME;
@@ -9156,6 +9341,20 @@ namespace STRINGS
 				public static LocString NAME = "Sena";
 
 				public static LocString DESC = "{0}s only care about three things: gold accents, true crime, and the advancement of nuclear physics.";
+			}
+
+			public class KAI
+			{
+				public static LocString NAME = "Kai";
+
+				public static LocString DESC = "The secret to a {0}'s perfectly soft hair is marine mineral hair masks.";
+			}
+
+			public class MINNOW
+			{
+				public static LocString NAME = "Minnow";
+
+				public static LocString DESC = "{0} always goes with the flow. Unless the flow is going somewhere boring.";
 			}
 		}
 
@@ -9945,6 +10144,11 @@ namespace STRINGS
 				});
 			}
 
+			public class BREATHMAX
+			{
+				public static LocString NAME = "Maximum Breath";
+			}
+
 			public class BIONICOILDELTA
 			{
 				public static LocString NAME = "Gear Oil";
@@ -10320,20 +10524,31 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Grilling", "COOKING1");
 
-				public static LocString DESCRIPTION = string.Concat(new string[]
-				{
-					"Allows Duplicants to cook using the ",
-					BUILDINGS.PREFABS.COOKINGSTATION.NAME,
-					", ",
-					BUILDINGS.PREFABS.GOURMETCOOKINGSTATION.NAME,
-					", and ",
-					BUILDINGS.PREFABS.DEEPFRYER.NAME
-				});
+				public static LocString DESCRIPTION = "Allows Duplicants to cook using the " + BUILDINGS.PREFABS.COOKINGSTATION.NAME;
 			}
 
 			public class COOK
 			{
-				public static LocString NAME = UI.FormatAsLink("Grilling II", "COOKING2");
+				public static LocString NAME = UI.FormatAsLink("Enhanced Seasoning", "COOKING2");
+
+				public static LocString DESCRIPTION = string.Concat(new string[]
+				{
+					"Allows Duplicants to cook using the ",
+					BUILDINGS.PREFABS.GOURMETCOOKINGSTATION.NAME,
+					", ",
+					BUILDINGS.PREFABS.SMOKER.NAME,
+					", ",
+					BUILDINGS.PREFABS.DEEPFRYER.NAME,
+					", ",
+					BUILDINGS.PREFABS.SUSHIBAR.NAME,
+					", and ",
+					BUILDINGS.PREFABS.SPICEGRINDER.NAME
+				});
+			}
+
+			public class SENIOR_COOK
+			{
+				public static LocString NAME = UI.FormatAsLink("Fine Dining", "COOKING3");
 
 				public static LocString DESCRIPTION = "Improves a Duplicant's cooking speed";
 			}
@@ -10592,6 +10807,20 @@ namespace STRINGS
 				public static LocString NAME = "W.I.P. Skill";
 
 				public static LocString DESCRIPTION = "This skill doesn't really do anything right now.";
+			}
+
+			public class SWIMMER
+			{
+				public static LocString NAME = UI.FormatAsLink("Basic Swimming", "SWIMMING");
+
+				public static LocString DESCRIPTION = "Allows Duplicants to safely navigate liquid environments.";
+			}
+
+			public class EXPERT_SWIMMER
+			{
+				public static LocString NAME = UI.FormatAsLink("Divemaster", "SWIMMING2");
+
+				public static LocString DESCRIPTION = "Grants Duplicants expert proficiency in liquid environment navigation.";
 			}
 
 			public class BIONICS_A1

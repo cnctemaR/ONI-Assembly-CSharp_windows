@@ -25,7 +25,7 @@ public class SameSpotPoopStates : GameStateMachine<SameSpotPoopStates, SameSpotP
 		{
 			smi.SetLastPoopCell();
 		}).GoTo(this.pooping);
-		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.Poop, false);
+		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).TriggerOnEnter(GameHashes.PoopStatesCompleted, (SameSpotPoopStates.Instance smi) => null).BehaviourComplete(GameTags.Creatures.Poop, false);
 	}
 
 	public GameStateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>.State goingtopoop;

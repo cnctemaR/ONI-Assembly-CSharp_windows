@@ -14,12 +14,12 @@ public class EggCrackerConfig : IBuildingConfig
 
 	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, global::Tuple<Tag, float>[] customDrops)
 	{
-		EggCrackerConfig.RegisterEgg(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC, customDrops, true);
+		EggCrackerConfig.RegisterEgg(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC, customDrops, 0.5f, true);
 	}
 
-	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, global::Tuple<Tag, float>[] customDrops, bool allowCrackerRecipeCreation = true)
+	public static void RegisterEgg(Tag eggPrefabTag, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, global::Tuple<Tag, float>[] customDrops, float customShellRatio, bool allowCrackerRecipeCreation = true)
 	{
-		EggCrackerConfig.EggData eggData = new EggCrackerConfig.EggData(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC, allowCrackerRecipeCreation);
+		EggCrackerConfig.EggData eggData = new EggCrackerConfig.EggData(eggPrefabTag, name, description, mass, requiredDLC, forbiddenDLC, allowCrackerRecipeCreation, customShellRatio);
 		eggData.customOutput = customDrops;
 		EggCrackerConfig.uncategorizedEggData.Add(eggData);
 	}
@@ -112,16 +112,37 @@ public class EggCrackerConfig : IBuildingConfig
 						material = array[0]
 					}
 				};
-				List<ComplexRecipe.RecipeElement> list = new List<ComplexRecipe.RecipeElement>
+				float num = ((eggData.customShellRatio < 0f) ? 0.5f : eggData.customShellRatio);
+				float num2 = 1f - num;
+				List<ComplexRecipe.RecipeElement> list = new List<ComplexRecipe.RecipeElement>();
+				ComplexRecipe.RecipeElement recipeElement = null;
+				ComplexRecipe.RecipeElement recipeElement2 = null;
+				if (num > 0f)
 				{
-					new ComplexRecipe.RecipeElement("RawEgg", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false),
-					new ComplexRecipe.RecipeElement("EggShell", 0.5f * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
-				};
+					list.Add(recipeElement = new ComplexRecipe.RecipeElement("EggShell", num * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+				}
+				if (num2 > 0f)
+				{
+					list.Add(recipeElement2 = new ComplexRecipe.RecipeElement("RawEgg", num2 * eggData.mass, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+				}
 				if (eggData.customOutput != null)
 				{
 					foreach (global::Tuple<Tag, float> tuple in eggData.customOutput)
 					{
-						list.Add(new ComplexRecipe.RecipeElement(tuple.first, tuple.second, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+						if (tuple.first == "EggShell")
+						{
+							recipeElement = ((recipeElement2 != null) ? recipeElement : new ComplexRecipe.RecipeElement("EggShell", 0f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+							recipeElement.amount += tuple.second;
+						}
+						else if (tuple.first == "RawEgg")
+						{
+							recipeElement2 = ((recipeElement2 != null) ? recipeElement2 : new ComplexRecipe.RecipeElement("RawEgg", 0f, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+							recipeElement2.amount += tuple.second;
+						}
+						else
+						{
+							list.Add(new ComplexRecipe.RecipeElement(tuple.first, tuple.second, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false));
+						}
 					}
 				}
 				ComplexRecipe.RecipeElement[] array3 = list.ToArray();
@@ -149,15 +170,20 @@ public class EggCrackerConfig : IBuildingConfig
 	{
 		public EggData(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC)
 		{
-			this.Config(id, name, description, mass, requiredDLC, forbiddenDLC, true);
+			this.Config(id, name, description, mass, requiredDLC, forbiddenDLC, true, -1f);
 		}
 
 		public EggData(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, bool hasCrackerRecipe = true)
 		{
-			this.Config(id, name, description, mass, requiredDLC, forbiddenDLC, hasCrackerRecipe);
+			this.Config(id, name, description, mass, requiredDLC, forbiddenDLC, hasCrackerRecipe, -1f);
 		}
 
-		private void Config(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, bool hasCrackerRecipe = true)
+		public EggData(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, bool hasCrackerRecipe = true, float customShellRatio = -1f)
+		{
+			this.Config(id, name, description, mass, requiredDLC, forbiddenDLC, hasCrackerRecipe, customShellRatio);
+		}
+
+		private void Config(Tag id, string name, string description, float mass, string[] requiredDLC, string[] forbiddenDLC, bool hasCrackerRecipe = true, float customShellRatio = -1f)
 		{
 			this.id = id;
 			this.name = name;
@@ -166,6 +192,7 @@ public class EggCrackerConfig : IBuildingConfig
 			this.requiredDlcIds = requiredDLC;
 			this.forbiddenDlcIds = forbiddenDLC;
 			this.hasCrackerRecipe = hasCrackerRecipe;
+			this.customShellRatio = customShellRatio;
 		}
 
 		public string[] GetRequiredDlcIds()
@@ -193,6 +220,8 @@ public class EggCrackerConfig : IBuildingConfig
 		public bool hasCrackerRecipe;
 
 		public global::Tuple<Tag, float>[] customOutput;
+
+		public float customShellRatio = -1f;
 
 		public bool isBaseMorph;
 	}

@@ -312,7 +312,7 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 			private static ReloadElectrobankChore.States.WorkerSnapshot Snapshot(ReloadElectrobankChore.Instance smi)
 			{
 				bool flag = smi.Resume != null && smi.Resume.CurrentHat != null;
-				bool flag2 = EatChore.StatesInstance.UseSalt(smi.sm.messstation.Get(smi));
+				bool flag2 = EatChore.StatesInstance.UseGarnish(smi.sm.messstation.Get(smi));
 				return new ReloadElectrobankChore.States.WorkerSnapshot
 				{
 					hasHat = flag,
@@ -366,14 +366,14 @@ public class ReloadElectrobankChore : Chore<ReloadElectrobankChore.Instance>
 				this.convo.Enter("Convo", delegate(ReloadElectrobankChore.Instance smi)
 				{
 					smi.Kpid.RemoveTag(GameTags.WantsToTalk);
-					smi.AnimController.SetSymbolVisiblity(Edible.SALT_SYMBOL, smi.workerSnapshot.hasSalt);
+					Garnish.SetDinerVisibility(smi.AnimController, smi.workerSnapshot.hasSalt);
 					smi.AnimController.SetSymbolVisiblity(Edible.HAT_SYMBOL, smi.workerSnapshot.hasHat);
 				}).PlayAnim((ReloadElectrobankChore.Instance _) => Edible.convoAnims[global::UnityEngine.Random.Range(0, Edible.convoAnims.Length)], KAnim.PlayMode.Once).OnAnimQueueComplete(this.idleOrConvo)
 					.ScheduleGoTo(15f, this.idleOrConvo)
 					.Exit("Exit Convo", delegate(ReloadElectrobankChore.Instance smi)
 					{
 						smi.Kpid.RemoveTag(GameTags.DoNotInterruptMe);
-						smi.AnimController.SetSymbolVisiblity(Edible.SALT_SYMBOL, true);
+						Garnish.SetDinerVisibility(smi.AnimController, true);
 						smi.AnimController.SetSymbolVisiblity(Edible.HAT_SYMBOL, true);
 					});
 				this.pst.PlayAnim((ReloadElectrobankChore.Instance smi) => anim.GetPrefix(smi, ReloadElectrobankChore.States.IInstallBatteryAnim.Anim.Pst) + "_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(nextState).ScheduleGoTo(15f, nextState);

@@ -131,7 +131,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 			}
 			else if (keyValuePair2.Value[0].RequiresTechUnlock())
 			{
-				if (keyValuePair2.Value[0].IsRequiredTechUnlocked() || Db.Get().Techs.Get(keyValuePair2.Value[0].requiredTech).ArePrerequisitesComplete())
+				if (keyValuePair2.Value[0].IsRequiredTechOrPOIUnlocked() || Db.Get().Techs.Get(keyValuePair2.Value[0].requiredTech).ArePrerequisitesComplete())
 				{
 					if (keyValuePair2.Value[0].RequiresAllIngredientsDiscovered)
 					{
@@ -357,7 +357,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		bool flag = recipeCategoryQueueCount == ComplexFabricator.QUEUE_INFINITE;
 		component.GetReference<LocText>("CountLabel").text = (flag ? "" : recipeCategoryQueueCount.ToString());
 		component.GetReference<RectTransform>("InfiniteIcon").gameObject.SetActive(flag);
-		bool flag2 = !this.recipeCategoryToggleMap[entryGO][0].IsRequiredTechUnlocked();
+		bool flag2 = !this.recipeCategoryToggleMap[entryGO][0].IsRequiredTechOrPOIUnlocked();
 		GameObject gameObject = component.GetReference<RectTransform>("TechRequired").gameObject;
 		gameObject.SetActive(flag2);
 		KButton component2 = gameObject.GetComponent<KButton>();

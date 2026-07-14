@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
@@ -27,26 +28,20 @@ public class AudioMixer
 
 	public static void Destroy()
 	{
-		AudioMixer._instance.StopAll(FMOD.Studio.STOP_MODE.IMMEDIATE);
+		AudioMixer._instance.StopAll(global::FMOD.Studio.STOP_MODE.IMMEDIATE);
 		AudioMixer._instance = null;
 	}
 
 	public EventInstance Start(EventReference event_ref)
 	{
-		string text;
-		RuntimeManager.GetEventDescription(event_ref.Guid).getPath(out text);
-		return this.Start(text);
-	}
-
-	public EventInstance Start(string snapshot)
-	{
+		RuntimeManager.GetEventDescription(event_ref.Guid);
 		EventInstance eventInstance;
-		if (!this.activeSnapshots.TryGetValue(snapshot, out eventInstance))
+		if (!this.activeSnapshots.TryGetValue(event_ref.Guid, out eventInstance))
 		{
 			if (RuntimeManager.IsInitialized)
 			{
-				eventInstance = KFMOD.CreateInstance(snapshot);
-				this.activeSnapshots[snapshot] = eventInstance;
+				eventInstance = KFMOD.CreateInstance(event_ref);
+				this.activeSnapshots[event_ref.Guid] = eventInstance;
 				eventInstance.start();
 				eventInstance.setParameterByName("snapshotActive", 1f, false);
 			}
@@ -55,60 +50,41 @@ public class AudioMixer
 				eventInstance = default(EventInstance);
 			}
 		}
-		AudioMixer.instance.Log("Start Snapshot: " + snapshot);
 		return eventInstance;
 	}
 
-	public bool Stop(EventReference event_ref, FMOD.Studio.STOP_MODE stop_mode = FMOD.Studio.STOP_MODE.ALLOWFADEOUT)
+	public bool Stop(EventReference event_ref, global::FMOD.Studio.STOP_MODE stop_mode = global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT)
 	{
-		string text;
-		RuntimeManager.GetEventDescription(event_ref.Guid).getPath(out text);
-		return this.Stop(text, stop_mode);
+		return this.Stop(event_ref.Guid, stop_mode);
 	}
 
-	public bool Stop(HashedString snapshot, FMOD.Studio.STOP_MODE stop_mode = FMOD.Studio.STOP_MODE.ALLOWFADEOUT)
+	public bool Stop(GUID event_guid, global::FMOD.Studio.STOP_MODE stop_mode = global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT)
 	{
 		bool flag = false;
 		EventInstance eventInstance;
-		if (this.activeSnapshots.TryGetValue(snapshot, out eventInstance))
+		if (this.activeSnapshots.TryGetValue(event_guid, out eventInstance))
 		{
 			eventInstance.setParameterByName("snapshotActive", 0f, false);
 			eventInstance.stop(stop_mode);
 			eventInstance.release();
-			this.activeSnapshots.Remove(snapshot);
+			this.activeSnapshots.Remove(event_guid);
 			flag = true;
-			AudioMixer instance = AudioMixer.instance;
-			string[] array = new string[5];
-			array[0] = "Stop Snapshot: [";
-			int num = 1;
-			HashedString hashedString = snapshot;
-			array[num] = hashedString.ToString();
-			array[2] = "] with fadeout mode: [";
-			array[3] = stop_mode.ToString();
-			array[4] = "]";
-			instance.Log(string.Concat(array));
-		}
-		else
-		{
-			AudioMixer instance2 = AudioMixer.instance;
-			string text = "Tried to stop snapshot: [";
-			HashedString hashedString = snapshot;
-			instance2.Log(text + hashedString.ToString() + "] but it wasn't active.");
 		}
 		return flag;
 	}
 
 	public void Reset()
 	{
-		this.StopAll(FMOD.Studio.STOP_MODE.IMMEDIATE);
+		this.StopAll(global::FMOD.Studio.STOP_MODE.IMMEDIATE);
 	}
 
-	public void StopAll(FMOD.Studio.STOP_MODE stop_mode = FMOD.Studio.STOP_MODE.IMMEDIATE)
+	public void StopAll(global::FMOD.Studio.STOP_MODE stop_mode = global::FMOD.Studio.STOP_MODE.IMMEDIATE)
 	{
-		List<HashedString> list = new List<HashedString>();
-		foreach (KeyValuePair<HashedString, EventInstance> keyValuePair in this.activeSnapshots)
+		List<GUID> list = new List<GUID>();
+		GUID guid = AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot.Guid;
+		foreach (KeyValuePair<GUID, EventInstance> keyValuePair in this.activeSnapshots)
 		{
-			if (keyValuePair.Key != AudioMixer.UserVolumeSettingsHash)
+			if (keyValuePair.Key != guid)
 			{
 				list.Add(keyValuePair.Key);
 			}
@@ -121,45 +97,45 @@ public class AudioMixer
 
 	public bool SnapshotIsActive(EventReference event_ref)
 	{
-		string text;
-		RuntimeManager.GetEventDescription(event_ref.Guid).getPath(out text);
-		return this.SnapshotIsActive(text);
+		return this.SnapshotIsActive(event_ref.Guid);
 	}
 
-	public bool SnapshotIsActive(HashedString snapshot_name)
+	public bool SnapshotIsActive(GUID guid)
 	{
-		return this.activeSnapshots.ContainsKey(snapshot_name);
+		return this.activeSnapshots.ContainsKey(guid);
 	}
 
 	public void SetSnapshotParameter(EventReference event_ref, string parameter_name, float parameter_value, bool shouldLog = true)
 	{
-		string text;
-		RuntimeManager.GetEventDescription(event_ref.Guid).getPath(out text);
-		this.SetSnapshotParameter(text, parameter_name, parameter_value, shouldLog);
-	}
-
-	public void SetSnapshotParameter(string snapshot_name, string parameter_name, float parameter_value, bool shouldLog = true)
-	{
+		shouldLog = false;
 		if (shouldLog)
 		{
-			this.Log(string.Format("Set Param {0}: {1}, {2}", snapshot_name, parameter_name, parameter_value));
+			this.Log(string.Format("Set Param {0}: {1}, {2}", this.GetSnapshotName(event_ref), parameter_name, parameter_value));
 		}
+		if (!this.SetSnapshotParameter(event_ref.Guid, parameter_name, parameter_value) && shouldLog)
+		{
+			this.Log(string.Concat(new string[]
+			{
+				"Tried to set [",
+				parameter_name,
+				"] to [",
+				parameter_value.ToString(),
+				"] but [",
+				this.GetSnapshotName(event_ref),
+				"] is not active."
+			}));
+		}
+	}
+
+	private bool SetSnapshotParameter(GUID guid, string parameter_name, float parameter_value)
+	{
 		EventInstance eventInstance;
-		if (this.activeSnapshots.TryGetValue(snapshot_name, out eventInstance))
+		if (this.activeSnapshots.TryGetValue(guid, out eventInstance))
 		{
 			eventInstance.setParameterByName(parameter_name, parameter_value, false);
-			return;
+			return true;
 		}
-		this.Log(string.Concat(new string[]
-		{
-			"Tried to set [",
-			parameter_name,
-			"] to [",
-			parameter_value.ToString(),
-			"] but [",
-			snapshot_name,
-			"] is not active."
-		}));
+		return false;
 	}
 
 	public void StartPersistentSnapshots()
@@ -176,12 +152,12 @@ public class AudioMixer
 	public void StopPersistentSnapshots()
 	{
 		this.persistentSnapshotsActive = false;
-		this.Stop(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().SpaceVisibleSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().FacilityVisibleSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
-		this.Stop(AudioMixerSnapshots.Get().PulseSnapshot, FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated, global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().SpaceVisibleSnapshot, global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().FacilityVisibleSnapshot, global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+		this.Stop(AudioMixerSnapshots.Get().PulseSnapshot, global::FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
 	}
 
 	private string GetSnapshotName(EventReference event_ref)
@@ -194,23 +170,23 @@ public class AudioMixer
 	public void UpdatePersistentSnapshotParameters()
 	{
 		this.SetVisibleDuplicants();
-		string snapshotName = this.GetSnapshotName(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot);
-		if (this.activeSnapshots.TryGetValue(snapshotName, out this.duplicantCountMovingInst))
+		GUID guid = AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot.Guid;
+		if (this.activeSnapshots.TryGetValue(guid, out this.duplicantCountMovingInst))
 		{
 			this.duplicantCountMovingInst.setParameterByName("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["moving"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION), false);
 		}
-		string snapshotName2 = this.GetSnapshotName(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot);
-		if (this.activeSnapshots.TryGetValue(snapshotName2, out this.duplicantCountSleepingInst))
+		GUID guid2 = AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot.Guid;
+		if (this.activeSnapshots.TryGetValue(guid2, out this.duplicantCountSleepingInst))
 		{
 			this.duplicantCountSleepingInst.setParameterByName("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["sleeping"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION), false);
 		}
-		string snapshotName3 = this.GetSnapshotName(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated);
-		if (this.activeSnapshots.TryGetValue(snapshotName3, out this.duplicantCountInst))
+		GUID guid3 = AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated.Guid;
+		if (this.activeSnapshots.TryGetValue(guid3, out this.duplicantCountInst))
 		{
 			this.duplicantCountInst.setParameterByName("duplicantCount", (float)Mathf.Max(0, this.visibleDupes["visible"] - AudioMixer.VISIBLE_DUPLICANTS_BEFORE_ATTENUATION), false);
 		}
-		string snapshotName4 = this.GetSnapshotName(AudioMixerSnapshots.Get().PulseSnapshot);
-		if (this.activeSnapshots.TryGetValue(snapshotName4, out this.pulseInst))
+		GUID guid4 = AudioMixerSnapshots.Get().PulseSnapshot.Guid;
+		if (this.activeSnapshots.TryGetValue(guid4, out this.pulseInst))
 		{
 			float num = AudioMixer.PULSE_SNAPSHOT_BPM / 60f;
 			int speed = SpeedControlScreen.Instance.GetSpeed();
@@ -277,9 +253,9 @@ public class AudioMixer
 	public void StartUserVolumesSnapshot()
 	{
 		this.Start(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot);
-		string snapshotName = this.GetSnapshotName(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot);
+		GUID guid = AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot.Guid;
 		EventInstance eventInstance;
-		if (this.activeSnapshots.TryGetValue(snapshotName, out eventInstance))
+		if (this.activeSnapshots.TryGetValue(guid, out eventInstance))
 		{
 			EventDescription eventDescription;
 			eventInstance.getDescription(out eventDescription);
@@ -322,22 +298,11 @@ public class AudioMixer
 		}
 		this.userVolumeSettings[bus].busLevel = value;
 		KPlayerPrefs.SetFloat("Volume_" + bus, value);
-		string snapshotName = this.GetSnapshotName(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot);
+		GUID guid = AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot.Guid;
 		EventInstance eventInstance;
-		if (this.activeSnapshots.TryGetValue(snapshotName, out eventInstance))
+		if (this.activeSnapshots.TryGetValue(guid, out eventInstance))
 		{
 			eventInstance.setParameterByName("userVolume_" + bus, this.userVolumeSettings[bus].busLevel, false);
-		}
-		else
-		{
-			this.Log(string.Concat(new string[]
-			{
-				"Tried to set [",
-				bus,
-				"] to [",
-				value.ToString(),
-				"] but UserVolumeSettingsSnapshot is not active."
-			}));
 		}
 		if (bus == "Music")
 		{
@@ -363,7 +328,7 @@ public class AudioMixer
 
 	private const string FOCUS_BUS_PATH = "bus:/SFX/Focus";
 
-	public Dictionary<HashedString, EventInstance> activeSnapshots = new Dictionary<HashedString, EventInstance>();
+	public Dictionary<GUID, EventInstance> activeSnapshots = new Dictionary<GUID, EventInstance>();
 
 	public List<HashedString> SnapshotDebugLog = new List<HashedString>();
 

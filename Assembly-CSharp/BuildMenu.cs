@@ -604,6 +604,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("WoodTile", global::Action.BuildMenuKeyO),
 				new BuildMenu.BuildingInfo("GasPermeableMembrane", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("MeshTile", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("RubberTile", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("InsulationTile", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("PlasticTile", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("MetalTile", global::Action.BuildMenuKeyX),
@@ -633,6 +634,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("StorageLocker", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("RationBox", global::Action.BuildMenuKeyR),
 				new BuildMenu.BuildingInfo("Refrigerator", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("MiniFridge", global::Action.BuildMenuKeyM),
 				new BuildMenu.BuildingInfo("StorageLockerSmart", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("LiquidReservoir", global::Action.BuildMenuKeyQ),
 				new BuildMenu.BuildingInfo("GasReservoir", global::Action.BuildMenuKeyG),
@@ -652,6 +654,8 @@ public class BuildMenu : KScreen
 		{
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Farming"), "icon_category_food", global::Action.BuildCategoryFarming, KKeyCode.F, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("LargeBackwallFarm", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("WideFarmTile", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("PlanterBox", global::Action.BuildMenuKeyB),
 				new BuildMenu.BuildingInfo("FarmTile", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("HydroponicFarm", global::Action.BuildMenuKeyD),
@@ -666,12 +670,15 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("SpiceGrinder", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("GourmetCookingStation", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("EggCracker", global::Action.BuildMenuKeyE),
-				new BuildMenu.BuildingInfo("Smoker", global::Action.BuildMenuKeyM)
+				new BuildMenu.BuildingInfo("Smoker", global::Action.BuildMenuKeyM),
+				new BuildMenu.BuildingInfo("SushiBar", global::Action.BuildMenuKeyI)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Ranching"), "icon_category_food", global::Action.BuildCategoryRanching, KKeyCode.R, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("UnderwaterMilkFeeder", global::Action.BuildMenuKeyU),
 				new BuildMenu.BuildingInfo("CreatureDeliveryPoint", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("FishDeliveryPoint", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("FishPickUp", global::Action.BuildMenuKeyH),
 				new BuildMenu.BuildingInfo("CreatureFeeder", global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo("FishFeeder", global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("RanchStation", global::Action.BuildMenuKeyR),
@@ -774,6 +781,7 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("SteamTurbine", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SteamTurbine2", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("SolarPanel", global::Action.BuildMenuKeyS),
+				new BuildMenu.BuildingInfo("ReefGenerator", global::Action.BuildMenuKeyL),
 				new BuildMenu.BuildingInfo("DevGenerator", global::Action.BuildMenuKeyX)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("PowerControl"), "icon_category_electrical", global::Action.BuildCategoryPowerControl, KKeyCode.R, new List<BuildMenu.BuildingInfo>
@@ -847,10 +855,12 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("AirFilter", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("CO2Scrubber", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("Electrolyzer", global::Action.BuildMenuKeyE),
-				new BuildMenu.BuildingInfo("RustDeoxidizer", global::Action.BuildMenuKeyF)
+				new BuildMenu.BuildingInfo("RustDeoxidizer", global::Action.BuildMenuKeyF),
+				new BuildMenu.BuildingInfo("UnderwaterBreathingStation", global::Action.BuildMenuKeyG)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Utilities"), "icon_category_utilities", global::Action.BuildCategoryUtilities, KKeyCode.T, new List<BuildMenu.BuildingInfo>
 			{
+				new BuildMenu.BuildingInfo("UnderwaterVentDrill", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("Campfire", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("DevHeater", global::Action.BuildMenuKeyH),
 				new BuildMenu.BuildingInfo("SpaceHeater", global::Action.BuildMenuKeyS),

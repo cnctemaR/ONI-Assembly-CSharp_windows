@@ -47,7 +47,7 @@ public class MultiMinionDiningTableConfig : IBuildingConfig
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
-		storage.capacityKg = TableSaltTuning.SALTSHAKERSTORAGEMASS * (float)MultiMinionDiningTableConfig.SeatCount;
+		storage.capacityKg = (TableSaltTuning.SALTSHAKERSTORAGEMASS + CaviarTuning.STORAGEMASS) * (float)MultiMinionDiningTableConfig.SeatCount;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.RequestedItemTag = TableSaltConfig.ID.ToTag();
@@ -55,6 +55,14 @@ public class MultiMinionDiningTableConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = TableSaltTuning.CONSUMABLE_RATE * (float)MultiMinionDiningTableConfig.SeatCount;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FoodFetch.IdHash;
 		manualDeliveryKG.ShowStatusItem = false;
+		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG2.SetStorage(storage);
+		manualDeliveryKG2.RequestedItemTag = CaviarConfig.TAG;
+		manualDeliveryKG2.capacity = CaviarTuning.STORAGEMASS * (float)MultiMinionDiningTableConfig.SeatCount;
+		manualDeliveryKG2.refillMass = CaviarTuning.CONSUMABLE_RATE * (float)MultiMinionDiningTableConfig.SeatCount;
+		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FoodFetch.IdHash;
+		manualDeliveryKG2.ShowStatusItem = false;
+		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 
 	public const string ID = "MultiMinionDiningTable";

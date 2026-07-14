@@ -129,6 +129,8 @@ public class Components
 
 	public static Components.Cmps<PlantableSeed> PlantableSeeds = new Components.Cmps<PlantableSeed>();
 
+	public static Components.Cmps<ClamHarvestable> ClamHarvestables = new Components.Cmps<ClamHarvestable>();
+
 	public static Components.Cmps<IBasicBuilding> BasicBuildings = new Components.Cmps<IBasicBuilding>();
 
 	public static Components.Cmps<Painting> Paintings = new Components.Cmps<Painting>();
@@ -201,6 +203,8 @@ public class Components
 
 	public static Components.CmpsByWorld<IRemoteDockWorkTarget> RemoteDockWorkTargets = new Components.CmpsByWorld<IRemoteDockWorkTarget>();
 
+	public static Components.CmpsByWorld<IPoopStation> PoopStations = new Components.CmpsByWorld<IPoopStation>();
+
 	public static Components.Cmps<Assignable> AssignableItems = new Components.Cmps<Assignable>();
 
 	public static Components.CmpsByWorld<Comet> Meteors = new Components.CmpsByWorld<Comet>();
@@ -215,6 +219,8 @@ public class Components
 
 	public static Components.Cmps<ClusterGridEntity> LongRangeMissileTargetables = new Components.Cmps<ClusterGridEntity>();
 
+	public static Components.Cmps<UnderwaterBreathingLocation> UnderwaterBreathingLocations = new Components.Cmps<UnderwaterBreathingLocation>();
+
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 
 	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
@@ -226,6 +232,8 @@ public class Components
 	public static Components.Cmps<PeeChoreMonitor.Instance> CriticalBladders = new Components.Cmps<PeeChoreMonitor.Instance>();
 
 	public static Components.Cmps<MissileLauncher.Instance> MissileLaunchers = new Components.Cmps<MissileLauncher.Instance>();
+
+	public static Components.Cmps<MinnowImperativePOIStates.Instance> MinnowImperativePOIs = new Components.Cmps<MinnowImperativePOIStates.Instance>();
 
 	public class Cmps<T> : ICollection, IEnumerable, IEnumerable<T>
 	{

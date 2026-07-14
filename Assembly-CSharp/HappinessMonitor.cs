@@ -30,7 +30,6 @@ public class HappinessMonitor : GameStateMachine<HappinessMonitor, HappinessMoni
 		this.glumTameEffect = new Effect("Glum", CREATURES.MODIFIERS.GLUM.NAME, CREATURES.MODIFIERS.GLUM.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 		this.miserableWildEffect = new Effect("Miserable", CREATURES.MODIFIERS.MISERABLE.NAME, CREATURES.MODIFIERS.MISERABLE.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
 		this.miserableTameEffect = new Effect("Miserable", CREATURES.MODIFIERS.MISERABLE.NAME, CREATURES.MODIFIERS.MISERABLE.TOOLTIP, 0f, true, false, true, null, -1f, 0f, null, "");
-		this.happyTameEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, 9f, CREATURES.MODIFIERS.HAPPY_TAME.NAME, true, false, true));
 		this.glumWildEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -15f, CREATURES.MODIFIERS.GLUM.NAME, false, false, true));
 		this.glumTameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -80f, CREATURES.MODIFIERS.GLUM.NAME, false, false, true));
 		this.miserableTameEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Metabolism.Id, -80f, CREATURES.MODIFIERS.MISERABLE.NAME, false, false, true));
@@ -63,6 +62,8 @@ public class HappinessMonitor : GameStateMachine<HappinessMonitor, HappinessMoni
 		return smi.happiness.GetTotalValue() <= smi.def.miserableThreshold;
 	}
 
+	private const float REPRODUCTION_HAPPINESS_MULTIPLIER = 2.25f;
+
 	private GameStateMachine<HappinessMonitor, HappinessMonitor.Instance, IStateMachineTarget, HappinessMonitor.Def>.State satisfied;
 
 	private HappinessMonitor.HappyState happy;
@@ -91,7 +92,7 @@ public class HappinessMonitor : GameStateMachine<HappinessMonitor, HappinessMoni
 
 	public class Def : StateMachine.BaseDef
 	{
-		public float happyThreshold = 4f;
+		public float happyThreshold = 1f;
 
 		public float glumThreshold = -1f;
 
@@ -132,8 +133,56 @@ public class HappinessMonitor : GameStateMachine<HappinessMonitor, HappinessMoni
 			: base(master, def)
 		{
 			this.happiness = base.gameObject.GetAttributes().Add(Db.Get().CritterAttributes.Happiness);
+			this.fertilityFromHappiness = new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, 0f, CREATURES.MODIFIERS.HAPPY_TAME.NAME, true, false, false);
+			AttributeInstance attributeInstance = this.happiness;
+			attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, new global::System.Action(this.UpdateFertilityModifier));
+			base.gameObject.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+			this.UpdateFertilityModifier();
+		}
+
+		private void OnTagsChanged(object data)
+		{
+			this.UpdateFertilityModifier();
+		}
+
+		private void UpdateFertilityModifier()
+		{
+			float fertilityMultiplier = this.GetFertilityMultiplier();
+			if (fertilityMultiplier > 0f)
+			{
+				this.fertilityFromHappiness.SetValue(fertilityMultiplier);
+				if (!this.fertilityModifierActive)
+				{
+					base.gameObject.GetAttributes().Add(this.fertilityFromHappiness);
+					this.fertilityModifierActive = true;
+					return;
+				}
+			}
+			else if (this.fertilityModifierActive)
+			{
+				base.gameObject.GetAttributes().Remove(this.fertilityFromHappiness);
+				this.fertilityModifierActive = false;
+			}
+		}
+
+		private float GetFertilityMultiplier()
+		{
+			if (base.gameObject.GetComponent<KPrefabID>().HasTag(GameTags.Creatures.Wild))
+			{
+				return 0f;
+			}
+			float totalValue = this.happiness.GetTotalValue();
+			if (totalValue <= 0f)
+			{
+				return 0f;
+			}
+			return totalValue * 2.25f;
 		}
 
 		public AttributeInstance happiness;
+
+		private AttributeModifier fertilityFromHappiness;
+
+		private bool fertilityModifierActive;
 	}
 }

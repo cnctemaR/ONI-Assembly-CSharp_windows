@@ -31,7 +31,7 @@ namespace STRINGS
 
 				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair " + EQUIPMENT.PREFABS.OXYGEN_MASK.NAME;
 
-				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Oxygen Mask", "OXYGEN_MASK") + " to working order.";
+				public static LocString REPAIR_WORN_DESC = "Restore an " + UI.FormatAsLink("Oxygen Mask", "OXYGEN_MASK") + " to working order.";
 			}
 
 			public class ATMO_SUIT
@@ -705,6 +705,64 @@ namespace STRINGS
 				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Worn Lead Suit", "LEAD_SUIT") + " to working order.";
 			}
 
+			public class RUBBERBOOTS
+			{
+				public static LocString NAME = UI.FormatAsLink("Rubber Boots", "RUBBERBOOTS");
+
+				public static LocString GENERICNAME = "Boots";
+
+				public static LocString DESC = "Grippy waterproof boots make chores much more manageable.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Protects the wearer from ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Slippery",
+					UI.PST_KEYWORD,
+					" floors."
+				});
+
+				public static LocString EFFECT_DLC3 = string.Concat(new string[]
+				{
+					"Protects the wearer from ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Slippery",
+					UI.PST_KEYWORD,
+					" floors.\n\nEnables Bionic Duplicants to cross small puddles without ",
+					UI.PRE_KEYWORD,
+					"Liquid Exposure",
+					UI.PST_KEYWORD,
+					" damage."
+				});
+
+				public static LocString RECIPE_DESC = EQUIPMENT.PREFABS.RUBBERBOOTS.EFFECT;
+
+				public static LocString RECIPE_DESC_DLC3 = EQUIPMENT.PREFABS.RUBBERBOOTS.EFFECT_DLC3;
+
+				public static LocString WORN_NAME = UI.FormatAsLink("Worn Rubber Boots", "RUBBERBOOTS");
+
+				public static LocString WORN_DESC = string.Concat(new string[]
+				{
+					"A worn out pair of ",
+					UI.FormatAsLink("Rubber Boots", "RUBBERBOOTS"),
+					".\nBoots can be repaired at a ",
+					UI.FormatAsLink("Crafting Station", "CRAFTINGTABLE"),
+					"."
+				});
+
+				public static LocString REPAIR_WORN_RECIPE_NAME = "Repair " + UI.FormatAsLink("Rubber Boots", "RUBBERBOOTS") + ".";
+
+				public static LocString REPAIR_WORN_DESC = "Restore a " + UI.FormatAsLink("Rubber Boots", "RUBBERBOOTS") + " to working order.";
+			}
+
 			public class COOL_VEST
 			{
 				public static LocString NAME = UI.FormatAsLink("Cool Vest", "COOL_VEST");
@@ -749,6 +807,58 @@ namespace STRINGS
 				});
 
 				public static LocString RECIPE_DESC = "Increases Decor in a small area effect around the wearer. Can be upgraded to " + UI.FormatAsLink("Primo Garb", "CUSTOMCLOTHING") + " at the " + UI.FormatAsLink("Clothing Refashionator", "CLOTHINGALTERATIONSTATION");
+			}
+
+			public class DRYSUIT
+			{
+				public static LocString NAME = UI.FormatAsLink("Swimwear", "DrySuit");
+
+				public static LocString GENERICNAME = "Clothing";
+
+				public static LocString DESC = "Keeps Duplicants comfy and dry while swimming.";
+
+				public static LocString EFFECT = string.Concat(new string[]
+				{
+					"Protects the wearer from ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Sopping Wet",
+					UI.PST_KEYWORD,
+					" effects."
+				});
+
+				public static LocString RECIPE_DESC = string.Concat(new string[]
+				{
+					"Protects the wearer from  ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Sopping Wet",
+					UI.PST_KEYWORD,
+					" effects."
+				});
+
+				public static LocString RECIPE_DESC_DLC3 = string.Concat(new string[]
+				{
+					"Protects the wearer from  ",
+					UI.PRE_KEYWORD,
+					"Soggy Feet",
+					UI.PST_KEYWORD,
+					" and ",
+					UI.PRE_KEYWORD,
+					"Sopping Wet",
+					UI.PST_KEYWORD,
+					" effects.\n\nEnables Bionic Duplicants to cross waist-deep pools without ",
+					UI.PRE_KEYWORD,
+					"Liquid Exposure",
+					UI.PST_KEYWORD,
+					" damage."
+				});
 			}
 
 			public class CUSTOMCLOTHING

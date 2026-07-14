@@ -22,6 +22,8 @@ public class TemplateContainer
 
 	public List<Prefab> elementalOres { get; set; }
 
+	public List<Prefab> backwallEntities { get; set; }
+
 	public List<Prefab> otherEntities { get; set; }
 
 	public void Init(List<Cell> _cells, List<Prefab> _buildings, List<Prefab> _pickupables, List<Prefab> _elementalOres, List<Prefab> _otherEntities)

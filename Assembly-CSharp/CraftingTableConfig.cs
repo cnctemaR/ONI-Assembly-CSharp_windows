@@ -101,6 +101,41 @@ public class CraftingTableConfig : IBuildingConfig
 		complexRecipe3.requiredTech = Db.Get().TechItems.oxygenMask.parentTechId;
 		complexRecipe3.sortOrder = 2;
 		complexRecipe3.customName = global::STRINGS.EQUIPMENT.PREFABS.OXYGEN_MASK.REPAIR_WORN_RECIPE_NAME;
+		if (DlcManager.IsContentSubscribed("DLC5_ID"))
+		{
+			int num = 1;
+			ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(new Tag[] { SimHashes.Rubber.CreateTag() }, (float)num * 50f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, "", false, true)
+			};
+			ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement("RubberGasket".ToTag(), (float)num, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+			};
+			ComplexRecipe complexRecipe4 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array7, array8), array7, array8);
+			complexRecipe4.time = INDUSTRIAL.RECIPES.STANDARD_FABRICATION_TIME;
+			complexRecipe4.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.RECIPE_DESCRIPTION, ELEMENTS.RUBBER.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.RUBBER_GASKET.NAME);
+			complexRecipe4.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
+			complexRecipe4.fabricators = new List<Tag> { "CraftingTable" };
+			complexRecipe4.requiredTech = Db.Get().TechItems.gasket.parentTechId;
+			complexRecipe4.sortOrder = 3;
+		}
+		int num2 = 1;
+		ComplexRecipe.RecipeElement[] array9 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(new Tag[] { SimHashes.Polypropylene.CreateTag() }, (float)num2 * 50f, ComplexRecipe.RecipeElement.TemperatureOperation.Heated, "", false, true)
+		};
+		ComplexRecipe.RecipeElement[] array10 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("PlasticGasket".ToTag(), (float)num2, ComplexRecipe.RecipeElement.TemperatureOperation.AverageTemperature, false)
+		};
+		ComplexRecipe complexRecipe5 = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("CraftingTable", array9, array10), array9, array10);
+		complexRecipe5.time = INDUSTRIAL.RECIPES.STANDARD_FABRICATION_TIME;
+		complexRecipe5.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.CRAFTINGTABLE.RECIPE_DESCRIPTION, ELEMENTS.POLYPROPYLENE.NAME, global::STRINGS.ITEMS.INDUSTRIAL_PRODUCTS.PLASTIC_GASKET.NAME);
+		complexRecipe5.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
+		complexRecipe5.fabricators = new List<Tag> { "CraftingTable" };
+		complexRecipe5.requiredTech = Db.Get().TechItems.gasket.parentTechId;
+		complexRecipe5.sortOrder = 4;
 	}
 
 	private void CreateMetalMiniVoltRecipe(Tag[] inputMetals)

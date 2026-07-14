@@ -422,6 +422,16 @@ public class SkillsScreen : KModalScreen
 		return 0;
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (!e.Consumed && e.TryConsume(global::Action.DebugInstantBuildMode))
+		{
+			DebugHandler.ToggleInstantBuildMode();
+			return;
+		}
+		base.OnKeyDown(e);
+	}
+
 	private void Update()
 	{
 		if (this.dirty)

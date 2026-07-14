@@ -1,10 +1,20 @@
 ﻿using System;
+using UnityEngine;
 
 namespace TUNING
 {
 	public class PLANTS
 	{
 		public const float MAX_MUTATION_CHANCE = 0.8f;
+
+		public class SAFE_ELEMENTS
+		{
+			[Tooltip("Populated in Assets.SubstanceListHookup with tag GameTags.AnyWater")]
+			public static SimHashes[] AllWaters;
+
+			[Tooltip("AllWaters + Ink")]
+			public static SimHashes[] MurkyWaters;
+		}
 
 		public class MASS_KG
 		{

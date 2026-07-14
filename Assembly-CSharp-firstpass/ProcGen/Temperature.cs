@@ -26,6 +26,7 @@ namespace ProcGen
 			Room,
 			HumanWarm,
 			HumanHot,
+			SomewhatHot,
 			Hot,
 			VeryHot,
 			ExtremelyHot

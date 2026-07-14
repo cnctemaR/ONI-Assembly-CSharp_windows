@@ -225,7 +225,7 @@ namespace ProcGenGame
 			return num2;
 		}
 
-		private void HandleSprinkleOfElement(WorldGenSettings settings, Tag targetTag, Chunk world, TerrainCell.SetValuesFunction SetValues, float temperatureMin, float temperatureRange, SeededRandom rnd)
+		private void HandleSprinkleOfElement(WorldGenSettings settings, Tag targetTag, Chunk world, TerrainCell.ISimDataSetter simDataSetter, float temperatureMin, float temperatureRange, SeededRandom rnd)
 		{
 			Element element = ElementLoader.FindElementByName(settings.GetFeature(targetTag.Name).GetOneWeightedSimHash("SprinkleOfElementChoices", rnd).element);
 			global::ProcGen.Room room = null;
@@ -246,7 +246,7 @@ namespace ProcGenGame
 						{
 							defaultValues.mass = this.GetDensityMassForCell(world, num2, element.defaultValues.mass);
 							defaultValues.temperature = temperatureMin + world.heatOffset[num2] * temperatureRange;
-							SetValues(num2, element, defaultValues, invalid);
+							simDataSetter.SetSimCell(num2, element, defaultValues, invalid);
 						}
 					}
 				}
@@ -390,7 +390,7 @@ namespace ProcGenGame
 			return true;
 		}
 
-		private void ApplyPlaceElementForRoom(FeatureSettings feature, string group, List<Vector2I> cells, WorldGen worldGen, Chunk world, TerrainCell.SetValuesFunction SetValues, float temperatureMin, float temperatureRange, SeededRandom rnd, HashSet<int> highPriorityClaims)
+		private void ApplyPlaceElementForRoom(FeatureSettings feature, string group, List<Vector2I> cells, WorldGen worldGen, Chunk world, TerrainCell.ISimDataSetter simSetter, float temperatureMin, float temperatureRange, SeededRandom rnd, HashSet<int> highPriorityClaims)
 		{
 			if (cells == null || cells.Count == 0)
 			{
@@ -420,7 +420,7 @@ namespace ProcGenGame
 						{
 							elementOverride.pdelement.mass = this.GetDensityMassForCell(world, num, elementOverride.mass);
 						}
-						SetValues(num, elementOverride.element, elementOverride.pdelement, elementOverride.dc);
+						simSetter.SetSimCell(num, elementOverride.element, elementOverride.pdelement, elementOverride.dc);
 					}
 				}
 				return;
@@ -451,7 +451,7 @@ namespace ProcGenGame
 						{
 							elementOverride2.pdelement.mass = this.GetDensityMassForCell(world, num5, elementOverride2.mass);
 						}
-						SetValues(num5, elementOverride2.element, elementOverride2.pdelement, elementOverride2.dc);
+						simSetter.SetSimCell(num5, elementOverride2.element, elementOverride2.pdelement, elementOverride2.dc);
 					}
 				}
 				return;
@@ -472,7 +472,7 @@ namespace ProcGenGame
 					{
 						elementOverride3.pdelement.mass = this.GetDensityMassForCell(world, num7, elementOverride3.mass);
 					}
-					SetValues(num7, elementOverride3.element, elementOverride3.pdelement, elementOverride3.dc);
+					simSetter.SetSimCell(num7, elementOverride3.element, elementOverride3.pdelement, elementOverride3.dc);
 				}
 			}
 		}
@@ -578,7 +578,7 @@ namespace ProcGenGame
 			return list.ToArray();
 		}
 
-		private void ApplyForeground(WorldGen worldGen, Chunk world, TerrainCell.SetValuesFunction SetValues, float temperatureMin, float temperatureRange, SeededRandom rnd)
+		private void ApplyForeground(WorldGen worldGen, Chunk world, TerrainCell.ISimDataSetter simDataSetter, float temperatureMin, float temperatureRange, SeededRandom rnd)
 		{
 			this.LogInfo("Apply foregreound", (this.node.tags != null).ToString(), (float)((this.node.tags != null) ? this.node.tags.Count : 0));
 			if (this.node.tags != null)
@@ -639,23 +639,32 @@ namespace ProcGenGame
 					}
 					this.LogInfo("\t\t", "claimed points", (float)this.featureSpawnPoints.Count);
 					this.availableTerrainPoints.ExceptWith(this.featureSpawnPoints);
-					this.ApplyPlaceElementForRoom(featureSettings, "RoomCenterElements", list2, worldGen, world, SetValues, temperatureMin, temperatureRange, rnd, worldGen.HighPriorityClaimedCells);
+					this.ApplyPlaceElementForRoom(featureSettings, "RoomCenterElements", list2, worldGen, world, simDataSetter, temperatureMin, temperatureRange, rnd, worldGen.HighPriorityClaimedCells);
 					if (list3 != null)
 					{
 						for (int i = 0; i < list3.Count; i++)
 						{
-							this.ApplyPlaceElementForRoom(featureSettings, "RoomBorderChoices" + i.ToString(), list3[i], worldGen, world, SetValues, temperatureMin, temperatureRange, rnd, worldGen.HighPriorityClaimedCells);
+							this.ApplyPlaceElementForRoom(featureSettings, "RoomBorderChoices" + i.ToString(), list3[i], worldGen, world, simDataSetter, temperatureMin, temperatureRange, rnd, worldGen.HighPriorityClaimedCells);
 						}
 					}
 					if (featureSettings.tags.Contains(WorldGenTags.HighPriorityFeature.Name))
 					{
+						this.featureSpawnPoints.RemoveWhere(delegate(int cellIdx)
+						{
+							if (!Grid.IsValidCell(cellIdx))
+							{
+								return true;
+							}
+							Vector2I vector2I2 = Grid.CellToXY(cellIdx);
+							return !this.IsFeaturePointContainedInBorder(new Vector2((float)vector2I2.x, (float)vector2I2.y), worldGen);
+						});
 						worldGen.AddHighPriorityCells(this.featureSpawnPoints);
 					}
 				}
 			}
 		}
 
-		private void ApplyBackground(WorldGen worldGen, Chunk world, TerrainCell.SetValuesFunction SetValues, float temperatureMin, float temperatureRange, SeededRandom rnd)
+		private void ApplyBackground(WorldGen worldGen, Chunk world, TerrainCell.ISimDataSetter simDataSetter, float temperatureMin, float temperatureRange, SeededRandom rnd)
 		{
 			this.LogInfo("Apply Background", this.node.type, 0f);
 			float floatSetting = worldGen.Settings.GetFloatSetting("CaveOverrideMaxValue");
@@ -696,6 +705,7 @@ namespace ProcGenGame
 					this.LogInfo("\tPicked biome", "", (float)num);
 				}
 			}
+			ElementBandConfiguration elementBandConfiguration2 = worldGen.Settings.GetElementBandForBiome(this.node.GetBiome() + "_backwall") ?? elementBandConfiguration;
 			DebugUtil.Assert(elementBandConfiguration != null, "A node didn't get assigned a biome! ", this.node.type);
 			foreach (int num2 in this.availableTerrainPoints)
 			{
@@ -707,15 +717,15 @@ namespace ProcGenGame
 					{
 						if (num3 >= 300f)
 						{
-							SetValues(num2, WorldGen.voidElement, WorldGen.voidElement.defaultValues, Sim.DiseaseCell.Invalid);
+							simDataSetter.SetSimCell(num2, WorldGen.voidElement, WorldGen.voidElement.defaultValues, Sim.DiseaseCell.Invalid);
 						}
 						else if (num3 >= 200f)
 						{
-							SetValues(num2, WorldGen.unobtaniumElement, WorldGen.unobtaniumElement.defaultValues, Sim.DiseaseCell.Invalid);
+							simDataSetter.SetSimCell(num2, WorldGen.unobtaniumElement, WorldGen.unobtaniumElement.defaultValues, Sim.DiseaseCell.Invalid);
 						}
 						else
 						{
-							SetValues(num2, WorldGen.katairiteElement, WorldGen.katairiteElement.defaultValues, Sim.DiseaseCell.Invalid);
+							simDataSetter.SetSimCell(num2, WorldGen.katairiteElement, WorldGen.katairiteElement.defaultValues, Sim.DiseaseCell.Invalid);
 						}
 					}
 					else
@@ -845,17 +855,32 @@ namespace ProcGenGame
 							}
 							defaultValues = element.defaultValues;
 						}
-						SetValues(num2, element, defaultValues, diseaseCell);
+						simDataSetter.SetSimCell(num2, element, defaultValues, diseaseCell);
+						if (this.spawnBackwall)
+						{
+							worldGen.GetElementForBackwallBiomePoint(world, elementBandConfiguration2, vector2I, out element, out defaultValues, out diseaseCell);
+							defaultValues.mass += defaultValues.mass * 0.2f * (world.density[vector2I.x + world.size.x * vector2I.y] - 0.5f);
+							float num21 = temperatureMin;
+							if (element.lowTempTransition != null && temperatureMin < element.lowTemp)
+							{
+								num21 = element.lowTemp;
+							}
+							defaultValues.temperature = num21 + world.heatOffset[num2] * temperatureRange;
+							if (element.IsSolid)
+							{
+								simDataSetter.SetSimBackwall(num2, element, defaultValues);
+							}
+						}
 					}
 				}
 			}
 			if (this.node.tags.Contains(WorldGenTags.SprinkleOfOxyRock))
 			{
-				this.HandleSprinkleOfElement(worldGen.Settings, WorldGenTags.SprinkleOfOxyRock, world, SetValues, temperatureMin, temperatureRange, rnd);
+				this.HandleSprinkleOfElement(worldGen.Settings, WorldGenTags.SprinkleOfOxyRock, world, simDataSetter, temperatureMin, temperatureRange, rnd);
 			}
 			if (this.node.tags.Contains(WorldGenTags.SprinkleOfMetal))
 			{
-				this.HandleSprinkleOfElement(worldGen.Settings, WorldGenTags.SprinkleOfMetal, world, SetValues, temperatureMin, temperatureRange, rnd);
+				this.HandleSprinkleOfElement(worldGen.Settings, WorldGenTags.SprinkleOfMetal, world, simDataSetter, temperatureMin, temperatureRange, rnd);
 			}
 		}
 
@@ -912,53 +937,30 @@ namespace ProcGenGame
 			}
 		}
 
-		private void DoProcess(WorldGen worldGen, Chunk world, TerrainCell.SetValuesFunction SetValues, SeededRandom rnd)
+		private void DoProcess(WorldGen worldGen, Chunk world, TerrainCell.ISimDataSetter simDataSetter, SeededRandom rnd)
 		{
 			float num = 265f;
 			float num2 = 30f;
 			this.InitializeCells(worldGen.ClaimedCells);
 			this.GetTemperatureRange(worldGen, ref num, ref num2);
-			this.ApplyForeground(worldGen, world, SetValues, num, num2, rnd);
+			this.ApplyForeground(worldGen, world, simDataSetter, num, num2, rnd);
 			for (int i = 0; i < this.node.tags.Count; i++)
 			{
 				this.GenerateActionCells(worldGen.Settings, this.node.tags[i], this.availableTerrainPoints, rnd);
 			}
-			this.ApplyBackground(worldGen, world, SetValues, num, num2, rnd);
+			this.ApplyBackground(worldGen, world, simDataSetter, num, num2, rnd);
 		}
 
-		public void Process(WorldGen worldGen, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dcs, Chunk world, SeededRandom rnd)
+		public void Process(WorldGen worldGen, ref WorldgenSimData simData, Chunk world, SeededRandom rnd)
 		{
-			TerrainCell.SetValuesFunction setValuesFunction = delegate(int index, object elem, Sim.PhysicsData pd, Sim.DiseaseCell dc)
-			{
-				if (Grid.IsValidCell(index))
-				{
-					if (pd.temperature == 0f || (elem as Element).HasTag(GameTags.Special))
-					{
-						bgTemp[index] = -1f;
-					}
-					cells[index].SetValues(elem as Element, pd, ElementLoader.elements);
-					dcs[index] = dc;
-					return;
-				}
-				global::Debug.LogError(string.Concat(new string[]
-				{
-					"Process::SetValuesFunction Index [",
-					index.ToString(),
-					"] is not valid. cells.Length [",
-					cells.Length.ToString(),
-					"]"
-				}));
-			};
-			this.DoProcess(worldGen, world, setValuesFunction, rnd);
+			TerrainCell.SimDataSetter simDataSetter = new TerrainCell.SimDataSetter(worldGen, simData);
+			this.DoProcess(worldGen, world, simDataSetter, rnd);
+			simData = simDataSetter.simData;
 		}
 
 		public void Process(WorldGen worldGen, Chunk world, SeededRandom rnd)
 		{
-			TerrainCell.SetValuesFunction setValuesFunction = delegate(int index, object elem, Sim.PhysicsData pd, Sim.DiseaseCell dc)
-			{
-				SimMessages.ModifyCell(index, (elem as Element).idx, pd.temperature, pd.mass, dc.diseaseIdx, dc.elementCount, SimMessages.ReplaceType.Replace, false, -1);
-			};
-			this.DoProcess(worldGen, world, setValuesFunction, rnd);
+			this.DoProcess(worldGen, world, new TerrainCell.SimUpdater(), rnd);
 		}
 
 		public int DistanceToTag(Tag tag)
@@ -1003,6 +1005,10 @@ namespace ProcGenGame
 		public List<KeyValuePair<int, Tag>> poi;
 
 		public List<int> neighbourTerrainCells = new List<int>();
+
+		public byte biomeIdx = byte.MaxValue;
+
+		public bool spawnBackwall;
 
 		private float finalSize;
 
@@ -1051,7 +1057,12 @@ namespace ProcGenGame
 
 		private static readonly TagSet relaxedNoPOISpawnAllowNearStartTagSet = new TagSet(TerrainCell.relaxedNoPOISpawnTagsAllowNearStart);
 
-		public delegate void SetValuesFunction(int index, object elem, Sim.PhysicsData pd, Sim.DiseaseCell dc);
+		public interface ISimDataSetter
+		{
+			void SetSimCell(int cellIdx, Element element, Sim.PhysicsData pd, Sim.DiseaseCell dc);
+
+			void SetSimBackwall(int cellIdx, Element element, Sim.PhysicsData pd);
+		}
 
 		public struct ElementOverride
 		{
@@ -1076,6 +1087,59 @@ namespace ProcGenGame
 			public bool overrideDiseaseIdx;
 
 			public bool overrideDiseaseAmount;
+		}
+
+		private class SimDataSetter : TerrainCell.ISimDataSetter
+		{
+			public SimDataSetter(WorldGen wg, WorldgenSimData sd)
+			{
+				this.worldGen = wg;
+				this.simData = sd;
+			}
+
+			public void SetSimBackwall(int cellIdx, Element element, Sim.PhysicsData pd)
+			{
+				this.simData.backwallCells[cellIdx].SetValues(element.idx, pd.mass, pd.temperature);
+			}
+
+			public void SetSimCell(int index, Element elem, Sim.PhysicsData pd, Sim.DiseaseCell dc)
+			{
+				if (!Grid.IsValidCell(index))
+				{
+					global::Debug.LogError(string.Concat(new string[]
+					{
+						"Process::SetValuesFunction Index [",
+						index.ToString(),
+						"] is not valid. cells.Length [",
+						this.simData.cells.Length.ToString(),
+						"]"
+					}));
+					return;
+				}
+				if (this.worldGen.HighPriorityClaimedCells.Contains(index))
+				{
+					return;
+				}
+				this.simData.cells[index].SetValues(elem, pd, ElementLoader.elements);
+				this.simData.diseaseCells[index] = dc;
+			}
+
+			public WorldGen worldGen;
+
+			public WorldgenSimData simData;
+		}
+
+		private class SimUpdater : TerrainCell.ISimDataSetter
+		{
+			public void SetSimBackwall(int cellIdx, Element element, Sim.PhysicsData pd)
+			{
+				throw new NotImplementedException();
+			}
+
+			public void SetSimCell(int index, Element elem, Sim.PhysicsData pd, Sim.DiseaseCell dc)
+			{
+				SimMessages.ModifyCell(index, elem.idx, pd.temperature, pd.mass, dc.diseaseIdx, dc.elementCount, SimMessages.ReplaceType.Replace, false, -1);
+			}
 		}
 	}
 }

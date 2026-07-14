@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FleeChore : Chore<FleeChore.StatesInstance>
@@ -54,44 +53,27 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.planFleeRoute;
-			this.root.ToggleStatusItem(Db.Get().DuplicantStatusItems.Fleeing, null);
+			this.root.ToggleStatusItem(Db.Get().DuplicantStatusItems.Fleeing, null).ToggleNotification((FleeChore.StatesInstance smi) => new Notification(Db.Get().DuplicantStatusItems.Fleeing.notificationText, Db.Get().DuplicantStatusItems.Fleeing.notificationType, null, null, true, 0f, null, null, smi.master.gameObject.transform, true, false, false));
 			this.planFleeRoute.Enter(delegate(FleeChore.StatesInstance smi)
 			{
-				int num = Grid.PosToCell(this.fleeFromTarget.Get(smi));
-				HashSet<int> hashSet = GameUtil.FloodCollectCells(Grid.PosToCell(smi.master.gameObject), new Func<int, bool>(smi.master.CanFleeTo), 300, null, true);
-				int num2 = -1;
-				int num3 = -1;
-				foreach (int num4 in hashSet)
+				FleeChore.States.<>c__DisplayClass7_0 CS$<>8__locals1 = new FleeChore.States.<>c__DisplayClass7_0();
+				CS$<>8__locals1.smi = smi;
+				CS$<>8__locals1.fleeFromCell = Grid.PosToCell(this.fleeFromTarget.Get(CS$<>8__locals1.smi));
+				int num = Grid.PosToCell(CS$<>8__locals1.smi.master.gameObject);
+				int num2 = FloodFill.FindBest(new Func<int, float>(CS$<>8__locals1.<InitializeStates>g__RateCell|3), new Func<int, FloodFill.BoundaryCheckResult>(CS$<>8__locals1.<InitializeStates>g__BoundaryCondition|4), num, 300);
+				if (num2 == -1)
 				{
-					if (smi.master.nav.CanReach(num4))
-					{
-						int num5 = -1;
-						num5 += Grid.GetCellDistance(num4, num);
-						if (smi.master.isInFavoredDirection(num4, num))
-						{
-							num5 += 8;
-						}
-						if (num5 > num3)
-						{
-							num3 = num5;
-							num2 = num4;
-						}
-					}
-				}
-				int num6 = num2;
-				if (num6 == -1)
-				{
-					smi.GoTo(this.cower);
+					CS$<>8__locals1.smi.GoTo(this.cower);
 					return;
 				}
-				smi.sm.fleeToTarget.Set(smi.master.CreateLocator(Grid.CellToPos(num6)), smi, false);
-				smi.sm.fleeToTarget.Get(smi).name = "FleeLocator";
-				if (num6 == num)
+				CS$<>8__locals1.smi.sm.fleeToTarget.Set(CS$<>8__locals1.smi.master.CreateLocator(Grid.CellToPos(num2)), CS$<>8__locals1.smi, false);
+				CS$<>8__locals1.smi.sm.fleeToTarget.Get(CS$<>8__locals1.smi).name = "FleeLocator";
+				if (num2 == CS$<>8__locals1.fleeFromCell)
 				{
-					smi.GoTo(this.cower);
+					CS$<>8__locals1.smi.GoTo(this.cower);
 					return;
 				}
-				smi.GoTo(this.flee);
+				CS$<>8__locals1.smi.GoTo(this.flee);
 			});
 			this.flee.InitializeStates(this.self, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).ToggleAnims("anim_loco_run_insane_kanim", 2f);
 			this.cower.ToggleAnims("anim_cringe_kanim", 4f).PlayAnim("cringe_pre").QueueAnim("cringe_loop", false, null)

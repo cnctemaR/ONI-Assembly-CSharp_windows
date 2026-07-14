@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using ElementData;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -10,6 +11,14 @@ using UnityEngine;
 [Serializable]
 public class Element : IComparable<Element>
 {
+	public bool IsMoltenMetal
+	{
+		get
+		{
+			return this.IsLiquid && this.substance.Metalic && this.lowTemp > 373.15f && this.HasTag(GameTags.Metal);
+		}
+	}
+
 	public float GetRelativeHeatLevel(float currentTemperature)
 	{
 		float num = this.lowTemp - 3f;
@@ -290,7 +299,7 @@ public class Element : IComparable<Element>
 
 	public int buildMenuSort;
 
-	public ElementLoader.ElementComposition[] elementComposition;
+	public ElementComposition[] elementComposition;
 
 	public Tag[] oreTags = new Tag[0];
 
@@ -299,6 +308,8 @@ public class Element : IComparable<Element>
 	public bool disabled;
 
 	public string dlcId;
+
+	private const float MOLTEN_LIQUID_MIN_TEMP = 373.15f;
 
 	public const byte StateMask = 3;
 

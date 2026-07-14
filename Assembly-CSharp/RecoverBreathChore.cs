@@ -22,6 +22,8 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
 			float recover_BREATH_DELTA = DUPLICANTSTATS.STANDARD.BaseStats.RECOVER_BREATH_DELTA;
 			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, recover_BREATH_DELTA, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false, true);
+			this.animcontroller = recoverer.GetComponent<KBatchedAnimController>();
+			this.navigator = recoverer.GetComponent<Navigator>();
 		}
 
 		public void CreateLocator()
@@ -64,6 +66,10 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		}
 
 		public AttributeModifier recoveringbreath;
+
+		public KBatchedAnimController animcontroller;
+
+		public Navigator navigator;
 	}
 
 	public class States : GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore>
@@ -88,9 +94,41 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 				.ToggleTag(GameTags.RecoveringBreath)
 				.TriggerOnEnter(GameHashes.BeginBreathRecovery, null)
 				.TriggerOnExit(GameHashes.EndBreathRecovery, null);
-			this.recover.pre.PlayAnim("breathe_pre").OnAnimQueueComplete(this.recover.loop);
-			this.recover.loop.PlayAnim("breathe_loop", KAnim.PlayMode.Loop);
-			this.recover.pst.QueueAnim("breathe_pst", false, null).OnAnimQueueComplete(null);
+			this.recover.pre.Enter(delegate(RecoverBreathChore.StatesInstance smi)
+			{
+				RecoverBreathChore.States.PlayRecoverAnim(smi, "breathe_pre", false, false);
+			}).OnAnimQueueComplete(this.recover.loop);
+			this.recover.loop.Enter(delegate(RecoverBreathChore.StatesInstance smi)
+			{
+				RecoverBreathChore.States.PlayRecoverAnim(smi, "breathe_loop", true, false);
+			});
+			this.recover.pst.Enter(delegate(RecoverBreathChore.StatesInstance smi)
+			{
+				RecoverBreathChore.States.PlayRecoverAnim(smi, "breathe_pst", false, true);
+			}).OnAnimQueueComplete(null);
+		}
+
+		private static void PlayRecoverAnim(RecoverBreathChore.StatesInstance smi, string anim, bool loop, bool queue)
+		{
+			string text = anim;
+			NavType currentNavType = smi.navigator.CurrentNavType;
+			if (currentNavType != NavType.Ladder)
+			{
+				if (currentNavType == NavType.Swim)
+				{
+					text = "swim_" + anim;
+				}
+			}
+			else
+			{
+				text = "ladder_" + anim;
+			}
+			if (queue)
+			{
+				smi.animcontroller.Queue(text, loop ? KAnim.PlayMode.Loop : KAnim.PlayMode.Once, 1f, 0f);
+				return;
+			}
+			smi.animcontroller.Play(text, loop ? KAnim.PlayMode.Loop : KAnim.PlayMode.Once, 1f, 0f);
 		}
 
 		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.ApproachSubState<IApproachable> approach;

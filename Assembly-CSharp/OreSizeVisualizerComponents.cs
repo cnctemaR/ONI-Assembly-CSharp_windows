@@ -117,13 +117,13 @@ public class OreSizeVisualizerComponents : KGameObjectComponentManager<OreSizeVi
 		new OreSizeVisualizerComponents.MassTier
 		{
 			animName = "idle1",
-			massRequired = 7.5f,
+			massRequired = 45f,
 			colliderRadius = 0.15f
 		},
 		new OreSizeVisualizerComponents.MassTier
 		{
 			animName = "idle2",
-			massRequired = 15f,
+			massRequired = 90f,
 			colliderRadius = 0.2f
 		},
 		new OreSizeVisualizerComponents.MassTier

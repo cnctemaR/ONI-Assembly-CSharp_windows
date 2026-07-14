@@ -122,11 +122,11 @@ public class StressShockChore : Chore<StressShockChore.StatesInstance>
 			Navigator component = base.smi.master.GetComponent<Navigator>();
 			MinionPathFinderAbilities minionPathFinderAbilities = (MinionPathFinderAbilities)component.GetCurrentAbilities();
 			minionPathFinderAbilities.SetIdleNavMaskEnabled(true);
-			IdleCellQuery idleCellQuery = PathFinderQueries.idleCellQuery.Reset(base.GetComponent<MinionBrain>(), global::UnityEngine.Random.Range(90, 180));
+			IdleCellQuery idleCellQuery = PathFinderQueries.idleCellQuery.Reset(base.GetComponent<MinionBrain>(), global::UnityEngine.Random.Range(90, 180), false);
 			component.RunQuery(idleCellQuery);
 			if (idleCellQuery.GetResultCell() == Grid.PosToCell(base.gameObject))
 			{
-				idleCellQuery = PathFinderQueries.idleCellQuery.Reset(base.GetComponent<MinionBrain>(), global::UnityEngine.Random.Range(0, 90));
+				idleCellQuery = PathFinderQueries.idleCellQuery.Reset(base.GetComponent<MinionBrain>(), global::UnityEngine.Random.Range(0, 90), false);
 				component.RunQuery(idleCellQuery);
 			}
 			minionPathFinderAbilities.SetIdleNavMaskEnabled(false);

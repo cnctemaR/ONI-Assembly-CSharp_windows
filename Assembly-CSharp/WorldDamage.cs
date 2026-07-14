@@ -71,6 +71,7 @@ public class WorldDamage : KMonoBehaviour
 			if (Grid.Damage[cell] >= 1f)
 			{
 				this.DestroyCell(cell);
+				Grid.Damage[cell] = 0f;
 			}
 			else if (Grid.IsValidCell(src_cell) && flag)
 			{
@@ -94,6 +95,18 @@ public class WorldDamage : KMonoBehaviour
 						}
 					}
 				}
+			}
+		}
+		else if (BackwallManager.HasBackwall(cell))
+		{
+			float num7 = Grid.Damage[cell];
+			num = Mathf.Min(amount, 1f - num7);
+			num7 += amount;
+			Grid.Damage[cell] = Mathf.Min(1f, num7);
+			if (Grid.Damage[cell] >= 1f)
+			{
+				SimMessages.Dig(cell, -1, false, true);
+				Grid.Damage[cell] = 0f;
 			}
 		}
 		return num;
@@ -182,7 +195,7 @@ public class WorldDamage : KMonoBehaviour
 	{
 		if (Grid.Solid[cell])
 		{
-			SimMessages.Dig(cell, -1, false);
+			SimMessages.Dig(cell, -1, false, false);
 		}
 	}
 
